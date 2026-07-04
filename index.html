@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coaster Hub — A roller coaster count, visualized</title>
+<meta name="description" content="Coaster Hub — an interactive look at a roller coaster count: credits, rides, parks, geography, and records.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="index.html">Coaster <span>Hub</span></a>
+  <nav class="links">
+    <a href="index.html" class="active">Home</a>
+    <a href="stats.html">My Stats</a>
+    <a href="coasters.html">Coasters</a>
+  </nav>
+</div></header>
+
+<section class="hero"><div class="container">
+  <svg class="track" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path d="M-50 500 C 250 500, 300 120, 520 120 S 780 560, 1000 380 S 1300 90, 1500 300"
+          fill="none" stroke="rgba(255,255,255,.10)" stroke-width="4"/>
+    <path d="M-50 520 C 250 520, 300 140, 520 140 S 780 580, 1000 400 S 1300 110, 1500 320"
+          fill="none" stroke="rgba(55,208,200,.20)" stroke-width="2" stroke-dasharray="6 10"/>
+  </svg>
+  <span class="badge">A count, visualized</span>
+  <h1>562 credits. 2,362 rides. One map.</h1>
+  <p>Coaster Hub turns a lifetime of roller coaster riding into something you can actually explore — every park, every big day, and every personal record.</p>
+  <a class="btn" href="stats.html">Explore the stats</a>
+</div></section>
+
+<section class="block"><div class="container">
+  <span class="eyebrow">What's inside</span>
+  <h2>Your count, brought to life</h2>
+  <p class="lead">The stats page pulls it all together into interactive charts and maps; the full list lets you filter and sort every credit.</p>
+  <div class="grid">
+    <div class="card">
+      <div class="meta">Geography</div>
+      <h3>An interactive map</h3>
+      <p>Every park you've ridden, plotted worldwide and sized by how many rides you've racked up there.</p>
+    </div>
+    <div class="card">
+      <div class="meta">Activity</div>
+      <h3>Every riding day</h3>
+      <p>A calendar heatmap of your entire riding history — the big trips and marathon days jump right out.</p>
+    </div>
+    <div class="card">
+      <div class="meta">Records</div>
+      <h3>Personal bests</h3>
+      <p>Tallest, fastest, longest, most-ridden — your milestones tracked and ranked automatically.</p>
+    </div>
+  </div>
+  <p style="margin-top:28px"><a class="btn" href="stats.html">Open My Stats</a> <a class="btn ghost" href="coasters.html">Browse all coasters</a></p>
+</div></section>
+
+<section class="block"><div class="container prose">
+  <span class="eyebrow">The idea</span>
+  <h2>Why Coaster Hub</h2>
+  <p>Coaster Hub started as a meticulously kept spreadsheet — every credit, every re-ride, every park visit, all with dates. This site turns that record into something you can actually explore: maps, timelines, records, and a calendar of every riding day.</p>
+  <p>Everything here comes straight from real logged rides — no estimates, no rounding, just the count as it actually happened. More visualizations are on the way, and eventually a way for other enthusiasts to drop in their own counts and see the same stats.</p>
+  <p>Have an idea for a stat worth showing? Email <a href="mailto:hello@coasterhub.org" style="color:var(--accent2)">hello@coasterhub.org</a>.</p>
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="index.html">Home</a> &nbsp;·&nbsp; <a href="stats.html">My Stats</a> &nbsp;·&nbsp; <a href="coasters.html">Coasters</a></div>
+</div></footer>
+<script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+</body>
+</html>
