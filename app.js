@@ -160,7 +160,7 @@
   function loadUser(userFile) {
     userFile = userFile || "carter.json";
     return Promise.all([
-      fetch("coasters.data.json").then(function (r) { return r.json(); }),
+      fetch("coasters.json").then(function (r) { return r.json(); }),
       fetch("parks.json").then(function (r) { return r.json(); }),
       fetch(userFile).then(function (r) { return r.json(); })
     ]).then(function (res) {
