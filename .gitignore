@@ -1,0 +1,9 @@
+# Internal project notes — kept local, never published to the public site
+COASTERHUB_HANDOFF.md
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
