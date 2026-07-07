@@ -4,15 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base href="/">
-<title>Combined list — Coaster Hub</title>
-<meta name="description" content="The combined list of every roller coaster across everyone's counts on Coaster Hub.">
+<title>Coasters — Coaster Hub</title>
+<meta name="description" content="Roller coaster lists on Coaster Hub — per rider, or the combined list.">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta property="og:title" content="Coaster Hub — Combined list">
-<meta property="og:description" content="Every coaster across everyone's counts.">
+<meta property="og:title" content="Coaster Hub — Coasters">
 <meta property="og:image" content="https://coasterhub.org/og-image.png">
 <style>
   .controls{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 18px}
@@ -58,19 +57,19 @@
 </div></header>
 
 <section class="hero" style="padding:56px 0 30px"><div class="container">
-  <span class="badge">The combined list</span>
-  <h1 style="max-width:20ch">Combined list &middot; <span id="total">…</span> coasters.</h1>
-  <p>A combination of everyone&rsquo;s lists — every coaster ridden across Carter, Cole &amp; Max&rsquo;s counts. Filter and sort by park, manufacturer, model, status, or stats.</p>
+  <span class="badge">The list</span>
+  <h1 style="max-width:20ch">Loading&hellip;</h1>
+  <p>Filter and sort every coaster.</p>
 </div></section>
 
 <section class="block" style="padding-top:24px"><div class="container">
   <div id="err">
-    <strong>Couldn&rsquo;t load the data.</strong> This page reads external data files, so it needs to be served over the web. View it on the live site, or run <code>python -m http.server</code> from this folder and open <code>localhost:8000/coasters.html</code>.
+    <strong>Couldn&rsquo;t load the data.</strong> This page reads external data files, so it needs to be served over the web.
   </div>
-  <div id="loading">Loading the combined list…</div>
+  <div id="loading">Loading coasters&hellip;</div>
   <div id="ui" style="display:none">
     <div class="controls">
-      <input id="q" type="search" placeholder="Search name, park, manufacturer, model…">
+      <input id="q" type="search" placeholder="Search name, park, manufacturer, model&hellip;">
       <select id="f_status"><option value="">All statuses</option><option value="Operating">Operating</option><option value="Defunct">Defunct</option></select>
       <select id="f_type"><option value="">All types</option></select>
       <select id="f_manu"><option value="">All manufacturers</option></select>
@@ -86,15 +85,15 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;·&nbsp; <a href="/stats">Stats</a> &nbsp;·&nbsp; <a href="/coasters">Coasters</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a></div>
 </div></footer>
 
 <script src="app.js"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('coasters');
-let DATA=[];
-const ALLCOLS=[
+var DATA=[];
+var ALLCOLS=[
  {k:'name',t:'Name',num:false,cls:'name'},
  {k:'park',t:'Park',num:false},
  {k:'loc',t:'Location',num:false},
@@ -102,42 +101,69 @@ const ALLCOLS=[
  {k:'manu',t:'Manufacturer',num:false},
  {k:'model',t:'Model',num:false},
  {k:'yr',t:'Year',num:true},
+ {k:'first',t:'First Ridden',num:false},
+ {k:'rides',t:'Rides',num:true},
  {k:'h',t:'Height (ft)',num:true},
  {k:'s',t:'Speed (mph)',num:true},
  {k:'l',t:'Length (ft)',num:true},
  {k:'inv',t:'Inv',num:true},
- {k:'status',t:'Status',num:false},
+ {k:'status',t:'Status',num:false}
 ];
-let COLS=ALLCOLS;
-let sortKey='park', sortDir=1;
-const FILTS=['q','f_status','f_type','f_manu','f_model','f_park','f_loc'];
-const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+var COLS=ALLCOLS;
+var sortKey='park', sortDir=1;
+var FILTS=['q','f_status','f_type','f_manu','f_model','f_park','f_loc'];
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function setHero(badge,h1,p){
+  document.querySelector('.hero .badge').textContent=badge;
+  document.querySelector('.hero h1').textContent=h1;
+  document.querySelector('.hero p').textContent=p;
+}
+function fail(e){console.error(e);document.getElementById('loading').style.display='none';document.getElementById('err').style.display='block';}
+function finish(){document.getElementById('loading').style.display='none';document.getElementById('ui').style.display='block';init();}
 
-fetch('/coasters.json').then(r=>r.json()).then(function(j){
-  DATA=j.coasters.map(function(c){return Object.assign({},c,{status:c.closed?'Defunct':'Operating'});});
-  document.getElementById('loading').style.display='none';
-  document.getElementById('ui').style.display='block';
-  document.getElementById('total').textContent=DATA.length.toLocaleString();
-  init();
-}).catch(function(e){
-  console.error(e);
-  document.getElementById('loading').style.display='none';
-  document.getElementById('err').style.display='block';
-});
+if(CoasterHub.currentUser()){
+  CoasterHub.loadUser().then(function(s){
+    DATA=s.coasters.filter(function(c){return s.byCoaster[c.id];}).map(function(c){
+      var d=s.byCoaster[c.id];
+      return Object.assign({},c,{rides:d.rides,first:d.first,status:c.closed?'Defunct':'Operating'});
+    });
+    var anyFirst=DATA.some(function(c){return c.first;});
+    var anyRides=DATA.some(function(c){return c.rides!=null;});
+    COLS=ALLCOLS.filter(function(col){
+      if(col.k==='first')return anyFirst;
+      if(col.k==='rides')return anyRides;
+      return true;
+    });
+    var nm=String(s.userName||'Carter').replace(/[&<>"]/g,'');
+    setHero('The full list','Every coaster in '+nm+'’s count.',
+      'All '+DATA.length.toLocaleString()+' credits — filter and sort by park, manufacturer, model, status, or stats.');
+    document.title=nm+'’s Coasters — Coaster Hub';
+    finish();
+  }).catch(fail);
+} else {
+  fetch('/coasters.json').then(function(r){return r.json();}).then(function(j){
+    DATA=j.coasters.map(function(c){return Object.assign({},c,{status:c.closed?'Defunct':'Operating'});});
+    COLS=ALLCOLS.filter(function(col){return col.k!=='first'&&col.k!=='rides';});
+    setHero('The combined list','Combined list · '+DATA.length.toLocaleString()+' coasters.',
+      'A combination of everyone’s lists — every coaster ridden across Carter, Cole & Max’s counts. Filter and sort by park, manufacturer, model, status, or stats.');
+    document.title='Combined list — Coaster Hub';
+    finish();
+  }).catch(fail);
+}
 
 function init(){
   ['f_type|type','f_manu|manu','f_model|model','f_park|park','f_loc|loc'].forEach(function(pair){
     var id=pair.split('|')[0], key=pair.split('|')[1];
-    var vals=[...new Set(DATA.map(c=>c[key]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b)));
+    var vals=[...new Set(DATA.map(function(c){return c[key];}).filter(Boolean))].sort(function(a,b){return String(a).localeCompare(String(b));});
     var sel=document.getElementById(id);
-    vals.forEach(v=>{var o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
+    vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
   });
   var head=document.getElementById('head');
   COLS.forEach(function(c){var th=document.createElement('th');th.textContent=c.t;if(c.num)th.className='num';
     th.dataset.k=c.k;th.onclick=function(){if(sortKey===c.k)sortDir*=-1;else{sortKey=c.k;sortDir=c.num?-1:1;}render();};
     head.appendChild(th);});
-  FILTS.forEach(id=>document.getElementById(id).addEventListener('input',render));
-  document.getElementById('reset').onclick=function(){FILTS.forEach(id=>document.getElementById(id).value='');sortKey='park';sortDir=1;render();};
+  FILTS.forEach(function(id){document.getElementById(id).addEventListener('input',render);});
+  document.getElementById('reset').onclick=function(){FILTS.forEach(function(id){document.getElementById(id).value='';});sortKey='park';sortDir=1;render();};
   render();
 }
 function current(){

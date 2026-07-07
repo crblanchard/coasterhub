@@ -327,8 +327,7 @@
   // (/stats, /coasters); everyone else lives under /user/<slug>/.
   function userPageHref(slug, page) {
     if (page === "home") return "/";
-    if (page === "coasters") return "/coasters";   // combined list (shared)
-    return "/user/" + slug + "/stats";              // a rider's own dashboard
+    return "/user/" + slug + "/" + page;   // a rider's own stats or coasters
   }
 
   // Wire the header for a page ("home" | "stats" | "coasters"): point the
@@ -336,30 +335,44 @@
   // render the User picker (alphabetical).
   function initNav(page) {
     if (typeof document === "undefined") return;
-    var slug = currentUser(); // set only on a rider's dashboard (/user/<slug>/stats)
+
+    // Active rider persists between pages: the URL wins (/user/<slug>/...),
+    // otherwise fall back to the last rider we remembered (so it carries to Home).
+    var urlSlug = currentUser(), slug;
+    try {
+      if (urlSlug) { window.localStorage.setItem("ch_rider", urlSlug); slug = urlSlug; }
+      else { slug = window.localStorage.getItem("ch_rider") || ""; }
+    } catch (e) { slug = urlSlug || ""; }
 
     var sEl = document.querySelector('[data-nav="stats"]');
     var cEl = document.querySelector('[data-nav="coasters"]');
-    if (sEl) sEl.setAttribute("href", "/stats");     // the riders hub
-    if (cEl) cEl.setAttribute("href", "/coasters");  // the combined list
+    if (sEl) sEl.setAttribute("href", slug ? "/user/" + slug + "/stats" : "/stats");
+    if (cEl) cEl.setAttribute("href", slug ? "/user/" + slug + "/coasters" : "/coasters");
 
     var links = document.querySelectorAll('nav.links a[data-nav]');
     for (var i = 0; i < links.length; i++) {
       links[i].classList.toggle("active", links[i].getAttribute("data-nav") === page);
     }
 
-    // The picker always jumps to a rider's own stats dashboard.
     var wrap = document.getElementById("people");
     if (wrap) {
       var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
-      var opts = '<option value="/stats"' + (slug ? '' : ' selected') + '>All</option>';
+      var opts = '<option value="__all__"' + (slug ? "" : " selected") + '>All</option>';
       opts += sorted.map(function (u) {
-        var on = (u.slug === slug) ? " selected" : "";
-        return '<option value="/user/' + u.slug + '/stats"' + on + '>' + u.name + '</option>';
+        return '<option value="' + u.slug + '"' + (u.slug === slug ? " selected" : "") + '>' + u.name + '</option>';
       }).join("");
       wrap.innerHTML = '<select class="userpick" aria-label="Select rider">' + opts + '</select>';
       var sel = wrap.querySelector("select");
-      sel.addEventListener("change", function () { if (sel.value) location.href = sel.value; });
+      var kind = (page === "coasters") ? "coasters" : "stats"; // keep the same page type when switching
+      sel.addEventListener("change", function () {
+        var v = sel.value;
+        try {
+          if (v === "__all__") window.localStorage.removeItem("ch_rider");
+          else window.localStorage.setItem("ch_rider", v);
+        } catch (e) {}
+        if (v === "__all__") location.href = (page === "coasters") ? "/coasters" : (page === "home" ? "/" : "/stats");
+        else location.href = "/user/" + v + "/" + kind;
+      });
     }
   }
 
