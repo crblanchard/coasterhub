@@ -7,3 +7,7 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
+.fuse_hidden*
+
+# Captain Coaster import cache (large, auto-regenerated)
+tools/.cc-cache/
