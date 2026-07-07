@@ -30,6 +30,9 @@
 
   function regionKind(reg) {
     if (reg === "NorCal" || reg === "SoCal") return ["state", "California"];
+    // Standardized US locations from the Captain Coaster import: "<State>, US".
+    var mUS = /^(.*),\s*US$/.exec(reg || "");
+    if (mUS) return ["state", mUS[1]];
     if (US_STATES.has(reg)) return ["state", reg];
     if (reg === "Abu Dhabi" || reg === "Dubai") return ["country", "United Arab Emirates"];
     return ["country", reg];

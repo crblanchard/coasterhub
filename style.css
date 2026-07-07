@@ -17,6 +17,7 @@ header.nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);
 .nav-inner{display:flex;align-items:center;justify-content:space-between;height:66px}
 .brand{font-weight:800;font-size:1.3rem;letter-spacing:-.01em}
 .brand span{color:var(--accent)}
+.brand-logo{height:42px;width:auto;display:block}
 nav.links{display:flex;gap:26px}
 nav.links a{color:var(--muted);font-weight:500;font-size:.95rem;transition:color .15s}
 nav.links a:hover,nav.links a.active{color:var(--fg)}

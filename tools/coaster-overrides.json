@@ -1,0 +1,1349 @@
+{
+ "_comment": "Your hand-entered laps and duration (seconds). Applied on import, keyed by \"Coaster Name @ Park\". Edit or append freely; these win over Captain Coaster data. laps omitted = 1; dur in seconds.",
+ "overrides": {
+  "Rewind Racers @ Adventure City": {
+   "laps": 2
+  },
+  "Canyon Blaster @ Adventuredome": {
+   "dur": 90
+  },
+  "El Loco @ Adventuredome": {
+   "dur": 73
+  },
+  "Dragon Slayer @ Adventureland": {
+   "dur": 55
+  },
+  "Outlaw @ Adventureland": {
+   "dur": 120
+  },
+  "Tornado @ Adventureland": {
+   "dur": 120
+  },
+  "Underground @ Adventureland": {
+   "dur": 120
+  },
+  "Spinning Coaster @ Alameda County Fair": {
+   "laps": 10
+  },
+  "Wacky Worm @ Alameda County Fair": {
+   "laps": 2
+  },
+  "Fiesta Express @ Austin's Park and Pizza": {
+   "laps": 2,
+   "dur": 120
+  },
+  "Bob Express @ Bobbejaanland": {
+   "laps": 2,
+   "dur": 150
+  },
+  "Dreamcatcher @ Bobbejaanland": {
+   "dur": 164
+  },
+  "Fury @ Bobbejaanland": {
+   "dur": 90
+  },
+  "Oki Doki @ Bobbejaanland": {
+   "dur": 62
+  },
+  "Revolution @ Bobbejaanland": {
+   "dur": 140
+  },
+  "Speedy Bob @ Bobbejaanland": {
+   "dur": 85
+  },
+  "Typhoon @ Bobbejaanland": {
+   "dur": 90
+  },
+  "Tiger Mike @ Boomers": {
+   "laps": 5
+  },
+  "Desperado @ Buffalo Bill's Resort & Casino": {
+   "dur": 163
+  },
+  "Alpengeist @ Busch Gardens Williamsburg": {
+   "dur": 190
+  },
+  "Apollo's Chariot @ Busch Gardens Williamsburg": {
+   "dur": 135
+  },
+  "Griffon @ Busch Gardens Williamsburg": {
+   "dur": 180
+  },
+  "Loch Ness Monster @ Busch Gardens Williamsburg": {
+   "dur": 130
+  },
+  "Tempesto @ Busch Gardens Williamsburg": {
+   "laps": 2,
+   "dur": 45
+  },
+  "Verbolten @ Busch Gardens Williamsburg": {
+   "dur": 205
+  },
+  "Spinning Coaster @ CJ Barrymore's": {
+   "laps": 10
+  },
+  "Demon @ California's Great America": {
+   "dur": 105
+  },
+  "Flight Deck @ California's Great America": {
+   "dur": 146
+  },
+  "Gold Striker @ California's Great America": {
+   "dur": 150
+  },
+  "Grizzly @ California's Great America": {
+   "dur": 160
+  },
+  "Lucy's Crabbie Cabbies @ California's Great America": {
+   "dur": 75
+  },
+  "Patriot @ California's Great America": {
+   "dur": 134
+  },
+  "Psycho Mouse @ California's Great America": {
+   "dur": 180
+  },
+  "Woodstock Express @ California's Great America": {
+   "dur": 75
+  },
+  "Backlot Stunt Coaster @ Canada's Wonderland": {
+   "dur": 64
+  },
+  "Bat @ Canada's Wonderland": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Behemoth @ Canada's Wonderland": {
+   "dur": 190
+  },
+  "Dragon Fyre @ Canada's Wonderland": {
+   "dur": 90
+  },
+  "Flight Deck @ Canada's Wonderland": {
+   "dur": 88
+  },
+  "Ghoster Coaster @ Canada's Wonderland": {
+   "dur": 80
+  },
+  "Leviathan @ Canada's Wonderland": {
+   "dur": 208
+  },
+  "Mighty Canadian Minebuster @ Canada's Wonderland": {
+   "dur": 122
+  },
+  "Silver Streak @ Canada's Wonderland": {
+   "dur": 76
+  },
+  "Thunder Run @ Canada's Wonderland": {
+   "laps": 2,
+   "dur": 84
+  },
+  "Time Warp @ Canada's Wonderland": {
+   "dur": 64
+  },
+  "Vortex @ Canada's Wonderland": {
+   "dur": 96
+  },
+  "Wild Beast @ Canada's Wonderland": {
+   "dur": 122
+  },
+  "Wonder Mountain's Guardian @ Canada's Wonderland": {
+   "dur": 210
+  },
+  "Yukon Striker @ Canada's Wonderland": {
+   "dur": 205
+  },
+  "Merlin's Revenge @ Castle Park": {
+   "laps": 2,
+   "dur": 44
+  },
+  "Blue Streak @ Cedar Point": {
+   "dur": 105
+  },
+  "Cedar Creek Mine Ride @ Cedar Point": {
+   "dur": 162
+  },
+  "Corkscrew @ Cedar Point": {
+   "dur": 120
+  },
+  "Gatekeeper @ Cedar Point": {
+   "dur": 160
+  },
+  "Gemini (Blue) @ Cedar Point": {
+   "dur": 140
+  },
+  "Gemini (Red) @ Cedar Point": {
+   "dur": 140
+  },
+  "Iron Dragon @ Cedar Point": {
+   "dur": 120
+  },
+  "Magnum XL-200 @ Cedar Point": {
+   "dur": 120
+  },
+  "Maverick @ Cedar Point": {
+   "dur": 150
+  },
+  "Mean Streak @ Cedar Point": {
+   "dur": 193
+  },
+  "Millennium Force @ Cedar Point": {
+   "dur": 140
+  },
+  "Raptor @ Cedar Point": {
+   "dur": 136
+  },
+  "Rougarou @ Cedar Point": {
+   "dur": 160
+  },
+  "Steel Vengeance @ Cedar Point": {
+   "dur": 150
+  },
+  "Top Thrill Dragster @ Cedar Point": {
+   "dur": 30
+  },
+  "Valravn @ Cedar Point": {
+   "dur": 118
+  },
+  "Wicked Twister @ Cedar Point": {
+   "dur": 40
+  },
+  "Wild Mouse @ Cedar Point": {
+   "dur": 70
+  },
+  "Woodstock Express @ Cedar Point": {
+   "dur": 66
+  },
+  "Twist-n-Shout @ Central Park Fun-Land": {
+   "laps": 10
+  },
+  "Crazy Mouse @ DelGrosso's Amusement Park": {
+   "dur": 90
+  },
+  "Wacky Worm @ DelGrosso's Amusement Park": {
+   "laps": 2
+  },
+  "Sea Serpent @ Deno's Wonder Wheel": {
+   "laps": 3
+  },
+  "Goofy's Sky School @ Disney California Adventure": {
+   "dur": 90
+  },
+  "Incredicoaster @ Disney California Adventure": {
+   "dur": 156
+  },
+  "Expedition Everest @ Disney's Animal Kingdom": {
+   "dur": 170
+  },
+  "Big Thunder Mountain Railroad @ Disneyland": {
+   "dur": 180
+  },
+  "Gadget's Go Coaster @ Disneyland": {
+   "dur": 44
+  },
+  "Matterhorn Bobsleds (Left) @ Disneyland": {
+   "dur": 127
+  },
+  "Matterhorn Bobsleds (Right) @ Disneyland": {
+   "dur": 146
+  },
+  "Space Mountain @ Disneyland": {
+   "dur": 165
+  },
+  "Demon Drop @ Dorney Park": {
+   "laps": 2
+  },
+  "Hydra: The Revenge @ Dorney Park": {
+   "dur": 155
+  },
+  "Possessed @ Dorney Park": {
+   "laps": 2
+  },
+  "Steel Force @ Dorney Park": {
+   "dur": 180
+  },
+  "Stinger @ Dorney Park": {
+   "laps": 2,
+   "dur": 90
+  },
+  "Talon @ Dorney Park": {
+   "dur": 120
+  },
+  "Thunderhawk @ Dorney Park": {
+   "dur": 78
+  },
+  "Wild Mouse @ Dorney Park": {
+   "dur": 70
+  },
+  "Woodstock Express @ Dorney Park": {
+   "dur": 40
+  },
+  "Baron 1898 @ Efteling": {
+   "dur": 130
+  },
+  "Max + Moritz (Max) @ Efteling": {
+   "laps": 2,
+   "dur": 150
+  },
+  "Max + Moritz (Moritz) @ Efteling": {
+   "laps": 2,
+   "dur": 150
+  },
+  "Python @ Efteling": {
+   "dur": 128
+  },
+  "Vogel Rok @ Efteling": {
+   "dur": 101
+  },
+  "Boomerang @ Elitch Gardens": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Half Pipe @ Elitch Gardens": {
+   "laps": 6,
+   "dur": 120
+  },
+  "Mind Eraser @ Elitch Gardens": {
+   "dur": 96
+  },
+  "Sidewinder @ Elitch Gardens": {
+   "laps": 2,
+   "dur": 66
+  },
+  "Formula Rossa Junior @ Ferrari World": {
+   "laps": 2
+  },
+  "Turbo Track @ Ferrari World": {
+   "laps": 2
+  },
+  "La Pomme @ Foire du Trône": {
+   "laps": 2,
+   "dur": 30
+  },
+  "Eejanaika @ Fuji-Q Highland": {
+   "dur": 130
+  },
+  "Fujiyama @ Fuji-Q Highland": {
+   "dur": 216
+  },
+  "Nia and Animal Coaster @ Fuji-Q Highland": {
+   "laps": 2,
+   "dur": 63
+  },
+  "Takabisha @ Fuji-Q Highland": {
+   "dur": 112
+  },
+  "Zokkon @ Fuji-Q Highland": {
+   "dur": 155
+  },
+  "Flying Dragon @ Funderland": {
+   "laps": 2
+  },
+  "Timber Twister @ Gilroy Gardens": {
+   "dur": 50
+  },
+  "Cliffhanger @ Glenwood Caverns": {
+   "dur": 80
+  },
+  "Roller Coaster @ Hanayashiki": {
+   "dur": 90
+  },
+  "Candymonium @ Hersheypark": {
+   "dur": 146
+  },
+  "Comet @ Hersheypark": {
+   "dur": 105
+  },
+  "Fahrenheit @ Hersheypark": {
+   "dur": 85
+  },
+  "Great Bear @ Hersheypark": {
+   "dur": 175
+  },
+  "Lightning Racer (Lightning) @ Hersheypark": {
+   "dur": 140
+  },
+  "Lightning Racer (Thunder) @ Hersheypark": {
+   "dur": 140
+  },
+  "Sidewinder @ Hersheypark": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Sooperdooperlooper @ Hersheypark": {
+   "dur": 105
+  },
+  "Storm Runner @ Hersheypark": {
+   "dur": 50
+  },
+  "Trailblazer @ Hersheypark": {
+   "dur": 75
+  },
+  "Wild Mouse @ Hersheypark": {
+   "dur": 110
+  },
+  "Wildcat's Revenge @ Hersheypark": {
+   "dur": 156
+  },
+  "Diavlo @ Himeji Central Park": {
+   "dur": 108
+  },
+  "Imorinth @ Himeji Central Park": {
+   "dur": 58
+  },
+  "Venus GP @ Himeji Central Park": {
+   "dur": 135
+  },
+  "The Legend @ Holiday World": {
+   "dur": 120
+  },
+  "The Raven @ Holiday World": {
+   "dur": 90
+  },
+  "The Voyage @ Holiday World": {
+   "dur": 165
+  },
+  "Thunderbird @ Holiday World": {
+   "dur": 78
+  },
+  "Velociraptor @ IMG Worlds of Adventure": {
+   "dur": 150
+  },
+  "Incredible Spin Coaster @ Incredible Pizza Company": {
+   "laps": 10
+  },
+  "Crazy 8's @ John's Incredible Pizza Company Carson": {
+   "laps": 6
+  },
+  "Incredible Express @ John's Incredible Pizza Company Roseville": {
+   "laps": 5
+  },
+  "Exterminator @ Kennywood": {
+   "dur": 108
+  },
+  "Jack Rabbit @ Kennywood": {
+   "dur": 96
+  },
+  "Lil' Phantom @ Kennywood": {
+   "laps": 3,
+   "dur": 30
+  },
+  "Phantom's Revenge @ Kennywood": {
+   "dur": 117
+  },
+  "Racer @ Kennywood": {
+   "dur": 92
+  },
+  "Sky Rocket @ Kennywood": {
+   "dur": 75
+  },
+  "Thunderbolt @ Kennywood": {
+   "dur": 101
+  },
+  "Lightning Run @ Kentucky Kingdom": {
+   "dur": 120
+  },
+  "Roller Skater @ Kentucky Kingdom": {
+   "dur": 50
+  },
+  "Storm Chaser @ Kentucky Kingdom": {
+   "dur": 100
+  },
+  "T3 @ Kentucky Kingdom": {
+   "dur": 96
+  },
+  "Thunder Run @ Kentucky Kingdom": {
+   "dur": 114
+  },
+  "Anaconda @ Kings Dominion": {
+   "dur": 110
+  },
+  "Backlot Stunt Coaster @ Kings Dominion": {
+   "dur": 64
+  },
+  "Flight of Fear @ Kings Dominion": {
+   "dur": 144
+  },
+  "Grizzly @ Kings Dominion": {
+   "dur": 150
+  },
+  "Intimidator 305 @ Kings Dominion": {
+   "dur": 180
+  },
+  "Racer 75 - North @ Kings Dominion": {
+   "dur": 135
+  },
+  "Racer 75 - South @ Kings Dominion": {
+   "dur": 135
+  },
+  "Woodstock Express @ Kings Dominion": {
+   "dur": 100
+  },
+  "Adventure Express @ Kings Island": {
+   "dur": 140
+  },
+  "Backlot Stunt Coaster @ Kings Island": {
+   "dur": 64
+  },
+  "Banshee @ Kings Island": {
+   "dur": 160
+  },
+  "Diamondback @ Kings Island": {
+   "dur": 180
+  },
+  "Flight of Fear @ Kings Island": {
+   "dur": 60
+  },
+  "Invertigo @ Kings Island": {
+   "laps": 2,
+   "dur": 90
+  },
+  "Mystic Timbers @ Kings Island": {
+   "dur": 120
+  },
+  "Orion @ Kings Island": {
+   "dur": 180
+  },
+  "The Bat @ Kings Island": {
+   "dur": 112
+  },
+  "The Racer (Blue) @ Kings Island": {
+   "dur": 120
+  },
+  "Woodstock Express @ Kings Island": {
+   "dur": 90
+  },
+  "Black Diamond @ Knoebels": {
+   "dur": 230
+  },
+  "Kozmo's Kurves @ Knoebels": {
+   "laps": 2
+  },
+  "Phoenix @ Knoebels": {
+   "dur": 120
+  },
+  "Twister @ Knoebels": {
+   "dur": 130
+  },
+  "Boomerang @ Knott's Berry Farm": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Coast Rider @ Knott's Berry Farm": {
+   "dur": 98
+  },
+  "GhostRider @ Knott's Berry Farm": {
+   "dur": 160
+  },
+  "GhostRider (Old) @ Knott's Berry Farm": {
+   "dur": 160
+  },
+  "Jaguar! @ Knott's Berry Farm": {
+   "dur": 120
+  },
+  "Montezooma's Revenge @ Knott's Berry Farm": {
+   "laps": 2,
+   "dur": 36
+  },
+  "Pony Express @ Knott's Berry Farm": {
+   "dur": 36
+  },
+  "Silver Bullet @ Knott's Berry Farm": {
+   "dur": 150
+  },
+  "Snoopy's Tenderpaw Twister Coaster @ Knott's Berry Farm": {
+   "laps": 2,
+   "dur": 50.8
+  },
+  "Timberline Twister @ Knott's Berry Farm": {
+   "dur": 55
+  },
+  "Xcelerator @ Knott's Berry Farm": {
+   "dur": 62
+  },
+  "Miner Mike @ Knucklehead's Bowling & Family Entertainment": {
+   "laps": 4
+  },
+  "Cannibal @ Lagoon": {
+   "dur": 150
+  },
+  "Colossus the Fire Dragon @ Lagoon": {
+   "dur": 105
+  },
+  "Puff the Little Fire Dragon @ Lagoon": {
+   "laps": 3
+  },
+  "The Bat @ Lagoon": {
+   "dur": 90
+  },
+  "The Spider @ Lagoon": {
+   "dur": 70
+  },
+  "Wicked @ Lagoon": {
+   "dur": 106
+  },
+  "Wild Mouse @ Lagoon": {
+   "dur": 70
+  },
+  "Boulder Dash @ Lake Compounce": {
+   "dur": 150
+  },
+  "Wildcat @ Lake Compounce": {
+   "dur": 75
+  },
+  "Wild Chipmunk @ Lakeside Amusement Park": {
+   "dur": 48
+  },
+  "Dragon Coaster @ Las Vegas Mini Gran Prix": {
+   "laps": 3,
+   "dur": 45
+  },
+  "Little Dipper @ Little Amerricka": {
+   "laps": 6
+  },
+  "Meteor @ Little Amerricka": {
+   "laps": 3,
+   "dur": 50
+  },
+  "Circus Coaster @ Luna Park": {
+   "laps": 2
+  },
+  "Cyclone @ Luna Park": {
+   "dur": 110
+  },
+  "Soarin' Eagle @ Luna Park": {
+   "dur": 48
+  },
+  "Tickler @ Luna Park": {
+   "dur": 90
+  },
+  "Barnstormer @ Magic Kingdom": {
+   "dur": 60
+  },
+  "Big Thunder Mountain Railroad @ Magic Kingdom": {
+   "dur": 210
+  },
+  "Space Mountain (Omega) @ Magic Kingdom": {
+   "dur": 155
+  },
+  "Great Nor'Easter @ Morey's Piers": {
+   "dur": 85
+  },
+  "Great White @ Morey's Piers": {
+   "dur": 120
+  },
+  "Runaway Tram @ Morey's Piers": {
+   "laps": 2
+  },
+  "Sea Serpent @ Morey's Piers": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Wild Whizzer @ Morey's Piers": {
+   "laps": 5
+  },
+  "Cyclops @ Mt. Olympus": {
+   "dur": 60
+  },
+  "Zeus @ Mt. Olympus": {
+   "dur": 85
+  },
+  "Gusano Loco @ Mundo Divertido": {
+   "laps": 3
+  },
+  "Acrobat @ Nagashima Spaland": {
+   "dur": 180
+  },
+  "Children Coaster @ Nagashima Spaland": {
+   "laps": 2,
+   "dur": 88
+  },
+  "Corkscrew @ Nagashima Spaland": {
+   "dur": 76
+  },
+  "Jet Coaster @ Nagashima Spaland": {
+   "dur": 122
+  },
+  "Looping Star @ Nagashima Spaland": {
+   "dur": 78
+  },
+  "Peter Rabbit Coaster @ Nagashima Spaland": {
+   "laps": 2
+  },
+  "Shuttle Loop @ Nagashima Spaland": {
+   "laps": 2,
+   "dur": 30
+  },
+  "Steel Dragon 2000 @ Nagashima Spaland": {
+   "dur": 240
+  },
+  "Ultra Twister @ Nagashima Spaland": {
+   "dur": 78
+  },
+  "Wild Mouse (Right) @ Nagashima Spaland": {
+   "dur": 88
+  },
+  "Big Apple Coaster @ New York, New York Hotel & Casino": {
+   "dur": 160
+  },
+  "Avatar Airbender @ Nickelodeon Universe": {
+   "laps": 3
+  },
+  "Back at the Barnyard Hayride @ Nickelodeon Universe": {
+   "laps": 6,
+   "dur": 90
+  },
+  "Fairly Odd Coaster @ Nickelodeon Universe": {
+   "dur": 90
+  },
+  "Pepsi Orange Streak @ Nickelodeon Universe": {
+   "dur": 150
+  },
+  "SpongeBob SquarePants Rock Bottom Plunge @ Nickelodeon Universe": {
+   "dur": 120
+  },
+  "Nickelodeon Slime Streak @ Nickelodeon Universe Theme Park": {
+   "dur": 70
+  },
+  "Tiger Trek @ Oakland Zoo": {
+   "laps": 2
+  },
+  "Crazy Coaster @ Orange County Fair": {
+   "dur": 90
+  },
+  "Little Dipper @ Orange County Fair": {
+   "laps": 8
+  },
+  "Wacky Worm @ Orange County Fair": {
+   "laps": 2
+  },
+  "Santa Monica West Coaster @ Pacific Park": {
+   "laps": 2
+  },
+  "Goudurix @ Parc Astérix": {
+   "dur": 80
+  },
+  "Pégase Express @ Parc Astérix": {
+   "dur": 180
+  },
+  "SOS Tournevis @ Parc Astérix": {
+   "laps": 2,
+   "dur": 90
+  },
+  "Tonnerre 2 Zeus @ Parc Astérix": {
+   "dur": 125
+  },
+  "Toutatis @ Parc Astérix": {
+   "dur": 123
+  },
+  "Vol D'Icare @ Parc Astérix": {
+   "dur": 75
+  },
+  "Colorado Adventure @ Phantasialand": {
+   "dur": 175
+  },
+  "Crazy Bats @ Phantasialand": {
+   "dur": 240
+  },
+  "Raik @ Phantasialand": {
+   "laps": 2
+  },
+  "Flying Dragon Coaster @ Pixieland": {
+   "laps": 2
+  },
+  "#LikeMe Coaster @ Plopsaland De Panne": {
+   "laps": 2
+  },
+  "Draconis @ Plopsaland De Panne": {
+   "laps": 2
+  },
+  "K3 Roller Skater @ Plopsaland De Panne": {
+   "laps": 2,
+   "dur": 66
+  },
+  "Wacky Dog @ San Mateo County Fair": {
+   "laps": 3
+  },
+  "Wacky Worm @ San Mateo County Fair": {
+   "laps": 2
+  },
+  "Dragon Wagon @ Sandy Lake Amusement Park": {
+   "laps": 2
+  },
+  "Giant Dipper @ Santa Cruz Beach Boardwalk": {
+   "dur": 112
+  },
+  "Sea Serpent @ Santa Cruz Beach Boardwalk": {
+   "laps": 2
+  },
+  "Surf Coaster Leviathan @ Sea Paradise": {
+   "dur": 143
+  },
+  "Great White @ SeaWorld San Antonio": {
+   "dur": 120
+  },
+  "Journey to Atlantis @ SeaWorld San Antonio": {
+   "dur": 210
+  },
+  "Shamu Express @ SeaWorld San Antonio": {
+   "laps": 2
+  },
+  "Steel Eel @ SeaWorld San Antonio": {
+   "dur": 100
+  },
+  "Arctic Rescue @ SeaWorld San Diego": {
+   "dur": 75
+  },
+  "Electric Eel @ SeaWorld San Diego": {
+   "laps": 2
+  },
+  "Emperor @ SeaWorld San Diego": {
+   "dur": 120
+  },
+  "Journey to Atlantis @ SeaWorld San Diego": {
+   "dur": 300
+  },
+  "Manta @ SeaWorld San Diego": {
+   "dur": 120
+  },
+  "Whirlwind @ Seabreeze": {
+   "dur": 70
+  },
+  "Fire In The Hole @ Silver Dollar City": {
+   "dur": 195
+  },
+  "Grand Exposition Coaster @ Silver Dollar City": {
+   "laps": 2
+  },
+  "Outlaw Run @ Silver Dollar City": {
+   "dur": 87
+  },
+  "Powder Keg @ Silver Dollar City": {
+   "dur": 173
+  },
+  "Thunderation @ Silver Dollar City": {
+   "dur": 130
+  },
+  "Time Traveler @ Silver Dollar City": {
+   "dur": 117
+  },
+  "Wildfire @ Silver Dollar City": {
+   "dur": 136
+  },
+  "Apocalypse @ Six Flags America": {
+   "dur": 120
+  },
+  "Batwing @ Six Flags America": {
+   "dur": 122
+  },
+  "Great Chase @ Six Flags America": {
+   "dur": 96
+  },
+  "Joker's Jinx @ Six Flags America": {
+   "dur": 56
+  },
+  "Mind Eraser @ Six Flags America": {
+   "dur": 96
+  },
+  "Ragin' Cajun @ Six Flags America": {
+   "dur": 90
+  },
+  "Roar @ Six Flags America": {
+   "dur": 112
+  },
+  "Superman: Ride of Steel @ Six Flags America": {
+   "dur": 130
+  },
+  "Wild One @ Six Flags America": {
+   "dur": 112
+  },
+  "Boomerang @ Six Flags Darien Lake": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Mind Eraser @ Six Flags Darien Lake": {
+   "dur": 85
+  },
+  "Predator @ Six Flags Darien Lake": {
+   "dur": 110
+  },
+  "Ride of Steel @ Six Flags Darien Lake": {
+   "dur": 122
+  },
+  "Tantrum @ Six Flags Darien Lake": {
+   "dur": 60
+  },
+  "Viper @ Six Flags Darien Lake": {
+   "dur": 124
+  },
+  "Boomerang: Coast to Coaster @ Six Flags Discovery Kingdom": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Cobra @ Six Flags Discovery Kingdom": {
+   "dur": 77
+  },
+  "Joker @ Six Flags Discovery Kingdom": {
+   "dur": 115
+  },
+  "Kong @ Six Flags Discovery Kingdom": {
+   "dur": 96
+  },
+  "Medusa @ Six Flags Discovery Kingdom": {
+   "dur": 195
+  },
+  "Road Runner Express @ Six Flags Discovery Kingdom": {
+   "dur": 40
+  },
+  "Roar @ Six Flags Discovery Kingdom": {
+   "dur": 112
+  },
+  "Superman: Ultimate Flight @ Six Flags Discovery Kingdom": {
+   "laps": 2,
+   "dur": 45
+  },
+  "V2: Vertical Velocity @ Six Flags Discovery Kingdom": {
+   "laps": 2,
+   "dur": 70
+  },
+  "Boomerang @ Six Flags Fiesta Texas": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Goliath @ Six Flags Fiesta Texas": {
+   "dur": 120
+  },
+  "Kiddee Koaster @ Six Flags Fiesta Texas": {
+   "laps": 2
+  },
+  "Pandemonium @ Six Flags Fiesta Texas": {
+   "dur": 111
+  },
+  "Poltergeist @ Six Flags Fiesta Texas": {
+   "dur": 75
+  },
+  "Road Runner Express @ Six Flags Fiesta Texas": {
+   "dur": 144
+  },
+  "Superman: Krypton Coaster @ Six Flags Fiesta Texas": {
+   "dur": 155
+  },
+  "Batman: The Ride @ Six Flags Great Adventure": {
+   "dur": 90
+  },
+  "Bizarro @ Six Flags Great Adventure": {
+   "dur": 140
+  },
+  "Dark Knight @ Six Flags Great Adventure": {
+   "dur": 120
+  },
+  "El Toro @ Six Flags Great Adventure": {
+   "dur": 102
+  },
+  "Green Lantern @ Six Flags Great Adventure": {
+   "dur": 150
+  },
+  "Harley Quinn's Crazy Train @ Six Flags Great Adventure": {
+   "dur": 65
+  },
+  "Kingda Ka @ Six Flags Great Adventure": {
+   "dur": 28
+  },
+  "Nitro @ Six Flags Great Adventure": {
+   "dur": 140
+  },
+  "Road Runner Railway @ Six Flags Great Adventure": {
+   "dur": 40
+  },
+  "Runaway Mine Train @ Six Flags Great Adventure": {
+   "dur": 200
+  },
+  "Skull Mountain @ Six Flags Great Adventure": {
+   "dur": 84
+  },
+  "Superman: Ultimate Flight @ Six Flags Great Adventure": {
+   "dur": 126
+  },
+  "American Eagle (Blue) @ Six Flags Great America": {
+   "dur": 143
+  },
+  "American Eagle (Red) @ Six Flags Great America": {
+   "dur": 143
+  },
+  "Batman: The Ride @ Six Flags Great America": {
+   "dur": 120
+  },
+  "Dark Knight @ Six Flags Great America": {
+   "dur": 120
+  },
+  "Demon @ Six Flags Great America": {
+   "dur": 105
+  },
+  "Little Dipper @ Six Flags Great America": {
+   "dur": 50
+  },
+  "Maxx Force @ Six Flags Great America": {
+   "dur": 23
+  },
+  "Raging Bull @ Six Flags Great America": {
+   "dur": 150
+  },
+  "Sprocket Rockets @ Six Flags Great America": {
+   "laps": 2,
+   "dur": 44
+  },
+  "Superman: Ultimate Flight @ Six Flags Great America": {
+   "dur": 180
+  },
+  "V2: Vertical Velocity @ Six Flags Great America": {
+   "laps": 2
+  },
+  "Viper @ Six Flags Great America": {
+   "dur": 105
+  },
+  "Whizzer @ Six Flags Great America": {
+   "dur": 120
+  },
+  "X-Flight @ Six Flags Great America": {
+   "dur": 75
+  },
+  "Canyon Blaster @ Six Flags Great Escape": {
+   "dur": 150
+  },
+  "Comet @ Six Flags Great Escape": {
+   "dur": 120
+  },
+  "Flashback @ Six Flags Great Escape": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Steamin' Demon @ Six Flags Great Escape": {
+   "dur": 90
+  },
+  "Apocalypse @ Six Flags Magic Mountain": {
+   "dur": 180
+  },
+  "Batman: The Ride @ Six Flags Magic Mountain": {
+   "dur": 120
+  },
+  "Canyon Blaster @ Six Flags Magic Mountain": {
+   "dur": 52
+  },
+  "Colossus (Red) @ Six Flags Magic Mountain": {
+   "dur": 150
+  },
+  "Full Throttle @ Six Flags Magic Mountain": {
+   "dur": 90
+  },
+  "Gold Rusher @ Six Flags Magic Mountain": {
+   "dur": 150
+  },
+  "Goliath @ Six Flags Magic Mountain": {
+   "dur": 180
+  },
+  "Green Lantern: First Flight @ Six Flags Magic Mountain": {
+   "dur": 120
+  },
+  "Ninja @ Six Flags Magic Mountain": {
+   "dur": 90
+  },
+  "Revolution @ Six Flags Magic Mountain": {
+   "dur": 132
+  },
+  "Riddler's Revenge @ Six Flags Magic Mountain": {
+   "dur": 180
+  },
+  "Road Runner Express @ Six Flags Magic Mountain": {
+   "dur": 44
+  },
+  "Scream! @ Six Flags Magic Mountain": {
+   "dur": 180
+  },
+  "Speedy Gonzales Hot Rod Racers @ Six Flags Magic Mountain": {
+   "dur": 40
+  },
+  "Superman: Escape From Krypton (Left) @ Six Flags Magic Mountain": {
+   "laps": 2,
+   "dur": 28
+  },
+  "Superman: Escape From Krypton (Right) @ Six Flags Magic Mountain": {
+   "laps": 2,
+   "dur": 28
+  },
+  "Tatsu @ Six Flags Magic Mountain": {
+   "dur": 120
+  },
+  "Twisted Colossus @ Six Flags Magic Mountain": {
+   "dur": 220
+  },
+  "Viper @ Six Flags Magic Mountain": {
+   "dur": 150
+  },
+  "West Coast Racers @ Six Flags Magic Mountain": {
+   "dur": 180
+  },
+  "X2 @ Six Flags Magic Mountain": {
+   "dur": 120
+  },
+  "Batman: The Ride @ Six Flags Mexico": {
+   "dur": 96
+  },
+  "Roller @ Six Flags Mexico": {
+   "dur": 44
+  },
+  "Superman: El Último Escape @ Six Flags Mexico": {
+   "dur": 184
+  },
+  "Batman: The Dark Knight @ Six Flags New England": {
+   "dur": 140
+  },
+  "Flashback @ Six Flags New England": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Gotham City Gauntlet: Escape from Arkham Asylum @ Six Flags New England": {
+   "dur": 92
+  },
+  "Riddler Revenge @ Six Flags New England": {
+   "dur": 96
+  },
+  "Superman: The Ride @ Six Flags New England": {
+   "dur": 155
+  },
+  "Thunderbolt @ Six Flags New England": {
+   "dur": 60
+  },
+  "Batman: The Ride @ Six Flags Over Texas": {
+   "dur": 120
+  },
+  "Judge Roy Scream @ Six Flags Over Texas": {
+   "dur": 90
+  },
+  "La Vibora @ Six Flags Over Texas": {
+   "dur": 90
+  },
+  "Mini Mine Train @ Six Flags Over Texas": {
+   "dur": 70
+  },
+  "Mr. Freeze Reverse Blast @ Six Flags Over Texas": {
+   "laps": 2
+  },
+  "Pandemonium @ Six Flags Over Texas": {
+   "dur": 111
+  },
+  "Runaway Mine Train @ Six Flags Over Texas": {
+   "dur": 180
+  },
+  "Shock Wave @ Six Flags Over Texas": {
+   "dur": 120
+  },
+  "Titan @ Six Flags Over Texas": {
+   "dur": 210
+  },
+  "Batman: The Ride @ Six Flags St. Louis": {
+   "dur": 120
+  },
+  "Boomerang @ Six Flags St. Louis": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Mr. Freeze Reverse Blast @ Six Flags St. Louis": {
+   "laps": 2
+  },
+  "Ninja @ Six Flags St. Louis": {
+   "dur": 120
+  },
+  "River King Mine Train @ Six Flags St. Louis": {
+   "dur": 180
+  },
+  "Screamin' Eagle @ Six Flags St. Louis": {
+   "dur": 150
+  },
+  "Queen Cobra @ Sun World Danang Wonders": {
+   "dur": 96
+  },
+  "Colossus @ Thorpe Park": {
+   "dur": 92
+  },
+  "Flying Fish @ Thorpe Park": {
+   "dur": 80
+  },
+  "Nemesis Inferno @ Thorpe Park": {
+   "dur": 103
+  },
+  "SAW - The Ride @ Thorpe Park": {
+   "dur": 100
+  },
+  "Stealth @ Thorpe Park": {
+   "dur": 28
+  },
+  "The Swarm @ Thorpe Park": {
+   "dur": 75
+  },
+  "The Walking Dead - The Ride @ Thorpe Park": {
+   "dur": 120
+  },
+  "X @ Thorpe Park": {
+   "dur": 120
+  },
+  "Regina II @ Tobu Zoo": {
+   "dur": 128
+  },
+  "Tentomushi @ Tobu Zoo": {
+   "laps": 2,
+   "dur": 90
+  },
+  "Flounder's Flying Fish Coaster @ Tokyo DisneySea": {
+   "dur": 66
+  },
+  "Raging Spirits @ Tokyo DisneySea": {
+   "dur": 98
+  },
+  "Panic Coaster - Back Daaan @ Tokyo Dome City": {
+   "laps": 2
+  },
+  "Thunder Dolphin @ Tokyo Dome City": {
+   "dur": 90
+  },
+  "Sky Rangers @ Tom Foolerys Adventure Park": {
+   "laps": 16
+  },
+  "Revenge of the Mummy @ Universal Studios Hollywood": {
+   "dur": 120
+  },
+  "Flight of the Hippogriff @ Universal Studios Japan": {
+   "dur": 66
+  },
+  "Hollywood Dream: The Ride @ Universal Studios Japan": {
+   "dur": 151
+  },
+  "Corkscrew @ Valleyfair!": {
+   "dur": 90
+  },
+  "Excalibur @ Valleyfair!": {
+   "dur": 137
+  },
+  "High Roller @ Valleyfair!": {
+   "dur": 105
+  },
+  "Mad Mouse @ Valleyfair!": {
+   "dur": 90
+  },
+  "Renegade @ Valleyfair!": {
+   "dur": 120
+  },
+  "Steel Venom @ Valleyfair!": {
+   "laps": 3
+  },
+  "Wild Thing @ Valleyfair!": {
+   "dur": 180
+  },
+  "Comet @ Waldameer": {
+   "dur": 84
+  },
+  "Ravine Flyer 3 @ Waldameer": {
+   "laps": 2
+  },
+  "Ravine Flyer II @ Waldameer": {
+   "dur": 90
+  },
+  "Steel Dragon @ Waldameer": {
+   "dur": 84
+  },
+  "Whirlwind @ Waldameer": {
+   "laps": 5
+  },
+  "Calamity Mine @ Walibi Belgium": {
+   "dur": 140
+  },
+  "Cobra @ Walibi Belgium": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Fun Pilot @ Walibi Belgium": {
+   "laps": 2
+  },
+  "Kondaa @ Walibi Belgium": {
+   "dur": 90
+  },
+  "Loup-Garou @ Walibi Belgium": {
+   "dur": 125
+  },
+  "Pulsar @ Walibi Belgium": {
+   "laps": 3,
+   "dur": 78
+  },
+  "Turbine @ Walibi Belgium": {
+   "laps": 2,
+   "dur": 35
+  },
+  "Vampire @ Walibi Belgium": {
+   "dur": 96
+  },
+  "Condor @ Walibi Holland": {
+   "dur": 122
+  },
+  "Drako @ Walibi Holland": {
+   "laps": 2
+  },
+  "Eat My Dust @ Walibi Holland": {
+   "laps": 2
+  },
+  "Goliath @ Walibi Holland": {
+   "dur": 92
+  },
+  "Lost Gravity @ Walibi Holland": {
+   "dur": 143
+  },
+  "Speed of Sound @ Walibi Holland": {
+   "laps": 2,
+   "dur": 108
+  },
+  "Untamed @ Walibi Holland": {
+   "dur": 106
+  },
+  "Xpress: Platform 13 @ Walibi Holland": {
+   "dur": 75
+  },
+  "The Wild Thing @ Wild Waves": {
+   "dur": 60
+  },
+  "Mamba @ Worlds of Fun": {
+   "dur": 180
+  },
+  "Patriot @ Worlds of Fun": {
+   "dur": 138
+  },
+  "Prowler @ Worlds of Fun": {
+   "dur": 150
+  },
+  "Spinning Dragons @ Worlds of Fun": {
+   "dur": 90
+  },
+  "Timber Wolf @ Worlds of Fun": {
+   "dur": 133
+  },
+  "Diving Coaster Vanish @ Yokohama Cosmoworld": {
+   "dur": 118
+  },
+  "Family Banana Coaster @ Yokohama Cosmoworld": {
+   "laps": 2
+  },
+  "Bandit @ Yomiuriland": {
+   "dur": 138
+  },
+  "DinoRunner @ Yomiuriland": {
+   "laps": 2
+  },
+  "Lipovatin Rocket Luna @ Yomiuriland": {
+   "dur": 120
+  },
+  "Wan Wan Coaster Wandit @ Yomiuriland": {
+   "laps": 2,
+   "dur": 106
+  },
+  "Switchback @ ZDT's Amusement Park": {
+   "laps": 2
+  }
+ }
+}
