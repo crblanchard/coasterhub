@@ -80,6 +80,19 @@
   <p id="hero_p">Every ride, park, and record from my coaster count.</p>
 </div></section>
 
+<div class="container" id="hub" style="display:none">
+  <section class="block" style="padding-top:8px">
+    <span class="eyebrow">The riders</span><h2>Whose stats?</h2>
+    <p class="lead">Pick a rider to dive into their maps, records, and milestones.</p>
+    <div class="grid" id="hub_people"></div>
+  </section>
+  <section class="block">
+    <span class="eyebrow">Combined</span><h2>Everyone, together</h2>
+    <p class="lead">The whole hub at a glance — every unique coaster across everyone&rsquo;s counts.</p>
+    <div class="kpis" id="hub_kpis"></div>
+  </section>
+</div>
+
 <div class="container"><div id="err">
   <strong>Couldn't load the data.</strong> This page reads external data files, so it needs to be served over the web — opening the file directly won't work.
   View it on the live site, or run a local server from this folder: <code>python -m http.server</code> then open <code>localhost:8000/stats.html</code>.
@@ -166,11 +179,42 @@ const nf=n=>(n==null?'—':n.toLocaleString());
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Friend pages are unlisted: nav always points to the main (Carter) site, so a
 // friend's page is only reachable by typing /user/<name>/... directly.
-CoasterHub.loadUser().then(render).catch(function(e){
-  console.error(e);
+if(CoasterHub.currentUser()){
+  CoasterHub.loadUser().then(render).catch(function(e){
+    console.error(e);
+    document.getElementById('loading').style.display='none';
+    document.getElementById('err').style.display='block';
+  });
+} else { renderHub(); }
+function renderHub(){
   document.getElementById('loading').style.display='none';
-  document.getElementById('err').style.display='block';
-});
+  document.getElementById('hero_badge').textContent='The hub';
+  document.getElementById('hero_h').textContent="Everyone\u2019s stats.";
+  document.getElementById('hero_p').textContent='Pick a rider below, or see the combined totals.';
+  document.title='Stats \u2014 Coaster Hub';
+  var tile=function(n,l){return '<div class="kpi"><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>';};
+  var files=['/coasters.json','/parks.json'].concat(CoasterHub.USERS.map(function(u){return '/'+u.slug+'.json';}));
+  Promise.all(files.map(function(u){return fetch(u).then(function(r){return r.json();});})).then(function(res){
+    var coasters=res[0].coasters, parks=res[1], datas=res.slice(2);
+    var union={}, cards='';
+    var sorted=CoasterHub.USERS.map(function(u,i){return {u:u,d:datas[i]};}).sort(function(a,b){return a.u.name.localeCompare(b.u.name);});
+    sorted.forEach(function(o){
+      var st=CoasterHub.computeStats(coasters,parks,o.d), k=st.kpi;
+      Object.keys(st.byCoaster).forEach(function(id){union[id]=true;});
+      var line=nf(k.credits)+' credits \u00b7 '+k.parks+' parks \u00b7 '+k.states+' states / '+k.countries+' countries';
+      cards+='<a class="card person-card" href="/user/'+o.u.slug+'/stats" style="text-decoration:none;display:block">'+
+        '<div class="meta">Rider</div><h3>'+esc(o.u.name)+'</h3>'+
+        '<p class="pc-stat">'+line+'</p>'+
+        '<p class="pc-links"><span style="color:var(--accent2);font-weight:600">View stats \u2192</span></p></a>';
+    });
+    document.getElementById('hub_people').innerHTML=cards;
+    var comb=CoasterHub.computeStats(coasters,parks,{credits:Object.keys(union).map(Number)}), ck=comb.kpi;
+    document.getElementById('hub_kpis').innerHTML=
+      tile(nf(ck.credits),'Unique credits')+tile(CoasterHub.USERS.length,'Riders')+
+      tile(ck.parks,'Parks')+tile(ck.states+' / '+ck.countries,'States / Countries');
+    document.getElementById('hub').style.display='block';
+  }).catch(function(e){console.error(e);document.getElementById('err').style.display='block';});
+}
 function render(s){
   document.getElementById('loading').style.display='none';
   document.getElementById('content').style.display='block';

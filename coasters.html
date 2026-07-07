@@ -4,18 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base href="/">
-<title>Coasters — Coaster Hub</title>
-<meta name="description" content="The full list of every coaster in my count — filter and sort.">
+<title>Combined list — Coaster Hub</title>
+<meta name="description" content="The combined list of every roller coaster across everyone's counts on Coaster Hub.">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta property="og:title" content="Coaster Hub">
-<meta property="og:description" content="A roller coaster count, visualized — credits, rides, parks, geography, and records.">
+<meta property="og:title" content="Coaster Hub — Combined list">
+<meta property="og:description" content="Every coaster across everyone's counts.">
 <meta property="og:image" content="https://coasterhub.org/og-image.png">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
 <style>
   .controls{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 18px}
   .controls input,.controls select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem}
@@ -60,19 +58,19 @@
 </div></header>
 
 <section class="hero" style="padding:56px 0 30px"><div class="container">
-  <span class="badge">The full list</span>
-  <h1 style="max-width:18ch">Every coaster in the count.</h1>
-  <p>All <span id="total">…</span> credits — filter and sort by park, manufacturer, model, status, or stats.</p>
+  <span class="badge">The combined list</span>
+  <h1 style="max-width:20ch">Combined list &middot; <span id="total">…</span> coasters.</h1>
+  <p>A combination of everyone&rsquo;s lists — every coaster ridden across Carter, Cole &amp; Max&rsquo;s counts. Filter and sort by park, manufacturer, model, status, or stats.</p>
 </div></section>
 
 <section class="block" style="padding-top:24px"><div class="container">
   <div id="err">
-    <strong>Couldn't load the data.</strong> This page reads external data files, so it needs to be served over the web. View it on the live site, or run <code>python -m http.server</code> from this folder and open <code>localhost:8000/coasters.html</code>.
+    <strong>Couldn&rsquo;t load the data.</strong> This page reads external data files, so it needs to be served over the web. View it on the live site, or run <code>python -m http.server</code> from this folder and open <code>localhost:8000/coasters.html</code>.
   </div>
-  <div id="loading">Loading coasters…</div>
+  <div id="loading">Loading the combined list…</div>
   <div id="ui" style="display:none">
     <div class="controls">
-      <input id="q" type="search" placeholder="Search name, park, model…">
+      <input id="q" type="search" placeholder="Search name, park, manufacturer, model…">
       <select id="f_status"><option value="">All statuses</option><option value="Operating">Operating</option><option value="Defunct">Defunct</option></select>
       <select id="f_type"><option value="">All types</option></select>
       <select id="f_manu"><option value="">All manufacturers</option></select>
@@ -104,40 +102,22 @@ const ALLCOLS=[
  {k:'manu',t:'Manufacturer',num:false},
  {k:'model',t:'Model',num:false},
  {k:'yr',t:'Year',num:true},
- {k:'status',t:'Status',num:false},
- {k:'first',t:'First Ridden',num:false},
- {k:'rides',t:'Rides',num:true},
  {k:'h',t:'Height (ft)',num:true},
  {k:'s',t:'Speed (mph)',num:true},
  {k:'l',t:'Length (ft)',num:true},
  {k:'inv',t:'Inv',num:true},
+ {k:'status',t:'Status',num:false},
 ];
 let COLS=ALLCOLS;
 let sortKey='park', sortDir=1;
 const FILTS=['q','f_status','f_type','f_manu','f_model','f_park','f_loc'];
-// Friend pages are unlisted: nav always points to the main (Carter) site.
-CoasterHub.loadUser().then(function(s){
-  // Only the coasters this user has actually ridden.
-  DATA=s.coasters.filter(function(c){return s.byCoaster[c.id];}).map(function(c){
-    var d=s.byCoaster[c.id];
-    return Object.assign({},c,{rides:d.rides,first:d.first,num:d.num,status:c.closed?'Defunct':'Operating'});
-  });
-  // Keep the First Ridden / Rides columns only if this user has that data.
-  var anyFirst=DATA.some(function(c){return c.first;});
-  var anyRides=DATA.some(function(c){return c.rides!=null;});
-  COLS=ALLCOLS.filter(function(col){
-    if(col.k==='first')return anyFirst;
-    if(col.k==='rides')return anyRides;
-    return true;
-  });
-  // Default sort is by park (ascending); coasters within a park fall alphabetically by name.
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+fetch('/coasters.json').then(r=>r.json()).then(function(j){
+  DATA=j.coasters.map(function(c){return Object.assign({},c,{status:c.closed?'Defunct':'Operating'});});
   document.getElementById('loading').style.display='none';
   document.getElementById('ui').style.display='block';
-  document.getElementById('total').textContent=DATA.length;
-  var nm=String(s.userName||'Carter').replace(/[&<>\"]/g,'');
-  var whose=nm+'’s';
-  var h1=document.querySelector('.hero h1'); if(h1) h1.textContent='Every coaster in '+whose+' count.';
-  document.title=nm+'’s Coasters — Coaster Hub';
+  document.getElementById('total').textContent=DATA.length.toLocaleString();
   init();
 }).catch(function(e){
   console.error(e);
@@ -168,7 +148,7 @@ function current(){
   var rows=DATA.filter(function(c){
     if(fs&&c.status!==fs)return false; if(ft&&c.type!==ft)return false; if(fm&&c.manu!==fm)return false;
     if(fmo&&c.model!==fmo)return false; if(fp&&c.park!==fp)return false; if(fl&&c.loc!==fl)return false;
-    if(q){var hay=(c.name+' '+c.park+' '+(c.model||'')+' '+(c.manu||'')).toLowerCase();if(hay.indexOf(q)<0)return false;}
+    if(q){var hay=(c.name+' '+c.park+' '+(c.model||'')+' '+(c.manu||'')+' '+(c.loc||'')).toLowerCase();if(hay.indexOf(q)<0)return false;}
     return true;});
   rows.sort(function(a,a2){var x=a[sortKey],y=a2[sortKey],c;
     if(x==null&&y==null)c=0; else if(x==null)c=1; else if(y==null)c=-1;
@@ -179,16 +159,16 @@ function current(){
 }
 function render(){
   var rows=current();
-  document.getElementById('count').innerHTML='Showing <b>'+rows.length+'</b> of '+DATA.length+' coasters';
+  document.getElementById('count').innerHTML='Showing <b>'+rows.length.toLocaleString()+'</b> of '+DATA.length.toLocaleString()+' coasters';
   var head=document.getElementById('head');
   head.querySelectorAll('th').forEach(function(th){var a=th.querySelector('.ar');if(a)a.remove();
     if(th.dataset.k===sortKey){var sp=document.createElement('span');sp.className='ar';sp.textContent=sortDir<0?'▼':'▲';th.appendChild(sp);}});
   document.getElementById('body').innerHTML=rows.map(function(c){return '<tr>'+COLS.map(function(col){
     var v=c[col.k];
-    if(col.k==='type')return '<td><span class="pill '+(v==='Wood'?'wood':'steel')+'">'+v+'</span></td>';
+    if(col.k==='type')return '<td>'+(v?'<span class="pill '+(v==='Wood'?'wood':'steel')+'">'+v+'</span>':'<span class="muted">—</span>')+'</td>';
     if(col.k==='status')return c.closed?'<td><span class="pill def">Defunct</span><span class="cyear">'+String(c.closed).slice(0,4)+'</span></td>':'<td><span class="pill op">Operating</span></td>';
     if(v==null||v==='')return '<td class="muted">—</td>';
-    return '<td class="'+(col.num?'num':'')+' '+(col.cls||'')+'">'+v+'</td>';
+    return '<td class="'+(col.num?'num':'')+' '+(col.cls||'')+'">'+esc(v)+'</td>';
   }).join('')+'</tr>';}).join('');
 }
 </script>
