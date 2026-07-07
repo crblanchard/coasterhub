@@ -352,7 +352,7 @@
     var wrap = document.getElementById("people");
     if (wrap) {
       var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
-      var opts = slug ? "" : '<option value="" selected disabled>User</option>';
+      var opts = '<option value="/stats"' + (slug ? '' : ' selected') + '>All</option>';
       opts += sorted.map(function (u) {
         var on = (u.slug === slug) ? " selected" : "";
         return '<option value="/user/' + u.slug + '/stats"' + on + '>' + u.name + '</option>';
