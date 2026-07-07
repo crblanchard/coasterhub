@@ -98,7 +98,6 @@ CoasterHub.initNav('coasters');
 let DATA=[];
 const ALLCOLS=[
  {k:'name',t:'Name',num:false,cls:'name'},
- {k:'num',t:'Credit #',num:true},
  {k:'park',t:'Park',num:false},
  {k:'loc',t:'Location',num:false},
  {k:'type',t:'Type',num:false},
@@ -126,11 +125,9 @@ CoasterHub.loadUser().then(function(s){
   // Keep the First Ridden / Rides columns only if this user has that data.
   var anyFirst=DATA.some(function(c){return c.first;});
   var anyRides=DATA.some(function(c){return c.rides!=null;});
-  var anyNum=DATA.some(function(c){return c.num!=null;});
   COLS=ALLCOLS.filter(function(col){
     if(col.k==='first')return anyFirst;
     if(col.k==='rides')return anyRides;
-    if(col.k==='num')return anyNum;
     return true;
   });
   // Default sort is by park (ascending); coasters within a park fall alphabetically by name.
