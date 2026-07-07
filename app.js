@@ -299,7 +299,7 @@
 
   // Wire the header for a page ("home" | "stats" | "coasters"): point the
   // Stats/Coasters links at the current person, mark the active link, and
-  // render the Carter | Cole toggle.
+  // render the User picker (alphabetical).
   function initNav(page) {
     if (typeof document === "undefined") return;
     var slug = currentUser() || DEFAULT_SLUG;
@@ -317,12 +317,15 @@
 
     var wrap = document.getElementById("people");
     if (wrap) {
-      var target = onPerson ? page : "stats"; // on Home the pills lead to each person's stats
-      wrap.innerHTML = USERS.map(function (u) {
-        var on = onPerson && u.slug === slug;
-        return '<a class="person' + (on ? " on" : "") +
-               '" href="' + userPageHref(u.slug, target) + '">' + u.name + '</a>';
-      }).join("");
+      var target = onPerson ? page : "stats"; // where the picker sends you
+      var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+      var opts = '<option value="" selected disabled>User</option>' +
+        sorted.map(function (u) {
+          return '<option value="' + userPageHref(u.slug, target) + '">' + u.name + '</option>';
+        }).join("");
+      wrap.innerHTML = '<select class="userpick" aria-label="Select user">' + opts + '</select>';
+      var sel = wrap.querySelector("select");
+      sel.addEventListener("change", function () { if (sel.value) location.href = sel.value; });
     }
   }
 

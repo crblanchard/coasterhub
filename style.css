@@ -22,10 +22,14 @@ header.nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);
 nav.links{display:flex;gap:26px}
 nav.links a{color:var(--muted);font-weight:500;font-size:.95rem;transition:color .15s}
 nav.links a:hover,nav.links a.active{color:var(--fg)}
-.people{display:inline-flex;gap:4px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:4px;flex:none}
-.people .person{color:var(--muted);font-weight:600;font-size:.85rem;padding:6px 15px;border-radius:999px;transition:color .15s,background .15s;white-space:nowrap}
-.people .person:hover{color:var(--fg)}
-.people .person.on{background:var(--accent2);color:#08131f}
+.people{flex:none}
+.userpick{appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background:rgba(255,255,255,.05) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="%239fb0d6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat right 12px center;
+  border:1px solid var(--line);color:var(--fg);font:inherit;font-weight:600;font-size:.85rem;
+  padding:8px 34px 8px 16px;border-radius:999px;cursor:pointer;line-height:1;white-space:nowrap;transition:border-color .15s}
+.userpick:hover{border-color:rgba(55,208,200,.5)}
+.userpick:focus{outline:none;border-color:var(--accent2)}
+.userpick option{background:var(--panel);color:var(--fg)}
 
 /* Hero */
 .hero{position:relative;overflow:hidden;padding:96px 0 84px;
