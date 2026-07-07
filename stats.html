@@ -108,6 +108,12 @@
   <div class="records" id="records"></div>
 </div></section>
 
+<section class="block" id="sec_milestones"><div class="container">
+  <span class="eyebrow">Milestones</span><h2>Milestone credits</h2>
+  <p class="lead">The 1st, every 100th, and the latest coaster — in the order they were ridden.</p>
+  <div class="records" id="milestones"></div>
+</div></section>
+
 <section class="block"><div class="container">
   <span class="eyebrow">Geography</span><h2>Everywhere I've ridden</h2>
   <p class="lead" id="geo_sub"></p>
@@ -211,6 +217,12 @@ function render(s){
   const hide=id=>{var el=document.getElementById(id); if(el) el.style.display='none';};
   if(!has.timeline){ hide('sec_overtime'); }                       // cumulative + new-per-year
   if(!has.activity){ ['sec_activity','panel_days','panel_rides_year'].forEach(hide); } // calendar, biggest days, rides/year
+  if(has.order){
+    document.getElementById('milestones').innerHTML=(s.milestones||[]).map(function(m){
+      return '<div class="rec"><div class="tag">#'+m.n+'</div><div class="rname">'+esc(m.name)+'</div>'+
+             '<div class="rval" style="font-size:.92rem;color:var(--muted);font-weight:600">'+esc(m.park)+'</div></div>';
+    }).join('');
+  } else { hide('sec_milestones'); }
 
   const circleMetric=has.activity?'rides':'credits';
   document.getElementById('geo_sub').textContent=k.parks+' parks across '+k.states+' U.S. states and '+k.countries+' countries. Circle size = '+circleMetric+'.';

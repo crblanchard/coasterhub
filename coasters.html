@@ -98,6 +98,7 @@ CoasterHub.initNav('coasters');
 let DATA=[];
 const ALLCOLS=[
  {k:'name',t:'Name',num:false,cls:'name'},
+ {k:'num',t:'Credit #',num:true},
  {k:'park',t:'Park',num:false},
  {k:'loc',t:'Location',num:false},
  {k:'type',t:'Type',num:false},
@@ -120,14 +121,16 @@ CoasterHub.loadUser().then(function(s){
   // Only the coasters this user has actually ridden.
   DATA=s.coasters.filter(function(c){return s.byCoaster[c.id];}).map(function(c){
     var d=s.byCoaster[c.id];
-    return Object.assign({},c,{rides:d.rides,first:d.first,status:c.closed?'Defunct':'Operating'});
+    return Object.assign({},c,{rides:d.rides,first:d.first,num:d.num,status:c.closed?'Defunct':'Operating'});
   });
   // Keep the First Ridden / Rides columns only if this user has that data.
   var anyFirst=DATA.some(function(c){return c.first;});
   var anyRides=DATA.some(function(c){return c.rides!=null;});
+  var anyNum=DATA.some(function(c){return c.num!=null;});
   COLS=ALLCOLS.filter(function(col){
     if(col.k==='first')return anyFirst;
     if(col.k==='rides')return anyRides;
+    if(col.k==='num')return anyNum;
     return true;
   });
   // Default sort is by park (ascending); coasters within a park fall alphabetically by name.

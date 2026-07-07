@@ -8,12 +8,14 @@
      • firstDates  — a date per credit  -> timeline (cumulative + new-per-year)
      • rideCounts  — a ride count per credit -> total rides, most-ridden, re-ride distance
      • activity    — a full dated ride log -> calendar heatmap, rides-per-year, biggest days
+     • order       — a credit number per credit -> milestone credits (1st, 100th, 200th, ...)
 
    Accepted shapes (any mix of the optional fields works):
      {user, credits:["id", ...]}                              // collection only
      {user, credits:[{c:"id", n:12}, ...]}                    // + ride counts
      {user, credits:[{c:"id", first:"YYYY-MM-DD"}, ...]}      // + first-ridden dates
      {user, credits:[{c:"id", first:"2019", n:12}, ...]}      // + both (year ok)
+     {user, credits:[{c:"id", num:200}, ...]}                 // + credit numbers (milestones)
      {user, rides:[{c:"id", d:"YYYY-MM-DD"}, ...]}            // full log (all of the above)
    (Legacy: computeStats may also be called with a bare rides array.) */
 (function (global) {
@@ -58,6 +60,7 @@
     var creditCount = {};    // id -> number of rides (when counts are known)
     var firstRidden = {};    // id -> earliest date string ('YYYY' or 'YYYY-MM-DD')
     var creditSet = {};      // id -> true
+    var creditNum = {};      // id -> the rider's credit number for that coaster (order)
     var hasFullLog = false, hasCounts = false;
 
     var ridesInput = null, creditsInput = null;
@@ -86,10 +89,30 @@
         if (item && typeof item === "object") {
           if (item.n != null) { creditCount[id] = (creditCount[id] || 0) + item.n; hasCounts = true; }
           if (item.first) { var f = String(item.first); if (!firstRidden[id] || f < firstRidden[id]) firstRidden[id] = f; }
+          if (item.num != null) { creditNum[id] = item.num; }
         }
       });
     }
     var hasFirstDates = Object.keys(firstRidden).length > 0;
+    var hasOrder = Object.keys(creditNum).length > 0;
+
+    // ---- Milestone credits (need a credit number per credit; no dates required) ---
+    // Sort credits by their number; surface the 1st, every 100th, and the latest.
+    var milestones = [];
+    if (hasOrder) {
+      var orderedNums = Object.keys(creditNum)
+        .map(function (id) { return { id: +id, num: creditNum[id] }; })
+        .sort(function (a, b) { return a.num - b.num; });
+      var N = orderedNums.length, picks = {};
+      picks[1] = true;
+      for (var mm = 100; mm <= N; mm += 100) picks[mm] = true;
+      picks[N] = true;
+      Object.keys(picks).map(Number).sort(function (a, b) { return a - b; }).forEach(function (t) {
+        var o = orderedNums[t - 1]; if (!o) return;
+        var c = byId[o.id]; if (!c) return;
+        milestones.push({ n: o.num, name: c.name, park: c.park });
+      });
+    }
 
     var creditList = Object.keys(creditSet).map(function (id) { return byId[id]; });
 
@@ -206,7 +229,8 @@
         activity: hasFullLog,
         timeline: hasFullLog || (hasFirstDates && Object.keys(firstRidden).length === creditList.length),
         firstDates: hasFirstDates,
-        rideCounts: hasCounts
+        rideCounts: hasCounts,
+        order: hasOrder
       },
       kpi: {
         credits: creditList.length,
@@ -240,6 +264,7 @@
       },
       day_detail: dayDetail,
       first_rides: firstRides,
+      milestones: milestones,
       geo: { states: [...states].sort(), countries: [...countries].sort(),
              n_states: states.size, n_countries: nCountries, n_parks: parksGeo.length },
       parksGeo: parksGeo,
@@ -250,7 +275,8 @@
           m[id] = {
             rides: creditCount[id] != null ? creditCount[id] : (dates.length || null),
             first: dates[0] || firstRidden[id] || null,
-            last: dates[dates.length - 1] || null, dates: dates
+            last: dates[dates.length - 1] || null, dates: dates,
+            num: creditNum[id] != null ? creditNum[id] : null
           };
         });
         return m;
