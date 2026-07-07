@@ -318,11 +318,13 @@
     var wrap = document.getElementById("people");
     if (wrap) {
       var target = onPerson ? page : "stats"; // where the picker sends you
+      var current = onPerson ? slug : null;   // active user (none on Home)
       var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
-      var opts = '<option value="" selected disabled>User</option>' +
-        sorted.map(function (u) {
-          return '<option value="' + userPageHref(u.slug, target) + '">' + u.name + '</option>';
-        }).join("");
+      var opts = current ? "" : '<option value="" selected disabled>User</option>';
+      opts += sorted.map(function (u) {
+        var on = (u.slug === current) ? " selected" : "";
+        return '<option value="' + userPageHref(u.slug, target) + '"' + on + '>' + u.name + '</option>';
+      }).join("");
       wrap.innerHTML = '<select class="userpick" aria-label="Select user">' + opts + '</select>';
       var sel = wrap.querySelector("select");
       sel.addEventListener("change", function () { if (sel.value) location.href = sel.value; });

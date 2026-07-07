@@ -37,35 +37,25 @@
     <path d="M-50 520 C 250 520, 300 140, 520 140 S 780 580, 1000 400 S 1300 110, 1500 320"
           fill="none" stroke="rgba(55,208,200,.20)" stroke-width="2" stroke-dasharray="6 10"/>
   </svg>
-  <span class="badge">Two counts, one hub</span>
-  <h1>Every credit, mapped and measured.</h1>
-  <p>Coaster Hub turns Carter’s and Cole’s roller coaster counts into something you can actually explore — every park, every big day, and every personal record.</p>
-  <a class="btn" href="/stats">Explore Carter’s stats</a>
-  <a class="btn ghost" href="/user/cole/stats">Explore Cole’s stats</a>
+  <span class="badge">One growing hub</span>
+  <h1><span id="combo">…</span> unique credits and counting.</h1>
+  <p>Coaster Hub gathers every rider's roller coaster count into one place you can actually explore — every park, every big day, and every personal record.</p>
+  <p class="hero-sub" id="combo-sub"></p>
+  <a class="btn" href="#riders">See the riders</a>
+  <a class="btn ghost" href="/coasters">Browse all coasters</a>
 </div></section>
 
 <section class="block"><div class="container">
-  <span class="eyebrow">Whose count?</span>
-  <h2>Two riders, one hub</h2>
-  <p class="lead">Coaster Hub hosts more than one count. Jump into either — each gets the same maps, records, and calendars.</p>
-  <div class="grid">
-    <div class="card person-card">
-      <div class="meta">Rider</div>
-      <h3>Carter</h3>
-      <p class="pc-stat" id="pc-carter">A lifetime of logged rides.</p>
-      <p class="pc-links"><a href="/stats">View stats →</a><a href="/coasters">All coasters</a></p>
-    </div>
-    <div class="card person-card">
-      <div class="meta">Rider</div>
-      <h3>Cole</h3>
-      <p class="pc-stat" id="pc-cole">A growing credit collection.</p>
-      <p class="pc-links"><a href="/user/cole/stats">View stats →</a><a href="/user/cole/coasters">All coasters</a></p>
-    </div>
+  <span class="eyebrow">The riders</span>
+  <h2>Who's counting</h2>
+  <p class="lead">Every rider on the hub, each with the same maps, records, and calendars. Jump into any count.</p>
+  <div class="grid" id="riders">
+    <div class="card person-card"><div class="meta">Rider</div><h3>&nbsp;</h3><p class="pc-stat">Loading counts…</p></div>
   </div>
 </div></section>
 
 <section class="block"><div class="container">
-  <span class="eyebrow">What’s inside</span>
+  <span class="eyebrow">What's inside</span>
   <h2>Each count, brought to life</h2>
   <p class="lead">The stats page pulls it all together into interactive charts and maps; the full list lets you filter and sort every credit.</p>
   <div class="grid">
@@ -85,14 +75,13 @@
       <p>Tallest, fastest, longest, most-ridden — milestones tracked and ranked automatically.</p>
     </div>
   </div>
-  <p style="margin-top:28px"><a class="btn" href="/stats">Explore the stats</a> <a class="btn ghost" href="/coasters">Browse all coasters</a></p>
 </div></section>
 
 <section class="block"><div class="container prose">
   <span class="eyebrow">The idea</span>
   <h2>Why Coaster Hub</h2>
   <p>Coaster Hub started as a meticulously kept spreadsheet — every credit, every re-ride, every park visit, all with dates. This site turns that record into something you can actually explore: maps, timelines, records, and a calendar of every riding day.</p>
-  <p>It began with one count and now holds more than one — everything here comes straight from real logged rides, no estimates, no rounding. More visualizations are on the way, and eventually a way for other enthusiasts to drop in their own counts and see the same stats.</p>
+  <p>It began with one count and keeps growing — everything here comes straight from real logged rides, no estimates, no rounding. More visualizations are on the way, and eventually a way for other enthusiasts to drop in their own counts and see the same stats.</p>
   <p>Have an idea for a stat worth showing? Email <a href="mailto:hello@coasterhub.org" style="color:var(--accent2)">hello@coasterhub.org</a>.</p>
 </div></section>
 
@@ -105,16 +94,32 @@
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('home');
-Promise.all(['/coasters.json','/parks.json','/carter.json','/cole.json'].map(function(u){return fetch(u).then(function(r){return r.json();});}))
+var nf=function(n){return n==null?'—':n.toLocaleString();};
+Promise.all([
+  fetch('/coasters.json').then(function(r){return r.json();}),
+  fetch('/parks.json').then(function(r){return r.json();})
+].concat(CoasterHub.USERS.map(function(u){return fetch('/'+u.slug+'.json').then(function(r){return r.json();});})))
 .then(function(res){
-  var coasters=res[0].coasters, parks=res[1];
-  [['pc-carter',res[2]],['pc-cole',res[3]]].forEach(function(pair){
-    try{
-      var st=CoasterHub.computeStats(coasters,parks,pair[1]);
-      var k=st.kpi, el=document.getElementById(pair[0]);
-      if(el) el.textContent=k.credits.toLocaleString()+' credits · '+k.parks+' parks · '+k.states+' states / '+k.countries+' countries';
-    }catch(e){console.error(e);}
+  var coasters=res[0].coasters, parks=res[1], users=res.slice(2);
+  var creditUnion={}, parkUnion={}, statsBySlug={};
+  CoasterHub.USERS.forEach(function(u,i){
+    var st=CoasterHub.computeStats(coasters,parks,users[i]);
+    statsBySlug[u.slug]=st;
+    Object.keys(st.byCoaster).forEach(function(id){creditUnion[id]=true;});
+    st.parksGeo.forEach(function(p){parkUnion[p.park]=true;});
   });
+  var uCredits=Object.keys(creditUnion).length, uParks=Object.keys(parkUnion).length;
+  document.getElementById('combo').textContent=nf(uCredits);
+  document.getElementById('combo-sub').textContent=CoasterHub.USERS.length+' riders · '+nf(uCredits)+' unique credits · '+uParks+' parks';
+  var sorted=CoasterHub.USERS.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  document.getElementById('riders').innerHTML=sorted.map(function(u){
+    var k=statsBySlug[u.slug].kpi;
+    var line=nf(k.credits)+' credits · '+k.parks+' parks · '+k.states+' states / '+k.countries+' countries';
+    var sh=CoasterHub.userPageHref(u.slug,'stats'), ch=CoasterHub.userPageHref(u.slug,'coasters');
+    return '<div class="card person-card"><div class="meta">Rider</div><h3>'+u.name+'</h3>'+
+      '<p class="pc-stat">'+line+'</p>'+
+      '<p class="pc-links"><a href="'+sh+'">View stats →</a><a href="'+ch+'">All coasters</a></p></div>';
+  }).join('');
 }).catch(function(e){console.error(e);});
 </script>
 </body>
