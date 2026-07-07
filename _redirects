@@ -1,5 +1,7 @@
-# Pretty per-user URLs -> serve the static page (JS reads the name from the path).
-# 200 = rewrite (the browser keeps the pretty URL). <base href="/"> keeps assets working.
-/user/:name/stats     /stats.html     200
-/user/:name/coasters  /coasters.html  200
-/user/:name           /stats.html     200
+# Pretty per-user URLs -> serve the page (JS reads the name from the path).
+# 200 = rewrite (browser keeps the pretty URL). Destinations use the CLEAN paths
+# (/stats not /stats.html) because Cloudflare Pages 301-redirects *.html to the
+# extensionless URL, which would bounce /user/<name>/stats to /stats.
+/user/:name/stats     /stats      200
+/user/:name/coasters  /coasters   200
+/user/:name           /stats      200
