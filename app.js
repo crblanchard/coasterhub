@@ -1,13 +1,32 @@
 /* Coaster Hub — shared data engine.
-   Loads normalized JSON (coasters + parks + a user's ride log) and computes
-   every stat the site shows. Pure computeStats() is Node-testable. */
+   Loads normalized JSON (coasters + parks + a user's data) and computes
+   every stat the site shows. Pure computeStats() is Node-testable.
+
+   A user file can carry different levels of detail. The engine detects three
+   INDEPENDENT capabilities and flags each, so the UI shows only what the data
+   supports (people's dashboards look the same — richer data just adds panels):
+     • firstDates  — a date per credit  -> timeline (cumulative + new-per-year)
+     • rideCounts  — a ride count per credit -> total rides, most-ridden, re-ride distance
+     • activity    — a full dated ride log -> calendar heatmap, rides-per-year, biggest days
+
+   Accepted shapes (any mix of the optional fields works):
+     {user, credits:["id", ...]}                              // collection only
+     {user, credits:[{c:"id", n:12}, ...]}                    // + ride counts
+     {user, credits:[{c:"id", first:"YYYY-MM-DD"}, ...]}      // + first-ridden dates
+     {user, credits:[{c:"id", first:"2019", n:12}, ...]}      // + both (year ok)
+     {user, rides:[{c:"id", d:"YYYY-MM-DD"}, ...]}            // full log (all of the above)
+   (Legacy: computeStats may also be called with a bare rides array.) */
 (function (global) {
   "use strict";
 
-  var US_STATES = new Set(["Colorado","Connecticut","Florida","Illinois","Indiana","Iowa",
-    "Kentucky","Maryland","Massachusetts","Michigan","Minnesota","Missouri","Nevada",
-    "New Jersey","New York","Ohio","Pennsylvania","Texas","Utah","Virginia","Washington",
-    "Wisconsin","NorCal","SoCal"]);
+  var US_STATES = new Set(["Alabama","Alaska","Arizona","Arkansas","California","Colorado",
+    "Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa",
+    "Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota",
+    "Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey",
+    "New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon",
+    "Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah",
+    "Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming",
+    "Washington DC","District of Columbia","NorCal","SoCal"]);
 
   function regionKind(reg) {
     if (reg === "NorCal" || reg === "SoCal") return ["state", "California"];
@@ -23,54 +42,103 @@
       .slice(0, n);
   }
 
-  // coasters: [{id,name,park,loc,type,manu,model,h,s,l,inv,dur,laps,yr,closed}]
-  // parks: {name:{lat,lon,region}}
-  // rides: [{c:coasterId, d:'YYYY-MM-DD'}]
-  function computeStats(coasters, parks, rides) {
+  function yearOf(d) { return parseInt(String(d).slice(0, 4), 10); }
+
+  function computeStats(coasters, parks, userInput) {
     var byId = {};
     coasters.forEach(function (c) { byId[c.id] = c; });
 
-    var creditIds = {}, ridesByYear = {}, newByYear = {}, dayCount = {}, dayParks = {},
-        parkRides = {}, coasterRides = {}, firstRidden = {}, parkVisitDays = {}, visitSet = {};
-    var years = new Set();
-    var distFt = 0, invExp = 0, rideSec = 0;  // totals across every ride, counting re-rides and laps
+    // ---- Normalize any input into: a full dated log (if any), per-credit ride
+    // counts (if known), a first-ridden date per credit (if known), the credit
+    // set, and the three capability flags. ------------------------------------
+    var log = [];            // [{c,d}] — only present with a full dated ride log
+    var creditCount = {};    // id -> number of rides (when counts are known)
+    var firstRidden = {};    // id -> earliest date string ('YYYY' or 'YYYY-MM-DD')
+    var creditSet = {};      // id -> true
+    var hasFullLog = false, hasCounts = false;
 
-    rides.forEach(function (r) {
-      var c = byId[r.c]; if (!c) return;
-      var yr = parseInt(r.d.slice(0, 4), 10);
-      years.add(yr);
-      creditIds[r.c] = true;
-      distFt += (c.l || 0) * (c.laps || 1);
-      invExp += (c.inv || 0) * (c.laps || 1);
-      rideSec += (c.dur || 0);
+    var ridesInput = null, creditsInput = null;
+    if (Array.isArray(userInput)) ridesInput = userInput;
+    else if (userInput && userInput.rides) ridesInput = userInput.rides;
+    else if (userInput && userInput.credits) creditsInput = userInput.credits;
+    else ridesInput = [];
+
+    if (ridesInput) {
+      ridesInput.forEach(function (r) {
+        if (!(r.c in byId)) return;
+        creditSet[r.c] = true;
+        creditCount[r.c] = (creditCount[r.c] || 0) + 1;
+        if (r.d) {
+          log.push({ c: r.c, d: r.d });
+          if (!firstRidden[r.c] || r.d < firstRidden[r.c]) firstRidden[r.c] = r.d;
+        }
+      });
+      hasCounts = ridesInput.length > 0;
+      hasFullLog = log.length > 0;
+    } else {
+      creditsInput.forEach(function (item) {
+        var id = (item && typeof item === "object") ? item.c : item;
+        if (!(id in byId)) return;
+        creditSet[id] = true;
+        if (item && typeof item === "object") {
+          if (item.n != null) { creditCount[id] = (creditCount[id] || 0) + item.n; hasCounts = true; }
+          if (item.first) { var f = String(item.first); if (!firstRidden[id] || f < firstRidden[id]) firstRidden[id] = f; }
+        }
+      });
+    }
+    var hasFirstDates = Object.keys(firstRidden).length > 0;
+
+    var creditList = Object.keys(creditSet).map(function (id) { return byId[id]; });
+
+    // ---- Timeline aggregates (need first-ridden dates; work for log OR dates) -
+    var newByYear = {}, years = new Set();
+    Object.keys(firstRidden).forEach(function (id) {
+      var y = yearOf(firstRidden[id]);
+      if (!isNaN(y)) { newByYear[y] = (newByYear[y] || 0) + 1; years.add(y); }
+    });
+
+    // ---- Full-activity aggregates (need every dated ride) --------------------
+    var ridesByYear = {}, dayCount = {}, dayParks = {},
+        parkRides = {}, visitSet = {}, parkVisitDays = {};
+    log.forEach(function (r) {
+      var c = byId[r.c];
+      var yr = yearOf(r.d); years.add(yr);
       ridesByYear[yr] = (ridesByYear[yr] || 0) + 1;
       dayCount[r.d] = (dayCount[r.d] || 0) + 1;
       (dayParks[r.d] = dayParks[r.d] || {})[c.park] = (dayParks[r.d][c.park] || 0) + 1;
       parkRides[c.park] = (parkRides[c.park] || 0) + 1;
-      coasterRides[r.c] = (coasterRides[r.c] || 0) + 1;
-      if (!firstRidden[r.c] || r.d < firstRidden[r.c]) firstRidden[r.c] = r.d;
       var vkey = c.park + "|" + r.d;
       if (!visitSet[vkey]) { visitSet[vkey] = true; parkVisitDays[c.park] = (parkVisitDays[c.park] || 0) + 1; }
     });
 
-    var creditList = Object.keys(creditIds).map(function (id) { return byId[id]; });
-    Object.keys(firstRidden).forEach(function (id) {
-      var y = parseInt(firstRidden[id].slice(0, 4), 10);
-      newByYear[y] = (newByYear[y] || 0) + 1;
-    });
+    var yrMin = null, yrMax = null, yearList = [], cumulative = [];
+    if (years.size) {
+      yrMin = Math.min.apply(null, [...years]); yrMax = Math.max.apply(null, [...years]);
+      for (var y = yrMin; y <= yrMax; y++) yearList.push(y);
+      var run = 0; cumulative = yearList.map(function (y) { run += (newByYear[y] || 0); return run; });
+    }
 
-    var yrMin = Math.min.apply(null, [...years]), yrMax = Math.max.apply(null, [...years]);
-    var yearList = [];
-    for (var y = yrMin; y <= yrMax; y++) yearList.push(y);
-    var run = 0, cumulative = yearList.map(function (y) { run += (newByYear[y] || 0); return run; });
-
-    var steel = 0, wood = 0, manu = {}, loc = {}, uniqueFt = 0, invUnique = 0;
+    // ---- Collection aggregates (available to everyone) ----------------------
+    var steel = 0, wood = 0, manu = {}, loc = {}, uniqueFt = 0, invUnique = 0, parkCredits = {};
     creditList.forEach(function (c) {
       if (c.type === "Wood") wood++; else steel++;
       if (c.manu) manu[c.manu] = (manu[c.manu] || 0) + 1;
       if (c.loc) loc[c.loc] = (loc[c.loc] || 0) + 1;
       uniqueFt += (c.l || 0); invUnique += (c.inv || 0);
+      parkCredits[c.park] = (parkCredits[c.park] || 0) + 1;
     });
+
+    // ---- Ride-count aggregates (need per-credit counts; re-rides included) ---
+    var totalRides = 0, distFt = 0, invExp = 0, rideSec = 0;
+    if (hasCounts) {
+      Object.keys(creditCount).forEach(function (id) {
+        var c = byId[id], n = creditCount[id];
+        totalRides += n;
+        distFt += (c.l || 0) * (c.laps || 1) * n;
+        invExp += (c.inv || 0) * (c.laps || 1) * n;
+        rideSec += (c.dur || 0) * n;
+      });
+    }
 
     var biggest = Object.keys(dayCount).map(function (d) {
       var pk = Object.keys(dayParks[d]).sort(function (a, b) { return dayParks[d][b] - dayParks[d][a]; })[0];
@@ -87,8 +155,12 @@
     var fastest = maxBy(creditList, function (c) { return c.s; });
     var longest = maxBy(creditList, function (c) { return c.l; });
     var oldest = maxBy(creditList, function (c) { return c.yr ? -c.yr : null; });
-    var mostRiddenId = Object.keys(coasterRides).sort(function (a, b) { return coasterRides[b] - coasterRides[a]; })[0];
-    var mostVisitedPark = Object.keys(parkVisitDays).sort(function (a, b) { return parkVisitDays[b] - parkVisitDays[a]; })[0];
+    var mostRiddenId = hasCounts
+      ? Object.keys(creditCount).sort(function (a, b) { return creditCount[b] - creditCount[a]; })[0]
+      : null;
+    var mostVisitedPark = hasFullLog
+      ? Object.keys(parkVisitDays).sort(function (a, b) { return parkVisitDays[b] - parkVisitDays[a]; })[0]
+      : null;
 
     var dayDetail = {};
     Object.keys(dayCount).forEach(function (d) {
@@ -97,40 +169,62 @@
               .sort(function (a, b) { return b[1] - a[1]; }) };
     });
 
-    var parkCredits = {};
-    creditList.forEach(function (c) { parkCredits[c.park] = (parkCredits[c.park] || 0) + 1; });
     var parksGeo = [];
-    Object.keys(parkRides).forEach(function (pk) {
+    Object.keys(parkCredits).forEach(function (pk) {
       var g = parks[pk]; if (!g) return;
       parksGeo.push({ park: pk, lat: g.lat, lon: g.lon, region: g.region,
-        rides: parkRides[pk], credits: parkCredits[pk] || 0 });
+        rides: parkRides[pk] || 0, credits: parkCredits[pk] });
     });
-    parksGeo.sort(function (a, b) { return b.rides - a.rides; });
+    parksGeo.sort(function (a, b) { return (b.rides || b.credits) - (a.rides || a.credits); });
 
+    // Region comes from each coaster's own loc field (self-contained — works for
+    // coasters whose park isn't in parks.json, e.g. a friend's new parks).
     var states = new Set(), countries = new Set();
     creditList.forEach(function (c) {
-      var g = parks[c.park]; if (!g) return;
-      var kv = regionKind(g.region);
+      var reg = c.loc; if (!reg) return;
+      var kv = regionKind(reg);
       if (kv[0] === "state") states.add(kv[1]); else countries.add(kv[1]);
     });
     var nCountries = countries.size + (states.size ? 1 : 0);
 
+    var topParks = hasFullLog ? topN(parkRides, 12, "park", "val") : topN(parkCredits, 12, "park", "val");
+
+    // First-ridden events with a full (mm-dd) date — powers "on this day".
+    var firstRides = Object.keys(firstRidden)
+      .filter(function (id) { return String(firstRidden[id]).length >= 10; })
+      .map(function (id) { return { c: +id, d: firstRidden[id] }; });
+
     return {
+      // activity  = full dated ride log (unlocks calendar + rides/year + biggest days)
+      // timeline  = every credit has a first-ridden date (unlocks cumulative + new/year)
+      // firstDates= at least some first-ridden dates exist (unlocks the table column)
+      // rideCounts= per-credit ride counts known (unlocks total rides + most-ridden)
+      has: {
+        activity: hasFullLog,
+        timeline: hasFullLog || (hasFirstDates && Object.keys(firstRidden).length === creditList.length),
+        firstDates: hasFirstDates,
+        rideCounts: hasCounts
+      },
       kpi: {
-        credits: creditList.length, rides: rides.length,
-        visits: Object.keys(visitSet).length,
-        steel: steel, wood: wood, year_min: yrMin, year_max: yrMax, span: yrMax - yrMin + 1,
+        credits: creditList.length,
+        rides: hasCounts ? totalRides : null,
+        visits: hasFullLog ? Object.keys(visitSet).length : null,
+        steel: steel, wood: wood,
+        year_min: yrMin, year_max: yrMax, span: yrMin != null ? yrMax - yrMin + 1 : null,
         parks: parksGeo.length, states: states.size, countries: nCountries,
-        miles: Math.round(distFt / 5280), miles_unique: Math.round(uniqueFt / 5280),
-        inversions: invExp, inversions_unique: invUnique,
-        ride_hours: Math.round(rideSec / 3600)
+        miles: hasCounts ? Math.round(distFt / 5280) : null,
+        miles_unique: Math.round(uniqueFt / 5280),
+        inversions: hasCounts ? invExp : null,
+        inversions_unique: invUnique,
+        ride_hours: hasCounts ? Math.round(rideSec / 3600) : null
       },
       years: yearList,
       rides_per_year: yearList.map(function (y) { return ridesByYear[y] || 0; }),
       new_credits_per_year: yearList.map(function (y) { return newByYear[y] || 0; }),
       cumulative_credits: cumulative,
       biggest_days: biggest,
-      top_parks: topN(parkRides, 12, "park", "rides"),
+      top_parks: topParks,
+      top_parks_metric: hasFullLog ? "rides" : "credits",
       top_manufacturers: topN(manu, 10, "name", "credits"),
       top_locations: topN(loc, 12, "loc", "credits"),
       records: {
@@ -138,18 +232,23 @@
         fastest: fastest && { name: fastest.name, val: fastest.s, unit: "mph" },
         longest: longest && { name: longest.name, val: longest.l, unit: "ft" },
         oldest: oldest && { name: oldest.name, val: curYear - oldest.yr, unit: "yrs" },
-        most_ridden: mostRiddenId && { name: byId[mostRiddenId].name, val: coasterRides[mostRiddenId], unit: "rides" },
+        most_ridden: mostRiddenId && { name: byId[mostRiddenId].name, val: creditCount[mostRiddenId], unit: "rides" },
         most_visited_park: mostVisitedPark && { name: mostVisitedPark, val: parkVisitDays[mostVisitedPark], unit: "visits" }
       },
       day_detail: dayDetail,
+      first_rides: firstRides,
       geo: { states: [...states].sort(), countries: [...countries].sort(),
              n_states: states.size, n_countries: nCountries, n_parks: parksGeo.length },
       parksGeo: parksGeo,
       byCoaster: (function () {
         var m = {};
-        Object.keys(creditIds).forEach(function (id) {
-          var dates = rides.filter(function (r) { return r.c == id; }).map(function (r) { return r.d; }).sort();
-          m[id] = { rides: dates.length, first: dates[0], last: dates[dates.length - 1], dates: dates };
+        Object.keys(creditSet).forEach(function (id) {
+          var dates = log.filter(function (r) { return r.c == id; }).map(function (r) { return r.d; }).sort();
+          m[id] = {
+            rides: creditCount[id] != null ? creditCount[id] : (dates.length || null),
+            first: dates[0] || firstRidden[id] || null,
+            last: dates[dates.length - 1] || null, dates: dates
+          };
         });
         return m;
       })(),
@@ -157,23 +256,31 @@
     };
   }
 
+  // Active user from a pretty path (/user/<name>/stats) or ?user=<name>. Null = Carter.
+  function currentUser() {
+    if (typeof location === "undefined") return null;
+    var m = location.pathname.match(/\/user\/([^\/]+)/);
+    if (m) return decodeURIComponent(m[1]);
+    return new URLSearchParams(location.search).get("user");
+  }
+
   function loadUser(userFile) {
-    userFile = userFile || "carter.json";
+    if (!userFile) { var u = currentUser(); userFile = u ? u + ".json" : "carter.json"; }
     return Promise.all([
-      fetch("coasters.json").then(function (r) { return r.json(); }),
-      fetch("parks.json").then(function (r) { return r.json(); }),
-      fetch(userFile).then(function (r) { return r.json(); })
+      fetch("/coasters.json").then(function (r) { return r.json(); }),
+      fetch("/parks.json").then(function (r) { return r.json(); }),
+      fetch("/" + userFile).then(function (r) { return r.json(); })
     ]).then(function (res) {
       var coasters = res[0].coasters, parks = res[1], user = res[2];
-      var stats = computeStats(coasters, parks, user.rides);
+      var stats = computeStats(coasters, parks, user);
       stats.userName = user.user;
       stats.coasters = coasters;
-      stats.rides = user.rides;
+      stats.rides = user.rides || [];
       return stats;
     });
   }
 
-  var api = { computeStats: computeStats, loadUser: loadUser };
+  var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

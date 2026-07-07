@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
 <title>Coasters — Coaster Hub</title>
 <meta name="description" content="The full list of every coaster in my count — filter and sort.">
 <link rel="stylesheet" href="style.css">
@@ -81,7 +82,7 @@
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 let DATA=[];
-const COLS=[
+const ALLCOLS=[
  {k:'name',t:'Name',num:false,cls:'name'},
  {k:'park',t:'Park',num:false},
  {k:'loc',t:'Location',num:false},
@@ -97,17 +98,30 @@ const COLS=[
  {k:'l',t:'Length (ft)',num:true},
  {k:'inv',t:'Inv',num:true},
 ];
+let COLS=ALLCOLS;
 let sortKey='rides', sortDir=-1;
 const FILTS=['q','f_status','f_type','f_manu','f_model','f_park','f_loc'];
-
+// Friend pages are unlisted: nav always points to the main (Carter) site.
 CoasterHub.loadUser().then(function(s){
-  DATA=s.coasters.map(function(c){
-    var d=s.byCoaster[c.id]||{rides:0,first:null};
+  // Only the coasters this user has actually ridden.
+  DATA=s.coasters.filter(function(c){return s.byCoaster[c.id];}).map(function(c){
+    var d=s.byCoaster[c.id];
     return Object.assign({},c,{rides:d.rides,first:d.first,status:c.closed?'Defunct':'Operating'});
   });
+  // Keep the First Ridden / Rides columns only if this user has that data.
+  var anyFirst=DATA.some(function(c){return c.first;});
+  var anyRides=DATA.some(function(c){return c.rides!=null;});
+  COLS=ALLCOLS.filter(function(col){
+    if(col.k==='first')return anyFirst;
+    if(col.k==='rides')return anyRides;
+    return true;
+  });
+  if(!anyRides){ sortKey=anyFirst?'first':'yr'; sortDir=anyFirst?-1:1; }
   document.getElementById('loading').style.display='none';
   document.getElementById('ui').style.display='block';
   document.getElementById('total').textContent=DATA.length;
+  var whose=(!s.userName||/^carter/i.test(s.userName))?'the':String(s.userName).replace(/[&<>\"]/g,'')+'’s';
+  var h1=document.querySelector('.hero h1'); if(h1) h1.textContent='Every coaster in '+whose+' count.';
   init();
 }).catch(function(e){
   console.error(e);

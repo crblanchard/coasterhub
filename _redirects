@@ -1,0 +1,5 @@
+# Pretty per-user URLs -> serve the static page (JS reads the name from the path).
+# 200 = rewrite (the browser keeps the pretty URL). <base href="/"> keeps assets working.
+/user/:name/stats     /stats.html     200
+/user/:name/coasters  /coasters.html  200
+/user/:name           /stats.html     200

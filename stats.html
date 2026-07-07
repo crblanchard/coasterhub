@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
 <title>My Stats — Coaster Hub</title>
 <meta name="description" content="Interactive roller coaster count statistics.">
 <link rel="stylesheet" href="style.css">
@@ -61,7 +62,7 @@
 </div></header>
 
 <section class="hero" style="padding:60px 0 36px"><div class="container">
-  <span class="badge">My Count</span>
+  <span class="badge" id="hero_badge">My Count</span>
   <h1 id="hero_h" style="max-width:20ch">Chasing credits.</h1>
   <p id="hero_p">Every ride, park, and record from my coaster count.</p>
 </div></section>
@@ -77,10 +78,10 @@
 <section class="block" style="padding-top:28px"><div class="container">
   <div class="kpis">
     <div class="kpi"><div class="num" id="k_credits"></div><div class="lbl">Credits</div><div class="sub" id="k_split"></div></div>
-    <div class="kpi"><div class="num" id="k_rides"></div><div class="lbl">Total Rides</div></div>
+    <div class="kpi" id="kpi_rides"><div class="num" id="k_rides"></div><div class="lbl">Total Rides</div></div>
     <div class="kpi"><div class="num" id="k_parks"></div><div class="lbl">Parks</div></div>
     <div class="kpi"><div class="num" id="k_geo"></div><div class="lbl">States / Countries</div></div>
-    <div class="kpi"><div class="num" id="k_miles"></div><div class="lbl">Total Distance Ridden</div><div class="sub" id="k_inv"></div></div>
+    <div class="kpi"><div class="num" id="k_miles"></div><div class="lbl" id="k_miles_lbl">Total Distance Ridden</div><div class="sub" id="k_inv"></div></div>
   </div>
 </div></section>
 
@@ -100,7 +101,7 @@
   <div id="map"></div>
 </div></section>
 
-<section class="block"><div class="container">
+<section class="block" id="sec_activity"><div class="container">
   <span class="eyebrow">Activity</span><h2>Every riding day</h2>
   <p class="lead">Each square is a day; darker means more rides. Hover for the date, parks, and count.</p>
   <div class="hm-wrap" id="heatmap"></div>
@@ -112,11 +113,11 @@
     <span class="sw" style="background:#8bf0ea"></span>More</div>
 </div></section>
 
-<section class="block"><div class="container">
+<section class="block" id="sec_overtime"><div class="container">
   <span class="eyebrow">Over time</span><h2>The story so far</h2>
   <div class="chart-grid">
     <div class="panel wide"><h3>Credits over time</h3><div class="cap">Cumulative new coasters ridden by year</div><div class="cwrap"><canvas id="cCum"></canvas></div></div>
-    <div class="panel"><h3>Rides per year</h3><div class="cap">Total rides incl. re-rides</div><div class="cwrap"><canvas id="cRides"></canvas></div></div>
+    <div class="panel" id="panel_rides_year"><h3>Rides per year</h3><div class="cap">Total rides incl. re-rides</div><div class="cwrap"><canvas id="cRides"></canvas></div></div>
     <div class="panel"><h3>New credits per year</h3><div class="cap">First-time coasters</div><div class="cwrap"><canvas id="cNew"></canvas></div></div>
   </div>
 </div></section>
@@ -124,9 +125,9 @@
 <section class="block"><div class="container">
   <span class="eyebrow">Parks, makers &amp; big days</span><h2>The breakdown</h2>
   <div class="chart-grid">
-    <div class="panel"><h3>Top parks by rides</h3><div class="cap">Home turf</div><div class="cwrap" style="height:360px"><canvas id="cParks"></canvas></div></div>
+    <div class="panel"><h3 id="parks_title">Top parks by rides</h3><div class="cap">Home turf</div><div class="cwrap" style="height:360px"><canvas id="cParks"></canvas></div></div>
     <div class="panel"><h3>Top manufacturers</h3><div class="cap">By credits ridden</div><div class="cwrap" style="height:360px"><canvas id="cManu"></canvas></div></div>
-    <div class="panel"><h3>Biggest single days</h3><div class="cap">Most rides in one day (hover for park)</div><div class="cwrap" style="height:360px"><canvas id="cDays"></canvas></div></div>
+    <div class="panel" id="panel_days"><h3>Biggest single days</h3><div class="cap">Most rides in one day (hover for park)</div><div class="cwrap" style="height:360px"><canvas id="cDays"></canvas></div></div>
     <div class="panel"><h3>Steel vs wood</h3><div class="cap">Credit breakdown</div><div class="cwrap"><canvas id="cType"></canvas></div></div>
   </div>
 </div></section>
@@ -141,7 +142,10 @@
 <script src="app.js"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
-const nf=n=>n.toLocaleString();
+const nf=n=>(n==null?'—':n.toLocaleString());
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Friend pages are unlisted: nav always points to the main (Carter) site, so a
+// friend's page is only reachable by typing /user/<name>/... directly.
 CoasterHub.loadUser().then(render).catch(function(e){
   console.error(e);
   document.getElementById('loading').style.display='none';
@@ -150,17 +154,51 @@ CoasterHub.loadUser().then(render).catch(function(e){
 function render(s){
   document.getElementById('loading').style.display='none';
   document.getElementById('content').style.display='block';
-  const k=s.kpi;
-  document.getElementById('hero_h').textContent=k.span+' years of chasing credits.';
-  document.getElementById('hero_p').textContent='Every ride, park, and record from my coaster count — '+k.year_min+' to '+k.year_max+'.';
+  const k=s.kpi, has=s.has||{activity:true,rideCounts:true};
+  // Whose count is this? "my" for Carter, "<Name>'s" for a friend.
+  const mine=!s.userName||/^carter/i.test(s.userName);
+  const who=mine?'my':esc(s.userName)+'’s';
+  const Who=mine?'My':esc(s.userName)+'’s';
+
+  document.getElementById('hero_badge').textContent=Who+' Count';
+  if(has.timeline){
+    document.getElementById('hero_h').textContent=k.span+' years of chasing credits.';
+    document.getElementById('hero_p').textContent='Every '+(has.activity?'ride, ':'')+'park, and record from '+who+' coaster count — '+k.year_min+' to '+k.year_max+'.';
+  } else {
+    document.getElementById('hero_h').textContent=nf(k.credits)+' coasters and counting.';
+    document.getElementById('hero_p').textContent='Every park, maker, and record from '+who+' coaster collection.';
+  }
   document.getElementById('k_credits').textContent=nf(k.credits);
   document.getElementById('k_split').textContent=k.steel+' steel · '+k.wood+' wood';
-  document.getElementById('k_rides').textContent=nf(k.rides);
   document.getElementById('k_parks').textContent=k.parks;
   document.getElementById('k_geo').textContent=k.states+' / '+k.countries;
-  document.getElementById('k_miles').textContent=nf(k.miles)+' mi';
-  document.getElementById('k_inv').textContent=nf(k.miles_unique)+' mi unique track · '+nf(k.inversions)+' inversions';
-  document.getElementById('geo_sub').textContent=k.parks+' parks across '+k.states+' U.S. states and '+k.countries+' countries. Circle size = rides.';
+
+  // Total Rides tile only when ride counts are known.
+  if(has.rideCounts){
+    document.getElementById('k_rides').textContent=nf(k.rides);
+  } else {
+    document.getElementById('kpi_rides').style.display='none';
+  }
+
+  // Distance tile: total (with re-rides) when counts exist, else unique track.
+  if(has.rideCounts){
+    document.getElementById('k_miles').textContent=nf(k.miles)+' mi';
+    document.getElementById('k_miles_lbl').textContent='Total Distance Ridden';
+    document.getElementById('k_inv').textContent=nf(k.miles_unique)+' mi unique track · '+nf(k.inversions)+' inversions';
+  } else {
+    document.getElementById('k_miles').textContent=nf(k.miles_unique)+' mi';
+    document.getElementById('k_miles_lbl').textContent='Unique Track Ridden';
+    document.getElementById('k_inv').textContent=nf(k.inversions_unique)+' inversions';
+  }
+
+  // Show time-based panels only when the data supports them.
+  const hide=id=>{var el=document.getElementById(id); if(el) el.style.display='none';};
+  if(!has.timeline){ hide('sec_overtime'); }                       // cumulative + new-per-year
+  if(!has.activity){ ['sec_activity','panel_days','panel_rides_year'].forEach(hide); } // calendar, biggest days, rides/year
+
+  const circleMetric=has.activity?'rides':'credits';
+  document.getElementById('geo_sub').textContent=k.parks+' parks across '+k.states+' U.S. states and '+k.countries+' countries. Circle size = '+circleMetric+'.';
+  document.getElementById('parks_title').textContent=has.activity?'Top parks by rides':'Top parks by credits';
   const R=s.records;
   const order=[['tallest','Tallest'],['fastest','Fastest'],['longest','Longest'],['oldest','Oldest'],['most_ridden','Most Ridden'],['most_visited_park','Most Visited']];
   const fmt=v=>typeof v==='number'?(Number.isInteger(v)?v.toLocaleString():v.toLocaleString(undefined,{maximumFractionDigits:1})):v;
@@ -177,24 +215,33 @@ function render(s){
       return '<div class="records">'+list.map(function(c){var y=c[key].slice(0,4);var age=cy-parseInt(y,10);
         return '<div class="rec"><div class="tag">'+label+' '+y+'</div><div class="rname">'+c.name+'</div><div class="rval" style="font-size:.92rem;color:var(--muted);font-weight:600">'+c.park+' · '+age+' yrs ago</div></div>';}).join('')+'</div>';
     }
-    var opened=(s.coasters||[]).filter(function(c){return c.opened&&c.openedPrec==='day'&&c.opened.slice(5)===mmdd;}).sort(function(a,b){return a.opened.localeCompare(b.opened);});
-    var closed=(s.coasters||[]).filter(function(c){return c.closed&&c.closedPrec==='day'&&c.closed.slice(5)===mmdd;}).sort(function(a,b){return a.closed.localeCompare(b.closed);});
-    var rode=(s.rides||[]).filter(function(r){return r.d.slice(5)===mmdd;});
+    var opened=(s.coasters||[]).filter(function(c){return s.byCoaster[c.id]&&c.opened&&c.openedPrec==='day'&&c.opened.slice(5)===mmdd;}).sort(function(a,b){return a.opened.localeCompare(b.opened);});
+    var closed=(s.coasters||[]).filter(function(c){return s.byCoaster[c.id]&&c.closed&&c.closedPrec==='day'&&c.closed.slice(5)===mmdd;}).sort(function(a,b){return a.closed.localeCompare(b.closed);});
+    // Use the full ride log if we have it, else first-ridden dates.
+    var rideSrc=has.activity?(s.rides||[]):(s.first_rides||[]);
+    var rode=rideSrc.filter(function(r){return r.d.slice(5)===mmdd;});
     var rodeYears=[...new Set(rode.map(function(r){return r.d.slice(0,4);}))].sort();
     var html='';
     if(opened.length){ html+='<div class="cap" style="margin-bottom:12px">Opened on '+dayLabel+':</div>'+otdCards(opened,'opened','Opened'); }
     if(closed.length){ html+='<div class="cap" style="margin:'+(opened.length?'24px':'0')+' 0 12px">Closed on '+dayLabel+':</div>'+otdCards(closed,'closed','Closed'); }
-    if(!opened.length&&!closed.length){ html+='<p class="lead">Nothing in my count opened or closed on '+dayLabel+'.</p>'; }
-    if(rode.length){ html+='<p class="note" style="margin-top:16px">I have taken <b style="color:var(--accent2)">'+rode.length+'</b> ride'+(rode.length>1?'s':'')+' on '+dayLabel+' over the years ('+rodeYears.join(', ')+').</p>'; }
+    if(!opened.length&&!closed.length){ html+='<p class="lead">Nothing in '+who+' count opened or closed on '+dayLabel+'.</p>'; }
+    if(rode.length){
+      var subj=mine?'I':esc(s.userName);
+      var phrase=has.activity
+        ? (mine?'I have':subj+' has')+' taken <b style="color:var(--accent2)">'+rode.length+'</b> ride'+(rode.length>1?'s':'')
+        : subj+' first rode <b style="color:var(--accent2)">'+rode.length+'</b> coaster'+(rode.length>1?'s':'');
+      html+='<p class="note" style="margin-top:16px">'+phrase+' on '+dayLabel+' over the years ('+rodeYears.join(', ')+').</p>';
+    }
     document.getElementById('otd').innerHTML=html;
   })();
 
   const map=L.map('map',{scrollWheelZoom:false,worldCopyJump:true}).setView([30,-40],2);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
   const pts=[];
-  s.parksGeo.forEach(p=>{const r=3+Math.sqrt(p.rides)*0.95;
+  s.parksGeo.forEach(p=>{const val=p.rides||p.credits;const r=3+Math.sqrt(val)*0.95;
+    const detail=has.activity?(p.rides+' rides · '+p.credits+' credits'):(p.credits+' credit'+(p.credits>1?'s':''));
     L.circleMarker([p.lat,p.lon],{radius:r,color:'#37d0c8',weight:1,fillColor:'#ff5a5f',fillOpacity:.65}).addTo(map)
-     .bindPopup('<div class="pp"><b>'+p.park+'</b><br><small>'+p.region+'</small><br>'+p.rides+' rides · '+p.credits+' credits</div>');
+     .bindPopup('<div class="pp"><b>'+p.park+'</b><br><small>'+p.region+'</small><br>'+detail+'</div>');
     pts.push([p.lat,p.lon]);});
   map.fitBounds(pts,{padding:[30,30]});
   const DAY=s.day_detail, tip=document.getElementById('hm-tip');
@@ -209,7 +256,7 @@ function render(s){
     let x=e.clientX+14, y=e.clientY+14; if(x+250>window.innerWidth) x=e.clientX-14-tip.offsetWidth;
     tip.style.left=x+'px'; tip.style.top=y+'px';
   }
-  for(let yr=k.year_min; yr<=k.year_max; yr++){
+  if(has.activity) for(let yr=k.year_min; yr<=k.year_max; yr++){
     const row=document.createElement('div'); row.className='hm-year';
     const lbl=document.createElement('div'); lbl.className='hm-lbl'; lbl.textContent=yr; row.appendChild(lbl);
     const start=new Date(yr,0,1), startWd=start.getDay();
@@ -235,12 +282,16 @@ function render(s){
   const AX='#9fb0d6', GRID='rgba(255,255,255,.07)', ACC='#ff5a5f', ACC2='#37d0c8';
   Chart.defaults.color=AX; Chart.defaults.font.family='system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
   const grid={grid:{color:GRID},ticks:{color:AX}}, noLeg={plugins:{legend:{display:false}}};
+  if(has.timeline){
   new Chart(cCum,{type:'line',data:{labels:s.years,datasets:[{data:s.cumulative_credits,borderColor:ACC2,backgroundColor:'rgba(55,208,200,.15)',fill:true,tension:.3,pointRadius:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}});
-  new Chart(cRides,{type:'bar',data:{labels:s.years,datasets:[{data:s.rides_per_year,backgroundColor:ACC,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}});
   new Chart(cNew,{type:'bar',data:{labels:s.years,datasets:[{data:s.new_credits_per_year,backgroundColor:ACC2,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}});
-  new Chart(cParks,{type:'bar',data:{labels:s.top_parks.map(p=>p.park),datasets:[{data:s.top_parks.map(p=>p.rides),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}});
-  new Chart(cManu,{type:'bar',data:{labels:s.top_manufacturers.map(m=>m.name),datasets:[{data:s.top_manufacturers.map(m=>m.credits),backgroundColor:ACC2,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}});
+  }
+  if(has.activity){
+  new Chart(cRides,{type:'bar',data:{labels:s.years,datasets:[{data:s.rides_per_year,backgroundColor:ACC,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}});
   new Chart(cDays,{type:'bar',data:{labels:s.biggest_days.map(d=>d.date),datasets:[{data:s.biggest_days.map(d=>d.rides),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:c=>s.biggest_days[c.dataIndex].park}}},scales:{x:{...grid,beginAtZero:true},y:grid}}});
+  }
+  new Chart(cParks,{type:'bar',data:{labels:s.top_parks.map(p=>p.park),datasets:[{data:s.top_parks.map(p=>p.val),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}});
+  new Chart(cManu,{type:'bar',data:{labels:s.top_manufacturers.map(m=>m.name),datasets:[{data:s.top_manufacturers.map(m=>m.credits),backgroundColor:ACC2,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}});
   new Chart(cType,{type:'doughnut',data:{labels:['Steel','Wood'],datasets:[{data:[k.steel,k.wood],backgroundColor:[ACC2,ACC],borderColor:'#121a33',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
 }
 </script>
