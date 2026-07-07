@@ -11,3 +11,11 @@ Thumbs.db
 
 # Captain Coaster import cache (large, auto-regenerated)
 tools/.cc-cache/
+
+# Local import working files (not part of the site)
+max-credits-*.xlsx
+max-import-*.xlsx
+
+# Local working/temp files
+~$*
+*.xlsx

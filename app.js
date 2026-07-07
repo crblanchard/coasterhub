@@ -103,14 +103,20 @@
       var orderedNums = Object.keys(creditNum)
         .map(function (id) { return { id: +id, num: creditNum[id] }; })
         .sort(function (a, b) { return a.num - b.num; });
-      var N = orderedNums.length, picks = {};
+      var maxN = orderedNums[orderedNums.length - 1].num, picks = {};
       picks[1] = true;
-      for (var mm = 100; mm <= N; mm += 100) picks[mm] = true;
-      picks[N] = true;
+      for (var mm = 100; mm <= maxN; mm += 100) picks[mm] = true;
+      picks[maxN] = true;
       Object.keys(picks).map(Number).sort(function (a, b) { return a - b; }).forEach(function (t) {
-        var o = orderedNums[t - 1]; if (!o) return;
-        var c = byId[o.id]; if (!c) return;
-        milestones.push({ n: o.num, name: c.name, park: c.park });
+        // the coaster reached at credit number t (exact, else the highest number below t)
+        var chosen = null;
+        for (var i = 0; i < orderedNums.length; i++) {
+          if (orderedNums[i].num > t) break;
+          chosen = orderedNums[i];
+        }
+        if (!chosen) return;
+        var c = byId[chosen.id]; if (!c) return;
+        milestones.push({ n: t, name: c.name, park: c.park });
       });
     }
 
@@ -312,7 +318,8 @@
   // ---- Multi-user site config + shared nav --------------------------------
   var USERS = [
     { slug: "carter", name: "Carter" },
-    { slug: "cole",   name: "Cole"   }
+    { slug: "cole",   name: "Cole"   },
+    { slug: "max",    name: "Max"    }
   ];
   var DEFAULT_SLUG = "carter";
 

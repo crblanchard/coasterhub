@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
+<title>Coaster database — QC</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<style>
+  .qcbar{display:flex;align-items:center;gap:12px;height:56px}
+  .qcbar .brand-mark{height:34px;width:34px}
+  .qcbar .t{font-weight:800;letter-spacing:-.01em}
+  .qcbar .t b{color:var(--accent2)}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0}
+  .controls input[type=search],.controls select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem}
+  .controls input[type=search]{min-width:240px;flex:1}
+  .controls label{color:var(--muted);font-size:.9rem;display:flex;align-items:center;gap:6px;cursor:pointer}
+  .controls button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem}
+  .controls button:hover{color:var(--fg)}
+  .count{color:var(--muted);font-size:.85rem;margin-bottom:12px}
+  .count b{color:var(--accent2)}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  table{border-collapse:collapse;width:100%;font-size:.82rem;white-space:nowrap}
+  thead th{position:sticky;top:0;background:#0e1730;color:var(--muted);text-align:left;padding:10px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.7rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
+  thead th:hover{color:var(--fg)}
+  thead th.num{text-align:right}
+  thead th .ar{color:var(--accent);margin-left:4px}
+  tbody td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+  tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+  tbody td.name{font-weight:600;color:var(--fg)}
+  tbody tr:hover{background:rgba(55,208,200,.06)}
+  tbody tr.incomplete td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+  td.muted{color:var(--muted)}
+  .pill{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+  .pill.steel{color:var(--accent2)}.pill.wood{color:var(--accent)}
+  .pill.def{color:var(--accent)}.pill.op{color:var(--accent2)}
+  #loading{color:var(--muted);padding:40px 0}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="qcbar">
+    <a href="/" style="display:flex;align-items:center;gap:10px">
+      <img src="mark.svg" alt="" class="brand-mark">
+      <span class="t">Coaster <b>database</b> — QC</span>
+    </a>
+  </div>
+</div>
+
+<section class="block" style="padding:8px 0 48px"><div class="container">
+  <p class="lead" style="margin-bottom:8px">Every coaster in <code>coasters.json</code> (the shared master list). Unlisted QC view. The <b style="color:var(--accent)">red bar</b> flags rows missing type/height/speed/length.</p>
+  <div id="loading">Loading database…</div>
+  <div id="ui" style="display:none">
+    <div class="controls">
+      <input id="q" type="search" placeholder="Search name, park, manufacturer, model, location…">
+      <select id="f_type"><option value="">All types</option><option>Steel</option><option>Wood</option></select>
+      <select id="f_status"><option value="">All statuses</option><option>Operating</option><option>Defunct</option></select>
+      <label><input type="checkbox" id="f_incomplete"> Only incomplete</label>
+      <button id="reset">Reset</button>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="tbl-wrap"><table><thead><tr id="head"></tr></thead><tbody id="body"></tbody></table></div>
+  </div>
+</div></section>
+
+<script>
+const COLS=[
+ {k:'id',t:'ID',num:true},
+ {k:'name',t:'Name',cls:'name'},
+ {k:'park',t:'Park'},
+ {k:'loc',t:'Location'},
+ {k:'type',t:'Type'},
+ {k:'manu',t:'Manufacturer'},
+ {k:'model',t:'Model'},
+ {k:'yr',t:'Year',num:true},
+ {k:'h',t:'Height',num:true},
+ {k:'s',t:'Speed',num:true},
+ {k:'l',t:'Length',num:true},
+ {k:'inv',t:'Inv',num:true},
+ {k:'status',t:'Status'},
+];
+let DATA=[], sortKey='park', sortDir=1;
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const incomplete=c=>(!c.type||c.h==null||c.s==null||c.l==null);
+
+fetch('/coasters.json').then(r=>r.json()).then(j=>{
+  DATA=j.coasters.map(c=>Object.assign({},c,{status:c.closed?'Defunct':'Operating'}));
+  document.getElementById('loading').style.display='none';
+  document.getElementById('ui').style.display='block';
+  const head=document.getElementById('head');
+  COLS.forEach(c=>{const th=document.createElement('th');th.textContent=c.t;if(c.num)th.className='num';
+    th.onclick=()=>{if(sortKey===c.k)sortDir*=-1;else{sortKey=c.k;sortDir=c.num?-1:1;}render();};head.appendChild(th);});
+  ['q','f_type','f_status'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+  document.getElementById('f_incomplete').addEventListener('change',render);
+  document.getElementById('reset').onclick=()=>{['q','f_type','f_status'].forEach(id=>document.getElementById(id).value='');document.getElementById('f_incomplete').checked=false;sortKey='park';sortDir=1;render();};
+  render();
+}).catch(e=>{console.error(e);document.getElementById('loading').textContent='Could not load coasters.json — view on the live site.';});
+
+function rows(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  const ft=document.getElementById('f_type').value, fs=document.getElementById('f_status').value;
+  const fi=document.getElementById('f_incomplete').checked;
+  let r=DATA.filter(c=>{
+    if(ft&&c.type!==ft)return false;
+    if(fs&&c.status!==fs)return false;
+    if(fi&&!incomplete(c))return false;
+    if(q){const hay=(c.name+' '+c.park+' '+(c.manu||'')+' '+(c.model||'')+' '+(c.loc||'')).toLowerCase();if(hay.indexOf(q)<0)return false;}
+    return true;
+  });
+  r.sort((a,b)=>{let x=a[sortKey],y=b[sortKey];
+    if(x==null&&y==null)return String(a.name).localeCompare(String(b.name));
+    if(x==null)return 1; if(y==null)return -1;
+    let c=(typeof x==='string')?x.localeCompare(y)*sortDir:(x-y)*sortDir;
+    return c!==0?c:String(a.name).localeCompare(String(b.name));});
+  return r;
+}
+function render(){
+  const r=rows();
+  document.getElementById('count').innerHTML='Showing <b>'+r.length+'</b> of '+DATA.length+' coasters · <b>'+DATA.filter(incomplete).length+'</b> incomplete';
+  document.querySelectorAll('#head th').forEach(th=>{const a=th.querySelector('.ar');if(a)a.remove();
+    if(th.textContent.replace(/[▲▼]/g,'').trim()===COLS.find(c=>c.k===sortKey).t){const sp=document.createElement('span');sp.className='ar';sp.textContent=sortDir<0?'▼':'▲';th.appendChild(sp);}});
+  document.getElementById('body').innerHTML=r.map(c=>'<tr class="'+(incomplete(c)?'incomplete':'')+'">'+COLS.map(col=>{
+    let v=c[col.k];
+    if(col.k==='type')return '<td>'+(v?'<span class="pill '+(v==='Wood'?'wood':'steel')+'">'+v+'</span>':'<span class="muted">—</span>')+'</td>';
+    if(col.k==='status')return '<td><span class="pill '+(v==='Defunct'?'def':'op')+'">'+v+'</span></td>';
+    if(v==null||v==='')return '<td class="muted">—</td>';
+    return '<td class="'+(col.num?'num ':'')+(col.cls||'')+'">'+esc(v)+'</td>';
+  }).join('')+'</tr>').join('');
+}
+</script>
+</body>
+</html>
