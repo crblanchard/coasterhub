@@ -7,6 +7,15 @@
 <title>My Stats — Coaster Hub</title>
 <meta name="description" content="Interactive roller coaster count statistics.">
 <link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:title" content="Coaster Hub">
+<meta property="og:description" content="A roller coaster count, visualized — credits, rides, parks, geography, and records.">
+<meta property="og:image" content="https://coasterhub.org/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -53,12 +62,16 @@
 </head>
 <body>
 <header class="nav"><div class="container nav-inner">
-  <a class="brand" href="index.html"><img src="logo.png" alt="Coaster Hub" class="brand-logo"></a>
+  <a class="brand" href="/">
+    <img src="mark.svg" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
   <nav class="links">
-    <a href="index.html">Home</a>
-    <a href="stats.html" class="active">My Stats</a>
-    <a href="coasters.html">Coasters</a>
+    <a href="/" data-nav="home">Home</a>
+    <a href="/stats" data-nav="stats">Stats</a>
+    <a href="/coasters" data-nav="coasters">Coasters</a>
   </nav>
+  <div class="people" id="people"></div>
 </div></header>
 
 <section class="hero" style="padding:60px 0 36px"><div class="container">
@@ -135,13 +148,14 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="index.html">Home</a> &nbsp;·&nbsp; <a href="stats.html">My Stats</a> &nbsp;·&nbsp; <a href="coasters.html">Coasters</a></div>
+  <div><a href="/">Home</a> &nbsp;·&nbsp; <a href="/stats">Stats</a> &nbsp;·&nbsp; <a href="/coasters">Coasters</a></div>
 </div></footer>
 <div id="hm-tip"></div>
 
 <script src="app.js"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('stats');
 const nf=n=>(n==null?'—':n.toLocaleString());
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Friend pages are unlisted: nav always points to the main (Carter) site, so a
@@ -156,9 +170,11 @@ function render(s){
   document.getElementById('content').style.display='block';
   const k=s.kpi, has=s.has||{activity:true,rideCounts:true};
   // Whose count is this? "my" for Carter, "<Name>'s" for a friend.
-  const mine=!s.userName||/^carter/i.test(s.userName);
-  const who=mine?'my':esc(s.userName)+'’s';
-  const Who=mine?'My':esc(s.userName)+'’s';
+  const name=esc(s.userName||'Carter');
+  const mine=false;
+  const who=name+'’s';
+  const Who=name+'’s';
+  document.title=name+'’s Stats — Coaster Hub';
 
   document.getElementById('hero_badge').textContent=Who+' Count';
   if(has.timeline){

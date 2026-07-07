@@ -283,7 +283,51 @@
     });
   }
 
-  var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser };
+  // ---- Multi-user site config + shared nav --------------------------------
+  var USERS = [
+    { slug: "carter", name: "Carter" },
+    { slug: "cole",   name: "Cole"   }
+  ];
+  var DEFAULT_SLUG = "carter";
+
+  // URL for a given person's page. The default user lives at the site root
+  // (/stats, /coasters); everyone else lives under /user/<slug>/.
+  function userPageHref(slug, page) {
+    if (page === "home") return "/";
+    return (slug === DEFAULT_SLUG) ? "/" + page : "/user/" + slug + "/" + page;
+  }
+
+  // Wire the header for a page ("home" | "stats" | "coasters"): point the
+  // Stats/Coasters links at the current person, mark the active link, and
+  // render the Carter | Cole toggle.
+  function initNav(page) {
+    if (typeof document === "undefined") return;
+    var slug = currentUser() || DEFAULT_SLUG;
+    var onPerson = (page === "stats" || page === "coasters");
+
+    var sEl = document.querySelector('[data-nav="stats"]');
+    var cEl = document.querySelector('[data-nav="coasters"]');
+    if (sEl) sEl.setAttribute("href", userPageHref(slug, "stats"));
+    if (cEl) cEl.setAttribute("href", userPageHref(slug, "coasters"));
+
+    var links = document.querySelectorAll('nav.links a[data-nav]');
+    for (var i = 0; i < links.length; i++) {
+      links[i].classList.toggle("active", links[i].getAttribute("data-nav") === page);
+    }
+
+    var wrap = document.getElementById("people");
+    if (wrap) {
+      var target = onPerson ? page : "stats"; // on Home the pills lead to each person's stats
+      wrap.innerHTML = USERS.map(function (u) {
+        var on = onPerson && u.slug === slug;
+        return '<a class="person' + (on ? " on" : "") +
+               '" href="' + userPageHref(u.slug, target) + '">' + u.name + '</a>';
+      }).join("");
+    }
+  }
+
+  var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser,
+              USERS: USERS, initNav: initNav, userPageHref: userPageHref };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

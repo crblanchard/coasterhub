@@ -7,6 +7,15 @@
 <title>Coasters — Coaster Hub</title>
 <meta name="description" content="The full list of every coaster in my count — filter and sort.">
 <link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:title" content="Coaster Hub">
+<meta property="og:description" content="A roller coaster count, visualized — credits, rides, parks, geography, and records.">
+<meta property="og:image" content="https://coasterhub.org/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   .controls{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 18px}
   .controls input,.controls select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem}
@@ -38,12 +47,16 @@
 </head>
 <body>
 <header class="nav"><div class="container nav-inner">
-  <a class="brand" href="index.html"><img src="logo.png" alt="Coaster Hub" class="brand-logo"></a>
+  <a class="brand" href="/">
+    <img src="mark.svg" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
   <nav class="links">
-    <a href="index.html">Home</a>
-    <a href="stats.html">My Stats</a>
-    <a href="coasters.html" class="active">Coasters</a>
+    <a href="/" data-nav="home">Home</a>
+    <a href="/stats" data-nav="stats">Stats</a>
+    <a href="/coasters" data-nav="coasters">Coasters</a>
   </nav>
+  <div class="people" id="people"></div>
 </div></header>
 
 <section class="hero" style="padding:56px 0 30px"><div class="container">
@@ -75,12 +88,13 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="index.html">Home</a> &nbsp;·&nbsp; <a href="stats.html">My Stats</a> &nbsp;·&nbsp; <a href="coasters.html">Coasters</a></div>
+  <div><a href="/">Home</a> &nbsp;·&nbsp; <a href="/stats">Stats</a> &nbsp;·&nbsp; <a href="/coasters">Coasters</a></div>
 </div></footer>
 
 <script src="app.js"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('coasters');
 let DATA=[];
 const ALLCOLS=[
  {k:'name',t:'Name',num:false,cls:'name'},
@@ -120,8 +134,10 @@ CoasterHub.loadUser().then(function(s){
   document.getElementById('loading').style.display='none';
   document.getElementById('ui').style.display='block';
   document.getElementById('total').textContent=DATA.length;
-  var whose=(!s.userName||/^carter/i.test(s.userName))?'the':String(s.userName).replace(/[&<>\"]/g,'')+'’s';
+  var nm=String(s.userName||'Carter').replace(/[&<>\"]/g,'');
+  var whose=nm+'’s';
   var h1=document.querySelector('.hero h1'); if(h1) h1.textContent='Every coaster in '+whose+' count.';
+  document.title=nm+'’s Coasters — Coaster Hub';
   init();
 }).catch(function(e){
   console.error(e);

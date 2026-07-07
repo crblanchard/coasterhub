@@ -4,17 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coaster Hub — A roller coaster count, visualized</title>
-<meta name="description" content="Coaster Hub — an interactive look at a roller coaster count: credits, rides, parks, geography, and records.">
+<meta name="description" content="Coaster Hub — an interactive look at roller coaster counts: credits, rides, parks, geography, and records.">
 <link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:title" content="Coaster Hub">
+<meta property="og:description" content="A roller coaster count, visualized — credits, rides, parks, geography, and records.">
+<meta property="og:image" content="https://coasterhub.org/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 <header class="nav"><div class="container nav-inner">
-  <a class="brand" href="index.html"><img src="logo.png" alt="Coaster Hub" class="brand-logo"></a>
+  <a class="brand" href="/">
+    <img src="mark.svg" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
   <nav class="links">
-    <a href="index.html" class="active">Home</a>
-    <a href="stats.html">My Stats</a>
-    <a href="coasters.html">Coasters</a>
+    <a href="/" data-nav="home">Home</a>
+    <a href="/stats" data-nav="stats">Stats</a>
+    <a href="/coasters" data-nav="coasters">Coasters</a>
   </nav>
+  <div class="people" id="people"></div>
 </div></header>
 
 <section class="hero"><div class="container">
@@ -24,43 +37,85 @@
     <path d="M-50 520 C 250 520, 300 140, 520 140 S 780 580, 1000 400 S 1300 110, 1500 320"
           fill="none" stroke="rgba(55,208,200,.20)" stroke-width="2" stroke-dasharray="6 10"/>
   </svg>
-  <span class="badge">A count, visualized</span>
-  <h1>562 credits. 2,362 rides. One map.</h1>
-  <p>Coaster Hub turns a lifetime of roller coaster riding into something you can actually explore — every park, every big day, and every personal record.</p>
-  <a class="btn" href="stats.html">Explore the stats</a>
+  <span class="badge">Two counts, one hub</span>
+  <h1>Every credit, mapped and measured.</h1>
+  <p>Coaster Hub turns Carter’s and Cole’s roller coaster counts into something you can actually explore — every park, every big day, and every personal record.</p>
+  <a class="btn" href="/stats">Explore Carter’s stats</a>
+  <a class="btn ghost" href="/user/cole/stats">Explore Cole’s stats</a>
 </div></section>
 
 <section class="block"><div class="container">
-  <span class="eyebrow">What's inside</span>
-  <h2>Your count, brought to life</h2>
+  <span class="eyebrow">Whose count?</span>
+  <h2>Two riders, one hub</h2>
+  <p class="lead">Coaster Hub hosts more than one count. Jump into either — each gets the same maps, records, and calendars.</p>
+  <div class="grid">
+    <div class="card person-card">
+      <div class="meta">Rider</div>
+      <h3>Carter</h3>
+      <p class="pc-stat" id="pc-carter">A lifetime of logged rides.</p>
+      <p class="pc-links"><a href="/stats">View stats →</a><a href="/coasters">All coasters</a></p>
+    </div>
+    <div class="card person-card">
+      <div class="meta">Rider</div>
+      <h3>Cole</h3>
+      <p class="pc-stat" id="pc-cole">A growing credit collection.</p>
+      <p class="pc-links"><a href="/user/cole/stats">View stats →</a><a href="/user/cole/coasters">All coasters</a></p>
+    </div>
+  </div>
+</div></section>
+
+<section class="block"><div class="container">
+  <span class="eyebrow">What’s inside</span>
+  <h2>Each count, brought to life</h2>
   <p class="lead">The stats page pulls it all together into interactive charts and maps; the full list lets you filter and sort every credit.</p>
   <div class="grid">
     <div class="card">
       <div class="meta">Geography</div>
       <h3>An interactive map</h3>
-      <p>Every park you've ridden, plotted worldwide and sized by how many rides you've racked up there.</p>
+      <p>Every park in a count, plotted worldwide and sized by how many rides piled up there.</p>
     </div>
     <div class="card">
       <div class="meta">Activity</div>
       <h3>Every riding day</h3>
-      <p>A calendar heatmap of your entire riding history — the big trips and marathon days jump right out.</p>
+      <p>A calendar heatmap of an entire riding history — the big trips and marathon days jump right out.</p>
     </div>
     <div class="card">
       <div class="meta">Records</div>
       <h3>Personal bests</h3>
-      <p>Tallest, fastest, longest, most-ridden — your milestones tracked and ranked automatically.</p>
+      <p>Tallest, fastest, longest, most-ridden — milestones tracked and ranked automatically.</p>
     </div>
   </div>
-  <p style="margin-top:28px"><a class="btn" href="stats.html">Open My Stats</a> <a class="btn ghost" href="coasters.html">Browse all coasters</a></p>
+  <p style="margin-top:28px"><a class="btn" href="/stats">Explore the stats</a> <a class="btn ghost" href="/coasters">Browse all coasters</a></p>
 </div></section>
 
 <section class="block"><div class="container prose">
   <span class="eyebrow">The idea</span>
   <h2>Why Coaster Hub</h2>
   <p>Coaster Hub started as a meticulously kept spreadsheet — every credit, every re-ride, every park visit, all with dates. This site turns that record into something you can actually explore: maps, timelines, records, and a calendar of every riding day.</p>
-  <p>Everything here comes straight from real logged rides — no estimates, no rounding, just the count as it actually happened. More visualizations are on the way, and eventually a way for other enthusiasts to drop in their own counts and see the same stats.</p>
+  <p>It began with one count and now holds more than one — everything here comes straight from real logged rides, no estimates, no rounding. More visualizations are on the way, and eventually a way for other enthusiasts to drop in their own counts and see the same stats.</p>
   <p>Have an idea for a stat worth showing? Email <a href="mailto:hello@coasterhub.org" style="color:var(--accent2)">hello@coasterhub.org</a>.</p>
 </div></section>
 
 <footer class="site"><div class="container foot-inner">
-  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.or
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;·&nbsp; <a href="/stats">Stats</a> &nbsp;·&nbsp; <a href="/coasters">Coasters</a></div>
+</div></footer>
+
+<script src="app.js"></script>
+<script>
+document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('home');
+Promise.all(['/coasters.json','/parks.json','/carter.json','/cole.json'].map(function(u){return fetch(u).then(function(r){return r.json();});}))
+.then(function(res){
+  var coasters=res[0].coasters, parks=res[1];
+  [['pc-carter',res[2]],['pc-cole',res[3]]].forEach(function(pair){
+    try{
+      var st=CoasterHub.computeStats(coasters,parks,pair[1]);
+      var k=st.kpi, el=document.getElementById(pair[0]);
+      if(el) el.textContent=k.credits.toLocaleString()+' credits · '+k.parks+' parks · '+k.states+' states / '+k.countries+' countries';
+    }catch(e){console.error(e);}
+  });
+}).catch(function(e){console.error(e);});
+</script>
+</body>
+</html>
