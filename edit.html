@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor — Coaster Hub</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root { --ink:#14110f; --muted:#6b6459; --line:#e5ddd0; --bg:#faf7f2; --accent:#b4471f; --ok:#0a7d2c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+         color:var(--ink); background:var(--bg); }
+
+  /* ---- login gate ---- */
+  .card { max-width:420px; margin:14vh auto; background:#fff; border:1px solid var(--line);
+          border-radius:14px; padding:28px; box-shadow:0 6px 24px rgba(0,0,0,.05); }
+  .card h1 { margin:0 0 4px; font-size:1.35rem; }
+  .sub { color:var(--muted); font-size:.95rem; }
+  label { display:block; font-size:.72rem; color:var(--muted); margin:0 0 5px; text-transform:uppercase; letter-spacing:.04em; }
+  input, select { width:100%; padding:9px 11px; font-size:.95rem; border:1px solid #cfc7ba; border-radius:8px; background:#fff; }
+  button { font-size:.95rem; font-weight:600; border:0; border-radius:8px; background:var(--ink); color:#fff; cursor:pointer; padding:10px 14px; }
+  button:hover { background:#000; }
+  button.ghost { background:#fff; color:var(--ink); border:1px solid #cfc7ba; }
+  button.ghost:hover { background:#f2ece2; }
+  button.danger { background:#fff; color:var(--accent); border:1px solid #e3b3a6; }
+  .msg { margin-top:12px; font-size:.9rem; min-height:1.1em; }
+  .bad { color:var(--accent); } .good { color:var(--ok); }
+
+  /* ---- editor ---- */
+  #app { display:none; }
+  header.bar { position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--line);
+               padding:12px 18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  header.bar h1 { font-size:1.05rem; margin:0; }
+  header.bar .grow { flex:1; }
+  header.bar .count { color:var(--muted); font-size:.85rem; }
+  .wrap { display:grid; grid-template-columns: 1fr 1fr; gap:0; height:calc(100vh - 55px); }
+  @media (max-width:820px){ .wrap { grid-template-columns:1fr; height:auto; } }
+  .list { overflow:auto; border-right:1px solid var(--line); }
+  .row { padding:9px 16px; border-bottom:1px solid #f0e9dd; cursor:pointer; font-size:.9rem; }
+  .row:hover { background:#f6f0e6; }
+  .row.sel { background:#efe7d9; }
+  .row .nm { font-weight:600; }
+  .row .pk { color:var(--muted); font-size:.82rem; }
+  .badge { display:inline-block; font-size:.68rem; padding:1px 6px; border-radius:20px; margin-left:6px; vertical-align:middle; }
+  .badge.inc { background:#fbe6de; color:var(--accent); }
+  .editor { overflow:auto; padding:20px 22px; }
+  .editor .empty { color:var(--muted); margin-top:40px; text-align:center; }
+  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .grid .full { grid-column:1 / -1; }
+  .fld { margin-bottom:2px; }
+  .actions { margin-top:18px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .toast { margin-left:auto; font-size:.9rem; }
+  .toolbar { margin-top:22px; padding-top:16px; border-top:1px dashed var(--line); }
+  .toolbar h3 { margin:0 0 6px; font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .inline { display:flex; gap:8px; align-items:center; }
+  .hint { color:var(--muted); font-size:.82rem; margin:4px 0 0; }
+  .cbrow { display:flex; align-items:center; gap:6px; font-size:.85rem; color:var(--muted); }
+  .cbrow input { width:auto; }
+</style>
+</head>
+<body>
+  <!-- ============ login gate ============ -->
+  <div class="card" id="gate">
+    <h1>Coaster Hub — Editor</h1>
+    <p class="sub">Admin only. Enter the password to continue.</p>
+    <div style="margin-top:16px"><label for="pw">Admin password</label>
+      <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+    <div style="margin-top:14px"><button id="go" style="width:100%">Unlock</button></div>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <!-- ============ editor ============ -->
+  <div id="app">
+    <header class="bar">
+      <h1>Coaster Editor</h1>
+      <input id="q" placeholder="Search name or park…" style="max-width:280px">
+      <label class="cbrow"><input type="checkbox" id="incOnly"> Only incomplete</label>
+      <span class="count" id="count"></span>
+      <span class="grow"></span>
+      <a href="/" style="color:var(--muted);font-size:.85rem;text-decoration:none">← Site</a>
+    </header>
+    <div class="wrap">
+      <div class="list" id="list"></div>
+      <div class="editor" id="editor"><div class="empty">Select a coaster to edit.</div></div>
+    </div>
+  </div>
+
+  <script>
+  var TOKEN = "";
+  var state = { coasters: [], byId: {}, sel: null };
+
+  // Fields shown in the form: [key, label, kind]  (kind: text | int | num | date)
+  var FIELDS = [
+    ["name","Name","text"], ["park","Park","text"],
+    ["loc","Location (e.g. \"Ohio, US\" or \"Japan\")","text"], ["type","Type (Steel/Wood)","text"],
+    ["manu","Manufacturer","text"], ["model","Model","text"],
+    ["h","Height (ft)","num"], ["s","Speed (mph)","num"], ["l","Length (ft)","num"],
+    ["inv","Inversions","int"], ["dur","Duration (sec)","int"], ["laps","Laps","int"],
+    ["yr","Year","int"], ["opened","Opened (YYYY-MM-DD)","text"], ["closed","Closed (YYYY-MM-DD)","text"]
+  ];
+
+  function incomplete(c){ return !c.type || c.h==null || c.s==null || c.l==null; }
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}); }
+
+  async function api(method, path, body){
+    var opt = { method: method, headers: { "x-admin-token": TOKEN } };
+    if (body){ opt.headers["content-type"]="application/json"; opt.body=JSON.stringify(body); }
+    var r = await fetch(path, opt);
+    var data = null; try { data = await r.json(); } catch(e){}
+    if (!r.ok) throw new Error((data && data.error) || ("HTTP " + r.status));
+    return data;
+  }
+
+  // ---------- login ----------
+  var pw=document.getElementById('pw'), msg=document.getElementById('msg');
+  function showMsg(t,c){ msg.textContent=t; msg.className="msg "+(c||""); }
+  async function unlock(){
+    var p = pw.value; if(!p){ showMsg("Enter a password.","bad"); return; }
+    showMsg("Checking…");
+    try {
+      var r = await fetch('/api/admin/login',{ method:"POST", headers:{ "x-admin-token": p } });
+      if (r.ok){
+        TOKEN = p; try{ sessionStorage.setItem('ch_admin', p); }catch(e){}
+        document.getElementById('gate').style.display="none";
+        document.getElementById('app').style.display="block";
+        boot();
+      } else if (r.status===401){
+        showMsg("Incorrect password — or ADMIN_PASSWORD isn’t set on the Worker yet.","bad");
+      } else { showMsg("Unexpected response ("+r.status+").","bad"); }
+    } catch(e){ showMsg("Network error: "+e.message,"bad"); }
+  }
+  document.getElementById('go').addEventListener('click', unlock);
+  pw.addEventListener('keydown', function(e){ if(e.key==="Enter") unlock(); });
+  // auto-resume within a tab
+  try { var saved=sessionStorage.getItem('ch_admin'); if(saved){ pw.value=saved; } } catch(e){}
+
+  // ---------- editor ----------
+  async function boot(){
+    var d = await api("GET","/api/coasters");
+    state.coasters = d.coasters;
+    state.byId = {}; state.coasters.forEach(function(c){ state.byId[c.id]=c; });
+    document.getElementById('q').addEventListener('input', renderList);
+    document.getElementById('incOnly').addEventListener('change', renderList);
+    renderList();
+  }
+
+  function matches(){
+    var q = document.getElementById('q').value.trim().toLowerCase();
+    var incOnly = document.getElementById('incOnly').checked;
+    return state.coasters.filter(function(c){
+      if (incOnly && !incomplete(c)) return false;
+      if (!q) return true;
+      return (c.name||"").toLowerCase().indexOf(q)>=0 || (c.park||"").toLowerCase().indexOf(q)>=0;
+    });
+  }
+
+  function renderList(){
+    var rows = matches();
+    document.getElementById('count').textContent = rows.length + " of " + state.coasters.length;
+    var cap = rows.slice(0, 400);
+    var html = cap.map(function(c){
+      return '<div class="row'+(state.sel===c.id?' sel':'')+'" data-id="'+c.id+'">'+
+        '<div class="nm">'+esc(c.name)+ (incomplete(c)?'<span class="badge inc">needs stats</span>':'') +'</div>'+
+        '<div class="pk">#'+c.id+' · '+esc(c.park||"—")+' · '+esc(c.loc||"—")+'</div></div>';
+    }).join("");
+    if (rows.length>400) html += '<div class="row" style="cursor:default;color:var(--muted)">…'+(rows.length-400)+' more — refine search</div>';
+    var list=document.getElementById('list'); list.innerHTML=html;
+    [].forEach.call(list.querySelectorAll('.row[data-id]'), function(el){
+      el.addEventListener('click', function(){ selectCoaster(+el.getAttribute('data-id')); });
+    });
+  }
+
+  function selectCoaster(id){
+    state.sel = id; renderList();
+    var c = state.byId[id];
+    var fields = FIELDS.map(function(f){
+      var key=f[0], val=c[key]==null?"":c[key];
+      var cls = (key==="name"||key==="park"||key==="loc") ? "fld full" : "fld";
+      var ph = f[2]==="num"||f[2]==="int" ? "number" : "text";
+      var step = f[2]==="num" ? ' step="any"' : '';
+      return '<div class="'+cls+'"><label>'+esc(f[1])+'</label>'+
+        '<input data-k="'+key+'" type="'+ph+'"'+step+' value="'+esc(val)+'"></div>';
+    }).join("");
+    document.getElementById('editor').innerHTML =
+      '<div style="display:flex;align-items:baseline;gap:10px"><h2 style="margin:0;font-size:1.15rem">'+esc(c.name)+'</h2>'+
+        '<span style="color:var(--muted)">#'+c.id+'</span></div>'+
+      '<p class="hint">Edits here update this coaster everywhere — every rider’s page reflects it automatically (they reference it by id).</p>'+
+      '<div class="grid" id="form">'+fields+'</div>'+
+      '<div class="actions"><button id="save">Save changes</button>'+
+        '<button class="ghost" id="revert">Revert</button>'+
+        '<span class="toast" id="toast"></span></div>'+
+      '<div class="toolbar"><h3>Merge duplicate</h3>'+
+        '<p class="hint">If this coaster is a duplicate of another, merge it: all riders’ credits move to the target id, then this one is deleted.</p>'+
+        '<div class="inline"><span>Merge #'+c.id+' → id</span>'+
+          '<input id="mergeTo" type="number" style="width:110px" placeholder="target id">'+
+          '<button class="danger" id="mergeBtn">Merge</button></div></div>';
+    document.getElementById('save').addEventListener('click', saveCoaster);
+    document.getElementById('revert').addEventListener('click', function(){ selectCoaster(id); });
+    document.getElementById('mergeBtn').addEventListener('click', mergeCoaster);
+  }
+
+  function readForm(){
+    var body={};
+    [].forEach.call(document.querySelectorAll('#form input'), function(inp){
+      var k=inp.getAttribute('data-k'), v=inp.value.trim();
+      var kind = (FIELDS.find(function(f){return f[0]===k;})||[])[2];
+      if (v==="") { body[k]=null; }
+      else if (kind==="int") { body[k]=parseInt(v,10); }
+      else if (kind==="num") { body[k]=Number(v); }
+      else { body[k]=v; }
+    });
+    return body;
+  }
+
+  async function saveCoaster(){
+    var id=state.sel, toast=document.getElementById('toast');
+    toast.textContent="Saving…"; toast.className="toast";
+    try {
+      var body = readForm();
+      await api("PUT","/api/coaster/"+id, body);
+      Object.assign(state.byId[id], body);       // reflect locally
+      toast.textContent="Saved ✓"; toast.className="toast good";
+      renderList();
+    } catch(e){
+      toast.textContent="Error: "+e.message; toast.className="toast bad";
+    }
+  }
+
+  async function mergeCoaster(){
+    var from=state.sel, to=parseInt(document.getElementById('mergeTo').value,10);
+    if(!to){ alert("Enter a target coaster id."); return; }
+    if(!state.byId[to]){ alert("No coaster with id "+to+"."); return; }
+    if(!confirm("Merge #"+from+" ("+state.byId[from].name+") into #"+to+" ("+state.byId[to].name+")?\nAll credits/rides move to #"+to+" and #"+from+" is deleted.")) return;
+    try {
+      await api("POST","/api/merge",{ from:from, to:to });
+      state.coasters = state.coasters.filter(function(c){ return c.id!==from; });
+      delete state.byId[from]; state.sel=null;
+      document.getElementById('editor').innerHTML='<div class="empty">Merged. Selected #'+to+' remains.</div>';
+      renderList();
+    } catch(e){ alert("Merge failed: "+e.message); }
+  }
+  </script>
+</body>
+</html>
