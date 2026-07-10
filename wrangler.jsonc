@@ -1,0 +1,21 @@
+{
+  // Coaster Hub — Worker + static assets + D1.
+  // The site is served from the repo root as static assets; _worker.js handles
+  // /api/* and falls through to assets for everything else.
+  "name": "coasterhub",
+  "main": "_worker.js",
+  "compatibility_date": "2025-05-01",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "coasterhub",
+      "database_id": "d4742d82-f606-498a-8520-bcbfec7dcf91"
+    }
+  ]
+  // ADMIN_PASSWORD is set as a secret (not stored here):
+  //   wrangler secret put ADMIN_PASSWORD   (or via the dashboard: Settings > Variables)
+}
