@@ -120,10 +120,8 @@ async function seed(env, origin) {
   }
   // D1 batch has a per-call statement cap; chunk it.
   const CHUNK = 90;
-  let written = 0;
   for (let i = 0; i < batch.length; i += CHUNK) {
     await env.DB.batch(batch.slice(i, i + CHUNK));
-    written += Math.min(CHUNK, batch.length - i);
   }
   return { statements: batch.length, coasters: coasters.length, parks: Object.keys(parks).length };
 }
@@ -212,4 +210,17 @@ export default {
           "ON CONFLICT(user_slug,coaster_id) DO UPDATE SET first=excluded.first, num=excluded.num, n=excluded.n"
         ).bind(b.user, b.coaster_id, b.first??null, b.num??null, b.n??null).run();
         return json({ ok: true });
-  
+      }
+      // remove a rider's credit
+      if (request.method === "DELETE" && path === "/api/credit") {
+        const b = await request.json();
+        await env.DB.prepare("DELETE FROM credits WHERE user_slug = ? AND coaster_id = ?").bind(b.user, b.coaster_id).run();
+        return json({ ok: true });
+      }
+
+      return err(404, "no such endpoint");
+    } catch (e) {
+      return err(500, String(e && e.message || e));
+    }
+  }
+};
