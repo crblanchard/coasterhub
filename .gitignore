@@ -16,3 +16,10 @@ max-import-*.xlsx
 # Local working/temp files
 ~$*
 *.xlsx
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
