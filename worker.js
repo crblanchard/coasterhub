@@ -136,7 +136,7 @@ async function geocodeMissing(env, limit) {
   const { results } = await env.DB.prepare(
     "SELECT c.park AS park, (SELECT loc FROM coasters c2 WHERE c2.park=c.park AND c2.loc IS NOT NULL LIMIT 1) AS loc " +
     "FROM (SELECT DISTINCT park FROM coasters WHERE park IS NOT NULL AND park NOT IN (SELECT name FROM parks)) c " +
-    "ORDER BY park LIMIT ?"
+    "ORDER BY RANDOM() LIMIT ?"
   ).bind(limit).all();
 
   let added = 0; const failed = [];
