@@ -319,6 +319,7 @@
   var USERS = [
     { slug: "carter", name: "Carter" },
     { slug: "cole",   name: "Cole"   },
+    { slug: "keltan", name: "Keltan" },
     { slug: "max",    name: "Max"    }
   ];
   var DEFAULT_SLUG = "carter";
