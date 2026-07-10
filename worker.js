@@ -147,13 +147,19 @@ export default {
         return u ? json(u) : err(404, "no such user");
       }
 
+      // Bootstrap seed: allowed WITHOUT a token while the DB is still empty, so
+      // the site can be populated once right after the D1 binding goes live.
+      // After that it requires the admin token like every other write.
+      if (request.method === "POST" && path === "/api/admin/seed") {
+        const cnt = await env.DB.prepare("SELECT COUNT(*) AS c FROM coasters").first();
+        const empty = !cnt || cnt.c === 0;
+        if (!empty && !tokenOk(request, env)) return err(401, "unauthorized");
+        return json({ ok: true, ...(await seed(env, url.origin)) });
+      }
+
       // ---- writes (auth required) ----
       const needsAuth = path.startsWith("/api/admin/") || request.method !== "GET";
       if (needsAuth && !tokenOk(request, env)) return err(401, "unauthorized");
-
-      if (request.method === "POST" && path === "/api/admin/seed") {
-        return json({ ok: true, ...(await seed(env, url.origin)) });
-      }
 
       // login check (lets the /edit page validate the password)
       if (request.method === "POST" && path === "/api/admin/login") return json({ ok: true });
@@ -206,17 +212,4 @@ export default {
           "ON CONFLICT(user_slug,coaster_id) DO UPDATE SET first=excluded.first, num=excluded.num, n=excluded.n"
         ).bind(b.user, b.coaster_id, b.first??null, b.num??null, b.n??null).run();
         return json({ ok: true });
-      }
-      // remove a rider's credit
-      if (request.method === "DELETE" && path === "/api/credit") {
-        const b = await request.json();
-        await env.DB.prepare("DELETE FROM credits WHERE user_slug = ? AND coaster_id = ?").bind(b.user, b.coaster_id).run();
-        return json({ ok: true });
-      }
-
-      return err(404, "no such endpoint");
-    } catch (e) {
-      return err(500, String(e && e.message || e));
-    }
-  }
-};
+  

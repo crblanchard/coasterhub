@@ -1,0 +1,6 @@
+_worker.js
+worker.js
+wrangler.jsonc
+.assetsignore
+tools/
+COASTERHUB_HANDOFF.md
