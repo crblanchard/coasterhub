@@ -4,6 +4,16 @@ _Local-only file (git-ignored). Last updated by a Cowork session on 2026-07-07 (
 
 This exists so a fresh session can pick up mid-task without re-deriving context.
 
+**STATUS UPDATE (2026-07-10) — BIG ARCHITECTURE CHANGE: the site is now D1-backed.**
+- **Keltan** imported as a 4th rider from coaster-count.com (`keltan.json`, 795 credits, 597 first-ridden dates → timeline). `coasters.json` grew to 1170 (350 new coasters, ids 825-1174, thin/QC-flagged).
+- **Cloudflare D1** (`coasterhub`, id `d4742d82-f606-498a-8520-bcbfec7dcf91`) is now the source of truth: tables `coasters`/`parks`/`rides`(Carter)/`credits`(Cole,Max,Keltan)/`users`. `worker.js` (wrangler `main`) serves `/api/coasters|parks|user/<slug>` (public, same shapes as before) + gated writes (`PUT /api/coaster/:id`, `POST /api/merge|coaster|credit`, `/api/admin/seed|geocode`). `app.js` now reads the API **with static-JSON fallback** (the .json files stay as seed + safety net).
+- **`/edit`** = password-gated admin editor (search/sort by park→name, pick-or-type dropdowns for loc/manu/model, Steel/Wood select, merge duplicates, geocode button). Needs Worker secret **`ADMIN_PASSWORD`** (Cloudflare dashboard → coasterhub → Settings → Variables and secrets). **Carter was setting this — confirm before assuming writes work.**
+- **Geocoder** (`/api/admin/geocode`, OSM Nominatim) filled parks 114→~208; Keltan's mapped parks 63→144. ~40 remain un-geocodable (traveling carnivals, "?????") — hand-enter or leave off the map.
+- **New logo/thumbnail** with a *flush* coaster loop (previous loop floated off the track): `mark.svg`, `favicon*.svg/png`, `apple-touch-icon.png`, `og-image.png`, `logo.svg/png`.
+- **Deploy gotcha (new):** Workers Build runs `npx wrangler deploy`; entry file MUST be `worker.js` (NOT `_worker.js` — wrangler rejects it as an asset), and `worker.js`/`wrangler.jsonc`/`.assetsignore` are in `.assetsignore`. Sandbox→Windows writes sometimes truncate — verify a committed file's tail.
+
+---
+
 **STATUS UPDATE (2026-07-07):** Max is now imported and LIVE (commit `bf44222`). `max.json` = 418 unique credits (9 racing-coaster dupes collapsed from 427), added to `USERS`, 132 new coasters appended to `coasters.json` (now 825), milestones show round hundreds (#1/#100/#200/#300/#400/#427). Also added an unlisted QC page at `/database` (database.html — lists every coaster in the DB, flags incomplete rows; not linked in nav).
 
 **Remaining Max cleanup (QC):** ~332 coasters are "incomplete" (missing type/height/speed/length) — mostly Max's 132 new ones, which currently default to `type:"Steel"` and have null stats, so steel/wood split + records don't fully reflect them. New parks are NOT in `parks.json`, so Max's new-park coasters don't plot on the map and his geography only counts coasters with a `loc` filled. One bad park value to fix: coaster id 793 park = "?????". Use `/database` (+ "Only incomplete" filter) to work through these; `tools/import-captaincoaster.js` can backfill details. Edited source workbook preserved locally as `maxlist-edited.xlsx` (git-ignored).

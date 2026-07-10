@@ -262,6 +262,26 @@ export default {
         return json({ ok: true });
       }
 
+      // every park referenced by a coaster, with coords (null = not on the map yet) + coaster count
+      if (request.method === "GET" && path === "/api/parks-all") {
+        const { results } = await env.DB.prepare(
+          "SELECT c.park AS name, p.lat AS lat, p.lon AS lon, p.region AS region, COUNT(*) AS coasters " +
+          "FROM coasters c LEFT JOIN parks p ON p.name = c.park " +
+          "WHERE c.park IS NOT NULL GROUP BY c.park ORDER BY c.park"
+        ).all();
+        return json({ parks: results });
+      }
+      // upsert a park's coordinates / region (used by the parks editor)
+      if (request.method === "PUT" && path === "/api/park") {
+        const b = await request.json();
+        if (!b.name) return err(400, "need name");
+        await env.DB.prepare(
+          "INSERT INTO parks (name,lat,lon,region) VALUES (?,?,?,?) " +
+          "ON CONFLICT(name) DO UPDATE SET lat=excluded.lat, lon=excluded.lon, region=excluded.region"
+        ).bind(b.name, b.lat ?? null, b.lon ?? null, b.region ?? null).run();
+        return json({ ok: true });
+      }
+
       return err(404, "no such endpoint");
     } catch (e) {
       return err(500, String(e && e.message || e));
