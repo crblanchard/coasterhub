@@ -126,6 +126,41 @@ async function seed(env, origin) {
   return { statements: batch.length, coasters: coasters.length, parks: Object.keys(parks).length };
 }
 
+// ---- Geocoding: fill lat/lon for parks referenced by coasters but not yet in
+//      the parks table, using OpenStreetMap Nominatim (server-side). ----------
+const MISSING_PARKS_COUNT =
+  "SELECT COUNT(*) AS n FROM (SELECT DISTINCT park FROM coasters " +
+  "WHERE park IS NOT NULL AND park NOT IN (SELECT name FROM parks))";
+
+async function geocodeMissing(env, limit) {
+  const { results } = await env.DB.prepare(
+    "SELECT c.park AS park, (SELECT loc FROM coasters c2 WHERE c2.park=c.park AND c2.loc IS NOT NULL LIMIT 1) AS loc " +
+    "FROM (SELECT DISTINCT park FROM coasters WHERE park IS NOT NULL AND park NOT IN (SELECT name FROM parks)) c " +
+    "ORDER BY park LIMIT ?"
+  ).bind(limit).all();
+
+  let added = 0; const failed = [];
+  for (const row of results) {
+    const park = row.park;
+    if (!park || park.indexOf("?") >= 0) { failed.push(park); continue; }
+    const q = encodeURIComponent(park + (row.loc ? (", " + row.loc) : ""));
+    let lat = null, lon = null;
+    try {
+      const res = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" + q,
+        { headers: { "User-Agent": "coasterhub.org park geocoder (carter.r.blanchard@gmail.com)", "Accept": "application/json" } });
+      if (res.ok) { const arr = await res.json(); if (arr && arr[0]) { lat = parseFloat(arr[0].lat); lon = parseFloat(arr[0].lon); } }
+    } catch (e) {}
+    if (lat != null && lon != null && !isNaN(lat) && !isNaN(lon)) {
+      await env.DB.prepare("INSERT OR REPLACE INTO parks (name,lat,lon,region) VALUES (?,?,?,?)")
+        .bind(park, lat, lon, row.loc || null).run();
+      added++;
+    } else { failed.push(park); }
+    await new Promise(r => setTimeout(r, 1100)); // Nominatim usage policy: <= 1 request/second
+  }
+  const remain = await env.DB.prepare(MISSING_PARKS_COUNT).first();
+  return { ok: true, added: added, failed: failed, remaining: remain.n };
+}
+
 // ---- Router ---------------------------------------------------------------
 export default {
   async fetch(request, env, ctx) {
@@ -153,6 +188,15 @@ export default {
         const empty = !cnt || cnt.c === 0;
         if (!empty && !tokenOk(request, env)) return err(401, "unauthorized");
         return json({ ok: true, ...(await seed(env, url.origin)) });
+      }
+
+      // Geocode parks that have no lat/lon yet (so they plot on the map). Open
+      // while parks are still missing coordinates (bootstrap fill); once every
+      // referenced park is placed, it requires the admin token.
+      if (path === "/api/admin/geocode" && (request.method === "POST" || request.method === "GET")) {
+        const miss = await env.DB.prepare(MISSING_PARKS_COUNT).first();
+        if ((miss.n || 0) === 0 && !tokenOk(request, env)) return err(401, "unauthorized");
+        return json(await geocodeMissing(env, 10));
       }
 
       // ---- writes (auth required) ----
