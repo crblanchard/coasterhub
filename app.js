@@ -299,12 +299,23 @@
     return new URLSearchParams(location.search).get("user");
   }
 
+  // Data loading: prefer the D1-backed API, fall back to the static JSON files
+  // (kept in the repo as the seed + a safety net) if the API is unavailable.
+  function fetchJSON(apiPath, staticPath) {
+    return fetch(apiPath).then(function (r) { if (!r.ok) throw new Error("api " + r.status); return r.json(); })
+      .catch(function () { return fetch(staticPath).then(function (r) { return r.json(); }); });
+  }
+  function fetchCoasters() { return fetchJSON("/api/coasters", "/coasters.json"); }
+  function fetchParks() { return fetchJSON("/api/parks", "/parks.json"); }
+  function fetchUser(slug) { return fetchJSON("/api/user/" + slug, "/" + slug + ".json"); }
+
   function loadUser(userFile) {
     if (!userFile) { var u = currentUser(); userFile = u ? u + ".json" : "carter.json"; }
+    var slug = userFile.replace(/\.json$/, "");
     return Promise.all([
-      fetch("/coasters.json").then(function (r) { return r.json(); }),
-      fetch("/parks.json").then(function (r) { return r.json(); }),
-      fetch("/" + userFile).then(function (r) { return r.json(); })
+      fetchCoasters(),
+      fetchParks(),
+      fetchUser(slug)
     ]).then(function (res) {
       var coasters = res[0].coasters, parks = res[1], user = res[2];
       var stats = computeStats(coasters, parks, user);
@@ -378,7 +389,8 @@
   }
 
   var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser,
-              USERS: USERS, initNav: initNav, userPageHref: userPageHref };
+              USERS: USERS, initNav: initNav, userPageHref: userPageHref,
+              fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

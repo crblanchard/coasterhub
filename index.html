@@ -96,9 +96,9 @@ document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('home');
 var nf=function(n){return n==null?'—':n.toLocaleString();};
 Promise.all([
-  fetch('/coasters.json').then(function(r){return r.json();}),
-  fetch('/parks.json').then(function(r){return r.json();})
-].concat(CoasterHub.USERS.map(function(u){return fetch('/'+u.slug+'.json').then(function(r){return r.json();});})))
+  CoasterHub.fetchCoasters(),
+  CoasterHub.fetchParks()
+].concat(CoasterHub.USERS.map(function(u){return CoasterHub.fetchUser(u.slug);})))
 .then(function(res){
   var coasters=res[0].coasters, parks=res[1], users=res.slice(2);
   var creditUnion={}, parkUnion={}, statsBySlug={};
