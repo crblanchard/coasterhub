@@ -86,8 +86,8 @@ let DATA=[], sortKey='park', sortDir=1;
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const incomplete=c=>(!c.type||c.h==null||c.s==null||c.l==null);
 
-fetch('/coasters.json').then(r=>r.json()).then(j=>{
-  DATA=j.coasters.map(c=>Object.assign({},c,{status:c.closed?'Defunct':'Operating'}));
+Promise.all([fetch('/coasters.json').then(r=>r.json()), fetch('/parks.json').then(r=>r.json())]).then(([j,parks])=>{
+  DATA=j.coasters.map(c=>{const pk=parks[c.park];return Object.assign({},c,{loc:pk&&pk.region?pk.region:'',status:c.closed?'Defunct':'Operating'});});
   document.getElementById('loading').style.display='none';
   document.getElementById('ui').style.display='block';
   const head=document.getElementById('head');
