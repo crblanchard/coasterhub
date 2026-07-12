@@ -203,7 +203,11 @@
 
     var parksGeo = [];
     Object.keys(parkCredits).forEach(function (pk) {
-      var g = parks[pk]; if (!g) return;
+      // Skip parks we can't place: not in parks.json, or present but not yet
+      // geocoded (null lat/lon — e.g. traveling carnivals). Plotting a null
+      // coordinate crashes Leaflet and takes down the whole stats page; such
+      // parks still count via each coaster's `loc`, they just aren't mapped.
+      var g = parks[pk]; if (!g || g.lat == null || g.lon == null) return;
       parksGeo.push({ park: pk, lat: g.lat, lon: g.lon, region: g.region,
         rides: parkRides[pk] || 0, credits: parkCredits[pk] });
     });
