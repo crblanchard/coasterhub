@@ -213,11 +213,15 @@
     });
     parksGeo.sort(function (a, b) { return (b.rides || b.credits) - (a.rides || a.credits); });
 
-    // Region comes from each coaster's own loc field (self-contained — works for
-    // coasters whose park isn't in parks.json, e.g. a friend's new parks).
+    // Region comes from the coaster's park — one value per park, so coasters at
+    // the same park are always counted the same way even when their individual
+    // loc fields disagree (loc is free text from mixed imports). Fall back to the
+    // coaster's own loc when the park isn't in parks.json (e.g. a friend's new
+    // park that hasn't been geocoded yet).
     var states = new Set(), countries = new Set();
     creditList.forEach(function (c) {
-      var reg = c.loc; if (!reg) return;
+      var pg = parks[c.park];
+      var reg = (pg && pg.region) || c.loc; if (!reg) return;
       var kv = regionKind(reg);
       if (kv[0] === "state") states.add(kv[1]); else countries.add(kv[1]);
     });
