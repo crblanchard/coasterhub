@@ -147,7 +147,7 @@ if(CoasterHub.currentUser()){
     DATA=j.coasters.map(function(c){var pk=parks[c.park];return Object.assign({},c,{loc:pk&&pk.region?pk.region:'',status:c.closed?'Defunct':'Operating'});});
     COLS=ALLCOLS.filter(function(col){return col.k!=='first'&&col.k!=='rides';});
     setHero('The combined list','Combined list · '+DATA.length.toLocaleString()+' coasters.',
-      'A combination of everyone’s lists — every coaster ridden across Carter, Cole & Max’s counts. Filter and sort by park, manufacturer, model, status, or stats.');
+      'Everyone’s lists combined — every unique coaster ridden across all the riders’ counts. Filter and sort by park, manufacturer, model, status, or stats.');
     document.title='Combined list — Coaster Hub';
     finish();
   }).catch(fail);
