@@ -155,7 +155,7 @@
     creditList.forEach(function (c) {
       if (c.type === "Wood") wood++; else steel++;
       if (c.manu) manu[c.manu] = (manu[c.manu] || 0) + 1;
-      if (c.loc) loc[c.loc] = (loc[c.loc] || 0) + 1;
+      var lreg = parks[c.park] && parks[c.park].region; if (lreg) loc[lreg] = (loc[lreg] || 0) + 1;
       uniqueFt += (c.l || 0); invUnique += (c.inv || 0);
       parkCredits[c.park] = (parkCredits[c.park] || 0) + 1;
     });
@@ -206,22 +206,20 @@
       // Skip parks we can't place: not in parks.json, or present but not yet
       // geocoded (null lat/lon — e.g. traveling carnivals). Plotting a null
       // coordinate crashes Leaflet and takes down the whole stats page; such
-      // parks still count via each coaster's `loc`, they just aren't mapped.
+      // parks still count toward their region, they just aren't mapped.
       var g = parks[pk]; if (!g || g.lat == null || g.lon == null) return;
       parksGeo.push({ park: pk, lat: g.lat, lon: g.lon, region: g.region,
         rides: parkRides[pk] || 0, credits: parkCredits[pk] });
     });
     parksGeo.sort(function (a, b) { return (b.rides || b.credits) - (a.rides || a.credits); });
 
-    // Region comes from the coaster's park — one value per park, so coasters at
-    // the same park are always counted the same way even when their individual
-    // loc fields disagree (loc is free text from mixed imports). Fall back to the
-    // coaster's own loc when the park isn't in parks.json (e.g. a friend's new
-    // park that hasn't been geocoded yet).
+    // Region comes from the coaster's park — the single source of truth for
+    // location (one value per park). Coasters whose park isn't in parks.json
+    // simply don't contribute a state/country.
     var states = new Set(), countries = new Set();
     creditList.forEach(function (c) {
       var pg = parks[c.park];
-      var reg = (pg && pg.region) || c.loc; if (!reg) return;
+      var reg = pg && pg.region; if (!reg) return;
       var kv = regionKind(reg);
       if (kv[0] === "state") states.add(kv[1]); else countries.add(kv[1]);
     });
@@ -329,6 +327,7 @@
       var stats = computeStats(coasters, parks, user);
       stats.userName = user.user;
       stats.coasters = coasters;
+      stats.parks = parks;
       stats.rides = user.rides || [];
       return stats;
     });

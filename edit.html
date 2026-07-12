@@ -92,12 +92,11 @@
 
   <script>
   var TOKEN = "";
-  var state = { mode:"coasters", coasters: [], byId: {}, sel: null, opts: { loc:[], manu:[], model:[] },
+  var state = { mode:"coasters", coasters: [], byId: {}, sel: null, opts: { manu:[], model:[] },
                 geo: {}, parks: [], selPark: null };
 
   var FIELDS = [
-    ["name","Name","text"], ["park","Park","text"],
-    ["loc","Location (e.g. \"Ohio, US\" or \"Japan\")","list"], ["type","Type","type"],
+    ["name","Name","text"], ["park","Park","text"], ["type","Type","type"],
     ["manu","Manufacturer","list"], ["model","Model","list"],
     ["h","Height (ft)","num"], ["s","Speed (mph)","num"], ["l","Length (ft)","num"],
     ["inv","Inversions","int"], ["dur","Duration (sec)","int"], ["laps","Laps","int"],
@@ -151,7 +150,7 @@
     var d = await api("GET","/api/coasters");
     state.coasters = d.coasters;
     state.byId = {}; state.coasters.forEach(function(c){ state.byId[c.id]=c; });
-    state.opts = { loc:distinct("loc"), manu:distinct("manu"), model:distinct("model") };
+    state.opts = { manu:distinct("manu"), model:distinct("model") };
     await loadGeo();
     document.getElementById('q').addEventListener('input', render);
     document.getElementById('incOnly').addEventListener('change', render);
@@ -208,7 +207,7 @@
       var pin = '<span class="pin '+(on?'on':'off')+'" title="'+(on?'park is on the map':'park not geocoded')+'">'+(on?'●':'○')+'</span>';
       return '<div class="row'+(state.sel===c.id?' sel':'')+'" data-id="'+c.id+'">'+
         '<div class="nm">'+pin+esc(c.name)+ (incomplete(c)?'<span class="badge inc">needs stats</span>':'') +'</div>'+
-        '<div class="pk">'+esc(c.park||"—")+' · '+esc(c.loc||"—")+' · #'+c.id+'</div></div>';
+        '<div class="pk">'+esc(c.park||"—")+' · #'+c.id+'</div></div>';
     }).join("");
   }
   function fieldControl(c, f){
@@ -229,7 +228,7 @@
     state.sel = id; renderCoasters();
     var c = state.byId[id];
     var fields = FIELDS.map(function(f){
-      var cls = (f[0]==="name"||f[0]==="park"||f[0]==="loc") ? "fld full" : "fld";
+      var cls = (f[0]==="name"||f[0]==="park") ? "fld full" : "fld";
       return '<div class="'+cls+'"><label>'+esc(f[1])+'</label>'+fieldControl(c,f)+'</div>';
     }).join("");
     var geoNote = geocoded(c.park) ? '<span class="badge onmap">park on map</span>' : '<span class="badge nomap">park not geocoded — add it in the Parks tab</span>';
@@ -257,7 +256,7 @@
     var id=state.sel, toast=document.getElementById('toast'); toast.textContent="Saving…"; toast.className="toast";
     try {
       var body = readForm(); await api("PUT","/api/coaster/"+id, body); Object.assign(state.byId[id], body);
-      state.opts = { loc:distinct("loc"), manu:distinct("manu"), model:distinct("model") };
+      state.opts = { manu:distinct("manu"), model:distinct("model") };
       toast.textContent="Saved ✓"; toast.className="toast good"; renderCoasters();
     } catch(e){ toast.textContent="Error: "+e.message; toast.className="toast bad"; }
   }

@@ -125,7 +125,8 @@ if(CoasterHub.currentUser()){
   CoasterHub.loadUser().then(function(s){
     DATA=s.coasters.filter(function(c){return s.byCoaster[c.id];}).map(function(c){
       var d=s.byCoaster[c.id];
-      return Object.assign({},c,{rides:d.rides,first:d.first,status:c.closed?'Defunct':'Operating'});
+      var pk=s.parks&&s.parks[c.park];
+      return Object.assign({},c,{loc:pk&&pk.region?pk.region:'',rides:d.rides,first:d.first,status:c.closed?'Defunct':'Operating'});
     });
     var anyFirst=DATA.some(function(c){return c.first;});
     var anyRides=DATA.some(function(c){return c.rides!=null;});
@@ -141,8 +142,9 @@ if(CoasterHub.currentUser()){
     finish();
   }).catch(fail);
 } else {
-  fetch('/coasters.json').then(function(r){return r.json();}).then(function(j){
-    DATA=j.coasters.map(function(c){return Object.assign({},c,{status:c.closed?'Defunct':'Operating'});});
+  Promise.all([fetch('/coasters.json').then(function(r){return r.json();}), CoasterHub.fetchParks()]).then(function(res){
+    var j=res[0], parks=res[1];
+    DATA=j.coasters.map(function(c){var pk=parks[c.park];return Object.assign({},c,{loc:pk&&pk.region?pk.region:'',status:c.closed?'Defunct':'Operating'});});
     COLS=ALLCOLS.filter(function(col){return col.k!=='first'&&col.k!=='rides';});
     setHero('The combined list','Combined list · '+DATA.length.toLocaleString()+' coasters.',
       'A combination of everyone’s lists — every coaster ridden across Carter, Cole & Max’s counts. Filter and sort by park, manufacturer, model, status, or stats.');

@@ -56,7 +56,7 @@ function tokenOk(request, env) {
 }
 
 // Columns on the coasters table, in order (id is managed separately).
-const COASTER_FIELDS = ["name","park","loc","type","manu","model","h","s","l","inv","dur","laps","yr","opened","openedPrec","closed","closedPrec"];
+const COASTER_FIELDS = ["name","park","type","manu","model","h","s","l","inv","dur","laps","yr","opened","openedPrec","closed","closedPrec"];
 
 // ---- Row <-> API shape helpers -------------------------------------------
 function coasterRow(r) {
@@ -117,8 +117,8 @@ async function seed(env, origin) {
   for (const t of ["rides","credits","coasters","parks","users"]) batch.push(env.DB.prepare("DELETE FROM " + t));
 
   for (const c of coasters) {
-    P("INSERT INTO coasters (id,name,park,loc,type,manu,model,h,s,l,inv,dur,laps,yr,opened,openedPrec,closed,closedPrec) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-      c.id, c.name??null, c.park??null, c.loc??null, c.type??null, c.manu??null, c.model??null,
+    P("INSERT INTO coasters (id,name,park,type,manu,model,h,s,l,inv,dur,laps,yr,opened,openedPrec,closed,closedPrec) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      c.id, c.name??null, c.park??null, c.type??null, c.manu??null, c.model??null,
       c.h??null, c.s??null, c.l??null, c.inv??null, c.dur??null, c.laps??null, c.yr??null,
       c.opened??null, c.openedPrec??null, c.closed??null, c.closedPrec??null);
   }
@@ -161,8 +161,7 @@ const MISSING_PARKS_COUNT =
 
 async function geocodeMissing(env, limit) {
   const { results } = await env.DB.prepare(
-    "SELECT c.park AS park, (SELECT loc FROM coasters c2 WHERE c2.park=c.park AND c2.loc IS NOT NULL LIMIT 1) AS loc " +
-    "FROM (SELECT DISTINCT park FROM coasters WHERE park IS NOT NULL AND park NOT IN (SELECT name FROM parks)) c " +
+    "SELECT DISTINCT park FROM coasters WHERE park IS NOT NULL AND park NOT IN (SELECT name FROM parks) " +
     "ORDER BY RANDOM() LIMIT ?"
   ).bind(limit).all();
 
@@ -170,7 +169,7 @@ async function geocodeMissing(env, limit) {
   for (const row of results) {
     const park = row.park;
     if (!park || park.indexOf("?") >= 0) { failed.push(park); continue; }
-    const q = encodeURIComponent(park + (row.loc ? (", " + row.loc) : ""));
+    const q = encodeURIComponent(park);
     let lat = null, lon = null;
     try {
       const res = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" + q,
@@ -179,7 +178,7 @@ async function geocodeMissing(env, limit) {
     } catch (e) {}
     if (lat != null && lon != null && !isNaN(lat) && !isNaN(lon)) {
       await env.DB.prepare("INSERT OR REPLACE INTO parks (name,lat,lon,region) VALUES (?,?,?,?)")
-        .bind(park, lat, lon, row.loc || null).run();
+        .bind(park, lat, lon, null).run();
       added++;
     } else { failed.push(park); }
     await new Promise(r => setTimeout(r, 1100)); // Nominatim usage policy: <= 1 request/second
@@ -239,8 +238,8 @@ export default {
         const row = await env.DB.prepare("SELECT COALESCE(MAX(id),0)+1 AS nid FROM coasters").first();
         const id = row.nid;
         await env.DB.prepare(
-          "INSERT INTO coasters (id,name,park,loc,type,manu,model,h,s,l,inv,dur,laps,yr,opened,openedPrec,closed,closedPrec) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-        ).bind(id, b.name??null, b.park??null, b.loc??null, b.type??"Steel", b.manu??null, b.model??null,
+          "INSERT INTO coasters (id,name,park,type,manu,model,h,s,l,inv,dur,laps,yr,opened,openedPrec,closed,closedPrec) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+        ).bind(id, b.name??null, b.park??null, b.type??"Steel", b.manu??null, b.model??null,
           b.h??null, b.s??null, b.l??null, b.inv??null, b.dur??null, b.laps??1, b.yr??null,
           b.opened??null, b.openedPrec??null, b.closed??null, b.closedPrec??null).run();
         return afterWrite(ctx, env, json({ ok: true, id }));
