@@ -16,6 +16,33 @@ function json(data, status = 200, extra = {}) {
 }
 function err(status, message) { return json({ error: message }, status); }
 
+// After a successful D1 write, nudge GitHub to re-sync the static JSON snapshot
+// (coasters.json / parks.json / <rider>.json) so the pages that read those files
+// directly stay in step with the live data. Fire-and-forget via ctx.waitUntil so
+// it never slows down or blocks the edit. No-op until a GITHUB_TOKEN secret (a
+// fine-grained PAT with Contents: write on this repo) is configured; the Actions
+// side debounces a burst of edits into a single commit.
+function afterWrite(ctx, env, response) {
+  ctx.waitUntil(dispatchSync(env));
+  return response;
+}
+async function dispatchSync(env) {
+  if (!env.GITHUB_TOKEN) return;
+  try {
+    await fetch("https://api.github.com/repos/crblanchard/coasterhub/dispatches", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + env.GITHUB_TOKEN,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "coasterhub-worker",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ event_type: "edit" }),
+    });
+  } catch (e) { /* best-effort; never let a sync hiccup break an edit */ }
+}
+
 // Constant-time-ish equality for the admin token.
 function tokenOk(request, env) {
   if (!env.ADMIN_PASSWORD) return false;
@@ -196,7 +223,7 @@ export default {
       if (path === "/api/admin/geocode" && (request.method === "POST" || request.method === "GET")) {
         const miss = await env.DB.prepare(MISSING_PARKS_COUNT).first();
         if ((miss.n || 0) === 0 && !tokenOk(request, env)) return err(401, "unauthorized");
-        return json(await geocodeMissing(env, 10));
+        return afterWrite(ctx, env, json(await geocodeMissing(env, 10)));
       }
 
       // ---- writes (auth required) ----
@@ -216,7 +243,7 @@ export default {
         ).bind(id, b.name??null, b.park??null, b.loc??null, b.type??"Steel", b.manu??null, b.model??null,
           b.h??null, b.s??null, b.l??null, b.inv??null, b.dur??null, b.laps??1, b.yr??null,
           b.opened??null, b.openedPrec??null, b.closed??null, b.closedPrec??null).run();
-        return json({ ok: true, id });
+        return afterWrite(ctx, env, json({ ok: true, id }));
       }
 
       // update coaster fields
@@ -229,7 +256,7 @@ export default {
         if (!sets.length) return err(400, "no fields");
         vals.push(id);
         await env.DB.prepare("UPDATE coasters SET " + sets.join(", ") + " WHERE id = ?").bind(...vals).run();
-        return json({ ok: true });
+        return afterWrite(ctx, env, json({ ok: true }));
       }
 
       // merge coaster `from` into `to` (repoints all credits/rides, deletes `from`)
@@ -242,7 +269,7 @@ export default {
           env.DB.prepare("UPDATE rides SET coaster_id = ? WHERE coaster_id = ?").bind(to, from),
           env.DB.prepare("DELETE FROM coasters WHERE id = ?").bind(from),
         ]);
-        return json({ ok: true });
+        return afterWrite(ctx, env, json({ ok: true }));
       }
 
       // add / update a rider's credit
@@ -253,13 +280,13 @@ export default {
           "INSERT INTO credits (user_slug,coaster_id,first,num,n) VALUES (?,?,?,?,?) " +
           "ON CONFLICT(user_slug,coaster_id) DO UPDATE SET first=excluded.first, num=excluded.num, n=excluded.n"
         ).bind(b.user, b.coaster_id, b.first??null, b.num??null, b.n??null).run();
-        return json({ ok: true });
+        return afterWrite(ctx, env, json({ ok: true }));
       }
       // remove a rider's credit
       if (request.method === "DELETE" && path === "/api/credit") {
         const b = await request.json();
         await env.DB.prepare("DELETE FROM credits WHERE user_slug = ? AND coaster_id = ?").bind(b.user, b.coaster_id).run();
-        return json({ ok: true });
+        return afterWrite(ctx, env, json({ ok: true }));
       }
 
       // every park referenced by a coaster, with coords (null = not on the map yet) + coaster count
@@ -279,7 +306,7 @@ export default {
           "INSERT INTO parks (name,lat,lon,region) VALUES (?,?,?,?) " +
           "ON CONFLICT(name) DO UPDATE SET lat=excluded.lat, lon=excluded.lon, region=excluded.region"
         ).bind(b.name, b.lat ?? null, b.lon ?? null, b.region ?? null).run();
-        return json({ ok: true });
+        return afterWrite(ctx, env, json({ ok: true }));
       }
 
       return err(404, "no such endpoint");

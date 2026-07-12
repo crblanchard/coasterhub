@@ -1,0 +1,51 @@
+name: Sync static JSON from D1
+
+# Runs when the Worker pings us after an edit in /edit (repository_dispatch),
+# and can also be started by hand from the Actions tab (the "Run workflow"
+# button, workflow_dispatch).
+on:
+  repository_dispatch:
+    types: [edit]
+  workflow_dispatch: {}
+
+# Debounce. While you keep editing, each new ping starts a fresh run and cancels
+# the previous one, so only the run after your LAST edit survives. Together with
+# the wait step below, that means a whole editing session collapses into a single
+# commit, landing ~2 minutes after you stop.
+concurrency:
+  group: sync-static
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Wait for edits to settle. If another edit lands during this window, the
+      # concurrency rule above cancels this run and the timer starts over.
+      - name: Debounce (wait 2 min for edits to settle)
+        run: sleep 120
+
+      - name: Pull the latest data from the live site
+        run: node tools/sync-static.mjs https://coasterhub.org
+
+      - name: Commit only if the data actually changed
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "coasterhub-sync[bot]"
+            git config user.email "coasterhub-sync@users.noreply.github.com"
+            git add coasters.json parks.json carter.json cole.json keltan.json max.json
+            git commit -m "chore: sync static JSON from D1"
+            git push
+            echo "Synced and pushed."
+          else
+            echo "No changes to commit."
+          fi
