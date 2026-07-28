@@ -403,7 +403,9 @@
     var wrap = document.getElementById("people");
     if (wrap) {
       var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
-      var opts = '<option value="__all__"' + (slug ? "" : " selected") + '>All</option>';
+      // "Everyone" reads clearer than "All" to someone landing here for the
+      // first time — it's a person picker, not a filter.
+      var opts = '<option value="__all__"' + (slug ? "" : " selected") + '>Everyone</option>';
       opts += sorted.map(function (u) {
         return '<option value="' + u.slug + '"' + (u.slug === slug ? " selected" : "") + '>' + u.name + '</option>';
       }).join("");
@@ -420,7 +422,50 @@
         if (v === "__all__") location.href = (page === "coasters" || page === "rides") ? ("/" + page) : (page === "home" ? "/" : "/stats");
         else location.href = "/user/" + v + "/" + kind;
       });
+      // Say whose count this is, in words, right next to the picker. On a phone
+      // the page hero scrolls away, so this is the thing that keeps "who am I
+      // looking at?" answered — especially for a first-time visitor.
+      var who = document.createElement("span");
+      who.className = "whoami";
+      who.textContent = slug ? (nameFor(slug) + "’s count") : "Everyone";
+      wrap.insertBefore(who, wrap.firstChild);
     }
+
+    buildTabBar(page, slug);
+  }
+
+  function nameFor(slug) {
+    for (var i = 0; i < USERS.length; i++) if (USERS[i].slug === slug) return USERS[i].name;
+    return slug;
+  }
+
+  // Mobile tab bar. Built here rather than in markup so all four pages get it
+  // (and the same ordering) from one place. Hidden above 680px by the CSS.
+  var TABS = [
+    { k: "home",     label: "Home",     path: "/" },
+    { k: "coasters", label: "Coasters", path: "/coasters" },
+    { k: "rides",    label: "Rides",    path: "/rides" },
+    { k: "stats",    label: "Stats",    path: "/stats" }
+  ];
+  var TAB_ICONS = {
+    home:     '<path d="M3 10.2 12 3l9 7.2V21H3z"/>',
+    coasters: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+    rides:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
+    stats:    '<path d="M5 20v-6M12 20V6M19 20v-9"/>'
+  };
+  function buildTabBar(page, slug) {
+    if (typeof document === "undefined" || document.querySelector(".tabbar")) return;
+    var nav = document.createElement("nav");
+    nav.className = "tabbar";
+    nav.setAttribute("aria-label", "Primary");
+    nav.innerHTML = TABS.map(function (t) {
+      var href = (t.k === "home") ? "/" : (slug ? "/user/" + slug + "/" + t.k : t.path);
+      return '<a href="' + href + '"' + (t.k === page ? ' class="on" aria-current="page"' : '') + '>'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
+        + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + TAB_ICONS[t.k] + '</svg>'
+        + '<span>' + t.label + '</span></a>';
+    }).join("");
+    document.body.appendChild(nav);
   }
 
   var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser,

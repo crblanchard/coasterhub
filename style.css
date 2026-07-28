@@ -90,3 +90,34 @@ footer.site a:hover{color:var(--fg)}
   .nav-inner{flex-wrap:wrap;height:auto;padding-top:12px;padding-bottom:12px;row-gap:12px}
   nav.links{order:3;width:100%;gap:20px}
 }
+
+/* Whose count am I looking at — sits next to the rider picker */
+.people{display:flex;align-items:center;gap:9px}
+.whoami{color:var(--muted);font-size:.82rem;white-space:nowrap}
+select.userpick{background:var(--panel);border:1px solid var(--line);color:var(--fg);
+  border-radius:999px;padding:7px 12px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit}
+select.userpick:hover{border-color:var(--accent2)}
+
+/* Mobile tab bar (built by app.js initNav) */
+.tabbar{display:none}
+@media (max-width:680px){
+  nav.links{display:none}                 /* replaced by the bottom bar */
+  .nav-inner{flex-wrap:nowrap;height:60px;padding-top:0;padding-bottom:0;row-gap:0;gap:10px}
+  /* The mark still links home (and Home is in the tab bar), so drop the
+     wordmark and give the space to WHOSE count you are looking at. */
+  .brand-text{display:none}
+  .people{min-width:0;flex:1;justify-content:flex-end}
+  .whoami{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  select.userpick{flex:none;max-width:9.5em}
+  body{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+  footer.site{margin-bottom:8px}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;
+    background:rgba(11,16,32,.94);backdrop-filter:blur(12px);
+    border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;padding:9px 0 8px;color:var(--muted);font-size:.68rem;font-weight:600;
+    letter-spacing:.02em;text-decoration:none}
+  .tabbar a svg{width:21px;height:21px}
+  .tabbar a.on{color:var(--accent2)}
+  .tabbar a:active{background:rgba(255,255,255,.05)}
+}
