@@ -48,12 +48,16 @@
   .rrow .acts .del:hover{color:var(--accent);border-color:var(--accent)}
 
   /* add panel */
-  .addrow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
+  /* Names wrap rather than truncate — "Superman: Escape From Krypton (Left)"
+     and "(Right)" are different coasters and both must stay readable. */
+  .addrow{display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;align-items:center;
+          padding:11px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
   .addrow:last-child{border-bottom:0}
-  .addrow .nm{flex:1;min-width:0}
-  .addrow .nm b{display:block;font-weight:600;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .addrow .nm span{color:var(--muted);font-size:.78rem}
-  .addrow .st{color:var(--accent2);font-size:.78rem;font-variant-numeric:tabular-nums;flex:none}
+  .addrow .nm{min-width:0}
+  .addrow .nm b{display:block;font-weight:600;font-size:.92rem;line-height:1.3}
+  .addrow .nm span{display:block;color:var(--muted);font-size:.78rem;line-height:1.35}
+  .addrow .st{color:var(--accent2);font-size:.78rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .addrow .acts{display:flex;gap:6px}
   .list{max-height:62vh;overflow-y:auto}
   .hint{color:var(--muted);padding:22px 4px;font-size:.9rem}
 
@@ -73,21 +77,60 @@
   .prog{flex:1;color:var(--muted);font-size:.8rem}
 
   #loading{color:var(--muted);padding:40px 0}
-  .soon{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:60ch}
-  .soon .tag{display:inline-block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
-    border:1px solid var(--line);border-radius:999px;padding:4px 10px;margin-bottom:12px}
-  .soon p{color:var(--muted);margin-bottom:12px}
-  .soon p:last-child{margin-bottom:0}
-  .who-list{display:flex;flex-direction:column;gap:8px;margin-top:18px}
-  .who-row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);
-           border-radius:12px;padding:12px 14px;text-decoration:none}
-  .who-row:hover{border-color:var(--accent2)}
-  .who-row b{flex:1}
-  .who-row span{color:var(--muted);font-size:.85rem}
+
+  /* everyone: the summary */
+  .figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:30px}
+  .fig{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px}
+  .fig b{display:block;font-size:1.7rem;font-weight:800;color:var(--accent2);letter-spacing:-.02em;
+         font-variant-numeric:tabular-nums;line-height:1.15}
+  .fig span{color:var(--muted);font-size:.8rem}
+  .sechd{margin:0 0 14px}
+  .sechd h2{font-size:1.15rem;letter-spacing:-.01em}
+  .sechd p{color:var(--muted);font-size:.88rem;margin-top:5px;max-width:62ch}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;
+        display:flex;flex-direction:column;text-decoration:none}
+  .card:hover{border-color:var(--accent2)}
+  .card .hd{display:flex;align-items:baseline;gap:8px;margin-bottom:13px}
+  .card .hd b{font-size:1rem}
+  .card .hd em{font-style:normal;color:var(--muted);font-size:.8rem;margin-left:auto;flex:none}
+  .top{display:flex;flex-direction:column;gap:8px;flex:1}
+  .top .t{display:flex;gap:9px;align-items:baseline;min-width:0}
+  .top .t i{font-style:normal;color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums;
+            min-width:1.2em;flex:none;font-size:.85rem}
+  .top .t .n{min-width:0}
+  .top .t .n b{display:block;font-weight:600;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .top .t .n span{display:block;color:var(--muted);font-size:.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card .go{margin-top:15px;font-size:.84rem;color:var(--accent2)}
+  .card .none{color:var(--muted);font-size:.88rem;flex:1}
+  .card .none em{font-style:normal;display:block;margin-top:6px;font-size:.8rem}
+
+  /* shared favorites */
+  .shared{display:flex;flex-direction:column;gap:8px}
+  .srow{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;padding:11px 14px}
+  .srow .n{flex:1;min-width:0}
+  .srow .n b{display:block;font-weight:600;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .n span{display:block;color:var(--muted);font-size:.77rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+  .srow .meta b{display:block;color:var(--accent2);font-weight:700}
+  .note{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:62ch;
+        color:var(--muted);font-size:.9rem}
+  .note b{color:var(--fg)}
+
   @media (max-width:680px){
     .vs{grid-template-columns:1fr;gap:8px}
     .vsx{padding:2px 0}
-    .rrow .nm span{display:none}
+    .figs{grid-template-columns:1fr 1fr}
+    /* Give the name its own full-width line; specs + buttons drop beneath it. */
+    .addrow{grid-template-columns:1fr auto;gap:8px 10px;padding:13px 4px}
+    .addrow .nm{grid-column:1/-1}
+    .addrow .st{grid-column:1;align-self:center}
+    .addrow .acts{grid-column:2}
+    .rrow{flex-wrap:wrap}
+    .rrow .nm{flex:1 1 8em}
+    .rrow .nm b{white-space:normal;line-height:1.3}
+    .rrow .nm span{white-space:normal;line-height:1.35}
   }
 </style>
 </head>
@@ -116,14 +159,23 @@
 <section class="block" style="padding-top:16px"><div class="container">
   <div id="loading">Loading&hellip;</div>
 
-  <!-- everyone: master ranking (not built yet) -->
+  <!-- everyone: a summary of where every list stands -->
   <div id="master" style="display:none">
-    <div class="soon">
-      <span class="tag">Page coming soon</span>
-      <p>Everyone ranks their own favorites first. Once those lists are in, they'll combine here into a single order.</p>
-      <p>Individual rankings work now — pick a rider below to see or build one.</p>
+    <div class="figs" id="figs"></div>
+
+    <div class="sechd">
+      <h2>Each rider&rsquo;s list</h2>
+      <p>The top of everyone&rsquo;s ranking. Open one to see it in full.</p>
     </div>
-    <div class="who-list" id="who_list"></div>
+    <div class="cards" id="cards"></div>
+
+    <div id="shared_wrap" style="display:none">
+      <div class="sechd" style="margin-top:34px">
+        <h2>Shared favorites</h2>
+        <p id="shared_sub"></p>
+      </div>
+      <div class="shared" id="shared"></div>
+    </div>
   </div>
 
   <!-- one rider: their ranking -->
@@ -193,26 +245,86 @@ CoasterHub.initNav('rankings');
 var $=function(id){return document.getElementById(id);};
 var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
 var nf=function(n){return n==null?'—':n.toLocaleString();};
+var fig=function(v,label){return '<div class="fig"><b>'+v+'</b><span>'+label+'</span></div>';};
 
 var slug=CoasterHub.currentUser();
 var BYID={}, MINE=[], ORDER=[], dirty=false, view='rank';
 
 // ---------------------------------------------------------------- load ------
 if(!slug){
-  // Everyone = the master ranking, which needs individual lists first.
+  // Everyone = a summary of where every list stands. The combined master
+  // ranking comes later; it needs more than one list to mean anything.
   $('hero_badge').textContent='Everyone';
-  $('hero_h1').textContent='Everyone’s favorites, combined.';
-  $('hero_p').textContent='One list built from every rider’s ranking.';
-  Promise.all(CoasterHub.USERS.map(function(u){
-    return fetch('/api/rankings/'+u.slug).then(function(r){return r.ok?r.json():{order:[]};})
-      .catch(function(){return {order:[]};});
-  })).then(function(all){
-    $('loading').style.display='none'; $('master').style.display='block';
-    $('who_list').innerHTML=CoasterHub.USERS.map(function(u,i){
-      var n=(all[i].order||[]).length;
-      return '<a class="who-row" href="/user/'+u.slug+'/rankings"><b>'+esc(u.name)+'</b>'
-        +'<span>'+(n?nf(n)+' ranked':'not started')+'</span></a>';
+  $('hero_h1').textContent='Everyone’s rankings, at a glance.';
+  $('hero_p').textContent='Who has ranked what, and the coasters you agree on.';
+  Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()].concat(
+    CoasterHub.USERS.map(function(u){
+      return fetch('/api/rankings/'+u.slug).then(function(r){return r.ok?r.json():{order:[]};})
+        .catch(function(){return {order:[]};});
+    })
+  )).then(function(res){
+    var coasters=res[0].coasters, parks=res[1], all=res.slice(2);
+    coasters.forEach(function(c){ var pk=parks[c.park];
+      BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
+
+    // Drop ids we can't name — a merged-away coaster shouldn't break the page.
+    var lists=CoasterHub.USERS.map(function(u,i){
+      return {user:u, order:(all[i].order||[]).filter(function(id){return BYID[id];})};
+    });
+    var started=lists.filter(function(l){return l.order.length;});
+
+    // How many lists each coaster is on, and where it sits on average.
+    var tally={};
+    lists.forEach(function(l){
+      l.order.forEach(function(id,i){
+        var t=tally[id]||(tally[id]={id:id,n:0,sum:0});
+        t.n++; t.sum+=i+1;
+      });
+    });
+    var ids=Object.keys(tally);
+    var shared=ids.filter(function(id){return tally[id].n>1;})
+      .map(function(id){return tally[id];})
+      .sort(function(a,b){ return (b.n-a.n) || (a.sum/a.n - b.sum/b.n); });
+
+    $('figs').innerHTML=[
+      fig(started.length+' <small style="font-size:.55em;color:var(--muted);font-weight:600">of '+lists.length+'</small>','Lists started'),
+      fig(nf(ids.length),'Coasters ranked'),
+      fig(nf(shared.length),'On 2+ lists')
+    ].join('');
+
+    $('cards').innerHTML=lists.map(function(l){
+      var href='/user/'+l.user.slug+'/rankings';
+      if(!l.order.length){
+        return '<a class="card" href="'+href+'"><div class="hd"><b>'+esc(l.user.name)+'</b><em>not started</em></div>'
+          +'<div class="none">No favorites ranked yet.<em>Anyone can build a list — nothing is locked.</em></div>'
+          +'<div class="go">Start one &rarr;</div></a>';
+      }
+      var top=l.order.slice(0,5).map(function(id,i){
+        var c=BYID[id];
+        return '<div class="t"><i>'+(i+1)+'</i><div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+'</span></div></div>';
+      }).join('');
+      var more=l.order.length>5?('See all '+nf(l.order.length)+' &rarr;'):'See the list &rarr;';
+      return '<a class="card" href="'+href+'"><div class="hd"><b>'+esc(l.user.name)+'</b><em>'
+        +nf(l.order.length)+' ranked</em></div><div class="top">'+top+'</div><div class="go">'+more+'</div></a>';
     }).join('');
+
+    if(shared.length){
+      $('shared_sub').textContent='Coasters more than one person put on their list, most agreed-on first.';
+      $('shared').innerHTML=shared.slice(0,10).map(function(t){
+        var c=BYID[t.id], avg=t.sum/t.n;
+        return '<div class="srow"><div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+'</span></div>'
+          +'<div class="meta"><b>'+t.n+' lists</b>avg #'+(Math.round(avg*10)/10)+'</div></div>';
+      }).join('');
+    } else {
+      $('shared_sub').textContent='';
+      $('shared').innerHTML='<div class="note">'+(started.length<2
+        ? 'Nothing to compare yet — only <b>'+(started.length?esc(started[0].user.name):'nobody')
+          +'</b> has ranked anything. Once a second list exists, the coasters you both rate show up here.'
+        : 'No overlap yet. None of the ranked coasters appear on more than one list.')+'</div>';
+    }
+    $('shared_wrap').style.display='block';
+
+    $('loading').style.display='none'; $('master').style.display='block';
   }).catch(function(e){ console.error(e); $('loading').textContent='Couldn’t load rankings.'; });
 } else {
   Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(),
@@ -361,8 +473,8 @@ function renderAdd(){
     return '<div class="addrow">'
       +'<span class="nm"><b>'+esc(c.name)+'</b><span>'+esc(c.park||'—')+'</span></span>'
       +'<span class="st">'+stat.join(' · ')+'</span>'
-      +'<button class="ghost" data-hh="'+c.id+'">Rank it</button>'
-      +'<button class="ghost" data-add="'+c.id+'">Add</button>'
+      +'<span class="acts"><button class="ghost" data-hh="'+c.id+'">Rank it</button>'
+      +'<button class="ghost" data-add="'+c.id+'">Add</button></span>'
       +'</div>';
   }).join('') : '<div class="hint">Nothing left to add.</div>';
   $('addlist').querySelectorAll('[data-add]').forEach(function(b){
@@ -375,31 +487,54 @@ function renderAdd(){
 
 // --------------------------------------------------------- head to head -----
 // Binary insertion: compare the candidate against the middle of the range it
-// could belong to and halve that range each answer, so placing a coaster in a
-// list of 500 takes ~9 questions rather than 500.
+// could still belong to and halve that range each answer, so placing a coaster
+// in a list of 500 takes ~9 questions rather than 500.
+//
+// Halving alone only *infers* the final spot — the candidate is never compared
+// against the two coasters it actually lands between, so the answer rests on
+// the existing list being perfectly transitive. It isn't always. So once the
+// range closes we directly confirm both neighbours. If a confirmation
+// contradicts the inference, the range reopens and the search carries on, which
+// means the spot is always settled by comparisons the rider actually made.
 var hh=null;
 function openHH(id){
   if(!ORDER.length){ ORDER.push(id); markDirty(); renderRank(); renderAdd(); setView('rank'); return; }
-  hh={id:id, lo:0, hi:ORDER.length, asked:0,
-      total:Math.ceil(Math.log2(ORDER.length+1))};
+  hh={id:id, lo:0, hi:ORDER.length, asked:0, cmp:{},
+      most:Math.ceil(Math.log2(ORDER.length+1))+2};
   $('hh').style.display='flex';
   stepHH();
 }
+// Which entry to compare against next, or -1 when the spot is fully confirmed.
+function nextHH(){
+  if(hh.lo<hh.hi) return Math.floor((hh.lo+hh.hi)/2);
+  if(hh.lo-1>=0 && hh.cmp[hh.lo-1]===undefined) return hh.lo-1;          // the one above
+  if(hh.lo<ORDER.length && hh.cmp[hh.lo]===undefined) return hh.lo;       // the one below
+  return -1;
+}
 function stepHH(){
   if(!hh) return;
-  if(hh.lo>=hh.hi){
+  var mid=nextHH();
+  if(mid<0){
     ORDER.splice(hh.lo,0,hh.id);
     closeHH(); markDirty(); renderRank(); renderAdd(); setView('rank');
     return;
   }
-  var mid=Math.floor((hh.lo+hh.hi)/2);
   var a=BYID[hh.id]||{}, b=BYID[ORDER[mid]]||{};
-  $('hh_sub').textContent='Placing '+(a.name||'')+' — usually takes about '+hh.total+' picks';
+  var confirming=hh.lo>=hh.hi;
+  $('hh_sub').textContent='Placing '+(a.name||'')+' — every pick narrows it to one exact spot.';
   $('hh_a').innerHTML='<b>'+esc(a.name||'')+'</b><span>'+esc(a.park||'')+'</span>';
   $('hh_b').innerHTML='<b>'+esc(b.name||'')+'</b><span>'+esc(b.park||'')+'</span>';
-  $('hh_prog').textContent='Pick '+(hh.asked+1)+' · comparing against your #'+(mid+1);
-  $('hh_a').onclick=function(){ hh.hi=mid; hh.asked++; stepHH(); };   // candidate is better
-  $('hh_b').onclick=function(){ hh.lo=mid+1; hh.asked++; stepHH(); }; // candidate is worse
+  $('hh_prog').textContent='Pick '+(hh.asked+1)+' · '
+    +(confirming?'confirming against your #':'against your #')+(mid+1);
+  $('hh_a').onclick=function(){ answerHH(mid,true); };   // candidate is better
+  $('hh_b').onclick=function(){ answerHH(mid,false); };  // candidate is worse
+}
+function answerHH(mid,better){
+  hh.cmp[mid]=better;
+  if(better){ hh.hi=Math.min(hh.hi,mid);   if(hh.lo>hh.hi) hh.lo=hh.hi; }
+  else      { hh.lo=Math.max(hh.lo,mid+1); if(hh.hi<hh.lo) hh.hi=hh.lo; }
+  hh.asked++;
+  stepHH();
 }
 function closeHH(){ hh=null; $('hh').style.display='none'; }
 
