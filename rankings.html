@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base href="/">
 <title>Rankings — Coaster Hub</title>
-<meta name="description" content="Rank your favourite coasters, and see how everyone's lists combine — Coaster Hub.">
+<meta name="description" content="Rank your favorite coasters, and see how everyone's lists combine — Coaster Hub.">
 <link rel="stylesheet" href="/style.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -120,7 +120,7 @@
   <div id="master" style="display:none">
     <div class="soon">
       <span class="tag">Page coming soon</span>
-      <p>Each rider builds their own order first. Once those lists exist, they'll combine here into one master ranking for the hub — weighted across everyone who's ridden each coaster.</p>
+      <p>Each rider builds their own order first. Once those lists exist, they'll combine here into one master ranking for the site — weighted across everyone who's ridden each coaster.</p>
       <p>Individual rankings are live now. Pick a rider to see or build theirs.</p>
     </div>
     <div class="who-list" id="who_list"></div>
@@ -202,7 +202,7 @@ if(!slug){
   // Everyone = the master ranking, which needs individual lists first.
   $('hero_badge').textContent='Everyone';
   $('hero_h1').textContent='The master ranking.';
-  $('hero_p').textContent='Every rider’s list, combined into one order for the hub.';
+  $('hero_p').textContent='Every rider’s list, combined into one order for the site.';
   Promise.all(CoasterHub.USERS.map(function(u){
     return fetch('/api/rankings/'+u.slug).then(function(r){return r.ok?r.json():{order:[]};})
       .catch(function(){return {order:[]};});
@@ -232,7 +232,7 @@ if(!slug){
     ORDER=(rank.order||[]).filter(function(id){return BYID[id];});
 
     var nm=esc(user.user||slug);
-    $('hero_h1').textContent=nm+'’s favourites, in order.';
+    $('hero_h1').textContent=nm+'’s favorites, in order.';
     $('hero_p').textContent='Ranked by taste, not by height — drag to reorder, or let head-to-head place them for you.';
     document.title=nm+'’s Rankings — Coaster Hub';
 
