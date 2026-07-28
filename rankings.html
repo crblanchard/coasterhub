@@ -14,19 +14,81 @@
 <meta property="og:title" content="Coaster Hub — Rankings">
 <meta property="og:image" content="https://coasterhub.org/og-image.png">
 <style>
-  .soon{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px 24px;max-width:60ch}
-  .soon h3{font-size:1.05rem;margin-bottom:10px}
-  .soon p{color:var(--muted);margin-bottom:14px}
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 16px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{background:transparent;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;font-size:.9rem;font-family:inherit}
+  .seg button.on{background:rgba(55,208,200,.14);color:var(--fg)}
+  .spacer{flex:1}
+  .status{color:var(--muted);font-size:.84rem}
+  .status.dirty{color:var(--accent)}
+  .status.ok{color:var(--accent2)}
+  button.primary{background:var(--accent2);border:0;color:#06121a;font-weight:700;border-radius:10px;padding:10px 16px;cursor:pointer;font-size:.9rem;font-family:inherit}
+  button.primary:disabled{opacity:.35;cursor:default}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:9px 14px;cursor:pointer;font-size:.88rem;font-family:inherit}
+  button.ghost:hover{color:var(--fg)}
+  input[type=search],select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem;font-family:inherit}
+  input[type=search]{min-width:200px;flex:1}
+
+  /* ranked list */
+  .rank{display:flex;flex-direction:column;gap:8px}
+  .rrow{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;padding:10px 12px}
+  .rrow.drag{opacity:.45;border-color:var(--accent2)}
+  .rrow.over{border-color:var(--accent2)}
+  .rrow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);min-width:2.1em;text-align:right;flex:none}
+  .rrow .grip{flex:none;color:var(--muted);cursor:grab;padding:4px 2px;touch-action:none;user-select:none;line-height:1}
+  .rrow .grip:active{cursor:grabbing}
+  .rrow .nm{flex:1;min-width:0}
+  .rrow .nm b{display:block;font-weight:600;font-size:.94rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rrow .nm span{color:var(--muted);font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+  .rrow .acts{display:flex;gap:4px;flex:none}
+  .rrow .acts button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;
+                     color:var(--muted);cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center}
+  .rrow .acts button:hover{color:var(--fg);border-color:var(--accent2)}
+  .rrow .acts .del:hover{color:var(--accent);border-color:var(--accent)}
+
+  /* add panel */
+  .addrow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
+  .addrow:last-child{border-bottom:0}
+  .addrow .nm{flex:1;min-width:0}
+  .addrow .nm b{display:block;font-weight:600;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .addrow .nm span{color:var(--muted);font-size:.78rem}
+  .addrow .st{color:var(--accent2);font-size:.78rem;font-variant-numeric:tabular-nums;flex:none}
+  .list{max-height:62vh;overflow-y:auto}
+  .hint{color:var(--muted);padding:22px 4px;font-size:.9rem}
+
+  /* head to head */
+  .hh{position:fixed;inset:0;background:rgba(6,10,22,.86);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+  .hhbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:520px;width:100%}
+  .hhbox h3{font-size:1.05rem;margin-bottom:4px}
+  .hhbox .sub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+  .pick{background:transparent;border:1px solid var(--line);border-radius:12px;padding:16px 12px;cursor:pointer;
+        color:var(--fg);text-align:center;font-family:inherit}
+  .pick:hover{border-color:var(--accent2);background:rgba(55,208,200,.07)}
+  .pick b{display:block;font-size:.98rem;margin-bottom:4px}
+  .pick span{color:var(--muted);font-size:.78rem}
+  .vsx{align-self:center;color:var(--muted);font-weight:800;font-size:.85rem}
+  .hhfoot{display:flex;gap:8px;align-items:center;margin-top:16px}
+  .prog{flex:1;color:var(--muted);font-size:.8rem}
+
+  #loading{color:var(--muted);padding:40px 0}
+  .soon{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:60ch}
+  .soon .tag{display:inline-block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
+    border:1px solid var(--line);border-radius:999px;padding:4px 10px;margin-bottom:12px}
+  .soon p{color:var(--muted);margin-bottom:12px}
   .soon p:last-child{margin-bottom:0}
-  .soon .tag{display:inline-block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
-    color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:4px 10px;margin-bottom:14px}
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0 0}
-  .step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
-  .step .n{color:var(--accent2);font-weight:800;font-size:.8rem;letter-spacing:.06em}
-  .step h4{margin:6px 0 6px;font-size:1rem}
-  .step p{color:var(--muted);font-size:.9rem}
-  .pool{color:var(--accent2);font-weight:600}
-  @media (max-width:680px){ .steps{grid-template-columns:1fr} }
+  .who-list{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+  .who-row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);
+           border-radius:12px;padding:12px 14px;text-decoration:none}
+  .who-row:hover{border-color:var(--accent2)}
+  .who-row b{flex:1}
+  .who-row span{color:var(--muted);font-size:.85rem}
+  @media (max-width:680px){
+    .vs{grid-template-columns:1fr;gap:8px}
+    .vsx{padding:2px 0}
+    .rrow .nm span{display:none}
+  }
 </style>
 </head>
 <body>
@@ -45,38 +107,78 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero" style="padding:56px 0 26px"><div class="container">
+<section class="hero" style="padding:56px 0 22px"><div class="container">
   <span class="badge" id="hero_badge">Rankings</span>
   <h1 style="max-width:20ch" id="hero_h1">Loading&hellip;</h1>
-  <p id="hero_p">Not by height or speed — by what you actually liked best.</p>
+  <p id="hero_p">Not tallest or fastest — best.</p>
 </div></section>
 
-<section class="block" style="padding-top:20px"><div class="container">
-  <div class="soon">
-    <span class="tag">Page coming soon</span>
-    <h3 id="soon_h3">Rank your favourites</h3>
-    <p id="soon_p1">This is where each rider puts the coasters they've ridden in their own order — a personal top list, best to worst, decided by taste rather than stats.</p>
-    <p id="soon_p2">Once people have ranked theirs, those lists combine into one master ranking for the hub: the group's collective favourites, weighted across everyone who's ridden each coaster.</p>
+<section class="block" style="padding-top:16px"><div class="container">
+  <div id="loading">Loading&hellip;</div>
+
+  <!-- everyone: master ranking (not built yet) -->
+  <div id="master" style="display:none">
+    <div class="soon">
+      <span class="tag">Page coming soon</span>
+      <p>Each rider builds their own order first. Once those lists exist, they'll combine here into one master ranking for the hub — weighted across everyone who's ridden each coaster.</p>
+      <p>Individual rankings are live now. Pick a rider to see or build theirs.</p>
+    </div>
+    <div class="who-list" id="who_list"></div>
   </div>
 
-  <div class="steps">
-    <div class="step">
-      <div class="n">01</div>
-      <h4>Pick from what you've ridden</h4>
-      <p>Your ranking is drawn from your own credits — <span class="pool" id="pool">…</span> to choose from.</p>
+  <!-- one rider: their ranking -->
+  <div id="mine" style="display:none">
+    <div class="bar">
+      <div class="seg">
+        <button id="v_rank" class="on">My ranking</button><button id="v_add">Add coasters</button>
+      </div>
+      <span class="spacer"></span>
+      <span class="status" id="status"></span>
+      <button class="primary" id="save" disabled>Save</button>
     </div>
-    <div class="step">
-      <div class="n">02</div>
-      <h4>Put them in order</h4>
-      <p>Drag to rank, or judge them head-to-head a pair at a time and let the order fall out.</p>
+
+    <div id="pane_rank">
+      <div class="rank" id="ranklist"></div>
+      <div class="hint" id="rank_empty" style="display:none">
+        Nothing ranked yet. Switch to <b>Add coasters</b> to start — or use <b>Rank it</b> there to place one by comparison.
+      </div>
     </div>
-    <div class="step">
-      <div class="n">03</div>
-      <h4>See the master list</h4>
-      <p>Everyone's rankings aggregate into one combined order for the whole hub.</p>
+
+    <div id="pane_add" style="display:none">
+      <div class="bar">
+        <input id="q" type="search" placeholder="Search your coasters&hellip;">
+        <select id="sort">
+          <option value="h">Tallest first</option>
+          <option value="s">Fastest first</option>
+          <option value="name">Name (A–Z)</option>
+          <option value="park">Park</option>
+        </select>
+        <label class="status" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="all_coasters"> Search all coasters
+        </label>
+      </div>
+      <div class="count status" id="addcount"></div>
+      <div class="list" id="addlist"></div>
     </div>
   </div>
 </div></section>
+
+<!-- head-to-head overlay -->
+<div class="hh" id="hh" style="display:none">
+  <div class="hhbox">
+    <h3>Which do you like more?</h3>
+    <div class="sub" id="hh_sub"></div>
+    <div class="vs">
+      <button class="pick" id="hh_a"></button>
+      <span class="vsx">vs</span>
+      <button class="pick" id="hh_b"></button>
+    </div>
+    <div class="hhfoot">
+      <span class="prog" id="hh_prog"></span>
+      <button class="ghost" id="hh_cancel">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
@@ -88,39 +190,234 @@
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
 
+var $=function(id){return document.getElementById(id);};
 var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
 var nf=function(n){return n==null?'—':n.toLocaleString();};
-var slug=CoasterHub.currentUser();
 
-// Everyone = the master ranking; a rider = their own list. Same two-mode shape
-// as the rest of the site, so this page slots in without a new mental model.
-if(slug){
-  document.getElementById('hero_h1').textContent='Loading…';
+var slug=CoasterHub.currentUser();
+var BYID={}, MINE=[], ORDER=[], dirty=false, view='rank';
+
+// ---------------------------------------------------------------- load ------
+if(!slug){
+  // Everyone = the master ranking, which needs individual lists first.
+  $('hero_badge').textContent='Everyone';
+  $('hero_h1').textContent='The master ranking.';
+  $('hero_p').textContent='Every rider’s list, combined into one order for the hub.';
+  Promise.all(CoasterHub.USERS.map(function(u){
+    return fetch('/api/rankings/'+u.slug).then(function(r){return r.ok?r.json():{order:[]};})
+      .catch(function(){return {order:[]};});
+  })).then(function(all){
+    $('loading').style.display='none'; $('master').style.display='block';
+    $('who_list').innerHTML=CoasterHub.USERS.map(function(u,i){
+      var n=(all[i].order||[]).length;
+      return '<a class="who-row" href="/user/'+u.slug+'/rankings"><b>'+esc(u.name)+'</b>'
+        +'<span>'+(n?nf(n)+' ranked':'not started')+'</span></a>';
+    }).join('');
+  }).catch(function(e){ console.error(e); $('loading').textContent='Couldn’t load rankings.'; });
 } else {
-  document.getElementById('hero_badge').textContent='Everyone';
-  document.getElementById('hero_h1').textContent='The master ranking.';
-  document.getElementById('hero_p').textContent='Every rider’s list, combined into one order for the hub.';
-  document.getElementById('soon_h3').textContent='One list from everyone’s';
-  document.getElementById('soon_p1').textContent='Each rider ranks the coasters they’ve ridden in their own order — a personal top list, decided by taste rather than stats.';
-  document.getElementById('soon_p2').textContent='Those lists then combine here into a single master ranking for the hub, weighted across everyone who has ridden each coaster.';
+  Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(),
+               CoasterHub.fetchUser(slug),
+               fetch('/api/rankings/'+slug).then(function(r){return r.ok?r.json():{order:[]};}).catch(function(){return {order:[]};})])
+  .then(function(res){
+    var coasters=res[0].coasters, parks=res[1], user=res[2], rank=res[3];
+    coasters.forEach(function(c){ var pk=parks[c.park];
+      BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
+
+    // the pool you rank from: your own credits
+    var seen={};
+    (user.credits||user.rides||[]).forEach(function(x){
+      var id=(typeof x==='object')?x.c:x; if(BYID[id]) seen[id]=1;
+    });
+    MINE=Object.keys(seen).map(Number);
+    ORDER=(rank.order||[]).filter(function(id){return BYID[id];});
+
+    var nm=esc(user.user||slug);
+    $('hero_h1').textContent=nm+'’s favourites, in order.';
+    $('hero_p').textContent='Ranked by taste, not by height — drag to reorder, or let head-to-head place them for you.';
+    document.title=nm+'’s Rankings — Coaster Hub';
+
+    $('loading').style.display='none'; $('mine').style.display='block';
+    wire(); renderRank(); renderAdd();
+  }).catch(function(e){ console.error(e); $('loading').textContent='Couldn’t load your coasters.'; });
 }
 
-// The one real number on the page: how many coasters there are to rank.
-CoasterHub.fetchCoasters().then(function(d){
-  var all=d.coasters.length;
-  if(!slug){ document.getElementById('pool').textContent=nf(all)+' coasters on the hub'; return; }
-  return CoasterHub.fetchUser(slug).then(function(u){
-    var n=(u.credits||u.rides||[]).length;
-    var uniq=new Set((u.credits||u.rides||[]).map(function(x){return (typeof x==='object')?x.c:x;})).size;
-    var nm=esc(u.user||slug);
-    document.getElementById('hero_h1').textContent=nm+'’s favourites, in order.';
-    document.title=nm+'’s Rankings — Coaster Hub';
-    document.getElementById('pool').textContent=nf(uniq)+' credits';
+// ---------------------------------------------------------------- wiring ----
+function wire(){
+  $('v_rank').onclick=function(){setView('rank');};
+  $('v_add').onclick=function(){setView('add');};
+  $('q').addEventListener('input',renderAdd);
+  $('sort').addEventListener('change',renderAdd);
+  $('all_coasters').addEventListener('change',renderAdd);
+  $('save').onclick=save;
+  $('hh_cancel').onclick=closeHH;
+  window.addEventListener('beforeunload',function(e){ if(dirty){ e.preventDefault(); e.returnValue=''; } });
+}
+function setView(v){
+  view=v;
+  $('v_rank').classList.toggle('on',v==='rank');
+  $('v_add').classList.toggle('on',v==='add');
+  $('pane_rank').style.display=v==='rank'?'block':'none';
+  $('pane_add').style.display=v==='add'?'block':'none';
+}
+function markDirty(){
+  dirty=true; $('save').disabled=false;
+  $('status').className='status dirty'; $('status').textContent='Unsaved changes';
+}
+
+// ------------------------------------------------------------ ranked list ---
+function renderRank(){
+  var el=$('ranklist');
+  $('rank_empty').style.display=ORDER.length?'none':'block';
+  el.innerHTML=ORDER.map(function(id,i){
+    var c=BYID[id]||{};
+    return '<div class="rrow" data-i="'+i+'">'
+      +'<span class="grip" data-grip="'+i+'" aria-hidden="true">⠿</span>'
+      +'<span class="pos">'+(i+1)+'</span>'
+      +'<span class="nm"><b>'+esc(c.name||('#'+id))+'</b><span>'+esc(c.park||'')+(c.loc?' · '+esc(c.loc):'')+'</span></span>'
+      +'<span class="acts">'
+        +'<button data-up="'+i+'" title="Move up" aria-label="Move up">↑</button>'
+        +'<button data-down="'+i+'" title="Move down" aria-label="Move down">↓</button>'
+        +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">×</button>'
+      +'</span></div>';
+  }).join('');
+  el.querySelectorAll('[data-up]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.up,-1); }; });
+  el.querySelectorAll('[data-down]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.down,1); }; });
+  el.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){
+    ORDER.splice(+b.dataset.del,1); markDirty(); renderRank(); renderAdd(); }; });
+  el.querySelectorAll('[data-grip]').forEach(function(g){ g.addEventListener('pointerdown',startDrag); });
+}
+function move(i,d){
+  var j=i+d; if(j<0||j>=ORDER.length) return;
+  var t=ORDER[i]; ORDER[i]=ORDER[j]; ORDER[j]=t;
+  markDirty(); renderRank();
+}
+
+// Pointer-based drag: works with touch and mouse alike (HTML5 drag-and-drop
+// doesn't fire on mobile Safari at all, which is where this gets used most).
+var dragFrom=-1;
+function startDrag(e){
+  dragFrom=+e.currentTarget.dataset.grip;
+  e.currentTarget.setPointerCapture(e.pointerId);
+  e.currentTarget.addEventListener('pointermove',onDrag);
+  e.currentTarget.addEventListener('pointerup',endDrag);
+  e.currentTarget.addEventListener('pointercancel',endDrag);
+  var row=$('ranklist').children[dragFrom]; if(row) row.classList.add('drag');
+  e.preventDefault();
+}
+function onDrag(e){
+  if(dragFrom<0) return;
+  var rows=[].slice.call($('ranklist').children);
+  var to=dragFrom;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i].getBoundingClientRect();
+    if(e.clientY>=r.top&&e.clientY<=r.bottom){ to=i; break; }
+    if(i===0&&e.clientY<r.top){ to=0; break; }
+    if(i===rows.length-1&&e.clientY>r.bottom){ to=rows.length-1; break; }
+  }
+  if(to!==dragFrom){
+    var item=ORDER.splice(dragFrom,1)[0];
+    ORDER.splice(to,0,item);
+    dragFrom=to;
+    markDirty(); renderRank();
+    // keep dragging against the freshly rendered row
+    var g=$('ranklist').querySelector('[data-grip="'+to+'"]');
+    if(g){ try{ g.setPointerCapture(e.pointerId); }catch(err){}
+      g.addEventListener('pointermove',onDrag); g.addEventListener('pointerup',endDrag);
+      g.addEventListener('pointercancel',endDrag);
+      var row=$('ranklist').children[to]; if(row) row.classList.add('drag'); }
+  }
+}
+function endDrag(){ dragFrom=-1; renderRank(); }
+
+// ------------------------------------------------------------- add panel ----
+function pool(){
+  var all=$('all_coasters').checked;
+  var ids=all?Object.keys(BYID).map(Number):MINE;
+  var ranked={}; ORDER.forEach(function(id){ranked[id]=1;});
+  var q=$('q').value.trim().toLowerCase();
+  var list=ids.filter(function(id){ return !ranked[id]; }).map(function(id){return BYID[id];});
+  if(q) list=list.filter(function(c){ return ((c.name||'')+' '+(c.park||'')).toLowerCase().indexOf(q)>=0; });
+  var s=$('sort').value;
+  list.sort(function(a,b){
+    if(s==='name') return String(a.name).localeCompare(String(b.name));
+    if(s==='park') return String(a.park||'').localeCompare(String(b.park||''))
+                     || String(a.name).localeCompare(String(b.name));
+    // tallest / fastest first, unknowns last so the big ones lead
+    var x=a[s], y=b[s];
+    if(x==null&&y==null) return String(a.name).localeCompare(String(b.name));
+    if(x==null) return 1; if(y==null) return -1;
+    return y-x;
   });
-}).catch(function(e){
-  console.error(e);
-  document.getElementById('pool').textContent='your credits';
-});
+  return list;
+}
+function renderAdd(){
+  var list=pool(), shown=list.slice(0,300);
+  $('addcount').textContent=list.length
+    ? ('Showing '+shown.length+' of '+nf(list.length)+' unranked'+($('all_coasters').checked?' (all coasters)':' from your count'))
+    : '';
+  $('addlist').innerHTML=shown.length?shown.map(function(c){
+    var stat=[]; if(c.h!=null)stat.push(Math.round(c.h)+' ft'); if(c.s!=null)stat.push(Math.round(c.s)+' mph');
+    return '<div class="addrow">'
+      +'<span class="nm"><b>'+esc(c.name)+'</b><span>'+esc(c.park||'—')+'</span></span>'
+      +'<span class="st">'+stat.join(' · ')+'</span>'
+      +'<button class="ghost" data-hh="'+c.id+'">Rank it</button>'
+      +'<button class="ghost" data-add="'+c.id+'">Add</button>'
+      +'</div>';
+  }).join('') : '<div class="hint">Nothing left to add.</div>';
+  $('addlist').querySelectorAll('[data-add]').forEach(function(b){
+    b.onclick=function(){ ORDER.push(+b.dataset.add); markDirty(); renderRank(); renderAdd(); };
+  });
+  $('addlist').querySelectorAll('[data-hh]').forEach(function(b){
+    b.onclick=function(){ openHH(+b.dataset.hh); };
+  });
+}
+
+// --------------------------------------------------------- head to head -----
+// Binary insertion: compare the candidate against the middle of the range it
+// could belong to and halve that range each answer, so placing a coaster in a
+// list of 500 takes ~9 questions rather than 500.
+var hh=null;
+function openHH(id){
+  if(!ORDER.length){ ORDER.push(id); markDirty(); renderRank(); renderAdd(); setView('rank'); return; }
+  hh={id:id, lo:0, hi:ORDER.length, asked:0,
+      total:Math.ceil(Math.log2(ORDER.length+1))};
+  $('hh').style.display='flex';
+  stepHH();
+}
+function stepHH(){
+  if(!hh) return;
+  if(hh.lo>=hh.hi){
+    ORDER.splice(hh.lo,0,hh.id);
+    closeHH(); markDirty(); renderRank(); renderAdd(); setView('rank');
+    return;
+  }
+  var mid=Math.floor((hh.lo+hh.hi)/2);
+  var a=BYID[hh.id]||{}, b=BYID[ORDER[mid]]||{};
+  $('hh_sub').textContent='Placing '+(a.name||'')+' — question '+(hh.asked+1)+' of about '+hh.total;
+  $('hh_a').innerHTML='<b>'+esc(a.name||'')+'</b><span>'+esc(a.park||'')+'</span>';
+  $('hh_b').innerHTML='<b>'+esc(b.name||'')+'</b><span>'+esc(b.park||'')+'</span>';
+  $('hh_prog').textContent='Currently #'+(mid+1)+' in your list';
+  $('hh_a').onclick=function(){ hh.hi=mid; hh.asked++; stepHH(); };   // candidate is better
+  $('hh_b').onclick=function(){ hh.lo=mid+1; hh.asked++; stepHH(); }; // candidate is worse
+}
+function closeHH(){ hh=null; $('hh').style.display='none'; }
+
+// ------------------------------------------------------------------ save ----
+function save(){
+  $('save').disabled=true;
+  $('status').className='status'; $('status').textContent='Saving…';
+  fetch('/api/rankings/'+slug,{method:'PUT',headers:{'content-type':'application/json'},
+                               body:JSON.stringify({order:ORDER})})
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); })
+    .then(function(j){
+      dirty=false;
+      $('status').className='status ok'; $('status').textContent='Saved · '+j.count+' ranked';
+    })
+    .catch(function(e){
+      $('save').disabled=false;
+      $('status').className='status dirty'; $('status').textContent='Save failed: '+e.message;
+    });
+}
 </script>
 </body>
 </html>

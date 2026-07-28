@@ -50,6 +50,8 @@ function freshDb() {
     CREATE TABLE credits (id INTEGER PRIMARY KEY AUTOINCREMENT, user_slug TEXT NOT NULL,
       coaster_id INTEGER NOT NULL, first TEXT, num INTEGER, n INTEGER,
       UNIQUE(user_slug, coaster_id));
+    CREATE TABLE rankings (user_slug TEXT NOT NULL, coaster_id INTEGER NOT NULL,
+      pos INTEGER NOT NULL, PRIMARY KEY (user_slug, coaster_id));
     INSERT INTO coasters (id,name,park,type) VALUES
       (1,'Steel Vengeance','Cedar Point','Steel'),
       (2,'Millennium Force','Cedar Point','Steel'),
@@ -179,6 +181,53 @@ async function main() {
       && rows(db, "SELECT * FROM rides").length === 2, JSON.stringify(r.data));
     r = await call(db, "DELETE", "/api/ride", { token: PW, body: { i: 99999 } });
     check("unknown ride id -> 404", r.status === 404);
+  }
+
+  console.log("\nRankings");
+  {
+    const db = freshDb();
+    let r = await call(db, "GET", "/api/rankings/carter");
+    check("empty ranking returns an empty order", r.status === 200 && Array.isArray(r.data.order) && r.data.order.length === 0);
+
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [3, 1, 2] } });
+    check("PUT stores the order", r.status === 200 && r.data.count === 3, JSON.stringify(r.data));
+    check("...with pos 1..n in list order",
+      JSON.stringify(rows(db, "SELECT coaster_id,pos FROM rankings WHERE user_slug='carter' ORDER BY pos"))
+        === JSON.stringify([{ coaster_id: 3, pos: 1 }, { coaster_id: 1, pos: 2 }, { coaster_id: 2, pos: 3 }]));
+
+    r = await call(db, "GET", "/api/rankings/carter");
+    check("GET reads it back in order", JSON.stringify(r.data.order) === JSON.stringify([3, 1, 2]));
+
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [2, 3] } });
+    check("a shorter list replaces the old one entirely (no orphans)",
+      rows(db, "SELECT * FROM rankings WHERE user_slug='carter'").length === 2
+      && JSON.stringify((await call(db, "GET", "/api/rankings/carter")).data.order) === JSON.stringify([2, 3]));
+
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2, 1, 3, 2] } });
+    check("duplicates are collapsed, first position wins",
+      JSON.stringify((await call(db, "GET", "/api/rankings/carter")).data.order) === JSON.stringify([1, 2, 3]));
+
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 9999] } });
+    check("unknown coaster id -> 400", r.status === 400);
+    check("...and the previous order is untouched",
+      JSON.stringify((await call(db, "GET", "/api/rankings/carter")).data.order) === JSON.stringify([1, 2, 3]));
+
+    r = await call(db, "PUT", "/api/rankings/carter", { body: {} });
+    check("missing order -> 400", r.status === 400);
+    r = await call(db, "PUT", "/api/rankings/nobody", { body: { order: [1] } });
+    check("unknown rider -> 404", r.status === 404);
+
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [] } });
+    check("an empty order clears the ranking", r.status === 200
+      && rows(db, "SELECT * FROM rankings WHERE user_slug='carter'").length === 0);
+
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2] } });
+    await call(db, "PUT", "/api/rankings/cole", { body: { order: [3] } });
+    check("riders' lists are independent",
+      JSON.stringify((await call(db, "GET", "/api/rankings/carter")).data.order) === JSON.stringify([1, 2])
+      && JSON.stringify((await call(db, "GET", "/api/rankings/cole")).data.order) === JSON.stringify([3]));
+    check("writes are open while RANKINGS_NEED_TOKEN is false (no token needed)",
+      (await call(db, "PUT", "/api/rankings/cole", { body: { order: [1] } })).status === 200);
   }
 
   console.log("\nRegression — endpoints the rest of the site depends on");

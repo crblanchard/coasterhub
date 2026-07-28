@@ -192,6 +192,63 @@ async function addRides(env, b) {
   };
 }
 
+// ---- Rankings -------------------------------------------------------------
+// A rider's personal order of the coasters they've ridden, best first. Stored as
+// (user, coaster, pos) with pos 1 = favourite.
+//
+// Writes are currently OPEN — anyone can PUT anyone's ranking. That is Carter's
+// call for now; flip RANKINGS_NEED_TOKEN to true (and nothing else) to put them
+// behind the same admin token as /edit and /log.
+const RANKINGS_NEED_TOKEN = false;
+
+async function getRankings(env, slug) {
+  const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
+  if (!u) return null;
+  const { results } = await env.DB.prepare(
+    "SELECT coaster_id, pos FROM rankings WHERE user_slug = ? ORDER BY pos"
+  ).bind(slug).all();
+  return { user: u.name, slug: slug, order: results.map(r => r.coaster_id) };
+}
+
+// Replace a rider's whole list in one shot: { order:[coasterId, ...] }. Doing it
+// wholesale keeps add / remove / reorder / head-to-head insert on one code path,
+// and means a half-applied reorder can't leave gaps or duplicate positions.
+async function putRankings(env, slug, body) {
+  const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
+  if (!u) return { bad: [404, "no such user"] };
+
+  const raw = Array.isArray(body && body.order) ? body.order : null;
+  if (!raw) return { bad: [400, "need order: [coasterId, ...]"] };
+  if (raw.length > 5000) return { bad: [400, "order too long"] };
+
+  const seen = new Set(), order = [];
+  for (const v of raw) {
+    const id = Number(v);
+    if (!Number.isInteger(id) || id <= 0) return { bad: [400, "bad coaster id: " + v] };
+    if (seen.has(id)) continue;            // a coaster can only sit in one place
+    seen.add(id); order.push(id);
+  }
+
+  if (order.length) {
+    const { results } = await env.DB.prepare(
+      "SELECT id FROM coasters WHERE id IN (" + order.map(() => "?").join(",") + ")"
+    ).bind(...order).all();
+    const known = new Set(results.map(r => r.id));
+    const unknown = order.filter(i => !known.has(i));
+    if (unknown.length) return { bad: [400, "unknown coaster id(s): " + unknown.join(", ")] };
+  }
+
+  const batch = [env.DB.prepare("DELETE FROM rankings WHERE user_slug = ?").bind(slug)];
+  order.forEach((id, i) => {
+    batch.push(env.DB.prepare("INSERT INTO rankings (user_slug,coaster_id,pos) VALUES (?,?,?)")
+      .bind(slug, id, i + 1));
+  });
+  const CHUNK = 90;
+  for (let i = 0; i < batch.length; i += CHUNK) await env.DB.batch(batch.slice(i, i + CHUNK));
+
+  return { ok: true, count: order.length };
+}
+
 // ---- Seeding: read the static JSON already in the repo, load into D1 ------
 async function fetchAsset(env, url, path) {
   const res = await env.ASSETS.fetch(new URL(path, url).toString());
@@ -308,6 +365,18 @@ export default {
       if (request.method === "GET" && rm) {
         const r = await getRides(env, rm[1].toLowerCase());
         return r ? json(r) : err(404, "no such user");
+      }
+      const km = path.match(/^\/api\/rankings\/([a-z0-9-]+)$/i);
+      if (request.method === "GET" && km) {
+        const r = await getRankings(env, km[1].toLowerCase());
+        return r ? json(r) : err(404, "no such user");
+      }
+      // Ungated on purpose for now — see RANKINGS_NEED_TOKEN.
+      if (request.method === "PUT" && km) {
+        if (RANKINGS_NEED_TOKEN && !tokenOk(request, env)) return err(401, "unauthorized");
+        const out = await putRankings(env, km[1].toLowerCase(), await request.json());
+        if (out.bad) return err(out.bad[0], out.bad[1]);
+        return afterWrite(ctx, env, json(out));
       }
 
       // Bootstrap seed: allowed WITHOUT a token while the DB is still empty, so
