@@ -450,10 +450,10 @@
   // (and the same ordering) from one place. Hidden above 680px by the CSS.
   var TABS = [
     { k: "home",     label: "Home",     path: "/" },
-    { k: "coasters", label: "Coasters", path: "/coasters" },
-    { k: "rides",    label: "Rides",    path: "/rides" },
+    { k: "rankings", label: "Rankings", path: "/rankings" },
     { k: "stats",    label: "Stats",    path: "/stats" },
-    { k: "rankings", label: "Rankings", path: "/rankings" }
+    { k: "coasters", label: "Coasters", path: "/coasters" },
+    { k: "rides",    label: "Rides",    path: "/rides" }
   ];
   // Five is the ceiling: measured at 320px (the narrowest phone) the widest
   // label, "Rankings", fills 58 of its 64px slot. A sixth tab would need
