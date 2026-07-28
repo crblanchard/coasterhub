@@ -239,11 +239,6 @@ What makes this bigger than it looks:
   where it was ridden; it's Keltan's credit, so ask him.
 - **Carter's total is 2,362, not 2,400.** Might be rounding, might be ~38 rides he knows are
   missing. `/log` is the tool for filling them in.
-- **Cache headers.** `style.css`, `app.js` and the JSON files have no hash in their filenames,
-  so browsers serve stale copies after a deploy (this bit Carter on iOS Safari — the page
-  rendered completely unstyled until Safari's website data was cleared). A `_headers` file with
-  `Cache-Control: no-cache` would force revalidation and retire the whole class of problem.
-  Proposed, not yet added.
 - **Traveling shows.** Butler Amusements, Ray Cammack Shows, Davis Amusement Cascadia, Helm &
   Sons, Pouzet Group are operators, not fixed parks — no coordinates, so they're skipped on the
   map. Considered an explicit `traveling` flag on the park so the UI can label them rather than
@@ -256,8 +251,8 @@ What makes this bigger than it looks:
 ## Gotchas that will bite you
 
 1. **Line endings are mixed — match the file you're editing.** `index.html` and `stats.html`
-   are **CRLF**; `coasters.html`, `rides.html`, `log.html`, `edit.html`, `database.html`,
-   `app.js`, `worker.js` and the JSON files are **LF**. Getting it wrong produces a whole-file
+   are **CRLF**; `coasters.html`, `rides.html`, `rankings.html`, `log.html`, `edit.html`,
+   `database.html`, `app.js`, `worker.js` and the JSON files are **LF**. Getting it wrong produces a whole-file
    whitespace diff.
 
 2. **JSON files are compact, one line, no trailing newline.** That's what
@@ -271,7 +266,21 @@ What makes this bigger than it looks:
    copies it to a `.mjs` name to import it. Don't "fix" this by adding a `package.json` type
    field — wrangler is happy as-is and changing it risks the deploy.
 
-5. **Merging coasters is safe, but verify.** The pattern used throughout this project:
+5. **Caching: `_headers` cannot expire a copy the browser already has.** `style.css`, `app.js`
+   and the JSON files have no hash in their filenames. `_headers` now sends
+   `Cache-Control: no-cache` for `/*` (images get a week), so anything fetched from here on
+   revalidates — but that only governs *future* fetches. A browser that cached a file before
+   those rules existed keeps serving its old copy regardless. This cost real debugging time:
+   iOS Safari held a `style.css` from before the bottom tab bar shipped, so `.tabbar` fell back
+   to its default `display:none`-less flow position, rendering as a block of links after the
+   footer with a page's worth of empty space below. It read as a scroll bug and several CSS
+   "fixes" were pushed into a file the phone never re-downloaded. Incognito was always fine —
+   **that's the diagnostic.** If a change appears not to take effect on one device but works in
+   a private tab, it's cache, not code. The only way out is to change the URL: bump the `?v=`
+   string on the `style.css` / `app.js` tags (currently `20260728a`) across all seven HTML
+   pages. With `no-cache` in place this shouldn't be needed again.
+
+6. **Merging coasters is safe, but verify.** The pattern used throughout this project:
    `UPDATE OR IGNORE credits SET coaster_id=<to> WHERE coaster_id=<from>`, same for `rides`,
    then delete the loser **guarded** by `AND id NOT IN (SELECT coaster_id FROM credits UNION
    SELECT coaster_id FROM rides)`. Afterwards confirm every rider's credit count is unchanged.
