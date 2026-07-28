@@ -235,8 +235,11 @@ What makes this bigger than it looks:
 
 - **117 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
   has an "Only incomplete" filter; `tools/import-captaincoaster.js` can backfill details.
-- **The `"?????"` park** — coaster **#793 "Spinning Coaster (The Track 3 SBF)"**. Nobody knows
-  where it was ridden; it's Keltan's credit, so ask him.
+- **The `"?????"` park** — coaster **#793 "Spinning Coaster (The Track 3 SBF)"**. It is **Max's**
+  credit and only Max's (an earlier version of this file said Keltan's — wrong). Almost certainly
+  the Spinning Coaster at **The Track Family Fun Parks #3**, 2505 W. 76 Country Blvd, Branson, MO
+  (`rcdb.com/19966.htm`) — the coaster's own name says "The Track 3", and that park has exactly
+  one SBF spinner. Confirm with Max, then rename the park and give it `Missouri, US` + coords.
 - **Carter's total is 2,362, not 2,400.** Might be rounding, might be ~38 rides he knows are
   missing. `/log` is the tool for filling them in.
 - **Traveling shows.** Butler Amusements, Ray Cammack Shows, Davis Amusement Cascadia, Helm &
