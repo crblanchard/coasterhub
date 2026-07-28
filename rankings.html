@@ -62,6 +62,8 @@
                     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .addrow .meta .st{color:var(--accent2);font-size:.77rem;font-variant-numeric:tabular-nums;
                     white-space:nowrap;flex:none}
+  /* Set per row by fitMeta() when the park would otherwise be clipped. */
+  .addrow.tight .meta .st .s{display:none}
   .addrow .acts{grid-column:2;display:flex;gap:6px}
   .addrow .acts button{padding:7px 13px;font-size:.83rem}
   .list{max-height:62vh;overflow-y:auto}
@@ -363,6 +365,9 @@ function wire(){
   $('all_coasters').addEventListener('change',renderAdd);
   $('save').onclick=save;
   $('hh_cancel').onclick=closeHH;
+  // Rotating the phone changes what fits, so re-decide. fitMeta() clears its
+  // own state first, which means speed comes back when there's room again.
+  var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(fitMeta,120); });
   window.addEventListener('beforeunload',function(e){ if(dirty){ e.preventDefault(); e.returnValue=''; } });
 }
 function setView(v){
@@ -371,6 +376,9 @@ function setView(v){
   $('v_add').classList.toggle('on',v==='add');
   $('pane_rank').style.display=v==='rank'?'block':'none';
   $('pane_add').style.display=v==='add'?'block':'none';
+  // Nothing in a display:none subtree has a width, so the fit can only be
+  // measured once the pane is actually on screen.
+  if(v==='add') fitMeta();
 }
 function markDirty(){
   dirty=true; $('save').disabled=false;
@@ -470,11 +478,16 @@ function renderAdd(){
        +(shown.length<list.length?' — showing the first '+shown.length:''))
     : '';
   $('addlist').innerHTML=shown.length?shown.map(function(c){
-    var stat=[]; if(c.h!=null)stat.push(Math.round(c.h)+' ft'); if(c.s!=null)stat.push(Math.round(c.s)+' mph');
+    // Height and speed are separate so speed can be dropped on its own — it's
+    // the first thing to give up when the park needs the room.
+    var h=c.h!=null?Math.round(c.h)+' ft':'', s=c.s!=null?Math.round(c.s)+' mph':'';
+    var stat=(h||s)
+      ? '<span class="st">'+(h?'<span class="h">'+h+'</span>':'')
+        +(s?'<span class="s">'+(h?' · ':'')+s+'</span>':'')+'</span>'
+      : '';
     return '<div class="addrow">'
       +'<span class="nm">'+esc(c.name)+'</span>'
-      +'<span class="meta"><span class="pk">'+esc(c.park||'—')+'</span>'
-      +(stat.length?'<span class="st">'+stat.join(' · ')+'</span>':'')+'</span>'
+      +'<span class="meta"><span class="pk">'+esc(c.park||'—')+'</span>'+stat+'</span>'
       +'<span class="acts"><button class="ghost" data-hh="'+c.id+'">Rank</button>'
       +'<button class="ghost" data-add="'+c.id+'">Add</button></span>'
       +'</div>';
@@ -485,6 +498,22 @@ function renderAdd(){
   $('addlist').querySelectorAll('[data-hh]').forEach(function(b){
     b.onclick=function(){ openHH(+b.dataset.hh); };
   });
+  fitMeta();
+}
+
+// Give the park as much of the second line as it needs: where it would be
+// clipped, drop the speed and let it have that space. Height always stays —
+// it's what the default sort is on, so it's the number worth scanning.
+// Batched into one read pass and one write pass so 300 rows don't thrash.
+function fitMeta(){
+  var rows=$('addlist').querySelectorAll('.addrow'), i;
+  for(i=0;i<rows.length;i++) rows[i].classList.remove('tight');
+  var tight=[];
+  for(i=0;i<rows.length;i++){
+    var pk=rows[i].querySelector('.pk');
+    if(pk && pk.scrollWidth>pk.clientWidth+1) tight.push(rows[i]);
+  }
+  for(i=0;i<tight.length;i++) tight[i].classList.add('tight');
 }
 
 // --------------------------------------------------------- head to head -----
