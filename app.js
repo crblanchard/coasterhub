@@ -374,9 +374,13 @@
     return "/user/" + slug + "/" + page;   // a rider's own stats or coasters
   }
 
-  // Wire the header for a page ("home" | "stats" | "coasters"): point the
-  // Stats/Coasters links at the current person, mark the active link, and
-  // render the User picker (alphabetical).
+  // The pages that exist per rider, i.e. everything but Home. Used for both
+  // the header links and the rider picker so the two can't disagree.
+  var PER_RIDER = ["coasters", "rides", "stats", "rankings"];
+
+  // Wire the header for a page ("home" | "stats" | "coasters" | "rides" |
+  // "rankings"): point the per-rider links at the current person, mark the
+  // active link, and render the rider picker (alphabetical).
   function initNav(page) {
     if (typeof document === "undefined") return;
 
@@ -394,12 +398,13 @@
       else { slug = window.localStorage.getItem("ch_rider") || ""; }
     } catch (e) { slug = (page === "home") ? "" : (urlSlug || ""); }
 
-    var sEl = document.querySelector('[data-nav="stats"]');
-    var cEl = document.querySelector('[data-nav="coasters"]');
-    var rEl = document.querySelector('[data-nav="rides"]');
-    if (sEl) sEl.setAttribute("href", slug ? "/user/" + slug + "/stats" : "/stats");
-    if (cEl) cEl.setAttribute("href", slug ? "/user/" + slug + "/coasters" : "/coasters");
-    if (rEl) rEl.setAttribute("href", slug ? "/user/" + slug + "/rides" : "/rides");
+    // Every page except Home is per-rider. Keep this list complete: anything
+    // missing from it loses the rider on navigation and, worse, sends the
+    // picker to PER_RIDER's fallback instead of back to the page you're on.
+    for (var p = 0; p < PER_RIDER.length; p++) {
+      var el = document.querySelector('[data-nav="' + PER_RIDER[p] + '"]');
+      if (el) el.setAttribute("href", slug ? "/user/" + slug + "/" + PER_RIDER[p] : "/" + PER_RIDER[p]);
+    }
 
     var links = document.querySelectorAll('nav.links a[data-nav]');
     for (var i = 0; i < links.length; i++) {
@@ -417,16 +422,17 @@
       }).join("");
       wrap.innerHTML = '<select class="userpick" aria-label="Select rider">' + opts + '</select>';
       var sel = wrap.querySelector("select");
-      // keep the same page type when switching riders
-      var kind = (page === "coasters" || page === "rides") ? page : "stats";
+      // Switching riders keeps you on the page you're already reading. Home is
+      // the only page with no per-rider version, so it stays put.
+      var perRider = PER_RIDER.indexOf(page) >= 0;
       sel.addEventListener("change", function () {
         var v = sel.value;
         try {
           if (v === "__all__") window.localStorage.removeItem("ch_rider");
           else window.localStorage.setItem("ch_rider", v);
         } catch (e) {}
-        if (v === "__all__") location.href = (page === "coasters" || page === "rides") ? ("/" + page) : (page === "home" ? "/" : "/stats");
-        else location.href = "/user/" + v + "/" + kind;
+        if (v === "__all__") location.href = perRider ? ("/" + page) : "/";
+        else location.href = perRider ? ("/user/" + v + "/" + page) : ("/user/" + v + "/stats");
       });
       // Label the control, and let the dropdown carry the value — "Viewing"
       // beside a picker reading "Max" says it once. On a phone the page hero
