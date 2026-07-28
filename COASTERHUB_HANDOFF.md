@@ -245,11 +245,11 @@ What makes this bigger than it looks:
 - **The Incredible Pizza spinners are a mess worth watching.** Two merges have already happened:
   #1140 → **#822** (duplicate rows for the same Tulsa ride, now "Spinning Coaster"), and
   #262 → **#679** (Carter's credit was filed under a Springfield park but the ride was actually
-  St. Louis; the now-orphaned `Incredible Pizza Company` park was deleted). #679 lost the
-  manufacturer/model/year/height/length that #262 carried, because those had been imported
-  against the *Springfield* listing and don't necessarily describe the St. Louis ride — only
-  `type=Steel` was kept. **#679 and #822 both still need specs.** Note the chain uses two naming
-  styles, `<City>'s Incredible Pizza Company` and `John's Incredible Pizza Company <City>`; keep
+  St. Louis; the now-orphaned `Incredible Pizza Company` park was deleted). The specs #262
+  carried turned out to describe the St. Louis ride correctly — only the park name had been
+  wrong — so they were restored onto #679, which Carter then confirmed as **closed in 2024**
+  (SBF Visa Spinner, opened 2016-11-04, defunct). **#822 still has no specs.** Note the chain
+  uses two naming styles, `<City>'s Incredible Pizza Company` and `John's Incredible Pizza Company <City>`; keep
   the city in the name so locations can't be confused again.
 - **Carter's total is 2,362, not 2,400.** Might be rounding, might be ~38 rides he knows are
   missing. `/log` is the tool for filling them in.
