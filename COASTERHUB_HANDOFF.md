@@ -17,6 +17,31 @@ This file is tracked in git on purpose so it syncs between machines. Commit your
   every `/api/*` returns 503 and the site still works.
 - **Deploy:** push to `main` → Cloudflare Workers Builds deploys automatically.
 
+### How we work — commit straight to `main`, no pull requests
+
+Carter's call (2026-07-28): **don't open PRs, just commit and push to `main`.** One
+person owns this repo, every change deploys on merge anyway, and a PR per tweak was
+mostly clutter on the backend. So:
+
+```bash
+git add -A && git commit -m "..." && git push origin main
+```
+
+What replaces the PR as the safety net — do these *before* pushing, because nothing
+downstream will catch a mistake now:
+
+- `node --check` any JS you touched, and `node tools/test-rides-api.mjs` if you went
+  near `worker.js`.
+- Actually render the affected pages and look at them. `playwright-core` + the
+  pre-installed Chromium works in a sandbox: serve the repo as static files and the
+  `/api/*` calls 404 and fall back to the static JSON, which exercises that path too.
+  **Always check a phone width** — most bugs in this project have been mobile-only
+  (unstyled pages from relative asset paths, header overflow, iOS overscroll).
+- Write a real commit message. With no PR description, the commit *is* the record of
+  why a change happened.
+- Keep each commit self-contained, since it lands on production directly. To undo:
+  `git revert <sha> && git push origin main`.
+
 ### Current data (2026-07-28)
 
 | | |
