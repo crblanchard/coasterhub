@@ -235,11 +235,16 @@ What makes this bigger than it looks:
 
 - **117 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
   has an "Only incomplete" filter; `tools/import-captaincoaster.js` can backfill details.
-- **The `"?????"` park** — coaster **#793 "Spinning Coaster (The Track 3 SBF)"**. It is **Max's**
-  credit and only Max's (an earlier version of this file said Keltan's — wrong). Almost certainly
-  the Spinning Coaster at **The Track Family Fun Parks #3**, 2505 W. 76 Country Blvd, Branson, MO
-  (`rcdb.com/19966.htm`) — the coaster's own name says "The Track 3", and that park has exactly
-  one SBF spinner. Confirm with Max, then rename the park and give it `Missouri, US` + coords.
+- ~~**The `"?????"` park**~~ — **resolved.** Coaster #793 "Spinning Coaster (The Track 3 SBF)"
+  was Max's credit (an earlier version of this file said Keltan's — wrong). It's the Spinning
+  Coaster at **Track Family Fun Parks**, Branson, MO (`rcdb.com/19966.htm`); the coaster's own
+  name gave it away. Renamed, given `Missouri, US` + coords, and the `?????` park deleted.
+  Its `h`/`l`/`inv` were filled from the SBF Visa Spinner model spec the other eight spinners
+  in the table already carry, **not** from RCDB — rcdb.com returns 403 to this environment, so
+  those three numbers are model-inferred and unverified against the listing.
+- **Duplicate spinner at Tulsa's Incredible Pizza Company.** #822 "Spin Coaster (Tulsa
+  Incredible Pizza)" (max) and #1140 "Spinning Coaster" (keltan) are the same ride entered
+  twice under the same park. Merge them the way #723 → #203 was merged (see gotcha 6).
 - **Carter's total is 2,362, not 2,400.** Might be rounding, might be ~38 rides he knows are
   missing. `/log` is the tool for filling them in.
 - **Traveling shows.** Butler Amusements, Ray Cammack Shows, Davis Amusement Cascadia, Helm &
