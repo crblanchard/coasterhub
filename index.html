@@ -16,6 +16,12 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <style>
+  /* --- "what's here" page guide --- */
+  .card.guide{display:flex;flex-direction:column;transition:border-color .15s,transform .15s}
+  .card.guide:hover{border-color:var(--accent2);transform:translateY(-2px)}
+  .card.guide h3{margin:2px 0 8px}
+  .card.guide p{color:var(--muted);flex:1}
+  .card.guide .go{color:var(--accent2);font-weight:600;font-size:.88rem;margin-top:14px}
   /* --- recent activity feed --- */
   .feed{display:flex;flex-direction:column;gap:8px}
   .fitem{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
@@ -72,10 +78,36 @@
   </svg>
   <span class="badge">One growing hub</span>
   <h1><span id="combo">…</span> unique credits and counting.</h1>
-  <p>Coaster Hub gathers every rider's roller coaster count into one place you can actually explore — every park, every big day, and every personal record.</p>
+  <p>A group of friends keep a careful record of every roller coaster they ride — every park, every re-ride, most of it dated. Coaster Hub turns those records into something you can actually explore.</p>
   <p class="hero-sub" id="combo-sub"></p>
   <a class="btn" href="#riders">See the riders</a>
   <a class="btn ghost" href="/coasters">Browse all coasters</a>
+</div></section>
+
+<section class="block" style="padding-bottom:8px"><div class="container">
+  <span class="eyebrow">What's here</span>
+  <h2>Three ways to look at a count</h2>
+  <p class="lead">Every page works two ways: for <b>everyone combined</b>, or for one rider. Use the picker in the top&nbsp;right to switch — this page always shows everyone.</p>
+  <div class="grid">
+    <a class="card guide" href="/coasters">
+      <div class="meta">Coasters</div>
+      <h3>The list</h3>
+      <p>Every coaster anyone here has ridden, <span id="g-coasters">…</span> in all. Sort and filter by park, manufacturer, model, year, height or speed.</p>
+      <span class="go">Browse all coasters &rarr;</span>
+    </a>
+    <a class="card guide" href="/rides">
+      <div class="meta">Rides</div>
+      <h3>The log</h3>
+      <p>Day-by-day: which park, which coasters, how many laps. Browse as expandable park days or one flat table, filtered by rider, year or park.</p>
+      <span class="go">See recent days &rarr;</span>
+    </a>
+    <a class="card guide" href="/stats">
+      <div class="meta">Stats</div>
+      <h3>The picture</h3>
+      <p>A count brought to life — an interactive world map, a calendar of every riding day, personal records, milestones and how it all grew over time.</p>
+      <span class="go">Explore the stats &rarr;</span>
+    </a>
+  </div>
 </div></section>
 
 <section class="block" style="padding-bottom:8px"><div class="container">
@@ -90,29 +122,6 @@
   <h2>Who's counting</h2>
   <p class="lead">Every rider on the hub, each with the same maps, records, and calendars. Jump into any count.</p>
   <div class="lb" id="riders"><p class="lead">Loading counts…</p></div>
-</div></section>
-
-<section class="block"><div class="container">
-  <span class="eyebrow">What's inside</span>
-  <h2>Each count, brought to life</h2>
-  <p class="lead">The stats page pulls it all together into interactive charts and maps; the full list lets you filter and sort every credit.</p>
-  <div class="grid">
-    <div class="card">
-      <div class="meta">Geography</div>
-      <h3>An interactive map</h3>
-      <p>Every park in a count, plotted worldwide and sized by how many rides piled up there.</p>
-    </div>
-    <div class="card">
-      <div class="meta">Activity</div>
-      <h3>Every riding day</h3>
-      <p>A calendar heatmap of an entire riding history — the big trips and marathon days jump right out.</p>
-    </div>
-    <div class="card">
-      <div class="meta">Records</div>
-      <h3>Personal bests</h3>
-      <p>Tallest, fastest, longest, most-ridden — milestones tracked and ranked automatically.</p>
-    </div>
-  </div>
 </div></section>
 
 <section class="block"><div class="container prose">
@@ -148,6 +157,7 @@ Promise.all([
   });
   var uCredits=Object.keys(creditUnion).length, uParks=Object.keys(parkUnion).length;
   document.getElementById('combo').textContent=nf(uCredits);
+  document.getElementById('g-coasters').textContent=nf(coasters.length);
   document.getElementById('combo-sub').textContent=CoasterHub.USERS.length+' riders · '+nf(uCredits)+' unique credits · '+uParks+' parks';
   // ---- leaderboard: ranked by credits, bar relative to the leader ----------
   var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};

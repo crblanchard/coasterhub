@@ -381,12 +381,18 @@
     if (typeof document === "undefined") return;
 
     // Active rider persists between pages: the URL wins (/user/<slug>/...),
-    // otherwise fall back to the last rider we remembered (so it carries to Home).
+    // otherwise fall back to the last rider we remembered.
+    //
+    // Home is the exception. It shows everyone, so it clears the remembered
+    // rider rather than displaying a name the page has nothing to do with. It
+    // has to actually clear it, not just hide it: leaving it set would send the
+    // next click on Coasters back to that rider while the picker said Everyone.
     var urlSlug = currentUser(), slug;
     try {
-      if (urlSlug) { window.localStorage.setItem("ch_rider", urlSlug); slug = urlSlug; }
+      if (page === "home") { window.localStorage.removeItem("ch_rider"); slug = ""; }
+      else if (urlSlug) { window.localStorage.setItem("ch_rider", urlSlug); slug = urlSlug; }
       else { slug = window.localStorage.getItem("ch_rider") || ""; }
-    } catch (e) { slug = urlSlug || ""; }
+    } catch (e) { slug = (page === "home") ? "" : (urlSlug || ""); }
 
     var sEl = document.querySelector('[data-nav="stats"]');
     var cEl = document.querySelector('[data-nav="coasters"]');

@@ -1,0 +1,20 @@
+# Cache rules for Cloudflare's static assets.
+#
+# style.css, app.js and the JSON files have no hash in their filenames, so a
+# browser has no way to tell a new deploy from the copy it already has — it will
+# happily serve the old one for days. That has bitten us twice: a page rendering
+# completely unstyled long after the fix shipped, and a CSS fix appearing not to
+# work at all.
+#
+# "no-cache" does NOT mean "don't store". The file is still cached; the browser
+# just has to ask "is this still current?" first, and gets a cheap 304 when it
+# is. That is exactly what we want for files that change on every deploy.
+/*
+  Cache-Control: no-cache
+
+# Images are content-stable — a new logo gets a new deploy but is rare, and a
+# week of staleness on a favicon hurts nobody.
+/*.png
+  Cache-Control: public, max-age=604800
+/*.svg
+  Cache-Control: public, max-age=604800
