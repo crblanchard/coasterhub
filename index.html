@@ -62,10 +62,10 @@
   </a>
   <nav class="links">
     <a href="/" data-nav="home">Home</a>
-    <a href="/coasters" data-nav="coasters">Coasters</a>
-    <a href="/rides" data-nav="rides">Rides</a>
-    <a href="/stats" data-nav="stats">Stats</a>
     <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/stats" data-nav="stats">Stats</a>
+    <a href="/rides" data-nav="rides">Rides</a>
+    <a href="/add" data-nav="add">Add new</a>
   </nav>
   <div class="people" id="people"></div>
 </div></header>
@@ -82,7 +82,7 @@
   <p>Coaster Hub is where you keep track of your roller coaster count — every credit, every re-ride, every park visit — and see it as maps, records and milestones instead of rows in a spreadsheet.</p>
   <p class="hero-sub" id="combo-sub"></p>
   <a class="btn" href="#riders">See the riders</a>
-  <a class="btn ghost" href="/coasters">Browse all coasters</a>
+  <a class="btn ghost" href="/rides?view=list">Browse every coaster</a>
 </div></section>
 
 <section class="block" style="padding-bottom:8px"><div class="container">
@@ -90,29 +90,29 @@
   <h2>Four ways to look at a count</h2>
   <p class="lead">Every page works two ways: for <b>everyone combined</b>, or for one rider. Use the picker in the top&nbsp;right to switch — this page always shows everyone.</p>
   <div class="grid">
-    <a class="card guide" href="/coasters">
-      <div class="meta">Coasters</div>
-      <h3>The list</h3>
-      <p>Every coaster anyone here has ridden, <span id="g-coasters">…</span> in all. Sort and filter by park, manufacturer, model, year, height or speed.</p>
-      <span class="go">Browse all coasters &rarr;</span>
-    </a>
-    <a class="card guide" href="/rides">
-      <div class="meta">Rides</div>
-      <h3>The log</h3>
-      <p>Day-by-day: which park, which coasters, how many laps. Browse as expandable park days or one flat table, filtered by rider, year or park.</p>
-      <span class="go">See recent days &rarr;</span>
+    <a class="card guide" href="/rankings">
+      <div class="meta">Rankings</div>
+      <h3>The favorites</h3>
+      <p>Not tallest or fastest &mdash; best. Each rider puts the coasters they&rsquo;ve ridden in their own order, either by dragging or by picking between two at a time.</p>
+      <span class="go">See the rankings &rarr;</span>
     </a>
     <a class="card guide" href="/stats">
       <div class="meta">Stats</div>
       <h3>The picture</h3>
-      <p>A count brought to life — an interactive world map, a calendar of every riding day, personal records, milestones and how it all grew over time.</p>
+      <p>A count brought to life &mdash; an interactive world map, a calendar of every riding day, personal records, milestones and how it all grew over time.</p>
       <span class="go">Explore the stats &rarr;</span>
     </a>
-    <a class="card guide" href="/rankings">
-      <div class="meta">Rankings</div>
-      <h3>The favorites</h3>
-      <p>Not tallest or fastest — best. Each rider puts the coasters they've ridden in their own order, and those lists combine into one master ranking. <b>Coming soon.</b></p>
-      <span class="go">See what's planned &rarr;</span>
+    <a class="card guide" href="/rides">
+      <div class="meta">Rides</div>
+      <h3>The log</h3>
+      <p>Day by day: which park, which coasters, how many laps. Or switch to the full list &mdash; every coaster in the count, <span id="g-coasters">&hellip;</span> in all, sortable by park, manufacturer, year, height or speed.</p>
+      <span class="go">See the rides &rarr;</span>
+    </a>
+    <a class="card guide" href="/add">
+      <div class="meta">Add new</div>
+      <h3>Your turn</h3>
+      <p>Log a park day or a single coaster, then rank it straight away or leave it for later. <b>Coming soon.</b></p>
+      <span class="go">See what&rsquo;s planned &rarr;</span>
     </a>
   </div>
 </div></section>
@@ -141,7 +141,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;·&nbsp; <a href="/coasters">Coasters</a> &nbsp;·&nbsp; <a href="/rides">Rides</a> &nbsp;·&nbsp; <a href="/stats">Stats</a> &nbsp;·&nbsp; <a href="/rankings">Rankings</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/rides?view=list">Credit list</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260728a"></script>
@@ -182,8 +182,8 @@ Promise.all([
       +'<span class="n">'+nf(k.credits)+'</span>'
       +'<span class="go">'
         +'<a href="'+CoasterHub.userPageHref(u.slug,'stats')+'">Stats</a>'
-        +'<a href="'+CoasterHub.userPageHref(u.slug,'coasters')+'">Coasters</a>'
         +'<a href="'+CoasterHub.userPageHref(u.slug,'rides')+'">Rides</a>'
+        +'<a href="'+CoasterHub.userPageHref(u.slug,'rankings')+'">Rankings</a>'
       +'</span>'
       +'<span class="sub">'+k.parks+' parks · '+k.states+' states / '+k.countries+' countries'
         +(k.rides!=null?' · '+nf(k.rides)+' rides':'')+'</span>'

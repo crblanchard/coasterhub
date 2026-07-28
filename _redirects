@@ -3,7 +3,12 @@
 # (/stats not /stats.html) because Cloudflare Pages 301-redirects *.html to the
 # extensionless URL, which would bounce /user/<name>/stats to /stats.
 /user/:name/stats     /stats      200
-/user/:name/coasters  /coasters   200
 /user/:name/rides     /rides      200
 /user/:name/rankings  /rankings   200
+/user/:name/add       /add        200
 /user/:name           /stats      200
+
+# /coasters was folded into the Rides page as its "Full list" view.
+# 301, not 200: the old URLs should settle on the new one.
+/user/:name/coasters  /user/:name/rides?view=list  301
+/coasters             /rides?view=list             301

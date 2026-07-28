@@ -376,7 +376,7 @@
 
   // The pages that exist per rider, i.e. everything but Home. Used for both
   // the header links and the rider picker so the two can't disagree.
-  var PER_RIDER = ["coasters", "rides", "stats", "rankings"];
+  var PER_RIDER = ["rides", "stats", "rankings", "add"];
 
   // Wire the header for a page ("home" | "stats" | "coasters" | "rides" |
   // "rankings"): point the per-rider links at the current person, mark the
@@ -401,9 +401,14 @@
     // Every page except Home is per-rider. Keep this list complete: anything
     // missing from it loses the rider on navigation and, worse, sends the
     // picker to PER_RIDER's fallback instead of back to the page you're on.
+    // querySelectorAll, not querySelector: Coasters is no longer in the header,
+    // so its only links are the "Full credit list" ones in the Rides and Stats
+    // heroes, and those need the rider too.
     for (var p = 0; p < PER_RIDER.length; p++) {
-      var el = document.querySelector('[data-nav="' + PER_RIDER[p] + '"]');
-      if (el) el.setAttribute("href", slug ? "/user/" + slug + "/" + PER_RIDER[p] : "/" + PER_RIDER[p]);
+      var els = document.querySelectorAll('[data-nav="' + PER_RIDER[p] + '"]');
+      for (var q = 0; q < els.length; q++) {
+        els[q].setAttribute("href", slug ? "/user/" + slug + "/" + PER_RIDER[p] : "/" + PER_RIDER[p]);
+      }
     }
 
     var links = document.querySelectorAll('nav.links a[data-nav]');
@@ -452,8 +457,8 @@
     { k: "home",     label: "Home",     path: "/" },
     { k: "rankings", label: "Rankings", path: "/rankings" },
     { k: "stats",    label: "Stats",    path: "/stats" },
-    { k: "coasters", label: "Coasters", path: "/coasters" },
-    { k: "rides",    label: "Rides",    path: "/rides" }
+    { k: "rides",    label: "Rides",    path: "/rides" },
+    { k: "add",      label: "Add new",  path: "/add" }
   ];
   // Five is the ceiling: measured at 320px (the narrowest phone) the widest
   // label, "Rankings", fills 58 of its 64px slot. A sixth tab would need
@@ -463,7 +468,8 @@
     coasters: '<path d="M4 6h16M4 12h16M4 18h16"/>',
     rides:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
     stats:    '<path d="M5 20v-6M12 20V6M19 20v-9"/>',
-    rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>'
+    rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>',
+    add:      '<path d="M12 5v14M5 12h14"/>'
   };
   function buildTabBar(page, slug) {
     if (typeof document === "undefined" || document.querySelector(".tabbar")) return;

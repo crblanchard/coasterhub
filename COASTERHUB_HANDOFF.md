@@ -59,8 +59,8 @@ downstream will catch a mistake now:
 |---|---|
 | `index.html` | home — combined unique credits + a card per rider, driven by `USERS` |
 | `stats.html` | per-rider dashboard (KPIs, on-this-day, records, milestones, map, charts) |
-| `coasters.html` | filterable coaster table. Default sort: park, then name |
-| `rides.html` | ride log — by-day cards or a flat sortable table |
+| `rides.html` | the count, three ways: by-day cards, a flat ride table, or **Full list** (every coaster once, filterable). The last one was `coasters.html` until it was folded in here — see below |
+| `add.html` | stub for self-serve logging. Real page not built yet |
 | `log.html` | gated park-day logger (`noindex`, not in nav — type `/log`) |
 | `edit.html` | gated admin editor (coasters + parks, merge, geocode) |
 | `database.html` | unlisted QC page, not in nav |
@@ -114,7 +114,7 @@ configured. Without it the dispatch is a silent no-op and nothing else breaks.
 `/user/<slug>/…` URLs are **200 rewrites**, so the browser keeps the pretty path. A relative
 `href="style.css"` there resolves to `/user/<slug>/style.css` → 404 → **completely unstyled
 page**. All asset refs are root-absolute (`/style.css`, `/app.js`, `/mark.svg`), and
-`stats/coasters/rides/log/database` also carry `<base href="/">`. `index.html` deliberately has
+`stats/rides/rankings/add/log/database` also carry `<base href="/">`. `index.html` deliberately has
 **no** `<base>` — it would break its in-page `#riders` anchor.
 
 ---
@@ -123,19 +123,42 @@ page**. All asset refs are root-absolute (`/style.css`, `/app.js`, `/mark.svg`),
 
 ### `/rides` — public, per-rider, in the main nav
 
-Reads `GET /api/rides/<slug>` with the usual static fallback. Two views:
+Reads `GET /api/rides/<slug>` with the usual static fallback. **Three** views:
 
 - **By day** (default, dated riders only) — one expandable card per date: parks visited, ride
   count, coaster count; expanding lists each coaster with a `×N` lap count. 30 days/page.
 - **All rides** — flat sortable table (Date / Coaster / Park / Location). 60 rows/page.
+- **Full list** — every coaster in the count, once each, with manufacturer/model/height/speed/
+  status and its own filters. This *was* the separate `/coasters` page.
 
-Search + year + park filters apply to both. Four tiles (rides · coasters · parks · days out)
-recount live against the current filter.
+Search + year + park filters apply to the first two. Four tiles (rides · coasters · parks ·
+days out) recount live against the current filter.
 
 Riders without a dated ride log still render: **Cole** and **Keltan** (first-ridden dates only)
 get a "credit log" framing — each coaster once, on the day they first rode it; **Max** (credit
-numbers, no dates) gets the flat table with a Credit # column. The page forces the flat view
-for those riders and hides the By-day toggle.
+numbers, no dates) gets the flat table with a Credit # column. For those riders only the
+**By day** button is hidden — not the whole switch, since Full list still applies.
+
+#### Why `/coasters` was folded in here (2026-07-28)
+
+For three of the four riders `/coasters` and `/rides` were showing the same set of coasters —
+Cole, Keltan and Max have **zero** rides, so `/rides` was re-listing their credits in a
+different order while `/coasters` listed the same credits in a table. Two nav slots, one
+dataset. Carter's call: merge them, keep the name **Rides**, because more people logging
+day-by-day is the direction this is going.
+
+Mechanics worth knowing before touching it:
+
+- The two views collide on **eleven element ids** (`q`, `head`, `body`, `count`, `reset`,
+  `ui`, `err`, `loading`, `f_park`, `people`, `y`). The full-list markup therefore uses
+  `c_`-prefixed ids, and its logic lives in the `CreditList` closure at the bottom of the
+  file, which exposes only `open()`. Don't hoist anything out of it.
+- `CreditList` loads **lazily** on first open, so the log isn't slowed by fetching the
+  coaster table nobody may look at.
+- `setView('list')` hides the log's own filters and has to hide `#dayview`/`#allview` itself,
+  because `render()` — which normally does that — doesn't run for this view.
+- `?view=list` opens straight on it. `/coasters` and `/user/:name/coasters` **301** there, and
+  the "Full credit list" link in the Stats hero points at it.
 
 ### `/log` — password-gated park-day logger
 
@@ -265,7 +288,7 @@ What makes this bigger than it looks:
 ## Gotchas that will bite you
 
 1. **Line endings are mixed — match the file you're editing.** `index.html` and `stats.html`
-   are **CRLF**; `coasters.html`, `rides.html`, `rankings.html`, `log.html`, `edit.html`,
+   are **CRLF**; `rides.html`, `rankings.html`, `add.html`, `log.html`, `edit.html`,
    `database.html`, `app.js`, `worker.js` and the JSON files are **LF**. Getting it wrong produces a whole-file
    whitespace diff.
 

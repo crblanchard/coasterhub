@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
+<title>Add new — Coaster Hub</title>
+<meta name="description" content="Add rides and credits to your count — Coaster Hub.">
+<link rel="stylesheet" href="/style.css?v=20260728a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:title" content="Coaster Hub — Add new">
+<meta property="og:image" content="https://coasterhub.org/og-image.png">
+<style>
+  .soon{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:62ch}
+  .soon .tag{display:inline-block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
+    border:1px solid var(--line);border-radius:999px;padding:4px 10px;margin-bottom:14px}
+  .soon p{color:var(--muted);margin-bottom:12px}
+  .soon p:last-child{margin-bottom:0}
+  .soon b{color:var(--fg)}
+  .steps{display:flex;flex-direction:column;gap:10px;margin:26px 0 0}
+  .step{display:flex;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .step i{font-style:normal;font-weight:800;color:var(--accent2);flex:none;min-width:1.3em}
+  .step div{min-width:0}
+  .step b{display:block;font-size:.94rem;margin-bottom:3px}
+  .step span{color:var(--muted);font-size:.85rem}
+  .meanwhile{margin-top:26px;color:var(--muted);font-size:.9rem}
+  .meanwhile a{color:var(--accent2)}
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="home">Home</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/stats" data-nav="stats">Stats</a>
+    <a href="/rides" data-nav="rides">Rides</a>
+    <a href="/add" data-nav="add">Add new</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero" style="padding:56px 0 22px"><div class="container">
+  <span class="badge">Add new</span>
+  <h1 style="max-width:20ch">Log what you rode.</h1>
+  <p>Add coasters to your count, day by day.</p>
+</div></section>
+
+<section class="block" style="padding-top:16px"><div class="container">
+  <div class="soon">
+    <span class="tag">Page coming soon</span>
+    <p>This will be where anyone adds to their own count &mdash; a day at a park, or a
+      single coaster you picked up along the way.</p>
+    <p>Right now logging goes through the private <b>/log</b> tool, so ask Carter to add
+      anything you&rsquo;ve ridden.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step"><i>1</i><div><b>Pick the park and the date</b>
+      <span>Or skip the date if you just know you&rsquo;ve ridden it.</span></div></div>
+    <div class="step"><i>2</i><div><b>Tick off what you rode</b>
+      <span>Everything at that park, with anything already in your count marked.</span></div></div>
+    <div class="step"><i>3</i><div><b>Rank it now, or later</b>
+      <span>New coasters can go straight into a head-to-head against your favorites,
+        or wait until you feel like ranking.</span></div></div>
+  </div>
+
+  <p class="meanwhile">Meanwhile: <a href="/rides" data-nav="rides">your rides</a> &middot;
+    <a href="/rankings" data-nav="rankings">your rankings</a></p>
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/rides?view=list">Credit list</a></div>
+</div></footer>
+
+<script src="/app.js?v=20260728a"></script>
+<script>
+document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('add');
+</script>
+</body>
+</html>
