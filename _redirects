@@ -5,4 +5,5 @@
 /user/:name/stats     /stats      200
 /user/:name/coasters  /coasters   200
 /user/:name/rides     /rides      200
+/user/:name/rankings  /rankings   200
 /user/:name           /stats      200

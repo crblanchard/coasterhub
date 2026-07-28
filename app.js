@@ -446,13 +446,18 @@
     { k: "home",     label: "Home",     path: "/" },
     { k: "coasters", label: "Coasters", path: "/coasters" },
     { k: "rides",    label: "Rides",    path: "/rides" },
-    { k: "stats",    label: "Stats",    path: "/stats" }
+    { k: "stats",    label: "Stats",    path: "/stats" },
+    { k: "rankings", label: "Rankings", path: "/rankings" }
   ];
+  // Five is the ceiling: measured at 320px (the narrowest phone) the widest
+  // label, "Rankings", fills 58 of its 64px slot. A sixth tab would need
+  // shorter labels or icons only.
   var TAB_ICONS = {
     home:     '<path d="M3 10.2 12 3l9 7.2V21H3z"/>',
     coasters: '<path d="M4 6h16M4 12h16M4 18h16"/>',
     rides:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
-    stats:    '<path d="M5 20v-6M12 20V6M19 20v-9"/>'
+    stats:    '<path d="M5 20v-6M12 20V6M19 20v-9"/>',
+    rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>'
   };
   function buildTabBar(page, slug) {
     if (typeof document === "undefined" || document.querySelector(".tabbar")) return;
