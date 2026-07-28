@@ -233,7 +233,7 @@ What makes this bigger than it looks:
 
 ### 4. Smaller items
 
-- **117 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
+- **116 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
   has an "Only incomplete" filter; `tools/import-captaincoaster.js` can backfill details.
 - ~~**The `"?????"` park**~~ — **resolved.** Coaster #793 "Spinning Coaster (The Track 3 SBF)"
   was Max's credit (an earlier version of this file said Keltan's — wrong). It's the Spinning
@@ -248,8 +248,8 @@ What makes this bigger than it looks:
   St. Louis; the now-orphaned `Incredible Pizza Company` park was deleted). The specs #262
   carried turned out to describe the St. Louis ride correctly — only the park name had been
   wrong — so they were restored onto #679, which Carter then confirmed as **closed in 2024**
-  (SBF Visa Spinner, opened 2016-11-04, defunct). **#822 still has no specs.** Note the chain
-  uses two naming styles, `<City>'s Incredible Pizza Company` and `John's Incredible Pizza Company <City>`; keep
+  (SBF Visa Spinner, opened 2016-11-04, defunct). #822 is the same model, opened 2015-07-25 and
+  still operating. Both are complete now. Note the chain uses two naming styles, `<City>'s Incredible Pizza Company` and `John's Incredible Pizza Company <City>`; keep
   the city in the name so locations can't be confused again.
 - **Carter's total is 2,362, not 2,400.** Might be rounding, might be ~38 rides he knows are
   missing. `/log` is the tool for filling them in.
