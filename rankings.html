@@ -48,16 +48,22 @@
   .rrow .acts .del:hover{color:var(--accent);border-color:var(--accent)}
 
   /* add panel */
-  /* Names wrap rather than truncate — "Superman: Escape From Krypton (Left)"
-     and "(Right)" are different coasters and both must stay readable. */
-  .addrow{display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;align-items:center;
-          padding:11px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
+  /* Two lines, tight. The name gets the full width — running under the
+     buttons — because "Superman: Escape From Krypton (Left)" and "(Right)"
+     are different coasters and truncating them makes the list unusable.
+     The park shares the second line with the buttons and is the one thing
+     allowed to clip, since it's the least load-bearing part of the row. */
+  .addrow{display:grid;grid-template-columns:1fr auto;gap:1px 10px;align-items:center;
+          padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
   .addrow:last-child{border-bottom:0}
-  .addrow .nm{min-width:0}
-  .addrow .nm b{display:block;font-weight:600;font-size:.92rem;line-height:1.3}
-  .addrow .nm span{display:block;color:var(--muted);font-size:.78rem;line-height:1.35}
-  .addrow .st{color:var(--accent2);font-size:.78rem;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .addrow .acts{display:flex;gap:6px}
+  .addrow .nm{grid-column:1/-1;min-width:0;font-weight:600;font-size:.9rem;line-height:1.25}
+  .addrow .meta{grid-column:1;min-width:0;display:flex;align-items:baseline;gap:8px;overflow:hidden}
+  .addrow .meta .pk{color:var(--muted);font-size:.77rem;min-width:0;
+                    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .addrow .meta .st{color:var(--accent2);font-size:.77rem;font-variant-numeric:tabular-nums;
+                    white-space:nowrap;flex:none}
+  .addrow .acts{grid-column:2;display:flex;gap:6px}
+  .addrow .acts button{padding:7px 13px;font-size:.83rem}
   .list{max-height:62vh;overflow-y:auto}
   .hint{color:var(--muted);padding:22px 4px;font-size:.9rem}
 
@@ -122,11 +128,6 @@
     .vs{grid-template-columns:1fr;gap:8px}
     .vsx{padding:2px 0}
     .figs{grid-template-columns:1fr 1fr}
-    /* Give the name its own full-width line; specs + buttons drop beneath it. */
-    .addrow{grid-template-columns:1fr auto;gap:8px 10px;padding:13px 4px}
-    .addrow .nm{grid-column:1/-1}
-    .addrow .st{grid-column:1;align-self:center}
-    .addrow .acts{grid-column:2}
     .rrow{flex-wrap:wrap}
     .rrow .nm{flex:1 1 8em}
     .rrow .nm b{white-space:normal;line-height:1.3}
@@ -192,7 +193,7 @@
     <div id="pane_rank">
       <div class="rank" id="ranklist"></div>
       <div class="hint" id="rank_empty" style="display:none">
-        Nothing ranked yet. Open <b>Add coasters</b> to pick some — <b>Add</b> drops one on the end, <b>Rank it</b> finds its spot by comparison.
+        Nothing ranked yet. Open <b>Add coasters</b> to pick some — <b>Add</b> drops one on the end, <b>Rank</b> finds its spot by comparison.
       </div>
     </div>
 
@@ -471,9 +472,10 @@ function renderAdd(){
   $('addlist').innerHTML=shown.length?shown.map(function(c){
     var stat=[]; if(c.h!=null)stat.push(Math.round(c.h)+' ft'); if(c.s!=null)stat.push(Math.round(c.s)+' mph');
     return '<div class="addrow">'
-      +'<span class="nm"><b>'+esc(c.name)+'</b><span>'+esc(c.park||'—')+'</span></span>'
-      +'<span class="st">'+stat.join(' · ')+'</span>'
-      +'<span class="acts"><button class="ghost" data-hh="'+c.id+'">Rank it</button>'
+      +'<span class="nm">'+esc(c.name)+'</span>'
+      +'<span class="meta"><span class="pk">'+esc(c.park||'—')+'</span>'
+      +(stat.length?'<span class="st">'+stat.join(' · ')+'</span>':'')+'</span>'
+      +'<span class="acts"><button class="ghost" data-hh="'+c.id+'">Rank</button>'
       +'<button class="ghost" data-add="'+c.id+'">Add</button></span>'
       +'</div>';
   }).join('') : '<div class="hint">Nothing left to add.</div>';
