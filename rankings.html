@@ -120,8 +120,8 @@
   <div id="master" style="display:none">
     <div class="soon">
       <span class="tag">Page coming soon</span>
-      <p>Each rider builds their own order first. Once those lists exist, they'll combine here into one master ranking for the site — weighted across everyone who's ridden each coaster.</p>
-      <p>Individual rankings are live now. Pick a rider to see or build theirs.</p>
+      <p>Everyone ranks their own favorites first. Once those lists are in, they'll combine here into a single order.</p>
+      <p>Individual rankings work now — pick a rider below to see or build one.</p>
     </div>
     <div class="who-list" id="who_list"></div>
   </div>
@@ -130,7 +130,7 @@
   <div id="mine" style="display:none">
     <div class="bar">
       <div class="seg">
-        <button id="v_rank" class="on">My ranking</button><button id="v_add">Add coasters</button>
+        <button id="v_rank" class="on">The list</button><button id="v_add">Add coasters</button>
       </div>
       <span class="spacer"></span>
       <span class="status" id="status"></span>
@@ -140,7 +140,7 @@
     <div id="pane_rank">
       <div class="rank" id="ranklist"></div>
       <div class="hint" id="rank_empty" style="display:none">
-        Nothing ranked yet. Switch to <b>Add coasters</b> to start — or use <b>Rank it</b> there to place one by comparison.
+        Nothing ranked yet. Open <b>Add coasters</b> to pick some — <b>Add</b> drops one on the end, <b>Rank it</b> finds its spot by comparison.
       </div>
     </div>
 
@@ -166,7 +166,7 @@
 <!-- head-to-head overlay -->
 <div class="hh" id="hh" style="display:none">
   <div class="hhbox">
-    <h3>Which do you like more?</h3>
+    <h3>Which is better?</h3>
     <div class="sub" id="hh_sub"></div>
     <div class="vs">
       <button class="pick" id="hh_a"></button>
@@ -201,8 +201,8 @@ var BYID={}, MINE=[], ORDER=[], dirty=false, view='rank';
 if(!slug){
   // Everyone = the master ranking, which needs individual lists first.
   $('hero_badge').textContent='Everyone';
-  $('hero_h1').textContent='The master ranking.';
-  $('hero_p').textContent='Every rider’s list, combined into one order for the site.';
+  $('hero_h1').textContent='Everyone’s favorites, combined.';
+  $('hero_p').textContent='One list built from every rider’s ranking.';
   Promise.all(CoasterHub.USERS.map(function(u){
     return fetch('/api/rankings/'+u.slug).then(function(r){return r.ok?r.json():{order:[]};})
       .catch(function(){return {order:[]};});
@@ -233,7 +233,7 @@ if(!slug){
 
     var nm=esc(user.user||slug);
     $('hero_h1').textContent=nm+'’s favorites, in order.';
-    $('hero_p').textContent='Ranked by taste, not by height — drag to reorder, or let head-to-head place them for you.';
+    $('hero_p').textContent='Best to worst, by preference — not by height or speed. Drag to reorder, or compare two at a time.';
     document.title=nm+'’s Rankings — Coaster Hub';
 
     $('loading').style.display='none'; $('mine').style.display='block';
@@ -353,7 +353,8 @@ function pool(){
 function renderAdd(){
   var list=pool(), shown=list.slice(0,300);
   $('addcount').textContent=list.length
-    ? ('Showing '+shown.length+' of '+nf(list.length)+' unranked'+($('all_coasters').checked?' (all coasters)':' from your count'))
+    ? (nf(list.length)+($('all_coasters').checked?' coasters':' of your coasters')+' not ranked yet'
+       +(shown.length<list.length?' — showing the first '+shown.length:''))
     : '';
   $('addlist').innerHTML=shown.length?shown.map(function(c){
     var stat=[]; if(c.h!=null)stat.push(Math.round(c.h)+' ft'); if(c.s!=null)stat.push(Math.round(c.s)+' mph');
@@ -393,10 +394,10 @@ function stepHH(){
   }
   var mid=Math.floor((hh.lo+hh.hi)/2);
   var a=BYID[hh.id]||{}, b=BYID[ORDER[mid]]||{};
-  $('hh_sub').textContent='Placing '+(a.name||'')+' — question '+(hh.asked+1)+' of about '+hh.total;
+  $('hh_sub').textContent='Placing '+(a.name||'')+' — usually takes about '+hh.total+' picks';
   $('hh_a').innerHTML='<b>'+esc(a.name||'')+'</b><span>'+esc(a.park||'')+'</span>';
   $('hh_b').innerHTML='<b>'+esc(b.name||'')+'</b><span>'+esc(b.park||'')+'</span>';
-  $('hh_prog').textContent='Currently #'+(mid+1)+' in your list';
+  $('hh_prog').textContent='Pick '+(hh.asked+1)+' · comparing against your #'+(mid+1);
   $('hh_a').onclick=function(){ hh.hi=mid; hh.asked++; stepHH(); };   // candidate is better
   $('hh_b').onclick=function(){ hh.lo=mid+1; hh.asked++; stepHH(); }; // candidate is worse
 }
