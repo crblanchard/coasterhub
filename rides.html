@@ -34,6 +34,7 @@
   .day summary::-webkit-details-marker{display:none}
   .day summary:hover{background:rgba(255,255,255,.03)}
   .day .dt{font-weight:700;min-width:9.5em}
+  .day .rd{font-weight:700;color:var(--accent2);font-size:.88rem;flex:none}
   .day .pk{color:var(--muted);font-size:.88rem;flex:1;min-width:12em}
   .day .n{color:var(--accent2);font-size:.82rem;white-space:nowrap}
   .day .inner{border-top:1px solid var(--line);padding:6px 16px 12px}
@@ -102,6 +103,7 @@
         <button id="v_day" class="on">By day</button><button id="v_all">All rides</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
+      <select id="f_rider" style="display:none"><option value="">All riders</option></select>
       <select id="f_year"><option value="">All years</option></select>
       <select id="f_park"><option value="">All parks</option></select>
       <button id="reset">Reset</button>
@@ -130,38 +132,64 @@ var MODE='rides';    // 'rides' = dated ride log, 'credits' = credit log
 var DATED=false;     // any dates at all?
 var view='day', page=0, sortKey='d', sortDir=-1;
 var DAYS=30, ROWS=60;
+var COMBINED=false;  // true on /rides with no rider selected = everyone
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function fail(e){console.error(e);document.getElementById('loading').style.display='none';document.getElementById('err').style.display='block';}
 
-var slug=CoasterHub.currentUser()||'carter';
-Promise.all([CoasterHub.fetchRides(slug), CoasterHub.fetchCoasters(), CoasterHub.fetchParks()])
-  .then(function(res){
-    var log=res[0], coasters=res[1].coasters, parks=res[2];
-    var byId={}; coasters.forEach(function(c){byId[c.id]=c;});
-    MODE=log.mode;
-    LOG=log.rides.map(function(r){
-      var c=byId[r.c]||{}, pk=parks[c.park];
-      return {i:r.i, c:r.c, d:r.d||null, num:r.num, n:r.n,
-              name:c.name||('#'+r.c), park:c.park||'—',
-              loc:(pk&&pk.region)?pk.region:''};
-    });
-    DATED=LOG.some(function(r){return r.d;});
-    // Only a full dated ride log makes a day-by-day view meaningful.
-    if(MODE!=='rides'){ view='all'; document.getElementById('seg').style.display='none'; }
-    if(MODE==='rides'){ sortKey='d'; sortDir=-1; }
+// No rider in the URL means "Everyone", exactly like /coasters and /stats —
+// this page used to quietly fall back to Carter, which contradicted the picker.
+var slug=CoasterHub.currentUser();
+var WHO = slug ? [{slug:slug}] : CoasterHub.USERS;
+COMBINED = !slug;
 
-    var nm=esc(log.user||'Carter');
-    document.querySelector('.hero .badge').textContent = MODE==='rides'?'The log':'The credit log';
-    document.querySelector('.hero h1').textContent =
-      MODE==='rides' ? ('Every ride in '+nm+'’s count.') : (nm+'’s credits, in order.');
-    document.querySelector('.hero p').textContent =
-      MODE==='rides' ? 'Browse by park day or as one flat list — filter by year, park or name.'
-                     : (DATED ? 'Each coaster once, on the day it was first ridden.'
-                              : 'Each coaster once, in credit order.');
-    document.title=nm+'’s Rides — Coaster Hub';
-    document.getElementById('t_rides_k').textContent = MODE==='rides'?'Rides':'Credits';
-    document.getElementById('t_days_k').textContent = MODE==='rides'?'Days out':'Dated days';
+Promise.all([
+  Promise.all(WHO.map(function(u){ return CoasterHub.fetchRides(u.slug); })),
+  CoasterHub.fetchCoasters(),
+  CoasterHub.fetchParks()
+]).then(function(res){
+    var logs=res[0], coasters=res[1].coasters, parks=res[2];
+    var byId={}; coasters.forEach(function(c){byId[c.id]=c;});
+
+    LOG=[];
+    logs.forEach(function(log){
+      log.rides.forEach(function(r){
+        var c=byId[r.c]||{}, pk=parks[c.park];
+        LOG.push({i:r.i, c:r.c, d:r.d||null, num:r.num, n:r.n,
+                  rider:log.user, rmode:log.mode,
+                  name:c.name||('#'+r.c), park:c.park||'—',
+                  loc:(pk&&pk.region)?pk.region:''});
+      });
+    });
+    MODE = COMBINED ? 'mixed' : logs[0].mode;
+    DATED = LOG.some(function(r){return r.d;});
+
+    // A day-by-day view only means something when the entries carry dates.
+    if(!DATED){ view='all'; document.getElementById('seg').style.display='none'; }
+    else if(!COMBINED && MODE!=='rides'){ view='all'; document.getElementById('seg').style.display='none'; }
+    sortKey='d'; sortDir=-1;
+
+    if(COMBINED){
+      document.querySelector('.hero .badge').textContent='Everyone';
+      document.querySelector('.hero h1').textContent='Every day out across the hub.';
+      document.querySelector('.hero p').textContent=
+        'Every rider’s logged days, newest first — filter by rider, year or park.';
+      document.title='Rides — Coaster Hub';
+      document.getElementById('t_rides_k').textContent='Rides';
+      document.getElementById('t_days_k').textContent='Days out';
+    } else {
+      var nm=esc(logs[0].user||'Carter');
+      document.querySelector('.hero .badge').textContent = MODE==='rides'?'The log':'The credit log';
+      document.querySelector('.hero h1').textContent =
+        MODE==='rides' ? ('Every ride in '+nm+'’s count.') : (nm+'’s credits, in order.');
+      document.querySelector('.hero p').textContent =
+        MODE==='rides' ? 'Browse by park day or as one flat list — filter by year, park or name.'
+                       : (DATED ? 'Each coaster once, on the day it was first ridden.'
+                                : 'Each coaster once, in credit order.');
+      document.title=nm+'’s Rides — Coaster Hub';
+      document.getElementById('t_rides_k').textContent = MODE==='rides'?'Rides':'Credits';
+      document.getElementById('t_days_k').textContent = MODE==='rides'?'Days out':'Dated days';
+    }
 
     buildFilters(); buildHead(); wire();
     document.getElementById('loading').style.display='none';
@@ -177,9 +205,19 @@ function buildFilters(){
   var parks=[...new Set(LOG.map(function(r){return r.park;}).filter(Boolean))].sort(function(a,b){return a.localeCompare(b);});
   var psel=document.getElementById('f_park');
   parks.forEach(function(p){var o=document.createElement('option');o.value=p;o.textContent=p;psel.appendChild(o);});
+  // Everyone view gets a rider filter, so you can still narrow to one person
+  // without leaving the combined page.
+  if(COMBINED){
+    var riders=[...new Set(LOG.map(function(r){return r.rider;}).filter(Boolean))].sort(function(a,b){return a.localeCompare(b);});
+    var rsel=document.getElementById('f_rider');
+    rsel.style.display='';
+    riders.forEach(function(n){var o=document.createElement('option');o.value=n;o.textContent=n;rsel.appendChild(o);});
+  }
 }
 function cols(){
-  var c=[{k:'d',t:'Date'},{k:'name',t:'Coaster',cls:'name'},{k:'park',t:'Park'},{k:'loc',t:'Location'}];
+  var c=[{k:'d',t:'Date'}];
+  if(COMBINED) c.push({k:'rider',t:'Rider'});
+  c=c.concat([{k:'name',t:'Coaster',cls:'name'},{k:'park',t:'Park'},{k:'loc',t:'Location'}]);
   if(MODE==='credits'&&LOG.some(function(r){return r.num!=null;})) c.push({k:'num',t:'Credit #',num:true});
   if(MODE==='credits'&&LOG.some(function(r){return r.n!=null;})) c.push({k:'n',t:'Rides',num:true});
   return c;
@@ -193,9 +231,9 @@ function buildHead(){
   });
 }
 function wire(){
-  ['q','f_year','f_park'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){page=0;render();});});
+  ['q','f_rider','f_year','f_park'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){page=0;render();});});
   document.getElementById('reset').onclick=function(){
-    ['q','f_year','f_park'].forEach(function(id){document.getElementById(id).value='';}); page=0; render();
+    ['q','f_rider','f_year','f_park'].forEach(function(id){document.getElementById(id).value='';}); page=0; render();
   };
   document.getElementById('v_day').onclick=function(){setView('day');};
   document.getElementById('v_all').onclick=function(){setView('all');};
@@ -209,10 +247,12 @@ function setView(v){
 function filtered(){
   var q=document.getElementById('q').value.trim().toLowerCase();
   var fy=document.getElementById('f_year').value, fp=document.getElementById('f_park').value;
+  var fr=document.getElementById('f_rider').value;
   return LOG.filter(function(r){
+    if(fr&&r.rider!==fr)return false;
     if(fy&&(!r.d||r.d.slice(0,4)!==fy))return false;
     if(fp&&r.park!==fp)return false;
-    if(q&&(r.name+' '+r.park+' '+r.loc).toLowerCase().indexOf(q)<0)return false;
+    if(q&&(r.name+' '+r.park+' '+r.loc+' '+(r.rider||'')).toLowerCase().indexOf(q)<0)return false;
     return true;
   });
 }
@@ -228,8 +268,11 @@ function render(){
   var uniq=new Set(rows.map(function(r){return r.c;}));
   var parks=new Set(rows.map(function(r){return r.park;}).filter(function(p){return p&&p!=='—';}));
   var days=new Set(rows.map(function(r){return r.d;}).filter(Boolean));
-  var rideCount = MODE==='rides' ? rows.length
-    : rows.reduce(function(a,r){return a+(r.n!=null?r.n:1);},0);
+  // rides-mode entries are one row per ride; credits-mode entries carry their
+  // own ride count (n) where it's known, else count the credit once.
+  var rideCount = rows.reduce(function(a,r){
+    return a + (r.rmode==='rides' ? 1 : (r.n!=null?r.n:1));
+  },0);
   document.getElementById('t_rides').textContent=rideCount.toLocaleString();
   document.getElementById('t_coasters').textContent=uniq.size.toLocaleString();
   document.getElementById('t_parks').textContent=parks.size.toLocaleString();
@@ -240,21 +283,39 @@ function render(){
   if(view==='day') renderDays(rows); else renderAll(rows);
 }
 function renderDays(rows){
+  // A day out belongs to one person, so in the combined view key the cards by
+  // date AND rider — otherwise two riders at different parks on the same date
+  // would collapse into one nonsensical card.
+  // Undated credits have no day, so they don't belong in a day view — without
+  // this they all pile into one absurd card per rider ("418 new credits" across
+  // 90-odd parks). They're still there in the All-rides table.
+  var undated=rows.filter(function(r){return !r.d;}).length;
+  rows=rows.filter(function(r){return r.d;});
   var byDay={};
-  rows.forEach(function(r){ var k=r.d||'—'; (byDay[k]=byDay[k]||[]).push(r); });
-  var keys=Object.keys(byDay).sort().reverse();
+  rows.forEach(function(r){
+    var k=r.d+(COMBINED?('|'+(r.rider||'')):'');
+    (byDay[k]=byDay[k]||[]).push(r);
+  });
+  var keys=Object.keys(byDay).sort().reverse();   // date leads the key, so this is newest-first
   var total=keys.length, start=page*DAYS, slice=keys.slice(start,start+DAYS);
-  document.getElementById('count').innerHTML='Showing <b>'+slice.length+'</b> of '+total+' day'+(total===1?'':'s');
+  document.getElementById('count').innerHTML='Showing <b>'+slice.length+'</b> of '+total+' day'+(total===1?'':'s')
+    +(undated?' <span style="opacity:.7">· '+undated.toLocaleString()+' undated credit'+(undated===1?'':'s')+' in All rides</span>':'');
   document.getElementById('dayview').innerHTML=slice.map(function(k){
-    var list=byDay[k];
+    var list=byDay[k], d=k.split('|')[0];
     var laps={}; list.forEach(function(r){ laps[r.c]=(laps[r.c]||0)+1; });
     var seen={}, uniqRows=[];
     list.forEach(function(r){ if(!seen[r.c]){seen[r.c]=1;uniqRows.push(r);} });
     var pk=[...new Set(list.map(function(r){return r.park;}))];
+    // credits-mode riders have no ride-by-ride history, so count new credits
+    var isRides=list[0].rmode==='rides';
+    var what=isRides
+      ? (list.length+' ride'+(list.length===1?'':'s')+' · '+uniqRows.length+' coaster'+(uniqRows.length===1?'':'s'))
+      : (uniqRows.length+' new credit'+(uniqRows.length===1?'':'s'));
     return '<details class="day"><summary>'
-      +'<span class="dt">'+esc(fmtDate(k==='—'?null:k))+'</span>'
+      +'<span class="dt">'+esc(fmtDate(d==='—'?null:d))+'</span>'
+      +(COMBINED?'<span class="rd">'+esc(list[0].rider||'')+'</span>':'')
       +'<span class="pk">'+esc(pk.join(' · '))+'</span>'
-      +'<span class="n">'+list.length+' ride'+(list.length===1?'':'s')+' · '+uniqRows.length+' coaster'+(uniqRows.length===1?'':'s')+'</span>'
+      +'<span class="n">'+what+'</span>'
       +'</summary><div class="inner">'
       + uniqRows.map(function(r){
           return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
