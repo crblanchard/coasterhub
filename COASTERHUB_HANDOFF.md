@@ -206,7 +206,32 @@ Work: in `computeStats`, when `hasOrder` is false but first-ridden dates exist, 
 dated credits, or do undated ones get appended? Consider labelling derived milestones
 differently ("your 500th dated credit"). Carter hasn't answered this.
 
-### 3. Smaller items
+### 3. Accounts / self-serve riders — wanted, deliberately deferred
+
+Carter wants people to be able to sign up and track their own count rather than a
+rider being added by hand. Not started; the home hero already says "keep track of
+**your** count", which everyone currently viewing the site knows is the direction
+rather than a description of today.
+
+What makes this bigger than it looks:
+
+- **Auth doesn't exist yet.** There is one shared `ADMIN_PASSWORD` gating every
+  write. Accounts means per-user identity — either a sessions table with hashed
+  passwords in D1, or Cloudflare Access / an OAuth provider in front.
+- **The `users` table is already shaped for it** (`slug, name, mode, email,
+  created`) — `email` is present and unused, so the schema barely has to move.
+- **`USERS` in `app.js` is hardcoded**, and every page reads it for the nav,
+  the picker, home cards and the combined totals. It would need to come from the
+  API instead.
+- **The static-JSON fallback assumes a fixed set of riders.** `tools/sync-static.mjs`
+  writes one `<slug>.json` per rider from a hardcoded `SLUGS` list; that model
+  doesn't survive arbitrary signups. Either generate from the live user list or
+  accept that the offline fallback only covers the original riders.
+- **Write authorisation becomes per-row**: today any unlocked session can log a day
+  for anyone. With accounts, a rider should only be able to edit their own count
+  (with an admin override).
+
+### 4. Smaller items
 
 - **117 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
   has an "Only incomplete" filter; `tools/import-captaincoaster.js` can backfill details.
