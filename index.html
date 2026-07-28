@@ -15,6 +15,38 @@
 <meta property="og:image" content="https://coasterhub.org/og-image.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<style>
+  /* --- recent activity feed --- */
+  .feed{display:flex;flex-direction:column;gap:8px}
+  .fitem{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+         border-radius:12px;padding:12px 15px;text-decoration:none;transition:border-color .15s}
+  .fitem:hover{border-color:var(--accent2)}
+  .fitem .when{min-width:6.2em;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;flex:none}
+  .fitem .who{font-weight:700;min-width:4.6em;flex:none}
+  .fitem .where{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.92rem}
+  .fitem .what{color:var(--accent2);font-size:.82rem;white-space:nowrap;flex:none}
+  /* --- leaderboard --- */
+  .lb{display:flex;flex-direction:column;gap:10px}
+  .lbrow{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+         border-radius:14px;padding:14px 16px}
+  .lbrow .rank{color:var(--muted);font-weight:800;font-size:.9rem;min-width:1.4em;flex:none}
+  .lbrow .who{min-width:0;flex:none;width:5.5em}
+  .lbrow .who a{font-weight:700;font-size:1.02rem}
+  .lbrow .who a:hover{color:var(--accent2)}
+  .lbrow .bar{flex:1;min-width:60px;height:8px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden}
+  .lbrow .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:999px}
+  .lbrow .n{font-weight:800;font-variant-numeric:tabular-nums;min-width:3.4em;text-align:right;flex:none}
+  .lbrow .sub{color:var(--muted);font-size:.78rem;width:100%;margin-top:2px}
+  .lbrow .go{display:flex;gap:12px;font-size:.82rem;flex:none}
+  .lbrow .go a{color:var(--muted)} .lbrow .go a:hover{color:var(--fg)}
+  @media (max-width:680px){
+    .fitem{flex-wrap:wrap;gap:6px 12px}
+    .fitem .when{min-width:100%;order:-1}
+    .lbrow{flex-wrap:wrap}
+    .lbrow .bar{order:5;flex-basis:100%;margin-top:6px}
+    .lbrow .go{width:100%;margin-top:4px}
+  }
+</style>
 </head>
 <body>
 <header class="nav"><div class="container nav-inner">
@@ -46,13 +78,18 @@
   <a class="btn ghost" href="/coasters">Browse all coasters</a>
 </div></section>
 
+<section class="block" style="padding-bottom:8px"><div class="container">
+  <span class="eyebrow">Lately</span>
+  <h2>Recent days out</h2>
+  <p class="lead">The latest logged park days across everyone's counts.</p>
+  <div class="feed" id="feed"><p class="lead">Loading…</p></div>
+</div></section>
+
 <section class="block"><div class="container">
   <span class="eyebrow">The riders</span>
   <h2>Who's counting</h2>
   <p class="lead">Every rider on the hub, each with the same maps, records, and calendars. Jump into any count.</p>
-  <div class="grid" id="riders">
-    <div class="card person-card"><div class="meta">Rider</div><h3>&nbsp;</h3><p class="pc-stat">Loading counts…</p></div>
-  </div>
+  <div class="lb" id="riders"><p class="lead">Loading counts…</p></div>
 </div></section>
 
 <section class="block"><div class="container">
@@ -112,15 +149,67 @@ Promise.all([
   var uCredits=Object.keys(creditUnion).length, uParks=Object.keys(parkUnion).length;
   document.getElementById('combo').textContent=nf(uCredits);
   document.getElementById('combo-sub').textContent=CoasterHub.USERS.length+' riders · '+nf(uCredits)+' unique credits · '+uParks+' parks';
-  var sorted=CoasterHub.USERS.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  document.getElementById('riders').innerHTML=sorted.map(function(u){
+  // ---- leaderboard: ranked by credits, bar relative to the leader ----------
+  var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var ranked=CoasterHub.USERS.slice().sort(function(a,b){
+    return statsBySlug[b.slug].kpi.credits-statsBySlug[a.slug].kpi.credits;
+  });
+  var top=statsBySlug[ranked[0].slug].kpi.credits||1;
+  document.getElementById('riders').innerHTML=ranked.map(function(u,i){
     var k=statsBySlug[u.slug].kpi;
-    var line=nf(k.credits)+' credits · '+k.parks+' parks · '+k.states+' states / '+k.countries+' countries';
-    var sh=CoasterHub.userPageHref(u.slug,'stats'), ch=CoasterHub.userPageHref(u.slug,'coasters');
-    return '<div class="card person-card"><div class="meta">Rider</div><h3>'+u.name+'</h3>'+
-      '<p class="pc-stat">'+line+'</p>'+
-      '<p class="pc-links"><a href="'+sh+'">View stats →</a><a href="'+ch+'">All coasters</a></p></div>';
+    var pct=Math.round((k.credits/top)*100);
+    return '<div class="lbrow">'
+      +'<span class="rank">'+(i+1)+'</span>'
+      +'<span class="who"><a href="'+CoasterHub.userPageHref(u.slug,'stats')+'">'+esc(u.name)+'</a></span>'
+      +'<span class="bar"><i style="width:'+pct+'%"></i></span>'
+      +'<span class="n">'+nf(k.credits)+'</span>'
+      +'<span class="go">'
+        +'<a href="'+CoasterHub.userPageHref(u.slug,'stats')+'">Stats</a>'
+        +'<a href="'+CoasterHub.userPageHref(u.slug,'coasters')+'">Coasters</a>'
+        +'<a href="'+CoasterHub.userPageHref(u.slug,'rides')+'">Rides</a>'
+      +'</span>'
+      +'<span class="sub">'+k.parks+' parks · '+k.states+' states / '+k.countries+' countries'
+        +(k.rides!=null?' · '+nf(k.rides)+' rides':'')+'</span>'
+      +'</div>';
   }).join('');
+
+  // ---- recent activity: most recent dated days across every rider ----------
+  // Carter's dated ride log gives real park days; the others' first-ridden
+  // dates give the day they picked up new credits. Both are worth surfacing.
+  var byId={}; coasters.forEach(function(c){byId[c.id]=c;});
+  var days=[];
+  CoasterHub.USERS.forEach(function(u,i){
+    var data=users[i], mode=data.rides?'rides':'credits';
+    var entries=data.rides||data.credits||[];
+    var acc={};
+    entries.forEach(function(e){
+      var d=(mode==='rides')?e.d:(typeof e==='object'?e.first:null);
+      if(!d)return;
+      var c=byId[(typeof e==='object')?e.c:e]; if(!c)return;
+      var a=acc[d]||(acc[d]={rides:0,coasters:{},parks:{}});
+      a.rides++; a.coasters[c.id]=1; if(c.park)a.parks[c.park]=1;
+    });
+    Object.keys(acc).forEach(function(d){
+      days.push({d:d,slug:u.slug,name:u.name,mode:mode,
+                 rides:acc[d].rides,
+                 nc:Object.keys(acc[d].coasters).length,
+                 parks:Object.keys(acc[d].parks)});
+    });
+  });
+  days.sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:0;});
+  var fmt=function(d){var p=d.split('-');
+    return new Date(Date.UTC(+p[0],+p[1]-1,+p[2]))
+      .toLocaleDateString(undefined,{timeZone:'UTC',year:'numeric',month:'short',day:'numeric'});};
+  document.getElementById('feed').innerHTML=days.slice(0,8).map(function(x){
+    var what=(x.mode==='rides')
+      ? (x.nc+' coaster'+(x.nc===1?'':'s')+' · '+x.rides+' ride'+(x.rides===1?'':'s'))
+      : (x.nc+' new credit'+(x.nc===1?'':'s'));
+    return '<a class="fitem" href="'+CoasterHub.userPageHref(x.slug,'rides')+'">'
+      +'<span class="when">'+fmt(x.d)+'</span>'
+      +'<span class="who">'+esc(x.name)+'</span>'
+      +'<span class="where">'+esc(x.parks.join(' · ')||'—')+'</span>'
+      +'<span class="what">'+what+'</span></a>';
+  }).join('') || '<p class="lead">No dated rides yet.</p>';
 }).catch(function(e){console.error(e);});
 </script>
 </body>
