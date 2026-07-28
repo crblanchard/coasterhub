@@ -93,6 +93,105 @@ async function getUser(env, slug) {
   return { user: u.name, credits };
 }
 
+// ---- Ride log -------------------------------------------------------------
+// One shape for every rider so a single page can render them all:
+//   { user, mode, rides:[{ i?, c, d, num?, n? }] }
+// `rides`-mode riders (a full dated log) get one entry per ride INCLUDING the
+// row id, so an individual mis-tapped ride can be deleted. `credits`-mode riders
+// are projected into the same shape with d = first-ridden, so they render as a
+// "credit log" (each coaster once) rather than a ride-by-ride history.
+async function getRides(env, slug) {
+  const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
+  if (!u) return null;
+  if (u.mode === "rides") {
+    const { results } = await env.DB.prepare(
+      "SELECT id, coaster_id, d FROM rides WHERE user_slug = ? ORDER BY d, id"
+    ).bind(slug).all();
+    return { user: u.name, mode: "rides", rides: results.map(x => ({ i: x.id, c: x.coaster_id, d: x.d })) };
+  }
+  const { results } = await env.DB.prepare(
+    "SELECT coaster_id, first, num, n FROM credits WHERE user_slug = ? ORDER BY id"
+  ).bind(slug).all();
+  return { user: u.name, mode: "credits", rides: results.map(x => {
+    const o = { c: x.coaster_id, d: x.first == null ? null : x.first };
+    if (x.num != null) o.num = x.num;
+    if (x.n != null) o.n = x.n;
+    return o;
+  }) };
+}
+
+async function userTotal(env, slug, mode) {
+  const t = mode === "rides"
+    ? await env.DB.prepare("SELECT COUNT(*) AS n FROM rides WHERE user_slug = ?").bind(slug).first()
+    : await env.DB.prepare("SELECT COUNT(*) AS n FROM credits WHERE user_slug = ?").bind(slug).first();
+  return t ? t.n : 0;
+}
+
+// Log a whole park day in one batch: { user, d:"YYYY-MM-DD", entries:[{c,n}] }.
+// EVERY coaster id is validated up front and the whole batch is rejected if any
+// is unknown — a typo must never half-log a day. Returns {added, total, date}.
+async function addRides(env, b) {
+  const slug = String(b && b.user || "").toLowerCase();
+  const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
+  if (!u) return { bad: [400, "no such user"] };
+
+  const d = String(b && b.d || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return { bad: [400, "need d as YYYY-MM-DD"] };
+
+  const entries = Array.isArray(b && b.entries) ? b.entries : [];
+  if (!entries.length) return { bad: [400, "no entries"] };
+
+  const norm = [];
+  for (const e of entries) {
+    const c = Number(e && e.c);
+    if (!Number.isInteger(c) || c <= 0) return { bad: [400, "bad coaster id"] };
+    let n = Math.round(Number(e && e.n));
+    if (!Number.isFinite(n) || n < 1) n = 1;
+    if (n > 50) n = 50;                       // laps clamp: a typo can't insert 5000 rows
+    norm.push({ c: c, n: n });
+  }
+
+  const ids = [...new Set(norm.map(e => e.c))];
+  const { results } = await env.DB.prepare(
+    "SELECT id FROM coasters WHERE id IN (" + ids.map(() => "?").join(",") + ")"
+  ).bind(...ids).all();
+  const known = new Set(results.map(r => r.id));
+  const unknown = ids.filter(i => !known.has(i));
+  if (unknown.length) return { bad: [400, "unknown coaster id(s): " + unknown.join(", ")] };
+
+  const batch = [];
+  if (u.mode === "rides") {
+    // one row per lap, so each ride stays individually deletable
+    for (const e of norm) {
+      for (let k = 0; k < e.n; k++) {
+        batch.push(env.DB.prepare("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,?)").bind(slug, e.c, d));
+      }
+    }
+  } else {
+    // credits-mode: earliest date wins, ride counts accumulate, an existing
+    // credit number (Max's milestones) is never touched.
+    for (const e of norm) {
+      batch.push(env.DB.prepare(
+        "INSERT INTO credits (user_slug,coaster_id,first,num,n) VALUES (?,?,?,NULL,?) " +
+        "ON CONFLICT(user_slug,coaster_id) DO UPDATE SET " +
+        "first = CASE WHEN first IS NULL THEN excluded.first " +
+        "WHEN excluded.first < first THEN excluded.first ELSE first END, " +
+        "n = COALESCE(n,0) + excluded.n"
+      ).bind(slug, e.c, d, e.n));
+    }
+  }
+
+  const CHUNK = 90;                            // D1 caps statements per batch call
+  for (let i = 0; i < batch.length; i += CHUNK) await env.DB.batch(batch.slice(i, i + CHUNK));
+
+  return {
+    added: norm.reduce((a, e) => a + e.n, 0),
+    coasters: norm.length,
+    total: await userTotal(env, slug, u.mode),
+    date: d,
+  };
+}
+
 // ---- Seeding: read the static JSON already in the repo, load into D1 ------
 async function fetchAsset(env, url, path) {
   const res = await env.ASSETS.fetch(new URL(path, url).toString());
@@ -205,6 +304,11 @@ export default {
         const u = await getUser(env, um[1].toLowerCase());
         return u ? json(u) : err(404, "no such user");
       }
+      const rm = path.match(/^\/api\/rides\/([a-z0-9-]+)$/i);
+      if (request.method === "GET" && rm) {
+        const r = await getRides(env, rm[1].toLowerCase());
+        return r ? json(r) : err(404, "no such user");
+      }
 
       // Bootstrap seed: allowed WITHOUT a token while the DB is still empty, so
       // the site can be populated once right after the D1 binding goes live.
@@ -286,6 +390,23 @@ export default {
         const b = await request.json();
         await env.DB.prepare("DELETE FROM credits WHERE user_slug = ? AND coaster_id = ?").bind(b.user, b.coaster_id).run();
         return afterWrite(ctx, env, json({ ok: true }));
+      }
+
+      // log a whole park day (see addRides) — used by /log
+      if (request.method === "POST" && path === "/api/rides") {
+        const out = await addRides(env, await request.json());
+        if (out.bad) return err(out.bad[0], out.bad[1]);
+        return afterWrite(ctx, env, json({ ok: true, ...out }));
+      }
+      // undo a single mis-tapped ride (dated ride log only)
+      if (request.method === "DELETE" && path === "/api/ride") {
+        const b = await request.json();
+        const i = Number(b && b.i);
+        if (!Number.isInteger(i) || i <= 0) return err(400, "need i (ride row id)");
+        const row = await env.DB.prepare("SELECT user_slug FROM rides WHERE id = ?").bind(i).first();
+        if (!row) return err(404, "no such ride");
+        await env.DB.prepare("DELETE FROM rides WHERE id = ?").bind(i).run();
+        return afterWrite(ctx, env, json({ ok: true, total: await userTotal(env, row.user_slug, "rides") }));
       }
 
       // every park referenced by a coaster, with coords (null = not on the map yet) + coaster count

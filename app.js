@@ -315,6 +315,31 @@
   function fetchParks() { return fetchJSON("/api/parks", "/parks.json"); }
   function fetchUser(slug) { return fetchJSON("/api/user/" + slug, "/" + slug + ".json"); }
 
+  // Ride log for one rider: { user, mode, rides:[{i?, c, d, num?, n?}] }.
+  // The API returns that shape directly; the static fallback file is the older
+  // per-rider shape, so normalise it here and both paths render identically.
+  function fetchRides(slug) {
+    return fetch("/api/rides/" + slug)
+      .then(function (r) { if (!r.ok) throw new Error("api " + r.status); return r.json(); })
+      .catch(function () {
+        return fetch("/" + slug + ".json").then(function (r) { return r.json(); }).then(function (u) {
+          if (u.rides) {
+            return { user: u.user, mode: "rides",
+                     rides: u.rides.map(function (r) { return { c: r.c, d: r.d == null ? null : r.d }; }) };
+          }
+          return { user: u.user, mode: "credits", rides: (u.credits || []).map(function (c) {
+            var o = { c: (typeof c === "object") ? c.c : c, d: null };
+            if (typeof c === "object") {
+              if (c.first != null) o.d = c.first;
+              if (c.num != null) o.num = c.num;
+              if (c.n != null) o.n = c.n;
+            }
+            return o;
+          }) };
+        });
+      });
+  }
+
   function loadUser(userFile) {
     if (!userFile) { var u = currentUser(); userFile = u ? u + ".json" : "carter.json"; }
     var slug = userFile.replace(/\.json$/, "");
@@ -365,8 +390,10 @@
 
     var sEl = document.querySelector('[data-nav="stats"]');
     var cEl = document.querySelector('[data-nav="coasters"]');
+    var rEl = document.querySelector('[data-nav="rides"]');
     if (sEl) sEl.setAttribute("href", slug ? "/user/" + slug + "/stats" : "/stats");
     if (cEl) cEl.setAttribute("href", slug ? "/user/" + slug + "/coasters" : "/coasters");
+    if (rEl) rEl.setAttribute("href", slug ? "/user/" + slug + "/rides" : "/rides");
 
     var links = document.querySelectorAll('nav.links a[data-nav]');
     for (var i = 0; i < links.length; i++) {
@@ -382,14 +409,15 @@
       }).join("");
       wrap.innerHTML = '<select class="userpick" aria-label="Select rider">' + opts + '</select>';
       var sel = wrap.querySelector("select");
-      var kind = (page === "coasters") ? "coasters" : "stats"; // keep the same page type when switching
+      // keep the same page type when switching riders
+      var kind = (page === "coasters" || page === "rides") ? page : "stats";
       sel.addEventListener("change", function () {
         var v = sel.value;
         try {
           if (v === "__all__") window.localStorage.removeItem("ch_rider");
           else window.localStorage.setItem("ch_rider", v);
         } catch (e) {}
-        if (v === "__all__") location.href = (page === "coasters") ? "/coasters" : (page === "home" ? "/" : "/stats");
+        if (v === "__all__") location.href = (page === "coasters" || page === "rides") ? ("/" + page) : (page === "home" ? "/" : "/stats");
         else location.href = "/user/" + v + "/" + kind;
       });
     }
@@ -397,7 +425,8 @@
 
   var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
-              fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser };
+              fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
+              fetchRides: fetchRides };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
+<title>Rides — Coaster Hub</title>
+<meta name="description" content="Every ride, by day or as one flat list — Coaster Hub.">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:title" content="Coaster Hub — Rides">
+<meta property="og:image" content="https://coasterhub.org/og-image.png">
+<style>
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:6px 0 20px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .tile .v{font-size:1.5rem;font-weight:800;letter-spacing:-.02em}
+  .tile .k{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+  .controls input,.controls select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem}
+  .controls input{min-width:220px;flex:1}
+  .controls select{cursor:pointer;max-width:210px}
+  .controls button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem}
+  .controls button:hover{color:var(--fg)}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{background:transparent;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;font-size:.9rem}
+  .seg button.on{background:rgba(55,208,200,.14);color:var(--fg)}
+  .count{color:var(--muted);font-size:.85rem;margin-bottom:12px}
+  .count b{color:var(--accent2)}
+  .day{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--panel);overflow:hidden}
+  .day summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .day summary::-webkit-details-marker{display:none}
+  .day summary:hover{background:rgba(255,255,255,.03)}
+  .day .dt{font-weight:700;min-width:9.5em}
+  .day .pk{color:var(--muted);font-size:.88rem;flex:1;min-width:12em}
+  .day .n{color:var(--accent2);font-size:.82rem;white-space:nowrap}
+  .day .inner{border-top:1px solid var(--line);padding:6px 16px 12px}
+  .day .row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.9rem}
+  .day .row:last-child{border-bottom:0}
+  .day .row .cn{font-weight:600;flex:1}
+  .day .row .cp{color:var(--muted);font-size:.82rem}
+  .lap{color:var(--accent);font-variant-numeric:tabular-nums;font-size:.82rem}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  table{border-collapse:collapse;width:100%;font-size:.85rem;white-space:nowrap}
+  thead th{position:sticky;top:0;background:#0e1730;color:var(--muted);text-align:left;padding:11px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.72rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
+  thead th:hover{color:var(--fg)}
+  thead th.num{text-align:right}
+  thead th .ar{color:var(--accent);margin-left:4px}
+  tbody td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+  tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+  tbody td.name{font-weight:600;color:var(--fg)}
+  tbody tr:hover{background:rgba(55,208,200,.06)}
+  td.muted{color:var(--muted)}
+  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:18px 0 0;color:var(--muted);font-size:.88rem}
+  .pager button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:7px 13px;cursor:pointer}
+  .pager button:hover:not(:disabled){color:var(--fg)}
+  .pager button:disabled{opacity:.35;cursor:default}
+  #loading{color:var(--muted);padding:40px 0}
+  #err{display:none;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:20px}
+  @media (max-width:680px){
+    .tiles{grid-template-columns:repeat(2,1fr)}
+    .day summary{gap:8px}
+    .day .dt{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="home">Home</a>
+    <a href="/stats" data-nav="stats">Stats</a>
+    <a href="/coasters" data-nav="coasters">Coasters</a>
+    <a href="/rides" data-nav="rides">Rides</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero" style="padding:56px 0 26px"><div class="container">
+  <span class="badge">The log</span>
+  <h1 style="max-width:20ch">Loading&hellip;</h1>
+  <p>Every ride, day by day.</p>
+</div></section>
+
+<section class="block" style="padding-top:20px"><div class="container">
+  <div id="err"><strong>Couldn&rsquo;t load the data.</strong> This page reads external data files, so it needs to be served over the web.</div>
+  <div id="loading">Loading rides&hellip;</div>
+  <div id="ui" style="display:none">
+    <div class="tiles">
+      <div class="tile"><div class="v" id="t_rides">—</div><div class="k" id="t_rides_k">Rides</div></div>
+      <div class="tile"><div class="v" id="t_coasters">—</div><div class="k">Coasters</div></div>
+      <div class="tile"><div class="v" id="t_parks">—</div><div class="k">Parks</div></div>
+      <div class="tile"><div class="v" id="t_days">—</div><div class="k" id="t_days_k">Days out</div></div>
+    </div>
+    <div class="controls">
+      <div class="seg" id="seg">
+        <button id="v_day" class="on">By day</button><button id="v_all">All rides</button>
+      </div>
+      <input id="q" type="search" placeholder="Search coaster or park&hellip;">
+      <select id="f_year"><option value="">All years</option></select>
+      <select id="f_park"><option value="">All parks</option></select>
+      <button id="reset">Reset</button>
+    </div>
+    <div class="count" id="count"></div>
+    <div id="dayview"></div>
+    <div id="allview" style="display:none">
+      <div class="tbl-wrap"><table><thead><tr id="head"></tr></thead><tbody id="body"></tbody></table></div>
+    </div>
+    <div class="pager" id="pager"></div>
+  </div>
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a></div>
+</div></footer>
+
+<script src="/app.js"></script>
+<script>
+document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('rides');
+
+var LOG=[];          // [{i?, c, d, num?, n?, name, park, loc}]
+var MODE='rides';    // 'rides' = dated ride log, 'credits' = credit log
+var DATED=false;     // any dates at all?
+var view='day', page=0, sortKey='d', sortDir=-1;
+var DAYS=30, ROWS=60;
+
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fail(e){console.error(e);document.getElementById('loading').style.display='none';document.getElementById('err').style.display='block';}
+
+var slug=CoasterHub.currentUser()||'carter';
+Promise.all([CoasterHub.fetchRides(slug), CoasterHub.fetchCoasters(), CoasterHub.fetchParks()])
+  .then(function(res){
+    var log=res[0], coasters=res[1].coasters, parks=res[2];
+    var byId={}; coasters.forEach(function(c){byId[c.id]=c;});
+    MODE=log.mode;
+    LOG=log.rides.map(function(r){
+      var c=byId[r.c]||{}, pk=parks[c.park];
+      return {i:r.i, c:r.c, d:r.d||null, num:r.num, n:r.n,
+              name:c.name||('#'+r.c), park:c.park||'—',
+              loc:(pk&&pk.region)?pk.region:''};
+    });
+    DATED=LOG.some(function(r){return r.d;});
+    // Only a full dated ride log makes a day-by-day view meaningful.
+    if(MODE!=='rides'){ view='all'; document.getElementById('seg').style.display='none'; }
+    if(MODE==='rides'){ sortKey='d'; sortDir=-1; }
+
+    var nm=esc(log.user||'Carter');
+    document.querySelector('.hero .badge').textContent = MODE==='rides'?'The log':'The credit log';
+    document.querySelector('.hero h1').textContent =
+      MODE==='rides' ? ('Every ride in '+nm+'’s count.') : (nm+'’s credits, in order.');
+    document.querySelector('.hero p').textContent =
+      MODE==='rides' ? 'Browse by park day or as one flat list — filter by year, park or name.'
+                     : (DATED ? 'Each coaster once, on the day it was first ridden.'
+                              : 'Each coaster once, in credit order.');
+    document.title=nm+'’s Rides — Coaster Hub';
+    document.getElementById('t_rides_k').textContent = MODE==='rides'?'Rides':'Credits';
+    document.getElementById('t_days_k').textContent = MODE==='rides'?'Days out':'Dated days';
+
+    buildFilters(); buildHead(); wire();
+    document.getElementById('loading').style.display='none';
+    document.getElementById('ui').style.display='block';
+    render();
+  }).catch(fail);
+
+function buildFilters(){
+  var years=[...new Set(LOG.map(function(r){return r.d?r.d.slice(0,4):null;}).filter(Boolean))].sort().reverse();
+  var ysel=document.getElementById('f_year');
+  years.forEach(function(y){var o=document.createElement('option');o.value=y;o.textContent=y;ysel.appendChild(o);});
+  if(!years.length) ysel.style.display='none';
+  var parks=[...new Set(LOG.map(function(r){return r.park;}).filter(Boolean))].sort(function(a,b){return a.localeCompare(b);});
+  var psel=document.getElementById('f_park');
+  parks.forEach(function(p){var o=document.createElement('option');o.value=p;o.textContent=p;psel.appendChild(o);});
+}
+function cols(){
+  var c=[{k:'d',t:'Date'},{k:'name',t:'Coaster',cls:'name'},{k:'park',t:'Park'},{k:'loc',t:'Location'}];
+  if(MODE==='credits'&&LOG.some(function(r){return r.num!=null;})) c.push({k:'num',t:'Credit #',num:true});
+  if(MODE==='credits'&&LOG.some(function(r){return r.n!=null;})) c.push({k:'n',t:'Rides',num:true});
+  return c;
+}
+function buildHead(){
+  var head=document.getElementById('head'); head.innerHTML='';
+  cols().forEach(function(c){
+    var th=document.createElement('th'); th.textContent=c.t; if(c.num)th.className='num';
+    th.onclick=function(){ if(sortKey===c.k)sortDir*=-1; else {sortKey=c.k;sortDir=c.num?-1:1;} page=0; render(); };
+    head.appendChild(th);
+  });
+}
+function wire(){
+  ['q','f_year','f_park'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){page=0;render();});});
+  document.getElementById('reset').onclick=function(){
+    ['q','f_year','f_park'].forEach(function(id){document.getElementById(id).value='';}); page=0; render();
+  };
+  document.getElementById('v_day').onclick=function(){setView('day');};
+  document.getElementById('v_all').onclick=function(){setView('all');};
+}
+function setView(v){
+  view=v; page=0;
+  document.getElementById('v_day').classList.toggle('on',v==='day');
+  document.getElementById('v_all').classList.toggle('on',v==='all');
+  render();
+}
+function filtered(){
+  var q=document.getElementById('q').value.trim().toLowerCase();
+  var fy=document.getElementById('f_year').value, fp=document.getElementById('f_park').value;
+  return LOG.filter(function(r){
+    if(fy&&(!r.d||r.d.slice(0,4)!==fy))return false;
+    if(fp&&r.park!==fp)return false;
+    if(q&&(r.name+' '+r.park+' '+r.loc).toLowerCase().indexOf(q)<0)return false;
+    return true;
+  });
+}
+function fmtDate(d){
+  if(!d)return '—';
+  var p=d.split('-'); if(p.length!==3)return d;
+  var dt=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));
+  return dt.toLocaleDateString(undefined,{timeZone:'UTC',year:'numeric',month:'short',day:'numeric'});
+}
+function render(){
+  var rows=filtered();
+  // tiles recount live against the current filter
+  var uniq=new Set(rows.map(function(r){return r.c;}));
+  var parks=new Set(rows.map(function(r){return r.park;}).filter(function(p){return p&&p!=='—';}));
+  var days=new Set(rows.map(function(r){return r.d;}).filter(Boolean));
+  var rideCount = MODE==='rides' ? rows.length
+    : rows.reduce(function(a,r){return a+(r.n!=null?r.n:1);},0);
+  document.getElementById('t_rides').textContent=rideCount.toLocaleString();
+  document.getElementById('t_coasters').textContent=uniq.size.toLocaleString();
+  document.getElementById('t_parks').textContent=parks.size.toLocaleString();
+  document.getElementById('t_days').textContent=days.size.toLocaleString();
+
+  document.getElementById('dayview').style.display = view==='day'?'block':'none';
+  document.getElementById('allview').style.display = view==='all'?'block':'none';
+  if(view==='day') renderDays(rows); else renderAll(rows);
+}
+function renderDays(rows){
+  var byDay={};
+  rows.forEach(function(r){ var k=r.d||'—'; (byDay[k]=byDay[k]||[]).push(r); });
+  var keys=Object.keys(byDay).sort().reverse();
+  var total=keys.length, start=page*DAYS, slice=keys.slice(start,start+DAYS);
+  document.getElementById('count').innerHTML='Showing <b>'+slice.length+'</b> of '+total+' day'+(total===1?'':'s');
+  document.getElementById('dayview').innerHTML=slice.map(function(k){
+    var list=byDay[k];
+    var laps={}; list.forEach(function(r){ laps[r.c]=(laps[r.c]||0)+1; });
+    var seen={}, uniqRows=[];
+    list.forEach(function(r){ if(!seen[r.c]){seen[r.c]=1;uniqRows.push(r);} });
+    var pk=[...new Set(list.map(function(r){return r.park;}))];
+    return '<details class="day"><summary>'
+      +'<span class="dt">'+esc(fmtDate(k==='—'?null:k))+'</span>'
+      +'<span class="pk">'+esc(pk.join(' · '))+'</span>'
+      +'<span class="n">'+list.length+' ride'+(list.length===1?'':'s')+' · '+uniqRows.length+' coaster'+(uniqRows.length===1?'':'s')+'</span>'
+      +'</summary><div class="inner">'
+      + uniqRows.map(function(r){
+          return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
+            +'<span class="cp">'+esc(r.park)+'</span>'
+            +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')+'</div>';
+        }).join('')
+      +'</div></details>';
+  }).join('') || '<p class="lead">No rides match those filters.</p>';
+  pager(total,DAYS);
+}
+function renderAll(rows){
+  var C=cols();
+  var sorted=rows.slice().sort(function(a,b){
+    var x=a[sortKey],y=b[sortKey];
+    if(x==null&&y==null)return 0;
+    if(x==null)return 1; if(y==null)return -1;
+    var c=(typeof x==='string')?x.localeCompare(y)*sortDir:(x-y)*sortDir;
+    return c!==0?c:String(a.name).localeCompare(String(b.name));
+  });
+  var total=sorted.length, start=page*ROWS, slice=sorted.slice(start,start+ROWS);
+  document.getElementById('count').innerHTML='Showing <b>'+slice.length+'</b> of '+total.toLocaleString()+' '+(MODE==='rides'?'rides':'credits');
+  document.querySelectorAll('#head th').forEach(function(th){
+    var a=th.querySelector('.ar'); if(a)a.remove();
+    var col=C.filter(function(c){return c.t===th.textContent.replace(/[▲▼]/g,'').trim();})[0];
+    if(col&&col.k===sortKey){var sp=document.createElement('span');sp.className='ar';sp.textContent=sortDir<0?'▼':'▲';th.appendChild(sp);}
+  });
+  document.getElementById('body').innerHTML=slice.map(function(r){
+    return '<tr>'+C.map(function(col){
+      var v=r[col.k];
+      if(col.k==='d')return '<td'+(v?'':' class="muted"')+'>'+esc(fmtDate(v))+'</td>';
+      if(v==null||v==='')return '<td class="muted">—</td>';
+      return '<td class="'+(col.num?'num ':'')+(col.cls||'')+'">'+esc(v)+'</td>';
+    }).join('')+'</tr>';
+  }).join('');
+  pager(total,ROWS);
+}
+function pager(total,per){
+  var pages=Math.ceil(total/per)||1;
+  var el=document.getElementById('pager');
+  if(pages<=1){el.innerHTML='';return;}
+  el.innerHTML='<button id="prev"'+(page===0?' disabled':'')+'>&larr; Prev</button>'
+    +'<span>Page '+(page+1)+' of '+pages+'</span>'
+    +'<button id="next"'+(page>=pages-1?' disabled':'')+'>Next &rarr;</button>';
+  var p=document.getElementById('prev'), n=document.getElementById('next');
+  if(p)p.onclick=function(){if(page>0){page--;render();window.scrollTo({top:0,behavior:'smooth'});}};
+  if(n)n.onclick=function(){if(page<pages-1){page++;render();window.scrollTo({top:0,behavior:'smooth'});}};
+}
+</script>
+</body>
+</html>

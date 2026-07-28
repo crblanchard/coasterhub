@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
+<title>Log a park day — Coaster Hub</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<style>
+  .bar{display:flex;align-items:center;gap:12px;height:56px}
+  .bar .brand-mark{height:34px;width:34px}
+  .bar .t{font-weight:800;letter-spacing:-.01em}
+  .bar .t b{color:var(--accent2)}
+  .gate{max-width:380px;margin:60px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
+  .gate h2{font-size:1.1rem;margin-bottom:6px}
+  .gate p{color:var(--muted);font-size:.88rem;margin-bottom:14px}
+  input,select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem;font-family:inherit}
+  .gate input{width:100%;margin-bottom:10px}
+  button.primary{background:var(--accent2);border:0;color:#06121a;font-weight:700;border-radius:10px;padding:11px 18px;cursor:pointer;font-size:.92rem}
+  button.primary:disabled{opacity:.4;cursor:default}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem}
+  button.ghost:hover{color:var(--fg)}
+  .setup{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:0 0 18px}
+  .fld{display:flex;flex-direction:column;gap:5px}
+  .fld label{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+  .grid{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .panel h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+  .clist{max-height:60vh;overflow-y:auto;margin:-4px -4px 0}
+  .crow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
+  .crow:last-child{border-bottom:0}
+  .crow .nm{flex:1;min-width:0}
+  .crow .nm b{display:block;font-weight:600;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .crow .nm span{color:var(--muted);font-size:.78rem}
+  .stepper{display:flex;align-items:center;gap:8px;flex:none}
+  .stepper button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center}
+  .stepper button:hover{border-color:var(--accent2)}
+  .stepper .v{min-width:1.6em;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
+  .stepper .v.zero{color:var(--muted);font-weight:400}
+  .basket .brow{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:.88rem;border-bottom:1px solid rgba(255,255,255,.05)}
+  .basket .brow:last-of-type{border-bottom:0}
+  .basket .brow .n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .basket .brow .x{color:var(--accent);cursor:pointer;padding:0 4px}
+  .tot{display:flex;justify-content:space-between;margin:12px 0;padding-top:12px;border-top:1px solid var(--line);font-weight:700}
+  .msg{margin-top:12px;font-size:.88rem}
+  .msg.ok{color:var(--accent2)} .msg.bad{color:var(--accent)}
+  .hint{color:var(--muted);font-size:.85rem;padding:18px 4px}
+  @media (max-width:820px){ .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="bar">
+    <a href="/" style="display:flex;align-items:center;gap:10px">
+      <img src="/mark.svg" alt="" class="brand-mark">
+      <span class="t">Log a <b>park day</b></span>
+    </a>
+  </div>
+</div>
+
+<!-- gate -->
+<div id="gate" class="gate">
+  <h2>Locked</h2>
+  <p>Enter the admin password to log rides.</p>
+  <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+  <button class="primary" id="unlock">Unlock</button>
+  <div class="msg bad" id="gate_msg"></div>
+</div>
+
+<!-- app -->
+<section class="block" id="app" style="display:none;padding:8px 0 60px"><div class="container">
+  <div class="setup">
+    <div class="fld"><label for="rider">Rider</label><select id="rider"></select></div>
+    <div class="fld"><label for="date">Date</label><input id="date" type="date"></div>
+    <div class="fld" style="flex:1;min-width:240px"><label for="park">Park</label><select id="park" style="width:100%"></select></div>
+    <div class="fld" style="flex:1;min-width:200px"><label for="search">Or search all coasters</label><input id="search" type="search" placeholder="Type 2+ letters&hellip;" style="width:100%"></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h3 id="listhead">Coasters</h3>
+      <div class="clist" id="clist"><div class="hint">Pick a park, or search for a coaster.</div></div>
+    </div>
+    <div class="panel basket">
+      <h3>This day</h3>
+      <div id="basket"><div class="hint" style="padding:6px 0">Nothing staged yet.</div></div>
+      <div class="tot"><span id="tot_c">0 coasters</span><span id="tot_r">0 rides</span></div>
+      <button class="primary" id="save" disabled>Save day</button>
+      <button class="ghost" id="clear" style="margin-left:8px">Clear</button>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+</div></section>
+
+<script src="/app.js"></script>
+<script>
+var TOKEN='', COASTERS=[], BYID={}, PARKS={}, basket={};   // basket: coasterId -> laps
+
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function $(id){return document.getElementById(id);}
+
+// ---- gate: same pattern as /edit, so unlocking one unlocks the other -------
+try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
+if(TOKEN) verify(TOKEN,true);
+$('unlock').onclick=function(){ verify($('pw').value,false); };
+$('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') verify($('pw').value,false); });
+
+function verify(pw,quiet){
+  if(!pw)return;
+  fetch('/api/admin/login',{method:'POST',headers:{'x-admin-token':pw}})
+    .then(function(r){
+      if(!r.ok) throw new Error('bad');
+      TOKEN=pw;
+      try{ sessionStorage.setItem('ch_admin',pw); }catch(e){}
+      $('gate').style.display='none'; $('app').style.display='block';
+      boot();
+    })
+    .catch(function(){
+      try{ sessionStorage.removeItem('ch_admin'); }catch(e){}
+      if(!quiet) $('gate_msg').textContent='Wrong password.';
+    });
+}
+
+function api(method,path,body){
+  return fetch(path,{method:method,headers:{'x-admin-token':TOKEN,'content-type':'application/json'},
+                     body:body?JSON.stringify(body):undefined})
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); });
+}
+
+// ---- boot ------------------------------------------------------------------
+function boot(){
+  // Date defaults to TODAY IN LOCAL TIME. Using toISOString() on a raw Date
+  // would roll back a day for anyone west of UTC after ~5pm.
+  var now=new Date();
+  var local=new Date(now.getTime()-now.getTimezoneOffset()*60000);
+  $('date').value=local.toISOString().slice(0,10);
+
+  CoasterHub.USERS.slice().sort(function(a,b){return a.name.localeCompare(b.name);})
+    .forEach(function(u){ var o=document.createElement('option'); o.value=u.slug; o.textContent=u.name; $('rider').appendChild(o); });
+  var remembered=''; try{ remembered=localStorage.getItem('ch_rider')||''; }catch(e){}
+  if(remembered) $('rider').value=remembered;
+
+  Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function(res){
+    COASTERS=res[0].coasters; PARKS=res[1];
+    COASTERS.forEach(function(c){BYID[c.id]=c;});
+    var counts={}; COASTERS.forEach(function(c){ if(c.park) counts[c.park]=(counts[c.park]||0)+1; });
+    var names=Object.keys(counts).sort(function(a,b){return a.localeCompare(b);});
+    var sel=$('park');
+    sel.innerHTML='<option value="">— pick a park —</option>'+names.map(function(p){
+      return '<option value="'+esc(p)+'">'+esc(p)+' ('+counts[p]+')</option>';
+    }).join('');
+    sel.addEventListener('change',function(){ $('search').value=''; renderList(); });
+    $('search').addEventListener('input',renderList);
+  });
+
+  $('save').onclick=save;
+  $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
+}
+
+// ---- coaster list ----------------------------------------------------------
+function currentList(){
+  var q=$('search').value.trim().toLowerCase(), park=$('park').value;
+  if(q.length>=2){
+    return COASTERS.filter(function(c){
+      return (c.name+' '+(c.park||'')).toLowerCase().indexOf(q)>=0;
+    }).slice(0,200);
+  }
+  if(park) return COASTERS.filter(function(c){return c.park===park;})
+    .sort(function(a,b){return a.name.localeCompare(b.name);});
+  return null;
+}
+function renderList(){
+  var list=currentList(), el=$('clist');
+  if(!list){ $('listhead').textContent='Coasters'; el.innerHTML='<div class="hint">Pick a park, or type 2+ letters to search every coaster.</div>'; return; }
+  if(!list.length){ $('listhead').textContent='Coasters'; el.innerHTML='<div class="hint">Nothing matches.</div>'; return; }
+  $('listhead').textContent=$('search').value.trim().length>=2 ? ('Search — '+list.length+' match'+(list.length===1?'':'es')) : ($('park').value+' — '+list.length);
+  el.innerHTML=list.map(function(c){
+    var n=basket[c.id]||0;
+    return '<div class="crow" data-id="'+c.id+'">'
+      +'<span class="nm"><b>'+esc(c.name)+'</b><span>'+esc(c.park||'—')+(c.type?' · '+esc(c.type):'')+'</span></span>'
+      +'<span class="stepper">'
+        +'<button data-act="dec" aria-label="one fewer">−</button>'
+        +'<span class="v'+(n?'':' zero')+'">'+n+'</span>'
+        +'<button data-act="inc" aria-label="one more">+</button>'
+      +'</span></div>';
+  }).join('');
+  el.querySelectorAll('button').forEach(function(b){
+    b.onclick=function(){
+      var id=+b.closest('.crow').dataset.id;
+      var n=basket[id]||0;
+      n += (b.dataset.act==='inc'?1:-1);
+      if(n<=0) delete basket[id]; else basket[id]=Math.min(n,50);
+      var v=b.closest('.stepper').querySelector('.v');
+      v.textContent=basket[id]||0; v.classList.toggle('zero',!basket[id]);
+      renderBasket();
+    };
+  });
+}
+
+// ---- basket ----------------------------------------------------------------
+function renderBasket(){
+  var ids=Object.keys(basket);
+  var rides=ids.reduce(function(a,k){return a+basket[k];},0);
+  $('tot_c').textContent=ids.length+' coaster'+(ids.length===1?'':'s');
+  $('tot_r').textContent=rides+' ride'+(rides===1?'':'s');
+  $('save').disabled=!ids.length;
+  if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">Nothing staged yet.</div>'; return; }
+  $('basket').innerHTML=ids.map(function(k){
+    var c=BYID[k]||{};
+    return '<div class="brow"><span class="n">'+esc(c.name||('#'+k))+'</span>'
+      +'<span class="lap">×'+basket[k]+'</span>'
+      +'<span class="x" data-id="'+k+'" title="Remove">×</span></div>';
+  }).join('');
+  $('basket').querySelectorAll('.x').forEach(function(x){
+    x.onclick=function(){ delete basket[x.dataset.id]; renderList(); renderBasket(); };
+  });
+}
+
+// ---- save ------------------------------------------------------------------
+function save(){
+  var entries=Object.keys(basket).map(function(k){return {c:+k,n:basket[k]};});
+  if(!entries.length)return;
+  var rider=$('rider').value, date=$('date').value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ $('msg').className='msg bad'; $('msg').textContent='Pick a valid date.'; return; }
+  $('save').disabled=true; $('msg').className='msg'; $('msg').textContent='Saving…';
+  api('POST','/api/rides',{user:rider,d:date,entries:entries})
+    .then(function(r){
+      basket={}; renderList(); renderBasket();
+      $('msg').className='msg ok';
+      $('msg').innerHTML='Saved '+r.added+' ride'+(r.added===1?'':'s')+' across '+r.coasters+' coaster'
+        +(r.coasters===1?'':'s')+'. New total: <b>'+r.total.toLocaleString()+'</b>. '
+        +'<a href="/user/'+encodeURIComponent(rider)+'/rides">View the log →</a>';
+    })
+    .catch(function(e){
+      $('save').disabled=false;
+      $('msg').className='msg bad'; $('msg').textContent=String(e.message||e);
+    });
+}
+</script>
+</body>
+</html>
