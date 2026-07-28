@@ -242,9 +242,15 @@ What makes this bigger than it looks:
   Its `h`/`l`/`inv` were filled from the SBF Visa Spinner model spec the other eight spinners
   in the table already carry, **not** from RCDB — rcdb.com returns 403 to this environment, so
   those three numbers are model-inferred and unverified against the listing.
-- **Duplicate spinner at Tulsa's Incredible Pizza Company.** #822 "Spin Coaster (Tulsa
-  Incredible Pizza)" (max) and #1140 "Spinning Coaster" (keltan) are the same ride entered
-  twice under the same park. Merge them the way #723 → #203 was merged (see gotcha 6).
+- **The Incredible Pizza spinners are a mess worth watching.** Two merges have already happened:
+  #1140 → **#822** (duplicate rows for the same Tulsa ride, now "Spinning Coaster"), and
+  #262 → **#679** (Carter's credit was filed under a Springfield park but the ride was actually
+  St. Louis; the now-orphaned `Incredible Pizza Company` park was deleted). #679 lost the
+  manufacturer/model/year/height/length that #262 carried, because those had been imported
+  against the *Springfield* listing and don't necessarily describe the St. Louis ride — only
+  `type=Steel` was kept. **#679 and #822 both still need specs.** Note the chain uses two naming
+  styles, `<City>'s Incredible Pizza Company` and `John's Incredible Pizza Company <City>`; keep
+  the city in the name so locations can't be confused again.
 - **Carter's total is 2,362, not 2,400.** Might be rounding, might be ~38 rides he knows are
   missing. `/log` is the tool for filling them in.
 - **Traveling shows.** Butler Amusements, Ray Cammack Shows, Davis Amusement Cascadia, Helm &
