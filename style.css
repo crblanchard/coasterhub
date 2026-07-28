@@ -103,9 +103,8 @@ select.userpick:hover{border-color:var(--accent2)}
 @media (max-width:680px){
   nav.links{display:none}                 /* replaced by the bottom bar */
   .nav-inner{flex-wrap:nowrap;height:60px;padding-top:0;padding-bottom:0;row-gap:0;gap:10px}
-  /* The mark still links home (and Home is in the tab bar), so drop the
-     wordmark and give the space to WHOSE count you are looking at. */
-  .brand-text{display:none}
+  /* The short "Viewing" label leaves room for the wordmark down to 320px. */
+  .brand-text{font-size:1.05rem}
   .people{min-width:0;flex:1;justify-content:flex-end}
   .whoami{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   select.userpick{flex:none;max-width:9.5em}

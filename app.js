@@ -422,21 +422,16 @@
         if (v === "__all__") location.href = (page === "coasters" || page === "rides") ? ("/" + page) : (page === "home" ? "/" : "/stats");
         else location.href = "/user/" + v + "/" + kind;
       });
-      // Say whose count this is, in words, right next to the picker. On a phone
-      // the page hero scrolls away, so this is the thing that keeps "who am I
-      // looking at?" answered — especially for a first-time visitor.
+      // Label the control, and let the dropdown carry the value — "Viewing"
+      // beside a picker reading "Max" says it once. On a phone the page hero
+      // scrolls away, so this keeps "who am I looking at?" answered on screen.
       var who = document.createElement("span");
       who.className = "whoami";
-      who.textContent = slug ? (nameFor(slug) + "’s count") : "Everyone";
+      who.textContent = "Viewing";
       wrap.insertBefore(who, wrap.firstChild);
     }
 
     buildTabBar(page, slug);
-  }
-
-  function nameFor(slug) {
-    for (var i = 0; i < USERS.length; i++) if (USERS[i].slug === slug) return USERS[i].name;
-    return slug;
   }
 
   // Mobile tab bar. Built here rather than in markup so all four pages get it
