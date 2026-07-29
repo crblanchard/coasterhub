@@ -66,7 +66,7 @@
   #loading{color:var(--muted);padding:40px 0}
   #err{display:none;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:20px}
   .sortpick{display:none}
-  td.cmeta{display:none}
+  td.cmeta,td.criders{display:none}
   @media (max-width:680px){
     .tiles{grid-template-columns:repeat(2,1fr)}
     .day summary{gap:8px}
@@ -100,6 +100,9 @@
                      font-size:.77rem;font-variant-numeric:tabular-nums;min-width:0;
                      overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #c_body td[data-k=status]{display:block;grid-column:2;grid-row:3;text-align:right}
+    #c_body td.criders{display:block;grid-column:1/-1;grid-row:4;color:var(--muted);
+                       font-size:.75rem;margin-top:4px}
+    #c_body td.criders:empty{display:none}
 
     /* Tap a card to see the columns the phone layout hides. The chevron is the
        affordance; :not() keeps the four summary cells out of the generic rule
@@ -111,10 +114,11 @@
       transform:rotate(45deg);transition:transform .15s}
     #c_body tr.open td[data-k=name]::after{transform:rotate(-135deg);top:18px}
     #c_body tr.open td.cmeta{display:none}
-    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not(.cmeta){
+    #c_body tr.open td.criders{grid-row:auto;order:99}
+    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not(.cmeta):not(.criders){
       display:flex;grid-column:1/-1;justify-content:space-between;align-items:baseline;gap:14px;
       text-align:left;font-size:.79rem;color:var(--fg);padding:5px 0 0;white-space:normal}
-    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not(.cmeta)::before{
+    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not(.cmeta):not(.criders)::before{
       content:attr(data-label);color:var(--muted);flex:none}
     #c_body tr.open td[data-k=status]{grid-row:auto}
     #c_body td.muted[data-k=park],#c_body td.muted[data-k=loc]{color:var(--muted)}
@@ -487,6 +491,7 @@ function pager(total,per){
 // ---------------------------------------------------------------------------
 var CreditList=(function(){
   var DATA=[], COLS=[], sortKey='park', sortDir=1, ready=false, loading=false;
+  var RIDERN={}, NRIDERS=0;   // coaster id -> how many riders have it
   var FILTS=['c_q','c_f_status','c_f_type','c_f_manu','c_f_model','c_f_park','c_f_loc'];
   var $=function(id){return document.getElementById(id);};
   var ALLCOLS=[
@@ -500,9 +505,32 @@ var CreditList=(function(){
   function open(){
     if(ready||loading) return;
     loading=true;
-    (CoasterHub.currentUser() ? forRider() : forEveryone()).then(build).catch(function(e){
-      console.error(e); loading=false;
-      $('c_loading').textContent='Couldn’t load the full list.';
+    var main=CoasterHub.currentUser() ? forRider() : forEveryone();
+    // Rider counts need every rider's list, not just the one being viewed.
+    // Fetched alongside the main load and allowed to fail on its own — a
+    // missing count should not take the whole list down with it.
+    Promise.all([main, riderCounts().catch(function(){return null;})])
+      .then(build).catch(function(e){
+        console.error(e); loading=false;
+        $('c_loading').textContent='Couldn’t load the full list.';
+      });
+  }
+  function riderCounts(){
+    return Promise.all(CoasterHub.USERS.map(function(u){
+      return CoasterHub.fetchUser(u.slug).catch(function(){return null;});
+    })).then(function(all){
+      var n={}, got=0;
+      all.forEach(function(j){
+        if(!j) return;
+        got++;
+        // Carter's file is a ride log with repeats, so count each rider once.
+        var seen={};
+        (j.credits||j.rides||[]).forEach(function(x){
+          var id=(typeof x==='object')?x.c:x;
+          if(id!=null&&!seen[id]){ seen[id]=1; n[id]=(n[id]||0)+1; }
+        });
+      });
+      RIDERN=n; NRIDERS=got;
     });
   }
   function forRider(){
@@ -616,7 +644,15 @@ var CreditList=(function(){
       if(c.rides!=null) bits.push(c.rides+(c.rides===1?' ride':' rides'));
       // first-ridden is deliberately left out — it pushed this line past the
       // half-width column and everything after it clipped.
-      return '<tr>'+cells+'<td class="cmeta" data-k="_meta">'+esc(bits.join(' · '))+'</td></tr>';
+      // Phone-only line: how many of the riders have this one. No good place
+      // for it in the desktop table, so it is display:none there.
+      var rn=RIDERN[c.id]||0;
+      var who=NRIDERS
+        ? (rn+' of '+NRIDERS+' rider'+(NRIDERS===1?'':'s')+' have ridden this')
+        : '';
+      return '<tr>'+cells
+        +'<td class="cmeta" data-k="_meta">'+esc(bits.join(' · '))+'</td>'
+        +'<td class="criders" data-k="_riders">'+esc(who)+'</td></tr>';
     }).join('');
   }
   return {open:open};
