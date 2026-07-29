@@ -256,7 +256,7 @@ What makes this bigger than it looks:
 
 ### 4. Smaller items
 
-- **116 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
+- **115 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
   has an "Only incomplete" filter; `tools/import-captaincoaster.js` can backfill details.
 - ~~**The `"?????"` park**~~ — **resolved.** Coaster #793 "Spinning Coaster (The Track 3 SBF)"
   was Max's credit (an earlier version of this file said Keltan's — wrong). It's the Spinning
