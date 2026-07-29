@@ -46,7 +46,7 @@ downstream will catch a mistake now:
 
 | | |
 |---|---|
-| coasters | **1,137** |
+| coasters | **1,129** |
 | parks | **238** |
 | carter | 2,362 rides / 562 credits |
 | cole | 546 credits |
