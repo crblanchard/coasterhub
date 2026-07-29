@@ -338,9 +338,10 @@ if(!slug){
     coasters.forEach(function(c){ var pk=parks[c.park];
       BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
 
-    // the pool you rank from: your own credits
+    // The pool you rank from: your own credits — one entry per coaster, so a
+    // coaster ridden thirty times is still ranked once.
     var seen={};
-    (user.credits||user.rides||[]).forEach(function(x){
+    (user.rides||[]).forEach(function(x){
       var id=(typeof x==='object')?x.c:x; if(BYID[id]) seen[id]=1;
     });
     MINE=Object.keys(seen).map(Number);

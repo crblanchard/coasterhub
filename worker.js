@@ -78,56 +78,40 @@ async function getParks(env) {
 async function getUser(env, slug) {
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
   if (!u) return null;
-  if (u.mode === "rides") {
-    const { results } = await env.DB.prepare("SELECT coaster_id, d FROM rides WHERE user_slug = ? ORDER BY id").bind(slug).all();
-    return { user: u.name, rides: results.map(x => ({ c: x.coaster_id, d: x.d })) };
-  }
-  const { results } = await env.DB.prepare("SELECT coaster_id, first, num, n FROM credits WHERE user_slug = ? ORDER BY id").bind(slug).all();
-  const credits = results.map(x => {
-    const o = { c: x.coaster_id };
-    if (x.first != null) o.first = x.first;
-    if (x.num != null) o.num = x.num;
-    if (x.n != null) o.n = x.n;
-    return o;
-  });
-  return { user: u.name, credits };
+  const { results } = await env.DB.prepare("SELECT coaster_id, d FROM rides WHERE user_slug = ? ORDER BY id").bind(slug).all();
+  return { user: u.name, rides: results.map(x => ({ c: x.coaster_id, d: x.d })) };
 }
 
 // ---- Ride log -------------------------------------------------------------
-// One shape for every rider so a single page can render them all:
-//   { user, mode, rides:[{ i?, c, d, num?, n? }] }
-// `rides`-mode riders (a full dated log) get one entry per ride INCLUDING the
-// row id, so an individual mis-tapped ride can be deleted. `credits`-mode riders
-// are projected into the same shape with d = first-ridden, so they render as a
-// "credit log" (each coaster once) rather than a ride-by-ride history.
+// One shape for every rider:  { user, rides:[{ i, c, d }] }
+// One row per ride, each with the row id so an individual mis-tapped ride can
+// be deleted, and `d` null when the date is not known. Undated rows sort last:
+// they are still credits, they just have no place on a calendar.
 async function getRides(env, slug) {
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
   if (!u) return null;
-  if (u.mode === "rides") {
-    const { results } = await env.DB.prepare(
-      "SELECT id, coaster_id, d FROM rides WHERE user_slug = ? ORDER BY d, id"
-    ).bind(slug).all();
-    return { user: u.name, mode: "rides", rides: results.map(x => ({ i: x.id, c: x.coaster_id, d: x.d })) };
-  }
   const { results } = await env.DB.prepare(
-    "SELECT coaster_id, first, num, n FROM credits WHERE user_slug = ? ORDER BY id"
+    "SELECT id, coaster_id, d FROM rides WHERE user_slug = ? ORDER BY d IS NULL, d, id"
   ).bind(slug).all();
-  return { user: u.name, mode: "credits", rides: results.map(x => {
-    const o = { c: x.coaster_id, d: x.first == null ? null : x.first };
-    if (x.num != null) o.num = x.num;
-    if (x.n != null) o.n = x.n;
-    return o;
-  }) };
+  return { user: u.name, rides: results.map(x => ({ i: x.id, c: x.coaster_id, d: x.d })) };
 }
 
-async function userTotal(env, slug, mode) {
-  const t = mode === "rides"
-    ? await env.DB.prepare("SELECT COUNT(*) AS n FROM rides WHERE user_slug = ?").bind(slug).first()
-    : await env.DB.prepare("SELECT COUNT(*) AS n FROM credits WHERE user_slug = ?").bind(slug).first();
-  return t ? t.n : 0;
+// Credits are the headline number (distinct coasters); rides counts the laps.
+async function userTotal(env, slug) {
+  const t = await env.DB.prepare(
+    "SELECT COUNT(DISTINCT coaster_id) AS credits, COUNT(*) AS rides FROM rides WHERE user_slug = ?"
+  ).bind(slug).first();
+  return t ? { credits: t.credits, rides: t.rides } : { credits: 0, rides: 0 };
 }
 
-// Log a whole park day in one batch: { user, d:"YYYY-MM-DD", entries:[{c,n}] }.
+// Add rides in one batch: { user, d:"YYYY-MM-DD"|null, entries:[{c,n}] }.
+//
+// Two ways in, one write path. A park day carries a date and a lap count per
+// coaster. A list built from memory carries neither: d is null and every entry
+// is a single row, because "I have ridden this" is one ride's worth of fact.
+// Passing d null is therefore explicit, not a missing field — see the null
+// check below, which distinguishes "no date given" from "bad date given".
+//
 // EVERY coaster id is validated up front and the whole batch is rejected if any
 // is unknown — a typo must never half-log a day. Returns {added, total, date}.
 async function addRides(env, b) {
@@ -135,8 +119,10 @@ async function addRides(env, b) {
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
   if (!u) return { bad: [400, "no such user"] };
 
-  const d = String(b && b.d || "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return { bad: [400, "need d as YYYY-MM-DD"] };
+  // null/absent d = undated. Anything else must be a real date; a malformed
+  // string is a bug worth surfacing, not something to silently treat as blank.
+  const d = (b && b.d != null && b.d !== "") ? String(b.d) : null;
+  if (d !== null && !/^\d{4}-\d{2}-\d{2}$/.test(d)) return { bad: [400, "need d as YYYY-MM-DD or null"] };
 
   const entries = Array.isArray(b && b.entries) ? b.entries : [];
   if (!entries.length) return { bad: [400, "no entries"] };
@@ -160,34 +146,39 @@ async function addRides(env, b) {
   if (unknown.length) return { bad: [400, "unknown coaster id(s): " + unknown.join(", ")] };
 
   const batch = [];
-  if (u.mode === "rides") {
-    // one row per lap, so each ride stays individually deletable
-    for (const e of norm) {
+  // One row per lap, so each ride stays individually deletable.
+  //
+  // An undated entry is only inserted if that coaster has no undated row yet:
+  // ticking the same coaster off a list twice means "yes, I have ridden it",
+  // not "I rode it twice". Dated rides have no such guard — riding something
+  // twice on one day is a real thing to record.
+  for (const e of norm) {
+    if (d === null) {
+      // Laps are unknown, so an undated entry is a single row — and only if
+      // the rider has NO row for that coaster yet. "I have ridden this" adds
+      // nothing when we already know they have, whether from a logged day or
+      // an earlier pass through the list, and inserting anyway would inflate
+      // their ride count with a ride that never happened.
+      batch.push(env.DB.prepare(
+        "INSERT INTO rides (user_slug,coaster_id,d) SELECT ?,?,NULL WHERE NOT EXISTS " +
+        "(SELECT 1 FROM rides WHERE user_slug = ? AND coaster_id = ?)"
+      ).bind(slug, e.c, slug, e.c));
+    } else {
       for (let k = 0; k < e.n; k++) {
         batch.push(env.DB.prepare("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,?)").bind(slug, e.c, d));
       }
-    }
-  } else {
-    // credits-mode: earliest date wins, ride counts accumulate, an existing
-    // credit number (Max's milestones) is never touched.
-    for (const e of norm) {
-      batch.push(env.DB.prepare(
-        "INSERT INTO credits (user_slug,coaster_id,first,num,n) VALUES (?,?,?,NULL,?) " +
-        "ON CONFLICT(user_slug,coaster_id) DO UPDATE SET " +
-        "first = CASE WHEN first IS NULL THEN excluded.first " +
-        "WHEN excluded.first < first THEN excluded.first ELSE first END, " +
-        "n = COALESCE(n,0) + excluded.n"
-      ).bind(slug, e.c, d, e.n));
     }
   }
 
   const CHUNK = 90;                            // D1 caps statements per batch call
   for (let i = 0; i < batch.length; i += CHUNK) await env.DB.batch(batch.slice(i, i + CHUNK));
 
+  const total = await userTotal(env, slug);
   return {
-    added: norm.reduce((a, e) => a + e.n, 0),
+    added: d === null ? norm.length : norm.reduce((a, e) => a + e.n, 0),
     coasters: norm.length,
-    total: await userTotal(env, slug, u.mode),
+    total: total.rides,
+    credits: total.credits,
     date: d,
   };
 }
@@ -270,7 +261,7 @@ async function seed(env, origin) {
   const P = (sql, ...b) => batch.push(env.DB.prepare(sql).bind(...b));
 
   // wipe (idempotent reseed)
-  for (const t of ["rides","credits","coasters","parks","users"]) batch.push(env.DB.prepare("DELETE FROM " + t));
+  for (const t of ["rides","coasters","parks","users"]) batch.push(env.DB.prepare("DELETE FROM " + t));
 
   for (const c of coasters) {
     P("INSERT INTO coasters (id,name,park,type,manu,model,h,s,l,inv,dur,laps,yr,opened,openedPrec,closed,closedPrec) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -283,22 +274,11 @@ async function seed(env, origin) {
   }
   for (const u of users) {
     const data = await fetchAsset(env, origin, u.file);
-    const mode = Array.isArray(data.rides) ? "rides" : "credits";
-    P("INSERT INTO users (slug,name,mode,email,created) VALUES (?,?,?,?,datetime('now'))", u.slug, data.user || u.name, mode, null);
-    if (mode === "rides") {
-      for (const r of data.rides) {
-        const c = typeof r === "object" ? r.c : r;
-        const d = typeof r === "object" ? (r.d ?? null) : null;
-        P("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,?)", u.slug, c, d);
-      }
-    } else {
-      for (const cr of data.credits) {
-        const c = typeof cr === "object" ? cr.c : cr;
-        const first = typeof cr === "object" ? (cr.first ?? null) : null;
-        const num = typeof cr === "object" ? (cr.num ?? null) : null;
-        const n = typeof cr === "object" ? (cr.n ?? null) : null;
-        P("INSERT OR IGNORE INTO credits (user_slug,coaster_id,first,num,n) VALUES (?,?,?,?,?)", u.slug, c, first, num, n);
-      }
+    P("INSERT INTO users (slug,name,mode,email,created) VALUES (?,?,'rides',?,datetime('now'))", u.slug, data.user || u.name, null);
+    for (const r of (data.rides || [])) {
+      const c = typeof r === "object" ? r.c : r;
+      const d = typeof r === "object" ? (r.d ?? null) : null;
+      P("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,?)", u.slug, c, d);
     }
   }
   // D1 batch has a per-call statement cap; chunk it.
@@ -442,33 +422,38 @@ export default {
         return afterWrite(ctx, env, json({ ok: true }));
       }
 
-      // merge coaster `from` into `to` (repoints all credits/rides, deletes `from`)
+      // merge coaster `from` into `to` (repoints every ride, deletes `from`)
+      // Two undated rows for the same rider would collapse into one credit
+      // anyway, so the dedupe keeps the table honest rather than changing counts.
       if (request.method === "POST" && path === "/api/merge") {
         const { from, to } = await request.json();
         if (!from || !to || from === to) return err(400, "need distinct from/to");
         await env.DB.batch([
-          env.DB.prepare("UPDATE OR IGNORE credits SET coaster_id = ? WHERE coaster_id = ?").bind(to, from),
-          env.DB.prepare("DELETE FROM credits WHERE coaster_id = ?").bind(from),
           env.DB.prepare("UPDATE rides SET coaster_id = ? WHERE coaster_id = ?").bind(to, from),
+          env.DB.prepare(
+            "DELETE FROM rides WHERE d IS NULL AND id NOT IN " +
+            "(SELECT MIN(id) FROM rides WHERE d IS NULL GROUP BY user_slug, coaster_id)"
+          ),
           env.DB.prepare("DELETE FROM coasters WHERE id = ?").bind(from),
         ]);
         return afterWrite(ctx, env, json({ ok: true }));
       }
 
-      // add / update a rider's credit
+      // add a rider's credit — one undated ride, unless they already have the
+      // coaster, in which case there is nothing to add
       if (request.method === "POST" && path === "/api/credit") {
         const b = await request.json();
         if (!b.user || !b.coaster_id) return err(400, "need user + coaster_id");
         await env.DB.prepare(
-          "INSERT INTO credits (user_slug,coaster_id,first,num,n) VALUES (?,?,?,?,?) " +
-          "ON CONFLICT(user_slug,coaster_id) DO UPDATE SET first=excluded.first, num=excluded.num, n=excluded.n"
-        ).bind(b.user, b.coaster_id, b.first??null, b.num??null, b.n??null).run();
+          "INSERT INTO rides (user_slug,coaster_id,d) SELECT ?,?,? WHERE NOT EXISTS " +
+          "(SELECT 1 FROM rides WHERE user_slug = ? AND coaster_id = ?)"
+        ).bind(b.user, b.coaster_id, b.first??null, b.user, b.coaster_id).run();
         return afterWrite(ctx, env, json({ ok: true }));
       }
-      // remove a rider's credit
+      // remove a rider's credit — every ride of it, not just one lap
       if (request.method === "DELETE" && path === "/api/credit") {
         const b = await request.json();
-        await env.DB.prepare("DELETE FROM credits WHERE user_slug = ? AND coaster_id = ?").bind(b.user, b.coaster_id).run();
+        await env.DB.prepare("DELETE FROM rides WHERE user_slug = ? AND coaster_id = ?").bind(b.user, b.coaster_id).run();
         return afterWrite(ctx, env, json({ ok: true }));
       }
 
@@ -486,7 +471,7 @@ export default {
         const row = await env.DB.prepare("SELECT user_slug FROM rides WHERE id = ?").bind(i).first();
         if (!row) return err(404, "no such ride");
         await env.DB.prepare("DELETE FROM rides WHERE id = ?").bind(i).run();
-        return afterWrite(ctx, env, json({ ok: true, total: await userTotal(env, row.user_slug, "rides") }));
+        return afterWrite(ctx, env, json({ ok: true, ...(await userTotal(env, row.user_slug)) }));
       }
 
       // every park referenced by a coaster, with coords (null = not on the map yet) + coaster count

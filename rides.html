@@ -244,22 +244,31 @@ Promise.all([
     var logs=res[0], coasters=res[1].coasters, parks=res[2];
     var byId={}; coasters.forEach(function(c){byId[c.id]=c;});
 
+    // Everyone is one row per ride now, so there is no stored mode to read.
+    // What actually differs between a logged park day and a list someone
+    // ticked off is whether any coaster appears twice — that is the only
+    // evidence we have that ride counts mean anything. Derive it per rider.
     LOG=[];
     logs.forEach(function(log){
+      var seen={}, repeats=false;
+      log.rides.forEach(function(r){ if(seen[r.c]) repeats=true; seen[r.c]=1; });
       log.rides.forEach(function(r){
         var c=byId[r.c]||{}, pk=parks[c.park];
-        LOG.push({i:r.i, c:r.c, d:r.d||null, num:r.num, n:r.n,
-                  rider:log.user, rmode:log.mode,
+        LOG.push({i:r.i, c:r.c, d:r.d||null,
+                  rider:log.user, rep:repeats,
                   name:c.name||('#'+r.c), park:c.park||'—',
                   loc:(pk&&pk.region)?pk.region:''});
       });
     });
-    MODE = COMBINED ? 'mixed' : logs[0].mode;
+    MODE = COMBINED ? 'mixed' : (LOG.length && LOG[0].rep ? 'rides' : 'credits');
     DATED = LOG.some(function(r){return r.d;});
 
-    // A day-by-day view only means something when the entries carry dates.
+    // A day-by-day view only means something when the entries carry dates —
+    // that is the whole test now. Someone who ticked a list off with dates on
+    // some of it gets the day view for the part that has them, and the cards
+    // read "N new credits" rather than "N rides" because no re-ride is implied.
     // Hide just that button, not the whole switch — Full list is always there.
-    if(!DATED || (!COMBINED && MODE!=='rides')){
+    if(!DATED){
       view='all'; document.getElementById('v_day').style.display='none';
     }
     sortKey='d'; sortDir=-1;
@@ -323,8 +332,6 @@ function cols(){
   var c=[{k:'d',t:'Date'}];
   if(COMBINED) c.push({k:'rider',t:'Rider'});
   c=c.concat([{k:'name',t:'Coaster',cls:'name'},{k:'park',t:'Park'},{k:'loc',t:'Location'}]);
-  if(MODE==='credits'&&LOG.some(function(r){return r.num!=null;})) c.push({k:'num',t:'Credit #',num:true});
-  if(MODE==='credits'&&LOG.some(function(r){return r.n!=null;})) c.push({k:'n',t:'Rides',num:true});
   return c;
 }
 function buildHead(){
@@ -390,11 +397,8 @@ function render(){
   var uniq=new Set(rows.map(function(r){return r.c;}));
   var parks=new Set(rows.map(function(r){return r.park;}).filter(function(p){return p&&p!=='—';}));
   var days=new Set(rows.map(function(r){return r.d;}).filter(Boolean));
-  // rides-mode entries are one row per ride; credits-mode entries carry their
-  // own ride count (n) where it's known, else count the credit once.
-  var rideCount = rows.reduce(function(a,r){
-    return a + (r.rmode==='rides' ? 1 : (r.n!=null?r.n:1));
-  },0);
+  // one row per ride, always — an undated row is one ride we know happened
+  var rideCount = rows.length;
   document.getElementById('t_rides').textContent=rideCount.toLocaleString();
   document.getElementById('t_coasters').textContent=uniq.size.toLocaleString();
   document.getElementById('t_parks').textContent=parks.size.toLocaleString();
@@ -428,8 +432,9 @@ function renderDays(rows){
     var seen={}, uniqRows=[];
     list.forEach(function(r){ if(!seen[r.c]){seen[r.c]=1;uniqRows.push(r);} });
     var pk=[...new Set(list.map(function(r){return r.park;}))];
-    // credits-mode riders have no ride-by-ride history, so count new credits
-    var isRides=list[0].rmode==='rides';
+    // Without a re-ride anywhere in their log, "8 rides · 8 coasters" would be
+    // saying the same thing twice — these are 8 credits picked up that day.
+    var isRides=list[0].rep;
     var what=isRides
       ? (list.length+' ride'+(list.length===1?'':'s')+' · '+uniqRows.length+' coaster'+(uniqRows.length===1?'':'s'))
       : (uniqRows.length+' new credit'+(uniqRows.length===1?'':'s'));

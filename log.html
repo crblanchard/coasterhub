@@ -353,7 +353,8 @@ function save(){
       basket={}; renderList(); renderBasket();
       $('msg').className='msg ok';
       $('msg').innerHTML='Saved '+r.added+' ride'+(r.added===1?'':'s')+' across '+r.coasters+' coaster'
-        +(r.coasters===1?'':'s')+'. New total: <b>'+r.total.toLocaleString()+'</b>. '
+        +(r.coasters===1?'':'s')+'. Now on <b>'+r.credits.toLocaleString()+'</b> coaster'
+        +(r.credits===1?'':'s')+' over '+r.total.toLocaleString()+' ride'+(r.total===1?'':'s')+'. '
         +'<a href="/user/'+encodeURIComponent(rider)+'/rides">View the log →</a>';
     })
     .catch(function(e){

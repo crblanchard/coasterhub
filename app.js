@@ -2,21 +2,22 @@
    Loads normalized JSON (coasters + parks + a user's data) and computes
    every stat the site shows. Pure computeStats() is Node-testable.
 
-   A user file can carry different levels of detail. The engine detects three
-   INDEPENDENT capabilities and flags each, so the UI shows only what the data
-   supports (people's dashboards look the same — richer data just adds panels):
-     • firstDates  — a date per credit  -> timeline (cumulative + new-per-year)
-     • rideCounts  — a ride count per credit -> total rides, most-ridden, re-ride distance
-     • activity    — a full dated ride log -> calendar heatmap, rides-per-year, biggest days
-     • order       — a credit number per credit -> milestone credits (1st, 100th, 200th, ...)
+   Every rider has ONE shape — a list of rides, each with an optional date:
 
-   Accepted shapes (any mix of the optional fields works):
-     {user, credits:["id", ...]}                              // collection only
-     {user, credits:[{c:"id", n:12}, ...]}                    // + ride counts
-     {user, credits:[{c:"id", first:"YYYY-MM-DD"}, ...]}      // + first-ridden dates
-     {user, credits:[{c:"id", first:"2019", n:12}, ...]}      // + both (year ok)
-     {user, credits:[{c:"id", num:200}, ...]}                 // + credit numbers (milestones)
-     {user, rides:[{c:"id", d:"YYYY-MM-DD"}, ...]}            // full log (all of the above)
+     {user, rides:[{c:"id", d:"YYYY-MM-DD"}, ...]}   // d null = date unknown
+
+   That single shape covers both ways of using the site. Ticking coasters off a
+   list leaves one undated row each; logging a park day leaves one dated row per
+   lap. Most riders end up with a mix, and the difference is only how much
+   detail a given row carries — not a different kind of account.
+
+   The engine reads three INDEPENDENT capabilities off that data and flags each,
+   so the UI shows only what is actually supported and dashboards otherwise look
+   the same (richer data just adds panels):
+     • firstDates  — some rows are dated -> timeline (cumulative + new-per-year)
+     • rideCounts  — a re-ride exists    -> total rides, most-ridden, re-ride distance
+     • activity    — both of the above   -> calendar heatmap, rides-per-year, biggest days
+   None of them is stored; each turns itself on as a rider logs more.
    (Legacy: computeStats may also be called with a bare rides array.) */
 (function (global) {
   "use strict";
@@ -60,67 +61,39 @@
     var creditCount = {};    // id -> number of rides (when counts are known)
     var firstRidden = {};    // id -> earliest date string ('YYYY' or 'YYYY-MM-DD')
     var creditSet = {};      // id -> true
-    var creditNum = {};      // id -> the rider's credit number for that coaster (order)
     var hasFullLog = false, hasCounts = false;
 
-    var ridesInput = null, creditsInput = null;
-    if (Array.isArray(userInput)) ridesInput = userInput;
-    else if (userInput && userInput.rides) ridesInput = userInput.rides;
-    else if (userInput && userInput.credits) creditsInput = userInput.credits;
-    else ridesInput = [];
+    // One shape for every rider: rides:[{c, d}], with d null when the date is
+    // not known. A credit is a distinct coaster id; first-ridden is the
+    // earliest date seen for it. An undated row still counts as a credit —
+    // that is what lets someone put their list together without remembering
+    // when they rode any of it.
+    var ridesInput = Array.isArray(userInput) ? userInput
+                   : (userInput && userInput.rides) ? userInput.rides : [];
 
-    if (ridesInput) {
-      ridesInput.forEach(function (r) {
-        if (!(r.c in byId)) return;
-        creditSet[r.c] = true;
-        creditCount[r.c] = (creditCount[r.c] || 0) + 1;
-        if (r.d) {
-          log.push({ c: r.c, d: r.d });
-          if (!firstRidden[r.c] || r.d < firstRidden[r.c]) firstRidden[r.c] = r.d;
-        }
-      });
-      hasCounts = ridesInput.length > 0;
-      hasFullLog = log.length > 0;
-    } else {
-      creditsInput.forEach(function (item) {
-        var id = (item && typeof item === "object") ? item.c : item;
-        if (!(id in byId)) return;
-        creditSet[id] = true;
-        if (item && typeof item === "object") {
-          if (item.n != null) { creditCount[id] = (creditCount[id] || 0) + item.n; hasCounts = true; }
-          if (item.first) { var f = String(item.first); if (!firstRidden[id] || f < firstRidden[id]) firstRidden[id] = f; }
-          if (item.num != null) { creditNum[id] = item.num; }
-        }
-      });
-    }
+    ridesInput.forEach(function (r) {
+      if (!(r.c in byId)) return;
+      creditSet[r.c] = true;
+      creditCount[r.c] = (creditCount[r.c] || 0) + 1;
+      if (r.d) {
+        log.push({ c: r.c, d: r.d });
+        if (!firstRidden[r.c] || r.d < firstRidden[r.c]) firstRidden[r.c] = r.d;
+      }
+    });
+
+    // "Counts are known" means a re-ride has actually been recorded somewhere.
+    // A list built by ticking coasters off leaves exactly one row each, which
+    // says nothing about how many times they were ridden — so ride totals,
+    // miles and airtime stay hidden rather than quietly reporting the floor as
+    // if it were the number. A full log needs dates on top of that. Both flip
+    // on by themselves as a rider logs more; neither is stored anywhere.
+    var creditIds = Object.keys(creditSet);
+    hasCounts = ridesInput.length > creditIds.length;
+    hasFullLog = hasCounts && log.length > 0;
+
     var hasFirstDates = Object.keys(firstRidden).length > 0;
-    var hasOrder = Object.keys(creditNum).length > 0;
 
-    // ---- Milestone credits (need a credit number per credit; no dates required) ---
-    // Sort credits by their number; surface the 1st, every 100th, and the latest.
-    var milestones = [];
-    if (hasOrder) {
-      var orderedNums = Object.keys(creditNum)
-        .map(function (id) { return { id: +id, num: creditNum[id] }; })
-        .sort(function (a, b) { return a.num - b.num; });
-      var maxN = orderedNums[orderedNums.length - 1].num, picks = {};
-      picks[1] = true;
-      for (var mm = 100; mm <= maxN; mm += 100) picks[mm] = true;
-      picks[maxN] = true;
-      Object.keys(picks).map(Number).sort(function (a, b) { return a - b; }).forEach(function (t) {
-        // the coaster reached at credit number t (exact, else the highest number below t)
-        var chosen = null;
-        for (var i = 0; i < orderedNums.length; i++) {
-          if (orderedNums[i].num > t) break;
-          chosen = orderedNums[i];
-        }
-        if (!chosen) return;
-        var c = byId[chosen.id]; if (!c) return;
-        milestones.push({ n: t, name: c.name, park: c.park });
-      });
-    }
-
-    var creditList = Object.keys(creditSet).map(function (id) { return byId[id]; });
+    var creditList = creditIds.map(function (id) { return byId[id]; });
 
     // ---- Timeline aggregates (need first-ridden dates; work for log OR dates) -
     var newByYear = {}, years = new Set();
@@ -241,8 +214,7 @@
         activity: hasFullLog,
         timeline: hasFullLog || (hasFirstDates && Object.keys(firstRidden).length === creditList.length),
         firstDates: hasFirstDates,
-        rideCounts: hasCounts,
-        order: hasOrder
+        rideCounts: hasCounts
       },
       kpi: {
         credits: creditList.length,
@@ -276,7 +248,6 @@
       },
       day_detail: dayDetail,
       first_rides: firstRides,
-      milestones: milestones,
       geo: { states: [...states].sort(), countries: [...countries].sort(),
              n_states: states.size, n_countries: nCountries, n_parks: parksGeo.length },
       parksGeo: parksGeo,
@@ -287,8 +258,7 @@
           m[id] = {
             rides: creditCount[id] != null ? creditCount[id] : (dates.length || null),
             first: dates[0] || firstRidden[id] || null,
-            last: dates[dates.length - 1] || null, dates: dates,
-            num: creditNum[id] != null ? creditNum[id] : null
+            last: dates[dates.length - 1] || null, dates: dates
           };
         });
         return m;

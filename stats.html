@@ -86,7 +86,7 @@
 <div class="container" id="hub" style="display:none">
   <section class="block" style="padding-top:8px">
     <span class="eyebrow">The riders</span><h2>Whose stats?</h2>
-    <p class="lead">Pick a rider to dive into their maps, records, and milestones.</p>
+    <p class="lead">Pick a rider to dive into their maps, records, and how their count grew.</p>
     <div class="grid" id="hub_people"></div>
   </section>
   <section class="block">
@@ -127,12 +127,6 @@
 <section class="block"><div class="container">
   <span class="eyebrow">The records</span><h2>Personal bests</h2>
   <div class="records" id="records"></div>
-</div></section>
-
-<section class="block" id="sec_milestones"><div class="container">
-  <span class="eyebrow">Milestones</span><h2>Milestone credits</h2>
-  <p class="lead">The 1st, every 100th, and the latest coaster — in the order they were ridden.</p>
-  <div class="records" id="milestones"></div>
 </div></section>
 
 <section class="block"><div class="container">
@@ -313,13 +307,6 @@ function render(s){
   const hide=id=>{var el=document.getElementById(id); if(el) el.style.display='none';};
   if(!has.timeline){ hide('sec_overtime'); }                       // cumulative + new-per-year
   if(!has.activity){ ['sec_activity','panel_days','panel_rides_year'].forEach(hide); } // calendar, biggest days, rides/year
-  if(has.order){
-    document.getElementById('milestones').innerHTML=(s.milestones||[]).map(function(m){
-      return '<div class="rec"><div class="tag">#'+m.n+'</div><div class="rname">'+esc(m.name)+'</div>'+
-             '<div class="rval" style="font-size:.92rem;color:var(--muted);font-weight:600">'+esc(m.park)+'</div></div>';
-    }).join('');
-  } else { hide('sec_milestones'); }
-
   const circleMetric=has.activity?'rides':'credits';
   document.getElementById('geo_sub').textContent=k.parks+' parks across '+k.states+' U.S. states and '+k.countries+' countries. Circle size = '+circleMetric+'.';
   document.getElementById('parks_title').textContent=has.activity?'Top parks by rides':'Top parks by credits';
