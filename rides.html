@@ -221,10 +221,13 @@ Promise.all([
     buildFilters(); buildHead(); wire();
     document.getElementById('loading').style.display='none';
     document.getElementById('ui').style.display='block';
+    // render() first, always: it fills the four tiles as well as the log, and
+    // setView('list') doesn't call it — landing straight on ?view=list used to
+    // leave the tiles showing em-dashes.
+    render();
     // ?view=list opens straight on the full list — that's where /coasters and
     // the link on Stats now point.
     if(new URLSearchParams(location.search).get('view')==='list') setView('list');
-    else render();
   }).catch(fail);
 
 function buildFilters(){
