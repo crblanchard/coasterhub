@@ -46,12 +46,12 @@ downstream will catch a mistake now:
 
 | | |
 |---|---|
-| coasters | **1,143** |
-| parks | **240** |
+| coasters | **1,144** |
+| parks | **239** |
 | carter | 2,362 rides / 562 credits |
 | cole | 546 credits |
 | keltan | 795 credits |
-| max | 418 credits |
+| max | 426 credits (renumbered 1-426, contiguous) |
 
 ### Key files
 
