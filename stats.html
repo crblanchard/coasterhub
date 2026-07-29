@@ -91,7 +91,7 @@
   </section>
   <section class="block">
     <span class="eyebrow">Combined</span><h2>Everyone, together</h2>
-    <p class="lead">The whole hub at a glance — every unique coaster across everyone&rsquo;s counts.</p>
+    <p class="lead">The whole site at a glance — every unique coaster across everyone&rsquo;s counts.</p>
     <div class="kpis" id="hub_kpis"></div>
   </section>
   <section class="block">
@@ -201,7 +201,7 @@ if(CoasterHub.currentUser()){
 } else { renderHub(); }
 function renderHub(){
   document.getElementById('loading').style.display='none';
-  document.getElementById('hero_badge').textContent='The hub';
+  document.getElementById('hero_badge').textContent='Everyone';
   document.getElementById('hero_h').textContent="Everyone\u2019s stats.";
   document.getElementById('hero_p').textContent='Pick a rider below, or see the combined totals.';
   document.title='Stats \u2014 Coaster Hub';
@@ -213,7 +213,7 @@ function renderHub(){
     var sorted=CoasterHub.USERS.map(function(u,i){return {u:u,d:datas[i]};}).sort(function(a,b){return a.u.name.localeCompare(b.u.name);});
     sorted.forEach(function(o){
       var st=CoasterHub.computeStats(coasters,parks,o.d), k=st.kpi;
-      Object.keys(st.byCoaster).forEach(function(id){union[id]=true;});
+      Object.keys(st.byCoaster).forEach(function(id){union[id]=(union[id]||0)+1;});
       var line=nf(k.credits)+' credits \u00b7 '+k.parks+' parks \u00b7 '+k.states+' states / '+k.countries+' countries';
       cards+='<a class="card person-card" href="/user/'+o.u.slug+'/stats" style="text-decoration:none;display:block">'+
         '<div class="meta">Rider</div><h3>'+esc(o.u.name)+'</h3>'+
@@ -225,14 +225,14 @@ function renderHub(){
     document.getElementById('hub_kpis').innerHTML=
       tile(nf(ck.credits),'Unique coasters')+tile(CoasterHub.USERS.length,'Riders')+
       tile(ck.parks,'Parks')+tile(ck.states+' / '+ck.countries,'States / Countries');
-    hubOpenings(coasters,parks);
+    hubOpenings(coasters,parks,union);
     document.getElementById('hub').style.display='block';
   }).catch(function(e){console.error(e);document.getElementById('err').style.display='block';});
 }
 
 // Openings on this date in history — the shared coaster list, not anyone's
 // riding. Exact day only: plenty of dates have nothing, and that's fine.
-function hubOpenings(coasters,parks){
+function hubOpenings(coasters,parks,riderCount){
   var now=new Date(), cy=now.getFullYear();
   var mmdd=String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
   var dayLabel=now.toLocaleDateString(undefined,{month:'long',day:'numeric'});
@@ -248,11 +248,13 @@ function hubOpenings(coasters,parks){
     document.getElementById('hub_otd').innerHTML='';
     return;
   }
-  sub.textContent='Coasters that opened on '+dayLabel+', across every coaster on the hub.';
+  sub.textContent='Coasters that opened on '+dayLabel+', across every coaster on the site.';
   document.getElementById('hub_otd').innerHTML='<div class="records">'+hits.map(function(c){
     var y=c.opened.slice(0,4), age=cy-parseInt(y,10);
     var pk=parks[c.park], reg=pk&&pk.region?pk.region:'';
-    var bits=[];
+    var n=riderCount[c.id]||0;
+    var bits=[age+' years ago'];
+    if(n) bits.push(n+(n===1?' rider':' riders'));
     if(c.h!=null) bits.push(Math.round(c.h)+' ft');
     if(c.s!=null) bits.push(Math.round(c.s)+' mph');
     return '<div class="rec">'
@@ -261,7 +263,7 @@ function hubOpenings(coasters,parks){
       +'<div class="rval" style="font-size:.92rem;color:var(--muted);font-weight:600">'
         +esc(c.park)+(reg?' · '+esc(reg):'')+'</div>'
       +'<div class="rval" style="font-size:.82rem;color:var(--accent2);font-weight:600;margin-top:4px">'
-        +age+' years ago'+(bits.length?' · '+bits.join(' · '):'')+'</div>'
+        +bits.join(' · ')+'</div>'
       +'</div>';
   }).join('')+'</div>';
 }
