@@ -46,7 +46,7 @@ downstream will catch a mistake now:
 
 | | |
 |---|---|
-| coasters | **1,086** |
+| coasters | **1,080** |
 | parks | **237** |
 | carter | 2,362 rides / 562 credits |
 | cole | 546 credits |
@@ -295,18 +295,28 @@ What makes this bigger than it looks:
    `database.html`, `app.js`, `worker.js` and the JSON files are **LF**. Getting it wrong produces a whole-file
    whitespace diff.
 
-2. **JSON files are compact, one line, no trailing newline.** That's what
+2. **Watch for curly apostrophes in pasted names.** `'` (U+0027) and `’` (U+2019) look
+   identical rendered but never match, so a pasted name silently creates a twin -- that is
+   how Woodstock's Air Rail got into the table twice. The house style is the straight quote;
+   `SELECT * FROM coasters WHERE name LIKE '%’%'` should always return nothing.
+
+3. **Finding duplicate coasters.** They leave a fingerprint: same park, *disjoint* rider sets,
+   and either identical h/s/yr or a name differing only by an article or punctuation. Genuine
+   racing pairs (Gemini, Matterhorn, Racer 75, Colossus) fail that test because the same people
+   ride both sides. Two queries in the 2026-07-29 session found nearly forty this way.
+
+4. **JSON files are compact, one line, no trailing newline.** That's what
    `tools/sync-static.mjs` writes; match it or every sync produces a spurious diff.
 
-3. **Worker entry file must stay `worker.js`.** Workers Builds runs `npx wrangler deploy` and
+5. **Worker entry file must stay `worker.js`.** Workers Builds runs `npx wrangler deploy` and
    wrangler rejects `_worker.js` as an asset. `worker.js`, `wrangler.jsonc` and `.assetsignore`
    are all listed in `.assetsignore`.
 
-4. **`worker.js` uses `export default` but the repo has no `"type":"module"`.** The test harness
+6. **`worker.js` uses `export default` but the repo has no `"type":"module"`.** The test harness
    copies it to a `.mjs` name to import it. Don't "fix" this by adding a `package.json` type
    field — wrangler is happy as-is and changing it risks the deploy.
 
-5. **Caching: `_headers` cannot expire a copy the browser already has.** `style.css`, `app.js`
+7. **Caching: `_headers` cannot expire a copy the browser already has.** `style.css`, `app.js`
    and the JSON files have no hash in their filenames. `_headers` now sends
    `Cache-Control: no-cache` for `/*` (images get a week), so anything fetched from here on
    revalidates — but that only governs *future* fetches. A browser that cached a file before
@@ -320,7 +330,7 @@ What makes this bigger than it looks:
    string on the `style.css` / `app.js` tags (currently `20260728a`) across all seven HTML
    pages. With `no-cache` in place this shouldn't be needed again.
 
-6. **Merging coasters is safe, but verify.** The pattern used throughout this project:
+8. **Merging coasters is safe, but verify.** The pattern used throughout this project:
    `UPDATE OR IGNORE credits SET coaster_id=<to> WHERE coaster_id=<from>`, same for `rides`,
    then delete the loser **guarded** by `AND id NOT IN (SELECT coaster_id FROM credits UNION
    SELECT coaster_id FROM rides)`. Afterwards confirm every rider's credit count is unchanged.
