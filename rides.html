@@ -100,6 +100,23 @@
                      font-size:.77rem;font-variant-numeric:tabular-nums;min-width:0;
                      overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #c_body td[data-k=status]{display:block;grid-column:2;grid-row:3;text-align:right}
+
+    /* Tap a card to see the columns the phone layout hides. The chevron is the
+       affordance; :not() keeps the four summary cells out of the generic rule
+       so they stay in their explicit grid slots. */
+    #c_body tr{cursor:pointer;position:relative}
+    #c_body td[data-k=name]{padding-right:20px}
+    #c_body td[data-k=name]::after{content:'';position:absolute;right:14px;top:15px;
+      width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
+      transform:rotate(45deg);transition:transform .15s}
+    #c_body tr.open td[data-k=name]::after{transform:rotate(-135deg);top:18px}
+    #c_body tr.open td.cmeta{display:none}
+    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not(.cmeta){
+      display:flex;grid-column:1/-1;justify-content:space-between;align-items:baseline;gap:14px;
+      text-align:left;font-size:.79rem;color:var(--fg);padding:5px 0 0;white-space:normal}
+    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not(.cmeta)::before{
+      content:attr(data-label);color:var(--muted);flex:none}
+    #c_body tr.open td[data-k=status]{grid-row:auto}
     #c_body td.muted[data-k=park],#c_body td.muted[data-k=loc]{color:var(--muted)}
   }
 </style>
@@ -529,6 +546,13 @@ var CreditList=(function(){
       head.appendChild(th);
     });
     FILTS.forEach(function(id){$(id).addEventListener('input',draw);});
+    // Phone only: tapping a card reveals the columns the table shows on desktop.
+    // Delegated, because draw() replaces every row on each filter or sort.
+    $('c_body').addEventListener('click',function(e){
+      if(!window.matchMedia('(max-width:680px)').matches) return;
+      var tr=e.target.closest('tr');
+      if(tr) tr.classList.toggle('open');
+    });
     $('c_sort').addEventListener('change',function(){
       var p=$('c_sort').value.split('|'); sortKey=p[0]; sortDir=+p[1]; draw();
     });
@@ -573,7 +597,8 @@ var CreditList=(function(){
       // Every cell carries data-k so the phone layout can pick out the few it
       // shows without depending on column position — COLS varies per rider.
       var cells=COLS.map(function(col){
-        var v=c[col.k], k=' data-k="'+col.k+'"';
+        // data-label feeds the expanded card view via CSS content:attr()
+        var v=c[col.k], k=' data-k="'+col.k+'" data-label="'+esc(col.t)+'"';
         if(col.k==='type')return '<td'+k+'>'+(v?'<span class="pill '+(v==='Wood'?'wood':'steel')+'">'+v+'</span>':'<span class="muted">—</span>')+'</td>';
         if(col.k==='status')return c.closed
           ? '<td'+k+'><span class="pill def">Defunct</span><span class="cyear">'+String(c.closed).slice(0,4)+'</span></td>'
