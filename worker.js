@@ -495,8 +495,12 @@ export default {
         const b = await request.json();
         if (!b.name) return err(400, "need name");
         await env.DB.prepare(
+          // COALESCE, not a plain overwrite: adding a park that already exists
+          // must never blank its coordinates. The geocoder and the parks editor
+          // still set values, they just cannot clear them from here.
           "INSERT INTO parks (name,lat,lon,region) VALUES (?,?,?,?) " +
-          "ON CONFLICT(name) DO UPDATE SET lat=excluded.lat, lon=excluded.lon, region=excluded.region"
+          "ON CONFLICT(name) DO UPDATE SET lat=COALESCE(excluded.lat,lat), " +
+          "lon=COALESCE(excluded.lon,lon), region=COALESCE(excluded.region,region)"
         ).bind(b.name, b.lat ?? null, b.lon ?? null, b.region ?? null).run();
         return afterWrite(ctx, env, json({ ok: true }));
       }

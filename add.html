@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base href="/">
 <title>Add new — Coaster Hub</title>
-<meta name="description" content="Add rides and credits to your count — Coaster Hub.">
+<meta name="description" content="Add a park or a coaster to the Coaster Hub database.">
 <link rel="stylesheet" href="/style.css?v=20260728a">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -14,20 +14,48 @@
 <meta property="og:title" content="Coaster Hub — Add new">
 <meta property="og:image" content="https://coasterhub.org/og-image.png">
 <style>
-  .soon{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:62ch}
-  .soon .tag{display:inline-block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
-    border:1px solid var(--line);border-radius:999px;padding:4px 10px;margin-bottom:14px}
-  .soon p{color:var(--muted);margin-bottom:12px}
-  .soon p:last-child{margin-bottom:0}
-  .soon b{color:var(--fg)}
-  .steps{display:flex;flex-direction:column;gap:10px;margin:26px 0 0}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin:0 0 18px}
+  .panel h2{font-size:1.05rem;margin:0 0 4px}
+  .panel .sub{color:var(--muted);font-size:.86rem;margin:0 0 16px;max-width:70ch}
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+  .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .fld label{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}
+  .fld.grow{flex:1;min-width:190px}
+  .fld.small{width:104px}
+  input,select{background:var(--bg);border:1px solid var(--line);color:var(--fg);
+               padding:10px 12px;border-radius:10px;font-size:.9rem;font-family:inherit;min-width:0;width:100%}
+  input:focus,select:focus{outline:0;border-color:var(--accent2)}
+  button.primary{background:var(--accent2);border:0;color:#06121a;font-weight:700;border-radius:10px;
+                 padding:11px 18px;cursor:pointer;font-size:.92rem}
+  button.primary:disabled{opacity:.4;cursor:default}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);
+               border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem}
+  button.ghost:hover{color:var(--fg)}
+  .msg{margin-top:14px;font-size:.88rem;min-height:1.2em}
+  .msg.ok{color:var(--accent2)} .msg.bad{color:var(--accent)}
+  .msg a{color:var(--accent2)}
+  /* Duplicate warnings. This site has already had ~50 duplicate coasters
+     merged by hand, so the check is the point of the page, not a nicety. */
+  .dupe{margin-top:12px;border-radius:12px;padding:12px 14px;font-size:.86rem;display:none}
+  .dupe.on{display:block}
+  .dupe.hard{background:rgba(255,90,110,.10);border:1px solid rgba(255,90,110,.45);color:#ffb3c0}
+  .dupe.soft{background:rgba(255,196,90,.09);border:1px solid rgba(255,196,90,.38);color:#ffd79a}
+  .dupe b{color:var(--fg)}
+  .dupe ul{margin:7px 0 0;padding-left:18px}
+  .dupe li{margin:2px 0}
+  .gate{max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  .gate h2{font-size:1.05rem;margin-bottom:6px}
+  .gate p{color:var(--muted);font-size:.88rem;margin-bottom:14px}
+  .gate input{margin-bottom:10px}
+  .steps{display:flex;flex-direction:column;gap:10px;margin:0 0 26px}
   .step{display:flex;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
   .step i{font-style:normal;font-weight:800;color:var(--accent2);flex:none;min-width:1.3em}
   .step div{min-width:0}
   .step b{display:block;font-size:.94rem;margin-bottom:3px}
   .step span{color:var(--muted);font-size:.85rem}
-  .meanwhile{margin-top:26px;color:var(--muted);font-size:.9rem}
-  .meanwhile a{color:var(--accent2)}
+  .after{color:var(--muted);font-size:.9rem;margin-top:22px}
+  .after a{color:var(--accent2)}
+  @media (max-width:560px){ .fld.small{width:calc(50% - 6px)} }
 </style>
 </head>
 <body>
@@ -48,31 +76,91 @@
 
 <section class="hero" style="padding:56px 0 22px"><div class="container">
   <span class="badge">Add new</span>
-  <h1 style="max-width:20ch">Log what you rode.</h1>
-  <p>Add coasters to your count, day by day.</p>
+  <h1 style="max-width:22ch">Something missing from the list?</h1>
+  <p>Add a park or a coaster so everyone can log it.</p>
 </div></section>
 
 <section class="block" style="padding-top:16px"><div class="container">
-  <div class="soon">
-    <span class="tag">Page coming soon</span>
-    <p>This will be where anyone adds to their own count &mdash; a day at a park, or a
-      single coaster you picked up along the way.</p>
-    <p>Right now logging goes through the private <b>/log</b> tool, so ask Carter to add
-      anything you&rsquo;ve ridden.</p>
-  </div>
 
   <div class="steps">
-    <div class="step"><i>1</i><div><b>Pick the park and the date</b>
-      <span>Or skip the date if you just know you&rsquo;ve ridden it.</span></div></div>
-    <div class="step"><i>2</i><div><b>Tick off what you rode</b>
-      <span>Everything at that park, with anything already in your count marked.</span></div></div>
-    <div class="step"><i>3</i><div><b>Rank it now, or later</b>
-      <span>New coasters can go straight into a head-to-head against your favorites,
-        or wait until you feel like ranking.</span></div></div>
+    <div class="step"><i>1</i><div><b>This is the shared list, not your count</b>
+      <span>Adding a coaster here doesn&rsquo;t say you&rsquo;ve ridden it &mdash; it just puts it on
+        the board for everyone. Log your own rides over on <a href="/log" style="color:var(--accent2)">the log</a>.</span></div></div>
+    <div class="step"><i>2</i><div><b>Check it isn&rsquo;t already there under another name</b>
+      <span>Rethemes and punctuation are how duplicates get in. This page warns you,
+        but it can&rsquo;t catch everything.</span></div></div>
+    <div class="step"><i>3</i><div><b>Stats can come later</b>
+      <span>Name and park are enough. Height, speed and the rest can be filled in
+        whenever &mdash; blanks are fine.</span></div></div>
   </div>
 
-  <p class="meanwhile">Meanwhile: <a href="/rides" data-nav="rides">your rides</a> &middot;
-    <a href="/rankings" data-nav="rankings">your rankings</a></p>
+  <!-- gate -->
+  <div id="gate" class="gate">
+    <h2>You&rsquo;ll need the password</h2>
+    <p>Adding to the shared database is held behind a password for now. Ask Carter
+      for it, or send him what&rsquo;s missing and he&rsquo;ll add it.</p>
+    <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+    <button class="primary" id="unlock">Unlock</button>
+    <div class="msg bad" id="gate_msg"></div>
+  </div>
+
+  <!-- app -->
+  <div id="app" style="display:none">
+
+    <div class="panel">
+      <h2>New coaster</h2>
+      <p class="sub">Pick the park first &mdash; the duplicate check runs against what&rsquo;s
+        already there. Only the name and park are required.</p>
+      <div class="row">
+        <div class="fld grow"><label for="c_park">Park</label><select id="c_park"></select></div>
+        <div class="fld grow"><label for="c_name">Coaster name</label>
+          <input id="c_name" type="text" placeholder="Stunt Pilot" autocomplete="off"></div>
+        <div class="fld small"><label for="c_type">Type</label>
+          <select id="c_type"><option>Steel</option><option>Wood</option></select></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div class="fld grow"><label for="c_manu">Manufacturer</label>
+          <input id="c_manu" type="text" placeholder="Rocky Mountain Construction" autocomplete="off"></div>
+        <div class="fld grow"><label for="c_model">Model</label>
+          <input id="c_model" type="text" placeholder="Raptor" autocomplete="off"></div>
+        <div class="fld small"><label for="c_h">Height (ft)</label><input id="c_h" type="number" step="0.1" min="0"></div>
+        <div class="fld small"><label for="c_s">Speed (mph)</label><input id="c_s" type="number" step="0.1" min="0"></div>
+        <div class="fld small"><label for="c_l">Length (ft)</label><input id="c_l" type="number" step="1" min="0"></div>
+        <div class="fld small"><label for="c_inv">Inversions</label><input id="c_inv" type="number" step="1" min="0"></div>
+        <div class="fld small"><label for="c_opened">Opened</label><input id="c_opened" type="date"></div>
+      </div>
+      <div class="dupe" id="c_dupe"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="primary" id="c_save">Add coaster</button>
+        <button class="ghost" id="c_clear">Clear</button>
+      </div>
+      <div class="msg" id="c_msg"></div>
+    </div>
+
+    <div class="panel">
+      <h2>New park</h2>
+      <p class="sub">Add the park first if the coaster you want isn&rsquo;t at anywhere listed.
+        Coordinates come later &mdash; the geocoder in <b>/edit</b> puts it on the map.</p>
+      <div class="row">
+        <div class="fld grow"><label for="p_name">Park name</label>
+          <input id="p_name" type="text" placeholder="Silverwood Theme Park" autocomplete="off"></div>
+        <div class="fld grow"><label for="p_region">Region</label>
+          <input id="p_region" type="text" placeholder="Idaho, US" autocomplete="off"></div>
+      </div>
+      <p class="sub" style="margin:10px 0 0">US parks are &ldquo;&lt;State&gt;, US&rdquo;.
+        Everywhere else is just the country.</p>
+      <div class="dupe" id="p_dupe"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="primary" id="p_save">Add park</button>
+        <button class="ghost" id="p_clear">Clear</button>
+      </div>
+      <div class="msg" id="p_msg"></div>
+    </div>
+
+    <p class="after">Added something? Now go
+      <a href="/log">log your rides on it &rarr;</a></p>
+  </div>
+
 </div></section>
 
 <footer class="site"><div class="container foot-inner">
@@ -84,6 +172,200 @@
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('add');
+
+var TOKEN='', COASTERS=[], PARKS={}, PCOUNT={};
+function $(id){return document.getElementById(id);}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+// ---- gate: same token as /log and /edit, so unlocking one unlocks them all --
+try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
+if(TOKEN) verify(TOKEN,true);
+$('unlock').onclick=function(){ verify($('pw').value,false); };
+$('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') verify($('pw').value,false); });
+
+function verify(pw,quiet){
+  if(!pw)return;
+  fetch('/api/admin/login',{method:'POST',headers:{'x-admin-token':pw}})
+    .then(function(r){
+      if(!r.ok) throw new Error('bad');
+      TOKEN=pw;
+      try{ sessionStorage.setItem('ch_admin',pw); }catch(e){}
+      $('gate').style.display='none'; $('app').style.display='block';
+      boot();
+    })
+    .catch(function(){
+      try{ sessionStorage.removeItem('ch_admin'); }catch(e){}
+      if(!quiet) $('gate_msg').textContent='Wrong password.';
+    });
+}
+
+function api(method,path,body){
+  return fetch(path,{method:method,headers:{'x-admin-token':TOKEN,'content-type':'application/json'},
+                     body:body?JSON.stringify(body):undefined})
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); });
+}
+
+// ---- duplicate detection --------------------------------------------------
+// Two normalisations, because duplicates arrive in two shapes. `norm` collapses
+// articles, punctuation and case, which catches "The Underground" vs
+// "Underground" and "Rollies" vs "Rollie's". `squash` additionally removes the
+// spaces, which is the only way "SandSerpent" matches "Sand Serpent". Both of
+// those were real duplicates in this database.
+function norm(s){
+  return String(s||'').toLowerCase()
+    .replace(/[‘’ʼ`´']/g,'')   // every apostrophe lookalike
+    .replace(/^(the|a)\s+/,'')
+    .replace(/[^a-z0-9]+/g,' ')
+    .trim();
+}
+function squash(s){ return norm(s).replace(/ /g,''); }
+
+function coasterDupes(name,park){
+  var n=norm(name), q=squash(name);
+  if(!q) return {hard:[],soft:[]};
+  var hard=[], soft=[];
+  COASTERS.forEach(function(c){
+    var cq=squash(c.name);
+    if(!cq) return;
+    if(c.park===park){
+      // same park: an exact match after normalising is almost certainly the
+      // same ride, and one name containing the other usually is too
+      if(cq===q) hard.push(c);
+      else if(cq.indexOf(q)>=0 || q.indexOf(cq)>=0) soft.push(c);
+    } else if(cq===q){
+      // same name elsewhere is normal (Boomerang, Wild Mouse) — just say so,
+      // in case the park picker is what's wrong
+      soft.push(c);
+    }
+  });
+  return {hard:hard,soft:soft};
+}
+
+function showDupe(el,res,what){
+  var box=$(el);
+  if(res.hard.length){
+    box.className='dupe on hard';
+    box.innerHTML='<b>This looks like it&rsquo;s already listed.</b>'
+      +'<ul>'+res.hard.map(function(c){return '<li>'+esc(c.name)+' &middot; '+esc(c.park||'—')+'</li>';}).join('')+'</ul>'
+      +'<div style="margin-top:7px">If it was renamed or rethemed, rename the existing one in <b>/edit</b> '
+      +'instead of adding a second row &mdash; that keeps everyone&rsquo;s rides attached to it.</div>';
+    return true;
+  }
+  if(res.soft.length){
+    box.className='dupe on soft';
+    box.innerHTML='<b>Worth a look first.</b> Similar '+what+' already listed:'
+      +'<ul>'+res.soft.slice(0,6).map(function(c){
+          return '<li>'+esc(c.name||c)+(c.park?(' &middot; '+esc(c.park)):'')+'</li>'; }).join('')+'</ul>';
+    return false;
+  }
+  box.className='dupe'; box.innerHTML='';
+  return false;
+}
+
+// ---- boot ------------------------------------------------------------------
+function boot(){
+  Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function(res){
+    COASTERS=res[0].coasters; PARKS=res[1];
+    PCOUNT={}; COASTERS.forEach(function(c){ if(c.park) PCOUNT[c.park]=(PCOUNT[c.park]||0)+1; });
+    Object.keys(PARKS).forEach(function(p){ if(PCOUNT[p]==null) PCOUNT[p]=0; });
+    fillParks();
+  });
+
+  $('c_name').addEventListener('input',checkCoaster);
+  $('c_park').addEventListener('change',checkCoaster);
+  $('p_name').addEventListener('input',checkPark);
+  $('c_save').onclick=saveCoaster;
+  $('p_save').onclick=savePark;
+  $('c_clear').onclick=function(){
+    ['c_name','c_manu','c_model','c_h','c_s','c_l','c_inv','c_opened'].forEach(function(k){ $(k).value=''; });
+    checkCoaster(); $('c_msg').textContent='';
+  };
+  $('p_clear').onclick=function(){ $('p_name').value=''; $('p_region').value=''; checkPark(); $('p_msg').textContent=''; };
+}
+
+function fillParks(keep){
+  var sel=$('c_park'), cur=keep!=null?keep:sel.value;
+  var names=Object.keys(PCOUNT).sort(function(a,b){return a.localeCompare(b);});
+  sel.innerHTML='<option value="">— pick a park —</option>'+names.map(function(p){
+    return '<option value="'+esc(p)+'">'+esc(p)+' ('+PCOUNT[p]+')</option>';
+  }).join('');
+  if(cur) sel.value=cur;
+}
+
+function checkCoaster(){ return showDupe('c_dupe',coasterDupes($('c_name').value,$('c_park').value),'coasters'); }
+
+function checkPark(){
+  var q=squash($('p_name').value);
+  var hard=[], soft=[];
+  if(q) Object.keys(PCOUNT).forEach(function(p){
+    var pq=squash(p);
+    if(pq===q) hard.push({name:p});
+    else if(pq.indexOf(q)>=0 || q.indexOf(pq)>=0) soft.push({name:p});
+  });
+  return showDupe('p_dupe',{hard:hard,soft:soft},'parks');
+}
+
+// ---- saves -----------------------------------------------------------------
+function num(id){ var v=$(id).value.trim(); if(!v) return null; var n=Number(v); return isFinite(n)?n:null; }
+
+function saveCoaster(){
+  var name=$('c_name').value.trim(), park=$('c_park').value, type=$('c_type').value;
+  $('c_msg').className='msg';
+  if(!park) return void($('c_msg').className='msg bad',$('c_msg').textContent='Pick a park first.');
+  if(!name) return void($('c_msg').className='msg bad',$('c_msg').textContent='Give the coaster a name.');
+  if(checkCoaster()) return void($('c_msg').className='msg bad',
+    $('c_msg').textContent='That looks like a duplicate — see above.');
+
+  var opened=$('c_opened').value||null;
+  var body={name:name,park:park,type:type,
+            manu:$('c_manu').value.trim()||null, model:$('c_model').value.trim()||null,
+            h:num('c_h'), s:num('c_s'), l:num('c_l'), inv:num('c_inv'),
+            opened:opened, openedPrec:opened?'day':null,
+            yr:opened?Number(opened.slice(0,4)):null};
+
+  // Everyone sees this and there is no undo from this page, so it is worth one
+  // deliberate click.
+  if(!confirm('Add "'+name+'" to '+park+' in the shared coaster list?\n\n'
+    +'Everyone sees this, and it can only be removed from /edit. '
+    +'Check the spelling and that it is not already listed under another name.')) return;
+
+  $('c_save').disabled=true; $('c_msg').textContent='Adding…';
+  api('POST','/api/coaster',body).then(function(r){
+    COASTERS.push({id:r.id,name:name,park:park,type:type});
+    PCOUNT[park]=(PCOUNT[park]||0)+1; fillParks(park);
+    $('c_name').value=''; ['c_manu','c_model','c_h','c_s','c_l','c_inv','c_opened'].forEach(function(k){ $(k).value=''; });
+    checkCoaster();
+    $('c_msg').className='msg ok';
+    $('c_msg').innerHTML='Added <b>'+esc(name)+'</b> to '+esc(park)+'. '
+      +'<a href="/log">Log a ride on it →</a>';
+  }).catch(function(e){
+    $('c_msg').className='msg bad'; $('c_msg').textContent='Could not add it: '+e.message;
+  }).then(function(){ $('c_save').disabled=false; });
+}
+
+function savePark(){
+  var name=$('p_name').value.trim(), region=$('p_region').value.trim();
+  $('p_msg').className='msg';
+  if(!name) return void($('p_msg').className='msg bad',$('p_msg').textContent='Give the park a name.');
+  if(PCOUNT[name]!=null) return void($('p_msg').className='msg bad',
+    $('p_msg').textContent='That park is already in the list.');
+  if(checkPark()) return void($('p_msg').className='msg bad',
+    $('p_msg').textContent='That looks like a duplicate — see above.');
+
+  if(!confirm('Add "'+name+'"'+(region?' ('+region+')':'')+' to the shared park list?\n\n'
+    +'Everyone sees this, and it can only be removed from /edit.')) return;
+
+  $('p_save').disabled=true; $('p_msg').textContent='Adding…';
+  api('PUT','/api/park',{name:name,region:region||null}).then(function(){
+    PARKS[name]={lat:null,lon:null,region:region||null};
+    PCOUNT[name]=0; fillParks(name);
+    $('p_name').value=''; $('p_region').value=''; checkPark();
+    $('p_msg').className='msg ok';
+    $('p_msg').innerHTML='Added <b>'+esc(name)+'</b>. Now add its coasters above.';
+  }).catch(function(e){
+    $('p_msg').className='msg bad'; $('p_msg').textContent='Could not add it: '+e.message;
+  }).then(function(){ $('p_save').disabled=false; });
+}
 </script>
 </body>
 </html>
