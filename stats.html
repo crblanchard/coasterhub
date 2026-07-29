@@ -218,7 +218,7 @@ function renderHub(){
     document.getElementById('hub_people').innerHTML=cards;
     var comb=CoasterHub.computeStats(coasters,parks,{credits:Object.keys(union).map(Number)}), ck=comb.kpi;
     document.getElementById('hub_kpis').innerHTML=
-      tile(nf(ck.credits),'Unique credits')+tile(CoasterHub.USERS.length,'Riders')+
+      tile(nf(ck.credits),'Unique coasters')+tile(CoasterHub.USERS.length,'Riders')+
       tile(ck.parks,'Parks')+tile(ck.states+' / '+ck.countries,'States / Countries');
     document.getElementById('hub').style.display='block';
   }).catch(function(e){console.error(e);document.getElementById('err').style.display='block';});
