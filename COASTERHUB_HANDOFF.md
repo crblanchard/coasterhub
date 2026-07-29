@@ -182,6 +182,9 @@ Pick rider + date + park, step lap counts up/down per coaster, save the whole da
   `POST /api/coaster`. The new coaster is **staged at one ride automatically**, because you
   are only adding it if you just rode it. Everything else — height, speed, year, maker — is
   left null for `/edit` later. A same-name coaster in the same park is refused client-side.
+- **Both adds ask for confirmation first.** The write is immediate and there is no undo from
+  `/log` — removing a bad row means `/edit`, or D1 directly. A test row got into the live
+  table within minutes of shipping this, which is why the confirm exists.
 
 #### Anyone with the password can add — this is deliberate, and temporary
 
