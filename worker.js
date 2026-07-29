@@ -170,12 +170,19 @@ async function addRides(env, b) {
     }
   }
 
+  // Count what the database actually wrote rather than what was asked for —
+  // the undated guard skips coasters the rider already has, so "added 12" has
+  // to mean twelve rows, not twelve ticks.
   const CHUNK = 90;                            // D1 caps statements per batch call
-  for (let i = 0; i < batch.length; i += CHUNK) await env.DB.batch(batch.slice(i, i + CHUNK));
+  let inserted = 0;
+  for (let i = 0; i < batch.length; i += CHUNK) {
+    const res = await env.DB.batch(batch.slice(i, i + CHUNK));
+    for (const r of res) inserted += (r.meta && r.meta.changes) || 0;
+  }
 
   const total = await userTotal(env, slug);
   return {
-    added: d === null ? norm.length : norm.reduce((a, e) => a + e.n, 0),
+    added: inserted,
     coasters: norm.length,
     total: total.rides,
     credits: total.credits,

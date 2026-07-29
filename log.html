@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base href="/">
-<title>Log a park day — Coaster Hub</title>
+<title>Add to your count — Coaster Hub</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="/style.css?v=20260728a">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -23,6 +23,16 @@
   button.primary:disabled{opacity:.4;cursor:default}
   button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem}
   button.ghost:hover{color:var(--fg)}
+  /* Mode switch: the only real difference between the two ways of adding is
+     whether a date is attached, but the controls differ enough (laps vs a
+     tick) that a toggle reads better than an optional date field. */
+  .modesw{display:inline-flex;background:var(--panel);border:1px solid var(--line);
+          border-radius:12px;padding:4px;gap:4px;margin:0 0 9px}
+  .modesw button{background:transparent;border:0;color:var(--muted);font:inherit;
+                 font-size:.88rem;padding:8px 14px;border-radius:9px;cursor:pointer}
+  .modesw button:hover{color:var(--fg)}
+  .modesw button.on{background:var(--accent2);color:#06121a;font-weight:700}
+  .modehint{color:var(--muted);font-size:.83rem;margin:0 0 16px;max-width:74ch}
   .setup{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:0 0 18px}
   .fld{display:flex;flex-direction:column;gap:5px}
   .fld label{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
@@ -40,6 +50,16 @@
   .stepper button:hover{border-color:var(--accent2)}
   .stepper .v{min-width:1.6em;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
   .stepper .v.zero{color:var(--muted);font-weight:400}
+  /* List mode: the whole row is the target. Ticking 200 coasters is the point,
+     so it must not require hitting a 30px box each time. */
+  .crow.pick{cursor:pointer}
+  .crow.pick:hover{background:rgba(255,255,255,.03)}
+  .tick{flex:none;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+        display:flex;align-items:center;justify-content:center;color:transparent}
+  .crow.pick:hover .tick{border-color:var(--accent2)}
+  .tick.on{background:var(--accent2);border-color:var(--accent2);color:#06121a}
+  .crow .have{flex:none;color:var(--muted);font-size:.77rem;padding-right:6px}
+  .crow.owned .nm b{font-weight:500;color:var(--muted)}
   .basket .brow{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:.88rem;border-bottom:1px solid rgba(255,255,255,.05)}
   .basket .brow:last-of-type{border-bottom:0}
   /* ×N reads as part of the ride, so it follows the name; the remove control
@@ -70,7 +90,7 @@
   <div class="bar">
     <a href="/" style="display:flex;align-items:center;gap:10px">
       <img src="/mark.svg" alt="" class="brand-mark">
-      <span class="t">Log a <b>park day</b></span>
+      <span class="t">Add to your <b>count</b></span>
     </a>
   </div>
 </div>
@@ -86,9 +106,15 @@
 
 <!-- app -->
 <section class="block" id="app" style="display:none;padding:8px 0 60px"><div class="container">
+  <div class="modesw" id="modesw">
+    <button type="button" class="on" data-mode="day">A day at a park</button>
+    <button type="button" data-mode="list">Coasters I&rsquo;ve ridden</button>
+  </div>
+  <p class="modehint" id="modehint"></p>
+
   <div class="setup">
     <div class="fld"><label for="rider">Rider</label><select id="rider"></select></div>
-    <div class="fld"><label for="date">Date</label><input id="date" type="date"></div>
+    <div class="fld" id="datefld"><label for="date">Date</label><input id="date" type="date"></div>
     <div class="fld" style="flex:1;min-width:240px"><label for="park">Park</label>
       <div style="display:flex;gap:8px">
         <select id="park" style="flex:1;min-width:0"></select>
@@ -143,6 +169,8 @@
 <script>
 var TOKEN='', COASTERS=[], BYID={}, PARKS={}, basket={};   // basket: coasterId -> laps
 var PCOUNT={};   // park name -> how many coasters, for the dropdown labels
+var MODE='day';  // 'day' = a dated visit with laps; 'list' = undated backfill
+var OWNED={};    // coaster id -> true, what this rider already has in their count
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function $(id){return document.getElementById(id);}
@@ -202,7 +230,47 @@ function boot(){
 
   $('save').onclick=save;
   $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
-  wireAdders();
+  wireAdders(); wireMode(); setMode('day');
+  $('rider').addEventListener('change',function(){
+    try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
+    basket={}; renderBasket(); loadOwned();
+  });
+  loadOwned();
+}
+
+// What the rider already has. In list mode this is the difference between a
+// usable page and re-ticking your whole history blind — you need to see what
+// is already counted. Failure is non-fatal: worst case nothing is marked and
+// the server's guard still refuses to double-count.
+function loadOwned(){
+  var slug=$('rider').value;
+  OWNED={};
+  return CoasterHub.fetchRides(slug).then(function(log){
+    if($('rider').value!==slug) return;            // rider changed mid-flight
+    (log.rides||[]).forEach(function(r){ OWNED[r.c]=true; });
+    renderList();
+  }).catch(function(){ renderList(); });
+}
+
+function wireMode(){
+  var btns=$('modesw').querySelectorAll('button');
+  for(var i=0;i<btns.length;i++)(function(b){
+    b.onclick=function(){ if(MODE!==b.getAttribute('data-mode')) setMode(b.getAttribute('data-mode')); };
+  })(btns[i]);
+}
+
+function setMode(m){
+  MODE=m;
+  var btns=$('modesw').querySelectorAll('button');
+  for(var i=0;i<btns.length;i++) btns[i].classList.toggle('on',btns[i].getAttribute('data-mode')===m);
+  $('datefld').style.display = m==='day' ? '' : 'none';
+  $('modehint').textContent = m==='day'
+    ? 'A dated visit. Every lap counts — tap + once per ride, re-rides included.'
+    : 'For filling in what you have ridden before. No dates and no ride counts — just tick everything you have been on, park by park.';
+  $('save').textContent = m==='day' ? 'Save day' : 'Add to my count';
+  // Laps mean nothing in list mode and a tick means nothing in day mode, so
+  // the basket does not survive the switch.
+  basket={}; renderList(); renderBasket(); $('msg').textContent='';
 }
 
 function fillParks(keep){
@@ -269,7 +337,8 @@ function wireAdders(){
       basket[c.id]=1;                      // you are adding it because you rode it
       toggleCoaster(false); renderList(); renderBasket();
       $('msg').className='msg ok';
-      $('msg').textContent='Added '+name+' and staged one ride. Fill in its stats later in /edit.';
+      $('msg').textContent='Added '+name+' and staged it'
+        +(MODE==='day'?' as one ride':'')+'. Fill in its stats later in /edit.';
     }).catch(function(e){ $('nc_err').textContent='Could not add it: '+e.message; })
       .then(function(){ $('nc_save').disabled=false; });
   };
@@ -283,8 +352,15 @@ function currentList(){
       return (c.name+' '+(c.park||'')).toLowerCase().indexOf(q)>=0;
     }).slice(0,200);
   }
-  if(park) return COASTERS.filter(function(c){return c.park===park;})
-    .sort(function(a,b){return a.name.localeCompare(b.name);});
+  if(park){
+    var list=COASTERS.filter(function(c){return c.park===park;})
+      .sort(function(a,b){return a.name.localeCompare(b.name);});
+    // In list mode float what you have NOT got to the top. A park you have
+    // mostly done otherwise buries the two or three you came to tick under a
+    // screenful of rows you cannot act on.
+    if(MODE==='list') list.sort(function(a,b){ return (OWNED[a.id]?1:0)-(OWNED[b.id]?1:0); });
+    return list;
+  }
   return null;
 }
 function renderList(){
@@ -298,17 +374,54 @@ function renderList(){
   if(!list){ $('listhead').textContent='Coasters'; el.innerHTML='<div class="hint">Pick a park, or type 2+ letters to search every coaster.</div>'; return; }
   if(!list.length){ $('listhead').textContent=park||'Coasters';
     el.innerHTML='<div class="hint">'+(park?'No coasters here yet — use <b>+ Coaster not listed</b> to add the first one.':'Nothing matches.')+'</div>'; return; }
-  $('listhead').textContent=$('search').value.trim().length>=2 ? ('Search — '+list.length+' match'+(list.length===1?'':'es')) : ($('park').value+' — '+list.length);
+  // In list mode say how much of the park is already counted — that is the
+  // number you are actually working against when filling in history.
+  var have=0; list.forEach(function(c){ if(OWNED[c.id]) have++; });
+  $('listhead').textContent = searching
+    ? ('Search — '+list.length+' match'+(list.length===1?'':'es'))
+    : (park+' — '+list.length+(MODE==='list'?(' · '+have+' in your count'):''));
+
   el.innerHTML=list.map(function(c){
-    var n=basket[c.id]||0;
-    return '<div class="crow" data-id="'+c.id+'">'
-      +'<span class="nm"><b>'+esc(c.name)+'</b><span>'+esc(c.park||'—')+(c.type?' · '+esc(c.type):'')+'</span></span>'
-      +'<span class="stepper">'
+    var n=basket[c.id]||0, owned=!!OWNED[c.id];
+    // Day mode: a stepper, because you can re-ride something you already have.
+    // List mode: a tick, and coasters already counted are shown but inert —
+    // there is nothing to add, and hiding them would look like missing data.
+    var ctrl;
+    if(MODE==='list'){
+      ctrl = owned
+        ? '<span class="have">in your count</span>'
+        : '<span class="tick'+(n?' on':'')+'"><svg viewBox="0 0 24 24" width="15" height="15" '
+          +'fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" '
+          +'stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>';
+    } else {
+      ctrl = '<span class="stepper">'
         +'<button data-act="dec" aria-label="one fewer">−</button>'
         +'<span class="v'+(n?'':' zero')+'">'+n+'</span>'
         +'<button data-act="inc" aria-label="one more">+</button>'
-      +'</span></div>';
+      +'</span>';
+    }
+    var cls='crow'+(MODE==='list'&&!owned?' pick':'')+(MODE==='list'&&owned?' owned':'');
+    return '<div class="'+cls+'" data-id="'+c.id+'"'
+      +(MODE==='list'&&!owned?' role="checkbox" tabindex="0" aria-checked="'+(n?'true':'false')+'"':'')+'>'
+      +'<span class="nm"><b>'+esc(c.name)+'</b><span>'+esc(c.park||'—')+(c.type?' · '+esc(c.type):'')+'</span></span>'
+      +ctrl+'</div>';
   }).join('');
+
+  if(MODE==='list'){
+    el.querySelectorAll('.crow.pick').forEach(function(row){
+      var toggle=function(){
+        var id=+row.getAttribute('data-id');
+        if(basket[id]) delete basket[id]; else basket[id]=1;
+        row.querySelector('.tick').classList.toggle('on',!!basket[id]);
+        row.setAttribute('aria-checked',basket[id]?'true':'false');
+        renderBasket();
+      };
+      row.onclick=toggle;
+      row.onkeydown=function(e){ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); toggle(); } };
+    });
+    return;
+  }
+
   el.querySelectorAll('button').forEach(function(b){
     b.onclick=function(){
       var id=+b.closest('.crow').dataset.id;
@@ -327,13 +440,15 @@ function renderBasket(){
   var ids=Object.keys(basket);
   var rides=ids.reduce(function(a,k){return a+basket[k];},0);
   $('tot_c').textContent=ids.length+' coaster'+(ids.length===1?'':'s');
-  $('tot_r').textContent=rides+' ride'+(rides===1?'':'s');
+  // List mode has no ride count to report — one tick is "I have ridden this",
+  // not "I rode this once", and showing "12 rides" would invent a fact.
+  $('tot_r').textContent = MODE==='day' ? (rides+' ride'+(rides===1?'':'s')) : 'no dates';
   $('save').disabled=!ids.length;
   if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">Nothing staged yet.</div>'; return; }
   $('basket').innerHTML=ids.map(function(k){
     var c=BYID[k]||{};
     return '<div class="brow"><span class="n">'+esc(c.name||('#'+k))+'</span>'
-      +'<span class="lap">×'+basket[k]+'</span>'
+      +(MODE==='day'?'<span class="lap">×'+basket[k]+'</span>':'')
       +'<span class="x" data-id="'+k+'" title="Remove">×</span></div>';
   }).join('');
   $('basket').querySelectorAll('.x').forEach(function(x){
@@ -343,17 +458,25 @@ function renderBasket(){
 
 // ---- save ------------------------------------------------------------------
 function save(){
-  var entries=Object.keys(basket).map(function(k){return {c:+k,n:basket[k]};});
+  var ids=Object.keys(basket);
+  var entries=ids.map(function(k){return {c:+k,n:basket[k]};});
   if(!entries.length)return;
   var rider=$('rider').value, date=$('date').value;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ $('msg').className='msg bad'; $('msg').textContent='Pick a valid date.'; return; }
+  // Undated is a deliberate null, not an omitted field — the server tells the
+  // two apart and rejects a malformed date rather than silently blanking it.
+  var d = MODE==='day' ? date : null;
+  if(MODE==='day' && !/^\d{4}-\d{2}-\d{2}$/.test(d)){
+    $('msg').className='msg bad'; $('msg').textContent='Pick a valid date.'; return; }
   $('save').disabled=true; $('msg').className='msg'; $('msg').textContent='Saving…';
-  api('POST','/api/rides',{user:rider,d:date,entries:entries})
+  api('POST','/api/rides',{user:rider,d:d,entries:entries})
     .then(function(r){
+      ids.forEach(function(k){ OWNED[k]=true; });   // so list mode marks them at once
       basket={}; renderList(); renderBasket();
       $('msg').className='msg ok';
-      $('msg').innerHTML='Saved '+r.added+' ride'+(r.added===1?'':'s')+' across '+r.coasters+' coaster'
-        +(r.coasters===1?'':'s')+'. Now on <b>'+r.credits.toLocaleString()+'</b> coaster'
+      $('msg').innerHTML=(MODE==='day'
+          ? ('Saved '+r.added+' ride'+(r.added===1?'':'s')+' across '+r.coasters+' coaster'+(r.coasters===1?'':'s')+'.')
+          : ('Added '+r.added+' coaster'+(r.added===1?'':'s')+' to your count.'))
+        +' Now on <b>'+r.credits.toLocaleString()+'</b> coaster'
         +(r.credits===1?'':'s')+' over '+r.total.toLocaleString()+' ride'+(r.total===1?'':'s')+'. '
         +'<a href="/user/'+encodeURIComponent(rider)+'/rides">View the log →</a>';
     })
