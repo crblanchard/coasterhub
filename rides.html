@@ -65,10 +65,42 @@
   .pager button:disabled{opacity:.35;cursor:default}
   #loading{color:var(--muted);padding:40px 0}
   #err{display:none;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:20px}
+  .sortpick{display:none}
+  td.cmeta{display:none}
   @media (max-width:680px){
     .tiles{grid-template-columns:repeat(2,1fr)}
     .day summary{gap:8px}
     .day .dt{min-width:100%}
+    .sortpick{display:block}
+
+    /* The full list stops being a table on a phone. At 390px the Name column
+       alone measured 419px, so Park began 100px past the right edge and you
+       had to scroll sideways to find out which park a coaster was at. Each row
+       becomes a card instead: name, then park and location, then the numbers.
+       Same shape as the Rankings add-panel, which already works at 320px. */
+    #c_wrap{overflow-x:visible;border:0;border-radius:0;background:none}
+    #c_wrap table{white-space:normal;font-size:1rem}
+    #c_head{display:none}
+    #c_body tr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;
+               background:var(--panel);border:1px solid var(--line);border-radius:12px;
+               padding:11px 13px;margin-bottom:8px}
+    #c_body tr:hover{background:var(--panel)}
+    #c_body td{display:none;border:0;padding:0;white-space:normal}
+    /* Explicit rows, because the status cell comes before the meta cell in the
+       source and sparse auto-placement would push meta onto a fourth row,
+       leaving a hole next to the pill. */
+    #c_body td[data-k=name]{display:block;grid-column:1/-1;grid-row:1;font-weight:600;
+                            font-size:.94rem;line-height:1.3;color:var(--fg)}
+    #c_body td[data-k=park]{display:block;grid-column:1;grid-row:2;color:var(--muted);
+                            font-size:.79rem;min-width:0;
+                            overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #c_body td[data-k=loc]{display:block;grid-column:2;grid-row:2;color:var(--muted);
+                           font-size:.79rem;text-align:right;white-space:nowrap}
+    #c_body td.cmeta{display:block;grid-column:1;grid-row:3;color:var(--accent2);
+                     font-size:.77rem;font-variant-numeric:tabular-nums;min-width:0;
+                     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #c_body td[data-k=status]{display:block;grid-column:2;grid-row:3;text-align:right}
+    #c_body td.muted[data-k=park],#c_body td.muted[data-k=loc]{color:var(--muted)}
   }
 </style>
 </head>
@@ -133,6 +165,17 @@
         <select id="c_f_model"><option value="">All models</option></select>
         <select id="c_f_park"><option value="">All parks</option></select>
         <select id="c_f_loc"><option value="">All locations</option></select>
+        <!-- Phone-only: the card layout has no column headers to tap, so
+             sorting needs its own control. Hidden above 680px. -->
+        <select id="c_sort" class="sortpick">
+          <option value="park|1">Sort: Park A&ndash;Z</option>
+          <option value="name|1">Sort: Name A&ndash;Z</option>
+          <option value="h|-1">Sort: Tallest first</option>
+          <option value="s|-1">Sort: Fastest first</option>
+          <option value="l|-1">Sort: Longest first</option>
+          <option value="yr|-1">Sort: Newest first</option>
+          <option value="yr|1">Sort: Oldest first</option>
+        </select>
         <button id="c_reset">Reset</button>
       </div>
       <div class="count" id="c_count"></div>
@@ -486,8 +529,12 @@ var CreditList=(function(){
       head.appendChild(th);
     });
     FILTS.forEach(function(id){$(id).addEventListener('input',draw);});
+    $('c_sort').addEventListener('change',function(){
+      var p=$('c_sort').value.split('|'); sortKey=p[0]; sortDir=+p[1]; draw();
+    });
     $('c_reset').onclick=function(){
-      FILTS.forEach(function(id){$(id).value='';}); sortKey='park'; sortDir=1; draw();
+      FILTS.forEach(function(id){$(id).value='';});
+      sortKey='park'; sortDir=1; $('c_sort').value='park|1'; draw();
     };
     $('c_loading').style.display='none';
     $('c_wrap').style.display='block';
@@ -523,15 +570,28 @@ var CreditList=(function(){
         sp.textContent=sortDir<0?'▼':'▲';th.appendChild(sp);}
     });
     $('c_body').innerHTML=r.map(function(c){
-      return '<tr>'+COLS.map(function(col){
-        var v=c[col.k];
-        if(col.k==='type')return '<td>'+(v?'<span class="pill '+(v==='Wood'?'wood':'steel')+'">'+v+'</span>':'<span class="muted">—</span>')+'</td>';
+      // Every cell carries data-k so the phone layout can pick out the few it
+      // shows without depending on column position — COLS varies per rider.
+      var cells=COLS.map(function(col){
+        var v=c[col.k], k=' data-k="'+col.k+'"';
+        if(col.k==='type')return '<td'+k+'>'+(v?'<span class="pill '+(v==='Wood'?'wood':'steel')+'">'+v+'</span>':'<span class="muted">—</span>')+'</td>';
         if(col.k==='status')return c.closed
-          ? '<td><span class="pill def">Defunct</span><span class="cyear">'+String(c.closed).slice(0,4)+'</span></td>'
-          : '<td><span class="pill op">Operating</span></td>';
-        if(v==null||v==='')return '<td class="muted">—</td>';
-        return '<td class="'+(col.num?'num':'')+' '+(col.cls||'')+'">'+esc(v)+'</td>';
-      }).join('')+'</tr>';
+          ? '<td'+k+'><span class="pill def">Defunct</span><span class="cyear">'+String(c.closed).slice(0,4)+'</span></td>'
+          : '<td'+k+'><span class="pill op">Operating</span></td>';
+        if(v==null||v==='')return '<td class="muted"'+k+'>—</td>';
+        return '<td class="'+(col.num?'num':'')+' '+(col.cls||'')+'"'+k+'>'+esc(v)+'</td>';
+      }).join('');
+      // One extra cell holding the numbers as a single line. display:none on
+      // desktop, so it costs nothing there and saves the phone layout from
+      // trying to lay six numeric columns out on a 340px screen.
+      var bits=[];
+      if(c.yr!=null) bits.push(c.yr);
+      if(c.h!=null) bits.push(Math.round(c.h)+' ft');
+      if(c.s!=null) bits.push(Math.round(c.s)+' mph');
+      if(c.rides!=null) bits.push(c.rides+(c.rides===1?' ride':' rides'));
+      // first-ridden is deliberately left out — it pushed this line past the
+      // half-width column and everything after it clipped.
+      return '<tr>'+cells+'<td class="cmeta" data-k="_meta">'+esc(bits.join(' · '))+'</td></tr>';
     }).join('');
   }
   return {open:open};
