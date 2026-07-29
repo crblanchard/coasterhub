@@ -46,6 +46,18 @@
      is what gets pushed to the far edge. */
   .basket .brow .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .basket .brow .x{color:var(--accent);cursor:pointer;padding:0 4px;margin-left:auto;flex:none}
+  /* Inline "add a park / add a coaster" forms. Hidden until asked for, so the
+     normal logging flow is unchanged. */
+  .miniform{display:none;gap:8px;flex-wrap:wrap;align-items:flex-end;
+            background:var(--panel);border:1px solid var(--line);border-radius:12px;
+            padding:12px 14px;margin:0 0 14px}
+  .miniform.on{display:flex}
+  .miniform input,.miniform select{padding:9px 11px;font-size:.88rem}
+  .miniform .grow{flex:1;min-width:170px}
+  .miniform .note{flex-basis:100%;color:var(--muted);font-size:.78rem;margin:0}
+  .miniform .err{flex-basis:100%;color:var(--accent);font-size:.82rem;margin:0}
+  .addbar{display:flex;justify-content:flex-end;margin:0 0 10px}
+  .addbar button{padding:7px 12px;font-size:.84rem}
   .tot{display:flex;justify-content:space-between;margin:12px 0;padding-top:12px;border-top:1px solid var(--line);font-weight:700}
   .msg{margin-top:12px;font-size:.88rem}
   .msg.ok{color:var(--accent2)} .msg.bad{color:var(--accent)}
@@ -77,13 +89,43 @@
   <div class="setup">
     <div class="fld"><label for="rider">Rider</label><select id="rider"></select></div>
     <div class="fld"><label for="date">Date</label><input id="date" type="date"></div>
-    <div class="fld" style="flex:1;min-width:240px"><label for="park">Park</label><select id="park" style="width:100%"></select></div>
+    <div class="fld" style="flex:1;min-width:240px"><label for="park">Park</label>
+      <div style="display:flex;gap:8px">
+        <select id="park" style="flex:1;min-width:0"></select>
+        <button class="ghost" id="newpark" type="button" style="flex:none;padding:10px 12px">+ Park</button>
+      </div>
+    </div>
     <div class="fld" style="flex:1;min-width:200px"><label for="search">Or search all coasters</label><input id="search" type="search" placeholder="Type 2+ letters&hellip;" style="width:100%"></div>
+  </div>
+
+  <div class="miniform" id="parkform">
+    <div class="fld grow"><label for="np_name">Park name</label>
+      <input id="np_name" type="text" placeholder="Silverwood Theme Park"></div>
+    <div class="fld grow"><label for="np_region">Region</label>
+      <input id="np_region" type="text" placeholder="Idaho, US"></div>
+    <button class="primary" id="np_save" type="button">Add park</button>
+    <button class="ghost" id="np_cancel" type="button">Cancel</button>
+    <p class="note">US parks are &ldquo;&lt;State&gt;, US&rdquo;; everywhere else is just the country.
+      Coordinates come later &mdash; run the geocoder in <b>/edit</b> and it will place the park on the map.</p>
+    <p class="err" id="np_err"></p>
   </div>
 
   <div class="grid">
     <div class="panel">
       <h3 id="listhead">Coasters</h3>
+      <div class="addbar" id="addbar" style="display:none">
+        <button class="ghost" id="newcoaster" type="button">+ Coaster not listed</button>
+      </div>
+      <div class="miniform" id="coasterform">
+        <div class="fld grow"><label for="nc_name">Coaster name</label>
+          <input id="nc_name" type="text" placeholder="Stunt Pilot"></div>
+        <div class="fld"><label for="nc_type">Type</label>
+          <select id="nc_type"><option>Steel</option><option>Wood</option></select></div>
+        <button class="primary" id="nc_save" type="button">Add</button>
+        <button class="ghost" id="nc_cancel" type="button">Cancel</button>
+        <p class="note" id="nc_note"></p>
+        <p class="err" id="nc_err"></p>
+      </div>
       <div class="clist" id="clist"><div class="hint">Pick a park, or search for a coaster.</div></div>
     </div>
     <div class="panel basket">
@@ -100,6 +142,7 @@
 <script src="/app.js?v=20260728a"></script>
 <script>
 var TOKEN='', COASTERS=[], BYID={}, PARKS={}, basket={};   // basket: coasterId -> laps
+var PCOUNT={};   // park name -> how many coasters, for the dropdown labels
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function $(id){return document.getElementById(id);}
@@ -148,18 +191,81 @@ function boot(){
   Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function(res){
     COASTERS=res[0].coasters; PARKS=res[1];
     COASTERS.forEach(function(c){BYID[c.id]=c;});
-    var counts={}; COASTERS.forEach(function(c){ if(c.park) counts[c.park]=(counts[c.park]||0)+1; });
-    var names=Object.keys(counts).sort(function(a,b){return a.localeCompare(b);});
-    var sel=$('park');
-    sel.innerHTML='<option value="">— pick a park —</option>'+names.map(function(p){
-      return '<option value="'+esc(p)+'">'+esc(p)+' ('+counts[p]+')</option>';
-    }).join('');
-    sel.addEventListener('change',function(){ $('search').value=''; renderList(); });
+    PCOUNT={}; COASTERS.forEach(function(c){ if(c.park) PCOUNT[c.park]=(PCOUNT[c.park]||0)+1; });
+    // Parks with no coasters yet still belong in the list — that is the whole
+    // point of being able to add one before logging its first ride.
+    Object.keys(PARKS).forEach(function(p){ if(PCOUNT[p]==null) PCOUNT[p]=0; });
+    fillParks();
+    $('park').addEventListener('change',function(){ $('search').value=''; renderList(); });
     $('search').addEventListener('input',renderList);
   });
 
   $('save').onclick=save;
   $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
+  wireAdders();
+}
+
+function fillParks(keep){
+  var sel=$('park'), cur=keep!=null?keep:sel.value;
+  var names=Object.keys(PCOUNT).sort(function(a,b){return a.localeCompare(b);});
+  sel.innerHTML='<option value="">— pick a park —</option>'+names.map(function(p){
+    return '<option value="'+esc(p)+'">'+esc(p)+' ('+PCOUNT[p]+')</option>';
+  }).join('');
+  if(cur) sel.value=cur;
+}
+
+// ---- adding a park or a coaster --------------------------------------------
+// Everyone with the log password can add directly for now. The eventual plan
+// is request-then-approve; see the handoff.
+function wireAdders(){
+  var pf=$('parkform'), cf=$('coasterform');
+  var togglePark=function(on){ pf.classList.toggle('on',on); $('np_err').textContent='';
+    if(on){ $('np_name').value=''; $('np_region').value=''; $('np_name').focus(); } };
+  var toggleCoaster=function(on){ cf.classList.toggle('on',on); $('nc_err').textContent='';
+    if(on){ $('nc_name').value=''; $('nc_note').textContent='Adding to '+$('park').value+'.';
+            $('nc_name').focus(); } };
+
+  $('newpark').onclick=function(){ togglePark(!pf.classList.contains('on')); };
+  $('np_cancel').onclick=function(){ togglePark(false); };
+  $('newcoaster').onclick=function(){ toggleCoaster(!cf.classList.contains('on')); };
+  $('nc_cancel').onclick=function(){ toggleCoaster(false); };
+
+  $('np_save').onclick=function(){
+    var name=$('np_name').value.trim(), region=$('np_region').value.trim();
+    if(!name) return void($('np_err').textContent='Give the park a name.');
+    if(PCOUNT[name]!=null) return void($('np_err').textContent='That park is already in the list.');
+    $('np_save').disabled=true;
+    api('PUT','/api/park',{name:name,region:region||null}).then(function(){
+      PARKS[name]={lat:null,lon:null,region:region||null};
+      PCOUNT[name]=0;
+      fillParks(name);
+      $('search').value='';
+      togglePark(false); renderList();
+      $('msg').className='msg ok'; $('msg').textContent='Added '+name+'. Now add its coasters.';
+    }).catch(function(e){ $('np_err').textContent='Could not add it: '+e.message; })
+      .then(function(){ $('np_save').disabled=false; });
+  };
+
+  $('nc_save').onclick=function(){
+    var name=$('nc_name').value.trim(), park=$('park').value, type=$('nc_type').value;
+    if(!park) return void($('nc_err').textContent='Pick a park first.');
+    if(!name) return void($('nc_err').textContent='Give the coaster a name.');
+    var clash=COASTERS.some(function(c){
+      return c.park===park && c.name.toLowerCase()===name.toLowerCase(); });
+    if(clash) return void($('nc_err').textContent='That park already has a coaster with that name.');
+    $('nc_save').disabled=true;
+    api('POST','/api/coaster',{name:name,park:park,type:type}).then(function(r){
+      var c={id:r.id,name:name,park:park,type:type,laps:1};
+      COASTERS.push(c); BYID[c.id]=c;
+      PCOUNT[park]=(PCOUNT[park]||0)+1;
+      fillParks(park);
+      basket[c.id]=1;                      // you are adding it because you rode it
+      toggleCoaster(false); renderList(); renderBasket();
+      $('msg').className='msg ok';
+      $('msg').textContent='Added '+name+' and staged one ride. Fill in its stats later in /edit.';
+    }).catch(function(e){ $('nc_err').textContent='Could not add it: '+e.message; })
+      .then(function(){ $('nc_save').disabled=false; });
+  };
 }
 
 // ---- coaster list ----------------------------------------------------------
@@ -176,8 +282,15 @@ function currentList(){
 }
 function renderList(){
   var list=currentList(), el=$('clist');
+  // "+ Coaster not listed" only makes sense with a park chosen — a new coaster
+  // needs a park to belong to, and search mode spans all of them.
+  var park=$('park').value, searching=$('search').value.trim().length>=2;
+  $('addbar').style.display=(park&&!searching)?'flex':'none';
+  if(!park||searching) $('coasterform').classList.remove('on');
+
   if(!list){ $('listhead').textContent='Coasters'; el.innerHTML='<div class="hint">Pick a park, or type 2+ letters to search every coaster.</div>'; return; }
-  if(!list.length){ $('listhead').textContent='Coasters'; el.innerHTML='<div class="hint">Nothing matches.</div>'; return; }
+  if(!list.length){ $('listhead').textContent=park||'Coasters';
+    el.innerHTML='<div class="hint">'+(park?'No coasters here yet — use <b>+ Coaster not listed</b> to add the first one.':'Nothing matches.')+'</div>'; return; }
   $('listhead').textContent=$('search').value.trim().length>=2 ? ('Search — '+list.length+' match'+(list.length===1?'':'es')) : ($('park').value+' — '+list.length);
   el.innerHTML=list.map(function(c){
     var n=basket[c.id]||0;

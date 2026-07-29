@@ -173,6 +173,28 @@ Pick rider + date + park, step lap counts up/down per coaster, save the whole da
   characters to search all coasters instead.
 - Right-hand basket shows what's staged with running totals; Save posts once and reports the
   new grand total.
+- **Adding a park** — the `+ Park` button beside the dropdown opens an inline form (name +
+  region) and `PUT /api/park`. The new park is selected straight away and appears with `(0)`.
+  It has no coordinates, so it is skipped on the map until someone runs the geocoder in
+  `/edit`.
+- **Adding a coaster** — `+ Coaster not listed` appears once a park is chosen (not while
+  searching, since a new coaster needs a park to belong to). Name + Steel/Wood, then
+  `POST /api/coaster`. The new coaster is **staged at one ride automatically**, because you
+  are only adding it if you just rode it. Everything else — height, speed, year, maker — is
+  left null for `/edit` later. A same-name coaster in the same park is refused client-side.
+
+#### Anyone with the password can add — this is deliberate, and temporary
+
+Carter's call (2026-07-29): let people add parks and coasters directly for now, because the
+friction of asking him for every kiddie coaster is worse than the odd bad row. **The
+eventual model is request-then-approve**: a rider proposes a park or coaster, it lands in a
+pending state, and Carter approves before it joins the shared list.
+
+Nothing in the schema supports that yet. When it is built it needs, roughly: a `pending`
+flag (or a separate `proposals` table) on `coasters`/`parks`, an approval view, and the
+public pages filtered to approved rows only. Worth doing at the same time as accounts —
+"who proposed this" needs a real user identity, which the single shared password cannot
+provide.
 
 ### Worker API
 
