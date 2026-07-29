@@ -40,8 +40,12 @@
   .day .inner{border-top:1px solid var(--line);padding:6px 16px 12px}
   .day .row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.9rem}
   .day .row:last-child{border-bottom:0}
-  .day .row .cn{font-weight:600;flex:1}
-  .day .row .cp{color:var(--muted);font-size:.82rem}
+  /* The lap count belongs to the ride, so it sits right after the name. The
+     park is pushed to the far side with margin-left:auto instead of the name
+     growing, which is what used to strand ×4 next to the park. */
+  .day .row .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .day .row .cp{color:var(--muted);font-size:.82rem;margin-left:auto;flex:none;
+                white-space:nowrap;padding-left:10px}
   .lap{color:var(--accent);font-variant-numeric:tabular-nums;font-size:.82rem}
   .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
   /* Full-list table (came over with the old /coasters page) */
@@ -437,8 +441,8 @@ function renderDays(rows){
       +'</summary><div class="inner">'
       + uniqRows.map(function(r){
           return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
-            +'<span class="cp">'+esc(r.park)+'</span>'
-            +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')+'</div>';
+            +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')
+            +'<span class="cp">'+esc(r.park)+'</span></div>';
         }).join('')
       +'</div></details>';
   }).join('') || '<p class="lead">No rides match those filters.</p>';

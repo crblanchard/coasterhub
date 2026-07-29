@@ -42,8 +42,10 @@
   .stepper .v.zero{color:var(--muted);font-weight:400}
   .basket .brow{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:.88rem;border-bottom:1px solid rgba(255,255,255,.05)}
   .basket .brow:last-of-type{border-bottom:0}
-  .basket .brow .n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .basket .brow .x{color:var(--accent);cursor:pointer;padding:0 4px}
+  /* ×N reads as part of the ride, so it follows the name; the remove control
+     is what gets pushed to the far edge. */
+  .basket .brow .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .basket .brow .x{color:var(--accent);cursor:pointer;padding:0 4px;margin-left:auto;flex:none}
   .tot{display:flex;justify-content:space-between;margin:12px 0;padding-top:12px;border-top:1px solid var(--line);font-weight:700}
   .msg{margin-top:12px;font-size:.88rem}
   .msg.ok{color:var(--accent2)} .msg.bad{color:var(--accent)}
