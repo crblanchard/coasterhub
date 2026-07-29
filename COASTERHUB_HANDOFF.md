@@ -280,8 +280,11 @@ What makes this bigger than it looks:
   Sons, Pouzet Group are operators, not fixed parks — no coordinates, so they're skipped on the
   map. Considered an explicit `traveling` flag on the park so the UI can label them rather than
   them looking like missing data; deferred.
-- **`Boomers` vs `Boomers!`** are two different real parks (Fountain Valley and El Cajon, CA).
-  Left as-is; renaming them to include the city would be clearer.
+- **The two Boomers parks are now `Boomers! (Fountain Valley)` and `Boomers! (El Cajon)`.**
+  They really are separate parks and the old names — `Boomers` and `Boomers!` — differed only
+  by punctuation, which read like a typo. The city is in the name because `parks` is keyed by
+  name, so the *only* way to keep two same-brand parks apart is to make the names differ. Do
+  not "tidy" them back to one.
 
 ---
 
