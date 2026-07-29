@@ -22,9 +22,13 @@
   .fld label{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}
   .fld.grow{flex:1;min-width:190px}
   .fld.small{width:104px}
-  input,select{background:var(--bg);border:1px solid var(--line);color:var(--fg);
-               padding:10px 12px;border-radius:10px;font-size:.9rem;font-family:inherit;min-width:0;width:100%}
-  input:focus,select:focus{outline:0;border-color:var(--accent2)}
+  /* Scoped to the forms on purpose. A bare `input,select` here also matched the
+     rider picker in the header — it sets no width of its own, so width:100%
+     leaked straight through and stretched it. */
+  .panel input,.panel select,.gate input{background:var(--bg);border:1px solid var(--line);
+               color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem;
+               font-family:inherit;min-width:0;width:100%}
+  .panel input:focus,.panel select:focus,.gate input:focus{outline:0;border-color:var(--accent2)}
   button.primary{background:var(--accent2);border:0;color:#06121a;font-weight:700;border-radius:10px;
                  padding:11px 18px;cursor:pointer;font-size:.92rem}
   button.primary:disabled{opacity:.4;cursor:default}
@@ -69,6 +73,7 @@
     <a href="/rankings" data-nav="rankings">Rankings</a>
     <a href="/stats" data-nav="stats">Stats</a>
     <a href="/rides" data-nav="rides">Rides</a>
+    <a href="/log" data-nav="log">Log</a>
     <a href="/add" data-nav="add">Add new</a>
   </nav>
   <div class="people" id="people"></div>
@@ -165,7 +170,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/rides?view=list">Credit list</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/rides?view=list">Credit list</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260728a"></script>

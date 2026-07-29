@@ -194,10 +194,11 @@ async function addRides(env, b) {
 // A rider's personal order of the coasters they've ridden, best first. Stored as
 // (user, coaster, pos) with pos 1 = favourite.
 //
-// Writes are currently OPEN — anyone can PUT anyone's ranking. That is Carter's
-// call for now; flip RANKINGS_NEED_TOKEN to true (and nothing else) to put them
-// behind the same admin token as /edit and /log.
-const RANKINGS_NEED_TOKEN = false;
+// Writes require the admin token, like every other write on the site. They were
+// open at first, which meant anyone who found the endpoint could reorder anyone
+// else's favourites. The rankings page asks for the password only when a save is
+// refused and remembers it for the session, so this costs a rider nothing.
+const RANKINGS_NEED_TOKEN = true;
 
 async function getRankings(env, slug) {
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
@@ -369,7 +370,6 @@ export default {
         const r = await getRankings(env, km[1].toLowerCase());
         return r ? json(r) : err(404, "no such user");
       }
-      // Ungated on purpose for now — see RANKINGS_NEED_TOKEN.
       if (request.method === "PUT" && km) {
         if (RANKINGS_NEED_TOKEN && !tokenOk(request, env)) return err(401, "unauthorized");
         const out = await putRankings(env, km[1].toLowerCase(), await request.json());

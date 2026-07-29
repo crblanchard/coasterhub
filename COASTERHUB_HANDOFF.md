@@ -1,6 +1,6 @@
 # Coaster Hub — Session Handoff
 
-_Last updated 2026-07-28 by a Claude Code session._
+_Last updated 2026-07-29 by a Claude Code session._
 
 This file is tracked in git on purpose so it syncs between machines. Commit your updates to it.
 
@@ -11,10 +11,13 @@ This file is tracked in git on purpose so it syncs between machines. Commit your
 - **What it is:** static site (HTML/CSS/vanilla JS) visualising roller-coaster counts for
   several riders. Live at **coasterhub.org** (also `coasterhub.carter-r-blanchard.workers.dev`).
 - **Backend:** Cloudflare **D1** (`coasterhub`, id `d4742d82-f606-498a-8520-bcbfec7dcf91`) is
-  the source of truth — tables `coasters` / `parks` / `rides` (Carter) / `credits` (Cole,
-  Keltan, Max) / `users`. `worker.js` serves the API; `app.js` reads it with a **static-JSON
-  fallback**, so the `.json` files in the repo stay as seed + safety net. If D1 is unbound
-  every `/api/*` returns 503 and the site still works.
+  the source of truth — tables `coasters` / `parks` / `rides` (**everyone**) / `users` /
+  `rankings`. `worker.js` serves the API; `app.js` reads it with a **static-JSON fallback**,
+  so the `.json` files in the repo stay as seed + safety net. If D1 is unbound every
+  `/api/*` returns 503 and the site still works.
+- **`credits` still exists but nothing reads it.** It is the backup from the 2026-07-29
+  migration (see below). Dropping it is step 3 of `migrations/001-credits-to-rides.sql`,
+  left commented out on purpose.
 - **Deploy:** push to `main` → Cloudflare Workers Builds deploys automatically.
 
 ### How we work — commit straight to `main`, no pull requests
@@ -42,16 +45,22 @@ downstream will catch a mistake now:
 - Keep each commit self-contained, since it lands on production directly. To undo:
   `git revert <sha> && git push origin main`.
 
-### Current data (2026-07-28)
+### Current data (2026-07-29)
 
-| | |
-|---|---|
-| coasters | **1,080** |
-| parks | **237** |
-| carter | 2,362 rides / 562 credits |
-| cole | 546 credits |
-| keltan | 795 credits |
-| max | 426 credits (renumbered 1-426, contiguous) |
+All four riders now live in `rides`. "Undated" rows are credits with no known date — they
+count toward credits, and are excluded from anything calendar-shaped.
+
+| rider | rows | credits | Σ distinct id | undated |
+|---|---|---|---|---|
+| carter | 2,362 | 562 | 159439 | 0 |
+| cole | 546 | 546 | 193652 | 243 |
+| keltan | 795 | 795 | 454445 | 198 |
+| max | 426 | 426 | 194626 | 426 |
+
+coasters **1,079** · parks **237**
+
+The Σ column is a checksum. **Verify migrations on counts _and_ `SUM(DISTINCT coaster_id)`** —
+counts alone hide a swapped pair, which is how a bad merge nearly went unnoticed.
 
 ### Key files
 
@@ -60,8 +69,9 @@ downstream will catch a mistake now:
 | `index.html` | home — combined unique credits + a card per rider, driven by `USERS` |
 | `stats.html` | per-rider dashboard (KPIs, on-this-day, records, milestones, map, charts) |
 | `rides.html` | the count, three ways: by-day cards, a flat ride table, or **Full list** (every coaster once, filterable). The last one was `coasters.html` until it was folded in here — see below |
-| `add.html` | stub for self-serve logging. Real page not built yet |
-| `log.html` | gated park-day logger (`noindex`, not in nav — type `/log`) |
+| `add.html` | gated page for adding **parks and coasters to the shared database**, with duplicate detection. Desktop header + footer only — not in the mobile tab bar |
+| `log.html` | gated logger, two modes (a dated park day, or a list ticked off). Last item in the mobile tab bar |
+| `migrations/` | one-off SQL, not served (see `.assetsignore`) |
 | `edit.html` | gated admin editor (coasters + parks, merge, geocode) |
 | `database.html` | unlisted QC page, not in nav |
 | `app.js` | data engine (`computeStats`) + nav (`initNav`, `USERS`, `userPageHref`) |
@@ -69,20 +79,38 @@ downstream will catch a mistake now:
 | `tools/sync-static.mjs` | regenerate the static JSON from the live API |
 | `tools/test-rides-api.mjs` | **31 endpoint tests** over `node:sqlite` (no network) |
 
-### Rider data shapes
+### Rider data shape — one shape, since 2026-07-29
 
 ```
-{user, credits:[{c:id}, ...]}                       // collection only
-{user, credits:[{c:id, n:12}, ...]}                 // + ride counts
-{user, credits:[{c:id, first:"YYYY-MM-DD"}, ...]}   // + first-ridden dates
-{user, credits:[{c:id, num:200}, ...]}              // + credit numbers (milestones)
-{user, rides:[{c:id, d:"YYYY-MM-DD"}, ...]}         // full dated log (unlocks everything)
+{user, rides:[{c:id, d:"YYYY-MM-DD"}, ...]}   // d absent/null = date not known
 ```
 
-`computeStats` detects four **independent** capabilities and only renders panels the data
-supports: `firstDates` (timeline), `rideCounts`, `activity` (calendar, biggest days), `order`
-(credit numbers → milestones). Adding a rider = drop `<name>.json` in the repo root + add
-`{slug, name}` to `USERS` in `app.js`; home cards, the combined total and the dropdown follow.
+That is it. There used to be two storage modes — Carter one-row-per-lap in `rides`, everyone
+else one-row-per-coaster in `credits` — and every read path branched on `users.mode`. They
+could not be reconciled: a credits-mode rider logging a park day had the day silently
+flattened away, and a rides-mode rider had nowhere to put a coaster they could not date.
+That is what made a single add page impossible, so it went first.
+
+Now **a credit is `COUNT(DISTINCT coaster_id)`** and **first-ridden is `MIN(d)`**. `rides.d`
+was already nullable, so no schema change was needed. `users.mode` is still a column but is
+`'rides'` for everyone and nothing branches on it.
+
+`computeStats` derives three **independent** capabilities rather than storing them, and only
+renders panels the data supports:
+
+| flag | test | unlocks |
+|---|---|---|
+| `firstDates` | any row has a date | timeline (cumulative, new-per-year) |
+| `rideCounts` | **rows > distinct coasters** — a re-ride exists | total rides, most-ridden, re-ride distance |
+| `activity` | both of the above | calendar heatmap, rides/year, biggest days |
+
+**`rideCounts` is deliberately not "has any rows".** A list ticked off leaves exactly one row
+per coaster, which says nothing about how many times they were ridden — reading that as "rode
+it once" would have Cole's page announce 546 rides he never claimed. Each flag flips on by
+itself as a rider logs more; there is nothing to set and no migration to run.
+
+Adding a rider = drop `<name>.json` in the repo root + add `{slug, name}` to `USERS` in
+`app.js`; home cards, the combined total and the dropdown follow.
 
 ---
 
@@ -160,7 +188,30 @@ Mechanics worth knowing before touching it:
 - `?view=list` opens straight on it. `/coasters` and `/user/:name/coasters` **301** there, and
   the "Full credit list" link in the Stats hero points at it.
 
-### `/log` — password-gated park-day logger
+### `/log` — password-gated, **two modes** (2026-07-29)
+
+Last item in the mobile tab bar. One park picker, two ways to add:
+
+| | **A day at a park** | **Coasters I've ridden** |
+|---|---|---|
+| date | shown, required | hidden, posts `d: null` |
+| control | `±` stepper, every lap counts | one tick, whole row tappable |
+| basket | `×3` lap counts | names only, "no dates" |
+| button | Save day | Add to my count |
+
+The only real difference is whether a date is attached; a toggle beats an optional date field
+because the *controls* differ, not just the field. **Switching modes clears the basket** —
+laps mean nothing in list mode and a tick means nothing in day mode.
+
+List mode loads the rider's existing count and marks it: already-held coasters are shown but
+inert (hiding them reads as missing data), and the ones you can still tick **sort to the
+top**. Cedar Point reads "23 · 20 in your count" for Cole. Without this you are re-ticking
+your own history blind.
+
+Undated writes are guarded server-side: an entry is inserted only if the rider has **no** row
+for that coaster, dated or not. Ticking something you already have adds nothing rather than
+inventing a ride. A lap count on an undated entry still writes one row, because laps are
+unknown. `d: null` is explicit — a *malformed* date is still a 400.
 
 Pick rider + date + park, step lap counts up/down per coaster, save the whole day as one batch.
 
@@ -186,6 +237,29 @@ Pick rider + date + park, step lap counts up/down per coaster, save the whole da
   `/log` — removing a bad row means `/edit`, or D1 directly. A test row got into the live
   table within minutes of shipping this, which is why the confirm exists.
 
+### `/add` — the shared database, not your count (2026-07-29)
+
+Same password as `/log` and `/edit` (`sessionStorage.ch_admin` — unlocking one unlocks all).
+A locked visitor gets an explanation rather than a dead form, because `/add` is linked from
+the public nav. Two forms: new coaster (name + park required, every spec optional) and new
+park. The inline `+ Park` / `+ Coaster not listed` buttons **stay in `/log`** — the moment you
+find something missing is mid-basket at a park, and bouncing to another page would drop it.
+
+**The duplicate check is why this page exists** rather than being two more boxes on `/log`.
+~50 duplicates have been merged by hand here. Two normalisations, because duplicates arrive
+in two shapes:
+
+- `norm` — lowercase, strip apostrophes (**every** lookalike: `'` `’` `ʼ` `` ` `` `´`), drop a
+  leading "the"/"a", collapse punctuation. Catches `The Underground` → `Underground`,
+  `Rollies Coaster` → `Rollie's Coaster`.
+- `squash` — the above with **spaces removed**. The only way `SandSerpent` matches
+  `Sand Serpent`.
+
+Same park + exact match after normalising **blocks** the save and points at renaming the
+existing row in `/edit` — renaming keeps everyone's rides attached, a second row strands them.
+One name containing the other only warns. Same name at a **different** park just informs:
+there are legitimately eight Boomerangs, and the useful reading is "check your park picker".
+
 #### Anyone with the password can add — this is deliberate, and temporary
 
 Carter's call (2026-07-29): let people add parks and coasters directly for now, because the
@@ -203,23 +277,34 @@ provide.
 
 | Method | Route | Auth | Notes |
 |---|---|---|---|
-| GET | `/api/rides/:slug` | public | `rides`-mode riders get one entry per ride **including the row id** (`i`) so a single ride is deletable. `credits`-mode riders are projected into the same shape (`d` = first-ridden, plus `num`/`n`) so one page renders everyone. |
-| POST | `/api/rides` | **gated** | `{user, d:"YYYY-MM-DD", entries:[{c,n}]}`. Validates **every** coaster id up front and 400s the whole batch if any is unknown — a typo can't half-log a day. Laps clamp to 1–50. Chunks the D1 batch at 90 statements. Returns `{added, coasters, total, date}`. |
-| DELETE | `/api/ride` | **gated** | `{i:<row id>}` — undo a mis-tapped ride (dated logs only). |
+| GET | `/api/rides/:slug` | public | One entry per ride **including the row id** (`i`) so a single ride is deletable. `d` is null when the date is unknown. Undated rows sort last. No `mode` field — there is one shape. |
+| POST | `/api/rides` | **gated** | `{user, d:"YYYY-MM-DD"\|null, entries:[{c,n}]}`. Validates **every** coaster id up front and 400s the whole batch if any is unknown — a typo can't half-log a day. Laps clamp to 1–50. Chunks the D1 batch at 90 statements. Returns `{added, coasters, total, credits, date}`. |
+| DELETE | `/api/ride` | **gated** | `{i:<row id>}` — undo a mis-tapped ride. Returns `{credits, rides}`. |
+| PUT | `/api/rankings/:slug` | **gated** | Was open until 2026-07-29. See below. |
 
-For a `credits`-mode rider, POST **upserts**: earliest date wins, lap counts accumulate, and an
-existing `num` (credit number) is preserved — so Max's milestones survive a logged day.
+**`d: null` is explicit, not a missing field.** A null date means undated and writes **one**
+row per coaster, and only if the rider has no row for that coaster already — dated or not.
+"I have ridden this" is not a second ride. A *malformed* date is still a 400; null is not a
+free pass for bad input.
+
+`added` counts what the database **actually wrote**, summed from `meta.changes` across the
+batch — not what was asked for, since the undated guard skips coasters already held.
 
 ### Tests
 
 ```bash
-node tools/test-rides-api.mjs        # 31 tests, all passing
+node tools/test-rides-api.mjs        # 52 tests, all passing
 ```
 
 Runs the real `worker.js` router against `node:sqlite` standing in for D1 — no network, no
-wrangler, no `npm install`. Covers auth, validation (a bad batch must write **nothing**), both
-write paths, lap clamping, the credits upsert rules, delete, and a regression pass over
-`/api/coasters`, `/api/parks` and `/api/user/:slug`.
+wrangler, no `npm install`. Covers auth, validation (a bad batch must write **nothing**),
+dated and undated writes, the undated dedupe guard, lap clamping, delete, the rankings token,
+and a regression pass over `/api/coasters`, `/api/parks` and `/api/user/:slug`.
+
+**The D1 shim must mirror `meta.changes`.** It used to return `{}` from `run()` and `[]` from
+`batch()`, which meant `added` — computed by summing `meta.changes` — was never actually
+tested and would have shipped as "Added 0 coasters" unnoticed. If you extend the shim, keep
+the result shape faithful.
 
 ---
 
@@ -236,23 +321,18 @@ remove lap counts, change the date, re-save. Notes for whoever picks it up:
 - `credits`-mode riders have no per-ride rows, so "editing a day" can only adjust `n` and
   `first` — decide whether to expose that at all, or keep full editing to dated riders.
 
-### 2. Milestones for everyone
+### 2. ~~Milestones~~ — **removed 2026-07-29, Carter's call**
 
-The milestones panel needs an explicit credit number (`num`), so only **Max** has it. The
-others could derive ordering from first-ridden dates:
+Milestone credits needed an explicit credit number (`num`), which only Max had. He said drop
+them, which is what made the storage migration a clean one-to-one. Gone: the Milestones panel
+on Stats and the `Credit #` column on the rides table. Both were already guarded and
+self-hid without the data, so removal was two deletions.
 
-| rider | credits | dated | derivable? |
-|---|---|---|---|
-| carter | 562 | 562 (100%) | yes — exact |
-| keltan | 795 | 597 (75%) | yes, but 198 undated credits have no place in the order |
-| cole | 546 | 303 (55%) | same caveat, worse |
-| max | 418 | 0 | already works via `num` |
-
-Work: in `computeStats`, when `hasOrder` is false but first-ridden dates exist, sort by
-`[date, coaster id]` (stable secondary key, or "your 500th" flips between loads) and set
-`has.order`. **Decide first:** for a partially-dated rider, does the Nth milestone count only
-dated credits, or do undated ones get appended? Consider labelling derived milestones
-differently ("your 500th dated credit"). Carter hasn't answered this.
+If they ever come back they should be **derived** from first-ridden dates sorted by
+`[date, coaster id]` (stable secondary key, or "your 500th" flips between loads), and the
+open question is unchanged: for a partially-dated rider, does the Nth milestone count only
+dated credits, or do undated ones get appended? 441 of 1,767 rows are undated, so this is
+not a corner case. Label derived ones differently ("your 500th dated credit").
 
 ### 3. Accounts / self-serve riders — wanted, deliberately deferred
 
@@ -279,10 +359,37 @@ What makes this bigger than it looks:
   for anyone. With accounts, a rider should only be able to edit their own count
   (with an admin override).
 
-### 4. Smaller items
+### 4. Per-rider tokens — discussed 2026-07-29, **deliberately not built**
 
-- **115 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
+Carter's call: leave it until it is actually needed. Worth recording *why*, since it looks
+like an obvious gap.
+
+It is **not** about privacy — every rider's count, rides and rankings are public either way.
+It is about **write authorization**, and it buys three things:
+
+- **Attribution.** The rider is a *dropdown* today, so whoever has the password picks who they
+  are logging as. A mis-set dropdown quietly writes rides into someone else's count.
+- **Least privilege.** One password unlocks `/log`, `/add` **and** `/edit` — merges, deletes,
+  the geocoder. Letting a fifth person log rides means handing them the ability to delete a park.
+- **Revocability.** Rotate one person's link instead of re-texting everyone a new password.
+
+A link is a **bearer credential** — anyone holding the URL is that person. Fine for friends,
+not for strangers, and no substitute for real accounts (§3).
+
+**The trigger is not a user count.** It is the first time Carter wants to give someone logging
+access he would not also give `/edit` access. Until then the shared password is adequate.
+
+### 5. Smaller items
+
+- **110 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
   has an "Only incomplete" filter; `tools/import-captaincoaster.js` can backfill details.
+- **The coaster table only holds coasters somebody has ridden.** Carter wants "all coasters"
+  eventually. That needs a `ridden` flag (or a derived check against `rides`) plus a "show
+  all" toggle — otherwise the *Everyone → Full list* view silently changes meaning from
+  "everything we have ridden" to "everything that exists".
+- **`/add` is reachable at `/user/<slug>/add`** via a `_redirects` 200-rewrite, left over from
+  when it was a per-rider page. It renders the same page — `add` was removed from `PER_RIDER`
+  in `app.js` — but the route is now meaningless and could go.
 - ~~**The `"?????"` park**~~ — **resolved.** Coaster #793 "Spinning Coaster (The Track 3 SBF)"
   was Max's credit (an earlier version of this file said Keltan's — wrong). It's the Spinning
   Coaster at **Track Family Fun Parks**, Branson, MO (`rcdb.com/19966.htm`); the coaster's own

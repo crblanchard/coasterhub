@@ -346,7 +346,10 @@
 
   // The pages that exist per rider, i.e. everything but Home. Used for both
   // the header links and the rider picker so the two can't disagree.
-  var PER_RIDER = ["rides", "stats", "rankings", "add"];
+  // Pages that belong to one rider and take a /user/<slug>/ prefix. Add new is
+  // deliberately absent: it edits the shared database, so it reads the same
+  // whoever is looking at it.
+  var PER_RIDER = ["rides", "stats", "rankings"];
 
   // Wire the header for a page ("home" | "stats" | "coasters" | "rides" |
   // "rankings"): point the per-rider links at the current person, mark the
@@ -423,12 +426,21 @@
 
   // Mobile tab bar. Built here rather than in markup so all four pages get it
   // (and the same ordering) from one place. Hidden above 680px by the CSS.
+  // `fixed` = the same URL for everyone. Home shows all riders, and the log
+  // picks its rider from a dropdown rather than the path, so neither takes the
+  // /user/<slug>/ prefix the other tabs get.
+  //
+  // The last slot is Log, not Add new: logging is the thing a rider does
+  // repeatedly and on a phone at a park, whereas adding a park or coaster to
+  // the shared database is occasional and rarely done one-handed. Add new
+  // stays in the desktop header and the footer, so it is still reachable on a
+  // phone — just not holding a thumb-sized slot it does not earn.
   var TABS = [
-    { k: "home",     label: "Home",     path: "/" },
+    { k: "home",     label: "Home",     path: "/",         fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
     { k: "stats",    label: "Stats",    path: "/stats" },
     { k: "rides",    label: "Rides",    path: "/rides" },
-    { k: "add",      label: "Add new",  path: "/add" }
+    { k: "log",      label: "Log",      path: "/log",      fixed: true }
   ];
   // Five is the ceiling: measured at 320px (the narrowest phone) the widest
   // label, "Rankings", fills 58 of its 64px slot. A sixth tab would need
@@ -439,7 +451,7 @@
     rides:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
     stats:    '<path d="M5 20v-6M12 20V6M19 20v-9"/>',
     rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>',
-    add:      '<path d="M12 5v14M5 12h14"/>'
+    log:      '<path d="M12 5v14M5 12h14"/>'
   };
   function buildTabBar(page, slug) {
     if (typeof document === "undefined" || document.querySelector(".tabbar")) return;
@@ -447,7 +459,7 @@
     nav.className = "tabbar";
     nav.setAttribute("aria-label", "Primary");
     nav.innerHTML = TABS.map(function (t) {
-      var href = (t.k === "home") ? "/" : (slug ? "/user/" + slug + "/" + t.k : t.path);
+      var href = t.fixed ? t.path : (slug ? "/user/" + slug + "/" + t.k : t.path);
       return '<a href="' + href + '"' + (t.k === page ? ' class="on" aria-current="page"' : '') + '>'
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
         + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + TAB_ICONS[t.k] + '</svg>'
