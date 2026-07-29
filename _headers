@@ -11,6 +11,12 @@
 # is. That is exactly what we want for files that change on every deploy.
 /*
   Cache-Control: no-cache
+  # Tell browsers to use HTTPS for this host without asking first, so typing
+  # "coasterhub.org" never touches plain HTTP again after the first visit.
+  # Deliberately NOT using `preload` — that ships the domain in a browser-baked
+  # list and is effectively permanent. One year, this host only, is reversible:
+  # drop max-age to 0 and wait it out.
+  Strict-Transport-Security: max-age=31536000
 
 # Images are content-stable — a new logo gets a new deploy but is rare, and a
 # week of staleness on a favicon hurts nobody.

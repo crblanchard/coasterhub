@@ -349,6 +349,17 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    // Force HTTPS. Typing "coasterhub.org" gets you http://, and without this
+    // the page is served over plain HTTP — Safari then shows "Not Secure" in
+    // the address bar. Cloudflare's "Always Use HTTPS" toggle does the same
+    // job at the edge; this is here so it holds even if that gets switched off.
+    // x-forwarded-proto is what Cloudflare sets; url.protocol is the fallback.
+    const proto = request.headers.get("x-forwarded-proto") || url.protocol.replace(":", "");
+    if (proto === "http") {
+      url.protocol = "https:";
+      return Response.redirect(url.toString(), 301);
+    }
+
     if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
     if (!env.DB) return err(503, "database not bound yet");
 
