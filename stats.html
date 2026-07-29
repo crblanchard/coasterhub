@@ -231,55 +231,32 @@ function renderHub(){
 }
 
 // Openings on this date in history — the shared coaster list, not anyone's
-// riding. Only 156 of 366 dates have a day-precision opening in the data, so
-// an exact-day-only panel would be blank 210 days a year; widen the window
-// until something turns up rather than show an empty section.
+// riding. Exact day only: plenty of dates have nothing, and that's fine.
 function hubOpenings(coasters,parks){
-  var now=new Date();
-  var cy=now.getFullYear();
+  var now=new Date(), cy=now.getFullYear();
+  var mmdd=String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
   var dayLabel=now.toLocaleDateString(undefined,{month:'long',day:'numeric'});
-  var mdOf=function(d){return String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+  document.getElementById('hub_otd_h').textContent='On this day — '+dayLabel;
 
-  var dated=coasters.filter(function(c){return c.opened&&c.openedPrec==='day';});
-  var byMd={};
-  dated.forEach(function(c){var k=c.opened.slice(5);(byMd[k]=byMd[k]||[]).push(c);});
-
-  var pick=function(window){
-    var out=[];
-    for(var o=-window;o<=window;o++){
-      var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+o);
-      (byMd[mdOf(d)]||[]).forEach(function(c){out.push(c);});
-    }
-    return out;
-  };
-  var hits=pick(0), widened=0;
-  [3,7,14].forEach(function(w){ if(!hits.length){ hits=pick(w); widened=w; } });
+  var hits=coasters.filter(function(c){
+    return c.opened && c.openedPrec==='day' && c.opened.slice(5)===mmdd;
+  }).sort(function(a,b){return a.opened.localeCompare(b.opened);});  // oldest first
 
   var sub=document.getElementById('hub_otd_sub');
-  document.getElementById('hub_otd_h').textContent='On this day — '+dayLabel;
   if(!hits.length){
-    sub.textContent='No opening dates on record near '+dayLabel+'.';
+    sub.textContent='Nothing on record opened on '+dayLabel+'.';
     document.getElementById('hub_otd').innerHTML='';
     return;
   }
-  sub.textContent = widened
-    ? ('Nothing opened on '+dayLabel+' itself — here’s what opened within '+widened+' days of it, across every coaster on the hub.')
-    : ('Coasters that opened on '+dayLabel+', across every coaster on the hub.');
-
-  // oldest first: the point of the panel is how far back it goes
-  hits.sort(function(a,b){return a.opened.localeCompare(b.opened);});
-
+  sub.textContent='Coasters that opened on '+dayLabel+', across every coaster on the hub.';
   document.getElementById('hub_otd').innerHTML='<div class="records">'+hits.map(function(c){
     var y=c.opened.slice(0,4), age=cy-parseInt(y,10);
     var pk=parks[c.park], reg=pk&&pk.region?pk.region:'';
-    var when=widened
-      ? new Date(c.opened+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+y
-      : y;
     var bits=[];
     if(c.h!=null) bits.push(Math.round(c.h)+' ft');
     if(c.s!=null) bits.push(Math.round(c.s)+' mph');
     return '<div class="rec">'
-      +'<div class="tag">Opened '+when+'</div>'
+      +'<div class="tag">Opened '+y+'</div>'
       +'<div class="rname">'+esc(c.name)+'</div>'
       +'<div class="rval" style="font-size:.92rem;color:var(--muted);font-weight:600">'
         +esc(c.park)+(reg?' · '+esc(reg):'')+'</div>'
