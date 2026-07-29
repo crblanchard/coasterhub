@@ -70,7 +70,7 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero"><div class="container">
+<section class="hero" style="padding-bottom:30px"><div class="container">
   <svg class="track" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <path d="M-50 500 C 250 500, 300 120, 520 120 S 780 560, 1000 380 S 1300 90, 1500 300"
           fill="none" stroke="rgba(255,255,255,.10)" stroke-width="4"/>
@@ -81,8 +81,13 @@
   <h1><span id="combo">…</span> unique credits and counting.</h1>
   <p>Coaster Hub is where you keep track of your roller coaster count — every credit, every re-ride, every park visit — and see it as maps, records and milestones instead of rows in a spreadsheet.</p>
   <p class="hero-sub" id="combo-sub"></p>
-  <a class="btn" href="#riders">See the riders</a>
-  <a class="btn ghost" href="/rides?view=list">Browse every coaster</a>
+</div></section>
+
+<section class="block" style="padding-top:34px;padding-bottom:8px"><div class="container">
+  <span class="eyebrow">The riders</span>
+  <h2>Whose count do you want?</h2>
+  <p class="lead">Four people, four counts, all with the same maps, records and calendars. Pick one and every page follows them &mdash; or stay here for everyone combined.</p>
+  <div class="lb" id="riders"><p class="lead">Loading counts…</p></div>
 </div></section>
 
 <section class="block" style="padding-bottom:8px"><div class="container">
@@ -124,13 +129,6 @@
   <div class="feed" id="feed"><p class="lead">Loading…</p></div>
 </div></section>
 
-<section class="block"><div class="container">
-  <span class="eyebrow">The riders</span>
-  <h2>Who's counting</h2>
-  <p class="lead">Every rider on the hub, each with the same maps, records, and calendars. Jump into any count.</p>
-  <div class="lb" id="riders"><p class="lead">Loading counts…</p></div>
-</div></section>
-
 <section class="block"><div class="container prose">
   <span class="eyebrow">The idea</span>
   <h2>Why Coaster Hub</h2>
@@ -163,9 +161,13 @@ Promise.all([
     st.parksGeo.forEach(function(p){parkUnion[p.park]=true;});
   });
   var uCredits=Object.keys(creditUnion).length, uParks=Object.keys(parkUnion).length;
+  // Only Carter has a real ride log today; sum whatever rides anyone has.
+  var totalRides=CoasterHub.USERS.reduce(function(n,u){
+    var k=statsBySlug[u.slug].kpi; return n+(k.rides||0);
+  },0);
   document.getElementById('combo').textContent=nf(uCredits);
   document.getElementById('g-coasters').textContent=nf(coasters.length);
-  document.getElementById('combo-sub').textContent=CoasterHub.USERS.length+' riders · '+nf(uCredits)+' unique credits · '+uParks+' parks';
+  document.getElementById('combo-sub').textContent=CoasterHub.USERS.length+' riders · '+uParks+' parks · '+nf(totalRides)+' rides logged';
   // ---- leaderboard: ranked by credits, bar relative to the leader ----------
   var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
   var ranked=CoasterHub.USERS.slice().sort(function(a,b){
