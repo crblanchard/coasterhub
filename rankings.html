@@ -417,40 +417,93 @@ function move(i,d){
 
 // Pointer-based drag: works with touch and mouse alike (HTML5 drag-and-drop
 // doesn't fire on mobile Safari at all, which is where this gets used most).
-var dragFrom=-1;
+var dragFrom=-1, dragY=0, dragPid=null, dragRAF=0;
+
 function startDrag(e){
   dragFrom=+e.currentTarget.dataset.grip;
+  dragY=e.clientY; dragPid=e.pointerId;
   e.currentTarget.setPointerCapture(e.pointerId);
   e.currentTarget.addEventListener('pointermove',onDrag);
   e.currentTarget.addEventListener('pointerup',endDrag);
   e.currentTarget.addEventListener('pointercancel',endDrag);
   var row=$('ranklist').children[dragFrom]; if(row) row.classList.add('drag');
+  if(!dragRAF) dragRAF=requestAnimationFrame(edgeScroll);
   e.preventDefault();
 }
+
 function onDrag(e){
   if(dragFrom<0) return;
+  dragY=e.clientY;
+  reorderTo(dragY);
+}
+
+// Move the dragged row to whatever is under `y` now. Split out of onDrag so the
+// auto-scroll can call it with the last known finger position — the page moves
+// under a stationary finger, so the row beneath it changes with no pointer event.
+function reorderTo(y){
+  if(dragFrom<0) return;
   var rows=[].slice.call($('ranklist').children);
+  if(!rows.length) return;
   var to=dragFrom;
   for(var i=0;i<rows.length;i++){
     var r=rows[i].getBoundingClientRect();
-    if(e.clientY>=r.top&&e.clientY<=r.bottom){ to=i; break; }
-    if(i===0&&e.clientY<r.top){ to=0; break; }
-    if(i===rows.length-1&&e.clientY>r.bottom){ to=rows.length-1; break; }
+    if(y>=r.top&&y<=r.bottom){ to=i; break; }
+    if(i===0&&y<r.top){ to=0; break; }
+    if(i===rows.length-1&&y>r.bottom){ to=rows.length-1; break; }
   }
-  if(to!==dragFrom){
-    var item=ORDER.splice(dragFrom,1)[0];
-    ORDER.splice(to,0,item);
-    dragFrom=to;
-    markDirty(); renderRank();
-    // keep dragging against the freshly rendered row
-    var g=$('ranklist').querySelector('[data-grip="'+to+'"]');
-    if(g){ try{ g.setPointerCapture(e.pointerId); }catch(err){}
-      g.addEventListener('pointermove',onDrag); g.addEventListener('pointerup',endDrag);
-      g.addEventListener('pointercancel',endDrag);
-      var row=$('ranklist').children[to]; if(row) row.classList.add('drag'); }
-  }
+  if(to===dragFrom) return;
+  var item=ORDER.splice(dragFrom,1)[0];
+  ORDER.splice(to,0,item);
+  dragFrom=to;
+  markDirty(); renderRank();
+  // keep dragging against the freshly rendered row
+  var g=$('ranklist').querySelector('[data-grip="'+to+'"]');
+  if(g){ if(dragPid!=null){ try{ g.setPointerCapture(dragPid); }catch(err){} }
+    g.addEventListener('pointermove',onDrag); g.addEventListener('pointerup',endDrag);
+    g.addEventListener('pointercancel',endDrag);
+    var row=$('ranklist').children[to]; if(row) row.classList.add('drag'); }
 }
-function endDrag(){ dragFrom=-1; renderRank(); }
+
+// Scroll the page when the finger nears an edge, so a row can be dragged past
+// one screenful. The grip sets touch-action:none, which suppresses the browser's
+// own scrolling for the whole gesture — without this you simply cannot move a
+// coaster further than the visible list.
+//
+// The zones sit INSIDE the chrome: the header is sticky and the tab bar is fixed,
+// so the last ~74px of the viewport is covered on a phone and a finger there is
+// already past the last row it can see. Both are measured rather than assumed,
+// since the tab bar only exists below 680px and carries a safe-area inset.
+function edgeScroll(){
+  dragRAF=0;
+  if(dragFrom<0) return;
+  var topInset=0, bottomInset=0, el;
+  el=document.querySelector('header.nav');
+  if(el) topInset=el.getBoundingClientRect().height;
+  el=document.querySelector('.tabbar');
+  if(el&&getComputedStyle(el).display!=='none') bottomInset=el.getBoundingClientRect().height;
+
+  var ZONE=80, MAX=22;                       // px of trigger band, px per frame
+  var toBottom=(window.innerHeight-bottomInset)-dragY;
+  var toTop=dragY-topInset;
+  var dy=0;
+  if(toBottom<ZONE) dy=Math.ceil(MAX*(1-Math.max(toBottom,0)/ZONE));
+  else if(toTop<ZONE) dy=-Math.ceil(MAX*(1-Math.max(toTop,0)/ZONE));
+
+  if(dy){
+    var before=window.pageYOffset;
+    window.scrollBy(0,dy);
+    // Only re-evaluate if the page actually moved; at the very top or bottom
+    // scrollBy is a no-op and re-running would thrash the list for nothing.
+    if(window.pageYOffset!==before) reorderTo(dragY);
+  }
+  dragRAF=requestAnimationFrame(edgeScroll);
+}
+
+function endDrag(){
+  dragFrom=-1; dragPid=null;
+  if(dragRAF){ cancelAnimationFrame(dragRAF); dragRAF=0; }
+  renderRank();
+}
 
 // ------------------------------------------------------------- add panel ----
 function pool(){
