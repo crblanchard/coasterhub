@@ -123,6 +123,24 @@ async function getRides(env, slug) {
   return { user: u.name, rides: results.map(x => ({ i: x.id, c: x.coaster_id, d: x.d })) };
 }
 
+// D1 caps bound parameters per statement (SQLITE_MAX_VARIABLE_NUMBER, ~100), so
+// any "WHERE id IN (?,?,…)" built from a user's list has to be asked in chunks.
+// Both callers below are list-shaped and unbounded in practice — a pasted import
+// or a ranking past 100 rides — and an unchunked lookup fails the whole write
+// with "too many SQL variables" rather than degrading.
+const SQL_VARS = 90;
+async function knownCoasterIds(env, ids) {
+  const known = new Set();
+  for (let i = 0; i < ids.length; i += SQL_VARS) {
+    const part = ids.slice(i, i + SQL_VARS);
+    const { results } = await env.DB.prepare(
+      "SELECT id FROM coasters WHERE id IN (" + part.map(() => "?").join(",") + ")"
+    ).bind(...part).all();
+    for (const r of results) known.add(r.id);
+  }
+  return known;
+}
+
 // Credits are the headline number (distinct coasters); rides counts the laps.
 async function userTotal(env, slug) {
   const t = await env.DB.prepare(
@@ -165,10 +183,7 @@ async function addRides(env, b) {
   }
 
   const ids = [...new Set(norm.map(e => e.c))];
-  const { results } = await env.DB.prepare(
-    "SELECT id FROM coasters WHERE id IN (" + ids.map(() => "?").join(",") + ")"
-  ).bind(...ids).all();
-  const known = new Set(results.map(r => r.id));
+  const known = await knownCoasterIds(env, ids);
   const unknown = ids.filter(i => !known.has(i));
   if (unknown.length) return { bad: [400, "unknown coaster id(s): " + unknown.join(", ")] };
 
@@ -264,21 +279,21 @@ async function putRankings(env, slug, body) {
   }
 
   if (order.length) {
-    const { results } = await env.DB.prepare(
-      "SELECT id FROM coasters WHERE id IN (" + order.map(() => "?").join(",") + ")"
-    ).bind(...order).all();
-    const known = new Set(results.map(r => r.id));
+    const known = await knownCoasterIds(env, order);
     const unknown = order.filter(i => !known.has(i));
     if (unknown.length) return { bad: [400, "unknown coaster id(s): " + unknown.join(", ")] };
   }
 
+  // The DELETE leads the batch so the replace is atomic within its chunk; the
+  // inserts that follow are ordered, so a mid-way failure truncates the list
+  // rather than scrambling it. Validation above is what keeps that from
+  // happening for the reason it used to (an over-long IN clause).
   const batch = [env.DB.prepare("DELETE FROM rankings WHERE user_slug = ?").bind(slug)];
   order.forEach((id, i) => {
     batch.push(env.DB.prepare("INSERT INTO rankings (user_slug,coaster_id,pos) VALUES (?,?,?)")
       .bind(slug, id, i + 1));
   });
-  const CHUNK = 90;
-  for (let i = 0; i < batch.length; i += CHUNK) await env.DB.batch(batch.slice(i, i + CHUNK));
+  for (let i = 0; i < batch.length; i += SQL_VARS) await env.DB.batch(batch.slice(i, i + SQL_VARS));
 
   return { ok: true, count: order.length };
 }

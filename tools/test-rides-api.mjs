@@ -24,9 +24,20 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PW = "test-password";
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
+// D1 rejects a statement with more bound parameters than SQLite's compiled-in
+// limit ("too many SQL variables"). node:sqlite's own limit is far higher, so
+// without this the shim happily runs queries the real database refuses — which
+// is exactly how an unchunked `IN (?,?,…)` shipped and broke Save on a ranking
+// past 100 rides. Enforce D1's ceiling so that class of bug fails here first.
+const D1_MAX_VARS = 100;
 class Stmt {
   constructor(db, sql) { this.db = db; this.sql = sql; this.args = []; }
-  bind(...a) { this.args = a; return this; }
+  bind(...a) {
+    if (a.length > D1_MAX_VARS) {
+      throw new Error("D1_ERROR: too many SQL variables (" + a.length + " > " + D1_MAX_VARS + ")");
+    }
+    this.args = a; return this;
+  }
   async all() { return { results: this.db.prepare(this.sql).all(...this.args) }; }
   async first() { const r = this.db.prepare(this.sql).get(...this.args); return r === undefined ? null : r; }
   // Mirror D1's result shape, including meta.changes — addRides counts what was
@@ -349,6 +360,38 @@ async function main() {
       (await call(db, "POST", "/api/rides", { body: { user: "cole", d: null, entries: [{ c: 2, n: 1 }] } })).status === 401);
     check("...and so does /api/coaster",
       (await call(db, "POST", "/api/coaster", { body: { name: "X", park: "Cedar Point" } })).status === 401);
+  }
+
+  // A ranking is one row per credit, so any rider past ~100 blows the bound-
+  // parameter ceiling. This failed in production with "too many SQL variables"
+  // once Carter's list crossed 100 — the save was rejected outright.
+  console.log("\nLong lists (bound-parameter ceiling)");
+  {
+    const db = freshDb();
+    const N = 260;
+    for (let i = 4; i <= N; i++) {
+      db.prepare("INSERT INTO coasters (id,name,park,type) VALUES (?,?,?,?)")
+        .run(i, "Coaster " + i, "Cedar Point", "Steel");
+    }
+    const order = Array.from({ length: N }, (_, i) => i + 1);
+
+    let r = await call(db, "PUT", "/api/rankings/carter", { body: { order } });
+    check(`a ranking of ${N} saves`, r.status === 200 && r.data.count === N, JSON.stringify(r.data));
+    check("...and reads back in the same order",
+      JSON.stringify((await call(db, "GET", "/api/rankings/carter")).data.order) === JSON.stringify(order));
+
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [...order.slice(0, 150), 99999] } });
+    check("one unknown id in a long list still rejects the whole write", r.status === 400);
+    check("...leaving the stored ranking intact",
+      rows(db, "SELECT * FROM rankings WHERE user_slug='carter'").length === N);
+
+    // Same ceiling on the import path: a pasted list is one entry per coaster.
+    const entries = order.map((c) => ({ c, n: 1 }));
+    r = await call(db, "POST", "/api/rides",
+      { token: PW, body: { user: "cole", d: null, entries } });
+    check(`an undated import of ${N} coasters saves`, r.status === 200, JSON.stringify(r.data));
+    check("...and gives the rider that many credits",
+      rows(db, "SELECT COUNT(DISTINCT coaster_id) AS c FROM rides WHERE user_slug='cole'")[0].c === N);
   }
 
   console.log("\nRegression — endpoints the rest of the site depends on");
