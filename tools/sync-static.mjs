@@ -24,7 +24,7 @@ const BASE = (process.argv[2] || "https://coasterhub.org").replace(/\/$/, "");
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 // Riders to sync. Keep in step with the USERS array in app.js.
-const SLUGS = ["carter", "cole", "keltan", "max"];
+const SLUGS = ["carter", "cole", "keltan", "max", "sean"];
 
 async function getJSON(path) {
   const res = await fetch(BASE + path);
