@@ -33,8 +33,11 @@ git add -A && git commit -m "..." && git push origin main
 What replaces the PR as the safety net — do these *before* pushing, because nothing
 downstream will catch a mistake now:
 
-- `node --check` any JS you touched, and `node tools/test-rides-api.mjs` if you went
-  near `worker.js`.
+- `node --check` any JS you touched, `node tools/check-inline-js.mjs` **always**, and
+  `node tools/test-rides-api.mjs` if you went near `worker.js`. The inline check exists
+  because a dropped `+` in a string concatenation once killed the whole script on
+  `/log` and `/add` — no tab bar, no footer year, and Unlock silently did nothing.
+  `node --check` does not look inside HTML.
 - Actually render the affected pages and look at them. `playwright-core` + the
   pre-installed Chromium works in a sandbox: serve the repo as static files and the
   `/api/*` calls 404 and fall back to the static JSON, which exercises that path too.
@@ -54,10 +57,16 @@ count toward credits, and are excluded from anything calendar-shaped.
 |---|---|---|---|---|
 | carter | 2,362 | 562 | 159439 | 0 |
 | cole | 546 | 546 | 193652 | 243 |
-| keltan | 795 | 795 | 454445 | 198 |
+| keltan | 795 | 795 | 452242 | 198 |
 | max | 426 | 426 | 194626 | 426 |
+| sean | 604 | 604 | 235981 | 604 |
 
-coasters **1,079** · parks **237**
+coasters **1,076** · parks **237**
+
+**Sean** was imported on 2026-07-30 from a spreadsheet, entirely undated — so his
+page shows credits, parks and geography but no ride total, no timeline and no day
+view. That is the capability flags working, not missing data. 63 of his 668 sheet
+rows are NOT imported; see the open task below.
 
 The Σ column is a checksum. **Verify migrations on counts _and_ `SUM(DISTINCT coaster_id)`** —
 counts alone hide a swapped pair, which is how a bad merge nearly went unnoticed.
@@ -77,7 +86,10 @@ counts alone hide a swapped pair, which is how a bad merge nearly went unnoticed
 | `app.js` | data engine (`computeStats`) + nav (`initNav`, `USERS`, `userPageHref`) |
 | `worker.js` | Worker entrypoint — static assets + JSON API |
 | `tools/sync-static.mjs` | regenerate the static JSON from the live API |
-| `tools/test-rides-api.mjs` | **53 endpoint tests** over `node:sqlite` (no network) |
+| `tools/test-rides-api.mjs` | **73 endpoint tests** over `node:sqlite` (no network) |
+| `tools/dev-server.mjs` | local stand-in for the Worker — serves the repo, mirrors `_redirects`, stubs the API so `/log`, `/add`, `/edit` can be driven in a browser. Password `letmein` |
+| `tools/check-inline-js.mjs` | parses every page's inline `<script>`. **Run it before pushing** |
+| `tools/build-aliases.mjs` | one-off: reconstructed the former-name table from git history |
 
 ### Rider data shape — one shape, since 2026-07-29
 
@@ -398,7 +410,48 @@ not for strangers, and no substitute for real accounts (§3).
 **The trigger is not a user count.** It is the first time Carter wants to give someone logging
 access he would not also give `/edit` access. Until then the shared password is adequate.
 
-### 5. Smaller items
+### 5. Sean's remaining 63 rows — **needs Carter**
+
+604 of Sean's 668 sheet rows imported. The rest need decisions, not code.
+
+**36 coasters at parks we already have.** Four are typos in his sheet, not missing
+rides — `Millenium Force`, `Colorado Adveture`, `Surf Coaster Leviatham`,
+`Wile E. Coyote's Grand Canyon Blaster`. The rest are real and should be added:
+DarKoaster, Rapterra, Firebird, Chupacabra, Hurler, Shockwave, Colossus,
+American Eagle, Big Bad Wolf: The Wolf's Revenge, both Snoopy coasters at
+Carowinds, Dragon Khan, Tomahawk, Stampida (red), and the county-fair spinners.
+
+**Two naming conflicts to settle:**
+- Sean writes `Racer 75 [left]`/`[right]`; we store `(North)`/`(South)`. Same
+  racers, and nobody has said which side is which.
+- `Matterhorn Bobsleds [Fantasyland]`/`[Tomorrowland]` — we renamed those to
+  `(Right)`/`(Left)`, and the old names ARE in `coaster_aliases`, but his square
+  brackets omit the side word so an exact alias match misses. Either add his
+  spelling as another alias or accept it by hand.
+
+**11 parks we do not have** (25 rows): Adventure Ocean Oasis (Labadee), Alameda
+County Fair, Beyond Wonderland, Casino Pier, Christmas in the Park, **Disneyland
+Park (Paris)**, Lake Tahoe Amusement Park, **Luna Park (Melbourne)**, Mt. Olympus
+Water & Theme Park, Victorian Gardens, **Walt Disney Studios Park**.
+
+**Sean counts pre/post-rebuild separately** — `[old]`/`[new]` on Big Thunder
+Mountain Railroad, GhostRider and Incredible Hulk. Only the Hulk is two rows for
+us, so only that one kept both credits; the other pairs collapsed to one each. If
+a retrack should count twice, those need splitting and it affects other riders too.
+
+**His sheet also carries a 14-column rating rubric** (Pacing, Duration, Speed,
+Positives, Negatives, Laterals, Tracking, Vehicles, Efficiency, Aesthetics,
+Theming, Elements, Accessibility, Total) on 75 rides. Nothing on the site models
+it and it was dropped on import. It is richer than our ordinal rankings.
+
+#### Do not fuzzy-match park names
+
+The import initially credited Sean's **Disneyland Paris** and **Tokyo** rides to
+Anaheim, because "Disneyland" is a prefix of "Disneyland Park (Paris)". Park
+matching is now exact-or-alias-or-an-explicit-hand-map only. Coaster names can be
+matched loosely *within* a park; park names cannot be matched loosely at all.
+
+### 6. Smaller items
 
 - **110 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
   has an "Only incomplete" filter; `tools/import-captaincoaster.js` can backfill details.

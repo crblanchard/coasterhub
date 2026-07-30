@@ -220,11 +220,32 @@ function api(method,path,body){
 function norm(s){
   return String(s||'').toLowerCase()
     .replace(/[‘’ʼ`´']/g,'')   // every apostrophe lookalike
+    // Fold accents BEFORE the a-z filter. Without this "Parc Astérix" reduces
+    // to "parcastrix" and someone typing "Parc Asterix" creates a second park.
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
     .replace(/^(the|a)\s+/,'')
     .replace(/[^a-z0-9]+/g,' ')
     .trim();
 }
 function squash(s){ return norm(s).replace(/ /g,''); }
+
+// Similarity 0..1, for catching a typo rather than a rename. Levenshtein over
+// the squashed forms, which is cheap at these lengths and catches the real
+// cases: "Millenium Force", "Colorado Adveture", "Surf Coaster Leviatham".
+function sim(a,b){
+  if(a===b) return 1;
+  if(!a.length||!b.length) return 0;
+  var prev=[], cur=[], i, j;
+  for(j=0;j<=b.length;j++) prev[j]=j;
+  for(i=1;i<=a.length;i++){
+    cur[0]=i;
+    for(j=1;j<=b.length;j++){
+      cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    }
+    for(j=0;j<=b.length;j++) prev[j]=cur[j];
+  }
+  return 1 - prev[b.length]/Math.max(a.length,b.length);
+}
 
 function byId(id){ for(var i=0;i<COASTERS.length;i++) if(COASTERS[i].id===id) return COASTERS[i]; return null; }
 
@@ -246,6 +267,19 @@ function coasterDupes(name,park){
       soft.push(c);
     }
   });
+
+  // Near-misses: a typo is not a new coaster. Only warns, never blocks —
+  // "Gemini (Blue)" and "Gemini (Red)" are 0.93 similar and both real, so this
+  // has to stay advisory. Same park only; a close name elsewhere means nothing.
+  if(!hard.length){
+    var near=null, best=0;
+    (COASTERS||[]).forEach(function(c){
+      if(c.park!==park) return;
+      var r=sim(q,squash(c.name));
+      if(r>best && r>=0.86 && r<1){ best=r; near=c; }
+    });
+    if(near && soft.indexOf(near)<0) soft.unshift(near);
+  }
 
   // Former names. No string metric bridges a retheme — "Intimidator" and
   // "Thunder Striker" share nothing — so this is the only way to catch someone
@@ -273,7 +307,8 @@ function showDupe(el,res,what){
       ? '<b>That&rsquo;s the old name.</b> <i>'+esc(res.was.former)+'</i> is now listed as '
         +'<b>'+esc(res.was.now)+'</b>, so it is already here &mdash; nothing to add.'
       : '<b>This looks like it&rsquo;s already listed.</b>'
-        +'<ul>'+res.hard.map(function(c){return '<li>'+esc(c.name)+' &middot; '+esc(c.park||'—')+'</li>';}).join('')+'</ul>'
+        +'<ul>'+res.hard.map(function(c){
+            return '<li>'+esc(c.name)+(c.park?(' &middot; '+esc(c.park)):'')+'</li>'; }).join('')+'</ul>'
         +'<div style="margin-top:7px">If it was renamed or rethemed, rename the existing one in <b>/edit</b> '
         +'instead of adding a second row &mdash; that keeps everyone&rsquo;s rides attached to it.</div>';
     return true;
@@ -330,6 +365,15 @@ function checkPark(){
     if(pq===q) hard.push({name:p});
     else if(pq.indexOf(q)>=0 || q.indexOf(pq)>=0) soft.push({name:p});
   });
+  if(q && !hard.length){
+    var pn=null, pb=0;
+    Object.keys(PCOUNT).forEach(function(p){
+      var r=sim(q,squash(p));
+      if(r>pb && r>=0.86 && r<1){ pb=r; pn=p; }
+    });
+    if(pn) soft.unshift({name:pn});
+  }
+
   // Parks get renamed too — Plopsaland De Panne, and both Boomers! before the
   // cities went into their names.
   if(q) for(var i=0;i<PALIAS.length;i++){

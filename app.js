@@ -333,7 +333,8 @@
     { slug: "carter", name: "Carter" },
     { slug: "cole",   name: "Cole"   },
     { slug: "keltan", name: "Keltan" },
-    { slug: "max",    name: "Max"    }
+    { slug: "max",    name: "Max"    },
+    { slug: "sean",   name: "Sean"   }
   ];
   var DEFAULT_SLUG = "carter";
 
