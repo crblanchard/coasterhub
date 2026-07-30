@@ -349,7 +349,7 @@ function wireAdders(){
     if(clash) return void($('nc_err').textContent='That park already has a coaster with that name.');
     if(!confirm('Add "'+name+'" to '+park+' in the shared coaster list?\n\n'
       +'Everyone sees this. It can be deleted in /edit while nobody has ridden it — '
-      'once someone logs a ride it can only be merged, not removed. '
+      +'once someone logs a ride it can only be merged, not removed. '
       +'Check the spelling and that it is not already listed under another name.')) return;
     $('nc_save').disabled=true;
     api('POST','/api/coaster',{name:name,park:park,type:type}).then(function(r){
