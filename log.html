@@ -123,6 +123,8 @@
     <button type="button" class="on" data-mode="day">A day at a park</button>
     <button type="button" data-mode="list">Coasters I&rsquo;ve ridden</button>
   </div>
+  <a href="/import" class="ghost" id="importlink"
+     style="margin-left:10px;text-decoration:none;display:inline-block">Import a list &rarr;</a>
   <p class="modehint" id="modehint"></p>
 
   <div class="setup">
@@ -288,7 +290,7 @@ function setMode(m){
   $('datefld').style.display = m==='day' ? '' : 'none';
   $('modehint').textContent = m==='day'
     ? 'A dated visit. Every lap counts — tap + once per ride, re-rides included.'
-    : 'For filling in what you have ridden before. No dates and no ride counts — just tick everything you have been on, park by park.';
+    : 'For filling in what you have ridden before. No dates and no ride counts — just tick everything you have been on, park by park. Got the whole thing written down already? Import it instead.';
   $('save').textContent = m==='day' ? 'Save day' : 'Add to my count';
   // Laps mean nothing in list mode and a tick means nothing in day mode, so
   // the basket does not survive the switch.

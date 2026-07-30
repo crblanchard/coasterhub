@@ -98,7 +98,7 @@ createServer(async (req, res) => {
 
     // ---- static, mirroring _redirects ----
     let f = u === "/" ? "/index.html" : u;
-    const pretty = ["coasters", "rides", "stats", "rankings", "add", "log", "edit", "database"];
+    const pretty = ["coasters", "rides", "stats", "rankings", "add", "log", "edit", "database", "import"];
     const um = f.match(/^\/user\/[^/]+\/([^/]+)$/);
     if (um && pretty.includes(um[1])) f = "/" + um[1] + ".html";
     else if (pretty.includes(f.slice(1))) f = f + ".html";

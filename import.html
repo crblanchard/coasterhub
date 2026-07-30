@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
+<title>Import a list — Coaster Hub</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="/style.css?v=20260728a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<style>
+  .gate{max-width:380px;margin:8px auto 80px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
+  .gate h2{font-size:1.1rem;margin-bottom:6px}
+  .gate p{color:var(--muted);font-size:.88rem;margin-bottom:14px}
+  .gate input{width:100%;margin-bottom:10px}
+  input,select,textarea{background:var(--panel);border:1px solid var(--line);color:var(--fg);
+    padding:10px 12px;border-radius:10px;font-size:.9rem;font-family:inherit}
+  textarea{width:100%;min-height:190px;resize:vertical;line-height:1.45;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.84rem}
+  button.primary{background:var(--accent2);border:0;color:#06121a;font-weight:700;border-radius:10px;padding:11px 18px;cursor:pointer;font-size:.92rem}
+  button.primary:disabled{opacity:.4;cursor:default}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem}
+  button.ghost:hover{color:var(--fg)}
+  .fld{display:flex;flex-direction:column;gap:5px}
+  .fld label{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+  .setup{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:0 0 16px}
+  /* A select is as wide as its longest option unless told otherwise, and the
+     park list contains "Mt. Olympus Water & Theme Park". Without this the row
+     pushes past a phone screen. */
+  .setup .fld{flex:1 1 210px;min-width:0}
+  .setup select{width:100%;max-width:100%}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:0 0 16px}
+  .panel h3{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  .panel .sub{color:var(--muted);font-size:.85rem;margin:0 0 12px;max-width:74ch}
+  .drop{border:1px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--muted);font-size:.86rem;margin-top:10px}
+  .drop.over{border-color:var(--accent2);color:var(--fg)}
+  .drop input{display:none}
+  .drop b{color:var(--accent2);cursor:pointer;text-decoration:underline}
+  /* review buckets */
+  .bucket{margin:0 0 14px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .bhead{display:flex;align-items:center;gap:10px;padding:12px 15px;background:var(--panel);cursor:pointer}
+  .bhead .n{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);min-width:2.4em}
+  .bhead .t{font-weight:600;font-size:.94rem}
+  .bhead .d{color:var(--muted);font-size:.82rem;margin-left:auto;text-align:right}
+  .bucket.warn .bhead .n{color:#ffc45a}
+  .bucket.bad .bhead .n{color:var(--accent)}
+  .blist{max-height:44vh;overflow-y:auto;border-top:1px solid var(--line);display:none}
+  .bucket.open .blist{display:block}
+  .irow{display:flex;align-items:center;gap:10px;padding:9px 15px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.88rem}
+  .irow:last-child{border-bottom:0}
+  .irow input[type=checkbox]{flex:none;width:18px;height:18px;accent-color:var(--accent2)}
+  .irow .src{min-width:0;flex:1}
+  .irow .src b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .irow .src span{color:var(--muted);font-size:.78rem}
+  .irow .to{flex:1;min-width:0;color:var(--accent2);font-size:.83rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .irow select{flex:1;min-width:0;max-width:46%;padding:7px 9px;font-size:.83rem}
+  .irow .why{color:#ffc45a;font-size:.76rem;flex:none}
+  .msg{margin-top:12px;font-size:.9rem}
+  .msg.ok{color:var(--accent2)} .msg.bad{color:var(--accent)}
+  .msg a{color:var(--accent2)}
+  .tot{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:16px 0 0}
+  .tot .big{font-weight:800;font-size:1.05rem}
+  @media (max-width:680px){ .irow{flex-wrap:wrap} .irow select,.irow .to{max-width:none;flex-basis:100%} }
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="home">Home</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/stats" data-nav="stats">Stats</a>
+    <a href="/rides" data-nav="rides">Rides</a>
+    <a href="/log" data-nav="log">Log</a>
+    <a href="/add" data-nav="add">Add new</a>
+  </nav>
+</div></header>
+
+<section class="hero" style="padding:52px 0 20px"><div class="container">
+  <span class="badge">Import</span>
+  <h1 style="max-width:22ch">Bring your whole list at once.</h1>
+  <p>Paste it, or drop in a spreadsheet. Nothing is saved until you look it over.</p>
+</div></section>
+
+<div id="gate" class="gate">
+  <h2>Locked</h2>
+  <p>Enter the admin password to import a list.</p>
+  <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+  <button class="primary" id="unlock">Unlock</button>
+  <div class="msg bad" id="gate_msg"></div>
+</div>
+
+<section class="block" id="app" style="display:none;padding:8px 0 60px"><div class="container">
+
+  <div class="setup">
+    <div class="fld"><label for="rider">Whose list is this?</label><select id="rider"></select></div>
+    <div class="fld"><label for="dflt">If a line has no park</label><select id="dflt"></select></div>
+  </div>
+
+  <div class="panel">
+    <h3>Paste it</h3>
+    <p class="sub">One coaster per line. A line that matches a park name becomes a heading for
+      everything under it &mdash; or put the park and the coaster on the same line separated by a
+      tab, which is what you get copying two columns out of a spreadsheet.</p>
+    <textarea id="src" spellcheck="false" placeholder="Cedar Point&#10;Millennium Force&#10;Steel Vengeance&#10;Magnum XL-200&#10;&#10;Kings Island&#10;Beast&#10;Banshee"></textarea>
+    <div class="drop" id="drop">
+      Or drop a file here &mdash; <b id="pick">choose one</b>
+      <input id="file" type="file" accept=".xlsx,.csv,.tsv,.txt">
+      <div style="margin-top:5px;font-size:.79rem">.xlsx, .csv, .tsv or .txt</div>
+      <input type="hidden">
+    </div>
+    <div class="tot">
+      <button class="primary" id="go">Check the list</button>
+      <button class="ghost" id="clear">Clear</button>
+      <span class="msg" id="parse_msg"></span>
+    </div>
+  </div>
+
+  <div id="review" style="display:none">
+    <div id="buckets"></div>
+    <div class="tot">
+      <span class="big" id="chosen">0 selected</span>
+      <button class="primary" id="save" disabled>Add to count</button>
+      <span class="msg" id="msg"></span>
+    </div>
+  </div>
+
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a></div>
+</div></footer>
+
+<script src="/app.js?v=20260728a"></script>
+<script>
+document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('log');
+
+var TOKEN='', COASTERS=[], PARKS={}, ALIAS=[], PALIAS=[], OWNED={}, ROWS=[];
+function $(id){return document.getElementById(id);}
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+// ---- gate (shared with /log, /add, /edit) ----------------------------------
+try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
+if(TOKEN) verify(TOKEN,true);
+$('unlock').onclick=function(){ verify($('pw').value,false); };
+$('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') verify($('pw').value,false); });
+function verify(pw,quiet){
+  if(!pw)return;
+  fetch('/api/admin/login',{method:'POST',headers:{'x-admin-token':pw}})
+    .then(function(r){ if(!r.ok) throw new Error('bad');
+      TOKEN=pw; try{ sessionStorage.setItem('ch_admin',pw); }catch(e){}
+      $('gate').style.display='none'; $('app').style.display='block'; boot(); })
+    .catch(function(){ try{ sessionStorage.removeItem('ch_admin'); }catch(e){}
+      if(!quiet) $('gate_msg').textContent='Wrong password.'; });
+}
+function api(method,path,body){
+  return fetch(path,{method:method,headers:{'x-admin-token':TOKEN,'content-type':'application/json'},
+                     body:body?JSON.stringify(body):undefined})
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); });
+}
+
+// ---- name matching ---------------------------------------------------------
+// Identical rules to /add, and for the same reasons: accents folded before the
+// a-z filter, every apostrophe lookalike stripped, and a squashed form so
+// "SandSerpent" meets "Sand Serpent".
+function norm(s){
+  return String(s==null?'':s).toLowerCase()
+    .replace(/[‘’ʼ`´']/g,'')
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/^(the|a)\s+/,'')
+    .replace(/[^a-z0-9]+/g,' ').trim();
+}
+function squash(s){ return norm(s).replace(/ /g,''); }
+function sim(a,b){
+  if(a===b) return 1;
+  if(!a.length||!b.length) return 0;
+  var prev=[],cur=[],i,j;
+  for(j=0;j<=b.length;j++) prev[j]=j;
+  for(i=1;i<=a.length;i++){
+    cur[0]=i;
+    for(j=1;j<=b.length;j++) cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    for(j=0;j<=b.length;j++) prev[j]=cur[j];
+  }
+  return 1-prev[b.length]/Math.max(a.length,b.length);
+}
+
+var PARK_EXACT={}, BY_PARK={}, ALIAS_BY_ID={};
+function indexData(){
+  PARK_EXACT={}; BY_PARK={}; ALIAS_BY_ID={};
+  COASTERS.forEach(function(c){
+    if(!c.park) return;
+    (BY_PARK[c.park]=BY_PARK[c.park]||[]).push(c);
+    if(PARK_EXACT[squash(c.park)]==null) PARK_EXACT[squash(c.park)]=c.park;
+  });
+  Object.keys(PARKS).forEach(function(p){ if(PARK_EXACT[squash(p)]==null) PARK_EXACT[squash(p)]=p; });
+  PALIAS.forEach(function(a){ if(PARK_EXACT[squash(a.n)]==null) PARK_EXACT[squash(a.n)]=a.p; });
+  ALIAS.forEach(function(a){ (ALIAS_BY_ID[a.c]=ALIAS_BY_ID[a.c]||[]).push(a.n); });
+}
+
+// Parks are matched EXACTLY (or by a recorded former name) and never fuzzily.
+// "Disneyland" is a prefix of "Disneyland Park (Paris)" and they are 5,500 miles
+// apart — a loose rule here silently credits the wrong continent. Coaster names
+// may be matched loosely, but only WITHIN an already-resolved park.
+function findPark(name){ return PARK_EXACT[squash(name)]||null; }
+
+function findCoaster(name,park){
+  var q=squash(name), cands=BY_PARK[park]||[], i, k;
+  for(i=0;i<cands.length;i++) if(squash(cands[i].name)===q) return {c:cands[i],how:'exact'};
+  for(i=0;i<cands.length;i++){
+    var al=ALIAS_BY_ID[cands[i].id]||[];
+    for(k=0;k<al.length;k++) if(squash(al[k])===q) return {c:cands[i],how:'former name “'+al[k]+'”'};
+  }
+  var part=cands.filter(function(c){ var s=squash(c.name); return q&&(q.indexOf(s)>=0||s.indexOf(q)>=0); });
+  if(part.length===1) return {c:part[0],how:'close match'};
+  if(part.length>1) return {c:null,how:'ambiguous',opts:part};
+  var best=null,score=0;
+  cands.forEach(function(c){ var r=sim(q,squash(c.name)); if(r>score&&r>=0.82){ score=r; best=c; } });
+  if(best) return {c:best,how:'looks like a typo',opts:cands};
+  return {c:null,how:'none'};
+}
+
+// ---- parsing ---------------------------------------------------------------
+// Handles the three shapes people actually have: a park heading with coasters
+// beneath it, two columns pasted from a spreadsheet (park often filled only on
+// the first row of each block, so it is carried down), and a bare list.
+function parseText(text){
+  var lines=String(text).replace(/\r\n?/g,'\n').split('\n');
+  var out=[], park=null, dflt=$('dflt').value||null;
+  var tabbed=lines.filter(function(l){return l.indexOf('\t')>=0;}).length;
+  var useTabs=tabbed>=Math.max(2,lines.filter(function(l){return l.trim();}).length*0.5);
+
+  // A spreadsheet's first row is nearly always column titles. Dropping it stops
+  // "Roller Coaster" being imported as a coaster with no park.
+  var first=(lines[0]||'').toLowerCase();
+  if(/\b(park|coaster|ride|name)\b/.test(first)&&!findPark((lines[0]||'').split('\t')[0].trim())) lines=lines.slice(1);
+
+  lines.forEach(function(raw){
+    if(!raw.trim()) return;
+    if(useTabs){
+      var cell=raw.split('\t').map(function(s){return s.trim();});
+      var a=cell[0]||'', b=cell[1]||'';
+      if(a&&b){ park=a; out.push({park:a,name:b}); return; }
+      // A park column filled on the first row of a block and blank after it is
+      // the normal spreadsheet shape, so the park carries down. An UNKNOWN name
+      // in that column still becomes the current park — otherwise its coasters
+      // silently inherit the park above and get credited to the wrong place.
+      if(a&&!b){ if(findPark(a)){ park=a; return; } out.push({park:park||dflt,name:a}); return; }
+      if(b) out.push({park:park||dflt,name:b});
+      return;
+    }
+    var line=raw.trim().replace(/^[-*•]\s*/,'').replace(/^\d+[.)]\s*/,'');
+    if(!line) return;
+    var atP=line.split(' @ ');
+    if(atP.length===2&&findPark(atP[1].trim())){ out.push({park:atP[1].trim(),name:atP[0].trim()}); return; }
+    if(findPark(line)){ park=line; return; }   // a bare park name is a heading
+    out.push({park:park||dflt,name:line});
+  });
+  return out;
+}
+
+// ---- xlsx, with no library -------------------------------------------------
+// An .xlsx is a ZIP of XML. DecompressionStream('deflate-raw') inflates the
+// entries natively, so this needs no dependency and no build step — which the
+// rest of this project does not have either.
+async function readXlsx(buf){
+  var dv=new DataView(buf), u8=new Uint8Array(buf);
+  var eocd=-1;
+  for(var i=u8.length-22;i>=0&&i>u8.length-70000;i--) if(dv.getUint32(i,true)===0x06054b50){ eocd=i; break; }
+  if(eocd<0) throw new Error('not a valid .xlsx (no zip directory)');
+  var count=dv.getUint16(eocd+10,true), off=dv.getUint32(eocd+16,true);
+  var files={};
+  for(var n=0;n<count;n++){
+    if(dv.getUint32(off,true)!==0x02014b50) break;
+    var method=dv.getUint16(off+10,true), csize=dv.getUint32(off+20,true);
+    var nlen=dv.getUint16(off+28,true), elen=dv.getUint16(off+30,true), clen=dv.getUint16(off+32,true);
+    var lho=dv.getUint32(off+42,true);
+    var name=new TextDecoder().decode(u8.subarray(off+46,off+46+nlen));
+    var lnlen=dv.getUint16(lho+26,true), lelen=dv.getUint16(lho+28,true);
+    var start=lho+30+lnlen+lelen;
+    files[name]={method:method,data:u8.subarray(start,start+csize)};
+    off+=46+nlen+elen+clen;
+  }
+  async function text(nm){
+    var f=files[nm]; if(!f) return '';
+    if(f.method===0) return new TextDecoder().decode(f.data);
+    var ds=new DecompressionStream('deflate-raw');
+    var out=new Response(new Blob([f.data]).stream().pipeThrough(ds));
+    return await out.text();
+  }
+  var P=new DOMParser();
+  var shared=[];
+  var ss=await text('xl/sharedStrings.xml');
+  if(ss){
+    var sd=P.parseFromString(ss,'application/xml');
+    [].forEach.call(sd.getElementsByTagName('si'),function(si){
+      var t=''; [].forEach.call(si.getElementsByTagName('t'),function(x){ t+=x.textContent; });
+      shared.push(t);
+    });
+  }
+  // first worksheet by part name; workbook order is not needed for a single sheet
+  var sheetName=Object.keys(files).filter(function(k){return /^xl\/worksheets\/sheet\d+\.xml$/.test(k);}).sort()[0];
+  if(!sheetName) throw new Error('no worksheet found in that file');
+  var sd2=P.parseFromString(await text(sheetName),'application/xml');
+  var rows=[];
+  [].forEach.call(sd2.getElementsByTagName('row'),function(r){
+    var cells=[];
+    [].forEach.call(r.getElementsByTagName('c'),function(c){
+      var ref=c.getAttribute('r')||'', col=(ref.match(/^[A-Z]+/)||['A'])[0];
+      var ci=0; for(var k=0;k<col.length;k++) ci=ci*26+(col.charCodeAt(k)-64); ci--;
+      var t=c.getAttribute('t'), v=c.getElementsByTagName('v')[0], val='';
+      if(t==='s'&&v) val=shared[+v.textContent]||'';
+      else if(t==='inlineStr'){ var is=c.getElementsByTagName('t')[0]; val=is?is.textContent:''; }
+      else if(v) val=v.textContent;
+      cells[ci]=val;
+    });
+    rows.push(cells);
+  });
+  // emit as tab-separated so the text parser handles it, blanks and all
+  return rows.map(function(r){
+    var a=[]; for(var i=0;i<Math.max(2,r.length);i++) a.push((r[i]==null?'':String(r[i])).replace(/\t/g,' '));
+    return a.slice(0,2).join('\t');
+  }).join('\n');
+}
+
+// ---- boot ------------------------------------------------------------------
+function boot(){
+  CoasterHub.USERS.slice().sort(function(a,b){return a.name.localeCompare(b.name);})
+    .forEach(function(u){ var o=document.createElement('option'); o.value=u.slug; o.textContent=u.name; $('rider').appendChild(o); });
+  var remembered=''; try{ remembered=localStorage.getItem('ch_rider')||''; }catch(e){}
+  if(remembered) $('rider').value=remembered;
+
+  Promise.all([CoasterHub.fetchCoasters(),CoasterHub.fetchParks()]).then(function(res){
+    COASTERS=res[0].coasters; PARKS=res[1];
+    ALIAS=res[0].aliases||[]; PALIAS=res[0].parkAliases||[];
+    indexData();
+    var names=Object.keys(BY_PARK).sort(function(a,b){return a.localeCompare(b);});
+    $('dflt').innerHTML='<option value="">— nothing, skip those lines —</option>'+
+      names.map(function(p){return '<option value="'+esc(p)+'">'+esc(p)+'</option>';}).join('');
+    loadOwned();
+  });
+
+  $('rider').addEventListener('change',function(){
+    try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
+    loadOwned(); $('review').style.display='none';
+  });
+  $('go').onclick=run;
+  $('clear').onclick=function(){ $('src').value=''; $('review').style.display='none';
+    $('parse_msg').textContent=''; $('msg').textContent=''; };
+  $('save').onclick=save;
+  wireFile();
+}
+
+function loadOwned(){
+  var slug=$('rider').value; OWNED={};
+  return CoasterHub.fetchRides(slug).then(function(log){
+    if($('rider').value!==slug) return;
+    (log.rides||[]).forEach(function(r){ OWNED[r.c]=true; });
+  }).catch(function(){});
+}
+
+function wireFile(){
+  var d=$('drop'), f=$('file');
+  $('pick').onclick=function(){ f.click(); };
+  f.onchange=function(){ if(f.files&&f.files[0]) loadFile(f.files[0]); };
+  ['dragenter','dragover'].forEach(function(ev){ d.addEventListener(ev,function(e){ e.preventDefault(); d.classList.add('over'); }); });
+  ['dragleave','drop'].forEach(function(ev){ d.addEventListener(ev,function(e){ e.preventDefault(); d.classList.remove('over'); }); });
+  d.addEventListener('drop',function(e){ if(e.dataTransfer.files&&e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+}
+
+function loadFile(file){
+  var m=$('parse_msg'); m.className='msg'; m.textContent='Reading '+file.name+'…';
+  var isXlsx=/\.xlsx$/i.test(file.name);
+  if(/\.xls$/i.test(file.name)){
+    m.className='msg bad';
+    m.textContent='Old .xls files aren’t readable here — open it and Save As .xlsx or .csv.';
+    return;
+  }
+  var fr=new FileReader();
+  fr.onerror=function(){ m.className='msg bad'; m.textContent='Could not read that file.'; };
+  fr.onload=function(){
+    if(isXlsx){
+      readXlsx(fr.result).then(function(txt){
+        $('src').value=txt; m.className='msg ok';
+        m.textContent='Loaded '+file.name+'. Check it below, then press Check the list.';
+        run();
+      }).catch(function(err){ m.className='msg bad'; m.textContent='Could not read that spreadsheet: '+err.message; });
+    } else {
+      var txt=String(fr.result).replace(/,/g, function(){ return ','; });
+      // CSV: treat commas as column separators only when the file is .csv AND
+      // the line has no tab. Coaster names contain commas ("Casey Jr., Le Petit
+      // Train du Cirque"), so this only splits on the FIRST comma.
+      if(/\.csv$/i.test(file.name)) txt=txt.split('\n').map(function(l){
+        if(l.indexOf('\t')>=0) return l;
+        var i=l.indexOf(','); return i<0?l:(l.slice(0,i)+'\t'+l.slice(i+1));
+      }).join('\n');
+      $('src').value=txt; m.className='msg ok';
+      m.textContent='Loaded '+file.name+'.'; run();
+    }
+  };
+  if(isXlsx) fr.readAsArrayBuffer(file); else fr.readAsText(file);
+}
+
+// ---- resolve + review ------------------------------------------------------
+function run(){
+  var parsed=parseText($('src').value);
+  var m=$('parse_msg');
+  if(!parsed.length){ m.className='msg bad'; m.textContent='Nothing to read there yet.'; $('review').style.display='none'; return; }
+
+  var seen={}, ready=[], check=[], owned=[], noPark=[], noCoaster=[], dupes=0;
+  parsed.forEach(function(p){
+    if(!p.park){ noPark.push({src:p,why:'no park'}); return; }
+    var park=findPark(p.park);
+    if(!park){ noPark.push({src:p,why:'park not in the list'}); return; }
+    var hit=findCoaster(p.name,park);
+    if(!hit.c){ noCoaster.push({src:p,park:park,why:hit.how==='ambiguous'?'more than one match':'not in the list',opts:hit.opts||[]}); return; }
+    if(seen[hit.c.id]){ dupes++; return; }
+    seen[hit.c.id]=1;
+    if(OWNED[hit.c.id]){ owned.push({src:p,c:hit.c}); return; }
+    var rec={src:p,park:park,c:hit.c,how:hit.how,opts:hit.opts||[],pick:true};
+    if(hit.how==='exact'||hit.how.indexOf('former name')===0) ready.push(rec); else check.push(rec);
+  });
+
+  ROWS={ready:ready,check:check,owned:owned,noPark:noPark,noCoaster:noCoaster,dupes:dupes};
+  m.className='msg';
+  m.textContent=parsed.length+' line'+(parsed.length===1?'':'s')+' read'+(dupes?(', '+dupes+' repeated'):'')+'.';
+  renderReview();
+  $('review').style.display='block';
+}
+
+function bucket(id,cls,n,title,detail,body,open){
+  return '<div class="bucket '+cls+(open?' open':'')+'" id="'+id+'">'
+    +'<div class="bhead" data-b="'+id+'"><span class="n">'+n+'</span><span class="t">'+title+'</span>'
+    +'<span class="d">'+detail+'</span></div><div class="blist">'+body+'</div></div>';
+}
+function rowHtml(r,i,kind){
+  var pick='<input type="checkbox" data-k="'+kind+'" data-i="'+i+'"'+(r.pick?' checked':'')+'>';
+  var src='<span class="src"><b>'+esc(r.src.name)+'</b><span>'+esc(r.src.park||'—')+'</span></span>';
+  if(kind==='noCoaster'||kind==='noPark')
+    return '<div class="irow"><span style="width:18px;flex:none"></span>'+src
+      +'<span class="to" style="color:var(--muted)">'+esc(r.why)+'</span></div>';
+  if(kind==='owned')
+    return '<div class="irow"><span style="width:18px;flex:none"></span>'+src
+      +'<span class="to" style="color:var(--muted)">already yours — '+esc(r.c.name)+'</span></div>';
+  if(kind==='check'&&r.opts&&r.opts.length>1){
+    var opts=r.opts.map(function(o){return '<option value="'+o.id+'"'+(o.id===r.c.id?' selected':'')+'>'+esc(o.name)+'</option>';}).join('');
+    return '<div class="irow">'+pick+src+'<select data-i="'+i+'">'+opts+'</select>'
+      +'<span class="why">'+esc(r.how)+'</span></div>';
+  }
+  return '<div class="irow">'+pick+src+'<span class="to">&rarr; '+esc(r.c.name)+'</span>'
+    +(kind==='check'?'<span class="why">'+esc(r.how)+'</span>':'')+'</div>';
+}
+function renderReview(){
+  var R=ROWS, h='';
+  h+=bucket('b_ready','',R.ready.length,'Ready to add','matched exactly',
+      R.ready.map(function(r,i){return rowHtml(r,i,'ready');}).join('')||'<div class="irow">Nothing.</div>', R.check.length===0);
+  if(R.check.length) h+=bucket('b_check','warn',R.check.length,'Worth a look','close matches — confirm or untick',
+      R.check.map(function(r,i){return rowHtml(r,i,'check');}).join(''), true);
+  if(R.owned.length) h+=bucket('b_owned','',R.owned.length,'Already in the count','skipped',
+      R.owned.map(function(r,i){return rowHtml(r,i,'owned');}).join(''), false);
+  if(R.noCoaster.length) h+=bucket('b_nc','bad',R.noCoaster.length,'Coaster not found','add it on /add first',
+      R.noCoaster.map(function(r,i){return rowHtml(r,i,'noCoaster');}).join(''), false);
+  if(R.noPark.length) h+=bucket('b_np','bad',R.noPark.length,'Park not found','add the park on /add first',
+      R.noPark.map(function(r,i){return rowHtml(r,i,'noPark');}).join(''), false);
+  $('buckets').innerHTML=h;
+  $('buckets').querySelectorAll('.bhead').forEach(function(b){
+    b.onclick=function(){ $(b.dataset.b).classList.toggle('open'); };
+  });
+  $('buckets').querySelectorAll('input[type=checkbox]').forEach(function(cb){
+    cb.onchange=function(){ ROWS[cb.dataset.k][+cb.dataset.i].pick=cb.checked; tally(); };
+  });
+  $('buckets').querySelectorAll('select[data-i]').forEach(function(sel){
+    sel.onchange=function(){
+      var r=ROWS.check[+sel.dataset.i];
+      for(var i=0;i<r.opts.length;i++) if(r.opts[i].id===+sel.value) r.c=r.opts[i];
+    };
+  });
+  tally();
+}
+function chosen(){
+  var ids={}, out=[];
+  ['ready','check'].forEach(function(k){ ROWS[k].forEach(function(r){
+    if(r.pick&&!ids[r.c.id]&&!OWNED[r.c.id]){ ids[r.c.id]=1; out.push(r.c.id); } }); });
+  return out;
+}
+function tally(){
+  var n=chosen().length;
+  $('chosen').textContent=n+' selected';
+  $('save').disabled=!n;
+}
+
+function save(){
+  var ids=chosen(), rider=$('rider').value;
+  if(!ids.length) return;
+  if(!confirm('Add '+ids.length+' coaster'+(ids.length===1?'':'s')+' to '+
+      $('rider').options[$('rider').selectedIndex].text+"'s count?\n\n"+
+      'They go in without dates, which is right for a list built from memory.')) return;
+  $('save').disabled=true; $('msg').className='msg'; $('msg').textContent='Adding…';
+  api('POST','/api/rides',{user:rider,d:null,entries:ids.map(function(c){return {c:c,n:1};})})
+    .then(function(r){
+      ids.forEach(function(i){ OWNED[i]=true; });
+      $('msg').className='msg ok';
+      $('msg').innerHTML='Added '+r.added+' coaster'+(r.added===1?'':'s')+'. Now on <b>'+
+        r.credits.toLocaleString()+'</b>. <a href="/user/'+encodeURIComponent(rider)+'/rides">See the list →</a>';
+      run();
+    })
+    .catch(function(e){ $('save').disabled=false; $('msg').className='msg bad'; $('msg').textContent=String(e.message||e); });
+}
+</script>
+</body>
+</html>
