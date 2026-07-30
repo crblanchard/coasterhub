@@ -55,6 +55,10 @@ function freshDb() {
       coaster_id INTEGER NOT NULL, d TEXT);
     CREATE TABLE rankings (user_slug TEXT NOT NULL, coaster_id INTEGER NOT NULL,
       pos INTEGER NOT NULL, PRIMARY KEY (user_slug, coaster_id));
+    CREATE TABLE coaster_aliases (coaster_id INTEGER NOT NULL, former_name TEXT NOT NULL,
+      note TEXT, added TEXT, UNIQUE(coaster_id, former_name));
+    CREATE TABLE park_aliases (park TEXT NOT NULL, former_name TEXT NOT NULL PRIMARY KEY,
+      note TEXT, added TEXT);
     INSERT INTO coasters (id,name,park,type) VALUES
       (1,'Steel Vengeance','Cedar Point','Steel'),
       (2,'Millennium Force','Cedar Point','Steel'),
@@ -243,6 +247,53 @@ async function main() {
     check("an unheld coaster deletes", r.status === 200 && r.data.deleted === 3, JSON.stringify(r.data));
     check("...and is gone", rows(db, "SELECT * FROM coasters WHERE id=3").length === 0);
     check("...while every ride row is untouched", rows(db, "SELECT * FROM rides").length === 5);
+  }
+
+  console.log("\nAliases — former names");
+  {
+    const db = freshDb();
+    // a rename banks the old name
+    let r = await call(db, "PUT", "/api/coaster/1", { token: PW, body: { name: "Iron Vengeance" } });
+    check("rename succeeds", r.status === 200);
+    let al = rows(db, "SELECT * FROM coaster_aliases WHERE coaster_id=1");
+    check("...and records the former name", al.length === 1 && al[0].former_name === "Steel Vengeance", JSON.stringify(al));
+
+    // editing something else must not bank anything
+    await call(db, "PUT", "/api/coaster/1", { token: PW, body: { h: 205 } });
+    check("a non-name edit records nothing new", rows(db, "SELECT * FROM coaster_aliases WHERE coaster_id=1").length === 1);
+
+    // renaming back must not alias a coaster to its own current name
+    await call(db, "PUT", "/api/coaster/1", { token: PW, body: { name: "Steel Vengeance" } });
+    check("renaming back does not alias a name to itself",
+      rows(db, "SELECT * FROM coaster_aliases WHERE coaster_id=1 AND former_name='Steel Vengeance'").length === 0,
+      JSON.stringify(rows(db, "SELECT * FROM coaster_aliases")));
+
+    // a merge banks the disappearing name AND inherits its aliases
+    const db2 = freshDb();
+    db2.exec("INSERT INTO coaster_aliases (coaster_id,former_name) VALUES (3,'Old Blue')");
+    await call(db2, "POST", "/api/merge", { token: PW, body: { from: 3, to: 2 } });
+    const m = rows(db2, "SELECT former_name FROM coaster_aliases WHERE coaster_id=2 ORDER BY former_name").map(x => x.former_name);
+    check("merge banks the removed name and carries its own aliases over",
+      m.join("|") === "Blue Streak|Old Blue", JSON.stringify(m));
+    check("...and leaves none behind on the deleted id",
+      rows(db2, "SELECT * FROM coaster_aliases WHERE coaster_id=3").length === 0);
+
+    // delete must not leave an alias pointing at nothing
+    const db3 = freshDb();
+    db3.exec("INSERT INTO coaster_aliases (coaster_id,former_name) VALUES (3,'Old Blue')");
+    await call(db3, "DELETE", "/api/coaster/3", { token: PW });
+    check("deleting a coaster removes its aliases",
+      rows(db3, "SELECT * FROM coaster_aliases WHERE coaster_id=3").length === 0);
+
+    // exposed on the coaster list, so the static fallback carries them
+    const db4 = freshDb();
+    db4.exec("INSERT INTO coaster_aliases (coaster_id,former_name) VALUES (1,'Mean Streak')");
+    db4.exec("INSERT INTO park_aliases (park,former_name) VALUES ('Cedar Point','Cedar Pointe')");
+    const list = await call(db4, "GET", "/api/coasters");
+    check("/api/coasters carries aliases + parkAliases",
+      list.data.aliases.length === 1 && list.data.aliases[0].n === "Mean Streak"
+      && list.data.parkAliases.length === 1 && list.data.parkAliases[0].p === "Cedar Point",
+      JSON.stringify({ a: list.data.aliases, p: list.data.parkAliases }));
   }
 
   console.log("\nRankings");

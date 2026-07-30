@@ -69,6 +69,33 @@ async function getCoasters(env) {
   const { results } = await env.DB.prepare("SELECT * FROM coasters ORDER BY id").all();
   return results.map(coasterRow);
 }
+// Former names, so a rename or a retheme doesn't read as a missing coaster.
+// Someone typing "Intimidator" at Carowinds should land on Thunder Striker
+// rather than create a second row — no string matcher bridges a retheme, which
+// is how most of this table's duplicates got in.
+async function getAliases(env) {
+  const [c, p] = await Promise.all([
+    env.DB.prepare("SELECT coaster_id, former_name FROM coaster_aliases").all(),
+    env.DB.prepare("SELECT park, former_name FROM park_aliases").all(),
+  ]);
+  return {
+    aliases: c.results.map(r => ({ c: r.coaster_id, n: r.former_name })),
+    parkAliases: p.results.map(r => ({ p: r.park, n: r.former_name })),
+  };
+}
+
+// Record a former name whenever one stops being current. Called on rename and on
+// merge, so the table maintains itself — every alias below the backfill was
+// reconstructed by hand from git history, which is not repeatable.
+function recordAlias(env, id, formerName, note) {
+  if (!formerName) return null;
+  return env.DB.prepare(
+    "INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) " +
+    "SELECT ?, ?, ?, date('now') WHERE NOT EXISTS " +
+    "(SELECT 1 FROM coasters WHERE id = ? AND name = ?)"   // never alias a name to itself
+  ).bind(id, formerName, note, id, formerName);
+}
+
 async function getParks(env) {
   const { results } = await env.DB.prepare("SELECT * FROM parks").all();
   const out = {};
@@ -361,7 +388,13 @@ export default {
 
     try {
       // ---- public reads ----
-      if (request.method === "GET" && path === "/api/coasters") return json({ coasters: await getCoasters(env) });
+      // Aliases ride along with the coaster list rather than living on their own
+      // endpoint: every consumer that needs them already fetches this, and it
+      // means the static coasters.json fallback carries them too (sync-static
+      // writes this response verbatim).
+      if (request.method === "GET" && path === "/api/coasters") {
+        return json({ coasters: await getCoasters(env), ...(await getAliases(env)) });
+      }
       if (request.method === "GET" && path === "/api/parks") return json(await getParks(env));
       const um = path.match(/^\/api\/user\/([a-z0-9-]+)$/i);
       if (request.method === "GET" && um) {
@@ -433,8 +466,23 @@ export default {
         const sets = [], vals = [];
         for (const f of COASTER_FIELDS) if (f in b) { sets.push(f + " = ?"); vals.push(b[f]); }
         if (!sets.length) return err(400, "no fields");
+        // Read the old name BEFORE the update — a rename is the moment a former
+        // name exists, and it is unrecoverable afterwards.
+        const prev = ("name" in b)
+          ? await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(id).first()
+          : null;
         vals.push(id);
         await env.DB.prepare("UPDATE coasters SET " + sets.join(", ") + " WHERE id = ?").bind(...vals).run();
+        if (prev && prev.name && prev.name !== b.name) {
+          const st = recordAlias(env, id, prev.name, "rename");
+          // A name that has become current again is no longer a FORMER name.
+          // Without this, renaming A->B->A leaves "A" aliased to a coaster
+          // called A, and /add would answer "that's the old name, it's now A".
+          const undo = env.DB.prepare(
+            "DELETE FROM coaster_aliases WHERE coaster_id = ? AND former_name = ?"
+          ).bind(id, b.name);
+          await env.DB.batch(st ? [st, undo] : [undo]);
+        }
         return afterWrite(ctx, env, json({ ok: true }));
       }
 
@@ -486,6 +534,9 @@ export default {
           "DELETE FROM coasters WHERE id = ? AND id NOT IN (SELECT coaster_id FROM rides)"
         ).bind(id).run();
         if (!res.meta || res.meta.changes === 0) return err(409, "coaster is still in use");
+        // Its former names go with it — an alias pointing at a deleted id would
+        // resolve to nothing and quietly suppress the "not listed" warning.
+        await env.DB.prepare("DELETE FROM coaster_aliases WHERE coaster_id = ?").bind(id).run();
         return afterWrite(ctx, env, json({ ok: true, deleted: id, name: row.name, park: row.park }));
       }
 
@@ -495,14 +546,23 @@ export default {
       if (request.method === "POST" && path === "/api/merge") {
         const { from, to } = await request.json();
         if (!from || !to || from === to) return err(400, "need distinct from/to");
-        await env.DB.batch([
+        // The disappearing row's name is a former name of the survivor, and any
+        // alias it already carried has to come with it — otherwise merging a
+        // coaster silently throws away everything it was ever called.
+        const src = await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(from).first();
+        const batch = [
           env.DB.prepare("UPDATE rides SET coaster_id = ? WHERE coaster_id = ?").bind(to, from),
           env.DB.prepare(
             "DELETE FROM rides WHERE d IS NULL AND id NOT IN " +
             "(SELECT MIN(id) FROM rides WHERE d IS NULL GROUP BY user_slug, coaster_id)"
           ),
+          env.DB.prepare("UPDATE OR IGNORE coaster_aliases SET coaster_id = ? WHERE coaster_id = ?").bind(to, from),
+          env.DB.prepare("DELETE FROM coaster_aliases WHERE coaster_id = ?").bind(from),
           env.DB.prepare("DELETE FROM coasters WHERE id = ?").bind(from),
-        ]);
+        ];
+        const rec = src && recordAlias(env, to, src.name, "merge");
+        if (rec) batch.unshift(rec);
+        await env.DB.batch(batch);
         return afterWrite(ctx, env, json({ ok: true }));
       }
 

@@ -179,6 +179,7 @@ document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('add');
 
 var TOKEN='', COASTERS=[], PARKS={}, PCOUNT={};
+var ALIAS=[], PALIAS=[];   // former names — see getAliases() in worker.js
 function $(id){return document.getElementById(id);}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
@@ -225,9 +226,11 @@ function norm(s){
 }
 function squash(s){ return norm(s).replace(/ /g,''); }
 
+function byId(id){ for(var i=0;i<COASTERS.length;i++) if(COASTERS[i].id===id) return COASTERS[i]; return null; }
+
 function coasterDupes(name,park){
-  var n=norm(name), q=squash(name);
-  if(!q) return {hard:[],soft:[]};
+  var q=squash(name);
+  if(!q) return {hard:[],soft:[],was:null};
   var hard=[], soft=[];
   COASTERS.forEach(function(c){
     var cq=squash(c.name);
@@ -243,17 +246,36 @@ function coasterDupes(name,park){
       soft.push(c);
     }
   });
-  return {hard:hard,soft:soft};
+
+  // Former names. No string metric bridges a retheme — "Intimidator" and
+  // "Thunder Striker" share nothing — so this is the only way to catch someone
+  // adding a coaster back under the name they remember it by.
+  var was=null;
+  for(var i=0;i<ALIAS.length;i++){
+    if(squash(ALIAS[i].n)!==q) continue;
+    var c=byId(ALIAS[i].c);
+    if(!c || c.park!==park) continue;
+    if(hard.indexOf(c)<0) hard.push(c);
+    was={former:ALIAS[i].n, now:c.name};
+    break;
+  }
+  return {hard:hard,soft:soft,was:was};
 }
 
 function showDupe(el,res,what){
   var box=$(el);
   if(res.hard.length){
     box.className='dupe on hard';
-    box.innerHTML='<b>This looks like it&rsquo;s already listed.</b>'
-      +'<ul>'+res.hard.map(function(c){return '<li>'+esc(c.name)+' &middot; '+esc(c.park||'—')+'</li>';}).join('')+'</ul>'
-      +'<div style="margin-top:7px">If it was renamed or rethemed, rename the existing one in <b>/edit</b> '
-      +'instead of adding a second row &mdash; that keeps everyone&rsquo;s rides attached to it.</div>';
+    // A former-name hit is a different message: nothing is wrong, the thing is
+    // simply called something else now, and saying so is more useful than
+    // "duplicate".
+    box.innerHTML = res.was
+      ? '<b>That&rsquo;s the old name.</b> <i>'+esc(res.was.former)+'</i> is now listed as '
+        +'<b>'+esc(res.was.now)+'</b>, so it is already here &mdash; nothing to add.'
+      : '<b>This looks like it&rsquo;s already listed.</b>'
+        +'<ul>'+res.hard.map(function(c){return '<li>'+esc(c.name)+' &middot; '+esc(c.park||'—')+'</li>';}).join('')+'</ul>'
+        +'<div style="margin-top:7px">If it was renamed or rethemed, rename the existing one in <b>/edit</b> '
+        +'instead of adding a second row &mdash; that keeps everyone&rsquo;s rides attached to it.</div>';
     return true;
   }
   if(res.soft.length){
@@ -271,6 +293,7 @@ function showDupe(el,res,what){
 function boot(){
   Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function(res){
     COASTERS=res[0].coasters; PARKS=res[1];
+    ALIAS=res[0].aliases||[]; PALIAS=res[0].parkAliases||[];
     PCOUNT={}; COASTERS.forEach(function(c){ if(c.park) PCOUNT[c.park]=(PCOUNT[c.park]||0)+1; });
     Object.keys(PARKS).forEach(function(p){ if(PCOUNT[p]==null) PCOUNT[p]=0; });
     fillParks();
@@ -301,13 +324,22 @@ function checkCoaster(){ return showDupe('c_dupe',coasterDupes($('c_name').value
 
 function checkPark(){
   var q=squash($('p_name').value);
-  var hard=[], soft=[];
+  var hard=[], soft=[], was=null;
   if(q) Object.keys(PCOUNT).forEach(function(p){
     var pq=squash(p);
     if(pq===q) hard.push({name:p});
     else if(pq.indexOf(q)>=0 || q.indexOf(pq)>=0) soft.push({name:p});
   });
-  return showDupe('p_dupe',{hard:hard,soft:soft},'parks');
+  // Parks get renamed too — Plopsaland De Panne, and both Boomers! before the
+  // cities went into their names.
+  if(q) for(var i=0;i<PALIAS.length;i++){
+    if(squash(PALIAS[i].n)!==q) continue;
+    if(PCOUNT[PALIAS[i].p]==null) continue;
+    hard.push({name:PALIAS[i].p});
+    was={former:PALIAS[i].n, now:PALIAS[i].p};
+    break;
+  }
+  return showDupe('p_dupe',{hard:hard,soft:soft,was:was},'parks');
 }
 
 // ---- saves -----------------------------------------------------------------
