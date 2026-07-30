@@ -213,7 +213,7 @@ async function main() {
     let r = await call(db, "GET", "/api/rankings/carter");
     check("empty ranking returns an empty order", r.status === 200 && Array.isArray(r.data.order) && r.data.order.length === 0);
 
-    r = await call(db, "PUT", "/api/rankings/carter", { token: PW, body: { order: [3, 1, 2] } });
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [3, 1, 2] } });
     check("PUT stores the order", r.status === 200 && r.data.count === 3, JSON.stringify(r.data));
     check("...with pos 1..n in list order",
       JSON.stringify(rows(db, "SELECT coaster_id,pos FROM rankings WHERE user_slug='carter' ORDER BY pos"))
@@ -222,40 +222,44 @@ async function main() {
     r = await call(db, "GET", "/api/rankings/carter");
     check("GET reads it back in order", JSON.stringify(r.data.order) === JSON.stringify([3, 1, 2]));
 
-    r = await call(db, "PUT", "/api/rankings/carter", { token: PW, body: { order: [2, 3] } });
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [2, 3] } });
     check("a shorter list replaces the old one entirely (no orphans)",
       rows(db, "SELECT * FROM rankings WHERE user_slug='carter'").length === 2
       && JSON.stringify((await call(db, "GET", "/api/rankings/carter")).data.order) === JSON.stringify([2, 3]));
 
-    r = await call(db, "PUT", "/api/rankings/carter", { token: PW, body: { order: [1, 2, 1, 3, 2] } });
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2, 1, 3, 2] } });
     check("duplicates are collapsed, first position wins",
       JSON.stringify((await call(db, "GET", "/api/rankings/carter")).data.order) === JSON.stringify([1, 2, 3]));
 
-    r = await call(db, "PUT", "/api/rankings/carter", { token: PW, body: { order: [1, 9999] } });
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 9999] } });
     check("unknown coaster id -> 400", r.status === 400);
     check("...and the previous order is untouched",
       JSON.stringify((await call(db, "GET", "/api/rankings/carter")).data.order) === JSON.stringify([1, 2, 3]));
 
-    r = await call(db, "PUT", "/api/rankings/carter", { token: PW, body: {} });
+    r = await call(db, "PUT", "/api/rankings/carter", { body: {} });
     check("missing order -> 400", r.status === 400);
-    r = await call(db, "PUT", "/api/rankings/nobody", { token: PW, body: { order: [1] } });
+    r = await call(db, "PUT", "/api/rankings/nobody", { body: { order: [1] } });
     check("unknown rider -> 404", r.status === 404);
 
-    r = await call(db, "PUT", "/api/rankings/carter", { token: PW, body: { order: [] } });
+    r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [] } });
     check("an empty order clears the ranking", r.status === 200
       && rows(db, "SELECT * FROM rankings WHERE user_slug='carter'").length === 0);
 
-    await call(db, "PUT", "/api/rankings/carter", { token: PW, body: { order: [1, 2] } });
-    await call(db, "PUT", "/api/rankings/cole", { token: PW, body: { order: [3] } });
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2] } });
+    await call(db, "PUT", "/api/rankings/cole", { body: { order: [3] } });
     check("riders' lists are independent",
       JSON.stringify((await call(db, "GET", "/api/rankings/carter")).data.order) === JSON.stringify([1, 2])
       && JSON.stringify((await call(db, "GET", "/api/rankings/cole")).data.order) === JSON.stringify([3]));
-    check("a write with no token is refused",
-      (await call(db, "PUT", "/api/rankings/cole", { body: { order: [1] } })).status === 401);
-    check("...and a wrong token too",
-      (await call(db, "PUT", "/api/rankings/cole", { token: "nope", body: { order: [1] } })).status === 401);
-    check("...while reading stays open to anyone",
+    // Ungated on purpose (RANKINGS_NEED_TOKEN false) — asserted so that flipping
+    // the flag fails here loudly instead of silently breaking the Save button.
+    check("writes need no token while RANKINGS_NEED_TOKEN is false",
+      (await call(db, "PUT", "/api/rankings/cole", { body: { order: [1] } })).status === 200);
+    check("...and reading is open too",
       (await call(db, "GET", "/api/rankings/cole")).status === 200);
+    check("...while /api/rides still DOES require a token",
+      (await call(db, "POST", "/api/rides", { body: { user: "cole", d: null, entries: [{ c: 2, n: 1 }] } })).status === 401);
+    check("...and so does /api/coaster",
+      (await call(db, "POST", "/api/coaster", { body: { name: "X", park: "Cedar Point" } })).status === 401);
   }
 
   console.log("\nRegression — endpoints the rest of the site depends on");

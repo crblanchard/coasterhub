@@ -194,11 +194,19 @@ async function addRides(env, b) {
 // A rider's personal order of the coasters they've ridden, best first. Stored as
 // (user, coaster, pos) with pos 1 = favourite.
 //
-// Writes require the admin token, like every other write on the site. They were
-// open at first, which meant anyone who found the endpoint could reorder anyone
-// else's favourites. The rankings page asks for the password only when a save is
-// refused and remembers it for the session, so this costs a rider nothing.
-const RANKINGS_NEED_TOKEN = true;
+// Writes are OPEN on purpose. Carter's call (2026-07-30): gating them made his
+// own rankings page demand a password to reorder his own list, which is friction
+// in exactly the wrong place — ranking is the enjoyable part of the site, and
+// the people doing it are the four riders. Logging rides (/log) and adding to
+// the shared coaster list (/add) stay gated, because those write data that
+// everyone else's pages read.
+//
+// The exposure, stated plainly: anyone who finds this endpoint can PUT any
+// rider's order. Nothing else is reachable through it — it touches only the
+// `rankings` table, ride and credit counts are unaffected, and a scrambled order
+// is repairable by dragging it back. Set this to true to gate it; the page will
+// need its unlock UI back, which is in git history at c27b43b.
+const RANKINGS_NEED_TOKEN = false;
 
 async function getRankings(env, slug) {
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
@@ -370,6 +378,7 @@ export default {
         const r = await getRankings(env, km[1].toLowerCase());
         return r ? json(r) : err(404, "no such user");
       }
+      // Ungated on purpose — see RANKINGS_NEED_TOKEN.
       if (request.method === "PUT" && km) {
         if (RANKINGS_NEED_TOKEN && !tokenOk(request, env)) return err(401, "unauthorized");
         const out = await putRankings(env, km[1].toLowerCase(), await request.json());

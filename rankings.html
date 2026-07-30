@@ -20,13 +20,6 @@
   .seg button.on{background:rgba(55,208,200,.14);color:var(--fg)}
   .spacer{flex:1}
   .status{color:var(--muted);font-size:.84rem}
-  /* Unlock sits inline in the save bar and appears only when a save is refused.
-     Browsing and reordering stay open — it is the write that needs the token. */
-  .unlock{display:none;align-items:center;gap:8px}
-  .unlock.on{display:flex}
-  .unlock input{background:var(--panel);border:1px solid var(--line);color:var(--fg);
-                padding:9px 11px;border-radius:9px;font-size:.86rem;font-family:inherit;width:150px}
-  .unlock input:focus{outline:0;border-color:var(--accent2)}
   .status.dirty{color:var(--accent)}
   .status.ok{color:var(--accent2)}
   button.primary{background:var(--accent2);border:0;color:#06121a;font-weight:700;border-radius:10px;padding:10px 16px;cursor:pointer;font-size:.9rem;font-family:inherit}
@@ -197,10 +190,6 @@
       </div>
       <span class="spacer"></span>
       <span class="status" id="status"></span>
-      <span class="unlock" id="unlock">
-        <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
-        <button class="primary" id="pw_go">Unlock</button>
-      </span>
       <button class="primary" id="save" disabled>Save</button>
     </div>
 
@@ -583,56 +572,20 @@ function answerHH(mid,better){
 function closeHH(){ hh=null; $('hh').style.display='none'; }
 
 // ------------------------------------------------------------------ save ----
-// The token is shared with /log, /add and /edit, so unlocking any one of them
-// covers the session. It is asked for only when a save is actually refused —
-// there is no reason to challenge someone who is just looking at their list.
-function token(){ try{ return sessionStorage.getItem('ch_admin')||''; }catch(e){ return ''; } }
-
-function askUnlock(msg){
-  $('unlock').classList.add('on');
-  $('status').className='status dirty'; $('status').textContent=msg;
-  $('pw').focus();
-}
-
-function tryUnlock(){
-  var pw=$('pw').value;
-  if(!pw) return;
-  fetch('/api/admin/login',{method:'POST',headers:{'x-admin-token':pw}})
-    .then(function(r){ if(!r.ok) throw new Error('bad'); })
-    .then(function(){
-      try{ sessionStorage.setItem('ch_admin',pw); }catch(e){}
-      $('pw').value=''; $('unlock').classList.remove('on');
-      save();                                  // resume the save that was refused
-    })
-    .catch(function(){
-      $('status').className='status dirty'; $('status').textContent='Wrong password.';
-    });
-}
-$('pw_go').onclick=tryUnlock;
-$('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') tryUnlock(); });
-
+// No password here on purpose — see RANKINGS_NEED_TOKEN in worker.js. Ranking is
+// the part people are meant to enjoy, so it does not get challenged.
 function save(){
   $('save').disabled=true;
   $('status').className='status'; $('status').textContent='Saving…';
-  var h={'content-type':'application/json'}, t=token();
-  if(t) h['x-admin-token']=t;
-  fetch('/api/rankings/'+slug,{method:'PUT',headers:h,body:JSON.stringify({order:ORDER})})
-    .then(function(r){
-      if(r.status===401){
-        // Stale or absent token: drop it and ask, rather than reporting a
-        // failure the rider has no way to act on.
-        try{ sessionStorage.removeItem('ch_admin'); }catch(e){}
-        var e401=new Error('locked'); e401.locked=true; throw e401;
-      }
-      return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; });
-    })
+  fetch('/api/rankings/'+slug,{method:'PUT',headers:{'content-type':'application/json'},
+                               body:JSON.stringify({order:ORDER})})
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); })
     .then(function(j){
       dirty=false;
       $('status').className='status ok'; $('status').textContent='Saved · '+j.count+' ranked';
     })
     .catch(function(e){
       $('save').disabled=false;
-      if(e.locked) return askUnlock('Enter the password to save.');
       $('status').className='status dirty'; $('status').textContent='Save failed: '+e.message;
     });
 }

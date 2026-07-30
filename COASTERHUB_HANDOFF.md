@@ -77,7 +77,7 @@ counts alone hide a swapped pair, which is how a bad merge nearly went unnoticed
 | `app.js` | data engine (`computeStats`) + nav (`initNav`, `USERS`, `userPageHref`) |
 | `worker.js` | Worker entrypoint — static assets + JSON API |
 | `tools/sync-static.mjs` | regenerate the static JSON from the live API |
-| `tools/test-rides-api.mjs` | **31 endpoint tests** over `node:sqlite` (no network) |
+| `tools/test-rides-api.mjs` | **53 endpoint tests** over `node:sqlite` (no network) |
 
 ### Rider data shape — one shape, since 2026-07-29
 
@@ -280,7 +280,7 @@ provide.
 | GET | `/api/rides/:slug` | public | One entry per ride **including the row id** (`i`) so a single ride is deletable. `d` is null when the date is unknown. Undated rows sort last. No `mode` field — there is one shape. |
 | POST | `/api/rides` | **gated** | `{user, d:"YYYY-MM-DD"\|null, entries:[{c,n}]}`. Validates **every** coaster id up front and 400s the whole batch if any is unknown — a typo can't half-log a day. Laps clamp to 1–50. Chunks the D1 batch at 90 statements. Returns `{added, coasters, total, credits, date}`. |
 | DELETE | `/api/ride` | **gated** | `{i:<row id>}` — undo a mis-tapped ride. Returns `{credits, rides}`. |
-| PUT | `/api/rankings/:slug` | **gated** | Was open until 2026-07-29. See below. |
+| PUT | `/api/rankings/:slug` | **open** | Ungated on purpose — `RANKINGS_NEED_TOKEN` is `false`. See below. |
 
 **`d: null` is explicit, not a missing field.** A null date means undated and writes **one**
 row per coaster, and only if the rider has no row for that coaster already — dated or not.
@@ -290,15 +290,34 @@ free pass for bad input.
 `added` counts what the database **actually wrote**, summed from `meta.changes` across the
 batch — not what was asked for, since the undated guard skips coasters already held.
 
+#### What's gated, and why it's split that way
+
+Carter's call (2026-07-30), after briefly gating everything and disliking it:
+
+| | gated? | reasoning |
+|---|---|---|
+| `/log` — logging rides | **yes** | writes counts every other page reads |
+| `/add` — new parks/coasters | **yes** | writes the list everyone shares, and there's no undo outside `/edit` |
+| `/edit` — merges, deletes, geocode | **yes** | destructive |
+| **rankings** | **no** | ranking is the enjoyable part; asking Carter for a password to reorder his own favourites was friction in the wrong place |
+
+The rankings exposure, plainly: anyone who finds `PUT /api/rankings/:slug` can reorder any
+rider's list. It reaches nothing else — only the `rankings` table, counts are untouched, and a
+scrambled order is fixable by dragging it back. That trade was made knowingly, not overlooked.
+Flip `RANKINGS_NEED_TOKEN` to gate it; the page then needs its unlock UI back, which is in git
+history at **c27b43b**. The test suite asserts the *current* state both ways, so flipping the
+flag fails loudly rather than silently breaking the Save button.
+
 ### Tests
 
 ```bash
-node tools/test-rides-api.mjs        # 52 tests, all passing
+node tools/test-rides-api.mjs        # 53 tests, all passing
 ```
 
 Runs the real `worker.js` router against `node:sqlite` standing in for D1 — no network, no
 wrangler, no `npm install`. Covers auth, validation (a bad batch must write **nothing**),
-dated and undated writes, the undated dedupe guard, lap clamping, delete, the rankings token,
+dated and undated writes, the undated dedupe guard, lap clamping, delete, which routes are
+gated and which are not,
 and a regression pass over `/api/coasters`, `/api/parks` and `/api/user/:slug`.
 
 **The D1 shim must mirror `meta.changes`.** It used to return `{}` from `run()` and `[]` from
