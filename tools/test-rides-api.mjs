@@ -207,6 +207,44 @@ async function main() {
     check("unknown ride id -> 404", r.status === 404);
   }
 
+  console.log("\nDELETE /api/coaster/:id + usage");
+  {
+    const db = freshDb();
+    // coaster 3 is ridden by nobody in the fixture; 1 is held by carter and cole
+    let u = await call(db, "GET", "/api/coaster/3/usage");
+    check("usage reports an unheld coaster as empty",
+      u.status === 200 && u.data.riders.length === 0 && u.data.rides === 0, JSON.stringify(u.data));
+    u = await call(db, "GET", "/api/coaster/1/usage");
+    // carter 2 dated + cole 1 dated + max 1 UNDATED. An undated row is still a
+    // rider holding the coaster, so it has to count here — miss that and the
+    // delete guard would happily strip Max's credit.
+    check("usage names every rider and their ride count, undated included",
+      u.data.riders.length === 3 && u.data.rides === 4
+      && u.data.riders.find(r => r.slug === "carter").rides === 2
+      && u.data.riders.find(r => r.slug === "max").rides === 1, JSON.stringify(u.data));
+    check("usage 404s for an unknown coaster", (await call(db, "GET", "/api/coaster/9999/usage")).status === 404);
+
+    let r = await call(db, "DELETE", "/api/coaster/3");
+    check("no token -> 401", r.status === 401);
+    check("...and the coaster survives", rows(db, "SELECT * FROM coasters WHERE id=3").length === 1);
+
+    r = await call(db, "DELETE", "/api/coaster/9999", { token: PW });
+    check("unknown coaster -> 404", r.status === 404);
+
+    // The important one: deleting must never quietly take a credit off someone.
+    r = await call(db, "DELETE", "/api/coaster/1", { token: PW });
+    check("a coaster riders still hold -> 409", r.status === 409, JSON.stringify(r.data));
+    check("...and the 409 says who, so the UI can name them",
+      r.data.riders.length === 3 && r.data.rides === 4 && /merge/i.test(r.data.error), JSON.stringify(r.data));
+    check("...and nothing was deleted", rows(db, "SELECT * FROM coasters WHERE id=1").length === 1
+      && rows(db, "SELECT * FROM rides WHERE coaster_id=1").length === 4);
+
+    r = await call(db, "DELETE", "/api/coaster/3", { token: PW });
+    check("an unheld coaster deletes", r.status === 200 && r.data.deleted === 3, JSON.stringify(r.data));
+    check("...and is gone", rows(db, "SELECT * FROM coasters WHERE id=3").length === 0);
+    check("...while every ride row is untouched", rows(db, "SELECT * FROM rides").length === 5);
+  }
+
   console.log("\nRankings");
   {
     const db = freshDb();

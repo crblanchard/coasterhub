@@ -239,10 +239,53 @@
       '<div class="grid" id="form">'+fields+'</div>'+
       '<div class="actions"><button id="save">Save changes</button><button class="ghost" id="revert">Revert</button><span class="toast" id="toast"></span></div>'+
       '<div class="toolbar"><h3>Merge duplicate</h3><p class="hint">Merge this into another coaster: all riders’ credits move to the target id, then this one is deleted.</p>'+
-        '<div class="inline"><span>Merge #'+c.id+' → id</span><input id="mergeTo" type="number" style="width:110px" placeholder="target id"><button class="danger" id="mergeBtn">Merge</button></div></div>';
+        '<div class="inline"><span>Merge #'+c.id+' → id</span><input id="mergeTo" type="number" style="width:110px" placeholder="target id"><button class="danger" id="mergeBtn">Merge</button></div></div>'+
+      '<div class="toolbar"><h3>Delete</h3>'+
+        '<p class="hint" id="delWho">Checking who has this…</p>'+
+        '<div class="inline"><button class="danger" id="delBtn" disabled>Delete #'+c.id+'</button></div></div>';
     document.getElementById('save').addEventListener('click', saveCoaster);
     document.getElementById('revert').addEventListener('click', function(){ selectCoaster(id); });
     document.getElementById('mergeBtn').addEventListener('click', mergeCoaster);
+    document.getElementById('delBtn').addEventListener('click', deleteCoaster);
+    loadUsage(id);
+  }
+
+  // Who still has this coaster. Answered before the button is live, so deleting
+  // is never a guess about whose count you are about to change.
+  async function loadUsage(id){
+    var who=document.getElementById('delWho'), btn=document.getElementById('delBtn');
+    try {
+      var u = await api("GET","/api/coaster/"+id+"/usage");
+      if(state.sel!==id) return;                     // selection moved while in flight
+      if(!u.riders.length){
+        who.innerHTML='<b>Nobody has this coaster.</b> Safe to delete — nothing references it.';
+        btn.disabled=false;
+        return;
+      }
+      var names=u.riders.map(function(r){ return esc(r.name||r.slug)+' ('+r.rides+')'; }).join(', ');
+      who.innerHTML='<b>'+u.riders.length+' rider'+(u.riders.length===1?'':'s')+' still have this</b> — '
+        +names+', '+u.rides+' ride'+(u.rides===1?'':'s')+' in total. '
+        +'Deleting would take it off their count, so this is blocked. '
+        +'Use <b>Merge</b> above to move them onto the surviving coaster instead.';
+      btn.disabled=true;
+    } catch(e){
+      if(state.sel!==id) return;
+      who.textContent="Couldn't check who has this: "+e.message+" — delete stays disabled.";
+      btn.disabled=true;
+    }
+  }
+
+  async function deleteCoaster(){
+    var id=state.sel, c=state.byId[id];
+    if(!confirm('Delete #'+id+' "'+c.name+'" at '+c.park+'?\n\n'
+      +'This removes it from the shared list for everyone. It cannot be undone from this page.')) return;
+    try {
+      await api("DELETE","/api/coaster/"+id);
+      state.coasters = state.coasters.filter(function(x){ return x.id!==id; });
+      delete state.byId[id]; state.sel=null;
+      document.getElementById('editor').innerHTML='<div class="empty">Deleted #'+id+'.</div>';
+      renderCoasters();
+    } catch(e){ alert("Delete failed: "+e.message); }
   }
   function readForm(){
     var body={};

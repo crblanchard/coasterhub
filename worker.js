@@ -438,6 +438,57 @@ export default {
         return afterWrite(ctx, env, json({ ok: true }));
       }
 
+      // who still has this coaster — drives the delete button's label in /edit,
+      // so you know what you are about to remove before you click it
+      const um2 = path.match(/^\/api\/coaster\/(\d+)\/usage$/);
+      if (request.method === "GET" && um2) {
+        const id = Number(um2[1]);
+        const row = await env.DB.prepare("SELECT id, name, park FROM coasters WHERE id = ?").bind(id).first();
+        if (!row) return err(404, "no such coaster");
+        const { results } = await env.DB.prepare(
+          "SELECT r.user_slug AS slug, u.name AS name, COUNT(*) AS rides " +
+          "FROM rides r LEFT JOIN users u ON u.slug = r.user_slug " +
+          "WHERE r.coaster_id = ? GROUP BY r.user_slug, u.name ORDER BY u.name"
+        ).bind(id).all();
+        return json({
+          id, name: row.name, park: row.park,
+          riders: results,
+          rides: results.reduce((a, r) => a + r.rides, 0),
+        });
+      }
+
+      // delete a coaster — refuses while anyone still has it
+      //
+      // A ride is a fact about a person, so this never cascades. If riders hold
+      // the coaster the right move is /api/merge, which moves them onto the
+      // surviving row; deleting would silently take credits off their count.
+      // The 409 carries the breakdown so the UI can say exactly who.
+      if (request.method === "DELETE" && cm) {
+        const id = Number(cm[1]);
+        const row = await env.DB.prepare("SELECT id, name, park FROM coasters WHERE id = ?").bind(id).first();
+        if (!row) return err(404, "no such coaster");
+        const { results } = await env.DB.prepare(
+          "SELECT r.user_slug AS slug, u.name AS name, COUNT(*) AS rides " +
+          "FROM rides r LEFT JOIN users u ON u.slug = r.user_slug " +
+          "WHERE r.coaster_id = ? GROUP BY r.user_slug, u.name ORDER BY u.name"
+        ).bind(id).all();
+        if (results.length) {
+          return json({
+            error: results.length + " rider" + (results.length === 1 ? "" : "s") +
+                   " still have this coaster — merge it instead of deleting it",
+            riders: results,
+            rides: results.reduce((a, r) => a + r.rides, 0),
+          }, 409);
+        }
+        // Belt and braces: the guard above is a separate read, so re-assert it in
+        // the statement itself rather than trusting nothing landed in between.
+        const res = await env.DB.prepare(
+          "DELETE FROM coasters WHERE id = ? AND id NOT IN (SELECT coaster_id FROM rides)"
+        ).bind(id).run();
+        if (!res.meta || res.meta.changes === 0) return err(409, "coaster is still in use");
+        return afterWrite(ctx, env, json({ ok: true, deleted: id, name: row.name, park: row.park }));
+      }
+
       // merge coaster `from` into `to` (repoints every ride, deletes `from`)
       // Two undated rows for the same rider would collapse into one credit
       // anyway, so the dedupe keeps the table honest rather than changing counts.

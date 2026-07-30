@@ -327,7 +327,7 @@ function wireAdders(){
     // Confirm before writing: this adds to the list everyone shares, and there
     // is no undo from this page.
     if(!confirm('Add "'+name+'"'+(region?' ('+region+')':'')+' to the shared park list?\n\n'
-      +'Everyone sees this, and it can only be removed from /edit.')) return;
+      +'Everyone sees this, and removing it again means /edit.')) return;
     $('np_save').disabled=true;
     api('PUT','/api/park',{name:name,region:region||null}).then(function(){
       PARKS[name]={lat:null,lon:null,region:region||null};
@@ -348,7 +348,8 @@ function wireAdders(){
       return c.park===park && c.name.toLowerCase()===name.toLowerCase(); });
     if(clash) return void($('nc_err').textContent='That park already has a coaster with that name.');
     if(!confirm('Add "'+name+'" to '+park+' in the shared coaster list?\n\n'
-      +'Everyone sees this, and it can only be removed from /edit. '
+      +'Everyone sees this. It can be deleted in /edit while nobody has ridden it — '
+      'once someone logs a ride it can only be merged, not removed. '
       +'Check the spelling and that it is not already listed under another name.')) return;
     $('nc_save').disabled=true;
     api('POST','/api/coaster',{name:name,park:park,type:type}).then(function(r){

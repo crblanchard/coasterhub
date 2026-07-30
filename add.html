@@ -331,7 +331,8 @@ function saveCoaster(){
   // Everyone sees this and there is no undo from this page, so it is worth one
   // deliberate click.
   if(!confirm('Add "'+name+'" to '+park+' in the shared coaster list?\n\n'
-    +'Everyone sees this, and it can only be removed from /edit. '
+    +'Everyone sees this. It can be deleted in /edit while nobody has ridden it — '
+    'once someone logs a ride it can only be merged, not removed. '
     +'Check the spelling and that it is not already listed under another name.')) return;
 
   $('c_save').disabled=true; $('c_msg').textContent='Adding…';
@@ -358,7 +359,7 @@ function savePark(){
     $('p_msg').textContent='That looks like a duplicate — see above.');
 
   if(!confirm('Add "'+name+'"'+(region?' ('+region+')':'')+' to the shared park list?\n\n'
-    +'Everyone sees this, and it can only be removed from /edit.')) return;
+    +'Everyone sees this, and removing it again means /edit.')) return;
 
   $('p_save').disabled=true; $('p_msg').textContent='Adding…';
   api('PUT','/api/park',{name:name,region:region||null}).then(function(){
