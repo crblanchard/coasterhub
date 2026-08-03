@@ -6,6 +6,7 @@
 <title>Coaster Hub — A roller coaster count, visualized</title>
 <meta name="description" content="Coaster Hub — an interactive look at roller coaster counts: credits, rides, parks, geography, and records.">
 <link rel="stylesheet" href="/style.css?v=20260728a">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
@@ -39,7 +40,7 @@
   .lbrow .who{min-width:0;flex:none;width:5.5em}
   .lbrow .who a{font-weight:700;font-size:1.02rem}
   .lbrow .who a:hover{color:var(--accent2)}
-  .lbrow .bar{flex:1;min-width:60px;height:8px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden}
+  .lbrow .bar{flex:1;min-width:60px;height:8px;background:var(--soft2);border-radius:999px;overflow:hidden}
   .lbrow .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:999px}
   .lbrow .n{font-weight:800;font-variant-numeric:tabular-nums;min-width:3.4em;text-align:right;flex:none}
   .lbrow .sub{color:var(--muted);font-size:.78rem;width:100%;margin-top:2px}
@@ -74,9 +75,9 @@
 <section class="hero" style="padding-bottom:30px"><div class="container">
   <svg class="track" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <path d="M-50 500 C 250 500, 300 120, 520 120 S 780 560, 1000 380 S 1300 90, 1500 300"
-          fill="none" stroke="rgba(255,255,255,.10)" stroke-width="4"/>
+          fill="none" stroke="var(--line)" stroke-width="4"/>
     <path d="M-50 520 C 250 520, 300 140, 520 140 S 780 580, 1000 400 S 1300 110, 1500 320"
-          fill="none" stroke="rgba(55,208,200,.20)" stroke-width="2" stroke-dasharray="6 10"/>
+          fill="none" stroke="var(--tint2)" stroke-width="2" stroke-dasharray="6 10"/>
   </svg>
   <span class="badge">Roller coaster counts, visualized</span>
   <h1><span id="combo">…</span> unique coasters and counting.</h1>

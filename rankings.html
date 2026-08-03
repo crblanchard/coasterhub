@@ -7,6 +7,7 @@
 <title>Rankings — Coaster Hub</title>
 <meta name="description" content="Rank your favorite coasters, and see how everyone's lists combine — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20260728a">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
@@ -17,12 +18,12 @@
   .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 16px}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .seg button{background:transparent;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;font-size:.9rem;font-family:inherit}
-  .seg button.on{background:rgba(55,208,200,.14);color:var(--fg)}
+  .seg button.on{background:var(--tint2);color:var(--fg)}
   .spacer{flex:1}
   .status{color:var(--muted);font-size:.84rem}
   .status.dirty{color:var(--accent)}
   .status.ok{color:var(--accent2)}
-  button.primary{background:var(--accent2);border:0;color:#06121a;font-weight:700;border-radius:10px;padding:10px 16px;cursor:pointer;font-size:.9rem;font-family:inherit}
+  button.primary{background:var(--accent2);border:0;color:var(--well);font-weight:700;border-radius:10px;padding:10px 16px;cursor:pointer;font-size:.9rem;font-family:inherit}
   button.primary:disabled{opacity:.35;cursor:default}
   button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:9px 14px;cursor:pointer;font-size:.88rem;font-family:inherit}
   button.ghost:hover{color:var(--fg)}
@@ -54,7 +55,7 @@
      The park shares the second line with the buttons and is the one thing
      allowed to clip, since it's the least load-bearing part of the row. */
   .addrow{display:grid;grid-template-columns:1fr auto;gap:1px 10px;align-items:center;
-          padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
+          padding:8px 4px;border-bottom:1px solid var(--soft)}
   .addrow:last-child{border-bottom:0}
   .addrow .nm{grid-column:1/-1;min-width:0;font-weight:600;font-size:.9rem;line-height:1.25}
   .addrow .meta{grid-column:1;min-width:0;display:flex;align-items:baseline;gap:8px;overflow:hidden}
@@ -70,14 +71,14 @@
   .hint{color:var(--muted);padding:22px 4px;font-size:.9rem}
 
   /* head to head */
-  .hh{position:fixed;inset:0;background:rgba(6,10,22,.86);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+  .hh{position:fixed;inset:0;background:var(--veil2);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
   .hhbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:520px;width:100%}
   .hhbox h3{font-size:1.05rem;margin-bottom:4px}
   .hhbox .sub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
   .vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
   .pick{background:transparent;border:1px solid var(--line);border-radius:12px;padding:16px 12px;cursor:pointer;
         color:var(--fg);text-align:center;font-family:inherit}
-  .pick:hover{border-color:var(--accent2);background:rgba(55,208,200,.07)}
+  .pick:hover{border-color:var(--accent2);background:var(--tint)}
   .pick b{display:block;font-size:.98rem;margin-bottom:4px}
   .pick span{color:var(--muted);font-size:.78rem}
   .vsx{align-self:center;color:var(--muted);font-weight:800;font-size:.85rem}

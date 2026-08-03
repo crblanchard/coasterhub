@@ -7,6 +7,7 @@
 <title>Rides — Coaster Hub</title>
 <meta name="description" content="Every ride, by day or as one flat list — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20260728a">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
@@ -26,19 +27,19 @@
   .controls button:hover{color:var(--fg)}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .seg button{background:transparent;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;font-size:.9rem}
-  .seg button.on{background:rgba(55,208,200,.14);color:var(--fg)}
+  .seg button.on{background:var(--tint2);color:var(--fg)}
   .count{color:var(--muted);font-size:.85rem;margin-bottom:12px}
   .count b{color:var(--accent2)}
   .day{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--panel);overflow:hidden}
   .day summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   .day summary::-webkit-details-marker{display:none}
-  .day summary:hover{background:rgba(255,255,255,.03)}
+  .day summary:hover{background:var(--soft)}
   .day .dt{font-weight:700;min-width:9.5em}
   .day .rd{font-weight:700;color:var(--accent2);font-size:.88rem;flex:none}
   .day .pk{color:var(--muted);font-size:.88rem;flex:1;min-width:12em}
   .day .n{color:var(--accent2);font-size:.82rem;white-space:nowrap}
   .day .inner{border-top:1px solid var(--line);padding:6px 16px 12px}
-  .day .row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.9rem}
+  .day .row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--soft);font-size:.9rem}
   .day .row:last-child{border-bottom:0}
   /* The lap count belongs to the ride, so it sits right after the name. The
      park is pushed to the far side with margin-left:auto instead of the name
@@ -54,14 +55,14 @@
   .pill.op{color:var(--accent2)}.pill.def{color:var(--accent)}
   .cyear{color:var(--muted);font-size:.78rem;margin-left:5px}
   table{border-collapse:collapse;width:100%;font-size:.85rem;white-space:nowrap}
-  thead th{position:sticky;top:0;background:#0e1730;color:var(--muted);text-align:left;padding:11px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.72rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
+  thead th{position:sticky;top:0;background:var(--well);color:var(--muted);text-align:left;padding:11px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.72rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
   thead th:hover{color:var(--fg)}
   thead th.num{text-align:right}
   thead th .ar{color:var(--accent);margin-left:4px}
-  tbody td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+  tbody td{padding:10px 12px;border-bottom:1px solid var(--soft)}
   tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
   tbody td.name{font-weight:600;color:var(--fg)}
-  tbody tr:hover{background:rgba(55,208,200,.06)}
+  tbody tr:hover{background:var(--tint)}
   td.muted{color:var(--muted)}
   .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:18px 0 0;color:var(--muted);font-size:.88rem}
   .pager button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:7px 13px;cursor:pointer}

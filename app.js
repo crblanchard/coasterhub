@@ -355,8 +355,76 @@
   // Wire the header for a page ("home" | "stats" | "coasters" | "rides" |
   // "rankings"): point the per-rider links at the current person, mark the
   // active link, and render the rider picker (alphabetical).
+  // ---- Theme ---------------------------------------------------------------
+  // Dark is the default and the only thing the CSS renders without help, so a
+  // visitor who has never touched the toggle gets the right page with no JS at
+  // all. Only "light" is ever stored; anything else (or a blocked localStorage)
+  // falls back to dark rather than guessing.
+  //
+  // The system preference is deliberately NOT consulted: Carter asked for dark
+  // unless you hit the toggle, and honouring prefers-color-scheme would hand a
+  // light page to everyone whose laptop is in light mode — the opposite.
+  var THEME_KEY = "ch_theme";
+  function readTheme() {
+    try { return window.localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark"; }
+    catch (e) { return "dark"; }
+  }
+  function applyTheme(t) {
+    var el = document.documentElement;
+    if (t === "light") el.setAttribute("data-theme", "light");
+    else el.removeAttribute("data-theme");
+    // Colour the browser's own chrome (iOS status bar, Android address bar) to
+    // match, or a light page keeps a dark notch above it.
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (!m) {
+      m = document.createElement("meta");
+      m.setAttribute("name", "theme-color");
+      document.head.appendChild(m);
+    }
+    m.setAttribute("content", t === "light" ? "#f5f7fb" : "#0b1020");
+
+    // Anything painted with JS rather than CSS — Chart.js canvases, Leaflet
+    // markers — has to be told, or it keeps the palette it was built with.
+    try {
+      el.dispatchEvent(new CustomEvent("ch:themechange", { detail: { theme: t } }));
+    } catch (e) { /* CustomEvent is everywhere we support; never block the toggle */ }
+  }
+
+  var SUN = '<path d="M12 4V2M12 22v-2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4'
+          + 'M5.6 18.4l-1.4 1.4M19.8 4.2l-1.4 1.4"/><circle cx="12" cy="12" r="4"/>';
+  var MOON = '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>';
+
+  // `atStart` is true only inside the #people group, where the toggle sits to
+  // the left of "Viewing <rider>". Log and Add have no picker, so there it is
+  // appended to the nav instead — prepending put it left of the wordmark and
+  // shoved the whole brand into the middle of the header.
+  function buildThemeToggle(wrap, atStart) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "themetoggle";
+    b.innerHTML = '<svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + MOON + '</svg>'
+      + '<svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + SUN + '</svg>';
+    function label() {
+      var next = readTheme() === "light" ? "dark" : "light";
+      b.setAttribute("aria-label", "Switch to " + next + " mode");
+      b.setAttribute("title", "Switch to " + next + " mode");
+    }
+    label();
+    b.addEventListener("click", function () {
+      var next = readTheme() === "light" ? "dark" : "light";
+      try { window.localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      applyTheme(next);
+      label();
+    });
+    if (atStart) wrap.insertBefore(b, wrap.firstChild);
+    else wrap.appendChild(b);
+  }
+
   function initNav(page) {
     if (typeof document === "undefined") return;
+    applyTheme(readTheme());
 
     // Active rider persists between pages: the URL wins (/user/<slug>/...),
     // otherwise fall back to the last rider we remembered.
@@ -421,6 +489,11 @@
       who.textContent = "Viewing";
       wrap.insertBefore(who, wrap.firstChild);
     }
+
+    // The toggle belongs to the header, not the rider picker, so pages without
+    // a #people block (Log, Add) still get it.
+    var themeHost = wrap || document.querySelector("header.nav .nav-inner");
+    if (themeHost && !themeHost.querySelector(".themetoggle")) buildThemeToggle(themeHost, !!wrap);
 
     buildTabBar(page, slug);
   }

@@ -1,7 +1,54 @@
+/* Dark is the default: it renders correctly with no JS and no stored setting,
+   so a first visit never flashes. Light is opt-in via the header toggle, which
+   sets data-theme="light" on <html> (see initTheme in app.js).
+
+   Every colour the pages use goes through one of these. The semantic ones below
+   the palette exist because the dark sheet was full of literal rgba(255,255,255,…)
+   overlays — those read as "slightly lighter than the page", which on a light
+   background has to become "slightly darker". A theme cannot be a palette swap
+   while that relationship is hardcoded. */
 :root{
   --bg:#0b1020; --panel:#121a33; --fg:#f4f7ff; --muted:#9fb0d6;
   --accent:#ff5a5f; --accent2:#37d0c8; --line:rgba(255,255,255,.10);
+  --soft:rgba(255,255,255,.05);     /* faint fill lifted off the page */
+  --soft2:rgba(255,255,255,.07);    /* one step up: inputs, hovered rows */
+  --well:#0e1730;                   /* recessed: sits *under* --panel */
+  --tint:rgba(55,208,200,.07);      /* accent wash */
+  --tint2:rgba(55,208,200,.14);
+  --ring:rgba(55,208,200,.35);      /* focus / hover border */
+  --veil:rgba(11,16,32,.78);        /* sticky header over scrolling content */
+  --veil2:rgba(11,16,32,.94);       /* mobile tab bar */
+  --shadow:rgba(0,0,0,.5);
+  --hero1:rgba(55,208,200,.16); --hero2:rgba(255,90,95,.16);
+  --onaccent:#fff;                  /* text on an --accent fill */
+  /* Heatmap ramp, least -> most. Light mode inverts the direction: on a dark
+     page "more" is brighter, on a light page "more" is darker. */
+  --hm0:#1b2540; --hm1:#1f6f6a; --hm2:#2aa79e; --hm3:#37d0c8; --hm4:#8bf0ea;
+  --hmline:rgba(0,0,0,.15); --hmhover:#fff;
 }
+:root[data-theme="light"]{
+  --bg:#f5f7fb; --panel:#fff; --fg:#111827; --muted:#5a6b8c;
+  /* Both accents are darkened until they carry text on white: the dark-mode
+     teal is ~1.9:1 there, which is unreadable, not merely soft. */
+  --accent:#d92c33; --accent2:#0d7f78; --line:rgba(17,24,39,.13);
+  --soft:rgba(17,24,39,.04);
+  --soft2:rgba(17,24,39,.07);
+  --well:#eaeff7;
+  --tint:rgba(13,127,120,.07);
+  --tint2:rgba(13,127,120,.15);
+  --ring:rgba(13,127,120,.45);
+  --veil:rgba(245,247,251,.82);
+  --veil2:rgba(245,247,251,.94);
+  --shadow:rgba(17,24,39,.16);
+  --hero1:rgba(13,127,120,.13); --hero2:rgba(217,44,51,.11);
+  --onaccent:#fff;
+  --hm0:#e6ebf4; --hm1:#a8ded9; --hm2:#5cbdb4; --hm3:#1c9089; --hm4:#0b5f5a;
+  --hmline:rgba(17,24,39,.10); --hmhover:#111827;
+}
+/* Panels sit on the page rather than glowing out of it, so on light they need
+   an edge the dark theme gets for free from the contrast step. */
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .panel{box-shadow:0 1px 2px rgba(17,24,39,.05)}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;overscroll-behavior-y:none}
 body{overscroll-behavior-y:none}
@@ -14,7 +61,7 @@ a{color:inherit;text-decoration:none}
 
 /* Nav */
 header.nav{position:sticky;top:0;z-index:10;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-  background:rgba(11,16,32,.78);border-bottom:1px solid var(--line)}
+  background:var(--veil);border-bottom:1px solid var(--line)}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;height:66px;gap:18px}
 .brand{display:flex;align-items:center;gap:11px}
 .brand-mark{height:40px;width:40px;display:block;flex:none}
@@ -25,26 +72,26 @@ nav.links a{color:var(--muted);font-weight:500;font-size:.95rem;transition:color
 nav.links a:hover,nav.links a.active{color:var(--fg)}
 .people{flex:none}
 .userpick{appearance:none;-webkit-appearance:none;-moz-appearance:none;
-  background:rgba(255,255,255,.05) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="%239fb0d6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat right 12px center;
+  background:var(--soft) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="%239fb0d6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat right 12px center;
   border:1px solid var(--line);color:var(--fg);font:inherit;font-weight:600;font-size:.85rem;
   padding:8px 34px 8px 16px;border-radius:999px;cursor:pointer;line-height:1;white-space:nowrap;transition:border-color .15s}
-.userpick:hover{border-color:rgba(55,208,200,.5)}
+.userpick:hover{border-color:var(--ring)}
 .userpick:focus{outline:none;border-color:var(--accent2)}
 .userpick option{background:var(--panel);color:var(--fg)}
 
 /* Hero */
 .hero{position:relative;overflow:hidden;padding:96px 0 84px;
-  background:radial-gradient(1000px 500px at 75% -10%,rgba(55,208,200,.16),transparent 60%),
-             radial-gradient(800px 460px at 0% 120%,rgba(255,90,95,.16),transparent 55%)}
+  background:radial-gradient(1000px 500px at 75% -10%,var(--hero1),transparent 60%),
+             radial-gradient(800px 460px at 0% 120%,var(--hero2),transparent 55%)}
 .hero .badge{display:inline-block;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--accent2);border:1px solid rgba(55,208,200,.35);border-radius:999px;padding:6px 14px;margin-bottom:22px}
+  color:var(--accent2);border:1px solid var(--ring);border-radius:999px;padding:6px 14px;margin-bottom:22px}
 .hero h1{font-size:clamp(2.4rem,6.5vw,4rem);line-height:1.03;font-weight:800;letter-spacing:-.02em;max-width:14ch}
 .hero p{color:var(--muted);font-size:clamp(1rem,2.2vw,1.2rem);margin:20px 0 30px;max-width:52ch}
 .hero-sub{color:var(--accent2);font-weight:600;font-size:.95rem;margin:-14px 0 28px;letter-spacing:.01em}
 .track{position:absolute;inset:0;z-index:-1;opacity:.5}
 
 /* Buttons */
-.btn{display:inline-block;background:var(--accent);color:#fff;padding:13px 24px;border-radius:12px;
+.btn{display:inline-block;background:var(--accent);color:var(--onaccent);padding:13px 24px;border-radius:12px;
   font-weight:600;transition:transform .12s,opacity .12s;border:0;cursor:pointer;font-size:1rem}
 .btn:hover{transform:translateY(-1px);opacity:.95}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg);margin-left:10px}
@@ -58,7 +105,7 @@ h2{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.01em;marg
 /* Cards */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;transition:transform .15s,border-color .15s}
-.card:hover{transform:translateY(-3px);border-color:rgba(55,208,200,.35)}
+.card:hover{transform:translateY(-3px);border-color:var(--ring)}
 .card h3{font-size:1.2rem;margin-bottom:6px}
 .card .meta{color:var(--accent2);font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
 .card p{color:var(--muted);font-size:.95rem}
@@ -66,7 +113,7 @@ h2{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.01em;marg
 
 /* Signup */
 .signup{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-.signup input{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg);
+.signup input{background:var(--soft2);border:1px solid var(--line);color:var(--fg);
   padding:13px 16px;border-radius:12px;font-size:1rem;width:280px;max-width:100%}
 .signup input::placeholder{color:var(--muted)}
 .note{color:var(--muted);font-size:.82rem;margin-top:12px}
@@ -92,6 +139,22 @@ footer.site a:hover{color:var(--fg)}
   nav.links{order:3;width:100%;gap:20px}
 }
 
+/* Light/dark toggle — built by initTheme, sits left of the rider picker.
+   Icon only: at 320px the header already spends its width on the wordmark,
+   "Viewing" and the picker, and a labelled control does not fit. */
+.themetoggle{flex:none;display:flex;align-items:center;justify-content:center;
+  width:34px;height:34px;padding:0;border-radius:999px;cursor:pointer;
+  background:var(--soft);border:1px solid var(--line);color:var(--muted);
+  transition:color .15s,border-color .15s}
+.themetoggle:hover{color:var(--fg);border-color:var(--ring)}
+.themetoggle:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+.themetoggle svg{width:17px;height:17px;display:block}
+/* One button, two glyphs: show the theme you'd switch TO, so the icon reads as
+   the action rather than as a status light. */
+.themetoggle .i-sun{display:none}
+:root[data-theme="light"] .themetoggle .i-sun{display:block}
+:root[data-theme="light"] .themetoggle .i-moon{display:none}
+
 /* Whose count am I looking at — sits next to the rider picker */
 .people{display:flex;align-items:center;gap:9px}
 .whoami{color:var(--muted);font-size:.82rem;white-space:nowrap}
@@ -106,13 +169,28 @@ select.userpick:hover{border-color:var(--accent2)}
   .nav-inner{flex-wrap:nowrap;height:60px;padding-top:0;padding-bottom:0;row-gap:0;gap:10px}
   /* The short "Viewing" label leaves room for the wordmark down to 320px. */
   .brand-text{font-size:1.05rem}
-  .people{min-width:0;flex:1;justify-content:flex-end}
+  /* The controls take the width they need and the brand gives way, rather than
+     .people shrinking below its contents — with justify-content:flex-end that
+     made the overflow spill leftwards and print the toggle over the wordmark. */
+  .people{flex:none;justify-content:flex-end}
+  .brand{flex:1 1 auto;min-width:0}
+  .brand-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
   .whoami{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   select.userpick{flex:none;max-width:9.5em}
+  /* "Viewing" is the first thing to go: the picker beside it already reads
+     "Carter", so the question it answers is still answered without it. */
+  .whoami{display:none}
+  .themetoggle{width:31px;height:31px}
+  .themetoggle svg{width:16px;height:16px}
+}
+/* Below ~375px even that isn't enough, and an ellipsised "Coaster H…" reads
+   worse than no wordmark. The mark stays, and it still links home. */
+@media (max-width:374px){
+  .brand-text{display:none}
   body{padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))}
   footer.site{margin-bottom:8px}
   .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;
-    background:rgba(11,16,32,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    background:var(--veil2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
     border-top:1px solid var(--line);
     /* Lift the labels off the bottom edge: on a rounded-corner iPhone the
        outer tabs sit right where the screen curves away and "Add new" clips.
@@ -126,5 +204,5 @@ select.userpick:hover{border-color:var(--accent2)}
     letter-spacing:.02em;text-decoration:none}
   .tabbar a svg{width:21px;height:21px}
   .tabbar a.on{color:var(--accent2)}
-  .tabbar a:active{background:rgba(255,255,255,.05)}
+  .tabbar a:active{background:var(--soft)}
 }

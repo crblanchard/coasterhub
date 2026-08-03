@@ -7,6 +7,7 @@
 <title>Coaster database — QC</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/style.css?v=20260728a">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <style>
@@ -24,14 +25,14 @@
   .count b{color:var(--accent2)}
   .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
   table{border-collapse:collapse;width:100%;font-size:.82rem;white-space:nowrap}
-  thead th{position:sticky;top:0;background:#0e1730;color:var(--muted);text-align:left;padding:10px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.7rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
+  thead th{position:sticky;top:0;background:var(--well);color:var(--muted);text-align:left;padding:10px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.7rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
   thead th:hover{color:var(--fg)}
   thead th.num{text-align:right}
   thead th .ar{color:var(--accent);margin-left:4px}
-  tbody td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--soft)}
   tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
   tbody td.name{font-weight:600;color:var(--fg)}
-  tbody tr:hover{background:rgba(55,208,200,.06)}
+  tbody tr:hover{background:var(--tint)}
   tbody tr.incomplete td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
   td.muted{color:var(--muted)}
   .pill{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}

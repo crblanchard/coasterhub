@@ -7,6 +7,7 @@
 <title>My Stats — Coaster Hub</title>
 <meta name="description" content="Interactive roller coaster count statistics.">
 <link rel="stylesheet" href="/style.css?v=20260728a">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
@@ -38,19 +39,24 @@
   .rec .rval{color:var(--accent);font-weight:800;font-size:1.3rem}
   .rec .rval span{color:var(--muted);font-weight:600;font-size:.8rem}
   #map{height:520px;border-radius:14px;z-index:1}
-  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#121a33;color:#f4f7ff;border:1px solid rgba(255,255,255,.14)}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
   .leaflet-popup-content{margin:12px 14px}
-  .pp b{font-size:1rem}.pp small{color:#9fb0d6}
+  .pp b{font-size:1rem}.pp small{color:var(--muted)}
   .hm-wrap{overflow-x:auto;padding-bottom:8px}
   .hm-year{display:flex;align-items:center;gap:10px;margin-bottom:3px}
   .hm-lbl{width:38px;color:var(--muted);font-size:.75rem;text-align:right;flex:none}
-  .hm-cell{stroke:rgba(0,0,0,.15);stroke-width:.5;cursor:pointer}
-  .hm-cell:hover{stroke:#fff;stroke-width:1.2}
+  .hm-cell{stroke:var(--hmline);stroke-width:.5;cursor:pointer}
+  .hm-cell:hover{stroke:var(--hmhover);stroke-width:1.2}
   .hm-legend{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.78rem;margin-top:10px}
   .hm-legend .sw{width:12px;height:12px;border-radius:2px;display:inline-block}
-  #hm-tip{position:fixed;z-index:50;pointer-events:none;display:none;background:#0b1020;
-    border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:10px 12px;font-size:.82rem;
-    box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:240px}
+  .hm-l0{fill:var(--hm0)}.hm-l1{fill:var(--hm1)}.hm-l2{fill:var(--hm2)}
+  .hm-l3{fill:var(--hm3)}.hm-l4{fill:var(--hm4)}
+  .hm-legend .sw.hm-l0{background:var(--hm0)}.hm-legend .sw.hm-l1{background:var(--hm1)}
+  .hm-legend .sw.hm-l2{background:var(--hm2)}.hm-legend .sw.hm-l3{background:var(--hm3)}
+  .hm-legend .sw.hm-l4{background:var(--hm4)}
+  #hm-tip{position:fixed;z-index:50;pointer-events:none;display:none;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.82rem;
+    box-shadow:0 8px 24px var(--shadow);max-width:240px}
   #hm-tip .d{font-weight:700;margin-bottom:4px}
   #hm-tip .t{color:var(--accent2);font-weight:600}
   #hm-tip ul{list-style:none;margin:6px 0 0;padding:0}
@@ -141,11 +147,11 @@
   <p class="lead">Each square is a day; darker means more rides. Hover for the date, parks, and count.</p>
   <div class="hm-wrap" id="heatmap"></div>
   <div class="hm-legend">Less
-    <span class="sw" style="background:#1b2540"></span>
-    <span class="sw" style="background:#1f6f6a"></span>
-    <span class="sw" style="background:#2aa79e"></span>
-    <span class="sw" style="background:#37d0c8"></span>
-    <span class="sw" style="background:#8bf0ea"></span>More</div>
+    <span class="sw hm-l0"></span>
+    <span class="sw hm-l1"></span>
+    <span class="sw hm-l2"></span>
+    <span class="sw hm-l3"></span>
+    <span class="sw hm-l4"></span>More</div>
 </div></section>
 
 <section class="block" id="sec_overtime"><div class="container">
@@ -350,14 +356,24 @@ function render(s){
   const map=L.map('map',{scrollWheelZoom:false,worldCopyJump:true}).setView([30,-40],2);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
   const pts=[];
+  const MARKERS=[];
   s.parksGeo.forEach(p=>{const val=p.rides||p.credits;const r=3+Math.sqrt(val)*0.95;
     const detail=has.activity?(p.rides+' rides · '+p.credits+' credits'):(p.credits+' credit'+(p.credits>1?'s':''));
-    L.circleMarker([p.lat,p.lon],{radius:r,color:'#37d0c8',weight:1,fillColor:'#ff5a5f',fillOpacity:.65}).addTo(map)
-     .bindPopup('<div class="pp"><b>'+p.park+'</b><br><small>'+p.region+'</small><br>'+detail+'</div>');
+    MARKERS.push(L.circleMarker([p.lat,p.lon],{radius:r,weight:1,fillOpacity:.65}).addTo(map)
+     .bindPopup('<div class="pp"><b>'+p.park+'</b><br><small>'+p.region+'</small><br>'+detail+'</div>'));
     pts.push([p.lat,p.lon]);});
+  function paintMarkers(){
+    const stroke=cssVar('--accent2'), fill=cssVar('--accent');
+    MARKERS.forEach(m=>m.setStyle({color:stroke,fillColor:fill}));
+  }
   map.fitBounds(pts,{padding:[30,30]});
+  paintMarkers();
+  document.documentElement.addEventListener('ch:themechange',paintMarkers);
   const DAY=s.day_detail, tip=document.getElementById('hm-tip');
-  function color(n){ if(!n)return'#1b2540'; if(n<3)return'#1f6f6a'; if(n<8)return'#2aa79e'; if(n<20)return'#37d0c8'; return'#8bf0ea'; }
+  // Level, not colour: the ramp lives in CSS (--hm0..--hm4) because it inverts
+  // between themes — on a dark page "more" is brighter, on a light one it is
+  // darker — and a fill baked in here would survive the toggle unchanged.
+  function level(n){ return !n?0 : n<3?1 : n<8?2 : n<20?3 : 4; }
   const CELL=12, GAP=2, hm=document.getElementById('heatmap');
   function showTip(e,iso){
     const info=DAY[iso];
@@ -384,27 +400,38 @@ function render(s){
       const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
       rect.setAttribute('x',col*(CELL+GAP)); rect.setAttribute('y',rw*(CELL+GAP));
       rect.setAttribute('width',CELL); rect.setAttribute('height',CELL); rect.setAttribute('rx',2);
-      rect.setAttribute('fill',color(n)); rect.setAttribute('class','hm-cell');
+      rect.setAttribute('class','hm-cell hm-l'+level(n));
       rect.addEventListener('mousemove',e=>showTip(e,iso));
       rect.addEventListener('mouseleave',()=>tip.style.display='none');
       svg.appendChild(rect);
     }
     row.appendChild(svg); hm.appendChild(row);
   }
-  const AX='#9fb0d6', GRID='rgba(255,255,255,.07)', ACC='#ff5a5f', ACC2='#37d0c8';
+  // Chart.js takes colours as values, not CSS — it cannot resolve a var(). Read
+  // the computed variables, and rebuild on a theme change so the axes and fills
+  // follow the toggle instead of going stale until the next reload.
+  const CH=[];
+  function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function drawCharts(){
+  while(CH.length) CH.pop().destroy();   // a live chart on a reused canvas throws
+  const AX=cssVar('--muted'), GRID=cssVar('--soft2'), ACC=cssVar('--accent'),
+        ACC2=cssVar('--accent2'), FILL=cssVar('--tint2'), PANEL=cssVar('--panel');
   Chart.defaults.color=AX; Chart.defaults.font.family='system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
   const grid={grid:{color:GRID},ticks:{color:AX}}, noLeg={plugins:{legend:{display:false}}};
   if(has.timeline){
-  new Chart(cCum,{type:'line',data:{labels:s.years,datasets:[{data:s.cumulative_credits,borderColor:ACC2,backgroundColor:'rgba(55,208,200,.15)',fill:true,tension:.3,pointRadius:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}});
-  new Chart(cNew,{type:'bar',data:{labels:s.years,datasets:[{data:s.new_credits_per_year,backgroundColor:ACC2,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}});
+  CH.push(new Chart(cCum,{type:'line',data:{labels:s.years,datasets:[{data:s.cumulative_credits,borderColor:ACC2,backgroundColor:FILL,fill:true,tension:.3,pointRadius:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}}));
+  CH.push(new Chart(cNew,{type:'bar',data:{labels:s.years,datasets:[{data:s.new_credits_per_year,backgroundColor:ACC2,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}}));
   }
   if(has.activity){
-  new Chart(cRides,{type:'bar',data:{labels:s.years,datasets:[{data:s.rides_per_year,backgroundColor:ACC,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}});
-  new Chart(cDays,{type:'bar',data:{labels:s.biggest_days.map(d=>d.date),datasets:[{data:s.biggest_days.map(d=>d.rides),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:c=>s.biggest_days[c.dataIndex].park}}},scales:{x:{...grid,beginAtZero:true},y:grid}}});
+  CH.push(new Chart(cRides,{type:'bar',data:{labels:s.years,datasets:[{data:s.rides_per_year,backgroundColor:ACC,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}}));
+  CH.push(new Chart(cDays,{type:'bar',data:{labels:s.biggest_days.map(d=>d.date),datasets:[{data:s.biggest_days.map(d=>d.rides),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:c=>s.biggest_days[c.dataIndex].park}}},scales:{x:{...grid,beginAtZero:true},y:grid}}}));
   }
-  new Chart(cParks,{type:'bar',data:{labels:s.top_parks.map(p=>p.park),datasets:[{data:s.top_parks.map(p=>p.val),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}});
-  new Chart(cManu,{type:'bar',data:{labels:s.top_manufacturers.map(m=>m.name),datasets:[{data:s.top_manufacturers.map(m=>m.credits),backgroundColor:ACC2,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}});
-  new Chart(cType,{type:'doughnut',data:{labels:['Steel','Wood'],datasets:[{data:[k.steel,k.wood],backgroundColor:[ACC2,ACC],borderColor:'#121a33',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  CH.push(new Chart(cParks,{type:'bar',data:{labels:s.top_parks.map(p=>p.park),datasets:[{data:s.top_parks.map(p=>p.val),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}}));
+  CH.push(new Chart(cManu,{type:'bar',data:{labels:s.top_manufacturers.map(m=>m.name),datasets:[{data:s.top_manufacturers.map(m=>m.credits),backgroundColor:ACC2,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}}));
+  CH.push(new Chart(cType,{type:'doughnut',data:{labels:['Steel','Wood'],datasets:[{data:[k.steel,k.wood],backgroundColor:[ACC2,ACC],borderColor:PANEL,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}}));
+  }
+  drawCharts();
+  document.documentElement.addEventListener('ch:themechange',drawCharts);
 }
 </script>
 </body>
