@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
+<title>Site map — Coaster Hub</title>
+<meta name="description" content="Every page on Coaster Hub, including the ones that aren't in the menu.">
+<link rel="stylesheet" href="/style.css?v=20260728a">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:title" content="Coaster Hub — Site map">
+<meta property="og:image" content="https://coasterhub.org/og-image.png">
+<style>
+  .smgroup{margin-bottom:34px}
+  .smgroup h2{font-size:1.15rem;margin:0 0 4px}
+  .smgroup .gl{color:var(--muted);font-size:.9rem;margin-bottom:14px;max-width:60ch}
+  .smlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .sm{display:block;background:var(--panel);border:1px solid var(--line);border-radius:13px;
+    padding:14px 16px;transition:border-color .15s,transform .15s}
+  .sm:hover{border-color:var(--accent2);transform:translateY(-2px)}
+  .sm .t{font-weight:700;font-size:1rem}
+  .sm .p{color:var(--accent2);font-size:.8rem;font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .sm .d{color:var(--muted);font-size:.88rem;margin-top:5px}
+  .tagpill{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.08em;border:1px solid var(--line);border-radius:999px;padding:2px 8px;
+    margin-left:7px;color:var(--muted);vertical-align:2px}
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="home">Home</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/stats" data-nav="stats">Stats</a>
+    <a href="/rides" data-nav="rides">Rides</a>
+    <a href="/log" data-nav="log">Log</a>
+    <a href="/add" data-nav="add">Add new</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero" style="padding:56px 0 26px"><div class="container">
+  <span class="badge">Site map</span>
+  <h1 style="max-width:16ch">Every page, in one place.</h1>
+  <p>Including the ones that aren&rsquo;t in the menu.</p>
+</div></section>
+
+<section class="block" style="padding-top:20px"><div class="container" id="map"></div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+</div></footer>
+
+<script src="/app.js?v=20260728a"></script>
+<script>
+document.getElementById('y').textContent = new Date().getFullYear();
+
+// The one place that has to list everything, so a page that isn't in the menu
+// is still findable. `rider` marks paths that also work as /user/<slug>/<page>;
+// the links below resolve to whoever is currently selected in the header.
+var GROUPS = [
+  { h: 'Looking at a count',
+    l: 'Every one of these works for one rider or for everyone combined — use the picker in the header.',
+    items: [
+      { t: 'Home',        p: '/',          d: 'All five riders side by side, with the site totals.' },
+      { t: 'Stats',       p: '/stats',     d: 'Records, map, charts and the calendar heatmap.', rider: 'stats' },
+      { t: 'Rides',       p: '/rides',     d: 'The log, by park day or as one flat list.', rider: 'rides' },
+      { t: 'Credit list', p: '/rides?view=list', d: 'Every coaster ridden, sortable and filterable.' },
+      { t: 'Rankings',    p: '/rankings',  d: 'Favourites in order — drag to reorder, or compare two at a time.', rider: 'rankings' }
+    ] },
+  { h: 'Adding to it',
+    l: 'Logging your own rides is separate from adding to the list everyone shares.',
+    items: [
+      { t: 'Log',      p: '/log',    d: 'A day at a park, or coasters you’ve ridden before.', tag: 'password' },
+      { t: 'Import',   p: '/import', d: 'Paste a whole list, or drop in a spreadsheet.', tag: 'password' },
+      { t: 'Add new',  p: '/add',    d: 'Put a park or a coaster on the shared list.', tag: 'password' }
+    ] },
+  { h: 'Keeping it tidy',
+    l: 'Housekeeping pages. Nothing here is linked from the menu.',
+    items: [
+      { t: 'Recent changes', p: '/changes',  d: 'What everyone has been logging, ranking and fixing.' },
+      { t: 'Edit',           p: '/edit',     d: 'Fix a coaster’s details, merge duplicates, or delete an empty one.', tag: 'password' },
+      { t: 'Database QC',    p: '/database', d: 'The whole list as one table, flagging rows missing specs.' },
+      { t: 'Site map',       p: '/sitemap',  d: 'This page.' }
+    ] }
+];
+
+function esc(s){ return String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.getElementById('map').innerHTML = GROUPS.map(function(g){
+  return '<div class="smgroup"><h2>' + esc(g.h) + '</h2>'
+    + '<p class="gl">' + esc(g.l) + '</p><div class="smlist">'
+    + g.items.map(function(it){
+        // Per-rider pages carry data-nav so initNav rewrites them to whoever is
+        // selected — following a link from here shouldn't silently drop you back
+        // to "Everyone". That is why the list is built BEFORE initNav runs.
+        return '<a class="sm" href="' + esc(it.p) + '"'
+          + (it.rider ? ' data-nav="' + esc(it.rider) + '"' : '') + '>'
+          + '<div class="t">' + esc(it.t)
+          + (it.tag ? '<span class="tagpill">' + esc(it.tag) + '</span>' : '') + '</div>'
+          + '<div class="p">' + esc(it.p) + '</div>'
+          + '<div class="d">' + esc(it.d) + '</div></a>';
+      }).join('')
+    + '</div></div>';
+}).join('');
+
+CoasterHub.initNav('sitemap');
+</script>
+</body>
+</html>

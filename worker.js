@@ -212,6 +212,11 @@ async function addRides(env, b) {
     }
   }
 
+  // Credits before the write, so the feed can say how many of these were new
+  // to the rider rather than re-rides. Has to be read first — afterwards the
+  // difference is unrecoverable.
+  const wasCredits = (await userTotal(env, slug)).credits;
+
   // Count what the database actually wrote rather than what was asked for —
   // the undated guard skips coasters the rider already has, so "added 12" has
   // to mean twelve rows, not twelve ticks.
@@ -223,6 +228,15 @@ async function addRides(env, b) {
   }
 
   const total = await userTotal(env, slug);
+  if (inserted) {
+    await recordActivity(env, d === null ? "credits" : "rides", {
+      actor: slug,
+      subject: d === null ? null : await parkLabel(env, ids),
+      n: inserted,
+      detail: { rides: inserted, coasters: norm.length,
+                newCredits: total.credits - wasCredits, date: d },
+    });
+  }
   return {
     added: inserted,
     coasters: norm.length,
@@ -230,6 +244,58 @@ async function addRides(env, b) {
     credits: total.credits,
     date: d,
   };
+}
+
+// ---- Activity feed --------------------------------------------------------
+// A plain record of what changed, so five people sharing one password can see
+// each other's work. There are no accounts here and this is not an audit log:
+// `actor` is whoever the request already identified — the rider picked on /log,
+// the slug in a /rankings URL — and it is NULL for the database-editing routes,
+// which carry no rider at all. Those read impersonally ("X was added") rather
+// than guessing a name, because a wrong name is worse than no name.
+//
+// Never let this break a write: an activity row is a nice-to-have, the edit is
+// not. Every call is wrapped and failures are swallowed.
+async function recordActivity(env, kind, { actor = null, subject = null, n = null, detail = null } = {}) {
+  try {
+    await env.DB.prepare(
+      "INSERT INTO activity (at, actor, kind, subject, n, detail) VALUES (?,?,?,?,?,?)"
+    ).bind(new Date().toISOString(), actor, kind, subject, n,
+           detail == null ? null : JSON.stringify(detail)).run();
+  } catch (e) { /* the edit already succeeded; a missing feed row is not worth a 500 */ }
+}
+
+async function getActivity(env, limit) {
+  const { results } = await env.DB.prepare(
+    "SELECT id, at, actor, kind, subject, n, detail FROM activity ORDER BY at DESC, id DESC LIMIT ?"
+  ).bind(limit).all();
+  const names = await env.DB.prepare("SELECT slug, name FROM users").all();
+  const by = {};
+  for (const u of names.results) by[u.slug] = u.name;
+  return {
+    events: results.map(r => ({
+      id: r.id, at: r.at, actor: r.actor, actorName: r.actor ? (by[r.actor] || r.actor) : null,
+      kind: r.kind, subject: r.subject, n: r.n,
+      detail: r.detail ? JSON.parse(r.detail) : null,
+    })),
+  };
+}
+
+// The park a batch of coasters belongs to, for "logged 5 rides at Kings Island".
+// One name when they all share a park, otherwise a count — a day that spans two
+// parks is real, and naming only the first would misreport it.
+async function parkLabel(env, ids) {
+  if (!ids.length) return null;
+  const known = new Set();
+  for (let i = 0; i < ids.length; i += SQL_VARS) {
+    const part = ids.slice(i, i + SQL_VARS);
+    const { results } = await env.DB.prepare(
+      "SELECT DISTINCT park FROM coasters WHERE id IN (" + part.map(() => "?").join(",") + ")"
+    ).bind(...part).all();
+    for (const r of results) if (r.park) known.add(r.park);
+  }
+  const list = [...known];
+  return list.length === 1 ? list[0] : (list.length ? list.length + " parks" : null);
 }
 
 // ---- Rankings -------------------------------------------------------------
@@ -284,6 +350,22 @@ async function putRankings(env, slug, body) {
     if (unknown.length) return { bad: [400, "unknown coaster id(s): " + unknown.join(", ")] };
   }
 
+  // Read the old order BEFORE replacing it. A PUT carries the whole list, so
+  // "what changed" only exists as the difference between the two — and after
+  // the DELETE below it is gone. This is what lets the feed say "ranked 20 new
+  // coasters" instead of the useless "saved 562 coasters" every single time.
+  const prev = await env.DB.prepare(
+    "SELECT coaster_id FROM rankings WHERE user_slug = ? ORDER BY pos"
+  ).bind(slug).all();
+  const before = prev.results.map(r => r.coaster_id);
+  const beforeSet = new Set(before);
+  const added = order.filter(id => !beforeSet.has(id)).length;
+  const removed = before.filter(id => !seen.has(id)).length;
+  // Reordered only counts when the list is otherwise the same, so a save that
+  // adds rides doesn't also claim a reshuffle it didn't really do.
+  const reordered = added === 0 && removed === 0
+    && before.some((id, i) => order[i] !== id);
+
   // The DELETE leads the batch so the replace is atomic within its chunk; the
   // inserts that follow are ordered, so a mid-way failure truncates the list
   // rather than scrambling it. Validation above is what keeps that from
@@ -294,6 +376,15 @@ async function putRankings(env, slug, body) {
       .bind(slug, id, i + 1));
   });
   for (let i = 0; i < batch.length; i += SQL_VARS) await env.DB.batch(batch.slice(i, i + SQL_VARS));
+
+  // A save that changed nothing is not news — dragging a row and dropping it
+  // back would otherwise fill the feed with noise.
+  if (added || removed || reordered) {
+    await recordActivity(env, "ranking", {
+      actor: slug, n: added || removed || order.length,
+      detail: { added: added, removed: removed, reordered: reordered, total: order.length },
+    });
+  }
 
   return { ok: true, count: order.length };
 }
@@ -411,6 +502,11 @@ export default {
         return json({ coasters: await getCoasters(env), ...(await getAliases(env)) });
       }
       if (request.method === "GET" && path === "/api/parks") return json(await getParks(env));
+      // Public read: the feed says what changed, never who is allowed to change it.
+      if (request.method === "GET" && path === "/api/activity") {
+        const n = Math.min(Math.max(Number(url.searchParams.get("limit")) || 100, 1), 500);
+        return json(await getActivity(env, n));
+      }
       const um = path.match(/^\/api\/user\/([a-z0-9-]+)$/i);
       if (request.method === "GET" && um) {
         const u = await getUser(env, um[1].toLowerCase());
@@ -470,6 +566,8 @@ export default {
         ).bind(id, b.name??null, b.park??null, b.type??"Steel", b.manu??null, b.model??null,
           b.h??null, b.s??null, b.l??null, b.inv??null, b.dur??null, b.laps??1, b.yr??null,
           b.opened??null, b.openedPrec??null, b.closed??null, b.closedPrec??null).run();
+        await recordActivity(env, "coaster_added",
+          { subject: b.name ?? null, detail: { id: id, park: b.park ?? null } });
         return afterWrite(ctx, env, json({ ok: true, id }));
       }
 
@@ -482,13 +580,12 @@ export default {
         for (const f of COASTER_FIELDS) if (f in b) { sets.push(f + " = ?"); vals.push(b[f]); }
         if (!sets.length) return err(400, "no fields");
         // Read the old name BEFORE the update — a rename is the moment a former
-        // name exists, and it is unrecoverable afterwards.
-        const prev = ("name" in b)
-          ? await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(id).first()
-          : null;
+        // name exists, and it is unrecoverable afterwards. Read unconditionally
+        // now, so an edit that only fills in specs still has a name to report.
+        const prev = await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(id).first();
         vals.push(id);
         await env.DB.prepare("UPDATE coasters SET " + sets.join(", ") + " WHERE id = ?").bind(...vals).run();
-        if (prev && prev.name && prev.name !== b.name) {
+        if ("name" in b && prev && prev.name && prev.name !== b.name) {
           const st = recordAlias(env, id, prev.name, "rename");
           // A name that has become current again is no longer a FORMER name.
           // Without this, renaming A->B->A leaves "A" aliased to a coaster
@@ -497,6 +594,16 @@ export default {
             "DELETE FROM coaster_aliases WHERE coaster_id = ? AND former_name = ?"
           ).bind(id, b.name);
           await env.DB.batch(st ? [st, undo] : [undo]);
+        }
+        // A rename is worth naming in the feed; a spec fill-in is just upkeep,
+        // so it says which fields moved rather than listing every value.
+        if ("name" in b && prev && prev.name && prev.name !== b.name) {
+          await recordActivity(env, "coaster_renamed",
+            { subject: b.name, detail: { id: id, from: prev.name } });
+        } else {
+          await recordActivity(env, "coaster_edited",
+            { subject: (prev && prev.name) || null, n: sets.length,
+              detail: { id: id, fields: COASTER_FIELDS.filter(f => f in b) } });
         }
         return afterWrite(ctx, env, json({ ok: true }));
       }
@@ -552,6 +659,8 @@ export default {
         // Its former names go with it — an alias pointing at a deleted id would
         // resolve to nothing and quietly suppress the "not listed" warning.
         await env.DB.prepare("DELETE FROM coaster_aliases WHERE coaster_id = ?").bind(id).run();
+        await recordActivity(env, "coaster_deleted",
+          { subject: row.name, detail: { id: id, park: row.park } });
         return afterWrite(ctx, env, json({ ok: true, deleted: id, name: row.name, park: row.park }));
       }
 
@@ -578,6 +687,11 @@ export default {
         const rec = src && recordAlias(env, to, src.name, "merge");
         if (rec) batch.unshift(rec);
         await env.DB.batch(batch);
+        const dst = await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(to).first();
+        await recordActivity(env, "coaster_merged", {
+          subject: dst ? dst.name : null,
+          detail: { from: from, to: to, fromName: src ? src.name : null },
+        });
         return afterWrite(ctx, env, json({ ok: true }));
       }
 
@@ -610,10 +724,14 @@ export default {
         const b = await request.json();
         const i = Number(b && b.i);
         if (!Number.isInteger(i) || i <= 0) return err(400, "need i (ride row id)");
-        const row = await env.DB.prepare("SELECT user_slug FROM rides WHERE id = ?").bind(i).first();
+        const row = await env.DB.prepare(
+          "SELECT r.user_slug AS slug, c.name AS name FROM rides r " +
+          "LEFT JOIN coasters c ON c.id = r.coaster_id WHERE r.id = ?"
+        ).bind(i).first();
         if (!row) return err(404, "no such ride");
         await env.DB.prepare("DELETE FROM rides WHERE id = ?").bind(i).run();
-        return afterWrite(ctx, env, json({ ok: true, ...(await userTotal(env, row.user_slug)) }));
+        await recordActivity(env, "ride_removed", { actor: row.slug, subject: row.name });
+        return afterWrite(ctx, env, json({ ok: true, ...(await userTotal(env, row.slug)) }));
       }
 
       // every park referenced by a coaster, with coords (null = not on the map yet) + coaster count

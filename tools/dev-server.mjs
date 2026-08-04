@@ -98,7 +98,10 @@ createServer(async (req, res) => {
 
     // ---- static, mirroring _redirects ----
     let f = u === "/" ? "/index.html" : u;
-    const pretty = ["coasters", "rides", "stats", "rankings", "add", "log", "edit", "database", "import"];
+    // Keep in step with the .html files in the repo root — production serves
+    // these extensionless, so a page missing here 404s only in local dev.
+    const pretty = ["coasters", "rides", "stats", "rankings", "add", "log", "edit",
+                    "database", "import", "changes", "sitemap"];
     const um = f.match(/^\/user\/[^/]+\/([^/]+)$/);
     if (um && pretty.includes(um[1])) f = "/" + um[1] + ".html";
     else if (pretty.includes(f.slice(1))) f = f + ".html";

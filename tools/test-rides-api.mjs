@@ -70,6 +70,8 @@ function freshDb() {
       note TEXT, added TEXT, UNIQUE(coaster_id, former_name));
     CREATE TABLE park_aliases (park TEXT NOT NULL, former_name TEXT NOT NULL PRIMARY KEY,
       note TEXT, added TEXT);
+    CREATE TABLE activity (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, actor TEXT,
+      kind TEXT NOT NULL, subject TEXT, n INTEGER, detail TEXT);
     INSERT INTO coasters (id,name,park,type) VALUES
       (1,'Steel Vengeance','Cedar Point','Steel'),
       (2,'Millennium Force','Cedar Point','Steel'),
@@ -392,6 +394,87 @@ async function main() {
     check(`an undated import of ${N} coasters saves`, r.status === 200, JSON.stringify(r.data));
     check("...and gives the rider that many credits",
       rows(db, "SELECT COUNT(DISTINCT coaster_id) AS c FROM rides WHERE user_slug='cole'")[0].c === N);
+  }
+
+  // The feed is what five people sharing one password use to see each other's
+  // work, so the thing that matters is that it says the right THING — "ranked 20
+  // new coasters", not "saved 562". recordActivity swallows its own errors on
+  // purpose, which means a broken feed cannot fail a write; these assertions are
+  // the only thing that would notice.
+  console.log("\nActivity feed");
+  {
+    const db = freshDb();
+    const acts = () => rows(db, "SELECT * FROM activity ORDER BY id");
+    const last = () => { const a = acts(); return a[a.length - 1]; };
+
+    await call(db, "POST", "/api/rides",
+      { token: PW, body: { user: "cole", d: "2026-08-01", entries: [{ c: 2, n: 3 }] } });
+    let e = last();
+    check("a logged day records the rider who logged it",
+      e && e.kind === "rides" && e.actor === "cole" && e.n === 3, JSON.stringify(e));
+    check("...naming the park, so the feed reads 'at Cedar Point'",
+      e.subject === "Cedar Point", JSON.stringify(e));
+    check("...and how many were new credits, not just laps",
+      JSON.parse(e.detail).newCredits === 1, e.detail);
+
+    await call(db, "POST", "/api/rides",
+      { token: PW, body: { user: "max", d: null, entries: [{ c: 2, n: 1 }, { c: 3, n: 1 }] } });
+    e = last();
+    check("an undated list-tick records as credits, not rides",
+      e.kind === "credits" && e.actor === "max" && e.n === 2, JSON.stringify(e));
+
+    // The whole point of diffing against the previous order.
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2, 3] } });
+    e = last();
+    check("a first ranking records 3 newly ranked",
+      e.kind === "ranking" && e.actor === "carter" && JSON.parse(e.detail).added === 3, JSON.stringify(e));
+
+    const nBefore = acts().length;
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2, 3] } });
+    check("re-saving the same order records nothing", acts().length === nBefore);
+
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [3, 1, 2] } });
+    e = last();
+    check("a pure reorder is recorded as a reorder, not as new coasters",
+      JSON.parse(e.detail).reordered === true && JSON.parse(e.detail).added === 0, e.detail);
+
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [3, 1] } });
+    check("a drop is recorded as removed", JSON.parse(last().detail).removed === 1, last().detail);
+
+    // Database edits carry no rider — they must stay anonymous rather than
+    // borrowing whichever name happens to be selected in the UI.
+    await call(db, "POST", "/api/coaster", { token: PW, body: { name: "Zippin Pippin", park: "Bay Beach" } });
+    e = last();
+    check("adding a coaster records it with NO actor",
+      e.kind === "coaster_added" && e.actor === null && e.subject === "Zippin Pippin", JSON.stringify(e));
+
+    await call(db, "PUT", "/api/coaster/3", { token: PW, body: { name: "Blue Streak (Wood)" } });
+    e = last();
+    check("a rename records both names",
+      e.kind === "coaster_renamed" && e.subject === "Blue Streak (Wood)"
+      && JSON.parse(e.detail).from === "Blue Streak", JSON.stringify(e));
+
+    await call(db, "PUT", "/api/coaster/3", { token: PW, body: { h: 78 } });
+    e = last();
+    check("a spec-only edit is an edit, and still names the coaster",
+      e.kind === "coaster_edited" && e.subject === "Blue Streak (Wood)", JSON.stringify(e));
+
+    await call(db, "POST", "/api/merge", { token: PW, body: { from: 2, to: 1 } });
+    e = last();
+    check("a merge records both sides",
+      e.kind === "coaster_merged" && e.subject === "Steel Vengeance"
+      && JSON.parse(e.detail).fromName === "Millennium Force", JSON.stringify(e));
+
+    const r = await call(db, "GET", "/api/activity");
+    check("GET /api/activity is public — no token needed", r.status === 200);
+    check("...newest first", r.data.events[0].kind === "coaster_merged", JSON.stringify(r.data.events[0]));
+    const cole = r.data.events.find(x => x.actor === "cole");
+    check("...and resolves the slug to a display name", cole && cole.actorName === "Cole");
+    check("...while an actorless event reports no name",
+      r.data.events.find(x => x.kind === "coaster_added").actorName === null);
+
+    check("limit is clamped, so ?limit=99999 can't dump the table",
+      (await call(db, "GET", "/api/activity?limit=99999")).status === 200);
   }
 
   console.log("\nRegression — endpoints the rest of the site depends on");
