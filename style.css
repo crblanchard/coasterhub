@@ -187,6 +187,11 @@ select.userpick:hover{border-color:var(--accent2)}
    worse than no wordmark. The mark stays, and it still links home. */
 @media (max-width:374px){
   .brand-text{display:none}
+}
+/* Back to phone-wide: the bottom tab bar and the body padding that keeps the
+   footer clear of it. These MUST stay in the 680px query — nesting them in the
+   374px one above hid the tab bar on every phone 375px and wider. */
+@media (max-width:680px){
   body{padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))}
   footer.site{margin-bottom:8px}
   .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;
