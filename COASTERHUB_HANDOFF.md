@@ -191,6 +191,33 @@ page**. All asset refs are root-absolute (`/style.css`, `/app.js`, `/mark.svg`),
 `stats/rides/rankings/add/log/database` also carry `<base href="/">`. `index.html` deliberately has
 **no** `<base>` — it would break its in-page `#riders` anchor.
 
+### The mark is one path, and the numbers are load-bearing (2026-08-05)
+
+The track in `mark.svg` is a **single continuous stroke** — lift hill, drop, under the loop,
+around it, and out. It used to be three pieces: two teal fragments with a coral circle butted
+against their ends, which read as a sticker parked next to a hill rather than part of the ride.
+Two things carry the fix, and neither is decoration:
+
+- **Entry and exit meet the loop on its tangent**, 45° either side of the bottom — `(50.22,
+  32.72)` and `(36.78,32.72)` on a circle centred `(43.5,26)` with `r=9.5`. That is why there is
+  no corner where they join.
+- **The legs cross below the loop**, at about `(43.6,40.7)`. That crossing is what says
+  "track". Remove it and the shape is a balloon.
+
+Change one of those and you have to change all of them. The coral is now only the car — a
+colour break mid-track was half of why the loop looked detached.
+
+Four SVGs carry the same path and must stay in step: `mark.svg` (header), `favicon.svg` (tile,
+no vertical supports), `favicon-small.svg` (16px: no ground line, no supports, no riders' heads,
+fatter stroke), and `logo.svg` (mark + wordmark).
+
+**Regenerating the rasters:** `favicon-16/32.png` and `apple-touch-icon.png` are rendered from
+that geometry in headless Chromium (see the render script in a scratchpad, or rebuild it — it is
+30 lines). `og-image.png` is **composited, not re-rendered**: only the 201×201 tile at `(500,92)`
+(fill `#061121`, corner radius 45) is redrawn, because the wordmark and tagline in that file were
+set in a font this container does not have and re-rendering the whole card would change the type.
+`logo.png` is stale and unused by any page; nothing links it.
+
 ---
 
 ## The ride log (added 2026-07-28)

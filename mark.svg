@@ -1,15 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- The track is ONE continuous stroke: up the lift hill, down the drop, under
+       the loop, around it, and away. It used to be three pieces — two teal
+       fragments with a coral circle butted against their ends — and the loop read
+       as a sticker sitting next to the hill rather than part of the ride.
+       Two things fix that and both are load-bearing:
+         • entry and exit meet the loop on its TANGENT, 45° either side of the
+           bottom (50.22,32.72) and (36.78,32.72) on a circle centred (43.5,26)
+           r=9.5, so there is no corner where they join;
+         • the two legs CROSS below the loop, at about (43.6,40.7). That crossing
+           is the thing that says "track" — take it away and this is a balloon.
+       Move any of those numbers and you have to move all of them. -->
   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
     <g stroke="#37d0c8" stroke-width="2" opacity="0.4">
-      <line x1="8" y1="54" x2="58" y2="54"/>
-      <line x1="16" y1="54" x2="16" y2="30"/>
-      <line x1="48" y1="54" x2="48" y2="44"/>
+      <line x1="6" y1="54" x2="58" y2="54"/>
+      <line x1="17" y1="54" x2="17" y2="17"/>
+      <line x1="43.5" y1="54" x2="43.5" y2="36"/>
     </g>
-    <path d="M8,54 C8,31 12,17 20,17 C30,17 32,39 41,44" stroke="#37d0c8" stroke-width="5"/>
-    <path d="M35,44 C43,49 50,51 58,54" stroke="#37d0c8" stroke-width="5"/>
-    <path d="M41,44 A9,9 0 1 0 35,44" stroke="#ff5a5f" stroke-width="5"/>
-    <rect x="15" y="10" width="12" height="6.4" rx="2.6" fill="#ff5a5f"/>
-    <circle cx="18.2" cy="8.7" r="1.35" fill="#eaf7ff"/>
-    <circle cx="23.8" cy="8.7" r="1.35" fill="#eaf7ff"/>
+    <path d="M7,54 C7,30 10,14.5 17,14.5 C24,14.5 27,47 34,47 C41,47 43.86,39.08 50.22,32.72 A9.5,9.5 0 1 0 36.78,32.72 C43.85,39.79 52,54 58,54" stroke="#37d0c8" stroke-width="5"/>
+    <rect x="11.5" y="8" width="12" height="6.4" rx="2.6" fill="#ff5a5f"/>
+    <circle cx="14.7" cy="6.7" r="1.35" fill="#eaf7ff"/>
+    <circle cx="20.3" cy="6.7" r="1.35" fill="#eaf7ff"/>
   </g>
 </svg>

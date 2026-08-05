@@ -1,9 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <rect width="64" height="64" rx="14" fill="#0e1730"/>
+  <!-- The 16px cut. Same geometry as mark.svg, but the ground line, the supports
+       and the riders' heads are gone and the stroke is fatter: at 16px each of
+       those is under a pixel and only muddies the silhouette. What has to survive
+       is the hill, the loop, and the crossing between them. -->
   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M9,53 C9,28 13,15 22,15 C33,15 35,40 44,45" stroke="#37d0c8" stroke-width="6.5"/>
-    <path d="M37,45 C44,50 50,52 56,53" stroke="#37d0c8" stroke-width="6.5"/>
-    <path d="M44,45 A9.5,9.5 0 1 0 37,45" stroke="#ff5a5f" stroke-width="6.5"/>
-    <rect x="17" y="8" width="13" height="7" rx="3" fill="#ff5a5f"/>
+    <path d="M7,54 C7,30 10,14.5 17,14.5 C24,14.5 27,47 34,47 C41,47 43.86,39.08 50.22,32.72 A9.5,9.5 0 1 0 36.78,32.72 C43.85,39.79 52,54 58,54" stroke="#37d0c8" stroke-width="7"/>
+    <rect x="11" y="7.4" width="13" height="7" rx="3" fill="#ff5a5f"/>
   </g>
 </svg>
