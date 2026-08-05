@@ -79,25 +79,26 @@ JSON, so activity rows were inserted by hand and the sync workflow was run manua
 (Actions → *Sync static JSON from D1* → Run workflow). Remember both if you ever write to D1
 directly again.
 
-### Current data (2026-07-29)
+### Current data (2026-08-05)
 
-All four riders now live in `rides`. "Undated" rows are credits with no known date — they
+Every rider lives in `rides`. "Undated" rows are credits with no known date — they
 count toward credits, and are excluded from anything calendar-shaped.
 
 | rider | rows | credits | Σ distinct id | undated |
 |---|---|---|---|---|
 | carter | 2,362 | 562 | 159439 | 0 |
-| cole | 546 | 546 | 193652 | 243 |
-| keltan | 795 | 795 | 452242 | 198 |
-| max | 426 | 426 | 194626 | 426 |
-| sean | 604 | 604 | 235981 | 604 |
+| cole | 596 | 546 | 193652 | 243 |
+| keltan | 795 | 795 | 448521 | 198 |
+| max | 442 | 424 | 193116 | 378 |
+| sean | 721 | 670 | 295201 | 559 |
 
-coasters **1,076** · parks **237**
+coasters **1,114** · parks **247**
 
-**Sean** was imported on 2026-07-30 from a spreadsheet, entirely undated — so his
-page shows credits, parks and geography but no ride total, no timeline and no day
-view. That is the capability flags working, not missing data. 63 of his 668 sheet
-rows are NOT imported; see the open task below.
+Checked against D1 on all three columns after the trip copy above; the static JSON in the
+repo matches. **Sean and Max have dated rides for the first time** (their trip days), so their
+pages now show timelines and day views for that slice — the capability flags turning on, not
+new data appearing from nowhere. 63 of Sean's 668 original sheet rows are still not imported;
+see the open task below.
 
 The Σ column is a checksum. **Verify migrations on counts _and_ `SUM(DISTINCT coaster_id)`** —
 counts alone hide a swapped pair, which is how a bad merge nearly went unnoticed.
@@ -600,6 +601,17 @@ matched loosely *within* a park; park names cannot be matched loosely at all.
 ---
 
 ## Gotchas that will bite you
+
+0. **A green sync run does not mean every rider's file was written.** Until 2026-08-05 the
+   commit step in `.github/workflows/sync-static.yml` staged a *hardcoded* list of files —
+   `coasters.json parks.json carter.json cole.json keltan.json max.json`. Sean was added after
+   that line was written, so `sean.json` was regenerated on every run and staged on none of
+   them: the run went green, the diff simply never mentioned him, and his file sat stale for
+   weeks. (That is what an earlier session was really fixing when it "refreshed sean.json by
+   hand".) It now stages `'*.json'`. **If you add a step that writes a new file, do not name
+   files in `git add`** — riders can be created from `/log` and `/import` now, so no fixed list
+   can keep up. After any bulk data change, verify rows, credits **and** `SUM(DISTINCT
+   coaster_id)` per rider against D1 rather than trusting the run's conclusion.
 
 1. **Line endings are mixed — match the file you're editing.** `index.html` and `stats.html`
    are **CRLF**; `rides.html`, `rankings.html`, `add.html`, `log.html`, `edit.html`,
