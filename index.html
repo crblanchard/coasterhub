@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coaster Hub — A roller coaster count, visualized</title>
 <meta name="description" content="Coaster Hub — an interactive look at roller coaster counts: credits, rides, parks, geography, and records.">
-<link rel="stylesheet" href="/style.css?v=20260728a">
+<link rel="stylesheet" href="/style.css?v=20260805a">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -148,15 +148,23 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
-<script src="/app.js?v=20260728a"></script>
+<script src="/app.js?v=20260805a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('home');
 var nf=function(n){return n==null?'—':n.toLocaleString();};
-Promise.all([
+// Wait for the rider list before loading anyone: a rider added on /log or
+// /import exists in D1 only, and reading USERS a beat too early would leave
+// them off the leaderboard until the next reload.
+CoasterHub.fetchUsers().then(function(){
+return Promise.all([
   CoasterHub.fetchCoasters(),
   CoasterHub.fetchParks()
-].concat(CoasterHub.USERS.map(function(u){return CoasterHub.fetchUser(u.slug);})))
+  // A rider with no static <slug>.json yet must not take the page down with
+  // them, so a failed read becomes an empty log rather than a rejection.
+].concat(CoasterHub.USERS.map(function(u){
+  return CoasterHub.fetchUser(u.slug).catch(function(){return {user:u.name,rides:[]};});
+})))
 .then(function(res){
   var coasters=res[0].coasters, parks=res[1], users=res.slice(2);
   var creditUnion={}, parkUnion={}, statsBySlug={};
@@ -235,6 +243,7 @@ Promise.all([
       +'<span class="where">'+esc(x.parks.join(' · ')||'—')+'</span>'
       +'<span class="what">'+what+'</span></a>';
   }).join('') || '<p class="lead">No dated rides yet.</p>';
+});
 }).catch(function(e){console.error(e);});
 </script>
 </body>

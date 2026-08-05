@@ -23,8 +23,10 @@ import { dirname, join } from "node:path";
 const BASE = (process.argv[2] || "https://coasterhub.org").replace(/\/$/, "");
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-// Riders to sync. Keep in step with the USERS array in app.js.
-const SLUGS = ["carter", "cole", "keltan", "max", "sean"];
+// Riders to sync. Taken from the live API (/api/users) so anyone added on /log
+// or /import gets a static file too; this list is only the fallback for an old
+// deployment that predates that endpoint.
+const FALLBACK_SLUGS = ["carter", "cole", "keltan", "max", "sean"];
 
 async function getJSON(path) {
   const res = await fetch(BASE + path);
@@ -45,7 +47,15 @@ async function main() {
   await writeFile(join(ROOT, "parks.json"), compact(parks));
   console.log(`  parks.json     <- ${Object.keys(parks).length} parks`);
 
-  for (const slug of SLUGS) {
+  let slugs = FALLBACK_SLUGS;
+  try {
+    const u = await getJSON("/api/users");
+    if (u.users && u.users.length) slugs = u.users.map((x) => x.slug);
+  } catch (e) {
+    console.log("  (no /api/users — falling back to the built-in rider list)");
+  }
+
+  for (const slug of slugs) {
     const user = await getJSON("/api/user/" + slug); // { user, rides|credits }
     const n = (user.rides || user.credits || []).length;
     await writeFile(join(ROOT, slug + ".json"), compact(user));

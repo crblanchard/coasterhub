@@ -6,7 +6,7 @@
 <base href="/">
 <title>Add new — Coaster Hub</title>
 <meta name="description" content="Add a park or a coaster to the Coaster Hub database.">
-<link rel="stylesheet" href="/style.css?v=20260728a">
+<link rel="stylesheet" href="/style.css?v=20260805a">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -17,7 +17,26 @@
 <style>
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin:0 0 18px}
   .panel h2{font-size:1.05rem;margin:0 0 4px}
-  .panel .sub{color:var(--muted);font-size:.86rem;margin:0 0 16px;max-width:70ch}
+  /* No max-width: a 70ch cap wrapped these one-sentence notes halfway across a
+     1,080px panel, which read as a random line break rather than a measure. The
+     step cards above them already run the full width. text-wrap:balance keeps
+     the break even on the narrow screens where it does still wrap. */
+  .panel .sub{color:var(--muted);font-size:.86rem;margin:0 0 16px;text-wrap:balance}
+  /* What's already at the chosen park. The whole point of this page is not
+     adding a coaster twice, and the fastest way to check is to see the list. */
+  .have{display:none;margin-top:14px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .have.on{display:block}
+  .have .hh{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;padding:10px 13px;
+    background:var(--bg);border-bottom:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+  .have .hh b{color:var(--fg);font-size:.88rem}
+  .have .hh em{font-style:normal;margin-left:auto}
+  .have .chips{display:flex;flex-wrap:wrap;gap:6px;padding:11px 13px;max-height:190px;overflow-y:auto}
+  .have .chip{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:.82rem;
+    color:var(--fg);background:var(--bg);white-space:nowrap}
+  .have .chip span{color:var(--muted);font-size:.76rem;margin-left:5px}
+  .have .chip.hit{border-color:var(--accent2);color:var(--accent2);background:rgba(45,212,191,.08)}
+  .have .chip.hit span{color:var(--accent2)}
+  .have .none{padding:11px 13px;color:var(--muted);font-size:.84rem}
   .row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
   .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
   .fld label{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}
@@ -124,6 +143,7 @@
         <div class="fld small"><label for="c_type">Type</label>
           <select id="c_type"><option>Steel</option><option>Wood</option></select></div>
       </div>
+      <div class="have" id="c_have"></div>
       <div class="row" style="margin-top:12px">
         <div class="fld grow"><label for="c_manu">Manufacturer</label>
           <input id="c_manu" type="text" placeholder="Rocky Mountain Construction" autocomplete="off"></div>
@@ -174,7 +194,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
-<script src="/app.js?v=20260728a"></script>
+<script src="/app.js?v=20260805a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('add');
@@ -356,7 +376,37 @@ function fillParks(keep){
   if(cur) sel.value=cur;
 }
 
-function checkCoaster(){ return showDupe('c_dupe',coasterDupes($('c_name').value,$('c_park').value),'coasters'); }
+// Everything already at the chosen park, listed as you pick it. The dupe warning
+// below only fires once a typed name looks like something — this answers the
+// question before it is asked, which is what stops a second row being added for
+// a coaster that is right there under a name you didn't think of. Anything close
+// to what is being typed is highlighted and floats to the front.
+function showHave(){
+  var park=$('c_park').value, box=$('c_have');
+  if(!park){ box.className='have'; box.innerHTML=''; return; }
+  var list=COASTERS.filter(function(c){ return c.park===park; })
+    .sort(function(a,b){ return a.name.localeCompare(b.name); });
+  var q=squash($('c_name').value);
+  var hit=function(c){ var s=squash(c.name);
+    return !!q && (s===q || s.indexOf(q)>=0 || q.indexOf(s)>=0 || sim(q,s)>=0.8); };
+  var hits=list.filter(hit), n=hits.length;
+  if(n) list=hits.concat(list.filter(function(c){ return !hit(c); }));
+  box.className='have on';
+  box.innerHTML='<div class="hh"><b>Already at '+esc(park)+'</b>'
+    +'<span>'+list.length+' coaster'+(list.length===1?'':'s')+' &mdash; check yours isn&rsquo;t one of them</span>'
+    +(n?'<em style="color:var(--accent2)">'+n+' look'+(n===1?'s':'')+' like what you&rsquo;re typing</em>':'')+'</div>'
+    +(list.length
+      ? '<div class="chips">'+list.map(function(c){
+          return '<span class="chip'+(hit(c)?' hit':'')+'">'+esc(c.name)
+            +'<span>'+esc(c.type||'')+(c.yr?(' &middot; '+c.yr):'')+'</span></span>';
+        }).join('')+'</div>'
+      : '<div class="none">Nothing listed here yet &mdash; this would be its first.</div>');
+}
+
+function checkCoaster(){
+  showHave();
+  return showDupe('c_dupe',coasterDupes($('c_name').value,$('c_park').value),'coasters');
+}
 
 function checkPark(){
   var q=squash($('p_name').value);

@@ -42,7 +42,12 @@ jobs:
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "coasterhub-sync[bot]"
             git config user.email "coasterhub-sync@users.noreply.github.com"
-            git add coasters.json parks.json carter.json cole.json keltan.json max.json
+            # Every JSON file at the root, not a hardcoded list. The list was
+            # written before Sean existed and never gained him, so his file was
+            # regenerated on every run and staged on none of them — it sat stale
+            # for weeks while every other rider updated. Riders can now be added
+            # from /log and /import, so naming files here cannot keep up.
+            git add -- '*.json'
             git commit -m "chore: sync static JSON from D1"
             git push
             echo "Synced and pushed."
