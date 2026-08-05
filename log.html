@@ -6,7 +6,7 @@
 <base href="/">
 <title>Add to your count — Coaster Hub</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="stylesheet" href="/style.css?v=20260728a">
+<link rel="stylesheet" href="/style.css?v=20260805a">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -129,7 +129,12 @@
   <p class="modehint" id="modehint"></p>
 
   <div class="setup">
-    <div class="fld"><label for="rider">Rider</label><select id="rider"></select></div>
+    <div class="fld"><label for="rider">Rider</label>
+      <div style="display:flex;gap:8px">
+        <select id="rider" style="flex:1;min-width:0"></select>
+        <button class="ghost" id="newrider" type="button" style="flex:none;padding:10px 12px">+</button>
+      </div>
+    </div>
     <div class="fld" id="datefld"><label for="date">Date</label><input id="date" type="date"></div>
     <div class="fld" style="flex:1;min-width:240px"><label for="park">Park</label>
       <div style="display:flex;gap:8px">
@@ -138,6 +143,16 @@
       </div>
     </div>
     <div class="fld" style="flex:1;min-width:200px"><label for="search">Or search all coasters</label><input id="search" type="search" placeholder="Type 2+ letters&hellip;" style="width:100%"></div>
+  </div>
+
+  <div class="miniform" id="riderform">
+    <div class="fld grow"><label for="nr_name">Their name</label>
+      <input id="nr_name" type="text" placeholder="Jamie" autocomplete="off"></div>
+    <button class="primary" id="nr_save" type="button">Add rider</button>
+    <button class="ghost" id="nr_cancel" type="button">Cancel</button>
+    <p class="note">A new rider gets their own stats, rides and rankings pages at
+      <b>/user/&lt;name&gt;</b> straight away, empty until something is logged for them.</p>
+    <p class="err" id="nr_err"></p>
   </div>
 
   <div class="miniform" id="parkform">
@@ -186,7 +201,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
-<script src="/app.js?v=20260728a"></script>
+<script src="/app.js?v=20260805a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 // Runs before the gate: the nav has to work whether or not you unlock.
@@ -236,10 +251,10 @@ function boot(){
   var local=new Date(now.getTime()-now.getTimezoneOffset()*60000);
   $('date').value=local.toISOString().slice(0,10);
 
-  CoasterHub.USERS.slice().sort(function(a,b){return a.name.localeCompare(b.name);})
-    .forEach(function(u){ var o=document.createElement('option'); o.value=u.slug; o.textContent=u.name; $('rider').appendChild(o); });
-  var remembered=''; try{ remembered=localStorage.getItem('ch_rider')||''; }catch(e){}
-  if(remembered) $('rider').value=remembered;
+  fillRiders();
+  // Riders live in D1; USERS is the offline fallback. Someone added on /import
+  // (or with the + beside the picker) can be logged for straight away.
+  CoasterHub.fetchUsers().then(function(){ fillRiders(); loadOwned(); });
 
   Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function(res){
     COASTERS=res[0].coasters; PARKS=res[1];
@@ -255,7 +270,7 @@ function boot(){
 
   $('save').onclick=save;
   $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
-  wireAdders(); wireMode(); setMode('day');
+  wireAdders(); wireRiderAdd(); wireMode(); setMode('day');
   $('rider').addEventListener('change',function(){
     try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
     basket={}; renderBasket(); loadOwned();
@@ -305,6 +320,47 @@ function fillParks(keep){
     return '<option value="'+esc(p)+'">'+esc(p)+' ('+PCOUNT[p]+')</option>';
   }).join('');
   if(cur) sel.value=cur;
+}
+
+function fillRiders(){
+  var sel=$('rider'), cur=sel.value;
+  sel.innerHTML=CoasterHub.USERS.slice().sort(function(a,b){return a.name.localeCompare(b.name);})
+    .map(function(u){ return '<option value="'+esc(u.slug)+'">'+esc(u.name)+'</option>'; }).join('');
+  var remembered=cur; if(!remembered){ try{ remembered=localStorage.getItem('ch_rider')||''; }catch(e){} }
+  if(remembered) sel.value=remembered;
+  if(!sel.value && sel.options.length) sel.selectedIndex=0;
+}
+
+// ---- adding a rider --------------------------------------------------------
+// Someone turning up for their first park day should not need a deploy to be
+// logged. Confirm first, like the other adds here: it writes to the shared
+// database and there is no undo from this page.
+function wireRiderAdd(){
+  var f=$('riderform');
+  var toggle=function(on){ f.classList.toggle('on',on); $('nr_err').textContent='';
+    if(on){ $('nr_name').value=''; $('nr_name').focus(); } };
+  $('newrider').onclick=function(){ toggle(!f.classList.contains('on')); };
+  $('nr_cancel').onclick=function(){ toggle(false); };
+  $('nr_name').addEventListener('keydown',function(e){ if(e.key==='Enter') $('nr_save').click(); });
+  $('nr_save').onclick=function(){
+    var name=$('nr_name').value.trim();
+    if(!name) return void($('nr_err').textContent='Give them a name.');
+    if(CoasterHub.USERS.some(function(u){return u.name.toLowerCase()===name.toLowerCase();}))
+      return void($('nr_err').textContent=name+' is already on the site.');
+    if(!confirm('Add '+name+' as a rider?\n\nThey get their own pages on the site straight away, '
+      +'and removing them again means the database.')) return;
+    $('nr_save').disabled=true;
+    api('POST','/api/user',{name:name}).then(function(r){
+      CoasterHub.mergeUsers([{slug:r.slug,name:r.name}]);
+      fillRiders();
+      $('rider').value=r.slug;
+      try{ localStorage.setItem('ch_rider',r.slug); }catch(e){}
+      toggle(false); basket={}; renderBasket(); loadOwned();
+      $('msg').className='msg ok';
+      $('msg').textContent='Added '+r.name+'. Anything you save now goes to their count.';
+    }).catch(function(e){ $('nr_err').textContent='Could not add them: '+e.message; })
+      .then(function(){ $('nr_save').disabled=false; });
+  };
 }
 
 // ---- adding a park or a coaster --------------------------------------------

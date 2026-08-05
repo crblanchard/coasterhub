@@ -477,6 +477,51 @@ async function main() {
       (await call(db, "GET", "/api/activity?limit=99999")).status === 200);
   }
 
+  console.log("\nRiders — GET /api/users + POST /api/user");
+  {
+    const db = freshDb();
+    let r = await call(db, "GET", "/api/users");
+    check("the rider list is public and name-sorted",
+      r.status === 200 && r.data.users.map(u => u.slug).join(",") === "carter,cole,max");
+
+    check("adding a rider needs the password",
+      (await call(db, "POST", "/api/user", { body: { name: "Jamie" } })).status === 401);
+
+    r = await call(db, "POST", "/api/user", { token: PW, body: { name: "Jamie" } });
+    check("a new rider is created, slug derived from the name",
+      r.status === 200 && r.data.slug === "jamie" && r.data.name === "Jamie", JSON.stringify(r.data));
+    check("...and lands in the users table with mode 'rides'",
+      rows(db, "SELECT * FROM users WHERE slug='jamie'")[0].mode === "rides");
+    check("...and shows up in the list straight away",
+      (await call(db, "GET", "/api/users")).data.users.some(u => u.slug === "jamie"));
+    check("...with pages that work while empty — /api/user/:slug is 200, not 404",
+      (await call(db, "GET", "/api/user/jamie")).status === 200);
+    check("...and an empty ride log rather than a missing one",
+      (await call(db, "GET", "/api/rides/jamie")).data.rides.length === 0);
+    check("...recorded in the activity feed",
+      rows(db, "SELECT * FROM activity WHERE kind='user_added'").length === 1);
+
+    r = await call(db, "POST", "/api/user", { token: PW, body: { name: "Jamie" } });
+    check("the same slug twice is refused, not silently merged", r.status === 409);
+    check("...and no second row was written",
+      rows(db, "SELECT * FROM users WHERE slug='jamie'").length === 1);
+
+    r = await call(db, "POST", "/api/user", { token: PW, body: { name: "  Ana María  " } });
+    check("accents and spaces fold into a URL-safe slug",
+      r.status === 200 && r.data.slug === "ana-maria" && r.data.name === "Ana María", JSON.stringify(r.data));
+
+    check("a nameless rider is a 400",
+      (await call(db, "POST", "/api/user", { token: PW, body: { name: "   " } })).status === 400);
+    check("a name with nothing slug-able in it is a 400",
+      (await call(db, "POST", "/api/user", { token: PW, body: { name: "!!!" } })).status === 400);
+    check("a one-character name is a 400 (the slug is a URL)",
+      (await call(db, "POST", "/api/user", { token: PW, body: { name: "J" } })).status === 400);
+    check("a page name can't be taken as a rider slug",
+      (await call(db, "POST", "/api/user", { token: PW, body: { name: "Stats" } })).status === 400);
+    check("...and none of those wrote a row",
+      rows(db, "SELECT * FROM users").length === 5);
+  }
+
   console.log("\nRegression — endpoints the rest of the site depends on");
   {
     const db = freshDb();

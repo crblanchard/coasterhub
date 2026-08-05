@@ -43,7 +43,10 @@
   .pin { font-size:.9rem; margin-right:5px; }
   .pin.on { color:var(--ok); } .pin.off { color:#c9a99f; }
   .badge { display:inline-block; font-size:.68rem; padding:1px 6px; border-radius:20px; margin-left:6px; vertical-align:middle; }
-  .badge.inc { background:#fbe6de; color:var(--accent); }
+  /* Two states, not one: nothing filled in at all is a different job from a row
+     that just needs its last couple of numbers, and they used to look identical. */
+  .badge.nostats { background:#fbe6de; color:var(--accent); }
+  .badge.somestats { background:#f7ecd2; color:#8a6100; }
   .badge.nomap { background:#fbe6de; color:var(--accent); }
   .badge.onmap { background:#e0f0e4; color:var(--ok); }
   .editor { overflow:auto; padding:20px 22px; }
@@ -103,7 +106,32 @@
     ["yr","Year","int"], ["opened","Opened (YYYY-MM-DD)","text"], ["closed","Closed (YYYY-MM-DD)","text"]
   ];
   function fieldKind(k){ for (var i=0;i<FIELDS.length;i++) if (FIELDS[i][0]===k) return FIELDS[i][2]; return "text"; }
-  function incomplete(c){ return !c.type || c.h==null || c.s==null || c.l==null; }
+  // The specs a coaster row is expected to carry. Everything else (model, maker,
+  // duration) is genuinely optional or not published for a lot of rides, so it
+  // stays out of the count rather than marking half the database as unfinished.
+  var STAT_FIELDS = [["type","type"],["h","height"],["s","speed"],["l","length"],
+                     ["inv","inversions"],["yr","year"]];
+  function statsHave(c){
+    return STAT_FIELDS.filter(function(f){ return c[f[0]]!=null && c[f[0]]!==""; });
+  }
+  function statsMissing(c){
+    return STAT_FIELDS.filter(function(f){ return c[f[0]]==null || c[f[0]]===""; })
+      .map(function(f){ return f[1]; });
+  }
+  // "none" = nothing to go on at all, "some" = partly filled, "full" = done.
+  function statLevel(c){
+    var n=statsHave(c).length;
+    return n===0 ? "none" : (n<STAT_FIELDS.length ? "some" : "full");
+  }
+  function statBadge(c){
+    var lvl=statLevel(c);
+    if (lvl==="full") return "";
+    var missing=statsMissing(c);
+    if (lvl==="none") return '<span class="badge nostats" title="nothing filled in yet">no stats</span>';
+    return '<span class="badge somestats" title="still missing: '+esc(missing.join(", "))+'">some stats · '
+      + statsHave(c).length + '/' + STAT_FIELDS.length + '</span>';
+  }
+  function incomplete(c){ return statLevel(c)!=="full"; }
   function geocoded(park){ return !!(park && state.geo[park]); }
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}); }
 
@@ -206,7 +234,7 @@
       var on = geocoded(c.park);
       var pin = '<span class="pin '+(on?'on':'off')+'" title="'+(on?'park is on the map':'park not geocoded')+'">'+(on?'●':'○')+'</span>';
       return '<div class="row'+(state.sel===c.id?' sel':'')+'" data-id="'+c.id+'">'+
-        '<div class="nm">'+pin+esc(c.name)+ (incomplete(c)?'<span class="badge inc">needs stats</span>':'') +'</div>'+
+        '<div class="nm">'+pin+esc(c.name)+ statBadge(c) +'</div>'+
         '<div class="pk">'+esc(c.park||"—")+' · #'+c.id+'</div></div>';
     }).join("");
   }

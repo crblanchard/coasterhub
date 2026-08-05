@@ -109,6 +109,45 @@ async function getUser(env, slug) {
   return { user: u.name, rides: results.map(x => ({ c: x.coaster_id, d: x.d })) };
 }
 
+// ---- Riders ---------------------------------------------------------------
+// The rider list lives in D1, not only in the USERS array in app.js, so someone
+// added on /log or /import can be picked and written to straight away instead of
+// waiting for a deploy. app.js still ships USERS as the offline fallback.
+async function getUsers(env) {
+  const { results } = await env.DB.prepare("SELECT slug, name FROM users ORDER BY name").all();
+  return results.map(u => ({ slug: u.slug, name: u.name }));
+}
+
+// The slug IS the URL (/user/<slug>/stats), so it is derived tightly and the
+// page names are refused — a rider called "Stats" would shadow a real page.
+const RESERVED_SLUGS = new Set(["api","user","users","admin","new","all","everyone",
+  "home","stats","rides","rankings","coasters","parks","log","add","edit","import",
+  "changes","database","sitemap","index"]);
+function slugify(s) {
+  return String(s == null ? "" : s).toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+async function addUser(env, body) {
+  const name = String(body && body.name || "").trim().replace(/\s+/g, " ");
+  if (!name) return { bad: [400, "give the rider a name"] };
+  if (name.length > 40) return { bad: [400, "that name is too long"] };
+  const slug = slugify(body && body.slug || name);
+  if (!/^[a-z0-9][a-z0-9-]{1,31}$/.test(slug)) {
+    return { bad: [400, "that name needs at least two letters or numbers"] };
+  }
+  if (RESERVED_SLUGS.has(slug)) return { bad: [400, "“" + slug + "” is a page name — pick another"] };
+  const clash = await env.DB.prepare("SELECT slug, name FROM users WHERE slug = ?").bind(slug).first();
+  if (clash) return { bad: [409, clash.name + " is already here (/user/" + slug + ")"] };
+  // mode is 'rides' for everyone since the 2026-07-29 migration; nothing branches
+  // on it any more, but the column is still NOT NULL-ish in spirit, so set it.
+  await env.DB.prepare(
+    "INSERT INTO users (slug,name,mode,email,created) VALUES (?,?,'rides',NULL,datetime('now'))"
+  ).bind(slug, name).run();
+  await recordActivity(env, "user_added", { actor: slug, subject: name });
+  return { ok: true, slug: slug, name: name };
+}
+
 // ---- Ride log -------------------------------------------------------------
 // One shape for every rider:  { user, rides:[{ i, c, d }] }
 // One row per ride, each with the row id so an individual mis-tapped ride can
@@ -502,6 +541,8 @@ export default {
         return json({ coasters: await getCoasters(env), ...(await getAliases(env)) });
       }
       if (request.method === "GET" && path === "/api/parks") return json(await getParks(env));
+      // Who exists. Public: the rider pickers and every /user/<slug>/ page read it.
+      if (request.method === "GET" && path === "/api/users") return json({ users: await getUsers(env) });
       // Public read: the feed says what changed, never who is allowed to change it.
       if (request.method === "GET" && path === "/api/activity") {
         const n = Math.min(Math.max(Number(url.searchParams.get("limit")) || 100, 1), 500);
@@ -555,6 +596,14 @@ export default {
 
       // login check (lets the /edit page validate the password)
       if (request.method === "POST" && path === "/api/admin/login") return json({ ok: true });
+
+      // add a rider, so a new person can be logged/imported the moment they turn
+      // up rather than after a code change. They start with no rides at all.
+      if (request.method === "POST" && path === "/api/user") {
+        const out = await addUser(env, await request.json());
+        if (out.bad) return err(out.bad[0], out.bad[1]);
+        return afterWrite(ctx, env, json(out));
+      }
 
       // create coaster (id = max+1)
       if (request.method === "POST" && path === "/api/coaster") {

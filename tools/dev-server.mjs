@@ -32,6 +32,13 @@ const RANK = { carter: [530, 201, 400, 289, 105, 78, 101, 542], cole: [], keltan
 // delete UI can be exercised; every other id reports riders.
 const FREE_ID = 999001;
 const HELD = [{ slug: "carter", name: "Carter", rides: 2 }, { slug: "cole", name: "Cole", rides: 1 }];
+// The rider list the real API serves from D1. A rider added through the stub
+// lives here until the server restarts — enough to drive the + button on /log
+// and /import, though their <slug>.json won't exist so their pages stay empty.
+const RIDERS = [
+  { slug: "carter", name: "Carter" }, { slug: "cole", name: "Cole" },
+  { slug: "keltan", name: "Keltan" }, { slug: "max", name: "Max" }, { slug: "sean", name: "Sean" },
+];
 let nextId = 900000;
 const body = req => new Promise(r => { let s = ""; req.on("data", d => (s += d)); req.on("end", () => r(s)); });
 
@@ -52,6 +59,8 @@ createServer(async (req, res) => {
 
     if (u === "/api/coasters" && req.method === "GET") return out(RD("coasters.json"));
     if (u === "/api/parks" && req.method === "GET") return out(RD("parks.json"));
+    // Riders, including any added during this run of the server (in memory only).
+    if (u === "/api/users" && req.method === "GET") return out({ users: RIDERS });
     const ur = u.match(/^\/api\/(?:user|rides)\/([a-z0-9-]+)$/i);
     if (ur && req.method === "GET") {
       const f = ur[1].toLowerCase() + ".json";
@@ -86,6 +95,16 @@ createServer(async (req, res) => {
       if (cd && req.method === "PUT") return out({ ok: true });
       if (u === "/api/coaster" && req.method === "POST") return out({ ok: true, id: nextId++ });
       if (u === "/api/park" && req.method === "PUT") return out({ ok: true });
+      if (u === "/api/user" && req.method === "POST") {
+        const b = JSON.parse((await body(req)) || "{}");
+        const name = String(b.name || "").trim();
+        const slug = name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+          .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        if (!/^[a-z0-9][a-z0-9-]{1,31}$/.test(slug)) return out({ error: "give the rider a name" }, 400);
+        if (RIDERS.some(r => r.slug === slug)) return out({ error: name + " is already here" }, 409);
+        RIDERS.push({ slug, name });
+        return out({ ok: true, slug, name });
+      }
       if (u === "/api/merge" && req.method === "POST") return out({ ok: true });
       if (u === "/api/rides" && req.method === "POST") {
         const b = JSON.parse((await body(req)) || "{}");

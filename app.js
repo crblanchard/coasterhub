@@ -338,6 +338,60 @@
   ];
   var DEFAULT_SLUG = "carter";
 
+  // ---- Riders are whoever is in D1, not only the array above ---------------
+  // Someone added on /log or /import exists in the database immediately; the
+  // array is the seed and the offline fallback. Two things follow:
+  //
+  //  • The API list is merged into USERS in place, so anything holding the
+  //    array (every page's boot code) sees the new rider without a deploy.
+  //  • It is cached, because home/stats/rides read USERS *synchronously* at
+  //    boot — without a cache a new rider would be missing from the page that
+  //    triggered the fetch and only appear on the one after. The cache holds
+  //    the API's list verbatim, so a rider removed from D1 stops being merged
+  //    on the next load rather than sticking around forever.
+  var USERS_KEY = "ch_users";
+  function escAttr(t) {
+    return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function mergeUsers(list) {
+    var have = {}, changed = false;
+    USERS.forEach(function (u) { have[u.slug] = u; });
+    (list || []).forEach(function (u) {
+      if (!u || !u.slug) return;
+      if (have[u.slug]) {
+        if (u.name && have[u.slug].name !== u.name) { have[u.slug].name = u.name; changed = true; }
+        return;
+      }
+      var rec = { slug: u.slug, name: u.name || u.slug };
+      USERS.push(rec); have[u.slug] = rec; changed = true;
+    });
+    return changed;
+  }
+  if (typeof window !== "undefined") {
+    try {
+      var cachedUsers = JSON.parse(window.localStorage.getItem(USERS_KEY) || "null");
+      if (Array.isArray(cachedUsers)) mergeUsers(cachedUsers);
+    } catch (e) { /* a blocked or corrupt cache just means the built-in list */ }
+  }
+  var usersPromise = null;
+  function fetchUsers() {
+    if (!usersPromise) {
+      usersPromise = fetch("/api/users")
+        .then(function (r) { if (!r.ok) throw new Error("api " + r.status); return r.json(); })
+        .then(function (j) {
+          var list = (j && j.users) || [];
+          if (!list.length) return USERS;          // never let an empty answer erase the seed
+          mergeUsers(list);
+          try { window.localStorage.setItem(USERS_KEY, JSON.stringify(list)); } catch (e) {}
+          return USERS;
+        })
+        .catch(function () { return USERS; });     // offline: the built-in list still works
+    }
+    return usersPromise;
+  }
+
   // URL for a given person's page. The default user lives at the site root
   // (/stats, /coasters); everyone else lives under /user/<slug>/.
   function userPageHref(slug, page) {
@@ -422,6 +476,47 @@
     else wrap.appendChild(b);
   }
 
+  // The header's rider picker. Built once and then refilled in place: the theme
+  // toggle is inserted into the same wrapper, so replacing the wrapper's
+  // innerHTML on a refresh would throw the toggle away with it.
+  function renderPeople(wrap, slug, page) {
+    var sel = wrap.querySelector("select.userpick");
+    if (!sel) {
+      // Label the control, and let the dropdown carry the value — "Viewing"
+      // beside a picker reading "Max" says it once. On a phone the page hero
+      // scrolls away, so this keeps "who am I looking at?" answered on screen.
+      var who = document.createElement("span");
+      who.className = "whoami";
+      who.textContent = "Viewing";
+      wrap.appendChild(who);
+      sel = document.createElement("select");
+      sel.className = "userpick";
+      sel.setAttribute("aria-label", "Select rider");
+      wrap.appendChild(sel);
+      // Switching riders keeps you on the page you're already reading. Home is
+      // the only page with no per-rider version, so it stays put.
+      var perRider = PER_RIDER.indexOf(page) >= 0;
+      sel.addEventListener("change", function () {
+        var v = sel.value;
+        try {
+          if (v === "__all__") window.localStorage.removeItem("ch_rider");
+          else window.localStorage.setItem("ch_rider", v);
+        } catch (e) {}
+        if (v === "__all__") location.href = perRider ? ("/" + page) : "/";
+        else location.href = perRider ? ("/user/" + v + "/" + page) : ("/user/" + v + "/stats");
+      });
+    }
+    var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+    // "Everyone" reads clearer than "All" to someone landing here for the
+    // first time — it's a person picker, not a filter.
+    // Names are typed by whoever added the rider, so they are escaped here.
+    sel.innerHTML = '<option value="__all__"' + (slug ? "" : " selected") + ">Everyone</option>"
+      + sorted.map(function (u) {
+        return '<option value="' + escAttr(u.slug) + '"' + (u.slug === slug ? " selected" : "") + ">"
+          + escAttr(u.name) + "</option>";
+      }).join("");
+  }
+
   function initNav(page) {
     if (typeof document === "undefined") return;
     applyTheme(readTheme());
@@ -460,34 +555,10 @@
 
     var wrap = document.getElementById("people");
     if (wrap) {
-      var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
-      // "Everyone" reads clearer than "All" to someone landing here for the
-      // first time — it's a person picker, not a filter.
-      var opts = '<option value="__all__"' + (slug ? "" : " selected") + '>Everyone</option>';
-      opts += sorted.map(function (u) {
-        return '<option value="' + u.slug + '"' + (u.slug === slug ? " selected" : "") + '>' + u.name + '</option>';
-      }).join("");
-      wrap.innerHTML = '<select class="userpick" aria-label="Select rider">' + opts + '</select>';
-      var sel = wrap.querySelector("select");
-      // Switching riders keeps you on the page you're already reading. Home is
-      // the only page with no per-rider version, so it stays put.
-      var perRider = PER_RIDER.indexOf(page) >= 0;
-      sel.addEventListener("change", function () {
-        var v = sel.value;
-        try {
-          if (v === "__all__") window.localStorage.removeItem("ch_rider");
-          else window.localStorage.setItem("ch_rider", v);
-        } catch (e) {}
-        if (v === "__all__") location.href = perRider ? ("/" + page) : "/";
-        else location.href = perRider ? ("/user/" + v + "/" + page) : ("/user/" + v + "/stats");
-      });
-      // Label the control, and let the dropdown carry the value — "Viewing"
-      // beside a picker reading "Max" says it once. On a phone the page hero
-      // scrolls away, so this keeps "who am I looking at?" answered on screen.
-      var who = document.createElement("span");
-      who.className = "whoami";
-      who.textContent = "Viewing";
-      wrap.insertBefore(who, wrap.firstChild);
+      renderPeople(wrap, slug, page);
+      // A rider added since the cache was written appears as soon as the list
+      // comes back, rather than after a reload.
+      fetchUsers().then(function () { renderPeople(wrap, slug, page); });
     }
 
     // Every page gets the same three-column header, even the ones with no rider
@@ -556,7 +627,7 @@
   var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
-              fetchRides: fetchRides };
+              fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

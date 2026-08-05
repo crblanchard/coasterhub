@@ -6,7 +6,7 @@
 <base href="/">
 <title>My Stats — Coaster Hub</title>
 <meta name="description" content="Interactive roller coaster count statistics.">
-<link rel="stylesheet" href="/style.css?v=20260728a">
+<link rel="stylesheet" href="/style.css?v=20260805a">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -180,7 +180,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20260728a"></script>
+<script src="/app.js?v=20260805a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('stats');
@@ -207,8 +207,14 @@ function renderHub(){
   document.getElementById('hero_p').textContent='Pick a rider below, or see the combined totals.';
   document.title='Stats \u2014 Coaster Hub';
   var tile=function(n,l){return '<div class="kpi"><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>';};
-  var files=['/coasters.json','/parks.json'].concat(CoasterHub.USERS.map(function(u){return '/'+u.slug+'.json';}));
-  Promise.all(files.map(function(u){return fetch(u).then(function(r){return r.json();});})).then(function(res){
+  // The API first, the static JSON as the fallback (fetchUser does both) — a
+  // rider added since the last static sync has no <slug>.json yet, and reading
+  // the files directly used to 404 the whole hub for everyone.
+  CoasterHub.fetchUsers().then(function(){
+  return Promise.all([CoasterHub.fetchCoasters(),CoasterHub.fetchParks()].concat(
+    CoasterHub.USERS.map(function(u){
+      return CoasterHub.fetchUser(u.slug).catch(function(){return {user:u.name,rides:[]};});
+    }))).then(function(res){
     var coasters=res[0].coasters, parks=res[1], datas=res.slice(2);
     var union={}, cards='';
     var sorted=CoasterHub.USERS.map(function(u,i){return {u:u,d:datas[i]};}).sort(function(a,b){return a.u.name.localeCompare(b.u.name);});
@@ -228,6 +234,7 @@ function renderHub(){
       tile(ck.parks,'Parks')+tile(ck.states+' / '+ck.countries,'States / Countries');
     hubOpenings(coasters,parks,union);
     document.getElementById('hub').style.display='block';
+  });
   }).catch(function(e){console.error(e);document.getElementById('err').style.display='block';});
 }
 

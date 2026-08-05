@@ -1,6 +1,6 @@
 # Coaster Hub — Session Handoff
 
-_Last updated 2026-07-29 by a Claude Code session._
+_Last updated 2026-08-05 by a Claude Code session._
 
 This file is tracked in git on purpose so it syncs between machines. Commit your updates to it.
 
@@ -86,7 +86,7 @@ counts alone hide a swapped pair, which is how a bad merge nearly went unnoticed
 | `app.js` | data engine (`computeStats`) + nav (`initNav`, `USERS`, `userPageHref`) |
 | `worker.js` | Worker entrypoint — static assets + JSON API |
 | `tools/sync-static.mjs` | regenerate the static JSON from the live API |
-| `tools/test-rides-api.mjs` | **73 endpoint tests** over `node:sqlite` (no network) |
+| `tools/test-rides-api.mjs` | **112 endpoint tests** over `node:sqlite` (no network) |
 | `tools/dev-server.mjs` | local stand-in for the Worker — serves the repo, mirrors `_redirects`, stubs the API so `/log`, `/add`, `/edit` can be driven in a browser. Password `letmein` |
 | `tools/check-inline-js.mjs` | parses every page's inline `<script>`. **Run it before pushing** |
 | `tools/build-aliases.mjs` | one-off: reconstructed the former-name table from git history |
@@ -121,8 +121,10 @@ per coaster, which says nothing about how many times they were ridden — readin
 it once" would have Cole's page announce 546 rides he never claimed. Each flag flips on by
 itself as a rider logs more; there is nothing to set and no migration to run.
 
-Adding a rider = drop `<name>.json` in the repo root + add `{slug, name}` to `USERS` in
-`app.js`; home cards, the combined total and the dropdown follow.
+Adding a rider (since 2026-08-05) = the **+ Person** button on `/import` or the **+** beside
+the rider picker on `/log`, which `POST`s `/api/user`. Every picker, the home cards and the
+combined total follow from `GET /api/users` — no `<name>.json` and no `USERS` edit needed.
+Their `<slug>.json` appears on the next static sync. See "Riders come from D1" below.
 
 ---
 
@@ -267,6 +269,12 @@ in two shapes:
 - `squash` — the above with **spaces removed**. The only way `SandSerpent` matches
   `Sand Serpent`.
 
+**Picking a park also lists what's already there** (2026-08-05) — every coaster at that park as
+a chip with type and year, right under the picker, before a name has been typed. The warnings
+below only fire once a typed name looks like something already listed, which is too late for
+the commonest case: not knowing the ride is there under a name you didn't think of. Anything
+close to what is being typed is highlighted and floats to the front of the list.
+
 Same park + exact match after normalising **blocks** the save and points at renaming the
 existing row in `/edit` — renaming keeps everyone's rides attached, a second row strands them.
 One name containing the other only warns. Same name at a **different** park just informs:
@@ -285,10 +293,72 @@ public pages filtered to approved rows only. Worth doing at the same time as acc
 "who proposed this" needs a real user identity, which the single shared password cannot
 provide.
 
+### `/import` — a whole list at once, and **nothing is skipped** (2026-08-05)
+
+Password-gated, linked from `/log`. Paste a list or drop a `.xlsx`/`.csv`/`.tsv`/`.txt`; it
+resolves each line and shows buckets to look over before anything is written.
+
+**The rule this page is built around: a line that doesn't match is work to do, not a line to
+drop.** Everything unresolved lands in the **Needs a hand** bucket, where each row carries a
+park box (backed by one shared `<datalist>` of every park) and a ride dropdown, and is only
+imported once both are set. The old "no park → skip those lines" default is gone; the setting
+now defaults to **sort them out below**, with skipping as a deliberate choice.
+
+How a row gets its guess:
+
+- Park resolved, ride not found → the ride dropdown lists that park's coasters, plus an
+  **Elsewhere** group for the same name at other parks (picking one moves the row's park —
+  that's how a wrong or renamed heading gets corrected).
+- No usable park → candidates come from `findAnywhere()`, which searches every coaster.
+  **Only an exact name match that is unique in the whole database is taken automatically.**
+  Substring and typo passes only ever populate the dropdown: "Batman: The Ride" is at nine
+  parks, and a loose substring once auto-matched "Zzzz Nonexistent Coaster" to "Coaster" at
+  Playland. The substring pass also requires the two names to be within 60% of each other's
+  length for the same reason.
+- Naming the park on one row **applies it to every other unfinished row under the same
+  heading**, so a forty-line block costs one park lookup, not forty.
+- A ride the rider already holds resolves but does **not** tick — it moves to *Already in the
+  count* on the next check rather than promising a credit that never appears.
+
+`FIXES` memoises every hand-picked ride against its source line, so re-checking the list,
+saving, or hitting **reload** (after adding something on `/add` in another tab) never makes
+anyone redo that work. The count next to the save button always says how many lines are still
+unmatched, and the save confirm repeats it.
+
+**Parsing changes that came with this**, both about not putting rides in the wrong place:
+
+- A line opening a block that matches nothing — not a coaster at the park above, not a coaster
+  anywhere — is carried as an **unknown park heading** rather than as a coaster. Previously
+  everything under a park we don't have was silently credited to the park above it.
+- The "first row is column titles" rule now requires **every** cell to be a header word
+  (`park`, `coaster`, `name`, `date`, …). It used to drop any first line *containing* the word
+  "park", which ate exactly the unknown-park headings above.
+
+### Riders come from D1, not only from `USERS` (2026-08-05)
+
+`GET /api/users` serves the rider list and `POST /api/user` (gated) adds one, so a new person
+can be added from the **+ Person** button on `/import` or the **+** beside the rider picker on
+`/log` and be logged for immediately — no deploy. The slug is derived from the name
+(accent-folded, URL-safe), page names are refused, and a clash 409s.
+
+`USERS` in `app.js` is now the **seed and the offline fallback**. `CoasterHub.fetchUsers()`
+merges the API's list into it in place and caches it in `localStorage` under `ch_users`; the
+cache is read synchronously at load because home/stats/rides read `USERS` while booting, so
+without it a new rider would be missing from the page that fetched them. The cache stores the
+API's list verbatim, so a rider removed from D1 stops being merged on the next load. Those
+pages now also tolerate a rider whose `<slug>.json` doesn't exist yet (`fetchUser` falls back
+to the API, and a failed read becomes an empty log instead of an exception), and
+`tools/sync-static.mjs` takes its slug list from `/api/users` so new riders get static files.
+
+A new rider's own pages work immediately — `/api/user/:slug` returns an empty ride log rather
+than a 404 — they just show nothing until something is logged.
+
 ### Worker API
 
 | Method | Route | Auth | Notes |
 |---|---|---|---|
+| GET | `/api/users` | public | `{users:[{slug,name}]}`, name-sorted. The rider pickers read this. |
+| POST | `/api/user` | **gated** | `{name}` (optional `slug`). Derives a URL-safe slug, refuses page names (`stats`, `rides`, …) and 409s on a clash. Records a `user_added` activity event. |
 | GET | `/api/rides/:slug` | public | One entry per ride **including the row id** (`i`) so a single ride is deletable. `d` is null when the date is unknown. Undated rows sort last. No `mode` field — there is one shape. |
 | POST | `/api/rides` | **gated** | `{user, d:"YYYY-MM-DD"\|null, entries:[{c,n}]}`. Validates **every** coaster id up front and 400s the whole batch if any is unknown — a typo can't half-log a day. Laps clamp to 1–50. Chunks the D1 batch at 90 statements. Returns `{added, coasters, total, credits, date}`. |
 | DELETE | `/api/ride` | **gated** | `{i:<row id>}` — undo a mis-tapped ride. Returns `{credits, rides}`. |
@@ -323,13 +393,13 @@ flag fails loudly rather than silently breaking the Save button.
 ### Tests
 
 ```bash
-node tools/test-rides-api.mjs        # 53 tests, all passing
+node tools/test-rides-api.mjs        # 112 tests, all passing
 ```
 
 Runs the real `worker.js` router against `node:sqlite` standing in for D1 — no network, no
 wrangler, no `npm install`. Covers auth, validation (a bad batch must write **nothing**),
 dated and undated writes, the undated dedupe guard, lap clamping, delete, which routes are
-gated and which are not,
+gated and which are not, rider creation (slug derivation, reserved page names, clashes),
 and a regression pass over `/api/coasters`, `/api/parks` and `/api/user/:slug`.
 
 **The D1 shim must mirror `meta.changes`.** It used to return `{}` from `run()` and `[]` from
@@ -379,13 +449,14 @@ What makes this bigger than it looks:
   passwords in D1, or Cloudflare Access / an OAuth provider in front.
 - **The `users` table is already shaped for it** (`slug, name, mode, email,
   created`) — `email` is present and unused, so the schema barely has to move.
-- **`USERS` in `app.js` is hardcoded**, and every page reads it for the nav,
-  the picker, home cards and the combined totals. It would need to come from the
-  API instead.
-- **The static-JSON fallback assumes a fixed set of riders.** `tools/sync-static.mjs`
-  writes one `<slug>.json` per rider from a hardcoded `SLUGS` list; that model
-  doesn't survive arbitrary signups. Either generate from the live user list or
-  accept that the offline fallback only covers the original riders.
+- ~~**`USERS` in `app.js` is hardcoded**~~ — **done 2026-08-05.** The list comes from
+  `GET /api/users` and is merged into `USERS` (cached in `localStorage`); riders can
+  be added from `/log` and `/import`. See "Riders come from D1" above. What is left
+  is *who may add one*: today that is anyone with the shared password.
+- ~~**The static-JSON fallback assumes a fixed set of riders.**~~ — `tools/sync-static.mjs`
+  now takes its slug list from `/api/users`, so new riders get a `<slug>.json` on the
+  next sync. Between being added and that sync they exist only in D1, which is fine —
+  every page tries the API first and the pages that read a rider file tolerate a miss.
 - **Write authorisation becomes per-row**: today any unlocked session can log a day
   for anyone. With accounts, a rider should only be able to edit their own count
   (with an admin override).
@@ -455,6 +526,11 @@ matched loosely *within* a park; park names cannot be matched loosely at all.
 
 - **110 coasters have no `type`** (Steel/Wood), which skews the steel/wood split. `/database`
   has an "Only incomplete" filter; `tools/import-captaincoaster.js` can backfill details.
+  `/edit` now grades this in two colours instead of one **needs stats** badge: red **no stats**
+  (nothing of `type, h, s, l, inv, yr` filled — 109 rows) and amber **some stats · n/6** with
+  the missing fields in its tooltip (515 rows). 490 are complete. Manufacturer, model and
+  duration are deliberately outside the count — they are genuinely unpublished for a lot of
+  rides, and including them would mark most of the database unfinished.
 - **The coaster table only holds coasters somebody has ridden.** Carter wants "all coasters"
   eventually. That needs a `ridden` flag (or a derived check against `rides`) plus a "show
   all" toggle — otherwise the *Everyone → Full list* view silently changes meaning from

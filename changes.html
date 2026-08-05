@@ -6,7 +6,7 @@
 <base href="/">
 <title>Recent changes — Coaster Hub</title>
 <meta name="description" content="What everyone has been adding, logging and fixing on Coaster Hub.">
-<link rel="stylesheet" href="/style.css?v=20260728a">
+<link rel="stylesheet" href="/style.css?v=20260805a">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -79,7 +79,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/stats">Stats</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
-<script src="/app.js?v=20260728a"></script>
+<script src="/app.js?v=20260805a"></script>
 <script>
 document.getElementById('y').textContent = new Date().getFullYear();
 CoasterHub.initNav('changes');
@@ -101,11 +101,11 @@ var ICONS = {
 };
 // Which of the two feeds an event belongs to: something a rider did to their own
 // count, or something that changed the shared list everyone draws from.
-var RIDER_KINDS = { rides:1, credits:1, ranking:1, ride_removed:1 };
+var RIDER_KINDS = { rides:1, credits:1, ranking:1, ride_removed:1, user_added:1 };
 
 function icon(kind){
   var k = kind === 'ride_removed' ? 'removed'
-        : kind === 'coaster_added' ? 'added'
+        : kind === 'coaster_added' || kind === 'user_added' ? 'added'
         : kind === 'coaster_edited' || kind === 'coaster_renamed' ? 'edited'
         : kind === 'coaster_merged' ? 'merged'
         : kind === 'coaster_deleted' ? 'deleted'
@@ -152,6 +152,8 @@ function sentence(e){
   if (e.kind === 'coaster_merged')  return (d.fromName ? esc(d.fromName) : 'A duplicate')
     + ' was merged into ' + (sub || 'another coaster');
   if (e.kind === 'coaster_deleted') return (sub || 'A coaster') + ' was deleted';
+  if (e.kind === 'user_added')      return (sub || 'A rider') + ' joined'
+    + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
   if (e.kind === 'coaster_edited')  return (sub || 'A coaster') + ' had '
     + plural(e.n || (d.fields || []).length || 1, 'detail') + ' updated';
   return esc(e.kind);
