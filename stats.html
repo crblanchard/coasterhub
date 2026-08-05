@@ -336,8 +336,14 @@ function render(s){
     var opened=(s.coasters||[]).filter(function(c){return s.byCoaster[c.id]&&c.opened&&c.openedPrec==='day'&&c.opened.slice(5)===mmdd;}).sort(function(a,b){return a.opened.localeCompare(b.opened);});
     var closed=(s.coasters||[]).filter(function(c){return s.byCoaster[c.id]&&c.closed&&c.closedPrec==='day'&&c.closed.slice(5)===mmdd;}).sort(function(a,b){return a.closed.localeCompare(b.closed);});
     // Use the full ride log if we have it, else first-ridden dates.
+    //
+    // s.rides is the RAW list, which mixes dated and undated rows — a rider who
+    // imported a list and then logged one park day is mostly undated. Undated
+    // rows have no place on a calendar, so they are dropped here rather than
+    // reaching .slice() as null. (s.first_rides is pre-filtered to full dates,
+    // so only this branch needs the guard.)
     var rideSrc=has.activity?(s.rides||[]):(s.first_rides||[]);
-    var rode=rideSrc.filter(function(r){return r.d.slice(5)===mmdd;});
+    var rode=rideSrc.filter(function(r){return r.d&&r.d.slice(5)===mmdd;});
     var rodeYears=[...new Set(rode.map(function(r){return r.d.slice(0,4);}))].sort();
     var html='';
     if(opened.length){ html+='<div class="cap" style="margin-bottom:12px">Opened on '+dayLabel+':</div>'+otdCards(opened,'opened','Opened'); }

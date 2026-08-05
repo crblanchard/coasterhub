@@ -490,10 +490,21 @@
       wrap.insertBefore(who, wrap.firstChild);
     }
 
-    // The toggle belongs to the header, not the rider picker, so pages without
-    // a #people block (Log, Add) still get it.
-    var themeHost = wrap || document.querySelector("header.nav .nav-inner");
-    if (themeHost && !themeHost.querySelector(".themetoggle")) buildThemeToggle(themeHost, !!wrap);
+    // Every page gets the same three-column header, even the ones with no rider
+    // picker (Log, Import). The right-hand column has to EXIST for the menu to
+    // stay centred — without it the menu inherits the slack and jumps sideways
+    // as you navigate. So build an empty .people here rather than hanging the
+    // toggle off .nav-inner as a fourth child.
+    var themeHost = wrap;
+    if (!themeHost) {
+      var inner = document.querySelector("header.nav .nav-inner");
+      if (inner) {
+        themeHost = document.createElement("div");
+        themeHost.className = "people";
+        inner.appendChild(themeHost);
+      }
+    }
+    if (themeHost && !themeHost.querySelector(".themetoggle")) buildThemeToggle(themeHost, true);
 
     buildTabBar(page, slug);
   }
