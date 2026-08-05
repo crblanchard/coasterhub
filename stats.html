@@ -26,6 +26,12 @@
   .kpi .num{font-size:2rem;font-weight:800;letter-spacing:-.02em;line-height:1}
   .kpi .lbl{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin-top:8px}
   .kpi .sub{color:var(--accent2);font-size:.78rem;margin-top:6px}
+  /* A standing note about a rider's own data — something known to be missing or
+     unresolved, kept visible so it doesn't get forgotten. See RIDER_NOTES. */
+  .ridernote{margin:22px 0 -6px;padding:11px 15px;border:1px solid var(--line);
+    border-left:3px solid #ffc45a;border-radius:10px;background:var(--panel);
+    color:var(--muted);font-size:.86rem}
+  .ridernote b{color:var(--fg)}
   .chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;margin-top:8px}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
   .panel h3{font-size:1.05rem;margin-bottom:4px}
@@ -116,6 +122,7 @@
 <div class="container"><div id="loading">Loading stats…</div></div>
 
 <main id="content" style="display:none">
+<div class="container"><p class="ridernote" id="ridernote" style="display:none"></p></div>
 <section class="block" style="padding-top:28px"><div class="container">
   <div class="kpis">
     <div class="kpi"><div class="num" id="k_credits"></div><div class="lbl">Credits</div><div class="sub" id="k_split"></div></div>
@@ -190,6 +197,16 @@ CoasterHub.initNav('stats');
   document.getElementById('hero_list').href=(u?('/user/'+u+'/rides'):'/rides')+'?view=list';
 })();
 const nf=n=>(n==null?'—':n.toLocaleString());
+
+// Standing notes about a rider's own data, keyed by slug. These are deliberately
+// in the page rather than the database: they are temporary reminders about
+// something unresolved, not a field every rider has. Delete an entry once the
+// thing it describes is settled.
+const RIDER_NOTES={
+  sean: 'Not counting <b>Free Fall</b> — Nagashima Spaland and <b>Supersplash</b> — Plopsaland. '
+      + 'Everyone else on those days has them; come back to this if they should be added.'
+};
+
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Friend pages are unlisted: nav always points to the main (Carter) site, so a
 // friend's page is only reachable by typing /user/<name>/... directly.
@@ -287,13 +304,22 @@ function render(s){
   document.title=name+'’s Stats — Coaster Hub';
 
   document.getElementById('hero_badge').textContent=Who+' Count';
-  if(has.timeline){
-    document.getElementById('hero_h').textContent=k.span+' years of chasing credits.';
-    document.getElementById('hero_p').textContent='Every '+(has.activity?'ride, ':'')+'park, and record from '+who+' coaster count — '+k.year_min+' to '+k.year_max+'.';
-  } else {
-    document.getElementById('hero_h').textContent=nf(k.credits)+' coasters and counting.';
-    document.getElementById('hero_p').textContent='Every park, manufacturer, and record from '+who+' coaster collection.';
-  }
+  // The headline is ALWAYS the credit count. It used to switch to "<span> years
+  // of chasing credits" for anyone whose credits are all dated, which reads as
+  // nonsense the moment those dates sit close together — Sean's page announced
+  // "1 years of chasing credits". The number everyone actually compares is the
+  // credit count, and it means the same thing on every rider's page.
+  document.getElementById('hero_h').textContent=nf(k.credits)+' coasters and counting.';
+  var yrs = (k.year_min==null) ? ''
+          : (k.year_min===k.year_max ? (' — '+k.year_min) : (' — '+k.year_min+' to '+k.year_max));
+  document.getElementById('hero_p').textContent = has.timeline
+    ? ('Every '+(has.activity?'ride, ':'')+'park, and record from '+who+' coaster count'+yrs+'.')
+    : ('Every park, manufacturer, and record from '+who+' coaster collection.');
+  // Standing notes about a rider's own data — things known to be unresolved, kept
+  // on the page so they aren't forgotten. Delete the entry once it's settled.
+  var note=RIDER_NOTES[CoasterHub.currentUser()||'carter'];
+  if(note){ var nd=document.getElementById('ridernote'); nd.innerHTML=note; nd.style.display='block'; }
+
   document.getElementById('k_credits').textContent=nf(k.credits);
   document.getElementById('k_split').textContent=k.steel+' steel · '+k.wood+' wood';
   document.getElementById('k_parks').textContent=k.parks;

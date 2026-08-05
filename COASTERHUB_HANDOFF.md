@@ -48,6 +48,37 @@ downstream will catch a mistake now:
 - Keep each commit self-contained, since it lands on production directly. To undo:
   `git revert <sha> && git push origin main`.
 
+### Carter's Europe 2025 + Japan 2026 trips were copied to the others (2026-08-05)
+
+Carter's rides from **Europe 2025** (2025-04-11 → 04-19, 98 rides / 66 coasters) and **Japan
+2026** (2026-03-07 → 03-16, 64 rides / 46 coasters) were copied to the riders who were there,
+written **straight to D1** rather than through the API (there is no bulk endpoint). The rule
+was: **credits must not change** — only ride totals — so each rider only received rides for
+coasters they already held.
+
+| rider | what they got | rows | credits |
+|---|---|---|---|
+| cole | already had every coaster dated on the right days; only the **50 re-rides** were missing | 546 → 596 | 546, unchanged |
+| max | Japan only, replacing his undated placeholders | 424 → 442 | 424, unchanged |
+| sean | both trips, replacing his undated placeholders | 670 → 721 | 669 → **670** |
+
+Two decisions worth keeping:
+
+- **Max was not on the Europe trip.** He held *none* of its 66 coasters, so copying would have
+  added 66 credits. Skipped — Carter confirmed.
+- **An undated row is a placeholder, so it was replaced, not added to.** "I rode this, date
+  unknown" plus the dated rides for the same coaster would count the ride twice. The inserts
+  top up to Carter's exact per-coaster-per-day counts, so nobody exceeds his numbers.
+- **Sean was missing three:** Supersplash (Plopsaland) and Free Fall (Nagashima) stayed off his
+  list, Roller Coaster (Hanayashiki) was added on Carter's say-so (that is his +1 credit). The
+  two left out are recorded in `RIDER_NOTES` in `stats.html`, which prints a standing note near
+  the top of his page. **Delete that entry if they're ever added.**
+
+Direct SQL bypasses `recordActivity` and the `repository_dispatch` that refreshes the static
+JSON, so activity rows were inserted by hand and the sync workflow was run manually
+(Actions → *Sync static JSON from D1* → Run workflow). Remember both if you ever write to D1
+directly again.
+
 ### Current data (2026-07-29)
 
 All four riders now live in `rides`. "Undated" rows are credits with no known date — they
@@ -206,7 +237,7 @@ Mechanics worth knowing before touching it:
 
 Last item in the mobile tab bar. One park picker, two ways to add:
 
-| | **A day at a park** | **Coasters I've ridden** |
+| | **Coaster rides** | **Coaster credits** |
 |---|---|---|
 | date | shown, required | hidden, posts `d: null` |
 | control | `±` stepper, every lap counts | one tick, whole row tappable |
