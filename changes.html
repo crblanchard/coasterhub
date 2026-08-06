@@ -31,6 +31,8 @@
   .ev .tx{flex:1;min-width:0;font-size:.95rem}
   .ev .tx b{font-weight:700}
   .ev .tx .sub{color:var(--accent2);font-weight:600}
+  /* Which park the coaster is at — context, not the subject, so it stays quiet. */
+  .ev .tx .at{color:var(--muted)}
   .ev .when{flex:none;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;
     white-space:nowrap;margin-top:2px}
   .note{color:var(--muted);font-size:.85rem;margin:0 0 22px;max-width:62ch}
@@ -118,6 +120,21 @@ function icon(kind){
 // Every sentence is built from what the row actually recorded. Where no rider
 // was known the subject leads instead of a name — see recordActivity in
 // worker.js for why those rows are deliberately anonymous rather than guessed.
+// Which park a rename or a merge happened at. Two names in a sentence and no
+// place is a riddle — "Batgirl was merged into Batgirl Batarang" could be any of
+// the six Six Flags parks that have both.
+//
+// New events carry the park in their detail (see the write paths in worker.js).
+// The 99 backfilled ones never did, but every one of them carries the coaster id
+// it ended up as, so the park is looked up from the coaster list instead. A
+// merge writes that id as `to`; the backfill wrote it as `id`.
+var PARK_BY_ID = null;   // filled in once the coaster list arrives, see load()
+function parkOf(e){
+  var d = e.detail || {};
+  var park = d.park || (PARK_BY_ID && PARK_BY_ID[d.to != null ? d.to : d.id]);
+  return park ? ' <span class="at">(' + esc(park) + ')</span>' : '';
+}
+
 function sentence(e){
   var who = e.actorName ? '<b>' + esc(e.actorName) + '</b>' : null;
   var d = e.detail || {};
@@ -148,9 +165,15 @@ function sentence(e){
   if (e.kind === 'coaster_added')   return (sub || 'A coaster') + ' was added'
     + (d.park ? ' at ' + esc(d.park) : '');
   if (e.kind === 'coaster_renamed') return (d.from ? esc(d.from) : 'A coaster')
-    + ' was renamed to ' + (sub || 'something else');
-  if (e.kind === 'coaster_merged')  return (d.fromName ? esc(d.fromName) : 'A duplicate')
-    + ' was merged into ' + (sub || 'another coaster');
+    + ' was renamed to ' + (sub || 'something else') + parkOf(e);
+  if (e.kind === 'coaster_merged'){
+    // The live path records the name it merged away as `fromName` and keeps `from`
+    // for the id; the backfill put the NAME in `from`. Read both, or 44 rows of
+    // history say "A duplicate" when they know exactly what it was called.
+    var gone = d.fromName || (typeof d.from === 'string' ? d.from : null);
+    return (gone ? esc(gone) : 'A duplicate')
+      + ' was merged into ' + (sub || 'another coaster') + parkOf(e);
+  }
   if (e.kind === 'coaster_deleted') return (sub || 'A coaster') + ' was deleted';
   if (e.kind === 'user_added')      return (sub || 'A rider') + ' joined'
     + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
@@ -271,6 +294,17 @@ function load(quiet){
     });
 }
 load(false);
+
+// The coaster list, only so a rename or a merge can say which park it was at.
+// Fetched alongside the feed rather than before it: the feed is what the page is
+// for, and it should not wait on 1,100 coasters to draw. When the list lands the
+// feed is drawn again with the parks filled in. A failure here is silent — the
+// sentences simply stay as they were.
+CoasterHub.fetchCoasters().then(function(res){
+  PARK_BY_ID = {};
+  (res.coasters || []).forEach(function(c){ if (c.park) PARK_BY_ID[c.id] = c.park; });
+  if (EVENTS.length) render();
+}).catch(function(){});
 
 // Keep it live. Ranking in another tab merges into one line here as you work, so
 // the page is worth watching rather than reloading. Only while it is on screen —

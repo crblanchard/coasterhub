@@ -82,8 +82,15 @@ createServer(async (req, res) => {
           detail: { added: 1, removed: 0, reordered: false, total: 105, saves: 1 } },
         { id: 3, at: ago(1610), actor: "carter", actorName: "Carter", kind: "ranking", n: 1,
           detail: { added: 1, removed: 0, reordered: false, total: 104, saves: 1 } },
+        // A rename written TODAY carries its own park...
+        { id: 2.5, at: ago(300), actor: null, actorName: null, kind: "coaster_renamed",
+          subject: "Top Thrill 2", detail: { id: 1, from: "Top Thrill Dragster", park: "Cedar Point" } },
+        // ...while a backfilled one has only the coaster id, so /changes looks
+        // the park up from the coaster list. Both must print it.
         { id: 2, at: "2026-08-05", actor: null, actorName: null, kind: "coaster_renamed",
-          subject: "Thunder Striker", detail: { from: "Intimidator", backfilled: true } },
+          subject: "Thunder Striker", detail: { id: 96, from: "Intimidator", backfilled: true } },
+        { id: 1.5, at: "2026-08-05", actor: null, actorName: null, kind: "coaster_merged",
+          subject: "Batgirl Batarang", detail: { id: 1020, from: "Batgirl", backfilled: true } },
         { id: 1, at: "2026-07-30", actor: null, actorName: null, kind: "coaster_added",
           subject: "Hyperia", detail: { park: "Thorpe Park", backfilled: true } },
       ] });

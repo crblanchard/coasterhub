@@ -438,6 +438,16 @@ trusting the order back, and shows no clock at all on a row that never had one.
 The page also refreshes every 60s while it is visible, so a ranking session in another tab grows
 that one line as you work.
 
+**Renames and merges name the park.** Two coaster names and no place is a riddle — the same
+retheme lands at six Six Flags parks. New events carry `detail.park` (the rename path reports the
+*new* park when an edit moved it too; a merge reports the surviving coaster's, falling back to the
+one merged away, read before its row is deleted). The 99 backfilled rows never had it, but each
+carries the coaster id it ended up as, so `/changes` fetches the coaster list **alongside** the
+feed and fills the park in on a second render — the feed never waits on 1,100 coasters to draw,
+and a failed fetch just leaves the sentences bare. Note the two shapes when reading old rows: a
+merge written live puts the id in `from` and the name in `fromName`, while the backfill put the
+**name** in `from`.
+
 ### Worker API
 
 | Method | Route | Auth | Notes |

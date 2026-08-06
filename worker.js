@@ -668,7 +668,7 @@ export default {
         // Read the old name BEFORE the update — a rename is the moment a former
         // name exists, and it is unrecoverable afterwards. Read unconditionally
         // now, so an edit that only fills in specs still has a name to report.
-        const prev = await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(id).first();
+        const prev = await env.DB.prepare("SELECT name, park FROM coasters WHERE id = ?").bind(id).first();
         vals.push(id);
         await env.DB.prepare("UPDATE coasters SET " + sets.join(", ") + " WHERE id = ?").bind(...vals).run();
         if ("name" in b && prev && prev.name && prev.name !== b.name) {
@@ -684,8 +684,10 @@ export default {
         // A rename is worth naming in the feed; a spec fill-in is just upkeep,
         // so it says which fields moved rather than listing every value.
         if ("name" in b && prev && prev.name && prev.name !== b.name) {
+          // The park rides along so /changes can say WHERE it happened: two names
+          // and no place is a riddle when the same retheme lands at six parks.
           await recordActivity(env, "coaster_renamed",
-            { subject: b.name, detail: { id: id, from: prev.name } });
+            { subject: b.name, detail: { id: id, from: prev.name, park: (b.park ?? prev.park) || null } });
         } else {
           await recordActivity(env, "coaster_edited",
             { subject: (prev && prev.name) || null, n: sets.length,
@@ -759,7 +761,7 @@ export default {
         // The disappearing row's name is a former name of the survivor, and any
         // alias it already carried has to come with it — otherwise merging a
         // coaster silently throws away everything it was ever called.
-        const src = await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(from).first();
+        const src = await env.DB.prepare("SELECT name, park FROM coasters WHERE id = ?").bind(from).first();
         const batch = [
           env.DB.prepare("UPDATE rides SET coaster_id = ? WHERE coaster_id = ?").bind(to, from),
           env.DB.prepare(
@@ -773,10 +775,13 @@ export default {
         const rec = src && recordAlias(env, to, src.name, "merge");
         if (rec) batch.unshift(rec);
         await env.DB.batch(batch);
-        const dst = await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(to).first();
+        const dst = await env.DB.prepare("SELECT name, park FROM coasters WHERE id = ?").bind(to).first();
         await recordActivity(env, "coaster_merged", {
           subject: dst ? dst.name : null,
-          detail: { from: from, to: to, fromName: src ? src.name : null },
+          // The surviving coaster's park, falling back to the one that was
+          // merged away — read before the delete, while its row still existed.
+          detail: { from: from, to: to, fromName: src ? src.name : null,
+                    park: (dst && dst.park) || (src && src.park) || null },
         });
         return afterWrite(ctx, env, json({ ok: true }));
       }

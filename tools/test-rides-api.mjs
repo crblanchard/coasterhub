@@ -508,6 +508,15 @@ async function main() {
     check("a rename records both names",
       e.kind === "coaster_renamed" && e.subject === "Blue Streak (Wood)"
       && JSON.parse(e.detail).from === "Blue Streak", JSON.stringify(e));
+    // /changes prints the park after a rename or a merge; two names and no place
+    // is a riddle when the same retheme lands at six parks.
+    check("...and the park it happened at",
+      JSON.parse(e.detail).park === "Cedar Point", e.detail);
+
+    await call(db, "PUT", "/api/coaster/3", { token: PW, body: { name: "Blue Streak", park: "Kings Island" } });
+    check("a rename that also moves parks reports the NEW park",
+      JSON.parse(last().detail).park === "Kings Island", last().detail);
+    await call(db, "PUT", "/api/coaster/3", { token: PW, body: { name: "Blue Streak (Wood)", park: "Cedar Point" } });
 
     await call(db, "PUT", "/api/coaster/3", { token: PW, body: { h: 78 } });
     e = last();
@@ -519,6 +528,8 @@ async function main() {
     check("a merge records both sides",
       e.kind === "coaster_merged" && e.subject === "Steel Vengeance"
       && JSON.parse(e.detail).fromName === "Millennium Force", JSON.stringify(e));
+    check("...and the surviving coaster's park",
+      JSON.parse(e.detail).park === "Cedar Point", e.detail);
 
     const r = await call(db, "GET", "/api/activity");
     check("GET /api/activity is public — no token needed", r.status === 200);
