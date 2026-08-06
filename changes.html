@@ -164,19 +164,62 @@ function niceDate(iso){
   if (isNaN(d)) return esc(iso);
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
-function dayKey(iso){ return new Date(iso).toLocaleDateString(undefined,
+
+// `at` comes in two shapes: an ISO instant for anything this feed recorded, and
+// a bare YYYY-MM-DD for the backfilled rows, which never had a time. They have
+// to be read differently or the day headings go out of order: new Date("2026-08-05")
+// is midnight UTC, which is the 4th in any western timezone, so a dated row and
+// a backfilled row from the same day landed under two different headings — and
+// the server sorts them as strings, which interleaves the two formats. Parse the
+// bare ones as LOCAL midnight, then sort on the parsed value here.
+function isDayOnly(iso){ return /^\d{4}-\d{2}-\d{2}$/.test(String(iso || '')); }
+function atTime(iso){ return new Date(isDayOnly(iso) ? (iso + 'T00:00') : iso).getTime(); }
+function dayKey(iso){ return new Date(atTime(iso)).toLocaleDateString(undefined,
   { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }); }
-function clock(iso){ return new Date(iso).toLocaleTimeString(undefined,
+// A backfilled row has no time to show, and inventing midnight for it would be
+// a fact this feed does not have.
+function clock(iso){ return isDayOnly(iso) ? '' : new Date(atTime(iso)).toLocaleTimeString(undefined,
   { hour: 'numeric', minute: '2-digit' }); }
+
+// Ranking bursts are merged when they are written (see recordRanking in
+// worker.js), which leaves the rows already in the table ungrouped. Fold those
+// together the same way on the way in: one rider's ranking events chain into a
+// single line while each is within an hour of the one before it, reported at the
+// newest timestamp. Chaining rather than a fixed window is deliberate — an hour
+// of steady work is one sitting, however many times it was saved.
+var GROUP_MS = 60 * 60 * 1000;
+function groupRankings(list){
+  var out = [];
+  list.forEach(function(e){
+    var last = out[out.length - 1];
+    if (e.kind === 'ranking' && last && last.kind === 'ranking' && last.actor === e.actor
+        && !isDayOnly(e.at) && !isDayOnly(last.at)
+        && atTime(last.at) - atTime(e.at) < GROUP_MS) {
+      var a = last.detail || {}, b = e.detail || {};
+      // `last` is the newer of the two (the list is newest-first), so its total
+      // and its timestamp are the ones that survive.
+      last.detail = {
+        added: (a.added || 0) + (b.added || 0),
+        removed: (a.removed || 0) + (b.removed || 0),
+        reordered: !!(a.reordered || b.reordered),
+        total: a.total,
+        saves: (a.saves || 1) + (b.saves || 1)
+      };
+      return;
+    }
+    out.push(Object.assign({}, e, { detail: Object.assign({}, e.detail) }));
+  });
+  return out;
+}
 
 var EVENTS = [], FILTER = 'all';
 
 function render(){
-  var list = EVENTS.filter(function(e){
+  var list = groupRankings(EVENTS.filter(function(e){
     if (FILTER === 'riders')   return !!RIDER_KINDS[e.kind];
     if (FILTER === 'database') return !RIDER_KINDS[e.kind];
     return true;
-  });
+  }));
   if (!list.length){
     $('feed').innerHTML = '<div class="empty">Nothing here yet.</div>';
     return;
@@ -204,24 +247,38 @@ Array.prototype.forEach.call(document.querySelectorAll('#filter button'), functi
   });
 });
 
-fetch('/api/activity?limit=300')
-  .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); })
-  .then(function(j){
-    EVENTS = j.events || [];
-    // Say plainly where the history starts. Nothing before the feed shipped was
-    // timestamped anywhere, so the older entries are reconstructed from the
-    // alias table and carry a date but not a time or a name.
-    var back = EVENTS.filter(function(e){ return e.detail && e.detail.backfilled; }).length;
-    $('note').innerHTML = back
-      ? 'Recorded as it happens. The ' + back + ' oldest entries were rebuilt from the '
-        + 'record of former names &mdash; those have a date but no time, and no-one attached, '
-        + 'because nothing before this page existed was ever timestamped.'
-      : 'Recorded as it happens.';
-    render();
-  })
-  .catch(function(){
-    $('feed').innerHTML = '<div class="empty">Couldn&rsquo;t load recent changes.</div>';
-  });
+function load(quiet){
+  return fetch('/api/activity?limit=300')
+    .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); })
+    .then(function(j){
+      // Sort here rather than trusting the order back: the two `at` formats are
+      // sorted as strings by SQL, which interleaves them. See atTime above.
+      EVENTS = (j.events || []).slice().sort(function(a, b){ return atTime(b.at) - atTime(a.at); });
+      // Say plainly where the history starts. Nothing before the feed shipped was
+      // timestamped anywhere, so the older entries are reconstructed from the
+      // alias table and carry a date but not a time or a name.
+      var back = EVENTS.filter(function(e){ return e.detail && e.detail.backfilled; }).length;
+      $('note').innerHTML = back
+        ? 'Recorded as it happens. The ' + back + ' oldest entries were rebuilt from the '
+          + 'record of former names &mdash; those have a date but no time, and no-one attached, '
+          + 'because nothing before this page existed was ever timestamped.'
+        : 'Recorded as it happens.';
+      render();
+    })
+    .catch(function(){
+      // A failed refresh must not wipe a feed that is already on screen.
+      if (!quiet) $('feed').innerHTML = '<div class="empty">Couldn&rsquo;t load recent changes.</div>';
+    });
+}
+load(false);
+
+// Keep it live. Ranking in another tab merges into one line here as you work, so
+// the page is worth watching rather than reloading. Only while it is on screen —
+// a background tab polling forever is rude to the phone it is sitting on.
+setInterval(function(){ if (document.visibilityState === 'visible') load(true); }, 60000);
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'visible') load(true);
+});
 </script>
 </body>
 </html>

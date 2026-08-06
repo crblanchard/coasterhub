@@ -304,6 +304,46 @@ async function recordActivity(env, kind, { actor = null, subject = null, n = nul
   } catch (e) { /* the edit already succeeded; a missing feed row is not worth a 500 */ }
 }
 
+// Ranking arrives in bursts. Building a list is fifty small saves — drag one
+// coaster, save, drag the next — and one row each turned the feed into a column
+// of "Carter ranked 1 new coaster" with the running total ticking up beside it.
+// So a ranking event MERGES into this rider's last one while that one is under
+// an hour old: the counts add up, the total and the timestamp become the newest,
+// and the feed carries a single line that grows as you work.
+//
+// The merge happens on write rather than on read because the feed is fetched
+// with a LIMIT — left alone, one long session would fill the whole page and
+// push everyone else's activity off it. `saves` keeps the honest count of how
+// many times it was actually saved.
+const RANKING_MERGE_MS = 60 * 60 * 1000;
+async function recordRanking(env, slug, { added, removed, reordered, total }) {
+  const now = new Date().toISOString();
+  try {
+    const prev = await env.DB.prepare(
+      "SELECT id, at, detail FROM activity WHERE kind = 'ranking' AND actor = ? ORDER BY at DESC, id DESC LIMIT 1"
+    ).bind(slug).first();
+    // A legacy row carrying a bare date parses to midnight and is days old, so
+    // it fails this test on its own — no special case needed for it.
+    if (prev && Date.parse(now) - Date.parse(prev.at) < RANKING_MERGE_MS) {
+      const d = JSON.parse(prev.detail || "{}");
+      const merged = {
+        added: (d.added || 0) + added,
+        removed: (d.removed || 0) + removed,
+        reordered: !!(d.reordered || reordered),
+        total: total,                       // the newest total, not a sum
+        saves: (d.saves || 1) + 1,
+      };
+      await env.DB.prepare("UPDATE activity SET at = ?, n = ?, detail = ? WHERE id = ?")
+        .bind(now, merged.added || merged.removed || total, JSON.stringify(merged), prev.id).run();
+      return;
+    }
+  } catch (e) { /* fall through and just record it normally */ }
+  await recordActivity(env, "ranking", {
+    actor: slug, n: added || removed || total,
+    detail: { added, removed, reordered, total, saves: 1 },
+  });
+}
+
 async function getActivity(env, limit) {
   const { results } = await env.DB.prepare(
     "SELECT id, at, actor, kind, subject, n, detail FROM activity ORDER BY at DESC, id DESC LIMIT ?"
@@ -419,10 +459,7 @@ async function putRankings(env, slug, body) {
   // A save that changed nothing is not news — dragging a row and dropping it
   // back would otherwise fill the feed with noise.
   if (added || removed || reordered) {
-    await recordActivity(env, "ranking", {
-      actor: slug, n: added || removed || order.length,
-      detail: { added: added, removed: removed, reordered: reordered, total: order.length },
-    });
+    await recordRanking(env, slug, { added, removed, reordered, total: order.length });
   }
 
   return { ok: true, count: order.length };

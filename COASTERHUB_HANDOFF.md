@@ -412,6 +412,32 @@ to the API, and a failed read becomes an empty log instead of an exception), and
 A new rider's own pages work immediately — `/api/user/:slug` returns an empty ride log rather
 than a 404 — they just show nothing until something is logged.
 
+### `/changes` — the activity feed, and two things that bite (2026-08-06)
+
+**Ranking saves are merged on write.** Building a list is dozens of small saves — drag one
+coaster, save, drag the next — and one activity row each turned the feed into a column of
+"Carter ranked 1 new coaster" with the total ticking up beside it. `recordRanking` in
+`worker.js` merges a ranking event into that rider's previous one while it is **under an hour
+old**: counts add up, `total` and `at` become the newest, and `detail.saves` keeps the honest
+number of saves behind the line.
+
+It merges on **write**, not on read, because the feed is fetched with a `LIMIT` — one long
+ranking session would otherwise fill the whole page and push everyone else off it. `/changes`
+*also* folds adjacent ranking events by the same rider on the way in, because the rows written
+before this shipped are still one-per-save, and because a burst can straddle a fetch. A reorder
+inside the window folds into the burst; on its own it still reads "reordered their rankings".
+
+**`activity.at` holds two formats and they must not be compared as strings.** Anything the feed
+recorded is a full ISO instant; the ~99 backfilled rows carry a bare `YYYY-MM-DD` and no time.
+That combination produced day headings that ran Aug 6 → Aug 5 → Aug 4 → **Aug 5 again**, because
+SQL sorted the two shapes as strings and `new Date("2026-08-05")` is midnight *UTC* — the 4th in
+any western timezone — while the rest of the page used local midnight. `/changes` now parses a
+bare date as **local** midnight (`atTime`), sorts on the parsed value client-side rather than
+trusting the order back, and shows no clock at all on a row that never had one.
+
+The page also refreshes every 60s while it is visible, so a ranking session in another tab grows
+that one line as you work.
+
 ### Worker API
 
 | Method | Route | Auth | Notes |

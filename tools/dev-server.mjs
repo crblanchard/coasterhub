@@ -61,6 +61,33 @@ createServer(async (req, res) => {
     if (u === "/api/parks" && req.method === "GET") return out(RD("parks.json"));
     // Riders, including any added during this run of the server (in memory only).
     if (u === "/api/users" && req.method === "GET") return out({ users: RIDERS });
+    // A feed fixture shaped like the real one: a burst of ranking saves a minute
+    // apart (which /changes has to fold into one line), an older burst on another
+    // day, a ride log, and a backfilled row carrying a bare date and no actor —
+    // that last one is what used to push the day headings out of order.
+    if (u === "/api/activity" && req.method === "GET") {
+      const ago = (min) => new Date(Date.now() - min * 60000).toISOString();
+      return out({ events: [
+        { id: 9, at: ago(2),    actor: "carter", actorName: "Carter", kind: "ranking", n: 1,
+          detail: { added: 1, removed: 0, reordered: false, total: 108, saves: 1 } },
+        { id: 8, at: ago(4),    actor: "carter", actorName: "Carter", kind: "ranking", n: 1,
+          detail: { added: 1, removed: 0, reordered: false, total: 107, saves: 1 } },
+        { id: 7, at: ago(21),   actor: "carter", actorName: "Carter", kind: "ranking", n: 3,
+          detail: { added: 3, removed: 0, reordered: true, total: 106, saves: 1 } },
+        { id: 6, at: ago(140),  actor: "cole", actorName: "Cole", kind: "ranking", n: 2,
+          detail: { added: 2, removed: 0, reordered: false, total: 12, saves: 1 } },
+        { id: 5, at: ago(1500), actor: "sean", actorName: "Sean", kind: "rides", subject: "Universal Studios Hollywood",
+          n: 2, detail: { rides: 2, coasters: 1, newCredits: 1, date: "2026-08-02" } },
+        { id: 4, at: ago(1600), actor: "carter", actorName: "Carter", kind: "ranking", n: 1,
+          detail: { added: 1, removed: 0, reordered: false, total: 105, saves: 1 } },
+        { id: 3, at: ago(1610), actor: "carter", actorName: "Carter", kind: "ranking", n: 1,
+          detail: { added: 1, removed: 0, reordered: false, total: 104, saves: 1 } },
+        { id: 2, at: "2026-08-05", actor: null, actorName: null, kind: "coaster_renamed",
+          subject: "Thunder Striker", detail: { from: "Intimidator", backfilled: true } },
+        { id: 1, at: "2026-07-30", actor: null, actorName: null, kind: "coaster_added",
+          subject: "Hyperia", detail: { park: "Thorpe Park", backfilled: true } },
+      ] });
+    }
     const ur = u.match(/^\/api\/(?:user|rides)\/([a-z0-9-]+)$/i);
     if (ur && req.method === "GET") {
       const f = ur[1].toLowerCase() + ".json";

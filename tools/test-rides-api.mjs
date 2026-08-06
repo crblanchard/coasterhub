@@ -364,6 +364,48 @@ async function main() {
       (await call(db, "POST", "/api/coaster", { body: { name: "X", park: "Cedar Point" } })).status === 401);
   }
 
+  console.log("\nRanking bursts merge into one activity row");
+  {
+    const db = freshDb();
+    const ranks = () => rows(db, "SELECT * FROM activity WHERE kind='ranking' AND actor='carter' ORDER BY id");
+
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [1] } });
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2] } });
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2, 3] } });
+    let all = ranks();
+    check("three saves in a row leave ONE row, not three", all.length === 1, JSON.stringify(all));
+    let d = JSON.parse(all[0].detail);
+    check("...with the added counts summed", d.added === 3, all[0].detail);
+    check("...the newest total, not a sum of totals", d.total === 3, all[0].detail);
+    check("...and an honest count of how many saves it took", d.saves === 3, all[0].detail);
+
+    // Another rider's burst must not be swept into Carter's line.
+    await call(db, "PUT", "/api/rankings/cole", { body: { order: [1, 2] } });
+    check("a different rider gets their own row",
+      rows(db, "SELECT * FROM activity WHERE kind='ranking'").length === 2);
+
+    // Age the row past the merge window: the next save has to start a new line.
+    db.prepare("UPDATE activity SET at = ? WHERE id = ?")
+      .run(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), all[0].id);
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [3, 2, 1] } });
+    all = ranks();
+    check("a save more than an hour later starts a new row", all.length === 2, JSON.stringify(all));
+    check("...and the new row counts one save", JSON.parse(all[1].detail).saves === 1, all[1].detail);
+
+    // A backfilled row carries a bare date, which must not be parsed as recent.
+    const db2 = freshDb();
+    db2.prepare("INSERT INTO activity (at,actor,kind,subject,n,detail) VALUES (?,?,?,?,?,?)")
+      .run("2026-01-01", "carter", "ranking", null, 1, JSON.stringify({ added: 1, total: 1 }));
+    await call(db2, "PUT", "/api/rankings/carter", { body: { order: [1, 2] } });
+    check("a dateless legacy row is never merged into",
+      rows(db2, "SELECT * FROM activity WHERE kind='ranking'").length === 2);
+
+    // A save that changes nothing still writes nothing, merge window or not.
+    const before = ranks().length;
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [3, 2, 1] } });
+    check("re-saving an unchanged order still records nothing", ranks().length === before);
+  }
+
   // A ranking is one row per credit, so any rider past ~100 blows the bound-
   // parameter ceiling. This failed in production with "too many SQL variables"
   // once Carter's list crossed 100 — the save was rejected outright.
@@ -433,13 +475,26 @@ async function main() {
     await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2, 3] } });
     check("re-saving the same order records nothing", acts().length === nBefore);
 
+    // Within the merge window a reorder folds into the burst it belongs to — the
+    // flag survives, the counts carry over. It only stands as its own row once
+    // the previous one has aged out, which is asserted below.
     await call(db, "PUT", "/api/rankings/carter", { body: { order: [3, 1, 2] } });
     e = last();
-    check("a pure reorder is recorded as a reorder, not as new coasters",
-      JSON.parse(e.detail).reordered === true && JSON.parse(e.detail).added === 0, e.detail);
+    check("a reorder inside the window merges into the burst, keeping the flag",
+      JSON.parse(e.detail).reordered === true && JSON.parse(e.detail).added === 3, e.detail);
 
     await call(db, "PUT", "/api/rankings/carter", { body: { order: [3, 1] } });
     check("a drop is recorded as removed", JSON.parse(last().detail).removed === 1, last().detail);
+
+    // Age the burst out, then reorder alone: on its own it is a reorder and
+    // nothing else, which is what the feed's "reordered their rankings" needs.
+    db.prepare("UPDATE activity SET at = ? WHERE id = ?")
+      .run(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), last().id);
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 3] } });
+    e = last();
+    check("a pure reorder on its own is a reorder, not new coasters",
+      JSON.parse(e.detail).reordered === true && JSON.parse(e.detail).added === 0
+      && JSON.parse(e.detail).saves === 1, e.detail);
 
     // Database edits carry no rider — they must stay anonymous rather than
     // borrowing whichever name happens to be selected in the UI.
