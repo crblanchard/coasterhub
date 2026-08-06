@@ -247,7 +247,13 @@ function renderHub(){
         '<p class="pc-links"><span style="color:var(--accent2);font-weight:600">View stats \u2192</span></p></a>';
     });
     document.getElementById('hub_people').innerHTML=cards;
-    var comb=CoasterHub.computeStats(coasters,parks,{credits:Object.keys(union).map(Number)}), ck=comb.kpi;
+    // The union has to be handed over in the ONE rider shape — {rides:[{c,d}]}.
+    // This passed {credits:[ids]} until 2026-08-06, a shape computeStats stopped
+    // reading in the 2026-07-29 storage migration, so it quietly computed on an
+    // empty list and every combined tile here read 0 while the per-rider cards
+    // beside them were right.
+    var comb=CoasterHub.computeStats(coasters,parks,
+      {rides:Object.keys(union).map(function(id){ return {c:+id,d:null}; })}), ck=comb.kpi;
     document.getElementById('hub_kpis').innerHTML=
       tile(nf(ck.credits),'Unique coasters')+tile(CoasterHub.USERS.length,'Riders')+
       tile(ck.parks,'Parks')+tile(ck.states+' / '+ck.countries,'States / Countries');

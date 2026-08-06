@@ -135,6 +135,13 @@ could not be reconciled: a credits-mode rider logging a park day had the day sil
 flattened away, and a rides-mode rider had nowhere to put a coaster they could not date.
 That is what made a single add page impossible, so it went first.
 
+**Anything you hand `computeStats` must be in that shape**, including synthetic input. It reads
+`userInput.rides` or a bare array and nothing else — a `{credits:[ids]}` object computes on an
+empty list and returns a full set of zeroes rather than throwing. The combined tiles on the
+`/stats` hub did exactly that from the migration until 2026-08-06: "0 unique coasters, 0 parks,
+0/0 states" sitting above per-rider cards that were all correct. If a panel reads zero while its
+neighbours look right, suspect the shape of what was passed in.
+
 Now **a credit is `COUNT(DISTINCT coaster_id)`** and **first-ridden is `MIN(d)`**. `rides.d`
 was already nullable, so no schema change was needed. `users.mode` is still a column but is
 `'rides'` for everyone and nothing branches on it.
