@@ -25,6 +25,8 @@
   .card.guide .go{color:var(--accent2);font-weight:600;font-size:.88rem;margin-top:14px}
   /* --- recent activity feed --- */
   .feed{display:flex;flex-direction:column;gap:8px}
+  .morelink{color:var(--accent2);font-weight:600;font-size:.92rem}
+  .morelink:hover{text-decoration:underline}
   .fitem{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
          border-radius:12px;padding:12px 15px;text-decoration:none;transition:border-color .15s}
   .fitem:hover{border-color:var(--accent2)}
@@ -132,13 +134,19 @@
   <h2>Recent days out</h2>
   <p class="lead">The latest logged park days across everyone's counts.</p>
   <div class="feed" id="feed"><p class="lead">Loading…</p></div>
+  <!-- This feed is only dated park days. /changes is everything: rankings,
+       credits ticked off a list, and every fix to the shared coaster list. -->
+  <p style="margin-top:16px"><a href="/changes" class="morelink">Everything that&rsquo;s changed &rarr;</a></p>
 </div></section>
 
 <section class="block"><div class="container prose">
   <span class="eyebrow">The idea</span>
   <h2>Why Coaster Hub</h2>
-  <p>This started as one meticulously kept spreadsheet and grew into something four people share.</p>
-  <p>Every number on the site comes from a ride someone actually logged &mdash; no estimates, no rounding, nothing filled in from memory. That&rsquo;s the point of keeping it this carefully: the totals are worth trusting, so the maps and records built on them are too.</p>
+  <!-- Deliberately not a number. It said "four people" while there were five,
+       and riders can be added from /log and /import now, so a count here goes
+       stale on its own. -->
+  <p>This started as one meticulously kept spreadsheet and grew into something a few of us share.</p>
+  <p>Every number on the site comes from a ride someone actually logged &mdash; no estimates, no rounding, nothing filled in from memory. That&rsquo;s the point of keeping it this carefully: the totals are worth trusting, so the maps and records built on them are too. Every edit is on the record, too &mdash; <a href="/changes" style="color:var(--accent2)">see what&rsquo;s changed lately</a>.</p>
   <p>Next up: a combined ranking built from everyone&rsquo;s favorites, and accounts, so keeping a count here beats keeping it in a spreadsheet of your own.</p>
   <p>Have an idea for a stat worth showing? Email <a href="mailto:hello@coasterhub.org" style="color:var(--accent2)">hello@coasterhub.org</a>.</p>
 </div></section>
