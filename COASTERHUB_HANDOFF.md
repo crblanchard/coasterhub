@@ -432,6 +432,20 @@ to the API, and a failed read becomes an empty log instead of an exception), and
 A new rider's own pages work immediately — `/api/user/:slug` returns an empty ride log rather
 than a 404 — they just show nothing until something is logged.
 
+### Home: "Recent days out" opens in place (2026-08-06)
+
+Each day on the home feed is a `<details>` that expands to the coasters ridden, with `×N` on
+re-rides — the same shape as the day cards on `/rides`, built from data the page already has
+(it loads every rider's log and the coaster list to compute the leaderboard). The row used to be
+a link to that rider's log; that link moved inside the opened panel, so nothing that was
+reachable stopped being so.
+
+**The mobile rule to watch:** `.fitem` is the `<details>` now, and the flex row is
+`.fitem > summary`. The `@media` block still pointed `flex-wrap` at `.fitem`, which left the
+summary unable to wrap — on a phone everything past the date ran off the side. The caret is last
+in the markup but is reordered onto the first line at narrow widths, with `margin-left:auto` to
+eat the slack; that is what forces the break, rather than hoping the column widths land right.
+
 ### `/changes` — the activity feed, and two things that bite (2026-08-06)
 
 **Ranking saves are merged on write.** Building a list is dozens of small saves — drag one

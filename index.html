@@ -27,13 +27,31 @@
   .feed{display:flex;flex-direction:column;gap:8px}
   .morelink{color:var(--accent2);font-weight:600;font-size:.92rem}
   .morelink:hover{text-decoration:underline}
-  .fitem{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
-         border-radius:12px;padding:12px 15px;text-decoration:none;transition:border-color .15s}
+  /* A day on this feed opens in place to show what was ridden, the same way the
+     day cards do on /rides. It is a <details>, so the summary row keeps the
+     layout the whole item used to have. */
+  .fitem{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+         overflow:hidden;transition:border-color .15s}
   .fitem:hover{border-color:var(--accent2)}
+  .fitem > summary{display:flex;align-items:center;gap:14px;padding:12px 15px;
+         cursor:pointer;list-style:none}
+  .fitem > summary::-webkit-details-marker{display:none}
+  .fitem[open] > summary{border-bottom:1px solid var(--line)}
   .fitem .when{min-width:6.2em;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;flex:none}
   .fitem .who{font-weight:700;min-width:4.6em;flex:none}
   .fitem .where{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.92rem}
   .fitem .what{color:var(--accent2);font-size:.82rem;white-space:nowrap;flex:none}
+  /* The caret is the only thing saying "this opens", so it has to survive the
+     summary wrapping on a phone — hence flex:none and its own column. */
+  .fitem .caret{flex:none;color:var(--muted);font-size:.7rem;transition:transform .15s}
+  .fitem[open] .caret{transform:rotate(90deg)}
+  .finner{padding:6px 15px 12px}
+  .frow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--soft);font-size:.9rem}
+  .frow:last-of-type{border-bottom:0}
+  .frow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .frow .lap{color:var(--accent2);font-weight:700;font-size:.8rem;flex:none}
+  .frow .cp{color:var(--muted);font-size:.82rem;margin-left:auto;flex:none}
+  .finner .go{display:inline-block;margin-top:10px;font-size:.85rem;color:var(--accent2);font-weight:600}
   /* --- leaderboard --- */
   .lb{display:flex;flex-direction:column;gap:10px}
   .lbrow{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
@@ -49,8 +67,21 @@
   .lbrow .go{display:flex;gap:12px;font-size:.82rem;flex:none}
   .lbrow .go a{color:var(--muted)} .lbrow .go a:hover{color:var(--fg)}
   @media (max-width:680px){
-    .fitem{flex-wrap:wrap;gap:6px 12px}
-    .fitem .when{min-width:100%;order:-1}
+    /* The flex row is the SUMMARY now, not .fitem itself — pointing this at
+       .fitem left the row unable to wrap, and everything past the date ran off
+       the side of the phone. Two lines: date + who + caret, then park + count.
+       margin-left:auto on the caret eats the slack, which is what forces the
+       break rather than hoping the widths land right. */
+    .fitem > summary{flex-wrap:wrap;gap:6px 10px;padding:11px 13px}
+    .fitem .when{order:1;min-width:0}
+    .fitem .who{order:2;min-width:0}
+    /* The caret is last in the markup — where a screen reader wants it — but on
+       a phone it belongs on the first line, so it is reordered up and given the
+       slack. Without that it ends up stranded on a third line of its own. */
+    .fitem .caret{order:3;margin-left:auto}
+    .fitem .where{order:4;flex:1 1 60%;white-space:normal}
+    .fitem .what{order:5}
+    .finner{padding:6px 13px 12px}
     .lbrow{flex-wrap:wrap}
     .lbrow .bar{order:5;flex-basis:100%;margin-top:6px}
     .lbrow .go{width:100%;margin-top:4px}
@@ -227,13 +258,20 @@ return Promise.all([
       var d=(mode==='rides')?e.d:(typeof e==='object'?e.first:null);
       if(!d)return;
       var c=byId[(typeof e==='object')?e.c:e]; if(!c)return;
-      var a=acc[d]||(acc[d]={rides:0,coasters:{},parks:{}});
-      a.rides++; a.coasters[c.id]=1; if(c.park)a.parks[c.park]=1;
+      var a=acc[d]||(acc[d]={rides:0,coasters:{},order:[],parks:{}});
+      a.rides++;
+      // Count the laps and remember the order they were logged in, so an opened
+      // day reads the same way it does on /rides.
+      if(!a.coasters[c.id]) a.order.push(c);
+      a.coasters[c.id]=(a.coasters[c.id]||0)+1;
+      if(c.park)a.parks[c.park]=1;
     });
     Object.keys(acc).forEach(function(d){
       days.push({d:d,slug:u.slug,name:u.name,mode:mode,
                  rides:acc[d].rides,
-                 nc:Object.keys(acc[d].coasters).length,
+                 nc:acc[d].order.length,
+                 laps:acc[d].coasters,
+                 ridden:acc[d].order,
                  parks:Object.keys(acc[d].parks)});
     });
   });
@@ -245,11 +283,27 @@ return Promise.all([
     var what=(x.mode==='rides')
       ? (x.nc+' coaster'+(x.nc===1?'':'s')+' · '+x.rides+' ride'+(x.rides===1?'':'s'))
       : (x.nc+' new credit'+(x.nc===1?'':'s'));
-    return '<a class="fitem" href="'+CoasterHub.userPageHref(x.slug,'rides')+'">'
+    // The row used to be a link straight to that rider's log. It opens in place
+    // now — the coasters are the thing you actually wanted — and the link to the
+    // full log moved inside, so nothing that was reachable stopped being so.
+    return '<details class="fitem">'
+      +'<summary>'
       +'<span class="when">'+fmt(x.d)+'</span>'
       +'<span class="who">'+esc(x.name)+'</span>'
       +'<span class="where">'+esc(x.parks.join(' · ')||'—')+'</span>'
-      +'<span class="what">'+what+'</span></a>';
+      +'<span class="what">'+what+'</span>'
+      +'<span class="caret">&#9654;</span>'
+      +'</summary>'
+      +'<div class="finner">'
+      + x.ridden.map(function(c){
+          return '<div class="frow"><span class="cn">'+esc(c.name)+'</span>'
+            +(x.laps[c.id]>1?'<span class="lap">&times;'+x.laps[c.id]+'</span>':'')
+            +(x.parks.length>1?'<span class="cp">'+esc(c.park||'')+'</span>':'')
+            +'</div>';
+        }).join('')
+      +'<a class="go" href="'+CoasterHub.userPageHref(x.slug,'rides')+'">'
+      +esc(x.name)+'&rsquo;s full log &rarr;</a>'
+      +'</div></details>';
   }).join('') || '<p class="lead">No dated rides yet.</p>';
 });
 }).catch(function(e){console.error(e);});
