@@ -32,6 +32,8 @@
   .modesw button:hover{color:var(--fg)}
   .modesw button.on{background:var(--accent2);color:var(--well);font-weight:700}
   .modehint{color:var(--muted);font-size:.83rem;margin:0 0 16px;max-width:74ch}
+  .geonote{color:var(--muted);font-size:.76rem;margin:5px 0 0;min-height:1em}
+  .geonote a{color:var(--accent2);cursor:pointer}
   .setup{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:0 0 18px}
   .fld{display:flex;flex-direction:column;gap:5px}
   .fld label{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
@@ -139,8 +141,11 @@
     <div class="fld" style="flex:1;min-width:240px"><label for="park">Park</label>
       <div style="display:flex;gap:8px">
         <select id="park" style="flex:1;min-width:0"></select>
+        <button class="ghost" id="nearme" type="button" title="Sort by how close they are to you"
+                style="flex:none;padding:10px 12px">Near me</button>
         <button class="ghost" id="newpark" type="button" style="flex:none;padding:10px 12px">+ Park</button>
       </div>
+      <p class="geonote" id="geonote"></p>
     </div>
     <div class="fld" style="flex:1;min-width:200px"><label for="search">Or search all coasters</label><input id="search" type="search" placeholder="Type 2+ letters&hellip;" style="width:100%"></div>
   </div>
@@ -263,14 +268,16 @@ function boot(){
     // Parks with no coasters yet still belong in the list — that is the whole
     // point of being able to add one before logging its first ride.
     Object.keys(PARKS).forEach(function(p){ if(PCOUNT[p]==null) PCOUNT[p]=0; });
-    fillParks();
+    // A location from earlier today is applied here, once the parks it sorts
+    // have actually arrived. wireNearMe() only reads it.
+    if(HERE) setHere(HERE); else fillParks();
     $('park').addEventListener('change',function(){ $('search').value=''; renderList(); });
     $('search').addEventListener('input',renderList);
   });
 
   $('save').onclick=save;
   $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
-  wireAdders(); wireRiderAdd(); wireMode(); setMode('day');
+  wireAdders(); wireRiderAdd(); wireNearMe(); wireMode(); setMode('day');
   $('rider').addEventListener('change',function(){
     try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
     basket={}; renderBasket(); loadOwned();
@@ -313,12 +320,115 @@ function setMode(m){
   basket={}; renderList(); renderBasket(); $('msg').textContent='';
 }
 
+// ---- "Near me" -------------------------------------------------------------
+// Standing in a park, the useful order is nearest-first, not alphabetical — 247
+// parks is a long scroll to reach the one you are standing in. The coordinates
+// are already loaded with the parks, so this is a sort, not a lookup: no service,
+// nothing sent anywhere, the position never leaves the browser.
+//
+// It is a button rather than something the page does on arrival: a permission
+// prompt nobody asked for is worse than a scroll. Once given, the fix is kept
+// for two hours — long enough for a park day, short enough that tomorrow at a
+// different park it doesn't quietly sort by where you were yesterday.
+var HERE=null;                      // {lat, lon} once known
+function sel(){ return $('park'); }
+var GEO_KEY='ch_here', GEO_TTL=2*60*60*1000;
+var NEAR_MI=60;                     // "nearby" really means nearby
+
+function miBetween(a,b,c,d){
+  // Haversine, in miles. Earth radius 3958.8mi.
+  var R=3958.8, r=Math.PI/180;
+  var dLat=(c-a)*r, dLon=(d-b)*r;
+  var h=Math.sin(dLat/2)*Math.sin(dLat/2)
+      + Math.cos(a*r)*Math.cos(c*r)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function parkMiles(name){
+  var g=PARKS[name];
+  if(!HERE||!g||g.lat==null||g.lon==null) return null;
+  return miBetween(HERE.lat,HERE.lon,g.lat,g.lon);
+}
+function showMiles(mi){ return mi<10 ? (Math.round(mi*10)/10)+' mi' : Math.round(mi)+' mi'; }
+
+function readHere(){
+  try{
+    var s=JSON.parse(localStorage.getItem(GEO_KEY)||'null');
+    if(s&&s.lat!=null&&Date.now()-s.at<GEO_TTL) return {lat:s.lat,lon:s.lon};
+  }catch(e){}
+  return null;
+}
+function setHere(pos,quiet){
+  HERE=pos;
+  try{
+    if(pos) localStorage.setItem(GEO_KEY,JSON.stringify({lat:pos.lat,lon:pos.lon,at:Date.now()}));
+    else localStorage.removeItem(GEO_KEY);
+  }catch(e){}
+  fillParks();
+  var n=$('geonote');
+  if(!pos){ n.textContent=''; return; }
+  // Name the nearest one: it is the fastest way to see whether the fix is sane
+  // before trusting the order.
+  var best=null;
+  Object.keys(PCOUNT).forEach(function(p){
+    var mi=parkMiles(p); if(mi!=null&&(!best||mi<best.mi)) best={p:p,mi:mi};
+  });
+  // Standing inside a park, picking it is the whole point of the button — but
+  // only when nothing is chosen yet, so this can never move a park you set
+  // yourself, and only from close enough that there is no doubt.
+  var picked=false;
+  if(best&&best.mi<=1&&!sel().value){
+    sel().value=best.p; picked=true;
+    if(typeof renderList==='function'){ $('search').value=''; renderList(); }
+  }
+  n.innerHTML=(best
+      ? ((picked?'You look like you&rsquo;re at <b>':'Closest: <b>')+esc(best.p)+'</b>, '+showMiles(best.mi)+'. ')
+      : '')
+    +'<a id="geoclear">Back to A&ndash;Z</a>';
+  $('geoclear').onclick=function(){ setHere(null); };
+}
+function wireNearMe(){
+  $('nearme').onclick=function(){
+    if(!navigator.geolocation){ $('geonote').textContent='This browser can’t share a location.'; return; }
+    $('nearme').disabled=true; $('geonote').textContent='Finding you…';
+    navigator.geolocation.getCurrentPosition(function(g){
+      $('nearme').disabled=false;
+      setHere({lat:g.coords.latitude,lon:g.coords.longitude});
+    },function(err){
+      $('nearme').disabled=false;
+      $('geonote').textContent = err && err.code===1
+        ? 'Location is blocked for this site — the list stays A–Z.'
+        : 'Couldn’t get a location just now.';
+    },{enableHighAccuracy:false,timeout:8000,maximumAge:5*60*1000});
+  };
+  HERE=readHere();                  // a fix from earlier today needs no prompt
+}
+
 function fillParks(keep){
   var sel=$('park'), cur=keep!=null?keep:sel.value;
   var names=Object.keys(PCOUNT).sort(function(a,b){return a.localeCompare(b);});
-  sel.innerHTML='<option value="">— pick a park —</option>'+names.map(function(p){
-    return '<option value="'+esc(p)+'">'+esc(p)+' ('+PCOUNT[p]+')</option>';
-  }).join('');
+  var body;
+  if(HERE){
+    // Two groups. Anything genuinely close, nearest first; then the rest, still
+    // A–Z so it stays scannable. A park with no coordinates can't be placed, so
+    // it lives in the second group rather than being dropped.
+    var near=names.map(function(p){ return {p:p,mi:parkMiles(p)}; })
+      .filter(function(x){ return x.mi!=null&&x.mi<=NEAR_MI; })
+      .sort(function(a,b){ return a.mi-b.mi; });
+    var seen={}; near.forEach(function(x){ seen[x.p]=1; });
+    var opt=function(p,mi){
+      return '<option value="'+esc(p)+'">'+esc(p)+' ('+PCOUNT[p]+')'
+        +(mi!=null?' · '+showMiles(mi):'')+'</option>';
+    };
+    body=(near.length
+        ? '<optgroup label="Near you">'+near.map(function(x){ return opt(x.p,x.mi); }).join('')+'</optgroup>'
+        : '')
+      +'<optgroup label="'+(near.length?'Everywhere else':'Nothing within '+NEAR_MI+' miles — everywhere else')+'">'
+      +names.filter(function(p){ return !seen[p]; }).map(function(p){ return opt(p,null); }).join('')
+      +'</optgroup>';
+  } else {
+    body=names.map(function(p){ return '<option value="'+esc(p)+'">'+esc(p)+' ('+PCOUNT[p]+')</option>'; }).join('');
+  }
+  sel.innerHTML='<option value="">— pick a park —</option>'+body;
   if(cur) sel.value=cur;
 }
 

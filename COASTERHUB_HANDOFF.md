@@ -272,6 +272,19 @@ Mechanics worth knowing before touching it:
 
 Last item in the mobile tab bar. One park picker, two ways to add:
 
+**"Near me" sorts the park list by distance (2026-08-06).** 247 parks alphabetically is a long
+scroll to reach the one you are standing in. The coordinates are already loaded with the parks,
+so this is a **sort, not a lookup** — no service, nothing sent anywhere, the position never
+leaves the browser. Parks within 60 miles go in a "Near you" group, nearest first with the
+distance in the label; everything else stays A–Z below, including the 16 parks with no
+coordinates, which can't be placed but must not disappear.
+
+Three deliberate choices: it is a **button**, because a permission prompt nobody asked for is
+worse than a scroll; the fix is kept for **two hours**, long enough for a park day and short
+enough that tomorrow at a different park it doesn't silently sort by where you were yesterday;
+and it **auto-selects** the nearest park only when it is within a mile *and* nothing is chosen
+yet, so it can never move a park you set yourself.
+
 | | **Coaster rides** | **Coaster credits** |
 |---|---|---|
 | date | shown, required | hidden, posts `d: null` |
@@ -656,6 +669,14 @@ matched loosely *within* a park; park names cannot be matched loosely at all.
   (SBF Visa Spinner, opened 2016-11-04, defunct). #822 is the same model, opened 2015-07-25 and
   still operating. Both are complete now. Note the chain uses two naming styles, `<City>'s Incredible Pizza Company` and `John's Incredible Pizza Company <City>`; keep
   the city in the name so locations can't be confused again.
+- **`Celebration City` is geocoded to the wrong city.** It sits at 39.219, -94.504 — Kansas
+  City — but it was a Branson park, next door to Silver Dollar City (36.668, -93.339). Found by
+  the "Near me" sort on `/log`, which listed it 9 miles from downtown KC. It also plots in the
+  wrong place on the stats map. The geocoder took a bad Nominatim hit; fixing it means setting
+  real coordinates in `/edit` (note `PUT /api/park` COALESCEs, so it will **not** overwrite
+  existing coordinates — this one has to be changed in the editor or in D1 directly). A sweep for
+  parks within ~1 mile of each other turned up no other bad geocodes: those clusters are all
+  real (Disneyland/DCA, Universal's two parks, the Gatlinburg coaster strip).
 - **Carter's total is 2,362, not 2,400.** Might be rounding, might be ~38 rides he knows are
   missing. `/log` is the tool for filling them in.
 - **Traveling shows.** Butler Amusements, Ray Cammack Shows, Davis Amusement Cascadia, Helm &
