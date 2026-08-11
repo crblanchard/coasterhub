@@ -453,10 +453,14 @@ function renderDays(rows){
       +'<span class="pk">'+esc(pk.join(' · '))+'</span>'
       +'<span class="n">'+what+'</span>'
       +'</summary><div class="inner">'
+      // The park only earns a column when the day actually spans more than one.
+      // On a normal day it is already in the summary directly above, so every
+      // row repeating it was the same six words down the card — and on a phone
+      // it stole the width that the coaster names needed ("Flash: Vertical …").
       + uniqRows.map(function(r){
           return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
             +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')
-            +'<span class="cp">'+esc(r.park)+'</span></div>';
+            +(pk.length>1?'<span class="cp">'+esc(r.park)+'</span>':'')+'</div>';
         }).join('')
       +'</div></details>';
   }).join('') || '<p class="lead">No rides match those filters.</p>';

@@ -436,6 +436,11 @@ than a 404 — they just show nothing until something is logged.
 
 Each day on the home feed is a `<details>` that expands to the coasters ridden, with `×N` on
 re-rides — the same shape as the day cards on `/rides`, built from data the page already has
+
+**Neither one repeats the park on every row.** It shows only when the day actually spans more
+than one park; otherwise it is already in the summary directly above, and on a phone it stole
+the width the coaster names needed (`Flash: Vertical …`). Keep the two in step — they are the
+same card in two places.
 (it loads every rider's log and the coaster list to compute the leaderboard). The row used to be
 a link to that rider's log; that link moved inside the opened panel, so nothing that was
 reachable stopped being so.
