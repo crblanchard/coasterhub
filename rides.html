@@ -45,6 +45,10 @@
      park is pushed to the far side with margin-left:auto instead of the name
      growing, which is what used to strand ×4 next to the park. */
   .day .row .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* One heading per park on a day that spans more than one — see renderDays. */
+  .day .pgrp{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.06em;margin:12px 0 1px}
+  .day .inner > .pgrp:first-child{margin-top:4px}
   .day .row .cp{color:var(--muted);font-size:.82rem;margin-left:auto;flex:none;
                 white-space:nowrap;padding-left:10px}
   .lap{color:var(--accent);font-variant-numeric:tabular-nums;font-size:.82rem}
@@ -444,6 +448,10 @@ function renderDays(rows){
     // Without a re-ride anywhere in their log, "8 rides · 8 coasters" would be
     // saying the same thing twice — these are 8 credits picked up that day.
     var isRides=list[0].rep;
+    var dayRow=function(r){
+      return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
+        +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')+'</div>';
+    };
     var what=isRides
       ? (list.length+' ride'+(list.length===1?'':'s')+' · '+uniqRows.length+' coaster'+(uniqRows.length===1?'':'s'))
       : (uniqRows.length+' new credit'+(uniqRows.length===1?'':'s'));
@@ -453,15 +461,18 @@ function renderDays(rows){
       +'<span class="pk">'+esc(pk.join(' · '))+'</span>'
       +'<span class="n">'+what+'</span>'
       +'</summary><div class="inner">'
-      // The park only earns a column when the day actually spans more than one.
-      // On a normal day it is already in the summary directly above, so every
-      // row repeating it was the same six words down the card — and on a phone
-      // it stole the width that the coaster names needed ("Flash: Vertical …").
-      + uniqRows.map(function(r){
-          return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
-            +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')
-            +(pk.length>1?'<span class="cp">'+esc(r.park)+'</span>':'')+'</div>';
-        }).join('')
+      // The park is never repeated on every row. On a one-park day it is already
+      // in the summary directly above; on a phone that column also stole the
+      // width the coaster names needed ("Flash: Vertical …"). A day that really
+      // does span two parks gets a heading per park instead, so the name is said
+      // once for the block rather than once per ride. `pk` is in the order the
+      // parks were first ridden, so the blocks match the summary line.
+      + (pk.length>1
+          ? pk.map(function(park){
+              return '<div class="pgrp">'+esc(park)+'</div>'
+                + uniqRows.filter(function(r){ return r.park===park; }).map(dayRow).join('');
+            }).join('')
+          : uniqRows.map(dayRow).join(''))
       +'</div></details>';
   }).join('') || '<p class="lead">No rides match those filters.</p>';
   pager(total,DAYS);

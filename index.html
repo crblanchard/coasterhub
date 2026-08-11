@@ -50,7 +50,9 @@
   .frow:last-of-type{border-bottom:0}
   .frow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .frow .lap{color:var(--accent2);font-weight:700;font-size:.8rem;flex:none}
-  .frow .cp{color:var(--muted);font-size:.82rem;margin-left:auto;flex:none}
+  .fgrp{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;
+        letter-spacing:.06em;margin:12px 0 1px}
+  .finner > .fgrp:first-child{margin-top:4px}
   .finner .go{display:inline-block;margin-top:10px;font-size:.85rem;color:var(--accent2);font-weight:600}
   /* --- leaderboard --- */
   .lb{display:flex;flex-direction:column;gap:10px}
@@ -295,12 +297,20 @@ return Promise.all([
       +'<span class="caret">&#9654;</span>'
       +'</summary>'
       +'<div class="finner">'
-      + x.ridden.map(function(c){
-          return '<div class="frow"><span class="cn">'+esc(c.name)+'</span>'
-            +(x.laps[c.id]>1?'<span class="lap">&times;'+x.laps[c.id]+'</span>':'')
-            +(x.parks.length>1?'<span class="cp">'+esc(c.park||'')+'</span>':'')
-            +'</div>';
-        }).join('')
+      // A day at one park says so in the summary already. A day across two gets
+      // a heading per park, so the name is said once for the block instead of
+      // once per ride — same treatment as the day cards on /rides.
+      + (function(){
+          var row=function(c){
+            return '<div class="frow"><span class="cn">'+esc(c.name)+'</span>'
+              +(x.laps[c.id]>1?'<span class="lap">&times;'+x.laps[c.id]+'</span>':'')+'</div>';
+          };
+          if(x.parks.length<2) return x.ridden.map(row).join('');
+          return x.parks.map(function(park){
+            return '<div class="fgrp">'+esc(park)+'</div>'
+              + x.ridden.filter(function(c){ return c.park===park; }).map(row).join('');
+          }).join('');
+        })()
       +'<a class="go" href="'+CoasterHub.userPageHref(x.slug,'rides')+'">'
       +esc(x.name)+'&rsquo;s full log &rarr;</a>'
       +'</div></details>';
