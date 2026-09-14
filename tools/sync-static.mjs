@@ -26,7 +26,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Riders to sync. Taken from the live API (/api/users) so anyone added on /log
 // or /import gets a static file too; this list is only the fallback for an old
 // deployment that predates that endpoint.
-const FALLBACK_SLUGS = ["carter", "cole", "keltan", "max", "sean"];
+const FALLBACK_SLUGS = ["crblanchard", "cole", "keltan", "max", "sean"];
 
 async function getJSON(path) {
   const res = await fetch(BASE + path);

@@ -331,7 +331,9 @@
   }
 
   function loadUser(userFile) {
-    if (!userFile) { var u = currentUser(); userFile = u ? u + ".json" : "carter.json"; }
+    // No rider in the URL means the site-owner's own page (/stats, /rides).
+    // Kept in step with the seed above when that rider renames.
+    if (!userFile) { var u = currentUser(); userFile = u ? u + ".json" : "crblanchard.json"; }
     var slug = userFile.replace(/\.json$/, "");
     return Promise.all([
       fetchCoasters(),
@@ -350,13 +352,16 @@
 
   // ---- Multi-user site config + shared nav --------------------------------
   var USERS = [
-    { slug: "carter", name: "Carter" },
+    // Seed + offline fallback only: the live list comes from /api/users and
+    // REPLACES this (adoptUsers). Kept in step by hand when a rider renames —
+    // carter became crblanchard on 2026-09-14, and <slug>.json was renamed with
+    // it so the fallback still resolves.
+    { slug: "crblanchard", name: "Carter" },
     { slug: "cole",   name: "Cole"   },
     { slug: "keltan", name: "Keltan" },
     { slug: "max",    name: "Max"    },
     { slug: "sean",   name: "Sean"   }
   ];
-  var DEFAULT_SLUG = "carter";
 
   // ---- Riders are whoever is in D1, not only the array above ---------------
   // Someone added on /log or /import exists in the database immediately; the
@@ -375,6 +380,25 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
     });
   }
+  // mergeUsers is additive on purpose — the seed and the cache fill gaps, they
+  // never contradict. But the live API is different: when it answers, it is the
+  // whole truth, and a rider who has been renamed or removed has to DISAPPEAR.
+  // Without this, a renamed rider showed up twice in the picker forever — once
+  // from the API under their new slug, once from the stale seed under the old
+  // one, both under the same display name.
+  //
+  // Mutates USERS in place rather than reassigning it: pages hold the array
+  // reference (CoasterHub.USERS), so swapping it would leave them on the old one.
+  function adoptUsers(list) {
+    var fresh = [];
+    (list || []).forEach(function (u) {
+      if (u && u.slug) fresh.push({ slug: u.slug, name: u.name || u.slug });
+    });
+    if (!fresh.length) return;              // never let an empty answer erase the seed
+    USERS.length = 0;
+    fresh.forEach(function (u) { USERS.push(u); });
+  }
+
   function mergeUsers(list) {
     var have = {}, changed = false;
     USERS.forEach(function (u) { have[u.slug] = u; });
@@ -395,6 +419,19 @@
       if (Array.isArray(cachedUsers)) mergeUsers(cachedUsers);
     } catch (e) { /* a blocked or corrupt cache just means the built-in list */ }
   }
+  // The last rider you looked at is remembered across pages. If that rider has
+  // since been renamed away, every nav link would point at a URL that now 404s,
+  // and the picker would sit on a name that is not in it. Drop it and fall back
+  // to Everyone — which is what the site shows a first-time visitor anyway.
+  function forgetUnknownRider() {
+    try {
+      var remembered = window.localStorage.getItem("ch_rider");
+      if (!remembered) return;
+      var known = USERS.some(function (u) { return u.slug === remembered; });
+      if (!known) window.localStorage.removeItem("ch_rider");
+    } catch (e) { /* blocked storage: nothing remembered, nothing to forget */ }
+  }
+
   var usersPromise = null;
   function fetchUsers() {
     if (!usersPromise) {
@@ -403,8 +440,11 @@
         .then(function (j) {
           var list = (j && j.users) || [];
           if (!list.length) return USERS;          // never let an empty answer erase the seed
-          mergeUsers(list);
+          adoptUsers(list);
+          // Overwrite rather than merge, so the cache cannot resurrect a rider
+          // the API has stopped listing.
           try { window.localStorage.setItem(USERS_KEY, JSON.stringify(list)); } catch (e) {}
+          forgetUnknownRider();
           return USERS;
         })
         .catch(function () { return USERS; });     // offline: the built-in list still works
@@ -599,12 +639,16 @@
     // querySelectorAll, not querySelector: Coasters is no longer in the header,
     // so its only links are the "Full credit list" ones in the Rides and Stats
     // heroes, and those need the rider too.
-    for (var p = 0; p < PER_RIDER.length; p++) {
-      var els = document.querySelectorAll('[data-nav="' + PER_RIDER[p] + '"]');
-      for (var q = 0; q < els.length; q++) {
-        els[q].setAttribute("href", slug ? "/user/" + slug + "/" + PER_RIDER[p] : "/" + PER_RIDER[p]);
+    function applyRiderLinks(forSlug) {
+      for (var p = 0; p < PER_RIDER.length; p++) {
+        var els = document.querySelectorAll('[data-nav="' + PER_RIDER[p] + '"]');
+        for (var q = 0; q < els.length; q++) {
+          els[q].setAttribute("href",
+            forSlug ? "/user/" + forSlug + "/" + PER_RIDER[p] : "/" + PER_RIDER[p]);
+        }
       }
     }
+    applyRiderLinks(slug);
 
     var links = document.querySelectorAll('nav.links a[data-nav]');
     for (var i = 0; i < links.length; i++) {
@@ -612,12 +656,20 @@
     }
 
     var wrap = document.getElementById("people");
-    if (wrap) {
-      renderPeople(wrap, slug, page);
-      // A rider added since the cache was written appears as soon as the list
-      // comes back, rather than after a reload.
-      fetchUsers().then(function () { renderPeople(wrap, slug, page); });
-    }
+    if (wrap) renderPeople(wrap, slug, page);
+    // The links above are written from localStorage before the rider list has
+    // arrived, because waiting would leave the nav dead on first paint. Once the
+    // real list is here, a remembered rider who no longer exists (renamed away)
+    // has been dropped by forgetUnknownRider — so re-apply, or the whole nav
+    // would keep pointing at URLs that now 404 until the next page load.
+    fetchUsers().then(function () {
+      var now = slug;
+      try {
+        if (page !== "home" && !urlSlug) now = window.localStorage.getItem("ch_rider") || "";
+      } catch (e) { /* storage blocked: keep what we started with */ }
+      if (now !== slug) { slug = now; applyRiderLinks(slug); }
+      if (wrap) renderPeople(wrap, slug, page);
+    });
 
     // Every page gets the same three-column header, even the ones with no rider
     // picker (Log, Import). The right-hand column has to EXIST for the menu to
@@ -692,7 +744,8 @@
   var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
-              fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers };
+              fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers,
+              adoptUsers: adoptUsers };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);
