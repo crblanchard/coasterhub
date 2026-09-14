@@ -586,17 +586,23 @@
   // picks its rider from a dropdown rather than the path, so neither takes the
   // /user/<slug>/ prefix the other tabs get.
   //
-  // The last slot is Log, not Add new: logging is the thing a rider does
-  // repeatedly and on a phone at a park, whereas adding a park or coaster to
-  // the shared database is occasional and rarely done one-handed. Add new
-  // stays in the desktop header and the footer, so it is still reachable on a
-  // phone — just not holding a thumb-sized slot it does not earn.
+  // Log sits in the centre slot, the easiest one to hit with a thumb: it is the
+  // thing a rider does repeatedly and on a phone at a park. Add new is still
+  // not here at all — adding a park or coaster to the shared database is
+  // occasional and rarely done one-handed, and it stays in the desktop header
+  // and the footer, so it is reachable on a phone, just not holding a
+  // thumb-sized slot it does not earn.
+  //
+  // The /stats tab is labelled "Profile": it is where a rider's own records,
+  // map and charts live, so it reads as their page rather than as a chart
+  // screen. The path stays /stats — only the label changed. The header nav and
+  // the footer use the same order and the same word.
   var TABS = [
     { k: "home",     label: "Home",     path: "/",         fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
-    { k: "stats",    label: "Stats",    path: "/stats" },
+    { k: "log",      label: "Log",      path: "/log",      fixed: true },
     { k: "rides",    label: "Rides",    path: "/rides" },
-    { k: "log",      label: "Log",      path: "/log",      fixed: true }
+    { k: "stats",    label: "Profile",  path: "/stats" }
   ];
   // Five is the ceiling: measured at 320px (the narrowest phone) the widest
   // label, "Rankings", fills 58 of its 64px slot. A sixth tab would need
