@@ -586,9 +586,17 @@ written to. Tables: `accounts`, `sessions`, `invites` (`migrations/003-accounts.
 | Another rider's anything | `ADMIN_PASSWORD`, or an account with `is_admin` |
 | Parks, coasters, merges, adding riders (`/add`, `/edit`, `/import`) | `ADMIN_PASSWORD` only |
 
-- **Passwords** are PBKDF2-HMAC-SHA256, 210k iterations, salt and iteration count stored in the
-  hash string. Raising the count later re-hashes people on their next sign-in rather than
-  locking them out. WebCrypto is all the Workers runtime offers — no bcrypt/argon2 without wasm.
+- **Passwords** are PBKDF2-HMAC-SHA256 at **100000 iterations, which is the Workers ceiling**,
+  with the salt and count stored in the hash string. Anything above 100000 is refused outright
+  by the runtime (`iteration counts above 100000 are not supported`) — and Node's WebCrypto has
+  no such limit, so `tools/test-rides-api.mjs` cannot catch it by running the code. It shipped
+  at 210000 on 2026-09-14 and died on the first real sign-up; the suite now reads the constant
+  out of the source and asserts the ceiling. **Do not "harden" this by raising the number** —
+  stronger hashing needs a different KDF (scrypt/argon2 via wasm), not a bigger count.
+- **Anything that can fail must fail before the first write.** `addUser()` creates a rider row
+  and an activity entry, and D1 has no transaction across these statements, so sign-up hashes
+  the password *first*: the 210000 bug left a stray unowned rider on the live site because the
+  hash threw after the rider was created.
 - **Sessions** are a 32-byte random token in an HttpOnly/Secure/SameSite=Lax cookie (`ch_sess`,
   90 days). The table stores its SHA-256, so a dump of `sessions` cannot be replayed as a login.
 - **Sign-up is open to anyone** (Carter's call, 2026-09-14) and creates the rider it owns, so a

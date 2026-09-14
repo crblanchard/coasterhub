@@ -608,6 +608,34 @@ async function main() {
       rows(db, "SELECT * FROM users").length === 5);
   }
 
+  console.log("\nAccounts — the Workers PBKDF2 ceiling");
+  {
+    // node:sqlite runs this suite on Node's WebCrypto, which accepts ANY
+    // iteration count. The Workers runtime refuses anything over 100000
+    // ("iteration counts above 100000 are not supported") — so the first real
+    // sign-up on production failed on a number every local test had passed.
+    // Reading the constant out of the source is the only way this suite can see
+    // a limit its own crypto does not enforce.
+    const src = await readFile(join(ROOT, "worker.js"), "utf8");
+    const iters = Number((src.match(/const PBKDF2_ITERS = (?:PBKDF2_MAX_ITERS|(\d+))/) || [])[1]
+      || (src.match(/const PBKDF2_MAX_ITERS = (\d+)/) || [])[1]);
+    check("the iteration count is within what Workers will run",
+      Number.isInteger(iters) && iters > 0 && iters <= 100000, "PBKDF2_ITERS = " + iters);
+
+    // Every hash the code can produce has to be verifiable by the same code.
+    const dummy = (src.match(/const DUMMY_HASH = "([^"]+)"/) || [])[1] || "";
+    const dummyIters = Number(dummy.split("$")[2]);
+    check("...and so is the dummy hash the login route verifies against",
+      dummyIters > 0 && dummyIters <= 100000, "DUMMY_HASH iters = " + dummyIters);
+
+    // An unknown email must reach the dummy-hash comparison and come back 401,
+    // not 500 — which is what a dummy hash above the ceiling would cause.
+    const db = freshDb();
+    const r = await call(db, "POST", "/api/auth/login",
+      { body: { email: "nobody@example.com", password: "whatever-it-is" } });
+    check("signing in with an unknown email is a clean 401", r.status === 401, JSON.stringify(r.data));
+  }
+
   console.log("\nAccounts — signing up");
   {
     const db = freshDb();
@@ -621,8 +649,11 @@ async function main() {
     check("...and the rider row exists, with no rides",
       rows(db, "SELECT * FROM users WHERE slug = 'nia'").length === 1
       && rows(db, "SELECT * FROM rides WHERE user_slug = 'nia'").length === 0);
+    // The shape, not the iteration count — that is pinned once, against the
+    // runtime ceiling, in the section above.
     check("...and the password is never stored in the clear",
-      rows(db, "SELECT pw FROM accounts")[0].pw.startsWith("pbkdf2$sha256$210000$"));
+      /^pbkdf2\$sha256\$\d+\$[^$]+\$[^$]+$/.test(rows(db, "SELECT pw FROM accounts")[0].pw),
+      rows(db, "SELECT pw FROM accounts")[0].pw);
     check("...and the email is normalised to lowercase, trimmed",
       rows(db, "SELECT email FROM accounts")[0].email === "nia@example.com");
 

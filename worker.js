@@ -71,9 +71,18 @@ function tokenOk(request, env) {
 //
 // Hashing is PBKDF2-HMAC-SHA256 via WebCrypto — the only KDF the Workers runtime
 // offers without shipping wasm. The iteration count is stored *in* the hash, so
-// raising it later re-hashes people on their next sign-in instead of locking
+// changing it later re-hashes people on their next sign-in instead of locking
 // them out.
-const PBKDF2_ITERS = 210000;
+//
+// 100000 is the CEILING, not a preference: the Workers runtime rejects anything
+// above it outright ("iteration counts above 100000 are not supported"), which
+// is below OWASP's current advice for this algorithm. Node's WebCrypto has no
+// such limit, so a local test will happily accept a number production refuses —
+// this shipped at 210000 and failed on the first real sign-up. The test suite
+// now asserts the ceiling. If stronger hashing is wanted, it needs a different
+// KDF (scrypt/argon2 via wasm), not a bigger number here.
+const PBKDF2_MAX_ITERS = 100000;
+const PBKDF2_ITERS = PBKDF2_MAX_ITERS;
 const SESSION_DAYS = 90;
 const COOKIE = "ch_sess";
 
@@ -105,19 +114,21 @@ async function verifyPassword(pw, stored) {
   if (p.length !== 5 || p[0] !== "pbkdf2" || p[1] !== "sha256") return false;
   const iters = Number(p[2]);
   // Bound the stored count: a corrupted row saying 10 iterations must not
-  // silently downgrade the check, and one saying 10 billion must not hang the
-  // Worker on every attempt.
-  if (!Number.isInteger(iters) || iters < 10000 || iters > 1000000) return false;
+  // silently downgrade the check, and one above the runtime ceiling would throw
+  // rather than return — a 500 on the login route instead of a clean "no".
+  if (!Number.isInteger(iters) || iters < 10000 || iters > PBKDF2_MAX_ITERS) return false;
   let salt;
   try { salt = unb64(p[3]); } catch (e) { return false; }
-  return sameString(await hashPassword(pw, salt, iters), stored);
+  try {
+    return sameString(await hashPassword(pw, salt, iters), stored);
+  } catch (e) { return false; }
 }
 
 // A real hash of a throwaway string, so signing in with an unknown email can do
 // the same PBKDF2 work as a known one. Without it, "no such account" returns in
 // microseconds and "wrong password" in ~100ms, which is a readable answer to
 // "does this person have an account here?".
-const DUMMY_HASH = "pbkdf2$sha256$210000$+Cpk9TMqsL1kpqKikaOZzw==$xjWiRIkjgLpAd+K6AXEMjRu8ZL59ZOKhGRnQH+Xx1Hc=";
+const DUMMY_HASH = "pbkdf2$sha256$100000$H9X3LabUcAffgcYCyj1o0g==$7sAIfFxqCdYJxURiUnrHT7zP+kFgAnGW0eMX7uxJpAo=";
 
 // Has migrations/003-accounts.sql been applied?
 //
@@ -839,12 +850,21 @@ export default {
         // secret here, and a silent failure is a support conversation.
         if (taken) return err(409, "there is already an account for that email — sign in instead");
 
+        // Hash FIRST. addUser() writes a rider row and an activity entry, and D1
+        // has no transaction spanning these statements, so anything that can
+        // fail has to fail before the first write — otherwise a signup that
+        // breaks halfway leaves a rider nobody owns on the public site. That is
+        // not hypothetical: it is what the 210000-iteration bug did.
+        let pwHash;
+        try { pwHash = await hashPassword(b.password); }
+        catch (e) { return err(500, "could not secure that password: " + (e && e.message || e)); }
+
         const made = await addUser(env, { name: b && b.name, slug: b && b.slug });
         if (made.bad) return err(made.bad[0], made.bad[1]);
         await env.DB.prepare("UPDATE users SET email = ? WHERE slug = ?").bind(email, made.slug).run();
         const acctId = (await env.DB.prepare(
           "INSERT INTO accounts (email,pw,slug,is_admin,created) VALUES (?,?,?,0,datetime('now')) RETURNING id"
-        ).bind(email, await hashPassword(b.password), made.slug).first()).id;
+        ).bind(email, pwHash, made.slug).first()).id;
         const raw = await startSession(env, acctId);
         return afterWrite(ctx, env, json({ ok: true, slug: made.slug, name: made.name },
           200, { "set-cookie": setCookie(raw) }));
@@ -902,9 +922,12 @@ export default {
         if (taken) return err(409, "there is already an account for that email — sign in instead");
         const owned = await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?").bind(inv.slug).first();
         if (owned) return err(409, "that rider has already been claimed");
+        let claimHash;
+        try { claimHash = await hashPassword(b.password); }
+        catch (e) { return err(500, "could not secure that password: " + (e && e.message || e)); }
         const acctId = (await env.DB.prepare(
           "INSERT INTO accounts (email,pw,slug,is_admin,created) VALUES (?,?,?,0,datetime('now')) RETURNING id"
-        ).bind(email, await hashPassword(b.password), inv.slug).first()).id;
+        ).bind(email, claimHash, inv.slug).first()).id;
         // Mark the invite spent in the same breath, so a link shared twice by
         // accident cannot make a second account for the same rider.
         await env.DB.prepare("UPDATE invites SET used = datetime('now') WHERE code = ?").bind(code).run();
