@@ -527,7 +527,7 @@ async function recordActivity(env, kind, { actor = null, subject = null, n = nul
 // push everyone else's activity off it. `saves` keeps the honest count of how
 // many times it was actually saved.
 const RANKING_MERGE_MS = 60 * 60 * 1000;
-async function recordRanking(env, slug, { added, removed, reordered, total }) {
+async function recordRanking(env, slug, { added, removed, reordered, credited, total }) {
   const now = new Date().toISOString();
   try {
     const prev = await env.DB.prepare(
@@ -541,6 +541,7 @@ async function recordRanking(env, slug, { added, removed, reordered, total }) {
         added: (d.added || 0) + added,
         removed: (d.removed || 0) + removed,
         reordered: !!(d.reordered || reordered),
+        credited: (d.credited || 0) + (credited || 0),
         total: total,                       // the newest total, not a sum
         saves: (d.saves || 1) + 1,
       };
@@ -551,7 +552,7 @@ async function recordRanking(env, slug, { added, removed, reordered, total }) {
   } catch (e) { /* fall through and just record it normally */ }
   await recordActivity(env, "ranking", {
     actor: slug, n: added || removed || total,
-    detail: { added, removed, reordered, total, saves: 1 },
+    detail: { added, removed, reordered, credited: credited || 0, total, saves: 1 },
   });
 }
 
@@ -667,13 +668,57 @@ async function putRankings(env, slug, body) {
   });
   for (let i = 0; i < batch.length; i += SQL_VARS) await env.DB.batch(batch.slice(i, i + SQL_VARS));
 
+  // Ranking a coaster means you have ridden it, so it becomes a credit.
+  //
+  // Before this, the two lists could disagree: a rider could rank twenty
+  // coasters and still show a count of zero, which is what a new account
+  // looked like after its first session with the head-to-head. Nobody ranks a
+  // ride they have not been on.
+  //
+  // It only ever ADDS. Un-ranking something does not delete the credit, and
+  // that asymmetry is deliberate: dropping a coaster off your favourites list
+  // says something about the ranking, not about whether you rode it, and a
+  // reorder must never be able to destroy ride history. Removing a credit
+  // stays an explicit act on /log.
+  //
+  // The rows are undated (d NULL) — the same shape as ticking a coaster off a
+  // list there — because a ranking carries no date. A rider who later logs the
+  // real day gets a dated row alongside it.
+  const credited = await creditRanked(env, slug, order);
+
   // A save that changed nothing is not news — dragging a row and dropping it
   // back would otherwise fill the feed with noise.
-  if (added || removed || reordered) {
-    await recordRanking(env, slug, { added, removed, reordered, total: order.length });
+  // Credits earned this way ride along IN the ranking entry rather than as a
+  // second row. It is one action by the rider, and two lines saying "ranked 20
+  // new coasters" and "added 20 credits" would read as two things happening.
+  if (added || removed || reordered || credited) {
+    await recordRanking(env, slug,
+      { added, removed, reordered, credited, total: order.length });
   }
 
-  return { ok: true, count: order.length };
+  return { ok: true, count: order.length, credited: credited };
+}
+
+// Give the rider an undated credit for every coaster they have ranked but have
+// no ride row for. Returns how many were added.
+//
+// INSERT ... SELECT ... WHERE NOT EXISTS, so it is idempotent: re-saving the
+// same order adds nothing the second time. Chunked because the ids are bound
+// parameters and D1 caps those per statement — the same limit that once broke
+// Save on a long ranking.
+async function creditRanked(env, slug, order) {
+  if (!order.length) return 0;
+  let added = 0;
+  for (let i = 0; i < order.length; i += SQL_VARS) {
+    const part = order.slice(i, i + SQL_VARS);
+    const batch = part.map(id => env.DB.prepare(
+      "INSERT INTO rides (user_slug,coaster_id,d) SELECT ?,?,NULL WHERE NOT EXISTS " +
+      "(SELECT 1 FROM rides WHERE user_slug = ? AND coaster_id = ?)"
+    ).bind(slug, id, slug, id));
+    const res = await env.DB.batch(batch);
+    for (const r of res) added += (r && r.meta && r.meta.changes) || 0;
+  }
+  return added;
 }
 
 // ---- Seeding: read the static JSON already in the repo, load into D1 ------

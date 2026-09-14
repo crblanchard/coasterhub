@@ -572,6 +572,24 @@ open question is unchanged: for a partially-dated rider, does the Nth milestone 
 dated credits, or do undated ones get appended? 441 of 1,767 rows are undated, so this is
 not a corner case. Label derived ones differently ("your 500th dated credit").
 
+### Ranking a coaster credits it (2026-09-14)
+
+`putRankings()` gives the rider an undated ride row for every coaster they have ranked but
+have no rides row for (`creditRanked()`). Nobody ranks a ride they have not been on, and
+before this the two lists could disagree — a new account could rank twenty coasters and still
+show a count of zero, which is exactly what the first open sign-up looked like.
+
+**It only ever adds.** Un-ranking does not delete the credit, and clearing a whole ranking
+removes nothing. Dropping a coaster off your favourites says something about the ranking, not
+about whether you rode it, and no reorder should be able to destroy ride history. Removing a
+credit stays an explicit act on `/log`.
+
+Rows are undated because a ranking carries no date — the same shape as ticking a coaster off a
+list. It is idempotent (`INSERT ... WHERE NOT EXISTS`), so re-saving credits nothing twice, and
+chunked by `SQL_VARS` like every other id list here. The count rides along inside the existing
+`ranking` activity entry (`detail.credited`) rather than as a second feed row: one action by the
+rider should read as one line.
+
 ### 3. Accounts — **built 2026-09-14**
 
 Riders sign in as themselves. `ADMIN_PASSWORD` still exists and still opens everything; what

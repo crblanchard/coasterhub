@@ -157,6 +157,9 @@ function sentence(e){
   if (e.kind === 'ranking') {
     var bits = [];
     if (d.added) bits.push('ranked ' + plural(d.added, 'new coaster'));
+    // Ranking something you had not logged adds it to your count (see
+    // creditRanked in worker.js), and a count moving is worth saying out loud.
+    if (d.credited) bits.push('picking up ' + plural(d.credited, 'new credit'));
     if (d.removed) bits.push('dropped ' + plural(d.removed, 'coaster'));
     if (!bits.length) bits.push('reordered their rankings');
     return (who || 'Someone') + ' ' + bits.join(' and ')
@@ -225,6 +228,7 @@ function groupRankings(list){
         added: (a.added || 0) + (b.added || 0),
         removed: (a.removed || 0) + (b.removed || 0),
         reordered: !!(a.reordered || b.reordered),
+        credited: (a.credited || 0) + (b.credited || 0),
         total: a.total,
         saves: (a.saves || 1) + (b.saves || 1)
       };

@@ -862,6 +862,77 @@ async function main() {
     check("and ordinary reads are untouched", r.status === 200);
   }
 
+  console.log("\nRanking a coaster makes it a credit");
+  {
+    const db = freshDb();
+    // Cole starts with one ride (coaster 1) and no rankings.
+    let r = await call(db, "PUT", "/api/rankings/cole", { body: { order: [1, 2, 3] } });
+    check("ranking coasters they have never logged gives them the credits",
+      r.status === 200 && r.data.credited === 2, JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/rides/cole");
+    check("...so the count moves from 1 to 3", r.status === 200
+      && new Set(r.data.rides.map(x => x.c)).size === 3, JSON.stringify(r.data));
+    check("...the new rows are undated, like a list ticked off",
+      rows(db, "SELECT * FROM rides WHERE user_slug='cole' AND coaster_id IN (2,3)")
+        .every(x => x.d === null));
+    check("...and the one they already had was not duplicated",
+      rows(db, "SELECT * FROM rides WHERE user_slug='cole' AND coaster_id=1").length === 1);
+
+    r = await call(db, "PUT", "/api/rankings/cole", { body: { order: [3, 2, 1] } });
+    check("re-saving the same coasters in a new order credits nothing more",
+      r.status === 200 && r.data.credited === 0, JSON.stringify(r.data));
+    check("...and the ride rows are unchanged",
+      rows(db, "SELECT * FROM rides WHERE user_slug='cole'").length === 3);
+
+    // The asymmetry: ranking adds, un-ranking never takes away.
+    r = await call(db, "PUT", "/api/rankings/cole", { body: { order: [1] } });
+    check("dropping a coaster off the ranking keeps the credit",
+      r.status === 200 && rows(db, "SELECT * FROM rides WHERE user_slug='cole'").length === 3,
+      JSON.stringify(r.data));
+
+    // A rider's real dated history must not be touched by any of this.
+    const carterBefore = rows(db, "SELECT * FROM rides WHERE user_slug='carter'").length;
+    await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2] } });
+    check("a rider who already rode everything they ranked gains nothing",
+      rows(db, "SELECT * FROM rides WHERE user_slug='carter'").length === carterBefore);
+    r = await call(db, "GET", "/api/rides/carter");
+    check("...and their dated rides keep their dates",
+      r.data.rides.filter(x => x.d === "2024-06-01").length === 2, JSON.stringify(r.data));
+
+    // Clearing a ranking entirely is not a way to lose a count.
+    r = await call(db, "PUT", "/api/rankings/cole", { body: { order: [] } });
+    check("clearing the ranking credits nothing and removes nothing",
+      r.status === 200 && r.data.credited === 0
+      && rows(db, "SELECT * FROM rides WHERE user_slug='cole'").length === 3, JSON.stringify(r.data));
+
+    // The feed should say the count moved, not just that a list was reordered —
+    // but as ONE entry, since the rider did one thing.
+    const feed = rows(db, "SELECT kind, actor, n, detail FROM activity WHERE actor='cole' ORDER BY id");
+    const ranking = feed.filter(x => x.kind === "ranking");
+    check("the credits gained are recorded on the ranking entry",
+      ranking.length === 1 && JSON.parse(ranking[0].detail).credited === 2, JSON.stringify(feed));
+    check("...and not as a second entry claiming a separate event",
+      feed.filter(x => x.kind === "credits").length === 0, JSON.stringify(feed));
+  }
+
+  console.log("\nRanking credits respect who may write");
+  {
+    const db = freshDb();
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    // An unclaimed rider's rankings are still open (see above), and that must
+    // not become a way to write rides into their count from outside.
+    let r = await call(db, "PUT", "/api/rankings/cole", { body: { order: [2] } });
+    check("an unclaimed rider's open rankings still credit them", r.status === 200
+      && r.data.credited === 1, JSON.stringify(r.data));
+    r = await call(db, "PUT", "/api/rankings/nia", { body: { order: [1, 2] } });
+    check("a claimed rider's rankings cannot be written by a stranger", r.status === 401);
+    check("...so no credits appeared in their count",
+      rows(db, "SELECT * FROM rides WHERE user_slug='nia'").length === 0);
+    r = await call(db, "PUT", "/api/rankings/nia", { body: { order: [1, 2] }, cookie: nia });
+    check("...but their own save credits them", r.status === 200 && r.data.credited === 2,
+      JSON.stringify(r.data));
+  }
+
   console.log("\nProfiles — renaming moves everything and leaves nothing behind");
   {
     const db = freshDb();

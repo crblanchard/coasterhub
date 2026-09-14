@@ -439,7 +439,12 @@ function render(s){
     const stroke=cssVar('--accent2'), fill=cssVar('--accent');
     MARKERS.forEach(m=>m.setStyle({color:stroke,fillColor:fill}));
   }
-  map.fitBounds(pts,{padding:[30,30]});
+  // A rider with no parks yet has no points to fit, and Leaflet throws "Bounds
+  // are not valid" on an empty list. That exception used to abort the whole of
+  // render() partway through, so a brand-new account's own profile greeted them
+  // with "Couldn't load the data" — every signup hit it. Keep the world view
+  // instead; it is the right picture for a count that has not started.
+  if (pts.length) map.fitBounds(pts,{padding:[30,30]});
   paintMarkers();
   document.documentElement.addEventListener('ch:themechange',paintMarkers);
   const DAY=s.day_detail, tip=document.getElementById('hm-tip');
