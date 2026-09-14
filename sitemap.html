@@ -80,9 +80,14 @@ var GROUPS = [
   { h: 'Adding to it',
     l: 'Logging your own rides is separate from adding to the list everyone shares.',
     items: [
-      { t: 'Log',      p: '/log',    d: 'Coaster rides from a day out, or coaster credits you already have.', tag: 'password' },
+      { t: 'Log',      p: '/log',    d: 'Coaster rides from a day out, or coaster credits you already have.', tag: 'sign in' },
       { t: 'Import',   p: '/import', d: 'Paste a whole list, or drop in a spreadsheet.', tag: 'password' },
       { t: 'Add new',  p: '/add',    d: 'Put a park or a coaster on the shared list.', tag: 'password' }
+    ] },
+  { h: 'Your account',
+    l: 'Signing in binds a count to a person: rides and rankings you log go to yours, and nobody else can write to it.',
+    items: [
+      { t: 'Account', p: '/account', d: 'Sign in, or start your own count. Invite links to claim an existing rider land here too.' }
     ] },
   { h: 'Keeping it tidy',
     l: 'Housekeeping pages. Nothing here is linked from the menu.',

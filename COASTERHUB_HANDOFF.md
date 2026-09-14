@@ -111,15 +111,16 @@ counts alone hide a swapped pair, which is how a bad merge nearly went unnoticed
 | `stats.html` | per-rider dashboard (KPIs, on-this-day, records, milestones, map, charts) |
 | `rides.html` | the count, three ways: by-day cards, a flat ride table, or **Full list** (every coaster once, filterable). The last one was `coasters.html` until it was folded in here — see below |
 | `add.html` | gated page for adding **parks and coasters to the shared database**, with duplicate detection. Desktop header + footer only — not in the mobile tab bar |
-| `log.html` | gated logger, two modes (a dated park day, or a list ticked off). Last item in the mobile tab bar |
+| `log.html` | the logger, two modes (a dated park day, or a list ticked off). **Middle** slot in the mobile tab bar since 2026-09-14. Signed in it skips the password gate and locks the rider to you |
+| `account.html` | sign in, sign up, claim an invite, change password, sign out. Reached from the person icon in the header |
 | `migrations/` | one-off SQL, not served (see `.assetsignore`) |
 | `edit.html` | gated admin editor (coasters + parks, merge, geocode) |
 | `database.html` | unlisted QC page, not in nav |
 | `app.js` | data engine (`computeStats`) + nav (`initNav`, `USERS`, `userPageHref`) |
 | `worker.js` | Worker entrypoint — static assets + JSON API |
 | `tools/sync-static.mjs` | regenerate the static JSON from the live API |
-| `tools/test-rides-api.mjs` | **112 endpoint tests** over `node:sqlite` (no network) |
-| `tools/dev-server.mjs` | local stand-in for the Worker — serves the repo, mirrors `_redirects`, stubs the API so `/log`, `/add`, `/edit` can be driven in a browser. Password `letmein` |
+| `tools/test-rides-api.mjs` | **183 endpoint tests** over `node:sqlite` (no network), including the whole of accounts |
+| `tools/dev-server.mjs` | local stand-in for the Worker — serves the repo, mirrors `_redirects`, stubs the API so `/log`, `/add`, `/edit` can be driven in a browser. Password `letmein`. It answers `/api/auth/me` as signed-out: it has no accounts table, so to exercise real sign-in run `worker.js` against `node:sqlite` the way the test harness does |
 | `tools/check-inline-js.mjs` | parses every page's inline `<script>`. **Run it before pushing** |
 | `tools/build-aliases.mjs` | one-off: reconstructed the former-name table from git history |
 
@@ -268,9 +269,11 @@ Mechanics worth knowing before touching it:
 - `?view=list` opens straight on it. `/coasters` and `/user/:name/coasters` **301** there, and
   the "Full credit list" link in the Stats hero points at it.
 
-### `/log` — password-gated, **two modes** (2026-07-29)
+### `/log` — **two modes** (2026-07-29), account-gated since 2026-09-14
 
-Last item in the mobile tab bar. One park picker, two ways to add:
+Middle slot in the mobile tab bar (2026-09-14 — it is the easiest slot to reach with a
+thumb, and logging is the thing done one-handed in a queue). Signed in, the gate is skipped
+and the rider dropdown is locked to you; signed out, the shared password still works. One park picker, two ways to add:
 
 **"Near me" sorts the park list by distance (2026-08-06).** 247 parks alphabetically is a long
 scroll to reach the one you are standing in. The coordinates are already loaded with the parks,
@@ -569,51 +572,84 @@ open question is unchanged: for a partially-dated rider, does the Nth milestone 
 dated credits, or do undated ones get appended? 441 of 1,767 rows are undated, so this is
 not a corner case. Label derived ones differently ("your 500th dated credit").
 
-### 3. Accounts / self-serve riders — wanted, deliberately deferred
+### 3. Accounts — **built 2026-09-14**
 
-Carter wants people to be able to sign up and track their own count rather than a
-rider being added by hand. Not started; the home hero already says "keep track of
-**your** count", which everyone currently viewing the site knows is the direction
-rather than a description of today.
+Riders sign in as themselves. `ADMIN_PASSWORD` still exists and still opens everything; what
+accounts add is **identity**, so the ride and ranking routes can tell whose count is being
+written to. Tables: `accounts`, `sessions`, `invites` (`migrations/003-accounts.sql`).
 
-What makes this bigger than it looks:
+**The write split, which is the whole point:**
 
-- **Auth doesn't exist yet.** There is one shared `ADMIN_PASSWORD` gating every
-  write. Accounts means per-user identity — either a sessions table with hashed
-  passwords in D1, or Cloudflare Access / an OAuth provider in front.
-- **The `users` table is already shaped for it** (`slug, name, mode, email,
-  created`) — `email` is present and unused, so the schema barely has to move.
-- ~~**`USERS` in `app.js` is hardcoded**~~ — **done 2026-08-05.** The list comes from
-  `GET /api/users` and is merged into `USERS` (cached in `localStorage`); riders can
-  be added from `/log` and `/import`. See "Riders come from D1" above. What is left
-  is *who may add one*: today that is anyone with the shared password.
-- ~~**The static-JSON fallback assumes a fixed set of riders.**~~ — `tools/sync-static.mjs`
-  now takes its slug list from `/api/users`, so new riders get a `<slug>.json` on the
-  next sync. Between being added and that sync they exist only in D1, which is fine —
-  every page tries the API first and the pages that read a rider file tolerate a miss.
-- **Write authorisation becomes per-row**: today any unlocked session can log a day
-  for anyone. With accounts, a rider should only be able to edit their own count
-  (with an admin override).
+| Write | Who |
+|---|---|
+| Your own rides, credits, rankings | your account — or `ADMIN_PASSWORD`, still |
+| Another rider's anything | `ADMIN_PASSWORD`, or an account with `is_admin` |
+| Parks, coasters, merges, adding riders (`/add`, `/edit`, `/import`) | `ADMIN_PASSWORD` only |
 
-### 4. Per-rider tokens — discussed 2026-07-29, **deliberately not built**
+- **Passwords** are PBKDF2-HMAC-SHA256, 210k iterations, salt and iteration count stored in the
+  hash string. Raising the count later re-hashes people on their next sign-in rather than
+  locking them out. WebCrypto is all the Workers runtime offers — no bcrypt/argon2 without wasm.
+- **Sessions** are a 32-byte random token in an HttpOnly/Secure/SameSite=Lax cookie (`ch_sess`,
+  90 days). The table stores its SHA-256, so a dump of `sessions` cannot be replayed as a login.
+- **Sign-up is open to anyone** (Carter's call, 2026-09-14) and creates the rider it owns, so a
+  stranger lands on an empty count of their own rather than anywhere near an existing one.
+- **Rankings** stay open for a rider with no account — the friction that made them open in the
+  first place is still real for an unclaimed rider — and close automatically the moment that
+  rider is claimed. No rider is worse off than before; every claimed one is better off.
 
-Carter's call: leave it until it is actually needed. Worth recording *why*, since it looks
-like an obvious gap.
+**Deploying it:** apply the migration before the Worker goes out, or every `/api/auth/*` call
+500s on a missing table:
 
-It is **not** about privacy — every rider's count, rides and rankings are public either way.
-It is about **write authorization**, and it buys three things:
+```bash
+wrangler d1 execute coasterhub --remote --file=migrations/003-accounts.sql
+```
 
-- **Attribution.** The rider is a *dropdown* today, so whoever has the password picks who they
-  are logging as. A mis-set dropdown quietly writes rides into someone else's count.
-- **Least privilege.** One password unlocks `/log`, `/add` **and** `/edit` — merges, deletes,
-  the geocoder. Letting a fifth person log rides means handing them the ability to delete a park.
-- **Revocability.** Rotate one person's link instead of re-texting everyone a new password.
+**Claiming the five original riders.** Nothing about their rows moved. Each one needs a
+one-time link:
 
-A link is a **bearer credential** — anyone holding the URL is that person. Fine for friends,
-not for strangers, and no substitute for real accounts (§3).
+```bash
+curl -X POST https://coasterhub.org/api/admin/invite \
+  -H "x-admin-token: $ADMIN_PASSWORD" -H 'content-type: application/json' \
+  -d '{"slug":"cole"}'
+# -> {"url":"https://coasterhub.org/account?claim=<code>"}
+```
 
-**The trigger is not a user count.** It is the first time Carter wants to give someone logging
-access he would not also give `/edit` access. Until then the shared password is adequate.
+Send that link to the person. It is a bearer credential and single-use: whoever opens it sets
+the email and password for that rider, once. An already-claimed rider cannot be re-invited.
+Carter's own account wants `UPDATE accounts SET is_admin = 1 WHERE slug = 'carter';` afterwards —
+there is no UI for that flag.
+
+**Still to do, in rough order of how much it matters:**
+
+1. **Password reset is by hand.** There is no mail out of the Worker, so a forgotten password
+   means updating `pw` in D1 (or deleting the row and re-inviting). An email provider is the
+   real fix; it is the one part of sign-up that is not self-service.
+2. **No rate limiting on `/api/auth/login`.** D1 write latency is the only brake. Worth a KV or
+   Durable Object counter before the site is findable by anyone but friends.
+3. **A signed-in rider cannot add a park or coaster** — those are shared-database writes and
+   still need the password. `/log` hides its inline adders for non-admin accounts and says why,
+   but the real answer is the request-then-approve flow already sketched for `/add`.
+4. **No admin UI for accounts.** `is_admin` is a column you set by hand; invites are minted with
+   the curl above. Fine for five riders, not for fifty.
+5. **Expired sessions** are deleted when next presented, not swept. Harmless at this size.
+
+### 4. Per-rider tokens — discussed 2026-07-29, not built, now **superseded**
+
+Accounts (§3) did what this was for: attribution, least privilege, revocability. Kept here
+because the reasoning still explains why the shared password survived as long as it did.
+
+It was **not** about privacy — every rider's count, rides and rankings are public either way.
+It was about **write authorization**, and it bought three things:
+
+- **Attribution.** The rider was a *dropdown*, so whoever had the password picked who they were
+  logging as. A mis-set dropdown quietly wrote rides into someone else's count. Accounts fix
+  that by making the dropdown *be* you — on `/log` it is locked to your own name.
+- **Least privilege.** One password unlocked `/log`, `/add` **and** `/edit`. An account opens
+  only your own count.
+- **Revocability.** Change one person's password instead of re-texting everyone a new one.
+
+A link is a **bearer credential** — anyone holding the URL is that person. Still true of the
+invite links in §3, which is why they are single-use.
 
 ### 5. Sean's remaining 63 rows — **needs Carter**
 

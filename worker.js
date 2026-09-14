@@ -2,12 +2,20 @@
 // Serves the static site (via the ASSETS binding) and a small JSON API backed
 // by a D1 database (binding: DB). The API is additive and DEFENSIVE: if D1 is
 // not bound yet, every /api/* route returns 503 and the static site still works
-// exactly as before. Reads are public; writes require the admin token.
+// exactly as before.
+//
+// Reads are public. Writes come in two kinds:
+//   - a rider's own rides and rankings, authorized by their ACCOUNT (see the
+//     Accounts section below, and migrations/003-accounts.sql);
+//   - everything shared — the coaster and park database, merges, imports —
+//     which still needs ADMIN_PASSWORD.
+// ADMIN_PASSWORD also opens the first kind, so it stays the break-glass key and
+// the riders who have not claimed an account yet keep working exactly as before.
 //
 // Bindings (see wrangler.jsonc):
 //   ASSETS  - static assets (the repo files)
 //   DB      - D1 database "coasterhub"
-//   ADMIN_PASSWORD - secret; required for all write endpoints + /api/admin/*
+//   ADMIN_PASSWORD - secret; required for shared-database writes + /api/admin/*
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
 
@@ -53,6 +61,158 @@ function tokenOk(request, env) {
   let diff = 0;
   for (let i = 0; i < supplied.length; i++) diff |= supplied.charCodeAt(i) ^ env.ADMIN_PASSWORD.charCodeAt(i);
   return diff === 0;
+}
+
+// ---- Accounts -------------------------------------------------------------
+// ADMIN_PASSWORD above is still the break-glass key and still opens everything.
+// What accounts add is *identity*: a session says which rider you are, so the
+// ride and ranking routes can refuse a write into someone else's count. See
+// migrations/003-accounts.sql for the tables.
+//
+// Hashing is PBKDF2-HMAC-SHA256 via WebCrypto — the only KDF the Workers runtime
+// offers without shipping wasm. The iteration count is stored *in* the hash, so
+// raising it later re-hashes people on their next sign-in instead of locking
+// them out.
+const PBKDF2_ITERS = 210000;
+const SESSION_DAYS = 90;
+const COOKIE = "ch_sess";
+
+const enc = new TextEncoder();
+function b64(bytes) { let s = ""; for (const b of bytes) s += String.fromCharCode(b); return btoa(s); }
+function unb64(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+function hex(bytes) { return [...bytes].map(b => b.toString(16).padStart(2, "0")).join(""); }
+
+// Same shape as tokenOk's compare: length first, then every byte, so a wrong
+// password takes the same time whether it differs in the first character or the
+// last.
+function sameString(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+async function hashPassword(pw, saltIn, itersIn) {
+  const salt = saltIn || crypto.getRandomValues(new Uint8Array(16));
+  const iters = itersIn || PBKDF2_ITERS;
+  const key = await crypto.subtle.importKey("raw", enc.encode(pw), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", hash: "SHA-256", salt, iterations: iters }, key, 256);
+  return "pbkdf2$sha256$" + iters + "$" + b64(salt) + "$" + b64(new Uint8Array(bits));
+}
+async function verifyPassword(pw, stored) {
+  const p = String(stored || "").split("$");
+  if (p.length !== 5 || p[0] !== "pbkdf2" || p[1] !== "sha256") return false;
+  const iters = Number(p[2]);
+  // Bound the stored count: a corrupted row saying 10 iterations must not
+  // silently downgrade the check, and one saying 10 billion must not hang the
+  // Worker on every attempt.
+  if (!Number.isInteger(iters) || iters < 10000 || iters > 1000000) return false;
+  let salt;
+  try { salt = unb64(p[3]); } catch (e) { return false; }
+  return sameString(await hashPassword(pw, salt, iters), stored);
+}
+
+// A real hash of a throwaway string, so signing in with an unknown email can do
+// the same PBKDF2 work as a known one. Without it, "no such account" returns in
+// microseconds and "wrong password" in ~100ms, which is a readable answer to
+// "does this person have an account here?".
+const DUMMY_HASH = "pbkdf2$sha256$210000$+Cpk9TMqsL1kpqKikaOZzw==$xjWiRIkjgLpAd+K6AXEMjRu8ZL59ZOKhGRnQH+Xx1Hc=";
+
+// Has migrations/003-accounts.sql been applied?
+//
+// This matters because a push to main deploys the Worker immediately while the
+// migration is run by hand: for the window between the two, `accounts` does not
+// exist. Every account-aware path asks this first and degrades to exactly the
+// old behaviour — the shared password — rather than throwing "no such table"
+// into a rankings save. Same defensiveness as the unbound-D1 case above.
+// Deliberately NOT cached per isolate. A cached "yes" would outlive the thing it
+// describes — a rolled-back database, a test that drops the table — and the
+// saving is one trivial query on paths that are already doing a write or a
+// password hash. The public read paths never call this at all.
+async function haveAccounts(env) {
+  try {
+    await env.DB.prepare("SELECT 1 FROM accounts LIMIT 1").first();
+    return true;
+  } catch (e) { return false; }
+}
+
+function randomToken() { return hex(crypto.getRandomValues(new Uint8Array(32))); }
+async function sha256hex(s) {
+  return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(s))));
+}
+
+// The cookie holds the raw token; the table holds its SHA-256. A dump of
+// `sessions` therefore cannot be replayed as a login — the same reason the
+// password column holds a hash.
+async function startSession(env, accountId) {
+  const raw = randomToken();
+  const now = new Date();
+  await env.DB.prepare("INSERT INTO sessions (token,account,created,expires) VALUES (?,?,?,?)")
+    .bind(await sha256hex(raw), accountId, now.toISOString(),
+          new Date(now.getTime() + SESSION_DAYS * 86400000).toISOString()).run();
+  return raw;
+}
+// Secure is unconditional: the Worker 301s http to https before any route runs,
+// so there is no plaintext context left for the cookie to be useful in.
+function setCookie(raw) {
+  return COOKIE + "=" + raw + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=" +
+    (SESSION_DAYS * 86400);
+}
+function clearCookie() {
+  return COOKIE + "=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
+}
+function cookieToken(request) {
+  const m = (request.headers.get("cookie") || "").match(/(?:^|;\s*)ch_sess=([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : "";
+}
+
+// Who is signed in, or null. Resolved once per request in fetch() and passed
+// around: every call costs a SHA-256 and a join, and the write routes would
+// otherwise each redo it.
+async function currentAccount(request, env) {
+  const raw = cookieToken(request);
+  if (!raw) return null;
+  if (!await haveAccounts(env)) return null;
+  const row = await env.DB.prepare(
+    "SELECT a.id AS id, a.email AS email, a.slug AS slug, a.is_admin AS adm, " +
+    "u.name AS name, s.expires AS expires FROM sessions s " +
+    "JOIN accounts a ON a.id = s.account LEFT JOIN users u ON u.slug = a.slug " +
+    "WHERE s.token = ?"
+  ).bind(await sha256hex(raw)).first();
+  if (!row) return null;
+  if (!(new Date(row.expires) > new Date())) {
+    // Expired: drop it now rather than leaving dead rows for a cleanup job that
+    // does not exist. The cookie is cleared by whatever route noticed.
+    await env.DB.prepare("DELETE FROM sessions WHERE token = ?").bind(await sha256hex(raw)).run();
+    return null;
+  }
+  return { id: row.id, email: row.email, slug: row.slug, name: row.name, admin: !!row.adm };
+}
+
+// May this request write to <slug>'s rides or rankings?
+//
+// Three ways in, in the order they are cheapest to check: the shared admin
+// password, an account flagged admin, or the account that owns that very rider.
+// Anything else is a 401 — including a signed-in rider aiming at someone else's
+// count, which is precisely the hole accounts were added to close.
+function mayWriteRider(request, env, slug, acct) {
+  if (tokenOk(request, env)) return true;
+  if (!acct) return false;
+  if (acct.admin) return true;
+  return !!slug && !!acct.slug && acct.slug === String(slug).toLowerCase();
+}
+
+function emailOk(s) {
+  return typeof s === "string" && s.length <= 200 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
+}
+// Length only. A composition rule ("one number, one symbol") mostly teaches
+// people to write Password1! — a floor of 8 with no ceiling below 200 is the
+// current NIST advice and is what the sign-up copy promises.
+function passwordProblem(s) {
+  if (typeof s !== "string" || s.length < 8) return "pick a password of at least 8 characters";
+  if (s.length > 200) return "that password is too long";
+  return null;
 }
 
 // Columns on the coasters table, in order (id is managed separately).
@@ -122,7 +282,8 @@ async function getUsers(env) {
 // page names are refused — a rider called "Stats" would shadow a real page.
 const RESERVED_SLUGS = new Set(["api","user","users","admin","new","all","everyone",
   "home","stats","rides","rankings","coasters","parks","log","add","edit","import",
-  "changes","database","sitemap","index"]);
+  "changes","database","sitemap","index","account","accounts","login","logout",
+  "signup","signin","profile","me","auth","session","settings"]);
 function slugify(s) {
   return String(s == null ? "" : s).toLowerCase()
     .normalize("NFD").replace(/[̀-ͯ]/g, "")
@@ -569,6 +730,11 @@ export default {
     if (!env.DB) return err(503, "database not bound yet");
 
     try {
+      // Who is signed in, resolved once for the whole request. Skipped entirely
+      // when there is no cookie, so the public read paths — which is most
+      // traffic — cost no extra query.
+      const acct = cookieToken(request) ? await currentAccount(request, env) : null;
+
       // ---- public reads ----
       // Aliases ride along with the coaster list rather than living on their own
       // endpoint: every consumer that needs them already fetches this, and it
@@ -600,8 +766,18 @@ export default {
         const r = await getRankings(env, km[1].toLowerCase());
         return r ? json(r) : err(404, "no such user");
       }
-      // Ungated on purpose — see RANKINGS_NEED_TOKEN.
+      // Ungated on purpose — see RANKINGS_NEED_TOKEN — *until* the rider has an
+      // account. Claiming your rider is what closes your own list: before that
+      // it stays as open as it has always been, so the riders who predate
+      // accounts do not lose the ability to drag their own order while they wait
+      // for an invite. No rider is worse off than yesterday, and every one that
+      // claims is better off.
       if (request.method === "PUT" && km) {
+        const slug = km[1].toLowerCase();
+        const claimed = await haveAccounts(env)
+          ? await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?").bind(slug).first()
+          : null;
+        if (claimed && !mayWriteRider(request, env, slug, acct)) return err(401, "unauthorized");
         if (RANKINGS_NEED_TOKEN && !tokenOk(request, env)) return err(401, "unauthorized");
         const out = await putRankings(env, km[1].toLowerCase(), await request.json());
         if (out.bad) return err(out.bad[0], out.bad[1]);
@@ -627,9 +803,205 @@ export default {
         return afterWrite(ctx, env, json(await geocodeMissing(env, 10)));
       }
 
+      // ---- accounts ----
+      // A clear answer beats a 500 from a missing table in the window between
+      // this Worker deploying and the migration being run.
+      if (path.startsWith("/api/auth/") && !await haveAccounts(env)) {
+        return path === "/api/auth/me"
+          ? json({ account: null })        // "nobody is signed in" is true, and every page copes
+          : err(503, "accounts are not set up on this deployment yet");
+      }
+
+      // Public by necessity: these are how you get a session in the first place,
+      // so they sit above the write gate. Each one is individually rate-limited
+      // by nothing at all — worth revisiting if the site is ever found by
+      // anyone but friends, but D1 writes are the natural brake for now.
+
+      // Who am I? The header and /log ask on every page load, so a signed-out
+      // answer is a 200 with a null account, not a 401 — a 401 here would make
+      // "not signed in" look like an error in the console on every page.
+      if (request.method === "GET" && path === "/api/auth/me") {
+        return json({ account: acct && { email: acct.email, slug: acct.slug, name: acct.name, admin: acct.admin } });
+      }
+
+      // Sign up. Open to anyone: creating an account also creates the rider it
+      // owns, so a new person lands on an empty count of their own rather than
+      // anywhere near an existing one.
+      if (request.method === "POST" && path === "/api/auth/signup") {
+        const b = await request.json();
+        const email = String(b && b.email || "").trim().toLowerCase();
+        if (!emailOk(email)) return err(400, "that does not look like an email address");
+        const problem = passwordProblem(b && b.password);
+        if (problem) return err(400, problem);
+        const taken = await env.DB.prepare("SELECT id FROM accounts WHERE lower(email) = ?").bind(email).first();
+        // Deliberately explicit rather than a vague "could not sign up": the
+        // rider list is public anyway, so which emails are registered is not the
+        // secret here, and a silent failure is a support conversation.
+        if (taken) return err(409, "there is already an account for that email — sign in instead");
+
+        const made = await addUser(env, { name: b && b.name, slug: b && b.slug });
+        if (made.bad) return err(made.bad[0], made.bad[1]);
+        await env.DB.prepare("UPDATE users SET email = ? WHERE slug = ?").bind(email, made.slug).run();
+        const acctId = (await env.DB.prepare(
+          "INSERT INTO accounts (email,pw,slug,is_admin,created) VALUES (?,?,?,0,datetime('now')) RETURNING id"
+        ).bind(email, await hashPassword(b.password), made.slug).first()).id;
+        const raw = await startSession(env, acctId);
+        return afterWrite(ctx, env, json({ ok: true, slug: made.slug, name: made.name },
+          200, { "set-cookie": setCookie(raw) }));
+      }
+
+      // Sign in.
+      if (request.method === "POST" && path === "/api/auth/login") {
+        const b = await request.json();
+        const email = String(b && b.email || "").trim().toLowerCase();
+        const row = await env.DB.prepare(
+          "SELECT id, pw, slug FROM accounts WHERE lower(email) = ?").bind(email).first();
+        // Verify against a dummy hash when the email is unknown, so "no such
+        // account" and "wrong password" take the same time and the response is
+        // the same either way.
+        const ok = row ? await verifyPassword(String(b && b.password || ""), row.pw)
+                       : await verifyPassword("x", DUMMY_HASH);
+        if (!row || !ok) return err(401, "wrong email or password");
+        await env.DB.prepare("UPDATE accounts SET seen = datetime('now') WHERE id = ?").bind(row.id).run();
+        const raw = await startSession(env, row.id);
+        return json({ ok: true, slug: row.slug }, 200, { "set-cookie": setCookie(raw) });
+      }
+
+      // Sign out. Drops the row as well as the cookie, so a copied cookie from
+      // another device stops working too.
+      if (request.method === "POST" && path === "/api/auth/logout") {
+        const raw = cookieToken(request);
+        if (raw) await env.DB.prepare("DELETE FROM sessions WHERE token = ?").bind(await sha256hex(raw)).run();
+        return json({ ok: true }, 200, { "set-cookie": clearCookie() });
+      }
+
+      // Claim an existing rider with a one-time invite. This is how the riders
+      // who predate accounts (and their rides) get a login without anything
+      // moving in the database — the account attaches to the slug that is
+      // already there.
+      if (request.method === "GET" && path === "/api/auth/invite") {
+        const inv = await env.DB.prepare(
+          "SELECT i.slug AS slug, i.used AS used, u.name AS name FROM invites i " +
+          "LEFT JOIN users u ON u.slug = i.slug WHERE i.code = ?"
+        ).bind(String(url.searchParams.get("code") || "")).first();
+        if (!inv) return err(404, "that invite link is not valid");
+        if (inv.used) return err(410, "that invite link has already been used");
+        return json({ ok: true, slug: inv.slug, name: inv.name });
+      }
+      if (request.method === "POST" && path === "/api/auth/claim") {
+        const b = await request.json();
+        const code = String(b && b.code || "");
+        const email = String(b && b.email || "").trim().toLowerCase();
+        if (!emailOk(email)) return err(400, "that does not look like an email address");
+        const problem = passwordProblem(b && b.password);
+        if (problem) return err(400, problem);
+        const inv = await env.DB.prepare("SELECT slug, used FROM invites WHERE code = ?").bind(code).first();
+        if (!inv) return err(404, "that invite link is not valid");
+        if (inv.used) return err(410, "that invite link has already been used");
+        const taken = await env.DB.prepare("SELECT id FROM accounts WHERE lower(email) = ?").bind(email).first();
+        if (taken) return err(409, "there is already an account for that email — sign in instead");
+        const owned = await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?").bind(inv.slug).first();
+        if (owned) return err(409, "that rider has already been claimed");
+        const acctId = (await env.DB.prepare(
+          "INSERT INTO accounts (email,pw,slug,is_admin,created) VALUES (?,?,?,0,datetime('now')) RETURNING id"
+        ).bind(email, await hashPassword(b.password), inv.slug).first()).id;
+        // Mark the invite spent in the same breath, so a link shared twice by
+        // accident cannot make a second account for the same rider.
+        await env.DB.prepare("UPDATE invites SET used = datetime('now') WHERE code = ?").bind(code).run();
+        await env.DB.prepare("UPDATE users SET email = COALESCE(email, ?) WHERE slug = ?").bind(email, inv.slug).run();
+        const raw = await startSession(env, acctId);
+        return json({ ok: true, slug: inv.slug }, 200, { "set-cookie": setCookie(raw) });
+      }
+
+      // Change your own password. Requires the current one: a borrowed session
+      // should not be able to lock the owner out of their own count.
+      if (request.method === "POST" && path === "/api/auth/password") {
+        if (!acct) return err(401, "sign in first");
+        const b = await request.json();
+        const problem = passwordProblem(b && b.password);
+        if (problem) return err(400, problem);
+        const row = await env.DB.prepare("SELECT pw FROM accounts WHERE id = ?").bind(acct.id).first();
+        if (!row || !await verifyPassword(String(b && b.current || ""), row.pw)) {
+          return err(401, "that is not your current password");
+        }
+        await env.DB.prepare("UPDATE accounts SET pw = ? WHERE id = ?")
+          .bind(await hashPassword(b.password), acct.id).run();
+        // Every other session for this account dies; the one making the change
+        // gets a fresh cookie. This is what makes a password change useful after
+        // "I think someone has my login".
+        await env.DB.prepare("DELETE FROM sessions WHERE account = ?").bind(acct.id).run();
+        const raw = await startSession(env, acct.id);
+        return json({ ok: true }, 200, { "set-cookie": setCookie(raw) });
+      }
+
+      // ---- rider-owned writes ----
+      // These carry their own authorization (mayWriteRider) instead of the
+      // blanket admin check below: the whole point of accounts is that Cole can
+      // log Cole's day without holding a key to the coaster database.
+
+      // Log a whole park day (see addRides) — used by /log.
+      if (request.method === "POST" && path === "/api/rides") {
+        const b = await request.json();
+        if (!mayWriteRider(request, env, b && b.user, acct)) return err(401, "unauthorized");
+        const out = await addRides(env, b);
+        if (out.bad) return err(out.bad[0], out.bad[1]);
+        return afterWrite(ctx, env, json({ ok: true, ...out }));
+      }
+      // Add a rider's credit — one undated ride, unless they already have the
+      // coaster, in which case there is nothing to add.
+      if (request.method === "POST" && path === "/api/credit") {
+        const b = await request.json();
+        if (!b.user || !b.coaster_id) return err(400, "need user + coaster_id");
+        if (!mayWriteRider(request, env, b.user, acct)) return err(401, "unauthorized");
+        await env.DB.prepare(
+          "INSERT INTO rides (user_slug,coaster_id,d) SELECT ?,?,? WHERE NOT EXISTS " +
+          "(SELECT 1 FROM rides WHERE user_slug = ? AND coaster_id = ?)"
+        ).bind(b.user, b.coaster_id, b.first??null, b.user, b.coaster_id).run();
+        return afterWrite(ctx, env, json({ ok: true }));
+      }
+      // Remove a rider's credit — every ride of it, not just one lap.
+      if (request.method === "DELETE" && path === "/api/credit") {
+        const b = await request.json();
+        if (!mayWriteRider(request, env, b && b.user, acct)) return err(401, "unauthorized");
+        await env.DB.prepare("DELETE FROM rides WHERE user_slug = ? AND coaster_id = ?").bind(b.user, b.coaster_id).run();
+        return afterWrite(ctx, env, json({ ok: true }));
+      }
+      // Undo a single mis-tapped ride (dated ride log only). The owner is on the
+      // row, not in the body, so this reads first and authorizes second.
+      if (request.method === "DELETE" && path === "/api/ride") {
+        const b = await request.json();
+        const i = Number(b && b.i);
+        if (!Number.isInteger(i) || i <= 0) return err(400, "need i (ride row id)");
+        const row = await env.DB.prepare(
+          "SELECT r.user_slug AS slug, c.name AS name FROM rides r " +
+          "LEFT JOIN coasters c ON c.id = r.coaster_id WHERE r.id = ?"
+        ).bind(i).first();
+        if (!row) return err(404, "no such ride");
+        if (!mayWriteRider(request, env, row.slug, acct)) return err(401, "unauthorized");
+        await env.DB.prepare("DELETE FROM rides WHERE id = ?").bind(i).run();
+        await recordActivity(env, "ride_removed", { actor: row.slug, subject: row.name });
+        return afterWrite(ctx, env, json({ ok: true, ...(await userTotal(env, row.slug)) }));
+      }
+
       // ---- writes (auth required) ----
       const needsAuth = path.startsWith("/api/admin/") || request.method !== "GET";
       if (needsAuth && !tokenOk(request, env)) return err(401, "unauthorized");
+
+      // Invite an existing rider to claim their count. Admin only, and it hands
+      // back a URL rather than mailing it — there is no mail out of this Worker.
+      if (request.method === "POST" && path === "/api/admin/invite") {
+        if (!await haveAccounts(env)) return err(503, "run migrations/003-accounts.sql first");
+        const b = await request.json();
+        const slug = String(b && b.slug || "").toLowerCase();
+        const u = await env.DB.prepare("SELECT slug, name FROM users WHERE slug = ?").bind(slug).first();
+        if (!u) return err(404, "no such rider");
+        const owned = await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?").bind(slug).first();
+        if (owned) return err(409, "that rider already has an account");
+        const code = randomToken();
+        await env.DB.prepare("INSERT INTO invites (code,slug,created) VALUES (?,?,datetime('now'))")
+          .bind(code, slug).run();
+        return json({ ok: true, slug: slug, name: u.name, url: url.origin + "/account?claim=" + code });
+      }
 
       // login check (lets the /edit page validate the password)
       if (request.method === "POST" && path === "/api/admin/login") return json({ ok: true });
@@ -784,45 +1156,6 @@ export default {
                     park: (dst && dst.park) || (src && src.park) || null },
         });
         return afterWrite(ctx, env, json({ ok: true }));
-      }
-
-      // add a rider's credit — one undated ride, unless they already have the
-      // coaster, in which case there is nothing to add
-      if (request.method === "POST" && path === "/api/credit") {
-        const b = await request.json();
-        if (!b.user || !b.coaster_id) return err(400, "need user + coaster_id");
-        await env.DB.prepare(
-          "INSERT INTO rides (user_slug,coaster_id,d) SELECT ?,?,? WHERE NOT EXISTS " +
-          "(SELECT 1 FROM rides WHERE user_slug = ? AND coaster_id = ?)"
-        ).bind(b.user, b.coaster_id, b.first??null, b.user, b.coaster_id).run();
-        return afterWrite(ctx, env, json({ ok: true }));
-      }
-      // remove a rider's credit — every ride of it, not just one lap
-      if (request.method === "DELETE" && path === "/api/credit") {
-        const b = await request.json();
-        await env.DB.prepare("DELETE FROM rides WHERE user_slug = ? AND coaster_id = ?").bind(b.user, b.coaster_id).run();
-        return afterWrite(ctx, env, json({ ok: true }));
-      }
-
-      // log a whole park day (see addRides) — used by /log
-      if (request.method === "POST" && path === "/api/rides") {
-        const out = await addRides(env, await request.json());
-        if (out.bad) return err(out.bad[0], out.bad[1]);
-        return afterWrite(ctx, env, json({ ok: true, ...out }));
-      }
-      // undo a single mis-tapped ride (dated ride log only)
-      if (request.method === "DELETE" && path === "/api/ride") {
-        const b = await request.json();
-        const i = Number(b && b.i);
-        if (!Number.isInteger(i) || i <= 0) return err(400, "need i (ride row id)");
-        const row = await env.DB.prepare(
-          "SELECT r.user_slug AS slug, c.name AS name FROM rides r " +
-          "LEFT JOIN coasters c ON c.id = r.coaster_id WHERE r.id = ?"
-        ).bind(i).first();
-        if (!row) return err(404, "no such ride");
-        await env.DB.prepare("DELETE FROM rides WHERE id = ?").bind(i).run();
-        await recordActivity(env, "ride_removed", { actor: row.slug, subject: row.name });
-        return afterWrite(ctx, env, json({ ok: true, ...(await userTotal(env, row.slug)) }));
       }
 
       // every park referenced by a coaster, with coords (null = not on the map yet) + coaster count

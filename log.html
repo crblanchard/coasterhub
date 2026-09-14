@@ -113,10 +113,14 @@
 
 <!-- gate -->
 <div id="gate" class="gate">
-  <h2>Locked</h2>
-  <p>Enter the admin password to log rides.</p>
-  <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
-  <button class="primary" id="unlock">Unlock</button>
+  <h2>Sign in to log rides</h2>
+  <p>Rides go to the count of whoever is signed in, so they land in the right place.</p>
+  <a class="primary" id="gosignin" href="/account?next=/log"
+     style="display:block;text-align:center;text-decoration:none;box-sizing:border-box">Sign in</a>
+  <p style="margin:16px 0 10px">Riders who haven&rsquo;t claimed an account yet can still use the
+     shared password.</p>
+  <input id="pw" type="password" placeholder="Shared password" autocomplete="current-password">
+  <button class="ghost" id="unlock" style="width:100%">Unlock</button>
   <div class="msg bad" id="gate_msg"></div>
 </div>
 
@@ -220,9 +224,20 @@ var OWNED={};    // coaster id -> true, what this rider already has in their cou
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function $(id){return document.getElementById(id);}
 
-// ---- gate: same pattern as /edit, so unlocking one unlocks the other -------
-try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
-if(TOKEN) verify(TOKEN,true);
+// ---- gate ------------------------------------------------------------------
+// Two ways in, tried in this order:
+//   1. an account — the normal one now, and the only one that attributes the
+//      rides to a person rather than to whoever holds a password;
+//   2. the shared admin password, same pattern as /edit, so unlocking one
+//      unlocks the other. Still here for the riders who have not claimed an
+//      account yet, and it is what the park/coaster adders on this page need.
+var ME=null;
+CoasterHub.me().then(function(acct){
+  ME=acct;
+  if(acct){ $('gate').style.display='none'; $('app').style.display='block'; boot(); return; }
+  try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
+  if(TOKEN) verify(TOKEN,true);
+});
 $('unlock').onclick=function(){ verify($('pw').value,false); };
 $('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') verify($('pw').value,false); });
 
@@ -242,8 +257,11 @@ function verify(pw,quiet){
     });
 }
 
+// TOKEN is '' when you got in with an account: the session cookie authorizes the
+// request instead, and the Worker falls through to it when the header is empty.
 function api(method,path,body){
-  return fetch(path,{method:method,headers:{'x-admin-token':TOKEN,'content-type':'application/json'},
+  return fetch(path,{method:method,credentials:'same-origin',
+                     headers:{'x-admin-token':TOKEN,'content-type':'application/json'},
                      body:body?JSON.stringify(body):undefined})
     .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); });
 }
@@ -257,6 +275,7 @@ function boot(){
   $('date').value=local.toISOString().slice(0,10);
 
   fillRiders();
+  applyAccountLimits();
   // Riders live in D1; USERS is the offline fallback. Someone added on /import
   // (or with the + beside the picker) can be logged for straight away.
   CoasterHub.fetchUsers().then(function(){ fillRiders(); loadOwned(); });
@@ -434,11 +453,40 @@ function fillParks(keep){
 
 function fillRiders(){
   var sel=$('rider'), cur=sel.value;
+  // Signed in as a rider, there is nothing to choose: the API would refuse a
+  // write to anyone else, so offering the list would only be a way to get a
+  // 401. Admins keep the full list — logging on someone's behalf is the
+  // override the shared password used to give everybody.
+  if(ME && !ME.admin){
+    sel.innerHTML='<option value="'+esc(ME.slug)+'">'+esc(ME.name||ME.slug)+'</option>';
+    sel.value=ME.slug;
+    sel.disabled=true;
+    sel.title='Rides go to your own count';
+    return;
+  }
+  sel.disabled=false;
   sel.innerHTML=CoasterHub.USERS.slice().sort(function(a,b){return a.name.localeCompare(b.name);})
     .map(function(u){ return '<option value="'+esc(u.slug)+'">'+esc(u.name)+'</option>'; }).join('');
   var remembered=cur; if(!remembered){ try{ remembered=localStorage.getItem('ch_rider')||''; }catch(e){} }
+  if(ME && ME.admin && ME.slug) remembered=remembered||ME.slug;
   if(remembered) sel.value=remembered;
   if(!sel.value && sel.options.length) sel.selectedIndex=0;
+}
+
+// The adders on this page all write to the SHARED database (a rider, a park, a
+// coaster), which an account does not open — see the write split in worker.js.
+// Hide them rather than let someone fill a form that can only 401, and say why
+// so it reads as a boundary and not as a bug.
+function applyAccountLimits(){
+  if(!ME || ME.admin) return;
+  ['newrider','newpark','newcoaster'].forEach(function(id){
+    var el=$(id); if(el) el.style.display='none';
+  });
+  var hint=$('modehint');
+  if(hint) hint.insertAdjacentHTML('afterend',
+    '<p class="modehint" style="margin-top:2px">A park or coaster that isn\u2019t listed has to be '
+    + 'added to the shared database \u2014 ask Carter, or use <a href="/add">Add new</a> with the '
+    + 'shared password.</p>');
 }
 
 // ---- adding a rider --------------------------------------------------------

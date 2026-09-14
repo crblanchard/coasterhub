@@ -72,6 +72,16 @@ function freshDb() {
       note TEXT, added TEXT);
     CREATE TABLE activity (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, actor TEXT,
       kind TEXT NOT NULL, subject TEXT, n INTEGER, detail TEXT);
+    -- Accounts. Kept in step with migrations/003-accounts.sql by hand, like every
+    -- other table here; the migration is the source of truth for production.
+    CREATE TABLE accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL,
+      pw TEXT NOT NULL, slug TEXT, is_admin INTEGER NOT NULL DEFAULT 0,
+      created TEXT NOT NULL, seen TEXT);
+    CREATE UNIQUE INDEX accounts_email ON accounts(lower(email));
+    CREATE UNIQUE INDEX accounts_slug ON accounts(slug) WHERE slug IS NOT NULL;
+    CREATE TABLE sessions (token TEXT PRIMARY KEY, account INTEGER NOT NULL,
+      created TEXT NOT NULL, expires TEXT NOT NULL);
+    CREATE TABLE invites (code TEXT PRIMARY KEY, slug TEXT NOT NULL, created TEXT NOT NULL, used TEXT);
     INSERT INTO coasters (id,name,park,type) VALUES
       (1,'Steel Vengeance','Cedar Point','Steel'),
       (2,'Millennium Force','Cedar Point','Steel'),
@@ -91,9 +101,10 @@ function freshDb() {
 let worker, pass = 0, fail = 0;
 const ctx = { waitUntil() {} };
 
-async function call(db, method, path, { body, token } = {}) {
+async function call(db, method, path, { body, token, cookie } = {}) {
   const headers = {};
   if (token) headers["x-admin-token"] = token;
+  if (cookie) headers["cookie"] = cookie;
   if (body !== undefined) headers["content-type"] = "application/json";
   const req = new Request("https://coasterhub.org" + path, {
     method, headers, body: body === undefined ? undefined : JSON.stringify(body),
@@ -102,7 +113,16 @@ async function call(db, method, path, { body, token } = {}) {
   const res = await worker.fetch(req, env, ctx);
   let data = null;
   try { data = await res.json(); } catch { /* non-JSON */ }
-  return { status: res.status, data };
+  // The name=value pair only, which is what a browser would send back up.
+  const set = res.headers.get("set-cookie");
+  return { status: res.status, data, setCookie: set, cookie: set ? set.split(";")[0] : null };
+}
+
+// Sign up and return the cookie a browser would then be holding.
+async function signedUp(db, email, name, password = "riding-things") {
+  const r = await call(db, "POST", "/api/auth/signup", { body: { email, name, password } });
+  if (r.status !== 200) throw new Error("signup failed: " + JSON.stringify(r.data));
+  return r.cookie;
 }
 
 function check(name, cond, detail) {
@@ -586,6 +606,229 @@ async function main() {
       (await call(db, "POST", "/api/user", { token: PW, body: { name: "Stats" } })).status === 400);
     check("...and none of those wrote a row",
       rows(db, "SELECT * FROM users").length === 5);
+  }
+
+  console.log("\nAccounts — signing up");
+  {
+    const db = freshDb();
+    let r = await call(db, "POST", "/api/auth/signup",
+      { body: { email: "Nia@Example.COM ", name: "Nia", password: "riding-things" } });
+    check("signup creates an account and returns the new rider",
+      r.status === 200 && r.data.slug === "nia", JSON.stringify(r.data));
+    check("...and sets an HttpOnly Secure SameSite cookie",
+      /^ch_sess=[0-9a-f]{64};/.test(r.setCookie || "") && /HttpOnly/.test(r.setCookie)
+      && /Secure/.test(r.setCookie) && /SameSite=Lax/.test(r.setCookie), r.setCookie);
+    check("...and the rider row exists, with no rides",
+      rows(db, "SELECT * FROM users WHERE slug = 'nia'").length === 1
+      && rows(db, "SELECT * FROM rides WHERE user_slug = 'nia'").length === 0);
+    check("...and the password is never stored in the clear",
+      rows(db, "SELECT pw FROM accounts")[0].pw.startsWith("pbkdf2$sha256$210000$"));
+    check("...and the email is normalised to lowercase, trimmed",
+      rows(db, "SELECT email FROM accounts")[0].email === "nia@example.com");
+
+    const me = await call(db, "GET", "/api/auth/me", { cookie: r.cookie });
+    check("/api/auth/me names the signed-in rider",
+      me.status === 200 && me.data.account.slug === "nia" && me.data.account.name === "Nia"
+      && me.data.account.admin === false, JSON.stringify(me.data));
+    const anon = await call(db, "GET", "/api/auth/me");
+    check("/api/auth/me is a 200 with a null account when signed out",
+      anon.status === 200 && anon.data.account === null, JSON.stringify(anon.data));
+
+    r = await call(db, "POST", "/api/auth/signup",
+      { body: { email: "NIA@example.com", name: "Nia Again", password: "riding-things" } });
+    check("the same email cannot sign up twice, whatever the case", r.status === 409);
+    check("...and the rejected signup left no half-made rider behind",
+      rows(db, "SELECT * FROM users WHERE slug = 'nia-again'").length === 0);
+
+    r = await call(db, "POST", "/api/auth/signup", { body: { email: "x@y.z", name: "Short", password: "abc" } });
+    check("a password under 8 characters is refused", r.status === 400);
+    r = await call(db, "POST", "/api/auth/signup", { body: { email: "not-an-email", name: "Bad", password: "riding-things" } });
+    check("a malformed email is refused", r.status === 400);
+    r = await call(db, "POST", "/api/auth/signup", { body: { email: "s@t.u", name: "Stats", password: "riding-things" } });
+    check("a rider name that collides with a page name is refused", r.status === 400, JSON.stringify(r.data));
+  }
+
+  console.log("\nAccounts — signing in and out");
+  {
+    const db = freshDb();
+    await signedUp(db, "nia@example.com", "Nia");
+
+    let r = await call(db, "POST", "/api/auth/login", { body: { email: "nia@example.com", password: "wrong" } });
+    check("the wrong password is a 401", r.status === 401);
+    check("...and says nothing about which half was wrong", r.data.error === "wrong email or password");
+    r = await call(db, "POST", "/api/auth/login", { body: { email: "ghost@example.com", password: "riding-things" } });
+    check("an unknown email gets the identical answer", r.status === 401
+      && r.data.error === "wrong email or password");
+
+    r = await call(db, "POST", "/api/auth/login", { body: { email: "NIA@Example.com", password: "riding-things" } });
+    check("the right password signs in, case-insensitively on the email", r.status === 200);
+    const cookie = r.cookie;
+    check("...and records the sign-in", rows(db, "SELECT seen FROM accounts")[0].seen !== null);
+    check("...and the session row holds a hash, not the cookie value",
+      rows(db, "SELECT token FROM sessions").every(x => !cookie.includes(x.token)));
+
+    // Two sessions are live here: the one signup opened and the one login just
+    // did. Signing out must end exactly one of them — logging out on a phone
+    // should not sign you out of a laptop.
+    const before = rows(db, "SELECT * FROM sessions").length;
+    const out = await call(db, "POST", "/api/auth/logout", { cookie });
+    check("logout clears the cookie", /Max-Age=0/.test(out.setCookie || ""), out.setCookie);
+    check("...and drops that session's row, leaving other devices signed in",
+      before === 2 && rows(db, "SELECT * FROM sessions").length === 1);
+    const after = await call(db, "GET", "/api/auth/me", { cookie });
+    check("...so the old cookie no longer signs anyone in", after.data.account === null);
+
+    const forged = await call(db, "GET", "/api/auth/me", { cookie: "ch_sess=" + "a".repeat(64) });
+    check("a made-up cookie is nobody", forged.data.account === null);
+  }
+
+  console.log("\nAccounts — you may only write to your own count");
+  {
+    const db = freshDb();
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    const ravi = await signedUp(db, "ravi@example.com", "Ravi");
+    const day = { d: "2026-01-02", entries: [{ c: 1, n: 2 }] };
+
+    let r = await call(db, "POST", "/api/rides", { body: { user: "nia", ...day }, cookie: nia });
+    check("a signed-in rider can log their own day, with no admin password",
+      r.status === 200 && rows(db, "SELECT * FROM rides WHERE user_slug = 'nia'").length === 2,
+      JSON.stringify(r.data));
+
+    r = await call(db, "POST", "/api/rides", { body: { user: "ravi", ...day }, cookie: nia });
+    check("...but not someone else's", r.status === 401);
+    check("...and nothing was written", rows(db, "SELECT * FROM rides WHERE user_slug = 'ravi'").length === 0);
+
+    r = await call(db, "POST", "/api/rides", { body: { user: "carter", ...day }, cookie: nia });
+    check("...not even into a rider who predates accounts", r.status === 401);
+
+    r = await call(db, "POST", "/api/rides", { body: { user: "nia", ...day } });
+    check("signed out, a ride write is still a 401", r.status === 401);
+    r = await call(db, "POST", "/api/rides", { body: { user: "carter", ...day }, token: PW });
+    check("the shared admin password still logs for anyone (unchanged)",
+      r.status === 200, JSON.stringify(r.data));
+
+    // Deleting one ride: the owner is on the row, not in the request.
+    const mine = rows(db, "SELECT id FROM rides WHERE user_slug = 'nia'")[0].id;
+    const theirs = rows(db, "SELECT id FROM rides WHERE user_slug = 'carter'")[0].id;
+    r = await call(db, "DELETE", "/api/ride", { body: { i: theirs }, cookie: nia });
+    check("a rider cannot delete a ride out of someone else's log", r.status === 401
+      && rows(db, "SELECT * FROM rides WHERE id = " + theirs).length === 1);
+    r = await call(db, "DELETE", "/api/ride", { body: { i: mine }, cookie: nia });
+    check("...but can delete their own", r.status === 200
+      && rows(db, "SELECT * FROM rides WHERE id = " + mine).length === 0);
+
+    r = await call(db, "POST", "/api/credit", { body: { user: "ravi", coaster_id: 3 }, cookie: nia });
+    check("credits follow the same rule", r.status === 401);
+    r = await call(db, "POST", "/api/credit", { body: { user: "nia", coaster_id: 3 }, cookie: nia });
+    check("...for you as well as against you", r.status === 200);
+    r = await call(db, "DELETE", "/api/credit", { body: { user: "ravi", coaster_id: 1 }, cookie: nia });
+    check("removing a credit from another rider is refused", r.status === 401);
+
+    r = await call(db, "POST", "/api/coaster", { body: { name: "New One", park: "Cedar Point" }, cookie: nia });
+    check("an account does NOT open the shared coaster database", r.status === 401, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/user", { body: { name: "Someone" }, cookie: nia });
+    check("...nor adding riders by hand", r.status === 401);
+  }
+
+  console.log("\nAccounts — rankings close as riders claim them");
+  {
+    const db = freshDb();
+    let r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2] } });
+    check("an unclaimed rider's rankings stay open, as before accounts", r.status === 200,
+      JSON.stringify(r.data));
+
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    r = await call(db, "PUT", "/api/rankings/nia", { body: { order: [1] } });
+    check("a claimed rider's rankings are closed to the public", r.status === 401);
+    r = await call(db, "PUT", "/api/rankings/nia", { body: { order: [1] }, cookie: nia });
+    check("...and open to its owner", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "PUT", "/api/rankings/nia", { body: { order: [2] }, token: PW });
+    check("...and to the admin password", r.status === 200);
+  }
+
+  console.log("\nAccounts — claiming a rider who predates accounts");
+  {
+    const db = freshDb();
+    let r = await call(db, "POST", "/api/admin/invite", { body: { slug: "carter" } });
+    check("only an admin can mint an invite", r.status === 401);
+    r = await call(db, "POST", "/api/admin/invite", { body: { slug: "nobody" }, token: PW });
+    check("an invite for a rider who does not exist is a 404", r.status === 404);
+    r = await call(db, "POST", "/api/admin/invite", { body: { slug: "carter" }, token: PW });
+    check("an invite hands back a claim URL", r.status === 200
+      && /^https:\/\/coasterhub\.org\/account\?claim=[0-9a-f]{64}$/.test(r.data.url || ""), r.data.url);
+    const code = r.data.url.split("=")[1];
+
+    const look = await call(db, "GET", "/api/auth/invite?code=" + code);
+    check("the claim page can look the invite up by code",
+      look.status === 200 && look.data.slug === "carter" && look.data.name === "Carter");
+    check("a bogus code 404s", (await call(db, "GET", "/api/auth/invite?code=nope")).status === 404);
+
+    r = await call(db, "POST", "/api/auth/claim",
+      { body: { code, email: "carter@example.com", password: "riding-things" } });
+    check("claiming binds a new login to the EXISTING rider", r.status === 200 && r.data.slug === "carter");
+    check("...and Carter's rides are untouched",
+      rows(db, "SELECT * FROM rides WHERE user_slug = 'carter'").length === 3);
+    check("...and no second rider was created", rows(db, "SELECT * FROM users").length === 3);
+
+    const carter = r.cookie;
+    r = await call(db, "POST", "/api/rides",
+      { body: { user: "carter", d: "2026-02-02", entries: [{ c: 2, n: 1 }] }, cookie: carter });
+    check("...so he can now log his own day without the shared password", r.status === 200);
+
+    r = await call(db, "POST", "/api/auth/claim",
+      { body: { code, email: "someone-else@example.com", password: "riding-things" } });
+    check("an invite is single use", r.status === 410, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/admin/invite", { body: { slug: "carter" }, token: PW });
+    check("and a claimed rider cannot be re-invited", r.status === 409);
+  }
+
+  console.log("\nAccounts — changing your password");
+  {
+    const db = freshDb();
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    let r = await call(db, "POST", "/api/auth/password", { body: { current: "riding-things", password: "longer-one" } });
+    check("signed out, you cannot change a password", r.status === 401);
+    r = await call(db, "POST", "/api/auth/password", { body: { current: "wrong", password: "longer-one" }, cookie: nia });
+    check("the current password is required", r.status === 401);
+    r = await call(db, "POST", "/api/auth/password", { body: { current: "riding-things", password: "short" }, cookie: nia });
+    check("the new one still has to be long enough", r.status === 400);
+    r = await call(db, "POST", "/api/auth/password", { body: { current: "riding-things", password: "longer-one" }, cookie: nia });
+    check("with the current password it changes", r.status === 200);
+    check("...and every other session is dropped", rows(db, "SELECT * FROM sessions").length === 1);
+    check("...leaving the old cookie dead",
+      (await call(db, "GET", "/api/auth/me", { cookie: nia })).data.account === null);
+    check("...and the new one working",
+      (await call(db, "GET", "/api/auth/me", { cookie: r.cookie })).data.account.slug === "nia");
+    check("...and the old password no longer signs in",
+      (await call(db, "POST", "/api/auth/login", { body: { email: "nia@example.com", password: "riding-things" } })).status === 401);
+  }
+
+  console.log("\nAccounts — a database where the migration has not run yet");
+  {
+    // The deploy order is: push (Worker goes live) then run the migration by
+    // hand. Everything has to keep working in the gap, or a rankings save 500s
+    // on "no such table: accounts" for everyone.
+    const db = freshDb();
+    db.exec("DROP TABLE sessions; DROP TABLE invites; DROP TABLE accounts;");
+
+    let r = await call(db, "PUT", "/api/rankings/carter", { body: { order: [1, 2] } });
+    check("rankings still save", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/rides",
+      { body: { user: "carter", d: "2026-03-03", entries: [{ c: 1, n: 1 }] }, token: PW });
+    check("the shared password still logs rides", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/rides",
+      { body: { user: "carter", d: "2026-03-03", entries: [{ c: 1, n: 1 }] } });
+    check("...and an unauthorized one is still refused, not a 500", r.status === 401);
+    r = await call(db, "GET", "/api/auth/me");
+    check("/api/auth/me answers 'nobody', so every page still renders",
+      r.status === 200 && r.data.account === null, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/auth/login", { body: { email: "a@b.c", password: "whatever" } });
+    check("signing in says the feature is not deployed, rather than 500ing", r.status === 503);
+    r = await call(db, "POST", "/api/admin/invite", { body: { slug: "carter" }, token: PW });
+    check("minting an invite names the migration to run", r.status === 503
+      && /003-accounts/.test(r.data.error || ""), JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/rides/carter");
+    check("and ordinary reads are untouched", r.status === 200);
   }
 
   console.log("\nRegression — endpoints the rest of the site depends on");

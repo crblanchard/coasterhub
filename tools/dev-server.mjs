@@ -116,6 +116,15 @@ createServer(async (req, res) => {
                             : out({ id, name: "Held", park: "Cedar Point", riders: HELD, rides: 3 });
     }
 
+    // Accounts are NOT stubbed as signed-in: this server has no accounts table,
+    // and answering "yes" here would send /log down a path whose writes it cannot
+    // honour. Signed out is the honest answer, and it leaves the shared-password
+    // route — the one this server does implement — as the way in. To exercise
+    // real sign-in locally, run worker.js against node:sqlite the way
+    // tools/test-rides-api.mjs does.
+    if (u === "/api/auth/me" && req.method === "GET") return out({ account: null });
+    if (u.startsWith("/api/auth/")) return out({ error: "accounts need the real Worker — see tools/test-rides-api.mjs" }, 501);
+
     // ---- gated ----
     if (u === "/api/admin/login" && req.method === "POST") return authed() ? out({ ok: true }) : deny();
     if (u.startsWith("/api/")) {

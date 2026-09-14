@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
+<title>Account — Coaster Hub</title>
+<meta name="description" content="Sign in to Coaster Hub, or start your own coaster count.">
+<link rel="stylesheet" href="/style.css?v=20260805b">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<link rel="icon" href="/favicon.svg?v=20260805b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260805b" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png?v=20260805b" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260805b">
+<meta property="og:title" content="Coaster Hub — Account">
+<meta property="og:image" content="https://coasterhub.org/og-image.png">
+<style>
+  /* Same panel + form vocabulary as /log's gate, so signing in looks like the
+     rest of the site rather than like a bolted-on auth page. */
+  .pane{max-width:420px;margin:8px auto 80px;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:24px}
+  .pane h2{font-size:1.1rem;margin-bottom:6px}
+  .pane p.sub{color:var(--muted);font-size:.88rem;margin-bottom:16px}
+  label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 5px}
+  input{background:var(--well);border:1px solid var(--line);color:var(--fg);padding:10px 12px;
+    border-radius:10px;font-size:.95rem;font-family:inherit;width:100%;margin-bottom:13px}
+  input:focus{outline:2px solid var(--accent2);outline-offset:1px;border-color:var(--accent2)}
+  button.primary{background:var(--accent2);border:0;color:var(--well);font-weight:700;border-radius:10px;
+    padding:11px 18px;cursor:pointer;font-size:.92rem;width:100%;font-family:inherit}
+  button.primary:disabled{opacity:.4;cursor:default}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;
+    padding:10px 14px;cursor:pointer;font-size:.9rem;font-family:inherit}
+  button.ghost:hover{color:var(--fg)}
+  .msg{margin-top:12px;font-size:.88rem;min-height:1.2em}
+  .msg.ok{color:var(--accent2)} .msg.bad{color:var(--accent)}
+  .hint{color:var(--muted);font-size:.8rem;margin:-6px 0 14px}
+  /* Sign in / Create account, same switch as /log's mode toggle. */
+  .modesw{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:999px;
+    padding:3px;margin-bottom:18px;width:100%}
+  .modesw button{flex:1;background:transparent;border:0;color:var(--muted);font:inherit;font-size:.88rem;
+    padding:8px 14px;border-radius:999px;cursor:pointer}
+  .modesw button:hover{color:var(--fg)}
+  .modesw button.on{background:var(--accent2);color:var(--well);font-weight:700}
+  /* "Create account" wraps to two lines on a 320px phone at the default size. */
+  @media (max-width:360px){
+    .modesw button{padding:8px 8px;font-size:.82rem}
+    .pane{padding:20px 16px}
+  }
+  .who{display:flex;align-items:center;gap:13px;margin-bottom:18px}
+  .who .av{width:44px;height:44px;border-radius:999px;background:var(--soft);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:var(--accent2)}
+  .who .nm{font-weight:700;font-size:1.05rem}
+  .who .em{color:var(--muted);font-size:.83rem;word-break:break-all}
+  .rowlinks{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .rowlinks a{flex:1 1 auto;text-align:center;border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;font-size:.9rem;font-weight:600;color:var(--fg)}
+  .rowlinks a:hover{border-color:var(--accent2)}
+  .sep{border:0;border-top:1px solid var(--line);margin:22px 0 18px}
+  details summary{cursor:pointer;color:var(--muted);font-size:.88rem;margin-bottom:12px}
+  details summary:hover{color:var(--fg)}
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260805b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="home">Home</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/log" data-nav="log">Log</a>
+    <a href="/rides" data-nav="rides">Rides</a>
+    <a href="/stats" data-nav="stats">Profile</a>
+    <a href="/add" data-nav="add">Add new</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero" style="padding:56px 0 20px"><div class="container">
+  <span class="badge" id="hero_badge">Account</span>
+  <h1 style="max-width:18ch" id="hero_h">Your count, in your name.</h1>
+  <p id="hero_p">Sign in to log rides against your own count &mdash; no shared password, and nobody
+     logging rides into it but you.</p>
+</div></section>
+
+<section class="block" style="padding-top:6px"><div class="container">
+
+  <!-- signed out: sign in / create account -->
+  <div class="pane" id="pane_auth" style="display:none">
+    <div class="modesw">
+      <button id="tab_in" class="on">Sign in</button>
+      <button id="tab_up">Create account</button>
+    </div>
+
+    <form id="form_in">
+      <label for="in_email">Email</label>
+      <input id="in_email" type="email" autocomplete="username" required>
+      <label for="in_pw">Password</label>
+      <input id="in_pw" type="password" autocomplete="current-password" required>
+      <button class="primary" type="submit" id="in_go">Sign in</button>
+      <div class="msg bad" id="in_msg"></div>
+    </form>
+
+    <form id="form_up" style="display:none">
+      <label for="up_name">Your name</label>
+      <input id="up_name" type="text" autocomplete="name" maxlength="40" required>
+      <p class="hint">This names your count and your page &mdash; coasterhub.org/user/&lt;you&gt;.</p>
+      <label for="up_email">Email</label>
+      <input id="up_email" type="email" autocomplete="username" required>
+      <label for="up_pw">Password</label>
+      <input id="up_pw" type="password" autocomplete="new-password" required>
+      <p class="hint">At least 8 characters. Length is all that is asked for &mdash; a phrase you can
+        remember beats a short one you cannot.</p>
+      <button class="primary" type="submit" id="up_go">Create account</button>
+      <div class="msg bad" id="up_msg"></div>
+    </form>
+  </div>
+
+  <!-- an invite link: claim a rider that already has rides -->
+  <div class="pane" id="pane_claim" style="display:none">
+    <h2 id="claim_h">Claim your count</h2>
+    <p class="sub" id="claim_p"></p>
+    <form id="form_claim">
+      <label for="cl_email">Email</label>
+      <input id="cl_email" type="email" autocomplete="username" required>
+      <label for="cl_pw">Choose a password</label>
+      <input id="cl_pw" type="password" autocomplete="new-password" required>
+      <p class="hint">At least 8 characters.</p>
+      <button class="primary" type="submit" id="cl_go">Claim it</button>
+      <div class="msg bad" id="cl_msg"></div>
+    </form>
+  </div>
+
+  <!-- signed in -->
+  <div class="pane" id="pane_me" style="display:none">
+    <div class="who">
+      <div class="av" id="me_av"></div>
+      <div>
+        <div class="nm" id="me_name"></div>
+        <div class="em" id="me_email"></div>
+      </div>
+    </div>
+    <div class="rowlinks">
+      <a id="me_profile" href="/stats">Your profile</a>
+      <a id="me_log" href="/log">Log a day</a>
+    </div>
+    <hr class="sep">
+    <details>
+      <summary>Change password</summary>
+      <form id="form_pw">
+        <label for="pw_cur">Current password</label>
+        <input id="pw_cur" type="password" autocomplete="current-password" required>
+        <label for="pw_new">New password</label>
+        <input id="pw_new" type="password" autocomplete="new-password" required>
+        <p class="hint">Signs you out everywhere else.</p>
+        <button class="primary" type="submit" id="pw_go">Change it</button>
+        <div class="msg" id="pw_msg"></div>
+      </form>
+    </details>
+    <button class="ghost" id="signout" style="width:100%;margin-top:6px">Sign out</button>
+    <div class="msg" id="me_msg"></div>
+  </div>
+
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/stats">Profile</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+</div></footer>
+
+<script src="/app.js?v=20260805b"></script>
+<script>
+document.getElementById('y').textContent = new Date().getFullYear();
+CoasterHub.initNav('account');
+
+var $ = function(id){ return document.getElementById(id); };
+var CLAIM = new URLSearchParams(location.search).get('claim') || '';
+
+function show(id){
+  ['pane_auth','pane_claim','pane_me'].forEach(function(p){
+    $(p).style.display = (p === id) ? '' : 'none';
+  });
+}
+function say(el, text, ok){
+  el.textContent = text || '';
+  el.className = 'msg ' + (ok ? 'ok' : 'bad');
+}
+// Every form here posts JSON and reads {error} back, so one helper covers all
+// four. credentials:'same-origin' is the default for same-origin fetch, but it
+// is stated because the whole page depends on the cookie coming back.
+function post(path, body){
+  return fetch(path, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify(body)
+  }).then(function(r){
+    return r.json().catch(function(){ return {}; }).then(function(d){
+      return { ok: r.ok, status: r.status, data: d };
+    });
+  });
+}
+// A submit handler that disables its button, posts, and either lands somewhere
+// or prints why not. Written once because four forms would otherwise each grow
+// their own slightly different version of it.
+function wire(form, button, msg, build, path, done){
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var body = build();
+    if (!body) return;
+    button.disabled = true;
+    say(msg, '');
+    post(path, body).then(function(r){
+      button.disabled = false;
+      if (!r.ok) { say(msg, r.data.error || ('Something went wrong (' + r.status + ').')); return; }
+      done(r.data);
+    }).catch(function(){
+      button.disabled = false;
+      say(msg, 'Could not reach the server — try again.');
+    });
+  });
+}
+
+// Where to go once you are signed in: back where you came from if another page
+// sent you here, otherwise your own profile.
+function landing(slug){
+  var next = new URLSearchParams(location.search).get('next');
+  if (next && next.charAt(0) === '/' && next.charAt(1) !== '/') return next;
+  return slug ? '/user/' + slug + '/stats' : '/';
+}
+
+// ---- signed in ------------------------------------------------------------
+function renderMe(a){
+  $('me_name').textContent = a.name || a.slug || 'Your account';
+  $('me_email').textContent = a.email;
+  $('me_av').textContent = (a.name || a.slug || '?').trim().charAt(0).toUpperCase();
+  $('me_profile').href = a.slug ? '/user/' + a.slug + '/stats' : '/stats';
+  $('hero_badge').textContent = 'Signed in';
+  $('hero_h').textContent = 'You’re signed in.';
+  $('hero_p').textContent = a.admin
+    ? 'You can log rides for anyone and edit the shared database.'
+    : 'Rides and rankings you log go to your count, and only you can write to it.';
+  show('pane_me');
+}
+
+$('signout').addEventListener('click', function(){
+  $('signout').disabled = true;
+  post('/api/auth/logout', {}).then(function(){ location.href = '/'; })
+    .catch(function(){ $('signout').disabled = false; say($('me_msg'), 'Could not sign out — try again.'); });
+});
+
+wire($('form_pw'), $('pw_go'), $('pw_msg'),
+  function(){ return { current: $('pw_cur').value, password: $('pw_new').value }; },
+  '/api/auth/password',
+  function(){
+    $('pw_cur').value = ''; $('pw_new').value = '';
+    say($('pw_msg'), 'Password changed.', true);
+  });
+
+// ---- signed out -----------------------------------------------------------
+function tab(which){
+  var inMode = which === 'in';
+  $('tab_in').classList.toggle('on', inMode);
+  $('tab_up').classList.toggle('on', !inMode);
+  $('form_in').style.display = inMode ? '' : 'none';
+  $('form_up').style.display = inMode ? 'none' : '';
+}
+$('tab_in').addEventListener('click', function(){ tab('in'); });
+$('tab_up').addEventListener('click', function(){ tab('up'); });
+
+wire($('form_in'), $('in_go'), $('in_msg'),
+  function(){ return { email: $('in_email').value, password: $('in_pw').value }; },
+  '/api/auth/login',
+  function(d){ location.href = landing(d.slug); });
+
+wire($('form_up'), $('up_go'), $('up_msg'),
+  function(){ return { name: $('up_name').value, email: $('up_email').value, password: $('up_pw').value }; },
+  '/api/auth/signup',
+  function(d){
+    // A brand new count has nothing on a profile page yet, so send them to the
+    // thing they came to do.
+    try { localStorage.setItem('ch_rider', d.slug); } catch (e) {}
+    location.href = '/log';
+  });
+
+wire($('form_claim'), $('cl_go'), $('cl_msg'),
+  function(){ return { code: CLAIM, email: $('cl_email').value, password: $('cl_pw').value }; },
+  '/api/auth/claim',
+  function(d){
+    try { localStorage.setItem('ch_rider', d.slug); } catch (e) {}
+    location.href = '/user/' + d.slug + '/stats';
+  });
+
+// ---- decide what to show --------------------------------------------------
+// Signed in wins over an invite link: someone who already has an account and
+// opens an invite should see their own account, not a form that will 409.
+fetch('/api/auth/me', { credentials: 'same-origin' })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d && d.account) { renderMe(d.account); return; }
+    if (!CLAIM) { show('pane_auth'); return; }
+    return fetch('/api/auth/invite?code=' + encodeURIComponent(CLAIM))
+      .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+      .then(function(res){
+        if (!res.ok) {
+          // A spent or bogus link still lands somewhere useful rather than on an
+          // error page: sign in if you already claimed it, sign up if you never had it.
+          show('pane_auth');
+          say($('in_msg'), res.j.error || 'That invite link is not valid.');
+          return;
+        }
+        $('hero_badge').textContent = 'Invitation';
+        $('hero_h').textContent = 'Claim your count.';
+        $('hero_p').textContent = 'Your rides are already here. This puts them behind your own login.';
+        $('claim_h').textContent = 'You are claiming ' + res.j.name;
+        $('claim_p').textContent = 'Everything already logged for ' + res.j.name +
+          ' stays exactly as it is — this only decides who can add to it.';
+        show('pane_claim');
+      });
+  })
+  .catch(function(){
+    // The API being unreachable should not leave a blank page.
+    show('pane_auth');
+    say($('in_msg'), 'Could not reach the server — reload to try again.');
+  });
+</script>
+</body>
+</html>

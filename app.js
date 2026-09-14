@@ -452,6 +452,44 @@
   // the left of "Viewing <rider>". Log and Add have no picker, so there it is
   // appended to the nav instead — prepending put it left of the wordmark and
   // shoved the whole brand into the middle of the header.
+  // ---- who is signed in ----------------------------------------------------
+  // One request per page load, shared by everything that asks. The answer is
+  // deliberately NOT cached in localStorage: a stale "you are Cole" would put
+  // the wrong name on the log button and hide the sign-in link from someone
+  // whose session has since expired.
+  var mePromise = null;
+  function me() {
+    if (!mePromise) {
+      mePromise = fetch("/api/auth/me", { credentials: "same-origin" })
+        .then(function (r) { return r.ok ? r.json() : { account: null }; })
+        .then(function (d) { return (d && d.account) || null; })
+        .catch(function () { return null; });   // offline, or the API is down
+    }
+    return mePromise;
+  }
+
+  // The header's account control: your initial when signed in, a person outline
+  // when not. Both go to /account — one to manage it, one to make one.
+  var PERSON = '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20a7.5 7.5 0 0 1 15 0"/>';
+  function buildAccountLink(wrap) {
+    var a = document.createElement("a");
+    a.className = "acctlink";
+    a.href = "/account";
+    a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
+      + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PERSON + "</svg>";
+    a.setAttribute("aria-label", "Sign in");
+    a.setAttribute("title", "Sign in");
+    wrap.appendChild(a);
+    me().then(function (acct) {
+      if (!acct) return;
+      var label = acct.name || acct.slug || acct.email;
+      a.textContent = String(label).trim().charAt(0).toUpperCase();
+      a.className = "acctlink on";
+      a.setAttribute("aria-label", "Signed in as " + label);
+      a.setAttribute("title", "Signed in as " + label);
+    });
+  }
+
   function buildThemeToggle(wrap, atStart) {
     var b = document.createElement("button");
     b.type = "button";
@@ -576,6 +614,7 @@
       }
     }
     if (themeHost && !themeHost.querySelector(".themetoggle")) buildThemeToggle(themeHost, true);
+    if (themeHost && !themeHost.querySelector(".acctlink")) buildAccountLink(themeHost);
 
     buildTabBar(page, slug);
   }
@@ -630,7 +669,7 @@
     document.body.appendChild(nav);
   }
 
-  var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser,
+  var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers };
