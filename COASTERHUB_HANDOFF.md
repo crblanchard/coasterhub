@@ -590,6 +590,13 @@ chunked by `SQL_VARS` like every other id list here. The count rides along insid
 `ranking` activity entry (`detail.credited`) rather than as a second feed row: one action by the
 rider should read as one line.
 
+**Ranking while signed out.** Rankings are still unchallenged for an unclaimed rider, but once
+a rider claims an account only that account may write their order — so a signed-out rider can
+rank happily and then fail to save. `/rankings` turns that 401 into a sign-in link that returns
+to the page (`?next=`), with their order still on screen, rather than printing "unauthorized".
+The save also reports credits gained ("Saved · 40 ranked · +3 credits") so a count moving is
+visible where it happened.
+
 **Backfill.** The live path only credits when a ranking is next saved, so anything ranked
 before the deploy stayed missing. `migrations/006-backfill-ranked-credits.sql` closes that once
 for existing rankings — undated, idempotent, insert-only, and it writes no activity row (it is a

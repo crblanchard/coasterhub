@@ -628,21 +628,45 @@ function answerHH(mid,better){
 function closeHH(){ hh=null; $('hh').style.display='none'; }
 
 // ------------------------------------------------------------------ save ----
-// No password here on purpose — see RANKINGS_NEED_TOKEN in worker.js. Ranking is
-// the part people are meant to enjoy, so it does not get challenged.
+// Still no password — see RANKINGS_NEED_TOKEN in worker.js. Ranking is the part
+// people are meant to enjoy, so it does not get challenged.
+//
+// Accounts changed this in one specific way (2026-09-14): once a rider has
+// claimed an account, only that account may write their order. A rider who is
+// signed out therefore CAN rank — the page works, the drag works — and then
+// cannot save. Saying "unauthorized" to someone in that position is useless,
+// so a 401 gets the one thing that actually helps: a way back in that returns
+// here afterwards. Their work is still on the page when they come back.
+function signInHref(){
+  return '/account?next=' + encodeURIComponent(location.pathname + location.search);
+}
 function save(){
   $('save').disabled=true;
   $('status').className='status'; $('status').textContent='Saving…';
-  fetch('/api/rankings/'+slug,{method:'PUT',headers:{'content-type':'application/json'},
+  fetch('/api/rankings/'+slug,{method:'PUT',credentials:'same-origin',
+                               headers:{'content-type':'application/json'},
                                body:JSON.stringify({order:ORDER})})
-    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); })
+    .then(function(r){ return r.json().then(function(j){
+      if(!r.ok){ var e=new Error(j.error||('HTTP '+r.status)); e.status=r.status; throw e; }
+      return j; }); })
     .then(function(j){
       dirty=false;
-      $('status').className='status ok'; $('status').textContent='Saved · '+j.count+' ranked';
+      $('status').className='status ok';
+      // Ranking something you had not logged adds it to your count, so say so
+      // rather than letting the number move silently on another page.
+      $('status').textContent='Saved · '+j.count+' ranked'
+        + (j.credited ? ' · +'+j.credited+' credit'+(j.credited>1?'s':'') : '');
     })
     .catch(function(e){
       $('save').disabled=false;
-      $('status').className='status dirty'; $('status').textContent='Save failed: '+e.message;
+      $('status').className='status dirty';
+      if(e.status===401){
+        $('status').innerHTML='Sign in to save this ranking — '
+          + '<a href="'+signInHref()+'" style="color:var(--accent2);font-weight:700">sign in</a>'
+          + '. Your order stays as it is here.';
+        return;
+      }
+      $('status').textContent='Save failed: '+e.message;
     });
 }
 </script>
