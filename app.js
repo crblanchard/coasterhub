@@ -277,9 +277,29 @@
 
   // Data loading: prefer the D1-backed API, fall back to the static JSON files
   // (kept in the repo as the seed + a safety net) if the API is unavailable.
+  // API first, static snapshot second. The two failures are NOT the same thing
+  // and callers need to tell them apart: a 404 from the API with no snapshot
+  // behind it means the thing genuinely is not there — a rider who renamed, say,
+  // since a rename deletes the old username outright — whereas anything else
+  // means we could not reach the data. Without the distinction, a visitor
+  // following a stale link used to get advice about running a local web server,
+  // because r.json() on the missing snapshot threw a parse error and every
+  // failure looked alike.
   function fetchJSON(apiPath, staticPath) {
-    return fetch(apiPath).then(function (r) { if (!r.ok) throw new Error("api " + r.status); return r.json(); })
-      .catch(function () { return fetch(staticPath).then(function (r) { return r.json(); }); });
+    return fetch(apiPath).then(function (r) {
+      if (!r.ok) { var e = new Error("api " + r.status); e.status = r.status; throw e; }
+      return r.json();
+    }).catch(function (apiErr) {
+      return fetch(staticPath).then(function (r) {
+        if (!r.ok) {
+          var gone = !!(apiErr && apiErr.status === 404);
+          var e2 = new Error(gone ? "not found" : "could not load data");
+          e2.missing = gone;
+          throw e2;
+        }
+        return r.json();
+      });
+    });
   }
   function fetchCoasters() { return fetchJSON("/api/coasters", "/coasters.json"); }
   function fetchParks() { return fetchJSON("/api/parks", "/parks.json"); }

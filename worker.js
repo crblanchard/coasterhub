@@ -141,12 +141,6 @@ const DUMMY_HASH = "pbkdf2$sha256$100000$H9X3LabUcAffgcYCyj1o0g==$7sAIfFxqCdYJxU
 // describes — a rolled-back database, a test that drops the table — and the
 // saving is one trivial query on paths that are already doing a write or a
 // password hash. The public read paths never call this at all.
-async function haveUserAliases(env) {
-  try {
-    await env.DB.prepare("SELECT 1 FROM user_aliases LIMIT 1").first();
-    return true;
-  } catch (e) { return false; }
-}
 async function haveAccounts(env) {
   try {
     await env.DB.prepare("SELECT 1 FROM accounts LIMIT 1").first();
@@ -331,8 +325,7 @@ async function addUser(env, body) {
 // other tables; `name` is free text nobody joins on. So they validate
 // differently and only one of them is hard to change.
 
-// Is this username free? Checks aliases too — reusing a name that used to point
-// somewhere else would silently steal every old link to it.
+// Is this username free?
 async function slugProblem(env, slug, selfSlug) {
   if (!/^[a-z0-9][a-z0-9-]{1,31}$/.test(slug)) {
     return "a username needs 2-32 characters, letters, numbers or hyphens";
@@ -341,46 +334,28 @@ async function slugProblem(env, slug, selfSlug) {
   if (slug === selfSlug) return null;
   const clash = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(slug).first();
   if (clash) return "“" + slug + "” is taken";
-  try {
-    const old = await env.DB.prepare("SELECT slug FROM user_aliases WHERE former_slug = ?").bind(slug).first();
-    if (old && old.slug !== selfSlug) return "“" + slug + "” used to be someone else's — pick another";
-  } catch (e) { /* migration 004 not applied yet; nothing to collide with */ }
   return null;
 }
 
-// Follow an old URL to whoever holds it now. Returns the slug unchanged when it
-// is already current, so every read path can call this without branching.
-async function canonicalSlug(env, slug) {
-  const u = await env.DB.prepare("SELECT slug FROM users WHERE slug = ?").bind(slug).first();
-  if (u) return u.slug;
-  try {
-    const a = await env.DB.prepare("SELECT slug FROM user_aliases WHERE former_slug = ?").bind(slug).first();
-    if (a) return a.slug;
-  } catch (e) { /* migration 004 not applied yet */ }
-  return slug;
-}
-
-// The rename itself. Every table that stores a slug moves together, in one
-// batch, because a half-applied rename would detach a rider from their rides.
+// The rename. Every table that stores a slug moves together, in one batch,
+// because a half-applied rename would detach a rider from their own rides.
+//
+// It is a MOVE, not a forward: the old username is gone the moment this
+// returns, and /user/<old>/ 404s rather than redirecting. Carter's call,
+// 2026-09-14, having seen the alternative — the first cut kept a `user_aliases`
+// row so old links survived, and he wanted the old id genuinely gone. The
+// consequences are the ones you would expect and are the point, not a bug: a
+// link someone saved last year breaks, and the freed name can be taken by
+// anyone, inheriting nothing except the name itself.
 async function renameRider(env, from, to) {
-  const now = new Date().toISOString();
-  const stmts = [
+  await env.DB.batch([
     env.DB.prepare("UPDATE users SET slug = ? WHERE slug = ?").bind(to, from),
     env.DB.prepare("UPDATE rides SET user_slug = ? WHERE user_slug = ?").bind(to, from),
     env.DB.prepare("UPDATE rankings SET user_slug = ? WHERE user_slug = ?").bind(to, from),
     env.DB.prepare("UPDATE accounts SET slug = ? WHERE slug = ?").bind(to, from),
     env.DB.prepare("UPDATE activity SET actor = ? WHERE actor = ?").bind(to, from),
     env.DB.prepare("UPDATE invites SET slug = ? WHERE slug = ?").bind(to, from),
-    // Anyone already pointed at the old name follows it, so a rider who renames
-    // twice does not leave a chain of links that die at the middle hop.
-    env.DB.prepare("UPDATE user_aliases SET slug = ? WHERE slug = ?").bind(to, from),
-    env.DB.prepare("INSERT OR REPLACE INTO user_aliases (former_slug, slug, added) VALUES (?,?,?)")
-      .bind(from, to, now),
-    // If the NEW name was itself an old alias of this rider, it is a real URL
-    // again now and must not also be an alias pointing at itself.
-    env.DB.prepare("DELETE FROM user_aliases WHERE former_slug = ?").bind(to),
-  ];
-  await env.DB.batch(stmts);
+  ]);
   await recordActivity(env, "user_renamed", { actor: to, subject: from });
 }
 
@@ -826,21 +801,19 @@ export default {
         const n = Math.min(Math.max(Number(url.searchParams.get("limit")) || 100, 1), 500);
         return json(await getActivity(env, n));
       }
-      // canonicalSlug on every per-rider read: a rider who renames keeps their
-      // old URL working, the same way a renamed coaster does.
       const um = path.match(/^\/api\/user\/([a-z0-9-]+)$/i);
       if (request.method === "GET" && um) {
-        const u = await getUser(env, await canonicalSlug(env, um[1].toLowerCase()));
+        const u = await getUser(env, um[1].toLowerCase());
         return u ? json(u) : err(404, "no such user");
       }
       const rm = path.match(/^\/api\/rides\/([a-z0-9-]+)$/i);
       if (request.method === "GET" && rm) {
-        const r = await getRides(env, await canonicalSlug(env, rm[1].toLowerCase()));
+        const r = await getRides(env, rm[1].toLowerCase());
         return r ? json(r) : err(404, "no such user");
       }
       const km = path.match(/^\/api\/rankings\/([a-z0-9-]+)$/i);
       if (request.method === "GET" && km) {
-        const r = await getRankings(env, await canonicalSlug(env, km[1].toLowerCase()));
+        const r = await getRankings(env, km[1].toLowerCase());
         return r ? json(r) : err(404, "no such user");
       }
       // Ungated on purpose — see RANKINGS_NEED_TOKEN — *until* the rider has an
@@ -1028,12 +1001,7 @@ export default {
         const slugBad = await slugProblem(env, wantSlug, who.slug);
         if (slugBad) return err(409, slugBad);
 
-        if (wantSlug !== who.slug) {
-          if (!await haveUserAliases(env)) {
-            return err(503, "run migrations/004-user-rename.sql before renaming");
-          }
-          await renameRider(env, who.slug, wantSlug);
-        }
+        if (wantSlug !== who.slug) await renameRider(env, who.slug, wantSlug);
         return afterWrite(ctx, env, json({ ok: true, slug: wantSlug, name: who.name,
           renamed: wantSlug !== who.slug, was: who.slug }));
       }

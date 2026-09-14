@@ -153,6 +153,8 @@
         <label for="pr_user">Username</label>
         <input id="pr_user" type="text" maxlength="32" autocapitalize="off" autocorrect="off" spellcheck="false" required>
         <p class="hint" id="pr_url">Your page address.</p>
+        <p class="hint">Changing this moves your page. Your rides, rankings and sign-in all come
+          with you, but the old address stops working &mdash; it does not redirect.</p>
         <button class="primary" type="submit" id="pr_go">Save</button>
         <div class="msg" id="pr_msg"></div>
       </form>
@@ -280,11 +282,13 @@ $('pr_user').addEventListener('input', function(){ showUrl($('pr_user').value); 
 wire($('form_profile'), $('pr_go'), $('pr_msg'),
   function(){
     var slug = $('pr_user').value.trim().toLowerCase();
-    // Renaming changes a public URL, so it asks — the old one keeps working,
-    // but anyone who bookmarked it deserves a mention.
+    // Renaming moves a public URL and does not leave a forwarding address, so
+    // the confirm says exactly that rather than something softer.
     if (slug && slug !== ($('pr_user').defaultValue || '').toLowerCase() &&
-        !confirm('Change your username?\n\nYour page moves to /user/' + slug +
-                 '. The old address will still work, but it is worth telling anyone who uses it.')) {
+        !confirm('Change your username to ' + slug + '?\n\nYour page moves to /user/' + slug +
+                 '. Your old address stops working straight away — any link to it will 404, and ' +
+                 'the old name becomes free for someone else to take.\n\nEverything you have ' +
+                 'logged moves with you.')) {
       return null;
     }
     return { username: slug };

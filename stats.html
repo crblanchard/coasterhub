@@ -119,6 +119,19 @@
   View it on the live site, or run a local server from this folder: <code>python -m http.server</code> then open <code>localhost:8000/stats.html</code>.
 </div></div>
 
+<!-- A rider who is not there. Separate from #err on purpose: that one is about
+     the page being opened off a file:// path, which is a developer's problem,
+     and printing it to someone who followed a stale link tells them nothing.
+     Renaming a username deletes the old one outright (see renameRider), so a
+     dead /user/<name>/ link is now an ordinary thing to land on. -->
+<div class="container"><div id="nouser" style="display:none">
+  <p class="lead" style="margin-bottom:10px"><strong id="nouser_h">No rider here.</strong></p>
+  <p class="lead" style="margin-bottom:16px">Nobody on Coaster Hub is using that name.
+     If you followed an old link, whoever it pointed at may have changed their username &mdash;
+     old addresses aren&rsquo;t kept.</p>
+  <p><a class="go" href="/">See everyone on Coaster Hub &rarr;</a></p>
+</div></div>
+
 <div class="container"><div id="loading">Loading stats…</div></div>
 
 <main id="content" style="display:none">
@@ -216,7 +229,20 @@ if(CoasterHub.currentUser()){
   CoasterHub.loadUser().then(render).catch(function(e){
     console.error(e);
     document.getElementById('loading').style.display='none';
-    document.getElementById('err').style.display='block';
+    // "No such rider" and "this page cannot reach its data" are different
+    // problems and get different answers. fetchJSON flags the first as
+    // .missing, so a visitor who followed a link that has expired is not shown
+    // advice about running a local web server.
+    var gone = !!(e && e.missing);
+    if(gone){
+      var who=CoasterHub.currentUser();
+      document.getElementById('nouser_h').textContent =
+        'No rider called \u201C' + who + '\u201D.';
+      document.title = 'Not found \u2014 Coaster Hub';
+      document.getElementById('nouser').style.display='block';
+    } else {
+      document.getElementById('err').style.display='block';
+    }
   });
 } else { renderHub(); }
 function renderHub(){

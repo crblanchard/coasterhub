@@ -630,12 +630,20 @@ there is no UI for that flag.
 **Changing a username (2026-09-14).** `/account` → "Change your username". `users.slug` is a
 public URL and an undeclared foreign key in five tables (`rides`, `rankings`, `accounts`,
 `activity`, `invites`), so `renameRider()` moves all of them in one `batch()` — a half-applied
-rename detaches a rider from their rides. Old addresses keep working via `user_aliases`, the
-same trick `coaster_aliases` and `park_aliases` already play, and every per-rider read goes
-through `canonicalSlug()`. Renaming twice re-points the earlier alias, so the oldest link does
-not die at the middle hop. A name someone else used to hold cannot be taken — that would
-silently inherit their inbound links. Needs `migrations/004-user-rename.sql`; without it a
-rename returns 503 naming the file rather than failing halfway.
+rename detaches a rider from their rides.
+
+It is a **move, not a forward**. The old username is gone the moment it returns: `/user/<old>/`
+404s, and the freed name can be taken by anyone, inheriting nothing but the name. Carter's call
+after using the first cut, which kept a `user_aliases` row so old links survived (migration 004,
+dropped again by 005 the same day). Coasters and parks still keep their aliases, and the
+difference is worth holding on to: a coaster is renamed *by the world* and both names go on
+meaning the same ride, whereas a person picking a new username is choosing to stop being
+findable at the old one.
+
+Because dead rider URLs are now an ordinary thing to land on, `fetchJSON()` in `app.js`
+distinguishes "genuinely not there" (API 404 **and** no static snapshot → `err.missing`) from
+"could not reach the data", and `/stats` prints "No rider called X" instead of the developer
+advice about `python -m http.server` that every failure used to produce.
 
 **`users.name` is not editable yet** — Carter's call, 2026-09-14: username first, display name
 later. The columns are already separate and the endpoint already isolates them, so adding it is

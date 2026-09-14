@@ -1,3 +1,8 @@
+-- SUPERSEDED by 005-drop-user-aliases.sql (2026-09-14), same day. Kept because
+-- it was applied to production; the table it creates is dropped again there.
+-- Carter's call after seeing it work: a rename should MOVE the username, not
+-- leave a forwarding address. See renameRider() in worker.js.
+--
 -- Renaming a rider. See renameRider() in worker.js.
 --
 -- Two things were welded together until now: `users.slug` is the URL
