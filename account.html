@@ -147,6 +147,16 @@
       <a id="me_log" href="/log">Log a day</a>
     </div>
     <hr class="sep">
+    <details id="det_profile">
+      <summary>Change your username</summary>
+      <form id="form_profile">
+        <label for="pr_user">Username</label>
+        <input id="pr_user" type="text" maxlength="32" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+        <p class="hint" id="pr_url">Your page address.</p>
+        <button class="primary" type="submit" id="pr_go">Save</button>
+        <div class="msg" id="pr_msg"></div>
+      </form>
+    </details>
     <details>
       <summary>Change password</summary>
       <form id="form_pw">
@@ -237,6 +247,12 @@ function renderMe(a){
   $('me_email').textContent = a.email;
   $('me_av').textContent = (a.name || a.slug || '?').trim().charAt(0).toUpperCase();
   $('me_profile').href = a.slug ? '/user/' + a.slug + '/stats' : '/stats';
+  // defaultValue as well as value: it is what the submit handler compares
+  // against to decide whether the username actually changed, so an unchanged
+  // one does not put a confirm() in the way of a no-op save.
+  $('pr_user').value = a.slug || '';
+  $('pr_user').defaultValue = a.slug || '';
+  showUrl(a.slug || '');
   $('hero_badge').textContent = 'Signed in';
   $('hero_h').textContent = 'You’re signed in.';
   $('hero_p').textContent = a.admin
@@ -250,6 +266,38 @@ $('signout').addEventListener('click', function(){
   post('/api/auth/logout', {}).then(function(){ location.href = '/'; })
     .catch(function(){ $('signout').disabled = false; say($('me_msg'), 'Could not sign out — try again.'); });
 });
+
+// Show the address the current username produces, live, so the consequence of
+// editing the field is visible before it is saved.
+function showUrl(slug){
+  var clean = String(slug || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  $('pr_url').textContent = clean
+    ? 'Your page: coasterhub.org/user/' + clean
+    : 'Your page address.';
+}
+$('pr_user').addEventListener('input', function(){ showUrl($('pr_user').value); });
+
+wire($('form_profile'), $('pr_go'), $('pr_msg'),
+  function(){
+    var slug = $('pr_user').value.trim().toLowerCase();
+    // Renaming changes a public URL, so it asks — the old one keeps working,
+    // but anyone who bookmarked it deserves a mention.
+    if (slug && slug !== ($('pr_user').defaultValue || '').toLowerCase() &&
+        !confirm('Change your username?\n\nYour page moves to /user/' + slug +
+                 '. The old address will still work, but it is worth telling anyone who uses it.')) {
+      return null;
+    }
+    return { username: slug };
+  },
+  '/api/account/profile',
+  function(d){
+    $('pr_user').defaultValue = d.slug;
+    showUrl(d.slug);
+    $('me_profile').href = '/user/' + d.slug + '/stats';
+    try { localStorage.setItem('ch_rider', d.slug); } catch (e) {}
+    say($('pr_msg'), d.renamed ? 'Saved. Your page is now /user/' + d.slug
+                               : 'That is already your username.', true);
+  });
 
 wire($('form_pw'), $('pw_go'), $('pw_msg'),
   function(){ return { current: $('pw_cur').value, password: $('pw_new').value }; },

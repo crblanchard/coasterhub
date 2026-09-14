@@ -82,6 +82,8 @@ function freshDb() {
     CREATE TABLE sessions (token TEXT PRIMARY KEY, account INTEGER NOT NULL,
       created TEXT NOT NULL, expires TEXT NOT NULL);
     CREATE TABLE invites (code TEXT PRIMARY KEY, slug TEXT NOT NULL, created TEXT NOT NULL, used TEXT);
+    CREATE TABLE user_aliases (former_slug TEXT PRIMARY KEY, slug TEXT NOT NULL, added TEXT NOT NULL);
+    CREATE INDEX user_aliases_slug ON user_aliases(slug);
     INSERT INTO coasters (id,name,park,type) VALUES
       (1,'Steel Vengeance','Cedar Point','Steel'),
       (2,'Millennium Force','Cedar Point','Steel'),
@@ -860,6 +862,124 @@ async function main() {
       && /003-accounts/.test(r.data.error || ""), JSON.stringify(r.data));
     r = await call(db, "GET", "/api/rides/carter");
     check("and ordinary reads are untouched", r.status === 200);
+  }
+
+  console.log("\nProfiles — renaming, and the links that already exist");
+  {
+    const db = freshDb();
+    const carter = await signedUp(db, "c@example.com", "Tempname");
+    // Give the new rider something to lose track of.
+    await call(db, "POST", "/api/rides",
+      { body: { user: "tempname", d: "2026-05-05", entries: [{ c: 1, n: 2 }] }, cookie: carter });
+    await call(db, "PUT", "/api/rankings/tempname", { body: { order: [1] }, cookie: carter });
+
+    let r = await call(db, "POST", "/api/account/profile", { body: { username: "coasterdad" }, cookie: carter });
+    check("the username can be changed", r.status === 200
+      && r.data.slug === "coasterdad" && r.data.renamed === true && r.data.was === "tempname",
+      JSON.stringify(r.data));
+
+    r = await call(db, "GET", "/api/rides/coasterdad");
+    check("...and the rides came with it", r.status === 200 && r.data.rides.length === 2, JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/rankings/coasterdad");
+    check("...and so did the rankings", r.status === 200 && r.data.order.length === 1);
+    check("...and the account still owns the rider",
+      rows(db, "SELECT slug FROM accounts")[0].slug === "coasterdad");
+    check("...and nothing was left behind under the old slug",
+      rows(db, "SELECT * FROM rides WHERE user_slug='tempname'").length === 0
+      && rows(db, "SELECT * FROM rankings WHERE user_slug='tempname'").length === 0
+      && rows(db, "SELECT * FROM users WHERE slug='tempname'").length === 0);
+
+    // The whole point of the alias table.
+    r = await call(db, "GET", "/api/rides/tempname");
+    check("a link to the OLD address still resolves", r.status === 200 && r.data.rides.length === 2,
+      JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/user/tempname");
+    check("...on every per-rider read path", r.status === 200 && r.data.rides.length === 2);
+
+    // Rename again: the first alias has to follow, or the oldest links die.
+    r = await call(db, "POST", "/api/account/profile", { body: { username: "airtime" }, cookie: carter });
+    check("renaming twice works", r.status === 200 && r.data.slug === "airtime");
+    r = await call(db, "GET", "/api/rides/tempname");
+    check("...and the ORIGINAL link still lands, not at the dead middle hop",
+      r.status === 200 && r.data.rides.length === 2, JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/rides/coasterdad");
+    check("...as does the one in between", r.status === 200 && r.data.rides.length === 2);
+
+    // Writes follow the account, which followed the rename.
+    r = await call(db, "POST", "/api/rides",
+      { body: { user: "airtime", d: "2026-06-06", entries: [{ c: 2, n: 1 }] }, cookie: carter });
+    check("and they can still log to their own count afterwards", r.status === 200, JSON.stringify(r.data));
+  }
+
+  console.log("\nProfiles — the names you may not take");
+  {
+    const db = freshDb();
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    await signedUp(db, "ravi@example.com", "Ravi");
+
+    let r = await call(db, "POST", "/api/account/profile", { body: { username: "ravi" }, cookie: nia });
+    check("a username already in use is refused", r.status === 409, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/account/profile", { body: { username: "stats" }, cookie: nia });
+    check("a page name is refused", r.status === 409, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/account/profile", { body: { username: "a" }, cookie: nia });
+    check("a one-character username is refused", r.status === 409);
+    r = await call(db, "POST", "/api/account/profile", { body: { username: "carter" }, cookie: nia });
+    check("an existing rider who predates accounts is still protected", r.status === 409);
+    r = await call(db, "POST", "/api/account/profile", { body: { username: "   " }, cookie: nia });
+    check("an empty username is refused rather than blanking the row", r.status === 400,
+      JSON.stringify(r.data));
+    check("...and nia is untouched by any of that",
+      rows(db, "SELECT slug FROM users WHERE slug='nia'").length === 1);
+
+    // A freed-up name must not quietly hijack the old owner's links.
+    await call(db, "POST", "/api/account/profile", { body: { username: "nia-two" }, cookie: nia });
+    const ravi2 = await call(db, "POST", "/api/auth/login",
+      { body: { email: "ravi@example.com", password: "riding-things" } });
+    r = await call(db, "POST", "/api/account/profile", { body: { username: "nia" }, cookie: ravi2.cookie });
+    check("a username someone else used to hold is refused, links and all", r.status === 409,
+      JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/rides/nia");
+    check("...so the old link still reaches the person who owned it",
+      r.status === 200 && r.data.user === "Nia", JSON.stringify(r.data));
+  }
+
+  console.log("\nProfiles — who may edit whom");
+  {
+    const db = freshDb();
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    await signedUp(db, "ravi@example.com", "Ravi");
+
+    // Refused outright, NOT quietly applied to the caller's own row — renaming
+    // the wrong person is worse than an error, and is what the first cut did.
+    let r = await call(db, "POST", "/api/account/profile", { body: { username: "stolen", slug_of: "ravi" }, cookie: nia });
+    check("a rider cannot rename another rider", r.status === 401, JSON.stringify(r.data));
+    check("...and Ravi keeps their username", rows(db, "SELECT slug FROM users WHERE slug='ravi'").length === 1);
+    check("...and the caller was not renamed instead",
+      rows(db, "SELECT slug FROM users WHERE slug='nia'").length === 1);
+    r = await call(db, "POST", "/api/account/profile", { body: { username: "nobody" } });
+    check("signed out, you cannot rename anyone", r.status === 401);
+
+    db.exec("UPDATE accounts SET is_admin = 1 WHERE slug = 'nia'");
+    r = await call(db, "POST", "/api/account/profile", { body: { username: "ravi-p", slug_of: "ravi" }, cookie: nia });
+    check("an admin can rename someone else", r.status === 200 && r.data.slug === "ravi-p",
+      JSON.stringify(r.data));
+    check("...and that rider's rides moved with them",
+      rows(db, "SELECT * FROM rides WHERE user_slug='ravi'").length === 0);
+  }
+
+  console.log("\nProfiles — before migration 004 has run");
+  {
+    const db = freshDb();
+    db.exec("DROP TABLE user_aliases;");
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    let r = await call(db, "POST", "/api/account/profile", { body: { username: "nia" }, cookie: nia });
+    check("a no-op save does not need the alias table", r.status === 200
+      && r.data.renamed === false, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/account/profile", { body: { username: "nia-b" }, cookie: nia });
+    check("a rename names the migration to run rather than 500ing", r.status === 503
+      && /004-user-rename/.test(r.data.error || ""), JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/rides/nia");
+    check("and ordinary per-rider reads are unaffected", r.status === 200);
   }
 
   console.log("\nRegression — endpoints the rest of the site depends on");

@@ -627,6 +627,21 @@ the email and password for that rider, once. An already-claimed rider cannot be 
 Carter's own account wants `UPDATE accounts SET is_admin = 1 WHERE slug = 'carter';` afterwards —
 there is no UI for that flag.
 
+**Changing a username (2026-09-14).** `/account` → "Change your username". `users.slug` is a
+public URL and an undeclared foreign key in five tables (`rides`, `rankings`, `accounts`,
+`activity`, `invites`), so `renameRider()` moves all of them in one `batch()` — a half-applied
+rename detaches a rider from their rides. Old addresses keep working via `user_aliases`, the
+same trick `coaster_aliases` and `park_aliases` already play, and every per-rider read goes
+through `canonicalSlug()`. Renaming twice re-points the earlier alias, so the oldest link does
+not die at the middle hop. A name someone else used to hold cannot be taken — that would
+silently inherit their inbound links. Needs `migrations/004-user-rename.sql`; without it a
+rename returns 503 naming the file rather than failing halfway.
+
+**`users.name` is not editable yet** — Carter's call, 2026-09-14: username first, display name
+later. The columns are already separate and the endpoint already isolates them, so adding it is
+a form field and a branch, not a migration. Note it would not need to be unique: the username is
+what tells two riders called Dave apart.
+
 **Still to do, in rough order of how much it matters:**
 
 1. **Password reset is by hand.** There is no mail out of the Worker, so a forgotten password
