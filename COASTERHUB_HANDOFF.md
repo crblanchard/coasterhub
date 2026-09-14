@@ -590,6 +590,13 @@ chunked by `SQL_VARS` like every other id list here. The count rides along insid
 `ranking` activity entry (`detail.credited`) rather than as a second feed row: one action by the
 rider should read as one line.
 
+**Backfill.** The live path only credits when a ranking is next saved, so anything ranked
+before the deploy stayed missing. `migrations/006-backfill-ranked-credits.sql` closes that once
+for existing rankings — undated, idempotent, insert-only, and it writes no activity row (it is a
+correction to data that was already there, not something a rider did). It applies to EVERY
+rider, so the preview query at the top of the file is worth running first: a large number
+against one of the original four would mean their public count is about to jump.
+
 ### 3. Accounts — **built 2026-09-14**
 
 Riders sign in as themselves. `ADMIN_PASSWORD` still exists and still opens everything; what
