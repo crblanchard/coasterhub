@@ -773,9 +773,11 @@ this also means a phone photo never travels at full size. The Worker still enfor
 (PNG/JPEG/WebP only — it is serving from our own origin) and a 512KB ceiling, because the
 browser is not the only thing that can call the endpoint.
 
-**Setup:** create an R2 bucket and bind it as `AVATARS` in `wrangler.jsonc`. Until that binding
-exists, uploads return 503 saying so and `/avatars/*` 404s — nothing else is affected. Note the
-binding must not be committed before the bucket exists, or the deploy fails.
+**Setup (done 2026-09-15):** bucket `coasterhub-avatars`, bound as `AVATARS`. It is NOT public
+and has no custom domain — the Worker reads objects through the binding and serves them itself,
+which is what keeps pictures on coasterhub.org and the bucket unenumerable. Note for any future
+binding: do not commit one before the bucket exists, or the build fails, and main deploys on
+push.
 
 **Still to do, in rough order of how much it matters:**
 

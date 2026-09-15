@@ -9,6 +9,15 @@
     "directory": ".",
     "binding": "ASSETS"
   },
+  // Profile pictures. The Worker reads objects through this binding and serves
+  // them itself at /avatars/<key> — the bucket is NOT public, so pictures live
+  // on coasterhub.org and nobody can enumerate the bucket directly.
+  "r2_buckets": [
+    {
+      "binding": "AVATARS",
+      "bucket_name": "coasterhub-avatars"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",

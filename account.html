@@ -423,6 +423,7 @@ wire($('form_profile'), $('pr_go'), $('pr_msg'),
     try { localStorage.setItem('ch_rider', d.slug); } catch (e) {}
     say($('pr_msg'), d.renamed ? 'Saved. Your page is now /user/' + d.slug
                                : 'That is already your username.', true);
+    setTimeout(function(){ $('det_profile').open = false; }, 1400);
   });
 
 // A password you cannot see, typed once, is a password you can lock yourself
@@ -443,6 +444,8 @@ wire($('form_pw'), $('pw_go'), $('pw_msg'),
   function(){
     $('pw_cur').value = ''; $('pw_new').value = ''; $('pw_new2').value = '';
     say($('pw_msg'), 'Password changed.', true);
+    var d = $('pw_cur').closest('details');
+    if (d) setTimeout(function(){ d.open = false; }, 1400);
   });
 
 // ---- bio ------------------------------------------------------------------
@@ -478,6 +481,13 @@ function squareBlob(file){
   });
 }
 
+// Saved, so the editor gets out of the way — but not instantly, or the "Name
+// saved." it just printed vanishes before anyone reads it. Long enough to
+// register, short enough not to feel stuck.
+function closeSoon(id){
+  setTimeout(function(){ if ($(id)) $(id).hidden = true; }, 1100);
+}
+
 // Clicking your picture, name or username opens the matching editor. One at a
 // time: two open panels in a card this size is just noise.
 function openPanel(which){
@@ -509,6 +519,7 @@ wire($('form_name'), $('nm_go'), $('nm_msg'),
     $('me_name').textContent = d.name;
     if (!ME.avatar) { paintAvatar($('me_av'), ME); paintAvatar($('pic_prev'), ME); }
     say($('nm_msg'), 'Name saved.', true);
+    closeSoon('pan_name');
   });
 
 $('pic_pick').addEventListener('click', function(){ $('pic_file').click(); });
@@ -531,6 +542,7 @@ $('pic_file').addEventListener('change', function(){
     ME = ME || {}; ME.avatar = d.avatar;
     paintAvatar($('pic_prev'), ME); paintAvatar($('me_av'), ME);
     say($('pic_msg'), 'Picture updated.', true);
+    closeSoon('pan_pic');
   }).catch(function(e){ say($('pic_msg'), e.message); })
     .then(function(){ $('pic_pick').disabled = false; $('pic_file').value = ''; });
 });
@@ -543,6 +555,7 @@ $('pic_clear').addEventListener('click', function(){
       ME = ME || {}; ME.avatar = null;
       paintAvatar($('pic_prev'), ME); paintAvatar($('me_av'), ME);
       say($('pic_msg'), 'Picture removed.', true);
+      closeSoon('pan_pic');
     }); })
     .catch(function(e){ say($('pic_msg'), e.message); })
     .then(function(){ $('pic_clear').disabled = false; });
