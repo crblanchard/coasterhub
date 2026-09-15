@@ -98,6 +98,12 @@
 </div></header>
 
 <section class="hero" style="padding:60px 0 36px"><div class="container">
+  <!-- Your own page: the whole account card, editable in place. /account is
+       signed-out only now, so this is where you change your picture, name,
+       username, bio and password, and where you sign out. Built by
+       profile-edit.js only when the signed-in account owns this page. -->
+  <div id="ownprofile" style="display:none;max-width:420px;margin-bottom:22px"></div>
+
   <!-- Whose page this is: the picture and bio, when they have set them.
        Hidden by default and only filled in for a single rider, so the
        everyone view is unchanged. -->
@@ -216,6 +222,7 @@
 <div id="hm-tip"></div>
 
 <script src="/app.js?v=20260805b"></script>
+<script src="/profile-edit.js?v=20260915"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('stats');
@@ -358,6 +365,23 @@ function render(s){
   // through from /api/user/<slug>; a database without migration 008 simply
   // has neither and the block stays hidden, which is also what an untouched
   // profile looks like.
+  // Your own page gets the editable card instead of the read-only row: one
+  // place for "you", rather than a profile page and an account page saying
+  // similar things in different words.
+  CoasterHub.me().then(function(acct){
+    if(!acct || !acct.slug || acct.slug!==CoasterHub.currentUser()) return;
+    document.getElementById('whois').style.display='none';
+    var host=document.getElementById('ownprofile');
+    host.style.display='block';
+    CoasterHubProfile.mount(host, acct, {
+      // The page IS this rider, so a rename has to move the address bar too
+      // or a refresh lands on a URL that no longer exists.
+      onRename: function(slug){
+        history.replaceState(null, '', '/user/' + slug + '/stats');
+      }
+    });
+  });
+
   (function(){
     var av=document.getElementById('whois_av'), bio=document.getElementById('whois_bio');
     if(s.avatar){ av.style.backgroundImage='url("/avatars/'+s.avatar+'")'; av.textContent=''; }

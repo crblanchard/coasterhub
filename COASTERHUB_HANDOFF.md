@@ -727,10 +727,22 @@ different things: free text, a public URL and a key in five tables, and a length
 A display name is NOT unique — two riders called Dave are two riders called Dave, and the
 username is what tells them apart.
 
-On `/account` the picture, display name, username and bio are each clickable and open their own
-editor, one at a time. `Change password` is the only written row left — it is the one thing on
-the card that is not a piece of the profile you can point at. An empty bio shows "Add a short
-bio" rather than nothing, because an editable thing that displays nothing is undiscoverable.
+**The editable card lives on your own profile page, not on /account** (2026-09-15). Carter's
+call: one page for "you", rather than a profile page and an account page saying similar things.
+`profile-edit.js` renders it, `stats.html` mounts it when the signed-in account owns the page,
+and `/account` is signed-out only — sign in, sign up, claim an invite, reset a password. Signed
+in, `/account` redirects to your profile, and the header avatar links there too.
+
+Picture, display name, username and bio are each clickable and open their own editor, one at a
+time. `Change password` is the only written row — the one thing on the card that is not a piece
+of the profile you can point at. An empty bio shows "Add a short bio" rather than nothing,
+because an editable thing that displays nothing is undiscoverable.
+
+Two things to know about the CSS: it is all scoped under `.profedit` in `style.css`, because a
+bare `input{}` or `label{}` rule would reach into `/log`, `/add` and `/edit`, which style their
+own forms. And `.profedit button.edit` is written `:not(.av)` — it is one element-selector more
+specific than `.profedit .av`, so without that the reset strips the avatar circle of its
+background and border and leaves a bare initial floating.
 
 **Password reset — built 2026-09-15.** The Worker sends mail through **Resend** over plain
 HTTPS (no SDK, which matters in a Worker). Two secrets:

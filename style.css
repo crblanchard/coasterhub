@@ -228,3 +228,108 @@ select.userpick:hover{border-color:var(--accent2)}
   .tabbar a.on{color:var(--accent2)}
   .tabbar a:active{background:var(--soft)}
 }
+
+/* The card itself, when it is mounted on a profile page: the hero has no
+   container of its own, so without this the controls float on the gradient. */
+.profedit{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:22px}
+
+/* ---- Editable profile card (profile-edit.js) -------------------------------
+   Everything is scoped under .profedit on purpose. A bare `input{}` or
+   `label{}` rule here would reach into /log, /add and /edit, which all style
+   their own forms. */
+.profedit label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+.profedit input[type=text],.profedit input[type=password],.profedit textarea{
+  background:var(--well);border:1px solid var(--line);color:var(--fg);padding:10px 12px;
+  border-radius:10px;font-size:.95rem;font-family:inherit;width:100%;margin:5px 0 13px;
+  text-transform:none;letter-spacing:normal;font-weight:400}
+.profedit textarea{resize:vertical;min-height:72px;margin-bottom:6px}
+.profedit input:focus,.profedit textarea:focus{outline:2px solid var(--accent2);
+  outline-offset:1px;border-color:var(--accent2)}
+.profedit button.primary{background:var(--accent2);border:0;color:var(--well);font-weight:700;
+  border-radius:10px;padding:11px 18px;cursor:pointer;font-size:.92rem;width:100%;font-family:inherit}
+.profedit button.primary:disabled{opacity:.4;cursor:default}
+.profedit button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);
+  border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem;font-family:inherit}
+.profedit button.ghost:hover{color:var(--fg)}
+.profedit .msg{margin-top:12px;font-size:.88rem;min-height:1.2em}
+.profedit .msg.ok{color:var(--accent2)} .profedit .msg.bad{color:var(--accent)}
+.profedit .hint{color:var(--muted);font-size:.8rem;margin:-6px 0 14px;text-transform:none;
+  letter-spacing:normal;font-weight:400}
+.profedit .who{display:flex;align-items:center;gap:13px;margin-bottom:14px}
+/* background-COLOR, not the shorthand: the shorthand resets background-size,
+   and these circles rely on `cover` to fit a photo. */
+.profedit .av{width:44px;height:44px;border-radius:999px;background-color:var(--soft);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:1.1rem;color:var(--accent2);background-size:cover;
+  background-position:center;flex:none}
+.profedit .av.big{width:64px;height:64px;font-size:1.5rem}
+.profedit .nm{font-weight:700;font-size:1.05rem}
+.profedit .em{color:var(--muted);font-size:.83rem;word-break:break-all}
+.profedit .un{color:var(--accent2);font-size:.83rem;font-weight:600;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+/* The editable things are buttons, so they are keyboard-reachable and announce
+   what they do, but styled as the text they replace — a row of grey form
+   controls would bury the person's own name. */
+/* :not(.av) matters. `button.edit` is one element-selector more specific than
+   `.profedit .av`, so this reset would otherwise strip the avatar circle of
+   its background and border and leave a bare initial floating. */
+.profedit button.edit:not(.av){background:none;border:0;padding:0;font:inherit;
+  color:inherit;cursor:pointer;text-align:left;display:block;max-width:100%}
+.profedit button.av{padding:0;cursor:pointer;font-family:inherit}
+.profedit button.edit:focus-visible{outline:2px solid var(--accent2);outline-offset:3px;
+  border-radius:6px}
+.profedit .nm.edit,.profedit .un.edit,.profedit .bioline{position:relative}
+.profedit .nm.edit::after,.profedit .un.edit::after,.profedit .bioline::after{
+  content:"\002710";opacity:0;margin-left:7px;font-size:.8em;color:var(--muted);
+  transition:opacity .12s}
+.profedit .nm.edit:hover::after,.profedit .un.edit:hover::after,
+.profedit .bioline:hover::after,.profedit .nm.edit:focus-visible::after,
+.profedit .un.edit:focus-visible::after,.profedit .bioline:focus-visible::after{opacity:1}
+.profedit .av.edit{transition:border-color .12s}
+.profedit .av.edit:hover{border-color:var(--accent2)}
+/* The bio reads as the sentence it is until you click it. Empty, it invites —
+   an editable thing showing nothing at all is undiscoverable. */
+.profedit .bioline{color:var(--muted);font-size:.92rem;line-height:1.5;margin:0 0 16px;width:100%}
+.profedit .bioline.empty{font-style:italic;opacity:.75}
+.profedit .panel{border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 16px;
+  background:var(--well)}
+.profedit .panel .msg{margin-bottom:0}
+.profedit .picrow{display:flex;gap:14px;align-items:center;margin-bottom:4px}
+.profedit .rowlinks{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 6px}
+.profedit .rowlinks a{flex:1 1 auto;text-align:center;border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;font-size:.9rem;font-weight:600;color:var(--fg)}
+.profedit .rowlinks a:hover{border-color:var(--accent2)}
+.profedit details summary{cursor:pointer;color:var(--muted);font-size:.88rem;margin:14px 0 12px}
+.profedit details summary:hover{color:var(--fg)}
+
+/* Crop window. A circle over the square viewport, because the avatar is round
+   everywhere it appears. */
+.cropwrap{position:fixed;inset:0;z-index:60;background:rgba(3,7,18,.72);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;padding:18px}
+.cropwrap[hidden]{display:none}
+.cropbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;
+  max-width:340px;width:100%}
+.cropbox h2{font-size:1.05rem;margin-bottom:4px}
+.cropbox p.sub{color:var(--muted);font-size:.88rem;margin-bottom:16px}
+.cropbox label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+.cropview{position:relative;width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;
+  background:var(--well);border:1px solid var(--line);touch-action:none;cursor:grab}
+.cropview:active{cursor:grabbing}
+.cropimg{position:absolute;inset:0;background-repeat:no-repeat}
+/* The dimming goes OUTSIDE the circle: the picture being chosen stays bright
+   and what will be cropped away is knocked back. `inset` does the opposite. */
+.cropmask{position:absolute;inset:0;pointer-events:none;border-radius:50%;
+  box-shadow:0 0 0 999px rgba(9,14,28,.62)}
+:root[data-theme="light"] .cropmask{box-shadow:0 0 0 999px rgba(100,116,139,.55)}
+.cropbox input[type=range]{width:100%;margin:5px 0 14px;accent-color:var(--accent2)}
+.cropbox .croprow{display:flex;gap:10px}
+.cropbox .msg{margin-top:12px;font-size:.88rem;min-height:1.2em}
+.cropbox .msg.ok{color:var(--accent2)} .cropbox .msg.bad{color:var(--accent)}
+.cropbox button.primary{background:var(--accent2);border:0;color:var(--well);font-weight:700;
+  border-radius:10px;padding:11px 18px;cursor:pointer;font-size:.92rem;font-family:inherit}
+.cropbox button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);
+  border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem;font-family:inherit}

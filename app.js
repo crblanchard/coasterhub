@@ -545,6 +545,9 @@
     me().then(function (acct) {
       if (!acct) return;
       var label = acct.name || acct.slug || acct.email;
+      // Signed in, this goes to your own profile: that is where the account
+      // lives now, and /account only holds the signed-out forms.
+      if (acct.slug) a.href = "/user/" + acct.slug + "/stats";
       a.className = "acctlink on";
       a.setAttribute("aria-label", "Signed in as " + label);
       a.setAttribute("title", "Signed in as " + label);
