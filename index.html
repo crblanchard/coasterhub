@@ -246,23 +246,24 @@ return Promise.all([
 })))
 .then(function(res){
   var coasters=res[0].coasters, parks=res[1], users=res.slice(2);
-  var creditUnion={}, parkUnion={}, statsBySlug={};
+  var parkUnion={}, statsBySlug={};
   CoasterHub.USERS.forEach(function(u,i){
     var st=CoasterHub.computeStats(coasters,parks,users[i]);
     statsBySlug[u.slug]=st;
-    Object.keys(st.byCoaster).forEach(function(id){creditUnion[id]=true;});
     st.parksGeo.forEach(function(p){parkUnion[p.park]=true;});
   });
-  var uCredits=Object.keys(creditUnion).length, uParks=Object.keys(parkUnion).length;
+  var uParks=Object.keys(parkUnion).length;
   // Only Carter has a real ride log today; sum whatever rides anyone has.
   var totalRides=CoasterHub.USERS.reduce(function(n,u){
     var k=statsBySlug[u.slug].kpi; return n+(k.rides||0);
   },0);
-  document.getElementById('combo').textContent=nf(uCredits);
-  // The same set as the headline above: coasters someone has ridden. It used
-  // to print coasters.length — the whole coaster table — under the words "every
-  // coaster in the count", so the two numbers on this page disagreed.
-  document.getElementById('g-coasters').textContent=nf(uCredits);
+  // The headline is the size of the shared coaster database, not the union of
+  // what has been ridden — Carter's call, 2026-09-15, and it is what /rides
+  // → Full list shows too, so the two numbers agree. The consequence worth
+  // knowing: adding a coaster on /add moves this number before anyone has
+  // ridden it. The per-rider counts everywhere else are still rides.
+  document.getElementById('combo').textContent=nf(coasters.length);
+  document.getElementById('g-coasters').textContent=nf(coasters.length);
   document.getElementById('combo-sub').textContent=CoasterHub.USERS.length+' riders · '+uParks+' parks · '+nf(totalRides)+' rides logged';
   // ---- leaderboard: ranked by credits, bar relative to the leader ----------
   var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};

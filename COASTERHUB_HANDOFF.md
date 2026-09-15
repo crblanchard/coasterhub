@@ -572,20 +572,26 @@ open question is unchanged: for a partially-dated rider, does the Nth milestone 
 dated credits, or do undated ones get appended? 441 of 1,767 rows are undated, so this is
 not a corner case. Label derived ones differently ("your 500th dated credit").
 
-### "Unique coasters" means RIDDEN, everywhere (2026-09-15)
+### The headline number is the DATABASE, not what has been ridden (2026-09-15)
 
-The home headline and `/rides` → Full list disagreed by one: the headline counted coasters
-someone had ridden, the full list printed every row in the `coasters` table. `/add` lets a
-coaster exist before anyone logs it ("Stats can come later"), so the gap is however many are
-waiting for their first ride — and both were labelled "every coaster in the count".
+The home headline and `/rides` → Full list disagreed by one (1,114 vs 1,115): the headline was
+the union of coasters someone had ridden, the full list was every row in the `coasters` table.
+`/add` lets a coaster exist before anyone logs it ("Stats can come later"), so the gap is
+however many are waiting for their first ride.
 
-`GET /api/ridden` returns the ridden set (one `DISTINCT` over an indexed column), `forEveryone()`
-filters by it, and home's "N in all" uses the same union as its own headline. If `/api/ridden`
-is unreachable the list falls back to showing everything, which is what it did before.
+**Carter's call: both show the database count.** The headline is `coasters.length`, the full
+list is unfiltered, and adding a coaster on `/add` moves the headline before anybody has ridden
+it. That is the intended behaviour, not a bug to re-fix — a previous pass made both the ridden
+union instead and it was reverted the same day.
 
-`forEveryone()` also fetched `/coasters.json` directly rather than going through
-`fetchCoasters()`, so that view alone showed the static snapshot and was stale between syncs.
-It uses the API-first path now like every other page.
+The ridden union is no longer displayed anywhere. It is one line to bring back
+(`Object.keys(st.byCoaster)` unioned across riders, which is what `index.html` used to do) if a
+"N ridden" figure is ever wanted alongside it. A `GET /api/ridden` endpoint existed briefly for
+the same purpose and was removed with it, rather than left as an endpoint nothing reads.
+
+Independently of all that: `forEveryone()` in `rides.html` was fetching `/coasters.json`
+directly instead of going through `fetchCoasters()`, so that one view read the static snapshot
+and was stale between syncs while every other page tried the API first. That fix stayed.
 
 ### Ranking a coaster credits it (2026-09-14)
 

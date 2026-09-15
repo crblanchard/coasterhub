@@ -1134,40 +1134,6 @@ async function main() {
       rows(db, "SELECT * FROM rides WHERE user_slug='ravi'").length === 0);
   }
 
-  console.log("\n/api/ridden — what the headline number counts");
-  {
-    const db = freshDb();
-    // Seed: coasters 1-3 exist, riders have ridden 1 and 2 only.
-    let r = await call(db, "GET", "/api/ridden");
-    check("lists only coasters somebody has ridden",
-      r.status === 200 && r.data.ids.join(",") === "1,2", JSON.stringify(r.data));
-    r = await call(db, "GET", "/api/coasters");
-    check("...which is FEWER than the coaster table, and that is the point",
-      r.data.coasters.length === 3, String(r.data.coasters.length));
-
-    // A coaster added but not yet logged must not join the count.
-    await call(db, "POST", "/api/coaster", { body: { name: "Brand New", park: "Cedar Point" }, token: PW });
-    r = await call(db, "GET", "/api/ridden");
-    check("adding a coaster does not add it to the count", r.data.ids.join(",") === "1,2",
-      JSON.stringify(r.data));
-
-    // Logging it does.
-    await call(db, "POST", "/api/rides",
-      { body: { user: "carter", d: "2026-07-07", entries: [{ c: 4, n: 1 }] }, token: PW });
-    r = await call(db, "GET", "/api/ridden");
-    check("...and logging a ride on it does", r.data.ids.join(",") === "1,2,4", JSON.stringify(r.data));
-
-    // Ranked-into-existence credits count too, since they are ride rows.
-    await call(db, "PUT", "/api/rankings/cole", { body: { order: [3] } });
-    r = await call(db, "GET", "/api/ridden");
-    check("...as does a credit gained by ranking", r.data.ids.join(",") === "1,2,3,4",
-      JSON.stringify(r.data));
-
-    r = await call(db, "GET", "/api/ridden");
-    check("it stays a public read — no sign-in needed for a public number",
-      r.status === 200);
-  }
-
   console.log("\nRegression — endpoints the rest of the site depends on");
   {
     const db = freshDb();
