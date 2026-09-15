@@ -52,6 +52,17 @@
     display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:var(--accent2)}
   .who .nm{font-weight:700;font-size:1.05rem}
   .who .em{color:var(--muted);font-size:.83rem;word-break:break-all}
+  .who .un{color:var(--accent2);font-size:.83rem;font-weight:600;font-family:ui-monospace,
+    SFMono-Regular,Menlo,monospace;word-break:break-all}
+  .who .av,.av.big{background-size:cover;background-position:center}
+  .av.big{width:64px;height:64px;border-radius:999px;background:var(--soft);
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:1.5rem;color:var(--accent2);flex:none}
+  .picrow{display:flex;gap:14px;align-items:center;margin-bottom:4px}
+  textarea{background:var(--well);border:1px solid var(--line);color:var(--fg);padding:10px 12px;
+    border-radius:10px;font-size:.95rem;font-family:inherit;width:100%;margin-bottom:6px;
+    resize:vertical;min-height:72px}
+  textarea:focus{outline:2px solid var(--accent2);outline-offset:1px;border-color:var(--accent2)}
   .rowlinks{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
   .rowlinks a{flex:1 1 auto;text-align:center;border:1px solid var(--line);border-radius:10px;
     padding:10px 12px;font-size:.9rem;font-weight:600;color:var(--fg)}
@@ -153,6 +164,8 @@
     <form id="form_reset">
       <label for="rs_pw">New password</label>
       <input id="rs_pw" type="password" autocomplete="new-password" required>
+      <label for="rs_pw2">Confirm new password</label>
+      <input id="rs_pw2" type="password" autocomplete="new-password" required>
       <p class="hint">At least 8 characters. This signs you out everywhere else.</p>
       <button class="primary" type="submit" id="rs_go">Set password</button>
       <div class="msg bad" id="rs_msg"></div>
@@ -163,8 +176,9 @@
   <div class="pane" id="pane_me" style="display:none">
     <div class="who">
       <div class="av" id="me_av"></div>
-      <div>
+      <div style="min-width:0">
         <div class="nm" id="me_name"></div>
+        <div class="un" id="me_user"></div>
         <div class="em" id="me_email"></div>
       </div>
     </div>
@@ -173,6 +187,32 @@
       <a id="me_log" href="/log">Log a day</a>
     </div>
     <hr class="sep">
+    <details id="det_pic">
+      <summary>Profile picture</summary>
+      <div class="picrow">
+        <div class="av big" id="pic_prev"></div>
+        <div style="flex:1;min-width:0">
+          <input id="pic_file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none">
+          <button class="ghost" type="button" id="pic_pick" style="width:100%;margin-bottom:8px">Choose a picture</button>
+          <button class="ghost" type="button" id="pic_clear" style="width:100%">Remove</button>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:12px">Cropped to a square and shrunk in your browser before
+        it is sent, so a photo straight off a phone is fine.</p>
+      <div class="msg" id="pic_msg"></div>
+    </details>
+
+    <details id="det_bio">
+      <summary>Short bio</summary>
+      <form id="form_bio">
+        <label for="bio_text">Bio</label>
+        <textarea id="bio_text" maxlength="280" rows="3"></textarea>
+        <p class="hint"><span id="bio_left">280</span> characters left. Shown on your profile page.</p>
+        <button class="primary" type="submit" id="bio_go">Save bio</button>
+        <div class="msg" id="bio_msg"></div>
+      </form>
+    </details>
+
     <details id="det_profile">
       <summary>Change your username</summary>
       <form id="form_profile">
@@ -192,6 +232,8 @@
         <input id="pw_cur" type="password" autocomplete="current-password" required>
         <label for="pw_new">New password</label>
         <input id="pw_new" type="password" autocomplete="new-password" required>
+        <label for="pw_new2">Confirm new password</label>
+        <input id="pw_new2" type="password" autocomplete="new-password" required>
         <p class="hint">Signs you out everywhere else.</p>
         <button class="primary" type="submit" id="pw_go">Change it</button>
         <div class="msg" id="pw_msg"></div>
@@ -214,6 +256,7 @@ document.getElementById('y').textContent = new Date().getFullYear();
 CoasterHub.initNav('account');
 
 var $ = function(id){ return document.getElementById(id); };
+var ME = null;
 var CLAIM = new URLSearchParams(location.search).get('claim') || '';
 var RESET = new URLSearchParams(location.search).get('reset') || '';
 
@@ -271,10 +314,30 @@ function landing(slug){
 }
 
 // ---- signed in ------------------------------------------------------------
+// One place that turns an account into the little avatar, so the card, the
+// picture preview and the header all agree: the image if there is one, the
+// initial in a circle if not.
+function paintAvatar(el, a){
+  if (a && a.avatar) {
+    el.style.backgroundImage = 'url("/avatars/' + a.avatar + '")';
+    el.textContent = '';
+  } else {
+    el.style.backgroundImage = '';
+    el.textContent = (a && (a.name || a.slug) || '?').trim().charAt(0).toUpperCase();
+  }
+}
+
 function renderMe(a){
+  ME = a;
   $('me_name').textContent = a.name || a.slug || 'Your account';
+  // The username, visible without opening anything — it is the address people
+  // share, so having to expand a section to see it was the wrong way round.
+  $('me_user').textContent = a.slug ? '@' + a.slug : '';
   $('me_email').textContent = a.email;
-  $('me_av').textContent = (a.name || a.slug || '?').trim().charAt(0).toUpperCase();
+  paintAvatar($('me_av'), a);
+  paintAvatar($('pic_prev'), a);
+  $('bio_text').value = a.bio || '';
+  countBio();
   $('me_profile').href = a.slug ? '/user/' + a.slug + '/stats' : '/stats';
   // defaultValue as well as value: it is what the submit handler compares
   // against to decide whether the username actually changed, so an unchanged
@@ -330,13 +393,95 @@ wire($('form_profile'), $('pr_go'), $('pr_msg'),
                                : 'That is already your username.', true);
   });
 
+// A password you cannot see, typed once, is a password you can lock yourself
+// out with. Checked here rather than server-side because the server has no
+// business knowing what was typed twice.
+function mismatch(a, b, msg){
+  if (a === b) return false;
+  say(msg, 'Those two passwords are not the same.');
+  return true;
+}
+
 wire($('form_pw'), $('pw_go'), $('pw_msg'),
-  function(){ return { current: $('pw_cur').value, password: $('pw_new').value }; },
+  function(){
+    if (mismatch($('pw_new').value, $('pw_new2').value, $('pw_msg'))) return null;
+    return { current: $('pw_cur').value, password: $('pw_new').value };
+  },
   '/api/auth/password',
   function(){
-    $('pw_cur').value = ''; $('pw_new').value = '';
+    $('pw_cur').value = ''; $('pw_new').value = ''; $('pw_new2').value = '';
     say($('pw_msg'), 'Password changed.', true);
   });
+
+// ---- bio ------------------------------------------------------------------
+function countBio(){
+  $('bio_left').textContent = String(280 - ($('bio_text').value || '').length);
+}
+$('bio_text').addEventListener('input', countBio);
+
+wire($('form_bio'), $('bio_go'), $('bio_msg'),
+  function(){ return { bio: $('bio_text').value }; },
+  '/api/account/profile',
+  function(d){ say($('bio_msg'), d.bio ? 'Bio saved.' : 'Bio cleared.', true); });
+
+// ---- profile picture ------------------------------------------------------
+// Cropped and resized HERE, not on the server: a Worker has no canvas, and a
+// phone photo is several megabytes of the wrong shape. This sends a 256px
+// square, which is a few tens of KB.
+var PIC_PX = 256;
+function squareBlob(file){
+  return new Promise(function(resolve, reject){
+    var img = new Image();
+    img.onload = function(){
+      var side = Math.min(img.width, img.height);
+      var c = document.createElement('canvas');
+      c.width = c.height = PIC_PX;
+      c.getContext('2d').drawImage(img,
+        (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, PIC_PX, PIC_PX);
+      c.toBlob(function(b){ b ? resolve(b) : reject(new Error('could not read that image')); },
+        'image/jpeg', 0.88);
+    };
+    img.onerror = function(){ reject(new Error('that file is not an image the browser can read')); };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+$('pic_pick').addEventListener('click', function(){ $('pic_file').click(); });
+$('pic_file').addEventListener('change', function(){
+  var file = $('pic_file').files && $('pic_file').files[0];
+  if (!file) return;
+  say($('pic_msg'), '');
+  $('pic_pick').disabled = true;
+  squareBlob(file).then(function(blob){
+    return fetch('/api/account/avatar', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'content-type': 'image/jpeg' }, body: blob
+    });
+  }).then(function(r){
+    return r.json().catch(function(){ return {}; }).then(function(d){
+      if (!r.ok) throw new Error(d.error || ('Something went wrong (' + r.status + ').'));
+      return d;
+    });
+  }).then(function(d){
+    ME = ME || {}; ME.avatar = d.avatar;
+    paintAvatar($('pic_prev'), ME); paintAvatar($('me_av'), ME);
+    say($('pic_msg'), 'Picture updated.', true);
+  }).catch(function(e){ say($('pic_msg'), e.message); })
+    .then(function(){ $('pic_pick').disabled = false; $('pic_file').value = ''; });
+});
+
+$('pic_clear').addEventListener('click', function(){
+  $('pic_clear').disabled = true;
+  fetch('/api/account/avatar', { method: 'DELETE', credentials: 'same-origin' })
+    .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){
+      if (!r.ok) throw new Error(d.error || 'Could not remove it.');
+      ME = ME || {}; ME.avatar = null;
+      paintAvatar($('pic_prev'), ME); paintAvatar($('me_av'), ME);
+      say($('pic_msg'), 'Picture removed.', true);
+    }); })
+    .catch(function(e){ say($('pic_msg'), e.message); })
+    .then(function(){ $('pic_clear').disabled = false; });
+});
 
 // ---- signed out -----------------------------------------------------------
 function tab(which){
@@ -388,7 +533,10 @@ wire($('form_forgot'), $('fg_go'), $('fg_msg'),
   });
 
 wire($('form_reset'), $('rs_go'), $('rs_msg'),
-  function(){ return { token: RESET, password: $('rs_pw').value }; },
+  function(){
+    if (mismatch($('rs_pw').value, $('rs_pw2').value, $('rs_msg'))) return null;
+    return { token: RESET, password: $('rs_pw').value };
+  },
   '/api/auth/reset',
   function(d){
     try { if (d.slug) localStorage.setItem('ch_rider', d.slug); } catch (e) {}

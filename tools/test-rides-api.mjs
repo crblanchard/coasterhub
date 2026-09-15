@@ -61,7 +61,8 @@ function freshDb() {
       model TEXT, h REAL, s REAL, l REAL, inv INTEGER, dur INTEGER, laps INTEGER, yr INTEGER,
       opened TEXT, openedPrec TEXT, closed TEXT, closedPrec TEXT);
     CREATE TABLE parks (name TEXT PRIMARY KEY, lat REAL, lon REAL, region TEXT);
-    CREATE TABLE users (slug TEXT PRIMARY KEY, name TEXT, mode TEXT, email TEXT, created TEXT);
+    CREATE TABLE users (slug TEXT PRIMARY KEY, name TEXT, mode TEXT, email TEXT, created TEXT,
+      bio TEXT, avatar TEXT);
     CREATE TABLE rides (id INTEGER PRIMARY KEY AUTOINCREMENT, user_slug TEXT NOT NULL,
       coaster_id INTEGER NOT NULL, d TEXT);
     CREATE TABLE rankings (user_slug TEXT NOT NULL, coaster_id INTEGER NOT NULL,
@@ -170,6 +171,37 @@ async function callMail(db, method, path, { body, cookie, noKey } = {}) {
   } finally { globalThis.fetch = realFetch; }
 }
 const linkToken = (mail) => (String(mail.body.text).match(/\?reset=([0-9a-f]{64})/) || [])[1];
+
+// R2 stand-in. The real binding is three methods for our purposes, and holding
+// the objects in a Map means the tests can assert that a replaced picture is
+// actually deleted rather than quietly accumulating.
+function fakeR2() {
+  const store = new Map();
+  return {
+    store,
+    async put(key, body, opts) { store.set(key, { body, opts }); },
+    async get(key) {
+      if (!store.has(key)) return null;
+      const o = store.get(key);
+      return { body: o.body, httpMetadata: o.opts && o.opts.httpMetadata };
+    },
+    async delete(key) { store.delete(key); },
+  };
+}
+
+// A call carrying a binary body and an R2 binding, for the avatar routes.
+async function callBin(db, method, path, { body, type, cookie, bucket } = {}) {
+  const headers = {};
+  if (cookie) headers["cookie"] = cookie;
+  if (type) headers["content-type"] = type;
+  const req = new Request("https://coasterhub.org" + path, { method, headers, body });
+  const env = { DB: new FakeD1(db), ADMIN_PASSWORD: PW };
+  if (bucket !== null) env.AVATARS = bucket || fakeR2();
+  const res = await worker.fetch(req, env, ctx);
+  let data = null;
+  try { data = await res.json(); } catch { /* an image comes back, not JSON */ }
+  return { status: res.status, data, res, env };
+}
 
 function check(name, cond, detail) {
   if (cond) { pass++; console.log("  ok   " + name); }
@@ -1284,6 +1316,113 @@ async function main() {
     r = await call(db, "POST", "/api/auth/login",
       { body: { email: "nia@example.com", password: "riding-things" } });
     check("and signing in normally is untouched", r.status === 200);
+  }
+
+  console.log("\nProfiles — a short bio");
+  {
+    const db = freshDb();
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    let r = await call(db, "POST", "/api/account/profile",
+      { body: { bio: "Wood over steel, always." }, cookie: nia });
+    check("a bio saves on its own, without touching the username",
+      r.status === 200 && r.data.bio === "Wood over steel, always." && r.data.renamed === false,
+      JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/user/nia");
+    check("...and comes back on the public profile", r.data.bio === "Wood over steel, always.",
+      JSON.stringify(r.data));
+
+    r = await call(db, "POST", "/api/account/profile", { body: { bio: "x".repeat(281) }, cookie: nia });
+    check("281 characters is too many", r.status === 400, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/account/profile", { body: { bio: "x".repeat(280) }, cookie: nia });
+    check("...280 is fine", r.status === 200);
+    r = await call(db, "POST", "/api/account/profile", { body: { bio: "" }, cookie: nia });
+    check("an empty bio clears it rather than storing blank",
+      r.status === 200 && r.data.bio === null
+      && rows(db, "SELECT bio FROM users WHERE slug='nia'")[0].bio === null, JSON.stringify(r.data));
+
+    const ravi = await signedUp(db, "ravi@example.com", "Ravi");
+    r = await call(db, "POST", "/api/account/profile",
+      { body: { bio: "not mine to write", slug_of: "nia" }, cookie: ravi });
+    check("you cannot write someone else's bio", r.status === 401, JSON.stringify(r.data));
+  }
+
+  console.log("\nProfiles — the picture");
+  {
+    const db = freshDb();
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    const bucket = fakeR2();
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3, 4]);
+
+    let r = await callBin(db, "POST", "/api/account/avatar",
+      { body: png, type: "image/png", cookie: nia, bucket });
+    check("uploading a picture stores it and names the key",
+      r.status === 200 && /^nia-[0-9a-f]{16}\.png$/.test(r.data.avatar || ""), JSON.stringify(r.data));
+    check("...the object is really in the bucket", bucket.store.has(r.data.avatar));
+    check("...and the rider row points at it",
+      rows(db, "SELECT avatar FROM users WHERE slug='nia'")[0].avatar === r.data.avatar);
+    const firstKey = r.data.avatar;
+
+    r = await callBin(db, "GET", "/avatars/" + firstKey, { bucket });
+    check("it serves from coasterhub.org, not a third party", r.status === 200
+      && r.res.headers.get("content-type") === "image/png", r.res.headers.get("content-type"));
+    check("...cached hard, which is safe because the key changes on replace",
+      /immutable/.test(r.res.headers.get("cache-control") || ""), r.res.headers.get("cache-control"));
+
+    // Replacing must not leave the old object behind.
+    r = await callBin(db, "POST", "/api/account/avatar",
+      { body: png, type: "image/jpeg", cookie: nia, bucket });
+    check("replacing it writes a new key", r.status === 200 && r.data.avatar !== firstKey,
+      JSON.stringify(r.data));
+    check("...and deletes the old object rather than accumulating",
+      !bucket.store.has(firstKey) && bucket.store.size === 1,
+      [...bucket.store.keys()].join(","));
+
+    r = await callBin(db, "GET", "/avatars/" + firstKey, { bucket });
+    check("...so the old URL stops resolving", r.status === 404);
+
+    // What must not be uploadable.
+    r = await callBin(db, "POST", "/api/account/avatar",
+      { body: png, type: "text/html", cookie: nia, bucket });
+    check("an HTML file is refused — this is served from our own origin", r.status === 400,
+      JSON.stringify(r.data));
+    r = await callBin(db, "POST", "/api/account/avatar",
+      { body: new Uint8Array(600 * 1024), type: "image/png", cookie: nia, bucket });
+    check("an oversized image is refused", r.status === 413, JSON.stringify(r.data));
+    r = await callBin(db, "POST", "/api/account/avatar",
+      { body: png, type: "image/png", bucket });
+    check("signed out, you cannot upload", r.status === 401);
+
+    // Removing.
+    const live = rows(db, "SELECT avatar FROM users WHERE slug='nia'")[0].avatar;
+    r = await callBin(db, "DELETE", "/api/account/avatar", { cookie: nia, bucket });
+    check("removing it clears the row and the object",
+      r.status === 200 && r.data.avatar === null
+      && rows(db, "SELECT avatar FROM users WHERE slug='nia'")[0].avatar === null
+      && !bucket.store.has(live), JSON.stringify(r.data));
+
+    // And with no bucket bound at all.
+    r = await callBin(db, "POST", "/api/account/avatar",
+      { body: png, type: "image/png", cookie: nia, bucket: null });
+    check("with no R2 bucket bound it says so rather than 500ing", r.status === 503,
+      JSON.stringify(r.data));
+    r = await callBin(db, "GET", "/avatars/anything.png", { bucket: null });
+    check("...and an avatar URL 404s rather than throwing", r.status === 404);
+  }
+
+  console.log("\nProfiles — avatars on the rider list");
+  {
+    const db = freshDb();
+    const nia = await signedUp(db, "nia@example.com", "Nia");
+    const bucket = fakeR2();
+    const up = await callBin(db, "POST", "/api/account/avatar",
+      { body: new Uint8Array([1,2,3]), type: "image/png", cookie: nia, bucket });
+    const r = await call(db, "GET", "/api/users");
+    const me = r.data.users.filter(u => u.slug === "nia")[0];
+    check("the rider list carries the avatar key, so pickers can show faces",
+      me && me.avatar === up.data.avatar, JSON.stringify(me));
+    const other = r.data.users.filter(u => u.slug === "carter")[0];
+    check("...and null for anyone without one", other && other.avatar === null,
+      JSON.stringify(other));
   }
 
   console.log("\nRegression — endpoints the rest of the site depends on");

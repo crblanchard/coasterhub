@@ -752,6 +752,25 @@ Two properties worth not breaking:
   back into a working link. Spent rows are kept, not deleted, so a second click gets "already
   been used" rather than the same answer as a forged token.
 
+**Profiles — bio and picture (2026-09-15).** `migrations/008-profiles.sql` adds `users.bio`
+(280 chars, a caption on a count rather than a second page of prose) and `users.avatar`.
+
+`avatar` holds an **R2 object key**, not a URL and not bytes. The Worker serves it at
+`/avatars/<key>` from the `AVATARS` binding, so pictures are on coasterhub.org and no third
+party sees who is looking at whom. A fresh key is written on every upload and the old object is
+deleted, which is what lets the response be cached `immutable` for a year — a cached picture
+can never be the wrong picture.
+
+**Cropping happens in the browser**, not the Worker: `/account` draws the file to a canvas,
+centre-crops it square, resizes to 256px and sends ~30KB of JPEG. A Worker has no canvas, and
+this also means a phone photo never travels at full size. The Worker still enforces type
+(PNG/JPEG/WebP only — it is serving from our own origin) and a 512KB ceiling, because the
+browser is not the only thing that can call the endpoint.
+
+**Setup:** create an R2 bucket and bind it as `AVATARS` in `wrangler.jsonc`. Until that binding
+exists, uploads return 503 saying so and `/avatars/*` 404s — nothing else is affected. Note the
+binding must not be committed before the bucket exists, or the deploy fails.
+
 **Still to do, in rough order of how much it matters:**
 
 1. **Nothing rate-limits `/api/auth/forgot`.** Someone can make the Worker send mail to any

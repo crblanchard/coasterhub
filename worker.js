@@ -206,13 +206,21 @@ async function currentAccount(request, env) {
     "WHERE s.token = ?"
   ).bind(await sha256hex(raw)).first();
   if (!row) return null;
+  // Separate query for the profile columns so a database without migration 008
+  // still signs people in — the session is the important part.
+  let bio = null, avatar = null;
+  try {
+    const p = await env.DB.prepare("SELECT bio, avatar FROM users WHERE slug = ?").bind(row.slug).first();
+    if (p) { bio = p.bio || null; avatar = p.avatar || null; }
+  } catch (e) { /* migration 008 not applied yet */ }
   if (!(new Date(row.expires) > new Date())) {
     // Expired: drop it now rather than leaving dead rows for a cleanup job that
     // does not exist. The cookie is cleared by whatever route noticed.
     await env.DB.prepare("DELETE FROM sessions WHERE token = ?").bind(await sha256hex(raw)).run();
     return null;
   }
-  return { id: row.id, email: row.email, slug: row.slug, name: row.name, admin: !!row.adm };
+  return { id: row.id, email: row.email, slug: row.slug, name: row.name, admin: !!row.adm,
+           bio: bio, avatar: avatar };
 }
 
 // May this request write to <slug>'s rides or rankings?
@@ -255,7 +263,46 @@ const MAIL_FROM_DEFAULT = "Coaster Hub <hello@coasterhub.org>";
 
 function mailConfigured(env) { return !!env.RESEND_API_KEY; }
 
-async function sendMail(env, { to, subject, text }) {
+// The mark, as a PNG. NOT mark.svg: most mail clients will not render SVG, and
+// a broken image in a password-reset email is the last thing that should look
+// wrong. 180px served at 48, so it stays sharp on a retina screen.
+const MAIL_LOGO = "https://coasterhub.org/apple-touch-icon.png";
+
+// Both parts, every time. Plain text is what a screen reader, a terminal client
+// and a spam filter all prefer; the HTML is for everyone else. Sending only
+// HTML is a small deliverability penalty for no reason.
+function mailHtml(subject, body, action) {
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  // Inline styles and a table: email clients have no <style> support worth
+  // relying on, and the dark palette here is fixed rather than themed because
+  // prefers-color-scheme in mail is a coin flip.
+  return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+    + 'style="background:#0b1020;padding:28px 0;font-family:-apple-system,BlinkMacSystemFont,'
+    + '\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif"><tr><td align="center">'
+    + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+    + 'style="max-width:460px;background:#121a33;border:1px solid #23304f;border-radius:14px;'
+    + 'padding:26px 28px"><tr><td>'
+    + '<img src="' + MAIL_LOGO + '" width="48" height="48" alt="Coaster Hub" '
+    + 'style="display:block;border:0;border-radius:10px;margin-bottom:16px">'
+    + '<div style="color:#e8edf9;font-size:17px;font-weight:700;margin-bottom:10px">'
+    + esc(subject) + '</div>'
+    + body.split("\n\n").map((p) =>
+        '<p style="color:#9fb0d0;font-size:14px;line-height:1.6;margin:0 0 12px">'
+        + esc(p).replace(/\n/g, "<br>") + '</p>').join("")
+    + (action
+        ? '<p style="margin:18px 0 6px"><a href="' + esc(action.href) + '" '
+          + 'style="display:inline-block;background:#3ad6c8;color:#0b1020;font-weight:700;'
+          + 'font-size:14px;text-decoration:none;padding:11px 20px;border-radius:9px">'
+          + esc(action.label) + '</a></p>'
+          + '<p style="color:#6d7f9f;font-size:12px;line-height:1.6;margin:10px 0 0;'
+          + 'word-break:break-all">Or paste this in: ' + esc(action.href) + '</p>'
+        : "")
+    + '<p style="color:#6d7f9f;font-size:12px;margin:20px 0 0">coasterhub.org</p>'
+    + '</td></tr></table></td></tr></table>';
+}
+
+async function sendMail(env, { to, subject, text, action }) {
   if (!mailConfigured(env)) return { bad: "email is not configured on this deployment" };
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -263,7 +310,8 @@ async function sendMail(env, { to, subject, text }) {
       Authorization: "Bearer " + env.RESEND_API_KEY,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from: env.MAIL_FROM || MAIL_FROM_DEFAULT, to: [to], subject, text }),
+    body: JSON.stringify({ from: env.MAIL_FROM || MAIL_FROM_DEFAULT, to: [to], subject, text,
+                           html: mailHtml(subject, text, action) }),
   });
   if (!res.ok) {
     // Resend puts the real reason in the body — an unverified domain, a bad
@@ -277,6 +325,14 @@ async function sendMail(env, { to, subject, text }) {
 }
 
 const RESET_MINUTES = 60;
+
+// A caption on a count, not a second page of prose in front of the numbers.
+const BIO_MAX = 280;
+// Avatars are cropped and resized in the browser before upload (see
+// /account), so anything above this is a client that did not, or someone
+// poking the endpoint by hand.
+const AVATAR_MAX_BYTES = 512 * 1024;
+const AVATAR_TYPES = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
 
 function emailOk(s) {
   return typeof s === "string" && s.length <= 200 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
@@ -341,7 +397,11 @@ async function getUser(env, slug) {
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
   if (!u) return null;
   const { results } = await env.DB.prepare("SELECT coaster_id, d FROM rides WHERE user_slug = ? ORDER BY id").bind(slug).all();
-  return { user: u.name, rides: results.map(x => ({ c: x.coaster_id, d: x.d })) };
+  // SELECT * above, so bio/avatar arrive on their own once migration 008 has
+  // run and are simply undefined before that. Null rather than undefined in the
+  // response, so the pages have one thing to test for.
+  return { user: u.name, slug: slug, bio: u.bio || null, avatar: u.avatar || null,
+           rides: results.map(x => ({ c: x.coaster_id, d: x.d })) };
 }
 
 // ---- Riders ---------------------------------------------------------------
@@ -349,8 +409,17 @@ async function getUser(env, slug) {
 // added on /log or /import can be picked and written to straight away instead of
 // waiting for a deploy. app.js still ships USERS as the offline fallback.
 async function getUsers(env) {
-  const { results } = await env.DB.prepare("SELECT slug, name FROM users ORDER BY name").all();
-  return results.map(u => ({ slug: u.slug, name: u.name }));
+  // Tried with the profile columns and retried without: this is the one query
+  // every page makes, and it must not start failing the moment it runs against
+  // a database where migration 008 has not been applied.
+  try {
+    const { results } = await env.DB.prepare(
+      "SELECT slug, name, avatar FROM users ORDER BY name").all();
+    return results.map(u => ({ slug: u.slug, name: u.name, avatar: u.avatar || null }));
+  } catch (e) {
+    const { results } = await env.DB.prepare("SELECT slug, name FROM users ORDER BY name").all();
+    return results.map(u => ({ slug: u.slug, name: u.name }));
+  }
 }
 
 // The slug IS the URL (/user/<slug>/stats), so it is derived tightly and the
@@ -892,6 +961,23 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
+    // Avatars come out of R2 rather than the asset bundle, so they are on
+    // coasterhub.org like everything else and no third party sees who is
+    // looking at whom. Immutable + a year: the key changes on every upload, so
+    // a cached picture is never the wrong picture.
+    const av = path.match(/^\/avatars\/([A-Za-z0-9._-]{1,120})$/);
+    if (av && request.method === "GET") {
+      if (!env.AVATARS) return new Response("not found", { status: 404 });
+      const obj = await env.AVATARS.get(av[1]);
+      if (!obj) return new Response("not found", { status: 404 });
+      return new Response(obj.body, {
+        headers: {
+          "content-type": obj.httpMetadata && obj.httpMetadata.contentType || "image/png",
+          "cache-control": "public, max-age=31536000, immutable",
+        },
+      });
+    }
+
     if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
     if (!env.DB) return err(503, "database not bound yet");
 
@@ -996,7 +1082,8 @@ export default {
       // answer is a 200 with a null account, not a 401 — a 401 here would make
       // "not signed in" look like an error in the console on every page.
       if (request.method === "GET" && path === "/api/auth/me") {
-        return json({ account: acct && { email: acct.email, slug: acct.slug, name: acct.name, admin: acct.admin } });
+        return json({ account: acct && { email: acct.email, slug: acct.slug, name: acct.name,
+                                         admin: acct.admin, bio: acct.bio, avatar: acct.avatar } });
       }
 
       // Sign up. Open to anyone: creating an account also creates the rider it
@@ -1120,6 +1207,21 @@ export default {
         const who = await env.DB.prepare("SELECT slug, name FROM users WHERE slug = ?").bind(target).first();
         if (!who) return err(404, "no such rider");
 
+        // Bio is optional and independent: sending only a bio leaves the
+        // username alone, and an empty string clears it.
+        if (b && b.bio !== undefined) {
+          const bio = String(b.bio || "").trim().replace(/\s+/g, " ");
+          if (bio.length > BIO_MAX) return err(400, "that bio is too long (" + BIO_MAX + " characters max)");
+          try {
+            await env.DB.prepare("UPDATE users SET bio = ? WHERE slug = ?")
+              .bind(bio || null, who.slug).run();
+          } catch (e) { return err(503, "run migrations/008-profiles.sql before editing a profile"); }
+          if (b.username === undefined) {
+            return afterWrite(ctx, env, json({ ok: true, slug: who.slug, name: who.name,
+              bio: bio || null, renamed: false, was: who.slug }));
+          }
+        }
+
         const wanted = String(b && b.username || "").trim();
         if (!wanted) return err(400, "give yourself a username");
         const wantSlug = slugify(wanted);
@@ -1163,6 +1265,7 @@ export default {
               + "The link works once and expires in " + RESET_MINUTES + " minutes.\n\n"
               + "If this wasn't you, you can ignore this email — nothing has changed, and "
               + "your current password still works.\n",
+          action: { href: link, label: "Set a new password" },
         });
         // The sender failing is worth surfacing: the person is staring at a
         // screen that says "check your email" and no email is coming.
@@ -1217,6 +1320,50 @@ export default {
         const fresh = await startSession(env, row.account);
         const who = await env.DB.prepare("SELECT slug FROM accounts WHERE id = ?").bind(row.account).first();
         return json({ ok: true, slug: who && who.slug }, 200, { "set-cookie": setCookie(fresh) });
+      }
+
+      // Upload your own picture. Raw image body, not multipart: the page has
+      // already drawn it to a canvas to crop and shrink it, so what arrives is
+      // a small square blob and multipart would only add parsing.
+      if (request.method === "POST" && path === "/api/account/avatar") {
+        if (!acct) return err(401, "sign in first");
+        if (!env.AVATARS) return err(503, "picture uploads are not set up on this deployment yet");
+        const asked = acct.admin && url.searchParams.get("slug_of");
+        if (asked && asked !== acct.slug && !acct.admin) return err(401, "unauthorized");
+        const slug = asked || acct.slug;
+        if (!slug) return err(400, "this account is not attached to a rider");
+
+        const type = (request.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+        const ext = AVATAR_TYPES[type];
+        if (!ext) return err(400, "that image has to be a PNG, JPEG or WebP");
+        const bytes = await request.arrayBuffer();
+        if (!bytes.byteLength) return err(400, "that image is empty");
+        if (bytes.byteLength > AVATAR_MAX_BYTES) return err(413, "that image is too big");
+
+        // A fresh key every time, so the old picture cannot be served from a
+        // cache after someone replaces it — the reason the cache header above
+        // can be immutable.
+        const key = slug + "-" + randomToken().slice(0, 16) + "." + ext;
+        await env.AVATARS.put(key, bytes, { httpMetadata: { contentType: type } });
+        const prev = await env.DB.prepare("SELECT avatar FROM users WHERE slug = ?").bind(slug).first();
+        try {
+          await env.DB.prepare("UPDATE users SET avatar = ? WHERE slug = ?").bind(key, slug).run();
+        } catch (e) { return err(503, "run migrations/008-profiles.sql before uploading a picture"); }
+        // Best effort: a leftover object costs a fraction of a cent and a
+        // failure here must not lose the upload that just succeeded.
+        if (prev && prev.avatar) { try { await env.AVATARS.delete(prev.avatar); } catch (e) {} }
+        return afterWrite(ctx, env, json({ ok: true, avatar: key, url: "/avatars/" + key }));
+      }
+
+      // Remove it again, back to the initial in a circle.
+      if (request.method === "DELETE" && path === "/api/account/avatar") {
+        if (!acct || !acct.slug) return err(401, "sign in first");
+        const prev = await env.DB.prepare("SELECT avatar FROM users WHERE slug = ?").bind(acct.slug).first();
+        try {
+          await env.DB.prepare("UPDATE users SET avatar = NULL WHERE slug = ?").bind(acct.slug).run();
+        } catch (e) { return err(503, "run migrations/008-profiles.sql first"); }
+        if (env.AVATARS && prev && prev.avatar) { try { await env.AVATARS.delete(prev.avatar); } catch (e) {} }
+        return afterWrite(ctx, env, json({ ok: true, avatar: null }));
       }
 
       // Change your own password. Requires the current one: a borrowed session

@@ -343,6 +343,8 @@
       var coasters = res[0].coasters, parks = res[1], user = res[2];
       var stats = computeStats(coasters, parks, user);
       stats.userName = user.user;
+      stats.bio = user.bio || null;
+      stats.avatar = user.avatar || null;
       stats.coasters = coasters;
       stats.parks = parks;
       stats.rides = user.rides || [];
@@ -543,10 +545,19 @@
     me().then(function (acct) {
       if (!acct) return;
       var label = acct.name || acct.slug || acct.email;
-      a.textContent = String(label).trim().charAt(0).toUpperCase();
       a.className = "acctlink on";
       a.setAttribute("aria-label", "Signed in as " + label);
       a.setAttribute("title", "Signed in as " + label);
+      if (acct.avatar) {
+        // The picture fills the circle the initial would have sat in, so the
+        // control keeps its size and place in the header either way.
+        a.innerHTML = "";
+        a.style.backgroundImage = 'url("/avatars/' + acct.avatar + '")';
+        a.style.backgroundSize = "cover";
+        a.style.backgroundPosition = "center";
+        return;
+      }
+      a.textContent = String(label).trim().charAt(0).toUpperCase();
     });
   }
 
