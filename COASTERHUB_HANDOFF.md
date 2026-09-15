@@ -767,8 +767,11 @@ party sees who is looking at whom. A fresh key is written on every upload and th
 deleted, which is what lets the response be cached `immutable` for a year — a cached picture
 can never be the wrong picture.
 
-**Cropping happens in the browser**, not the Worker: `/account` draws the file to a canvas,
-centre-crops it square, resizes to 256px and sends ~30KB of JPEG. A Worker has no canvas, and
+**Cropping happens in the browser**, not the Worker: choosing a file opens a crop window (drag
+to position, scroll/pinch/slider to zoom, with a circle drawn over the square viewport because
+the avatar is round everywhere it appears). "Use this picture" renders the chosen region to a
+256px canvas and sends ~30KB of JPEG; nothing is uploaded until then. The image is kept covering
+the viewport, so a corner of empty background cannot be cropped. A Worker has no canvas, and
 this also means a phone photo never travels at full size. The Worker still enforces type
 (PNG/JPEG/WebP only — it is serving from our own origin) and a 512KB ceiling, because the
 browser is not the only thing that can call the endpoint.

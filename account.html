@@ -75,6 +75,25 @@
   .panel{border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 16px;
     background:var(--well)}
   .panel .msg{margin-bottom:0}
+  /* Crop window. A circle is drawn over the square viewport because the avatar
+     is round everywhere it appears — cropping to a square and discovering the
+     corners are gone afterwards is the classic version of this going wrong. */
+  .cropwrap{position:fixed;inset:0;z-index:60;background:rgba(3,7,18,.72);
+    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;padding:18px}
+  .cropwrap[hidden]{display:none}
+  .cropbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:22px;max-width:340px;width:100%}
+  .cropbox h2{font-size:1.05rem;margin-bottom:4px}
+  .cropview{position:relative;width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;
+    background:var(--well);border:1px solid var(--line);touch-action:none;cursor:grab}
+  .cropview:active{cursor:grabbing}
+  .cropimg{position:absolute;inset:0;background-repeat:no-repeat}
+  .cropmask{position:absolute;inset:0;pointer-events:none;
+    box-shadow:0 0 0 999px rgba(3,7,18,.45) inset;border-radius:50%}
+  #crop_zoom{width:100%;margin-bottom:14px;accent-color:var(--accent2)}
+  .croprow{display:flex;gap:10px}
+  .croprow button{margin:0}
   .picrow{display:flex;gap:14px;align-items:center;margin-bottom:4px}
   textarea{background:var(--well);border:1px solid var(--line);color:var(--fg);padding:10px 12px;
     border-radius:10px;font-size:.95rem;font-family:inherit;width:100%;margin-bottom:6px;
@@ -282,6 +301,24 @@
 
 </div></section>
 
+<!-- Crop window. Outside the panes because it sits over the whole page, and a
+     dialog nested in a hidden pane would inherit its display:none. -->
+<div class="cropwrap" id="crop" hidden role="dialog" aria-modal="true" aria-label="Crop your picture">
+  <div class="cropbox">
+    <h2>Crop your picture</h2>
+    <p class="sub">Drag to move it. Scroll, pinch or use the slider to zoom.</p>
+    <div class="cropview" id="crop_view"><div class="cropimg" id="crop_img"></div>
+      <div class="cropmask" aria-hidden="true"></div></div>
+    <label for="crop_zoom" style="margin-top:14px">Zoom</label>
+    <input id="crop_zoom" type="range" min="100" max="300" value="100" step="1">
+    <div class="croprow">
+      <button class="ghost" type="button" id="crop_cancel">Cancel</button>
+      <button class="primary" type="button" id="crop_ok" style="width:auto;flex:1">Use this picture</button>
+    </div>
+    <div class="msg" id="crop_msg"></div>
+  </div>
+</div>
+
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/stats">Profile</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
@@ -467,21 +504,18 @@ wire($('form_bio'), $('bio_go'), $('bio_msg'),
 
 // ---- profile picture ------------------------------------------------------
 // Cropped and resized HERE, not on the server: a Worker has no canvas, and a
-// phone photo is several megabytes of the wrong shape. This sends a 256px
-// square, which is a few tens of KB.
+// phone photo is several megabytes of the wrong shape. What gets sent is a
+// 256px square, a few tens of KB.
 var PIC_PX = 256;
-function squareBlob(file){
+
+// The crop window. State is the image, how far it is zoomed past "just covers
+// the viewport", and where it has been dragged to.
+var CROP = { img: null, zoom: 1, x: 0, y: 0, base: 1, vw: 0, done: null };
+
+function loadImage(file){
   return new Promise(function(resolve, reject){
     var img = new Image();
-    img.onload = function(){
-      var side = Math.min(img.width, img.height);
-      var c = document.createElement('canvas');
-      c.width = c.height = PIC_PX;
-      c.getContext('2d').drawImage(img,
-        (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, PIC_PX, PIC_PX);
-      c.toBlob(function(b){ b ? resolve(b) : reject(new Error('could not read that image')); },
-        'image/jpeg', 0.88);
-    };
+    img.onload = function(){ resolve(img); };
     // Chrome cannot decode HEIC; Safari can. So an iPhone photo works on a Mac
     // or iPhone and fails on Chrome — say which file it was and what to do,
     // rather than "not an image", which is both unhelpful and untrue.
@@ -492,6 +526,131 @@ function squareBlob(file){
     img.src = URL.createObjectURL(file);
   });
 }
+
+// Keep the image covering the viewport. Without this you can drag the picture
+// off its own frame and crop a corner of empty background.
+function clampCrop(){
+  var s = CROP.base * CROP.zoom;
+  var dw = CROP.img.width * s, dh = CROP.img.height * s, V = CROP.vw;
+  CROP.x = Math.min(0, Math.max(V - dw, CROP.x));
+  CROP.y = Math.min(0, Math.max(V - dh, CROP.y));
+}
+
+function paintCrop(){
+  clampCrop();
+  var s = CROP.base * CROP.zoom;
+  var el = $('crop_img');
+  el.style.backgroundImage = 'url("' + CROP.img.src + '")';
+  el.style.backgroundSize = (CROP.img.width * s) + 'px ' + (CROP.img.height * s) + 'px';
+  el.style.backgroundPosition = CROP.x + 'px ' + CROP.y + 'px';
+}
+
+function openCrop(img){
+  CROP.img = img;
+  CROP.zoom = 1;
+  $('crop').hidden = false;
+  say($('crop_msg'), '');
+  $('crop_zoom').value = 100;
+  // Measured after the dialog is visible, or the viewport is 0 wide and every
+  // number below comes out as Infinity.
+  CROP.vw = $('crop_view').clientWidth;
+  // "Just covers": the smaller dimension fills the frame, so zoom 1 is the most
+  // of the picture that can be shown without empty edges.
+  CROP.base = Math.max(CROP.vw / img.width, CROP.vw / img.height);
+  // Start centred, which is where most people would have put it anyway.
+  CROP.x = (CROP.vw - img.width * CROP.base) / 2;
+  CROP.y = (CROP.vw - img.height * CROP.base) / 2;
+  paintCrop();
+}
+
+function closeCrop(){
+  $('crop').hidden = true;
+  if (CROP.img) { try { URL.revokeObjectURL(CROP.img.src); } catch (e) {} }
+  CROP.img = null;
+  $('pic_file').value = '';
+}
+
+// Zoom about the CENTRE of the viewport, not the top-left, so the thing you are
+// looking at stays where it is instead of sliding away as you zoom.
+function setZoom(z){
+  var old = CROP.base * CROP.zoom;
+  CROP.zoom = Math.min(3, Math.max(1, z));
+  var now = CROP.base * CROP.zoom, V = CROP.vw;
+  CROP.x = (CROP.x - V / 2) * (now / old) + V / 2;
+  CROP.y = (CROP.y - V / 2) * (now / old) + V / 2;
+  $('crop_zoom').value = Math.round(CROP.zoom * 100);
+  paintCrop();
+}
+
+function croppedBlob(){
+  var s = CROP.base * CROP.zoom, V = CROP.vw;
+  var c = document.createElement('canvas');
+  c.width = c.height = PIC_PX;
+  // Viewport coordinates back into image coordinates.
+  c.getContext('2d').drawImage(CROP.img, -CROP.x / s, -CROP.y / s, V / s, V / s,
+    0, 0, PIC_PX, PIC_PX);
+  return new Promise(function(resolve, reject){
+    c.toBlob(function(b){ b ? resolve(b) : reject(new Error('could not read that image')); },
+      'image/jpeg', 0.88);
+  });
+}
+
+// Drag. Pointer events rather than mouse+touch pairs: one code path covers a
+// finger, a mouse and a stylus.
+(function(){
+  var view = $('crop_view'), dragging = false, lastX = 0, lastY = 0;
+  view.addEventListener('pointerdown', function(e){
+    if (!CROP.img) return;
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    view.setPointerCapture(e.pointerId);
+  });
+  view.addEventListener('pointermove', function(e){
+    if (!dragging) return;
+    CROP.x += e.clientX - lastX; CROP.y += e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    paintCrop();
+  });
+  ['pointerup','pointercancel'].forEach(function(ev){
+    view.addEventListener(ev, function(){ dragging = false; });
+  });
+  view.addEventListener('wheel', function(e){
+    if (!CROP.img) return;
+    e.preventDefault();
+    setZoom(CROP.zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08));
+  }, { passive: false });
+})();
+
+$('crop_zoom').addEventListener('input', function(){ if (CROP.img) setZoom(this.value / 100); });
+$('crop_cancel').addEventListener('click', closeCrop);
+// Escape and a click on the backdrop both cancel, which is what a dialog that
+// covers the page is expected to do.
+$('crop').addEventListener('click', function(e){ if (e.target === $('crop')) closeCrop(); });
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && !$('crop').hidden) closeCrop();
+});
+
+$('crop_ok').addEventListener('click', function(){
+  $('crop_ok').disabled = true;
+  say($('crop_msg'), '');
+  croppedBlob().then(function(blob){
+    return fetch('/api/account/avatar', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'content-type': 'image/jpeg' }, body: blob
+    });
+  }).then(function(r){
+    return r.json().catch(function(){ return {}; }).then(function(d){
+      if (!r.ok) throw new Error(d.error || ('Something went wrong (' + r.status + ').'));
+      return d;
+    });
+  }).then(function(d){
+    ME = ME || {}; ME.avatar = d.avatar;
+    paintAvatar($('pic_prev'), ME); paintAvatar($('me_av'), ME);
+    closeCrop();
+    say($('pic_msg'), 'Picture updated.', true);
+    closeSoon('pan_pic');
+  }).catch(function(e){ say($('crop_msg'), e.message); })
+    .then(function(){ $('crop_ok').disabled = false; });
+});
 
 // Saved, so the editor gets out of the way — but not instantly, or the "Name
 // saved." it just printed vanishes before anyone reads it. Long enough to
@@ -535,28 +694,17 @@ wire($('form_name'), $('nm_go'), $('nm_msg'),
   });
 
 $('pic_pick').addEventListener('click', function(){ $('pic_file').click(); });
+// Choosing a file opens the crop window rather than uploading on the spot —
+// nothing is sent until "Use this picture".
 $('pic_file').addEventListener('change', function(){
   var file = $('pic_file').files && $('pic_file').files[0];
   if (!file) return;
   say($('pic_msg'), '');
   $('pic_pick').disabled = true;
-  squareBlob(file).then(function(blob){
-    return fetch('/api/account/avatar', {
-      method: 'POST', credentials: 'same-origin',
-      headers: { 'content-type': 'image/jpeg' }, body: blob
-    });
-  }).then(function(r){
-    return r.json().catch(function(){ return {}; }).then(function(d){
-      if (!r.ok) throw new Error(d.error || ('Something went wrong (' + r.status + ').'));
-      return d;
-    });
-  }).then(function(d){
-    ME = ME || {}; ME.avatar = d.avatar;
-    paintAvatar($('pic_prev'), ME); paintAvatar($('me_av'), ME);
-    say($('pic_msg'), 'Picture updated.', true);
-    closeSoon('pan_pic');
-  }).catch(function(e){ say($('pic_msg'), e.message); })
-    .then(function(){ $('pic_pick').disabled = false; $('pic_file').value = ''; });
+  loadImage(file)
+    .then(openCrop)
+    .catch(function(e){ say($('pic_msg'), e.message); $('pic_file').value = ''; })
+    .then(function(){ $('pic_pick').disabled = false; });
 });
 
 $('pic_clear').addEventListener('click', function(){
