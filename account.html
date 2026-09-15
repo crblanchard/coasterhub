@@ -70,11 +70,17 @@
   button.edit{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;
     text-align:left;display:block;max-width:100%}
   button.edit:focus-visible{outline:2px solid var(--accent2);outline-offset:3px;border-radius:6px}
-  .who .nm.edit,.who .un.edit{position:relative}
-  .who .nm.edit::after,.who .un.edit::after{content:"✎";opacity:0;margin-left:7px;
+  .who .nm.edit,.who .un.edit,.bioline{position:relative}
+  .who .nm.edit::after,.who .un.edit::after,.bioline::after{content:"✎";opacity:0;margin-left:7px;
     font-size:.8em;color:var(--muted);transition:opacity .12s}
-  .who .nm.edit:hover::after,.who .un.edit:hover::after,
-  .who .nm.edit:focus-visible::after,.who .un.edit:focus-visible::after{opacity:1}
+  .who .nm.edit:hover::after,.who .un.edit:hover::after,.bioline:hover::after,
+  .who .nm.edit:focus-visible::after,.who .un.edit:focus-visible::after,
+  .bioline:focus-visible::after{opacity:1}
+  /* The bio reads as the sentence it is, not as a form field, until you click
+     it. Empty, it invites — an editable thing that shows nothing at all is
+     impossible to discover. */
+  .bioline{color:var(--muted);font-size:.92rem;line-height:1.5;margin:0 0 16px;width:100%}
+  .bioline.empty{font-style:italic;opacity:.75}
   .who .av.edit{transition:border-color .12s}
   .who .av.edit:hover{border-color:var(--accent2)}
   .panel{border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 16px;
@@ -232,6 +238,9 @@
       </div>
     </div>
 
+    <button class="bioline edit" id="me_bio" type="button" aria-label="Change your bio"
+      title="Change your bio"></button>
+
     <!-- Opened by clicking the picture or the name above. Panels rather than
          details/summary: the summary would be a second label for something the
          thing itself already offers. -->
@@ -266,21 +275,22 @@
       </form>
     </div>
 
-    <form id="form_bio" style="margin-top:4px">
-      <label for="bio_text">Bio</label>
-      <textarea id="bio_text" maxlength="280" rows="3"
-        placeholder="A line about your riding — shown on your profile."></textarea>
-      <p class="hint"><span id="bio_left">280</span> characters left.</p>
-      <button class="primary" type="submit" id="bio_go">Save bio</button>
-      <div class="msg" id="bio_msg"></div>
-    </form>
+    <div class="panel" id="pan_bio" hidden>
+      <form id="form_bio">
+        <label for="bio_text">Bio</label>
+        <textarea id="bio_text" maxlength="280" rows="3"
+          placeholder="A line about your riding — shown on your profile."></textarea>
+        <p class="hint"><span id="bio_left">280</span> characters left.</p>
+        <button class="primary" type="submit" id="bio_go">Save bio</button>
+        <div class="msg" id="bio_msg"></div>
+      </form>
+    </div>
     <div class="rowlinks">
       <a id="me_profile" href="/stats">Your profile</a>
       <a id="me_log" href="/log">Log a day</a>
     </div>
     <hr class="sep">
-    <details id="det_profile">
-      <summary>Change username</summary>
+    <div class="panel" id="pan_user" hidden>
       <form id="form_profile">
         <label for="pr_user">Username</label>
         <input id="pr_user" type="text" maxlength="32" autocapitalize="off" autocorrect="off" spellcheck="false" required>
@@ -290,7 +300,7 @@
         <button class="primary" type="submit" id="pr_go">Save</button>
         <div class="msg" id="pr_msg"></div>
       </form>
-    </details>
+    </div>
     <details>
       <summary>Change password</summary>
       <form id="form_pw">
@@ -422,6 +432,7 @@ function renderMe(a){
   paintAvatar($('pic_prev'), a);
   $('nm_text').value = a.name || '';
   $('bio_text').value = a.bio || '';
+  paintBioLine(a.bio);
   countBio();
   $('me_profile').href = a.slug ? '/user/' + a.slug + '/stats' : '/stats';
   // defaultValue as well as value: it is what the submit handler compares
@@ -472,11 +483,13 @@ wire($('form_profile'), $('pr_go'), $('pr_msg'),
   function(d){
     $('pr_user').defaultValue = d.slug;
     showUrl(d.slug);
+    ME = ME || {}; ME.slug = d.slug;
+    $('me_user').textContent = '@' + d.slug;
     $('me_profile').href = '/user/' + d.slug + '/stats';
     try { localStorage.setItem('ch_rider', d.slug); } catch (e) {}
     say($('pr_msg'), d.renamed ? 'Saved. Your page is now /user/' + d.slug
                                : 'That is already your username.', true);
-    setTimeout(function(){ $('det_profile').open = false; }, 1400);
+    closeSoon('pan_user');
   });
 
 // A password you cannot see, typed once, is a password you can lock yourself
@@ -502,6 +515,12 @@ wire($('form_pw'), $('pw_go'), $('pw_msg'),
   });
 
 // ---- bio ------------------------------------------------------------------
+function paintBioLine(bio){
+  var el = $('me_bio');
+  el.textContent = bio || 'Add a short bio';
+  el.classList.toggle('empty', !bio);
+}
+
 function countBio(){
   $('bio_left').textContent = String(280 - ($('bio_text').value || '').length);
 }
@@ -510,7 +529,12 @@ $('bio_text').addEventListener('input', countBio);
 wire($('form_bio'), $('bio_go'), $('bio_msg'),
   function(){ return { bio: $('bio_text').value }; },
   '/api/account/profile',
-  function(d){ say($('bio_msg'), d.bio ? 'Bio saved.' : 'Bio cleared.', true); });
+  function(d){
+    ME = ME || {}; ME.bio = d.bio;
+    paintBioLine(d.bio);
+    say($('bio_msg'), d.bio ? 'Bio saved.' : 'Bio cleared.', true);
+    closeSoon('pan_bio');
+  });
 
 // ---- profile picture ------------------------------------------------------
 // Cropped and resized HERE, not on the server: a Worker has no canvas, and a
@@ -671,26 +695,24 @@ function closeSoon(id){
 
 // Clicking your picture, name or username opens the matching editor. One at a
 // time: two open panels in a card this size is just noise.
+var PANELS = ['pan_pic','pan_name','pan_user','pan_bio'];
 function openPanel(which){
-  ['pan_pic','pan_name'].forEach(function(id){ $(id).hidden = (id !== which); });
+  PANELS.forEach(function(id){ $(id).hidden = (id !== which); });
   if (which === 'pan_name') $('nm_text').focus();
+  if (which === 'pan_user') $('pr_user').focus();
+  if (which === 'pan_bio') $('bio_text').focus();
 }
-$('me_av').addEventListener('click', function(){
-  var open = !$('pan_pic').hidden;
-  openPanel(open ? null : 'pan_pic');
-});
-$('me_name').addEventListener('click', function(){
-  var open = !$('pan_name').hidden;
-  openPanel(open ? null : 'pan_name');
-});
-// The username keeps its written row as well, so clicking it just opens that —
-// one form, two ways in, rather than two forms that could disagree.
-$('me_user').addEventListener('click', function(){
-  $('pan_pic').hidden = true; $('pan_name').hidden = true;
-  $('det_profile').open = true;
-  $('pr_user').focus();
-  $('det_profile').scrollIntoView({ block: 'nearest' });
-});
+// Click the thing to change the thing. Each click toggles, so a second click on
+// the same one puts it away again.
+function editor(btn, panel){
+  $(btn).addEventListener('click', function(){
+    openPanel($(panel).hidden ? panel : null);
+  });
+}
+editor('me_av', 'pan_pic');
+editor('me_name', 'pan_name');
+editor('me_user', 'pan_user');
+editor('me_bio', 'pan_bio');
 
 wire($('form_name'), $('nm_go'), $('nm_msg'),
   function(){ return { name: $('nm_text').value }; },

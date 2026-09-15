@@ -727,9 +727,10 @@ different things: free text, a public URL and a key in five tables, and a length
 A display name is NOT unique — two riders called Dave are two riders called Dave, and the
 username is what tells them apart.
 
-On `/account` the picture, display name and username are each clickable and open their own
-editor; the bio sits open below them. `Change username` and `Change password` stay as written
-rows, so the username has two ways in to one form rather than two forms that could disagree.
+On `/account` the picture, display name, username and bio are each clickable and open their own
+editor, one at a time. `Change password` is the only written row left — it is the one thing on
+the card that is not a piece of the profile you can point at. An empty bio shows "Add a short
+bio" rather than nothing, because an editable thing that displays nothing is undiscoverable.
 
 **Password reset — built 2026-09-15.** The Worker sends mail through **Resend** over plain
 HTTPS (no SDK, which matters in a Worker). Two secrets:
