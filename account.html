@@ -210,7 +210,13 @@
       <div class="picrow">
         <div class="av big" id="pic_prev"></div>
         <div style="flex:1;min-width:0">
-          <input id="pic_file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none">
+          <!-- image/*, not a list of three types: a photo off an iPhone or a Mac
+               is HEIC, and naming only png/jpeg/webp greyed it out in the file
+               picker so it could not even be chosen. The canvas below converts
+               whatever it can decode to JPEG, so the narrow filter bought
+               nothing — the Worker's type check is on what we SEND, which is
+               always image/jpeg. -->
+          <input id="pic_file" type="file" accept="image/*" style="display:none">
           <button class="ghost" type="button" id="pic_pick" style="width:100%;margin-bottom:8px">Choose a picture</button>
           <button class="ghost" type="button" id="pic_clear" style="width:100%">Remove</button>
         </div>
@@ -476,7 +482,13 @@ function squareBlob(file){
       c.toBlob(function(b){ b ? resolve(b) : reject(new Error('could not read that image')); },
         'image/jpeg', 0.88);
     };
-    img.onerror = function(){ reject(new Error('that file is not an image the browser can read')); };
+    // Chrome cannot decode HEIC; Safari can. So an iPhone photo works on a Mac
+    // or iPhone and fails on Chrome — say which file it was and what to do,
+    // rather than "not an image", which is both unhelpful and untrue.
+    img.onerror = function(){
+      reject(new Error('This browser cannot read ' + (file.name || 'that file')
+        + '. If it is a HEIC photo, export it as JPEG first, or try Safari.'));
+    };
     img.src = URL.createObjectURL(file);
   });
 }
