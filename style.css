@@ -93,6 +93,26 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
 .hero h1{font-size:clamp(2.4rem,6.5vw,4rem);line-height:1.03;font-weight:800;letter-spacing:-.02em;max-width:14ch}
 .hero p{color:var(--muted);font-size:clamp(1rem,2.2vw,1.2rem);margin:20px 0 30px;max-width:52ch}
 .hero-sub{color:var(--accent2);font-weight:600;font-size:.95rem;margin:-14px 0 28px;letter-spacing:.01em}
+
+/* /stats splits the hero in two: who the rider is on the left, what they have
+   ridden on the right. The hub (/stats with nobody in the URL) has no profile
+   block, so it keeps the one-column, left-aligned hero and only a rider's page
+   gets `.split`. */
+.herotop{display:flex;flex-wrap:wrap;gap:26px 40px;align-items:flex-start}
+.herotop>div{min-width:0}
+.herotop.split .herocount{margin-left:auto;text-align:right}
+/* Big, but not hero-headline big — this sits BESIDE a name rather than above
+   the page. Each number is its own span so the two lines stack without a <br>. */
+.herotop.split .herocount h1{font-size:clamp(1.6rem,3.4vw,2.3rem);max-width:none;line-height:1.2}
+.herotop.split .herocount h1 span{display:block}
+/* Beats `.hero p`, which is sized for a paragraph of lead copy. */
+.hero .listp{margin:10px 0 0}
+.hero .listp a{color:var(--accent2);font-size:.9rem;font-weight:600}
+@media(max-width:640px){
+  /* Stacked: the numbers sit under the profile, so right-aligning them would
+     leave the two blocks pointing opposite ways. */
+  .herotop.split .herocount{margin-left:0;text-align:left}
+}
 .track{position:absolute;inset:0;z-index:-1;opacity:.5}
 
 /* Buttons */

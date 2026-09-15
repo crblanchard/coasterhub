@@ -740,6 +740,18 @@ editing machinery, the crop window and the email are never built at all rather t
 hidden. An empty bio invites on your own page ("Add a short bio") and takes up no room on
 someone else's.
 
+**The `/stats` hero is two columns** (2026-09-15): the identity block on the left, the rider's
+two numbers on the right — `561 coasters.` over `2,238 rides.`, with "Full credit list →" under
+them. What went away: the `CARTER'S COUNT` badge and the "Every ride, park, and record from
+Carter's coaster count — 2004 to 2026" blurb, both of which named the rider a second and third
+time directly under a card that already says who they are. The badge and the blurb are still in
+the markup because the hub (`/stats` with nobody in the URL) uses them; `render()` removes them
+from the DOM and adds `.split` to `#herotop`, so a rider's page is the only one that gets the
+right-hand column. The rides line is dropped entirely when `has.rideCounts` is false — `k.rides`
+is null there, and "— rides." reads as a bug rather than as a rider whose re-rides aren't known.
+Below 640px the two columns stack and the numbers go back to left-aligned, because right-aligned
+numbers under a left-aligned name point in two directions.
+
 Three CSS traps live here, all the same shape and all commented in place: `background`,
 `font` and any other shorthand RESETS the longhands it covers, and `.profedit button.edit`
 outranks `.profedit .av` / `.nm`. That combination silently ate the avatar circle once and the

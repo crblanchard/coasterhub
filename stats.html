@@ -90,16 +90,25 @@
 </div></header>
 
 <section class="hero" style="padding:60px 0 36px"><div class="container">
-  <!-- Your own page: the whole account card, editable in place. /account is
-       signed-out only now, so this is where you change your picture, name,
-       username, bio and password, and where you sign out. Built by
-       profile-edit.js only when the signed-in account owns this page. -->
-  <div id="profilehead" style="display:none;margin-bottom:22px"></div>
+  <!-- Two columns on a rider's page: who they are on the left, their two
+       numbers on the right. The hub (no rider in the URL) has no profile block,
+       so `.split` is only added once we know we are on a rider page and the
+       single remaining column falls back to the ordinary left-aligned hero.
 
-  <span class="badge" id="hero_badge">My Count</span>
-  <h1 id="hero_h" style="max-width:20ch">Chasing credits.</h1>
-  <p id="hero_p">Every ride, park, and record from my coaster count.</p>
-  <p style="margin-top:10px"><a id="hero_list" href="/rides?view=list" style="color:var(--accent2);font-size:.9rem">Full credit list &rarr;</a></p>
+       The profile block is built by profile-edit.js: the same identity card for
+       everyone, editable in place when the signed-in account owns the page.
+       /account is signed-out only now, so this is also where you change your
+       picture, name, username, bio and password, and where you sign out. -->
+  <div class="herotop" id="herotop">
+    <div id="profilehead" style="display:none"></div>
+
+    <div class="herocount" id="herocount">
+      <span class="badge" id="hero_badge">My Count</span>
+      <h1 id="hero_h" style="max-width:20ch">Chasing credits.</h1>
+      <p id="hero_p">Every ride, park, and record from my coaster count.</p>
+      <p class="listp"><a id="hero_list" href="/rides?view=list">Full credit list &rarr;</a></p>
+    </div>
+  </div>
 </div></section>
 
 <div class="container" id="hub" style="display:none">
@@ -341,10 +350,16 @@ function render(s){
   const name=esc(s.userName||'Carter');
   const mine=false;
   const who=name+'’s';
-  const Who=name+'’s';
   document.title=name+'’s Stats — Coaster Hub';
 
-  document.getElementById('hero_badge').textContent=Who+' Count';
+  // A rider's own page names them once, in the profile block below. The badge
+  // ("CARTER'S COUNT") and the blurb under the headline both said it again, so
+  // both are gone here; the hub still uses them, which is why they are removed
+  // rather than deleted from the markup.
+  var top=document.getElementById('herotop');
+  top.className='herotop split';
+  document.getElementById('hero_badge').remove();
+  document.getElementById('hero_p').remove();
 
   // Picture and bio, when this rider has set them. loadUser() carries them
   // through from /api/user/<slug>; a database without migration 008 simply
@@ -367,17 +382,21 @@ function render(s){
         } });
   });
 
-  // The headline is ALWAYS the credit count. It used to switch to "<span> years
-  // of chasing credits" for anyone whose credits are all dated, which reads as
-  // nonsense the moment those dates sit close together — Sean's page announced
-  // "1 years of chasing credits". The number everyone actually compares is the
-  // credit count, and it means the same thing on every rider's page.
-  document.getElementById('hero_h').textContent=nf(k.credits)+' coasters and counting.';
-  var yrs = (k.year_min==null) ? ''
-          : (k.year_min===k.year_max ? (' — '+k.year_min) : (' — '+k.year_min+' to '+k.year_max));
-  document.getElementById('hero_p').textContent = has.timeline
-    ? ('Every '+(has.activity?'ride, ':'')+'park, and record from '+who+' coaster count'+yrs+'.')
-    : ('Every park, manufacturer, and record from '+who+' coaster collection.');
+  // Two numbers, two lines, and nothing else. The headline used to be prose —
+  // "<span> years of chasing credits", then "N coasters and counting." over a
+  // sentence naming the rider again — and prose here ages badly: Sean's page
+  // once announced "1 years of chasing credits". Credits and rides are what
+  // everyone actually compares, and they mean the same thing on every page.
+  //
+  // Ride totals are not known for every rider (has.rideCounts), and a page
+  // printing "— rides." would read as a bug, so that line is simply absent
+  // when there is nothing to put in it.
+  var hh=document.getElementById('hero_h');
+  hh.textContent='';
+  hh.removeAttribute('style');
+  var line=function(t){ var d=document.createElement('span'); d.textContent=t; hh.appendChild(d); };
+  line(nf(k.credits)+' coasters.');
+  if(has.rideCounts) line(nf(k.rides)+' rides.');
   // Standing notes about a rider's own data — things known to be unresolved, kept
   // on the page so they aren't forgotten. Delete the entry once it's settled.
   var note=RIDER_NOTES[CoasterHub.currentUser()||'carter'];
