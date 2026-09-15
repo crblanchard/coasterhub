@@ -230,13 +230,9 @@ const nf=n=>(n==null?'—':n.toLocaleString());
 // Standing notes about a rider's own data, keyed by slug. These are deliberately
 // in the page rather than the database: they are temporary reminders about
 // something unresolved, not a field every rider has. Delete an entry once the
-// thing it describes is settled.
-const RIDER_NOTES={
-  sean: 'Credits went <b>669 → 670</b> when Carter’s Europe 2025 and Japan 2026 rides were '
-      + 'copied across: <b>Roller Coaster</b> — Hanayashiki wasn’t on the list. '
-      + 'Still not counting <b>Free Fall</b> — Nagashima Spaland or <b>Supersplash</b> — Plopsaland. '
-      + 'Everyone else on those days has them; come back to this if they should be added.'
-};
+// thing it describes is settled. Empty right now: Sean's went when the two
+// credits it was holding open — Free Fall and Supersplash — were added.
+const RIDER_NOTES={};
 
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Friend pages are unlisted: nav always points to the main (Carter) site, so a
@@ -475,7 +471,45 @@ function render(s){
   })();
 
   const map=L.map('map',{scrollWheelZoom:false,worldCopyJump:true}).setView([30,-40],2);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
+  // The basemap. This was CARTO's dark_all until 2026-09-15, when CARTO started
+  // stamping "API KEY REQUIRED" across every tile of their free endpoint. Esri's
+  // canvas basemaps are the replacement: same muted, label-light look, no key,
+  // no account, no per-domain allowlist to keep in sync with the site.
+  //
+  // Note the {z}/{y}/{x} order — Esri's REST tiles are row before column. Get it
+  // backwards and you get a map of somewhere else, not an error.
+  //
+  // maxNativeZoom, not maxZoom: these services stop at level 16, and without it
+  // Leaflet refuses to zoom past 16 at all. With it, closer zooms upscale the
+  // level-16 tile — slightly soft, but the map keeps working.
+  var TILES={
+    dark: {url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+           attribution:'Tiles &copy; Esri'},
+    light:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+           attribution:'Tiles &copy; Esri'}
+  };
+  // If Esri ever does what CARTO just did, a plain OpenStreetMap map is better
+  // than an empty grey box. Nothing here needs a key either.
+  var FALLBACK={url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                attribution:'&copy; OpenStreetMap contributors',native:19};
+  var base=null, fellBack=false;
+  function setBase(spec){
+    var layer=L.tileLayer(spec.url,{attribution:spec.attribution,
+      maxNativeZoom:spec.native||16, maxZoom:19});
+    var ok=false, bad=0;
+    layer.on('tileload',function(){ ok=true; });
+    layer.on('tileerror',function(){
+      // One failed tile is a gap in the ocean. A dozen with not a single tile
+      // ever loading is a dead tile server, and that is worth switching for.
+      if(!ok && !fellBack && ++bad>=8){ fellBack=true; setBase(FALLBACK); }
+    });
+    if(base) map.removeLayer(base);
+    base=layer.addTo(map);
+  }
+  function mapTheme(){
+    return document.documentElement.getAttribute('data-theme')==='light' ? 'light' : 'dark';
+  }
+  setBase(TILES[mapTheme()]);
   const pts=[];
   const MARKERS=[];
   s.parksGeo.forEach(p=>{const val=p.rides||p.credits;const r=3+Math.sqrt(val)*0.95;
@@ -494,7 +528,12 @@ function render(s){
   // instead; it is the right picture for a count that has not started.
   if (pts.length) map.fitBounds(pts,{padding:[30,30]});
   paintMarkers();
-  document.documentElement.addEventListener('ch:themechange',paintMarkers);
+  // The basemap follows the toggle too. It used to be dark on every page, which
+  // left a black rectangle sitting in the middle of the light theme.
+  document.documentElement.addEventListener('ch:themechange',function(){
+    paintMarkers();
+    if(!fellBack) setBase(TILES[mapTheme()]);
+  });
   const DAY=s.day_detail, tip=document.getElementById('hm-tip');
   // Level, not colour: the ramp lives in CSS (--hm0..--hm4) because it inverts
   // between themes — on a dark page "more" is brighter, on a light one it is

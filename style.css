@@ -305,6 +305,17 @@ select.userpick:hover{border-color:var(--accent2)}
   font-family:inherit;font-weight:inherit;color:inherit;cursor:pointer;
   text-align:left;display:block;max-width:100%}
 .profedit button.av{padding:0;cursor:pointer;font-family:inherit}
+/* …and the same trap a third time, now in the three properties the reset DOES
+   set. `font-weight`, `font-family` and `color` on the button outrank
+   `.profedit .nm` / `.un` / `.bioline`, so the OWNER's profile rendered its name
+   at body weight, its username in the body face instead of mono, and its bio at
+   full contrast — every visitor saw a different-looking card from the one Carter
+   saw of himself. These three selectors carry the same weight as the reset and
+   come after it, so they win; keep them next to it. */
+.profedit button.edit.nm{font-weight:800;color:var(--fg)}
+.profedit button.edit.un{font-weight:600;color:var(--accent2);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.profedit button.edit.bioline{color:var(--muted)}
 .profedit button.edit:focus-visible{outline:2px solid var(--accent2);outline-offset:3px;
   border-radius:6px}
 .profedit .nm.edit,.profedit .un.edit,.profedit .bioline{position:relative}
