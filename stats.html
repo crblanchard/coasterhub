@@ -32,14 +32,6 @@
     border-left:3px solid #ffc45a;border-radius:10px;background:var(--panel);
     color:var(--muted);font-size:.86rem}
   .ridernote b{color:var(--fg)}
-  #whois{display:flex}
-  /* background-COLOR: the shorthand resets background-size, which this relies
-     on to fit a photo. See the same note in account.html. */
-  #whois_av{width:56px;height:56px;border-radius:999px;background-color:var(--soft);
-    border:1px solid var(--line);flex:none;display:flex;align-items:center;
-    justify-content:center;font-weight:800;font-size:1.3rem;color:var(--accent2);
-    background-size:cover;background-position:center}
-  #whois_bio{color:var(--muted);font-size:.95rem;line-height:1.5;margin:0;max-width:52ch}
   .chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;margin-top:8px}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
   .panel h3{font-size:1.05rem;margin-bottom:4px}
@@ -102,15 +94,8 @@
        signed-out only now, so this is where you change your picture, name,
        username, bio and password, and where you sign out. Built by
        profile-edit.js only when the signed-in account owns this page. -->
-  <div id="ownprofile" style="display:none;max-width:420px;margin-bottom:22px"></div>
+  <div id="profilehead" style="display:none;margin-bottom:22px"></div>
 
-  <!-- Whose page this is: the picture and bio, when they have set them.
-       Hidden by default and only filled in for a single rider, so the
-       everyone view is unchanged. -->
-  <div id="whois" style="display:none;align-items:center;gap:13px;margin-bottom:14px">
-    <div id="whois_av"></div>
-    <p id="whois_bio"></p>
-  </div>
   <span class="badge" id="hero_badge">My Count</span>
   <h1 id="hero_h" style="max-width:20ch">Chasing credits.</h1>
   <p id="hero_p">Every ride, park, and record from my coaster count.</p>
@@ -365,33 +350,23 @@ function render(s){
   // through from /api/user/<slug>; a database without migration 008 simply
   // has neither and the block stays hidden, which is also what an untouched
   // profile looks like.
-  // Your own page gets the editable card instead of the read-only row: one
-  // place for "you", rather than a profile page and an account page saying
-  // similar things in different words.
+  // EVERY profile gets the same identity block — picture, name, username,
+  // bio. Yours is the editable one; a visitor sees the same thing without the
+  // pencils, the email or the account buttons.
+  var host=document.getElementById('profilehead');
+  host.style.display='block';
   CoasterHub.me().then(function(acct){
-    if(!acct || !acct.slug || acct.slug!==CoasterHub.currentUser()) return;
-    document.getElementById('whois').style.display='none';
-    var host=document.getElementById('ownprofile');
-    host.style.display='block';
-    CoasterHubProfile.mount(host, acct, {
-      // The page IS this rider, so a rename has to move the address bar too
-      // or a refresh lands on a URL that no longer exists.
-      onRename: function(slug){
-        history.replaceState(null, '', '/user/' + slug + '/stats');
-      }
-    });
+    var mine = acct && acct.slug && acct.slug===CoasterHub.currentUser();
+    CoasterHubProfile.mount(host,
+      mine ? acct : { name:s.userName, slug:CoasterHub.currentUser(), bio:s.bio, avatar:s.avatar },
+      { editable: !!mine,
+        // The page IS this rider, so a rename has to move the address bar too
+        // or a refresh lands on a URL that no longer exists.
+        onRename: function(slug){
+          history.replaceState(null, '', '/user/' + slug + '/stats');
+        } });
   });
 
-  (function(){
-    var av=document.getElementById('whois_av'), bio=document.getElementById('whois_bio');
-    if(s.avatar){ av.style.backgroundImage='url("/avatars/'+s.avatar+'")'; av.textContent=''; }
-    else av.textContent=(s.userName||'?').trim().charAt(0).toUpperCase();
-    bio.textContent=s.bio||'';
-    bio.style.display=s.bio?'':'none';
-    // No picture AND no bio is nothing to show, so the row stays out of the
-    // way rather than leaving a lone initial floating above the heading.
-    document.getElementById('whois').style.display=(s.avatar||s.bio)?'flex':'none';
-  })();
   // The headline is ALWAYS the credit count. It used to switch to "<span> years
   // of chasing credits" for anyone whose credits are all dated, which reads as
   // nonsense the moment those dates sit close together — Sean's page announced

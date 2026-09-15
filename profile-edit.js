@@ -23,7 +23,22 @@
     });
   }
 
-  function CARD() {
+  // The identity block, which every profile page gets — yours and everyone
+  // else's. The only difference is whether the pieces are buttons that open an
+  // editor or plain text, so a visitor sees the same profile you do, minus the
+  // pencils and the things that are nobody's business but yours.
+  function HEAD(editable) {
+    if (!editable) {
+      return ''
+        + '<div class="who">'
+        +   '<div class="av" data-el="av"></div>'
+        +   '<div style="min-width:0">'
+        +     '<div class="nm" data-el="name"></div>'
+        +     '<div class="un" data-el="user"></div>'
+        +   '</div>'
+        + '</div>'
+        + '<p class="bioline" data-el="bio"></p>';
+    }
     return ''
       + '<div class="who">'
       +   '<button class="av edit" data-el="av" type="button" title="Change your picture"'
@@ -37,7 +52,11 @@
       +   '</div>'
       + '</div>'
       + '<button class="bioline edit" data-el="bio" type="button" title="Change your bio"'
-      +   ' aria-label="Change your bio"></button>'
+      +   ' aria-label="Change your bio"></button>';
+  }
+
+  function CARD() {
+    return HEAD(true)
 
       + '<div class="panel" data-panel="pic" hidden>'
       +   '<div class="picrow">'
@@ -82,10 +101,9 @@
       +   '<div class="msg" data-msg="user"></div>'
       + '</form></div>'
 
-      + '<div class="rowlinks"><a data-el="logday" href="/log">Log a day</a>'
-      +   '<a data-el="addnew" href="/add">Add new</a></div>'
-
-      + '<details data-el="pwrow"><summary>Change password</summary><form data-form="pw">'
+      // Log a day is gone from here — it is the middle tab and a header link
+      // already, and a profile is not a menu.
+      + '<div class="panel" data-panel="pw" hidden><form data-form="pw">'
       +   '<label>Current password<input type="password" autocomplete="current-password"'
       +     ' data-el="pwcur" required></label>'
       +   '<label>New password<input type="password" autocomplete="new-password"'
@@ -95,9 +113,12 @@
       +   '<p class="hint">Signs you out everywhere else.</p>'
       +   '<button class="primary" type="submit" data-el="pwgo">Change it</button>'
       +   '<div class="msg" data-msg="pw"></div>'
-      + '</form></details>'
+      + '</form></div>'
 
-      + '<button class="ghost" data-el="signout" style="width:100%;margin-top:6px">Sign out</button>'
+      + '<div class="ownrow">'
+      +   '<button class="ghost" data-el="pwbtn">Change password</button>'
+      +   '<button class="ghost" data-el="signout">Sign out</button>'
+      + '</div>'
       + '<div class="msg" data-msg="out"></div>';
   }
 
@@ -121,11 +142,15 @@
       + '</div>';
   }
 
+  // mount(el, profile, opts)
+  //   opts.editable  this is the signed-in owner, so render the editors
+  //   opts.onRename  the page IS this rider; move the address bar
   function mount(root, account, opts) {
     opts = opts || {};
     var me = account || {};
+    var editable = !!opts.editable;
     root.classList.add("profedit");
-    root.innerHTML = CARD();
+    root.innerHTML = editable ? CARD() : HEAD(false);
 
     var el = {};
     root.querySelectorAll("[data-el]").forEach(function (n) { el[n.getAttribute("data-el")] = n; });
@@ -179,6 +204,14 @@
       }
     }
     function paintBio() {
+      // Someone else's empty bio is nothing to say, so it takes up no room.
+      // Your own invites, because an editable thing showing nothing is
+      // impossible to find.
+      if (!editable) {
+        el.bio.textContent = me.bio || "";
+        el.bio.style.display = me.bio ? "" : "none";
+        return;
+      }
       el.bio.textContent = me.bio || "Add a short bio";
       el.bio.classList.toggle("empty", !me.bio);
     }
@@ -189,21 +222,28 @@
     function render() {
       el.name.textContent = me.name || me.slug || "Your account";
       el.user.textContent = me.slug ? "@" + me.slug : "";
+      paintAvatar(el.av); paintBio();
+      // Everything past here only exists on your own card.
+      if (!editable) return;
+      // An email address is nobody's business but its owner's, so it is only
+      // ever rendered for the person it belongs to.
       el.email.textContent = me.email || "";
-      paintAvatar(el.av); paintAvatar(el.picprev); paintBio();
+      paintAvatar(el.picprev);
       el.nametext.value = me.name || "";
       el.biotext.value = me.bio || "";
       el.usertext.value = me.slug || "";
       el.usertext.defaultValue = me.slug || "";
       el.bioleft.textContent = String(BIO_MAX - (me.bio || "").length);
       paintUrl(me.slug);
-      // Admins keep a way to the shared database; everyone else has no business
-      // being sent to a page that will refuse them.
-      el.addnew.style.display = me.admin ? "" : "none";
     }
 
+    // A visitor gets the identity and nothing else: no editors, no crop window,
+    // no password form, no listeners. Returning here rather than hiding things
+    // afterwards means none of that is ever built.
+    if (!editable) { render(); return { render: render, account: me }; }
+
     // ---- one editor at a time ------------------------------------------------
-    var NAMES = ["pic", "name", "bio", "user"];
+    var NAMES = ["pic", "name", "bio", "user", "pw"];
     function open(which) {
       NAMES.forEach(function (n) { panel[n].hidden = (n !== which); });
       if (which === "name") el.nametext.focus();
@@ -280,8 +320,13 @@
       function () {
         el.pwcur.value = el.pwnew.value = el.pwnew2.value = "";
         say(msg.pw, "Password changed.", true);
-        setTimeout(function () { el.pwrow.open = false; }, 1400);
+        closeSoon("pw");
       });
+
+    el.pwbtn.addEventListener("click", function () {
+      open(panel.pw.hidden ? "pw" : null);
+      if (!panel.pw.hidden) el.pwcur.focus();
+    });
 
     el.signout.addEventListener("click", function () {
       el.signout.disabled = true;

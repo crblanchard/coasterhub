@@ -733,10 +733,17 @@ call: one page for "you", rather than a profile page and an account page saying 
 and `/account` is signed-out only — sign in, sign up, claim an invite, reset a password. Signed
 in, `/account` redirects to your profile, and the header avatar links there too.
 
-Picture, display name, username and bio are each clickable and open their own editor, one at a
-time. `Change password` is the only written row — the one thing on the card that is not a piece
-of the profile you can point at. An empty bio shows "Add a short bio" rather than nothing,
-because an editable thing that displays nothing is undiscoverable.
+**Every profile page gets the same identity block** — picture, name, username, bio — and
+`mount()` takes `editable`. Yours renders them as buttons that open editors, with your email and
+a Change password / Sign out row; a visitor gets the identical block as plain text, and the
+editing machinery, the crop window and the email are never built at all rather than built and
+hidden. An empty bio invites on your own page ("Add a short bio") and takes up no room on
+someone else's.
+
+Three CSS traps live here, all the same shape and all commented in place: `background`,
+`font` and any other shorthand RESETS the longhands it covers, and `.profedit button.edit`
+outranks `.profedit .av` / `.nm`. That combination silently ate the avatar circle once and the
+display name's size once. Use `background-color` and `font-family`, not the shorthands.
 
 Two things to know about the CSS: it is all scoped under `.profedit` in `style.css`, because a
 bare `input{}` or `label{}` rule would reach into `/log`, `/add` and `/edit`, which style their
