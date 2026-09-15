@@ -720,10 +720,16 @@ distinguishes "genuinely not there" (API 404 **and** no static snapshot → `err
 "could not reach the data", and `/stats` prints "No rider called X" instead of the developer
 advice about `python -m http.server` that every failure used to produce.
 
-**`users.name` is not editable yet** — Carter's call, 2026-09-14: username first, display name
-later. The columns are already separate and the endpoint already isolates them, so adding it is
-a form field and a branch, not a migration. Note it would not need to be unique: the username is
-what tells two riders called Dave apart.
+**Display name is editable** (added 2026-09-15, after a day without it). `POST
+/api/account/profile` takes `name`, `username` and `bio` in any combination, each optional, so a
+page can send only the field it changed. The three validate differently because they are
+different things: free text, a public URL and a key in five tables, and a length-capped caption.
+A display name is NOT unique — two riders called Dave are two riders called Dave, and the
+username is what tells them apart.
+
+On `/account` the picture, display name and username are each clickable and open their own
+editor; the bio sits open below them. `Change username` and `Change password` stay as written
+rows, so the username has two ways in to one form rather than two forms that could disagree.
 
 **Password reset — built 2026-09-15.** The Worker sends mail through **Resend** over plain
 HTTPS (no SDK, which matters in a Worker). Two secrets:

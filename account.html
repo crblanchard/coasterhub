@@ -58,6 +58,23 @@
   .av.big{width:64px;height:64px;border-radius:999px;background:var(--soft);
     border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
     font-weight:800;font-size:1.5rem;color:var(--accent2);flex:none}
+  /* The three editable things. Buttons, so they are reachable by keyboard and
+     announce themselves, but styled as the text they replace — a row of grey
+     form buttons would bury the person's own name. The pencil appears on hover
+     and focus, which is where the affordance belongs on something this quiet. */
+  button.edit{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;
+    text-align:left;display:block;max-width:100%}
+  button.edit:focus-visible{outline:2px solid var(--accent2);outline-offset:3px;border-radius:6px}
+  .who .nm.edit,.who .un.edit{position:relative}
+  .who .nm.edit::after,.who .un.edit::after{content:"✎";opacity:0;margin-left:7px;
+    font-size:.8em;color:var(--muted);transition:opacity .12s}
+  .who .nm.edit:hover::after,.who .un.edit:hover::after,
+  .who .nm.edit:focus-visible::after,.who .un.edit:focus-visible::after{opacity:1}
+  .who .av.edit{transition:border-color .12s}
+  .who .av.edit:hover{border-color:var(--accent2)}
+  .panel{border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 16px;
+    background:var(--well)}
+  .panel .msg{margin-bottom:0}
   .picrow{display:flex;gap:14px;align-items:center;margin-bottom:4px}
   textarea{background:var(--well);border:1px solid var(--line);color:var(--fg);padding:10px 12px;
     border-radius:10px;font-size:.95rem;font-family:inherit;width:100%;margin-bottom:6px;
@@ -175,20 +192,21 @@
   <!-- signed in -->
   <div class="pane" id="pane_me" style="display:none">
     <div class="who">
-      <div class="av" id="me_av"></div>
+      <button class="av edit" id="me_av" type="button" aria-label="Change your profile picture"
+        title="Change your picture"></button>
       <div style="min-width:0">
-        <div class="nm" id="me_name"></div>
-        <div class="un" id="me_user"></div>
+        <button class="nm edit" id="me_name" type="button" aria-label="Change your display name"
+          title="Change your display name"></button>
+        <button class="un edit" id="me_user" type="button" aria-label="Change your username"
+          title="Change your username"></button>
         <div class="em" id="me_email"></div>
       </div>
     </div>
-    <div class="rowlinks">
-      <a id="me_profile" href="/stats">Your profile</a>
-      <a id="me_log" href="/log">Log a day</a>
-    </div>
-    <hr class="sep">
-    <details id="det_pic">
-      <summary>Profile picture</summary>
+
+    <!-- Opened by clicking the picture or the name above. Panels rather than
+         details/summary: the summary would be a second label for something the
+         thing itself already offers. -->
+    <div class="panel" id="pan_pic" hidden>
       <div class="picrow">
         <div class="av big" id="pic_prev"></div>
         <div style="flex:1;min-width:0">
@@ -197,24 +215,37 @@
           <button class="ghost" type="button" id="pic_clear" style="width:100%">Remove</button>
         </div>
       </div>
-      <p class="hint" style="margin-top:12px">Cropped to a square and shrunk in your browser before
-        it is sent, so a photo straight off a phone is fine.</p>
+      <p class="hint" style="margin-top:12px">Cropped square and shrunk in your browser before it
+        is sent, so a photo straight off a phone is fine.</p>
       <div class="msg" id="pic_msg"></div>
-    </details>
+    </div>
 
-    <details id="det_bio">
-      <summary>Short bio</summary>
-      <form id="form_bio">
-        <label for="bio_text">Bio</label>
-        <textarea id="bio_text" maxlength="280" rows="3"></textarea>
-        <p class="hint"><span id="bio_left">280</span> characters left. Shown on your profile page.</p>
-        <button class="primary" type="submit" id="bio_go">Save bio</button>
-        <div class="msg" id="bio_msg"></div>
+    <div class="panel" id="pan_name" hidden>
+      <form id="form_name">
+        <label for="nm_text">Display name</label>
+        <input id="nm_text" type="text" maxlength="40" required>
+        <p class="hint">What the site calls you. Spaces, capitals and accents are all fine, and it
+          does not have to be unique.</p>
+        <button class="primary" type="submit" id="nm_go">Save name</button>
+        <div class="msg" id="nm_msg"></div>
       </form>
-    </details>
+    </div>
 
+    <form id="form_bio" style="margin-top:4px">
+      <label for="bio_text">Bio</label>
+      <textarea id="bio_text" maxlength="280" rows="3"
+        placeholder="A line about your riding — shown on your profile."></textarea>
+      <p class="hint"><span id="bio_left">280</span> characters left.</p>
+      <button class="primary" type="submit" id="bio_go">Save bio</button>
+      <div class="msg" id="bio_msg"></div>
+    </form>
+    <div class="rowlinks">
+      <a id="me_profile" href="/stats">Your profile</a>
+      <a id="me_log" href="/log">Log a day</a>
+    </div>
+    <hr class="sep">
     <details id="det_profile">
-      <summary>Change your username</summary>
+      <summary>Change username</summary>
       <form id="form_profile">
         <label for="pr_user">Username</label>
         <input id="pr_user" type="text" maxlength="32" autocapitalize="off" autocorrect="off" spellcheck="false" required>
@@ -336,6 +367,7 @@ function renderMe(a){
   $('me_email').textContent = a.email;
   paintAvatar($('me_av'), a);
   paintAvatar($('pic_prev'), a);
+  $('nm_text').value = a.name || '';
   $('bio_text').value = a.bio || '';
   countBio();
   $('me_profile').href = a.slug ? '/user/' + a.slug + '/stats' : '/stats';
@@ -445,6 +477,39 @@ function squareBlob(file){
     img.src = URL.createObjectURL(file);
   });
 }
+
+// Clicking your picture, name or username opens the matching editor. One at a
+// time: two open panels in a card this size is just noise.
+function openPanel(which){
+  ['pan_pic','pan_name'].forEach(function(id){ $(id).hidden = (id !== which); });
+  if (which === 'pan_name') $('nm_text').focus();
+}
+$('me_av').addEventListener('click', function(){
+  var open = !$('pan_pic').hidden;
+  openPanel(open ? null : 'pan_pic');
+});
+$('me_name').addEventListener('click', function(){
+  var open = !$('pan_name').hidden;
+  openPanel(open ? null : 'pan_name');
+});
+// The username keeps its written row as well, so clicking it just opens that —
+// one form, two ways in, rather than two forms that could disagree.
+$('me_user').addEventListener('click', function(){
+  $('pan_pic').hidden = true; $('pan_name').hidden = true;
+  $('det_profile').open = true;
+  $('pr_user').focus();
+  $('det_profile').scrollIntoView({ block: 'nearest' });
+});
+
+wire($('form_name'), $('nm_go'), $('nm_msg'),
+  function(){ return { name: $('nm_text').value }; },
+  '/api/account/profile',
+  function(d){
+    ME = ME || {}; ME.name = d.name;
+    $('me_name').textContent = d.name;
+    if (!ME.avatar) { paintAvatar($('me_av'), ME); paintAvatar($('pic_prev'), ME); }
+    say($('nm_msg'), 'Name saved.', true);
+  });
 
 $('pic_pick').addEventListener('click', function(){ $('pic_file').click(); });
 $('pic_file').addEventListener('change', function(){

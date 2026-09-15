@@ -1187,12 +1187,14 @@ export default {
         return json({ ok: true, slug: inv.slug }, 200, { "set-cookie": setCookie(raw) });
       }
 
-      // Change your username.
+      // Edit your profile: display name, username, bio — any combination, each
+      // optional and independent, so a page can send just the one field it
+      // changed.
       //
-      // `users.name` (the printed name) is deliberately NOT editable here yet —
-      // Carter's call, 2026-09-14: username first, display name later. The two
-      // are separate columns already, so adding it is a field and a branch, not
-      // a migration.
+      // The three are validated differently because they are different kinds of
+      // thing. A display name is free text nobody joins on. A username is a
+      // public URL and a key in five tables. A bio is a caption with a length
+      // limit. Only the username is expensive to change.
       if (request.method === "POST" && path === "/api/account/profile") {
         if (!acct) return err(401, "sign in first");
         const b = await request.json();
@@ -1216,9 +1218,24 @@ export default {
             await env.DB.prepare("UPDATE users SET bio = ? WHERE slug = ?")
               .bind(bio || null, who.slug).run();
           } catch (e) { return err(503, "run migrations/008-profiles.sql before editing a profile"); }
-          if (b.username === undefined) {
+          if (b.username === undefined && b.name === undefined) {
             return afterWrite(ctx, env, json({ ok: true, slug: who.slug, name: who.name,
               bio: bio || null, renamed: false, was: who.slug }));
+          }
+        }
+
+        // Display name: free text, within reason. NOT required to be unique —
+        // two riders both called Dave are two riders called Dave, and the
+        // username is what tells them apart.
+        if (b && b.name !== undefined) {
+          const nm = String(b.name || "").trim().replace(/\s+/g, " ");
+          if (!nm) return err(400, "give yourself a name");
+          if (nm.length > 40) return err(400, "that name is too long");
+          await env.DB.prepare("UPDATE users SET name = ? WHERE slug = ?").bind(nm, who.slug).run();
+          who.name = nm;
+          if (b.username === undefined) {
+            return afterWrite(ctx, env, json({ ok: true, slug: who.slug, name: nm,
+              renamed: false, was: who.slug }));
           }
         }
 
