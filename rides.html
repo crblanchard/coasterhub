@@ -583,11 +583,26 @@ var CreditList=(function(){
     });
   }
   function forEveryone(){
-    return Promise.all([fetch('/coasters.json').then(function(r){return r.json();}),
-                        CoasterHub.fetchParks()]).then(function(res){
-      var parks=res[1];
-      DATA=res[0].coasters.map(function(c){var pk=parks[c.park];
-        return Object.assign({},c,{loc:pk&&pk.region?pk.region:'',status:c.closed?'Defunct':'Operating'});});
+    // Coasters SOMEONE has ridden, not every row in the coaster table. This
+    // view is the combined credit list, and the home page's headline counts the
+    // same set — they used to disagree by however many coasters had been added
+    // on /add but not yet logged by anyone, which read as an off-by-one bug.
+    //
+    // fetchCoasters(), not a bare fetch of /coasters.json: every other page
+    // tries the API first and falls back to the static snapshot, and this one
+    // was reading the snapshot directly, so it showed stale data between syncs.
+    return Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(),
+                        fetch('/api/ridden').then(function(r){ return r.ok?r.json():null; })
+                          .catch(function(){ return null; })])
+    .then(function(res){
+      var parks=res[1], ridden=res[2] && res[2].ids;
+      // No ridden list (API down, static fallback in play) means showing
+      // everything, which is what this page did before. Better a slightly
+      // generous list than an empty one.
+      var keep=ridden ? new Set(ridden) : null;
+      DATA=res[0].coasters.filter(function(c){ return !keep || keep.has(c.id); })
+        .map(function(c){var pk=parks[c.park];
+          return Object.assign({},c,{loc:pk&&pk.region?pk.region:'',status:c.closed?'Defunct':'Operating'});});
       COLS=ALLCOLS.filter(function(col){return col.k!=='first'&&col.k!=='rides';});
     });
   }

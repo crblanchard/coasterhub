@@ -863,6 +863,17 @@ export default {
         return json({ coasters: await getCoasters(env), ...(await getAliases(env)) });
       }
       if (request.method === "GET" && path === "/api/parks") return json(await getParks(env));
+      // Which coasters anyone has actually ridden. The site's headline number is
+      // this set, not the size of the coaster table — /add lets a coaster exist
+      // before anybody logs it ("Stats can come later"), so the two differ by
+      // however many are waiting for their first ride. One DISTINCT over an
+      // indexed column, so the full-list page can filter without asking every
+      // rider for their rides.
+      if (request.method === "GET" && path === "/api/ridden") {
+        const { results } = await env.DB.prepare(
+          "SELECT DISTINCT coaster_id FROM rides ORDER BY coaster_id").all();
+        return json({ ids: results.map(r => r.coaster_id) });
+      }
       // Who exists. Public: the rider pickers and every /user/<slug>/ page read it.
       if (request.method === "GET" && path === "/api/users") return json({ users: await getUsers(env) });
       // Public read: the feed says what changed, never who is allowed to change it.

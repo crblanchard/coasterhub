@@ -132,6 +132,20 @@
   <p class="hero-sub" id="combo-sub"></p>
 </div></section>
 
+<section class="block" style="padding-top:26px;padding-bottom:0"><div class="container">
+  <div class="fbcard">
+    <div>
+      <h2>Feedback?</h2>
+      <p>Something broken, a number that looks wrong, or a stat worth adding &mdash; it all helps.</p>
+    </div>
+    <span class="spacer"></span>
+    <!-- href is set by the script below rather than written here: a mailto in
+         the page source is the easiest thing in the world for an address
+         harvester to walk off with. -->
+    <a class="go" id="fb_link" rel="nofollow">Email us &rarr;</a>
+  </div>
+</div></section>
+
 <section class="block" style="padding-top:34px;padding-bottom:8px"><div class="container">
   <span class="eyebrow">What's here</span>
   <h2>Four ways to look at a count</h2>
@@ -194,20 +208,6 @@
   <p>Every number on the site comes from a ride someone actually logged &mdash; no estimates, no rounding, nothing filled in from memory. That&rsquo;s the point of keeping it this carefully: the totals are worth trusting, so the maps and records built on them are too. Every edit is on the record, too &mdash; <a href="/changes" style="color:var(--accent2)">see what&rsquo;s changed lately</a>.</p>
 </div></section>
 
-<section class="block" style="padding-top:0"><div class="container">
-  <div class="fbcard">
-    <div>
-      <h2>Feedback?</h2>
-      <p>Something broken, a number that looks wrong, or a stat worth adding &mdash; it all helps.</p>
-    </div>
-    <span class="spacer"></span>
-    <!-- href is set by the script below rather than written here: a mailto in
-         the page source is the easiest thing in the world for an address
-         harvester to walk off with. -->
-    <a class="go" id="fb_link" rel="nofollow">Email us &rarr;</a>
-  </div>
-</div></section>
-
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/rides">Rides</a> &nbsp;&middot;&nbsp; <a href="/stats">Profile</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
@@ -259,7 +259,10 @@ return Promise.all([
     var k=statsBySlug[u.slug].kpi; return n+(k.rides||0);
   },0);
   document.getElementById('combo').textContent=nf(uCredits);
-  document.getElementById('g-coasters').textContent=nf(coasters.length);
+  // The same set as the headline above: coasters someone has ridden. It used
+  // to print coasters.length — the whole coaster table — under the words "every
+  // coaster in the count", so the two numbers on this page disagreed.
+  document.getElementById('g-coasters').textContent=nf(uCredits);
   document.getElementById('combo-sub').textContent=CoasterHub.USERS.length+' riders · '+uParks+' parks · '+nf(totalRides)+' rides logged';
   // ---- leaderboard: ranked by credits, bar relative to the leader ----------
   var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
