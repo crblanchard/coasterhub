@@ -33,7 +33,9 @@
     color:var(--muted);font-size:.86rem}
   .ridernote b{color:var(--fg)}
   #whois{display:flex}
-  #whois_av{width:56px;height:56px;border-radius:999px;background:var(--soft);
+  /* background-COLOR: the shorthand resets background-size, which this relies
+     on to fit a photo. See the same note in account.html. */
+  #whois_av{width:56px;height:56px;border-radius:999px;background-color:var(--soft);
     border:1px solid var(--line);flex:none;display:flex;align-items:center;
     justify-content:center;font-weight:800;font-size:1.3rem;color:var(--accent2);
     background-size:cover;background-position:center}

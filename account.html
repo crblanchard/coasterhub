@@ -48,14 +48,19 @@
     .pane{padding:20px 16px}
   }
   .who{display:flex;align-items:center;gap:13px;margin-bottom:18px}
-  .who .av{width:44px;height:44px;border-radius:999px;background:var(--soft);border:1px solid var(--line);
+  /* background-COLOR, not the background shorthand: the shorthand resets
+     background-size, and these circles rely on `cover` to fit a photo. Setting
+     it here and `cover` below in either order then silently broke the preview,
+     which rendered a 3000px photo at natural size. */
+  .who .av{width:44px;height:44px;border-radius:999px;background-color:var(--soft);
+    border:1px solid var(--line);
     display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:var(--accent2)}
   .who .nm{font-weight:700;font-size:1.05rem}
   .who .em{color:var(--muted);font-size:.83rem;word-break:break-all}
   .who .un{color:var(--accent2);font-size:.83rem;font-weight:600;font-family:ui-monospace,
     SFMono-Regular,Menlo,monospace;word-break:break-all}
   .who .av,.av.big{background-size:cover;background-position:center}
-  .av.big{width:64px;height:64px;border-radius:999px;background:var(--soft);
+  .av.big{width:64px;height:64px;border-radius:999px;background-color:var(--soft);
     border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
     font-weight:800;font-size:1.5rem;color:var(--accent2);flex:none}
   /* The three editable things. Buttons, so they are reachable by keyboard and
@@ -89,8 +94,13 @@
     background:var(--well);border:1px solid var(--line);touch-action:none;cursor:grab}
   .cropview:active{cursor:grabbing}
   .cropimg{position:absolute;inset:0;background-repeat:no-repeat}
-  .cropmask{position:absolute;inset:0;pointer-events:none;
-    box-shadow:0 0 0 999px rgba(3,7,18,.45) inset;border-radius:50%}
+  /* The dimming goes OUTSIDE the circle: the picture is the thing being chosen,
+     so it stays bright and everything that will be cropped away is knocked
+     back. `inset` here did the exact opposite and shaded the photo instead.
+     The 999px spread is clipped by .cropview's overflow:hidden. */
+  .cropmask{position:absolute;inset:0;pointer-events:none;border-radius:50%;
+    box-shadow:0 0 0 999px rgba(9,14,28,.62)}
+  :root[data-theme="light"] .cropmask{box-shadow:0 0 0 999px rgba(100,116,139,.55)}
   #crop_zoom{width:100%;margin-bottom:14px;accent-color:var(--accent2)}
   .croprow{display:flex;gap:10px}
   .croprow button{margin:0}
