@@ -725,11 +725,39 @@ later. The columns are already separate and the endpoint already isolates them, 
 a form field and a branch, not a migration. Note it would not need to be unique: the username is
 what tells two riders called Dave apart.
 
+**Password reset — built 2026-09-15.** The Worker sends mail through **Resend** over plain
+HTTPS (no SDK, which matters in a Worker). Two secrets:
+
+| secret | what |
+|---|---|
+| `RESEND_API_KEY` | `re_...` from resend.com. **Without it reset is off and says so** — no silent pretending a link is coming. |
+| `MAIL_FROM` | optional; defaults to `Coaster Hub <hello@coasterhub.org>`. Must be on a domain verified with Resend or every send is rejected. |
+
+Setup, once: create the Resend account, add `coasterhub.org` as a domain, paste the DKIM/SPF
+records it gives you into Cloudflare DNS, wait for it to verify, then
+`wrangler secret put RESEND_API_KEY`. Apply `migrations/007-password-resets.sql` too — the
+routes 503 with a clear message until it exists.
+
+The flow: `POST /api/auth/forgot` → a link at `/account?reset=<token>`, good for **60 minutes
+and one use**. Setting the password spends that link AND every other outstanding one for the
+account (a stale email in an inbox must not stay a way in), deletes every session, and signs
+the person in on the spot.
+
+Two properties worth not breaking:
+
+- **`/api/auth/forgot` answers identically whether or not the address has an account**, and the
+  page prints the same sentence either way. Anything else tells a stranger which addresses are
+  registered.
+- **`resets.token` holds a SHA-256**, like `sessions`. A dump of the table cannot be turned
+  back into a working link. Spent rows are kept, not deleted, so a second click gets "already
+  been used" rather than the same answer as a forged token.
+
 **Still to do, in rough order of how much it matters:**
 
-1. **Password reset is by hand.** There is no mail out of the Worker, so a forgotten password
-   means updating `pw` in D1 (or deleting the row and re-inviting). An email provider is the
-   real fix; it is the one part of sign-up that is not self-service.
+1. **Nothing rate-limits `/api/auth/forgot`.** Someone can make the Worker send mail to any
+   registered address repeatedly. The blast radius is small (the mail says "ignore this if it
+   wasn't you" and nothing changes without the link) but it burns Resend quota and is rude to
+   the recipient. A KV or Durable Object counter is the fix, and the same applies to `/login`.
 2. **No rate limiting on `/api/auth/login`.** D1 write latency is the only brake. Worth a KV or
    Durable Object counter before the site is findable by anyone but friends.
 3. **A signed-in rider cannot add a park or coaster** — those are shared-database writes and

@@ -101,6 +101,19 @@
       <input id="in_pw" type="password" autocomplete="current-password" required>
       <button class="primary" type="submit" id="in_go">Sign in</button>
       <div class="msg bad" id="in_msg"></div>
+      <p class="hint" style="margin:12px 0 0"><a href="#" id="forgot_go"
+        style="color:var(--accent2)">Forgot your password?</a></p>
+    </form>
+
+    <form id="form_forgot" style="display:none">
+      <h2 style="font-size:1.05rem;margin-bottom:6px">Reset your password</h2>
+      <p class="sub">We&rsquo;ll email you a link. It works once and expires in an hour.</p>
+      <label for="fg_email">Email</label>
+      <input id="fg_email" type="email" autocomplete="username" required>
+      <button class="primary" type="submit" id="fg_go">Email me a link</button>
+      <div class="msg" id="fg_msg"></div>
+      <p class="hint" style="margin:12px 0 0"><a href="#" id="forgot_back"
+        style="color:var(--accent2)">Back to signing in</a></p>
     </form>
 
     <form id="form_up" style="display:none">
@@ -130,6 +143,19 @@
       <p class="hint">At least 8 characters.</p>
       <button class="primary" type="submit" id="cl_go">Claim it</button>
       <div class="msg bad" id="cl_msg"></div>
+    </form>
+  </div>
+
+  <!-- arrived from a reset link -->
+  <div class="pane" id="pane_reset" style="display:none">
+    <h2 id="rs_h">Set a new password</h2>
+    <p class="sub" id="rs_p"></p>
+    <form id="form_reset">
+      <label for="rs_pw">New password</label>
+      <input id="rs_pw" type="password" autocomplete="new-password" required>
+      <p class="hint">At least 8 characters. This signs you out everywhere else.</p>
+      <button class="primary" type="submit" id="rs_go">Set password</button>
+      <div class="msg bad" id="rs_msg"></div>
     </form>
   </div>
 
@@ -189,9 +215,10 @@ CoasterHub.initNav('account');
 
 var $ = function(id){ return document.getElementById(id); };
 var CLAIM = new URLSearchParams(location.search).get('claim') || '';
+var RESET = new URLSearchParams(location.search).get('reset') || '';
 
 function show(id){
-  ['pane_auth','pane_claim','pane_me'].forEach(function(p){
+  ['pane_auth','pane_claim','pane_reset','pane_me'].forEach(function(p){
     $(p).style.display = (p === id) ? '' : 'none';
   });
 }
@@ -337,6 +364,37 @@ wire($('form_up'), $('up_go'), $('up_msg'),
     location.href = '/log';
   });
 
+// ---- forgotten password ---------------------------------------------------
+function showForgot(on){
+  $('form_in').style.display = on ? 'none' : '';
+  $('form_up').style.display = 'none';
+  $('form_forgot').style.display = on ? '' : 'none';
+  $('tab_in').classList.toggle('on', !on);
+  $('tab_up').classList.remove('on');
+  if (on) $('fg_email').value = $('in_email').value;
+}
+$('forgot_go').addEventListener('click', function(e){ e.preventDefault(); showForgot(true); });
+$('forgot_back').addEventListener('click', function(e){ e.preventDefault(); showForgot(false); say($('fg_msg'),''); });
+
+wire($('form_forgot'), $('fg_go'), $('fg_msg'),
+  function(){ return { email: $('fg_email').value }; },
+  '/api/auth/forgot',
+  function(){
+    // Deliberately the same message whether or not that address has an account
+    // — the API answers identically too, so the page must not give away what
+    // the API is careful not to.
+    say($('fg_msg'), 'If there is an account for that address, a link is on its way. '
+      + 'It expires in an hour.', true);
+  });
+
+wire($('form_reset'), $('rs_go'), $('rs_msg'),
+  function(){ return { token: RESET, password: $('rs_pw').value }; },
+  '/api/auth/reset',
+  function(d){
+    try { if (d.slug) localStorage.setItem('ch_rider', d.slug); } catch (e) {}
+    location.href = d.slug ? '/user/' + d.slug + '/stats' : '/';
+  });
+
 wire($('form_claim'), $('cl_go'), $('cl_msg'),
   function(){ return { code: CLAIM, email: $('cl_email').value, password: $('cl_pw').value }; },
   '/api/auth/claim',
@@ -351,6 +409,26 @@ wire($('form_claim'), $('cl_go'), $('cl_msg'),
 fetch('/api/auth/me', { credentials: 'same-origin' })
   .then(function(r){ return r.json(); })
   .then(function(d){
+    // A reset link is checked FIRST, even when someone is already signed in:
+    // the usual reason to be holding one is that a session you did not open is
+    // the problem, and showing that person their account page instead of the
+    // reset form would be exactly the wrong answer.
+    if (RESET) {
+      return fetch('/api/auth/reset?token=' + encodeURIComponent(RESET))
+        .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+        .then(function(res){
+          if (!res.ok) {
+            show('pane_auth');
+            say($('in_msg'), res.j.error || 'That reset link is not valid.');
+            return;
+          }
+          $('hero_badge').textContent = 'Password reset';
+          $('hero_h').textContent = 'Set a new password.';
+          $('hero_p').textContent = 'Then you are straight back in.';
+          $('rs_p').textContent = 'For ' + res.j.email + '.';
+          show('pane_reset');
+        });
+    }
     if (d && d.account) { renderMe(d.account); return; }
     if (!CLAIM) { show('pane_auth'); return; }
     return fetch('/api/auth/invite?code=' + encodeURIComponent(CLAIM))

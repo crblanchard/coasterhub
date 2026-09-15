@@ -82,6 +82,8 @@ function freshDb() {
     CREATE TABLE sessions (token TEXT PRIMARY KEY, account INTEGER NOT NULL,
       created TEXT NOT NULL, expires TEXT NOT NULL);
     CREATE TABLE invites (code TEXT PRIMARY KEY, slug TEXT NOT NULL, created TEXT NOT NULL, used TEXT);
+    CREATE TABLE resets (token TEXT PRIMARY KEY, account INTEGER NOT NULL, created TEXT NOT NULL,
+      expires TEXT NOT NULL, used TEXT);
     INSERT INTO coasters (id,name,park,type) VALUES
       (1,'Steel Vengeance','Cedar Point','Steel'),
       (2,'Millennium Force','Cedar Point','Steel'),
@@ -139,6 +141,35 @@ async function callNoPassword(db, method, path, { body, cookie } = {}) {
   try { data = await res.json(); } catch { /* non-JSON */ }
   return { status: res.status, data };
 }
+
+// Outgoing mail, captured. The worker posts to Resend with the global fetch, so
+// tests swap it out: nothing leaves the machine, and the email body becomes
+// something to assert on — including the link, which is the only place the
+// reset token is ever visible.
+const OUTBOX = [];
+async function callMail(db, method, path, { body, cookie, noKey } = {}) {
+  const headers = {};
+  if (cookie) headers["cookie"] = cookie;
+  if (body !== undefined) headers["content-type"] = "application/json";
+  const req = new Request("https://coasterhub.org" + path, {
+    method, headers, body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (u, init) => {
+    OUTBOX.push({ url: String(u), body: JSON.parse(init.body), auth: init.headers.Authorization });
+    return new Response(JSON.stringify({ id: "test" }), { status: 200 });
+  };
+  try {
+    const env = { DB: new FakeD1(db), ADMIN_PASSWORD: PW };
+    if (!noKey) env.RESEND_API_KEY = "re_test_key";
+    const res = await worker.fetch(req, env, ctx);
+    let data = null;
+    try { data = await res.json(); } catch { /* non-JSON */ }
+    const set = res.headers.get("set-cookie");
+    return { status: res.status, data, cookie: set ? set.split(";")[0] : null };
+  } finally { globalThis.fetch = realFetch; }
+}
+const linkToken = (mail) => (String(mail.body.text).match(/\?reset=([0-9a-f]{64})/) || [])[1];
 
 function check(name, cond, detail) {
   if (cond) { pass++; console.log("  ok   " + name); }
@@ -1132,6 +1163,127 @@ async function main() {
       JSON.stringify(r.data));
     check("...and that rider's rides moved with them",
       rows(db, "SELECT * FROM rides WHERE user_slug='ravi'").length === 0);
+  }
+
+  console.log("\nPassword reset — asking for a link");
+  {
+    const db = freshDb();
+    await signedUp(db, "nia@example.com", "Nia");
+    OUTBOX.length = 0;
+
+    let r = await callMail(db, "POST", "/api/auth/forgot", { body: { email: "nia@example.com" } });
+    check("asking for a link works", r.status === 200 && r.data.sent === true, JSON.stringify(r.data));
+    check("...and one email went out, to that address", OUTBOX.length === 1
+      && OUTBOX[0].body.to[0] === "nia@example.com", JSON.stringify(OUTBOX));
+    check("...from the verified domain, not a gmail address",
+      /@coasterhub\.org>?$/.test(String(OUTBOX[0].body.from).replace(/>$/, "") + ">"),
+      OUTBOX[0].body.from);
+    check("...with the API key as a bearer token", OUTBOX[0].auth === "Bearer re_test_key");
+    check("...and a link in the body", !!linkToken(OUTBOX[0]), OUTBOX[0].body.text);
+    check("...saying it is single use and how long it lasts",
+      /works once/.test(OUTBOX[0].body.text) && /60 minutes/.test(OUTBOX[0].body.text),
+      OUTBOX[0].body.text);
+    check("...and telling someone who did not ask that nothing has changed",
+      /ignore this email/.test(OUTBOX[0].body.text));
+    check("the stored row is a HASH, not the token from the link",
+      rows(db, "SELECT token FROM resets").every(x => x.token !== linkToken(OUTBOX[0])));
+
+    // The part that must not leak: an unknown address gets the same answer.
+    OUTBOX.length = 0;
+    const unknown = await callMail(db, "POST", "/api/auth/forgot", { body: { email: "nobody@example.com" } });
+    check("an unknown address gets the identical answer",
+      unknown.status === 200 && JSON.stringify(unknown.data) === JSON.stringify(r.data),
+      JSON.stringify(unknown.data));
+    check("...but no email is sent and no row is written",
+      OUTBOX.length === 0 && rows(db, "SELECT * FROM resets").length === 1);
+    const malformed = await callMail(db, "POST", "/api/auth/forgot", { body: { email: "not-an-email" } });
+    check("...as does a malformed one", malformed.status === 200 && OUTBOX.length === 0);
+
+    r = await callMail(db, "POST", "/api/auth/forgot", { body: { email: "nia@example.com" }, noKey: true });
+    check("with no API key configured it says so rather than pretending", r.status === 503,
+      JSON.stringify(r.data));
+  }
+
+  console.log("\nPassword reset — using the link");
+  {
+    const db = freshDb();
+    const old = await signedUp(db, "nia@example.com", "Nia");
+    OUTBOX.length = 0;
+    await callMail(db, "POST", "/api/auth/forgot", { body: { email: "nia@example.com" } });
+    const token = linkToken(OUTBOX[0]);
+
+    let r = await call(db, "GET", "/api/auth/reset?token=" + token);
+    check("the page can check a link before showing the form",
+      r.status === 200 && r.data.email === "nia@example.com", JSON.stringify(r.data));
+    check("a forged token 404s", (await call(db, "GET", "/api/auth/reset?token=" + "a".repeat(64))).status === 404);
+
+    r = await call(db, "POST", "/api/auth/reset", { body: { token, password: "short" } });
+    check("the new password still has to be long enough", r.status === 400);
+    r = await call(db, "POST", "/api/auth/reset", { body: { token, password: "a-whole-new-one" } });
+    check("setting a new password works and signs you straight in",
+      r.status === 200 && r.data.slug === "nia" && /^ch_sess=/.test(r.cookie || ""),
+      JSON.stringify(r.data));
+    check("...the new password signs in",
+      (await call(db, "POST", "/api/auth/login",
+        { body: { email: "nia@example.com", password: "a-whole-new-one" } })).status === 200);
+    check("...the old one does not",
+      (await call(db, "POST", "/api/auth/login",
+        { body: { email: "nia@example.com", password: "riding-things" } })).status === 401);
+    check("...and whoever was signed in before is signed out",
+      (await call(db, "GET", "/api/auth/me", { cookie: old })).data.account === null);
+
+    r = await call(db, "POST", "/api/auth/reset", { body: { token, password: "another-one-again" } });
+    check("the link is single use", r.status === 410, JSON.stringify(r.data));
+    check("...and says so rather than pretending it never existed",
+      /already been used/.test(r.data.error || ""), JSON.stringify(r.data));
+  }
+
+  console.log("\nPassword reset — links that should not work");
+  {
+    const db = freshDb();
+    await signedUp(db, "nia@example.com", "Nia");
+    OUTBOX.length = 0;
+
+    // Two requests: the older link must die when the newer one is used, or a
+    // stale email in an inbox stays a way in.
+    await callMail(db, "POST", "/api/auth/forgot", { body: { email: "nia@example.com" } });
+    await callMail(db, "POST", "/api/auth/forgot", { body: { email: "nia@example.com" } });
+    const first = linkToken(OUTBOX[0]), second = linkToken(OUTBOX[1]);
+    check("two requests make two different links", first && second && first !== second);
+    let r = await call(db, "POST", "/api/auth/reset", { body: { token: second, password: "the-new-one" } });
+    check("the newest link works", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/auth/reset", { body: { token: first, password: "sneaky-one" } });
+    check("...and using it kills the older one too", r.status === 410, JSON.stringify(r.data));
+
+    // Expiry.
+    OUTBOX.length = 0;
+    await callMail(db, "POST", "/api/auth/forgot", { body: { email: "nia@example.com" } });
+    const tok = linkToken(OUTBOX[0]);
+    db.prepare("UPDATE resets SET expires = ? WHERE used IS NULL")
+      .run(new Date(Date.now() - 60000).toISOString());
+    r = await call(db, "GET", "/api/auth/reset?token=" + tok);
+    check("an expired link is refused on the check", r.status === 410
+      && /expired/.test(r.data.error || ""), JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/auth/reset", { body: { token: tok, password: "too-late-now" } });
+    check("...and on the write", r.status === 410, JSON.stringify(r.data));
+    check("...so the password did not change",
+      (await call(db, "POST", "/api/auth/login",
+        { body: { email: "nia@example.com", password: "the-new-one" } })).status === 200);
+  }
+
+  console.log("\nPassword reset — before migration 007 has run");
+  {
+    const db = freshDb();
+    db.exec("DROP TABLE resets;");
+    await signedUp(db, "nia@example.com", "Nia");
+    let r = await callMail(db, "POST", "/api/auth/forgot", { body: { email: "nia@example.com" } });
+    check("asking for a link names the missing setup rather than 500ing", r.status === 503,
+      JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/auth/reset?token=" + "a".repeat(64));
+    check("...as does checking one", r.status === 503, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/auth/login",
+      { body: { email: "nia@example.com", password: "riding-things" } });
+    check("and signing in normally is untouched", r.status === 200);
   }
 
   console.log("\nRegression — endpoints the rest of the site depends on");

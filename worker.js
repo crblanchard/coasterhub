@@ -21,6 +21,9 @@
 //   ASSETS  - static assets (the repo files)
 //   DB      - D1 database "coasterhub"
 //   ADMIN_PASSWORD - secret; required for shared-database writes + /api/admin/*
+//   RESEND_API_KEY - secret; without it password reset is off (and says so)
+//   MAIL_FROM      - optional; "Coaster Hub <hello@coasterhub.org>" by default,
+//                    and must be on a domain verified with Resend
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
 
@@ -146,6 +149,12 @@ const DUMMY_HASH = "pbkdf2$sha256$100000$H9X3LabUcAffgcYCyj1o0g==$7sAIfFxqCdYJxU
 // describes — a rolled-back database, a test that drops the table — and the
 // saving is one trivial query on paths that are already doing a write or a
 // password hash. The public read paths never call this at all.
+async function haveResets(env) {
+  try {
+    await env.DB.prepare("SELECT 1 FROM resets LIMIT 1").first();
+    return true;
+  } catch (e) { return false; }
+}
 async function haveAccounts(env) {
   try {
     await env.DB.prepare("SELECT 1 FROM accounts LIMIT 1").first();
@@ -230,6 +239,44 @@ function mayWriteRider(request, env, slug, acct) {
   if (acct.admin) return true;
   return !!slug && !!acct.slug && acct.slug === String(slug).toLowerCase();
 }
+
+// ---- Sending mail ---------------------------------------------------------
+// Resend, over plain HTTPS — no SDK, which matters in a Worker. Configure with
+// two secrets:
+//
+//   RESEND_API_KEY   re_...  from resend.com
+//   MAIL_FROM        optional; defaults to the address below, which must be on
+//                    a domain verified with Resend or every send is rejected
+//
+// Without the key nothing is sent and the caller is told so, rather than the
+// site pretending a reset email is on its way to somebody who will wait for it
+// forever. Same defensiveness as the unbound-D1 and missing-table paths.
+const MAIL_FROM_DEFAULT = "Coaster Hub <hello@coasterhub.org>";
+
+function mailConfigured(env) { return !!env.RESEND_API_KEY; }
+
+async function sendMail(env, { to, subject, text }) {
+  if (!mailConfigured(env)) return { bad: "email is not configured on this deployment" };
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + env.RESEND_API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ from: env.MAIL_FROM || MAIL_FROM_DEFAULT, to: [to], subject, text }),
+  });
+  if (!res.ok) {
+    // Resend puts the real reason in the body — an unverified domain, a bad
+    // key. Carry it into the log rather than a bare status, because "550" on
+    // its own has cost people hours.
+    let why = "";
+    try { why = JSON.stringify(await res.json()); } catch (e) { why = "HTTP " + res.status; }
+    return { bad: "could not send the email: " + why };
+  }
+  return { ok: true };
+}
+
+const RESET_MINUTES = 60;
 
 function emailOk(s) {
   return typeof s === "string" && s.length <= 200 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
@@ -1082,6 +1129,94 @@ export default {
         if (wantSlug !== who.slug) await renameRider(env, who.slug, wantSlug);
         return afterWrite(ctx, env, json({ ok: true, slug: wantSlug, name: who.name,
           renamed: wantSlug !== who.slug, was: who.slug }));
+      }
+
+      // Forgot your password: ask for a link.
+      //
+      // ALWAYS answers the same way, whether or not that email has an account.
+      // The alternative tells anyone who asks which addresses are registered,
+      // and the people it would help most are the ones guessing.
+      if (request.method === "POST" && path === "/api/auth/forgot") {
+        if (!mailConfigured(env) || !await haveResets(env)) {
+          return err(503, "password reset is not set up on this deployment yet");
+        }
+        const b = await request.json();
+        const email = String(b && b.email || "").trim().toLowerCase();
+        const sameAnswer = json({ ok: true, sent: true });
+        if (!emailOk(email)) return sameAnswer;
+        const acc = await env.DB.prepare(
+          "SELECT id, email FROM accounts WHERE lower(email) = ?").bind(email).first();
+        if (!acc) return sameAnswer;
+
+        const raw = randomToken();
+        const now = new Date();
+        await env.DB.prepare("INSERT INTO resets (token,account,created,expires) VALUES (?,?,?,?)")
+          .bind(await sha256hex(raw), acc.id, now.toISOString(),
+                new Date(now.getTime() + RESET_MINUTES * 60000).toISOString()).run();
+
+        const link = url.origin + "/account?reset=" + raw;
+        const sent = await sendMail(env, {
+          to: acc.email,
+          subject: "Reset your Coaster Hub password",
+          text: "Someone asked to reset the password for this Coaster Hub account.\n\n"
+              + "Set a new one here:\n" + link + "\n\n"
+              + "The link works once and expires in " + RESET_MINUTES + " minutes.\n\n"
+              + "If this wasn't you, you can ignore this email — nothing has changed, and "
+              + "your current password still works.\n",
+        });
+        // The sender failing is worth surfacing: the person is staring at a
+        // screen that says "check your email" and no email is coming.
+        if (sent.bad) return err(502, sent.bad);
+        return sameAnswer;
+      }
+
+      // Is this reset link still good? The page asks before showing the form,
+      // so an expired or spent link says so instead of taking a new password
+      // and then refusing it.
+      if (request.method === "GET" && path === "/api/auth/reset") {
+        if (!await haveResets(env)) return err(503, "password reset is not set up on this deployment yet");
+        const raw = String(url.searchParams.get("token") || "");
+        if (!raw) return err(400, "no token");
+        const row = await env.DB.prepare(
+          "SELECT r.expires AS expires, r.used AS used, a.email AS email FROM resets r " +
+          "JOIN accounts a ON a.id = r.account WHERE r.token = ?"
+        ).bind(await sha256hex(raw)).first();
+        if (!row) return err(404, "that reset link is not valid");
+        if (row.used) return err(410, "that reset link has already been used");
+        if (!(new Date(row.expires) > new Date())) return err(410, "that reset link has expired");
+        return json({ ok: true, email: row.email });
+      }
+
+      // Set the new password.
+      if (request.method === "POST" && path === "/api/auth/reset") {
+        if (!await haveResets(env)) return err(503, "password reset is not set up on this deployment yet");
+        const b = await request.json();
+        const raw = String(b && b.token || "");
+        const problem = passwordProblem(b && b.password);
+        if (problem) return err(400, problem);
+        const hashed = await sha256hex(raw);
+        const row = await env.DB.prepare(
+          "SELECT account, expires, used FROM resets WHERE token = ?").bind(hashed).first();
+        if (!row) return err(404, "that reset link is not valid");
+        if (row.used) return err(410, "that reset link has already been used");
+        if (!(new Date(row.expires) > new Date())) return err(410, "that reset link has expired");
+
+        let pwHash;
+        try { pwHash = await hashPassword(b.password); }
+        catch (e) { return err(500, "could not secure that password: " + (e && e.message || e)); }
+        await env.DB.prepare("UPDATE accounts SET pw = ? WHERE id = ?").bind(pwHash, row.account).run();
+        // Spend this link, and every other outstanding one for the account: if
+        // two were requested, the older must not still be a way in.
+        await env.DB.prepare("UPDATE resets SET used = datetime('now') WHERE token = ?").bind(hashed).run();
+        await env.DB.prepare(
+          "UPDATE resets SET used = datetime('now') WHERE account = ? AND used IS NULL")
+          .bind(row.account).run();
+        // Whoever was signed in is signed out — that is the whole point of a
+        // reset when someone else has been in the account.
+        await env.DB.prepare("DELETE FROM sessions WHERE account = ?").bind(row.account).run();
+        const fresh = await startSession(env, row.account);
+        const who = await env.DB.prepare("SELECT slug FROM accounts WHERE id = ?").bind(row.account).first();
+        return json({ ok: true, slug: who && who.slug }, 200, { "set-cookie": setCookie(fresh) });
       }
 
       // Change your own password. Requires the current one: a borrowed session
