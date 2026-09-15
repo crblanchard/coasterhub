@@ -590,6 +590,19 @@ chunked by `SQL_VARS` like every other id list here. The count rides along insid
 `ranking` activity entry (`detail.credited`) rather than as a second feed row: one action by the
 rider should read as one line.
 
+**A claimed rider's ranking has NO admin override** (2026-09-15) — the only write on the site
+that does not. Carter's call, on finding he could reorder someone else's favourites. Everywhere
+else an override earns its keep because the data can be wrong and need repairing: a mistyped
+ride, a merged coaster, a park in the wrong place. A ranking cannot be wrong. It is one
+person's opinion of what they enjoyed, and no support request ends in someone else reordering
+it. Neither `ADMIN_PASSWORD` nor an `is_admin` account opens it; D1 remains the escape hatch if
+a list ever genuinely has to be repaired.
+
+`GET /api/rankings/<slug>` returns `claimed` so the page knows before it offers anything:
+viewing someone else's list hides the drag handles, the row controls, Add coasters and Save,
+and says whose list it is. An unclaimed rider stays editable by anyone, which is still how the
+riders who predate accounts manage their own.
+
 **Ranking while signed out.** Rankings are still unchallenged for an unclaimed rider, but once
 a rider claims an account only that account may write their order — so a signed-out rider can
 rank happily and then fail to save. `/rankings` turns that 401 into a sign-in link that returns

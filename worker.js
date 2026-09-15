@@ -613,7 +613,14 @@ async function getRankings(env, slug) {
   const { results } = await env.DB.prepare(
     "SELECT coaster_id, pos FROM rankings WHERE user_slug = ? ORDER BY pos"
   ).bind(slug).all();
-  return { user: u.name, slug: slug, order: results.map(r => r.coaster_id) };
+  // `claimed` drives the page's read-only mode. Without it /rankings had no way
+  // to know whose list it was showing, so it offered drag handles and a Save
+  // button to everyone and only revealed the truth on a refused save.
+  let claimed = false;
+  try {
+    claimed = !!(await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?").bind(slug).first());
+  } catch (e) { /* accounts table not there yet: nothing is claimed */ }
+  return { user: u.name, slug: slug, claimed: claimed, order: results.map(r => r.coaster_id) };
 }
 
 // Replace a rider's whole list in one shot: { order:[coasterId, ...] }. Doing it
@@ -867,12 +874,21 @@ export default {
       // accounts do not lose the ability to drag their own order while they wait
       // for an invite. No rider is worse off than yesterday, and every one that
       // claims is better off.
+      //
+      // A claimed rider's order is theirs ALONE — this is the one write on the
+      // site with no admin override, by Carter's call on 2026-09-15 when he
+      // found he could reorder someone else's favourites. Everywhere else an
+      // admin override earns its keep because the data can need repairing: a
+      // mistyped ride, a merged coaster, a park in the wrong place. A ranking
+      // cannot be wrong. It is one person's opinion of what they enjoyed, and
+      // there is no support request that ends in someone else reordering it.
+      // If a list ever genuinely has to be repaired, D1 is still there.
       if (request.method === "PUT" && km) {
         const slug = km[1].toLowerCase();
         const claimed = await haveAccounts(env)
           ? await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?").bind(slug).first()
           : null;
-        if (claimed && !mayWriteRider(request, env, slug, acct)) return err(401, "unauthorized");
+        if (claimed && !(acct && acct.slug === slug)) return err(401, "unauthorized");
         if (RANKINGS_NEED_TOKEN && !tokenOk(request, env)) return err(401, "unauthorized");
         const out = await putRankings(env, km[1].toLowerCase(), await request.json());
         if (out.bad) return err(out.bad[0], out.bad[1]);

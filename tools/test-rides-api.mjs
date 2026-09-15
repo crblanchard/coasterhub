@@ -773,8 +773,29 @@ async function main() {
     check("a claimed rider's rankings are closed to the public", r.status === 401);
     r = await call(db, "PUT", "/api/rankings/nia", { body: { order: [1] }, cookie: nia });
     check("...and open to its owner", r.status === 200, JSON.stringify(r.data));
+
+    // The one write on the site with NO admin override. A ranking is an
+    // opinion, not data that can be wrong, so there is no repair an admin needs
+    // to make to it — and being able to reorder someone's favourites is exactly
+    // the power nobody should hold. Carter's call, 2026-09-15.
     r = await call(db, "PUT", "/api/rankings/nia", { body: { order: [2] }, token: PW });
-    check("...and to the admin password", r.status === 200);
+    check("the shared admin password does NOT open someone else's ranking", r.status === 401,
+      JSON.stringify(r.data));
+
+    const boss = await signedUp(db, "boss@example.com", "Boss");
+    db.exec("UPDATE accounts SET is_admin = 1 WHERE slug = 'boss'");
+    r = await call(db, "PUT", "/api/rankings/nia", { body: { order: [3] }, cookie: boss });
+    check("...nor does an admin account", r.status === 401, JSON.stringify(r.data));
+    check("...and the owner's order is exactly as they left it",
+      rows(db, "SELECT coaster_id FROM rankings WHERE user_slug='nia' ORDER BY pos")
+        .map(x => x.coaster_id).join(",") === "1");
+
+    r = await call(db, "GET", "/api/rankings/nia");
+    check("a claimed ranking says so, so the page can go read-only",
+      r.status === 200 && r.data.claimed === true, JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/rankings/cole");
+    check("...and an unclaimed one says that too", r.status === 200 && r.data.claimed === false,
+      JSON.stringify(r.data));
   }
 
   console.log("\nAccounts — claiming a rider who predates accounts");
