@@ -135,8 +135,10 @@
   function geocoded(park){ return !!(park && state.geo[park]); }
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}); }
 
+  // TOKEN is '' when an admin account got in: the session cookie authorizes the
+  // request instead, and the Worker falls through to it when the header is empty.
   async function api(method, path, body){
-    var opt = { method: method, headers: { "x-admin-token": TOKEN } };
+    var opt = { method: method, credentials: "same-origin", headers: { "x-admin-token": TOKEN } };
     if (body){ opt.headers["content-type"]="application/json"; opt.body=JSON.stringify(body); }
     var r = await fetch(path, opt);
     var data = null; try { data = await r.json(); } catch(e){}
@@ -164,6 +166,20 @@
   document.getElementById('go').addEventListener('click', unlock);
   pw.addEventListener('keydown', function(e){ if(e.key==="Enter") unlock(); });
   try { var saved=sessionStorage.getItem('ch_admin'); if(saved){ pw.value=saved; } } catch(e){}
+
+  // An admin ACCOUNT gets in without the password. This page does not load
+  // app.js (it is standalone on purpose), so it asks the API directly rather
+  // than through CoasterHub.me(). TOKEN stays '' and the session cookie
+  // authorizes every write instead.
+  fetch('/api/auth/me',{credentials:'same-origin'})
+    .then(function(r){ return r.ok ? r.json() : {account:null}; })
+    .then(function(d){
+      if (!(d && d.account && d.account.admin)) return;
+      document.getElementById('gate').style.display = "none";
+      document.getElementById('app').style.display = "block";
+      boot();
+    })
+    .catch(function(){ /* offline: the password gate is still there */ });
 
   // ---------- boot ----------
   function distinct(key){

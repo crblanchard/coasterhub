@@ -35,15 +35,13 @@
   .rrow{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);
         border-radius:12px;padding:10px 12px}
   .rrow.drag{opacity:.45;border-color:var(--accent2)}
-  /* Someone else's list. Hide the controls rather than disable them: a greyed
-     drag handle still invites a drag, and the honest thing to show a visitor is
-     simply the ranking. */
+  /* Someone else's list: just the ranking, read-only. Hide the controls rather
+     than disable them — a greyed drag handle still invites a drag — and say
+     nothing about it. The heading already names whose list this is. */
   #mine.readonly .grip,#mine.readonly .acts,#mine.readonly #save,
   #mine.readonly #v_add,#mine.readonly #pane_add{display:none}
   #mine.readonly .rrow{cursor:default}
-  .rolock{display:none;background:var(--soft);border:1px solid var(--line);border-radius:12px;
-    padding:11px 14px;margin:0 0 14px;color:var(--muted);font-size:.9rem}
-  #mine.readonly .rolock{display:block}
+
   .rrow.over{border-color:var(--accent2)}
   .rrow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);min-width:2.1em;text-align:right;flex:none}
   .rrow .grip{flex:none;color:var(--muted);cursor:grab;padding:4px 2px;touch-action:none;user-select:none;line-height:1}
@@ -203,8 +201,6 @@
       <button class="primary" id="save" disabled>Save</button>
     </div>
 
-    <div class="rolock" id="rolock"></div>
-
     <div id="pane_rank">
       <div class="rank" id="ranklist"></div>
       <div class="hint" id="rank_empty" style="display:none">
@@ -353,7 +349,9 @@ if(!slug){
     // A ranking is one person's opinion, so only that person may change it —
     // there is no admin override on this write (see the PUT in worker.js). The
     // page has to know that up front: offering drag handles and a Save button
-    // to a visitor and refusing them afterwards wastes their work.
+    // to a visitor and refusing them afterwards wastes their work. No notice
+    // is shown — the heading already says whose favourites these are, and a
+    // page with nothing to press does not need to explain itself.
     //
     // An UNCLAIMED rider stays editable by anyone, which is how the four riders
     // who predate accounts still manage their own lists.
@@ -364,8 +362,6 @@ if(!slug){
       // The hero promises "Drag to reorder, or compare two at a time", which is
       // not true for a reader. Say what this page is for them instead.
       $('hero_p').textContent = 'Best to worst, by preference \u2014 not by height or speed.';
-      $('rolock').textContent = 'This is ' + (user.user || slug) + '\u2019s ranking, and only '
-        + (user.user || slug) + ' can change it. You are welcome to read it.';
     });
     coasters.forEach(function(c){ var pk=parks[c.park];
       BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });

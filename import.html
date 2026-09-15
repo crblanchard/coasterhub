@@ -195,8 +195,18 @@ function $(id){return document.getElementById(id);}
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
 // ---- gate (shared with /log, /add, /edit) ----------------------------------
-try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
-if(TOKEN) verify(TOKEN,true);
+// ---- gate ------------------------------------------------------------------
+// Two ways in. An ADMIN ACCOUNT is the normal one now — this page writes to the
+// shared database, so an ordinary rider's account is not enough. The shared
+// password still works and still unlocks /log, /add, /edit and /import
+// together, but nobody needs to hold it day to day.
+var ME=null;
+CoasterHub.me().then(function(acct){
+  ME=acct;
+  if(acct && acct.admin){ $('gate').style.display='none'; $('app').style.display='block'; boot(); return; }
+  try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
+  if(TOKEN) verify(TOKEN,true);
+});
 $('unlock').onclick=function(){ verify($('pw').value,false); };
 $('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') verify($('pw').value,false); });
 function verify(pw,quiet){
@@ -208,8 +218,12 @@ function verify(pw,quiet){
     .catch(function(){ try{ sessionStorage.removeItem('ch_admin'); }catch(e){}
       if(!quiet) $('gate_msg').textContent='Wrong password.'; });
 }
+// TOKEN is '' when you got in with an admin account: the session cookie
+// authorizes the request instead, and the Worker falls through to it when the
+// header is empty.
 function api(method,path,body){
-  return fetch(path,{method:method,headers:{'x-admin-token':TOKEN,'content-type':'application/json'},
+  return fetch(path,{method:method,credentials:'same-origin',
+                     headers:{'x-admin-token':TOKEN,'content-type':'application/json'},
                      body:body?JSON.stringify(body):undefined})
     .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); });
 }

@@ -125,6 +125,21 @@ async function signedUp(db, email, name, password = "riding-things") {
   return r.cookie;
 }
 
+// The same request with NO ADMIN_PASSWORD configured, which is the end state
+// Carter is heading for: the secret unset, admin accounts the only way in.
+async function callNoPassword(db, method, path, { body, cookie } = {}) {
+  const headers = {};
+  if (cookie) headers["cookie"] = cookie;
+  if (body !== undefined) headers["content-type"] = "application/json";
+  const req = new Request("https://coasterhub.org" + path, {
+    method, headers, body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const res = await worker.fetch(req, { DB: new FakeD1(db) }, ctx);
+  let data = null;
+  try { data = await res.json(); } catch { /* non-JSON */ }
+  return { status: res.status, data };
+}
+
 function check(name, cond, detail) {
   if (cond) { pass++; console.log("  ok   " + name); }
   else { fail++; console.log("  FAIL " + name + (detail ? "  -> " + detail : "")); }
@@ -759,6 +774,58 @@ async function main() {
     check("an account does NOT open the shared coaster database", r.status === 401, JSON.stringify(r.data));
     r = await call(db, "POST", "/api/user", { body: { name: "Someone" }, cookie: nia });
     check("...nor adding riders by hand", r.status === 401);
+  }
+
+  console.log("\nAdmin accounts open the shared database, so the password is optional");
+  {
+    const db = freshDb();
+    const rider = await signedUp(db, "rider@example.com", "Rider");
+    const boss = await signedUp(db, "boss@example.com", "Boss");
+    db.exec("UPDATE accounts SET is_admin = 1 WHERE slug = 'boss'");
+
+    // The whole point: everything /add, /edit and /import write, with no
+    // password anywhere.
+    let r = await call(db, "POST", "/api/coaster",
+      { body: { name: "Iron Gwazi", park: "Busch Gardens Tampa" }, cookie: boss });
+    check("an admin account can add a coaster", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "PUT", "/api/park",
+      { body: { name: "Busch Gardens Tampa", lat: 28.03, lon: -82.42, region: "Florida, US" }, cookie: boss });
+    check("...and place a park", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/user", { body: { name: "Newcomer" }, cookie: boss });
+    check("...and add a rider", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/admin/invite", { body: { slug: "cole" }, cookie: boss });
+    check("...and mint an invite, which is how the password stops being needed",
+      r.status === 200 && /\/account\?claim=/.test(r.data.url || ""), JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/admin/login", { cookie: boss });
+    check("...and the gate check the pages use says yes, via the account",
+      r.status === 200 && r.data.via === "account", JSON.stringify(r.data));
+
+    // An ordinary rider is still nowhere near any of it.
+    r = await call(db, "POST", "/api/coaster",
+      { body: { name: "Sneaky", park: "Cedar Point" }, cookie: rider });
+    check("a plain rider account still cannot add a coaster", r.status === 401);
+    r = await call(db, "POST", "/api/user", { body: { name: "Nobody" }, cookie: rider });
+    check("...nor add a rider", r.status === 401);
+    r = await call(db, "POST", "/api/merge", { body: { from: 1, to: 2 }, cookie: rider });
+    check("...nor merge coasters", r.status === 401);
+    r = await call(db, "POST", "/api/admin/login", { cookie: rider });
+    check("...and the gate check says no", r.status === 401);
+    r = await call(db, "POST", "/api/coaster", { body: { name: "Sneaky", park: "Cedar Point" } });
+    check("signed out, still no", r.status === 401);
+
+    // The password has not stopped working; it is just no longer the only key.
+    r = await call(db, "POST", "/api/coaster",
+      { body: { name: "Velocicoaster", park: "Islands of Adventure" }, token: PW });
+    check("the shared password still works as break-glass", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/admin/login", { token: PW });
+    check("...and reports itself as the password, not an account",
+      r.status === 200 && r.data.via === "password", JSON.stringify(r.data));
+
+    // And with no ADMIN_PASSWORD configured at all, accounts are the only way in.
+    const noPw = await callNoPassword(db, "POST", "/api/coaster",
+      { body: { name: "No Password Here", park: "Cedar Point" }, cookie: boss });
+    check("an admin account works even with ADMIN_PASSWORD unset entirely",
+      noPw.status === 200, JSON.stringify(noPw.data));
   }
 
   console.log("\nAccounts — rankings close as riders claim them");

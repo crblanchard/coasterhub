@@ -8,9 +8,14 @@
 //   - a rider's own rides and rankings, authorized by their ACCOUNT (see the
 //     Accounts section below, and migrations/003-accounts.sql);
 //   - everything shared — the coaster and park database, merges, imports —
-//     which still needs ADMIN_PASSWORD.
+//     which needs ADMIN rights: an is_admin ACCOUNT, or ADMIN_PASSWORD.
 // ADMIN_PASSWORD also opens the first kind, so it stays the break-glass key and
-// the riders who have not claimed an account yet keep working exactly as before.
+// the riders who have not claimed an account yet keep working exactly as
+// before. It is no longer needed day to day, and unsetting the secret leaves
+// admin accounts as the only way in.
+//
+// The one exception, deliberately: a claimed rider's RANKINGS have no admin
+// override at all. See the PUT route for why.
 //
 // Bindings (see wrangler.jsonc):
 //   ASSETS  - static assets (the repo files)
@@ -207,6 +212,18 @@ async function currentAccount(request, env) {
 // password, an account flagged admin, or the account that owns that very rider.
 // Anything else is a 401 — including a signed-in rider aiming at someone else's
 // count, which is precisely the hole accounts were added to close.
+// Admin rights: the shared password, or an account flagged is_admin.
+//
+// ADMIN_PASSWORD came first and everything was gated on it. An admin ACCOUNT
+// now does the same job better — it says who acted, it is revoked by changing
+// one person's password, and there is nothing to text anybody. The password
+// stays as break-glass and for scripts (the curl in the handoff), but it is no
+// longer needed day to day: leaving the secret unset simply means accounts are
+// the only way in, since tokenOk() returns false without it.
+function adminOk(request, env, acct) {
+  return tokenOk(request, env) || !!(acct && acct.admin);
+}
+
 function mayWriteRider(request, env, slug, acct) {
   if (tokenOk(request, env)) return true;
   if (!acct) return false;
@@ -901,7 +918,7 @@ export default {
       if (request.method === "POST" && path === "/api/admin/seed") {
         const cnt = await env.DB.prepare("SELECT COUNT(*) AS c FROM coasters").first();
         const empty = !cnt || cnt.c === 0;
-        if (!empty && !tokenOk(request, env)) return err(401, "unauthorized");
+        if (!empty && !adminOk(request, env, acct)) return err(401, "unauthorized");
         return json({ ok: true, ...(await seed(env, url.origin)) });
       }
 
@@ -910,7 +927,7 @@ export default {
       // referenced park is placed, it requires the admin token.
       if (path === "/api/admin/geocode" && (request.method === "POST" || request.method === "GET")) {
         const miss = await env.DB.prepare(MISSING_PARKS_COUNT).first();
-        if ((miss.n || 0) === 0 && !tokenOk(request, env)) return err(401, "unauthorized");
+        if ((miss.n || 0) === 0 && !adminOk(request, env, acct)) return err(401, "unauthorized");
         return afterWrite(ctx, env, json(await geocodeMissing(env, 10)));
       }
 
@@ -1139,7 +1156,7 @@ export default {
 
       // ---- writes (auth required) ----
       const needsAuth = path.startsWith("/api/admin/") || request.method !== "GET";
-      if (needsAuth && !tokenOk(request, env)) return err(401, "unauthorized");
+      if (needsAuth && !adminOk(request, env, acct)) return err(401, "unauthorized");
 
       // Invite an existing rider to claim their count. Admin only, and it hands
       // back a URL rather than mailing it — there is no mail out of this Worker.
@@ -1158,7 +1175,12 @@ export default {
       }
 
       // login check (lets the /edit page validate the password)
-      if (request.method === "POST" && path === "/api/admin/login") return json({ ok: true });
+      // Reached only once adminOk() has passed, so it answers for an admin
+      // ACCOUNT as well as for a correct password — which is what lets /add,
+      // /edit and /import skip their gate for someone already signed in.
+      if (request.method === "POST" && path === "/api/admin/login") {
+        return json({ ok: true, via: tokenOk(request, env) ? "password" : "account" });
+      }
 
       // add a rider, so a new person can be logged/imported the moment they turn
       // up rather than after a code change. They start with no rides at all.

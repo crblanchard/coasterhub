@@ -627,9 +627,18 @@ written to. Tables: `accounts`, `sessions`, `invites` (`migrations/003-accounts.
 
 | Write | Who |
 |---|---|
-| Your own rides, credits, rankings | your account — or `ADMIN_PASSWORD`, still |
-| Another rider's anything | `ADMIN_PASSWORD`, or an account with `is_admin` |
-| Parks, coasters, merges, adding riders (`/add`, `/edit`, `/import`) | `ADMIN_PASSWORD` only |
+| Your own rides and credits | your account — or `ADMIN_PASSWORD`, still |
+| Your own **rankings**, once claimed | **you alone.** No admin override at all — see below |
+| Another rider's rides | `ADMIN_PASSWORD`, or an account with `is_admin` |
+| Parks, coasters, merges, adding riders (`/add`, `/edit`, `/import`) | an `is_admin` account, or `ADMIN_PASSWORD` |
+
+**`ADMIN_PASSWORD` is no longer needed day to day (2026-09-15).** An admin account opens
+everything it opened — `/add`, `/edit` and `/import` skip their password gate when an
+`is_admin` account is signed in, and `adminOk()` accepts either. The account is the better
+credential: it records who acted, it is revoked by changing one person's password, and there is
+nothing to text anybody. The secret stays as break-glass and for scripts; **unsetting it
+entirely is supported** — `tokenOk()` simply returns false and accounts become the only way in.
+There is a test for that exact configuration.
 
 - **Passwords** are PBKDF2-HMAC-SHA256 at **100000 iterations, which is the Workers ceiling**,
   with the salt and count stored in the hash string. Anything above 100000 is refused outright
