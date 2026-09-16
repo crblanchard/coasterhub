@@ -77,17 +77,21 @@ nav.links a{color:var(--muted);font-weight:500;font-size:.95rem;transition:color
 nav.links a:hover,nav.links a.active{color:var(--fg)}
 .people{flex:1 1 0;min-width:0}
 .userpick{appearance:none;-webkit-appearance:none;-moz-appearance:none;
-  /* background-COLOR and background-IMAGE, never the shorthand: a later rule
-     using `background` here is what erased this chevron once already. */
+  /* background-COLOR, never the shorthand — a later rule using `background` here
+     is what erased this pill's dropdown chevron for weeks. There is no chevron
+     now on purpose: the pill shrink-wraps its name and centres it, and an arrow
+     inside that either crowds the name or pushes it off centre. To bring one
+     back, give it its own padding-right rather than borrowing the label's. */
   background-color:var(--panel);
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="%239fb0d6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-  background-repeat:no-repeat;background-position:right 11px center;
   border:1px solid var(--line);color:var(--fg);font:inherit;font-weight:600;font-size:.88rem;
-  /* Symmetric padding so the name sits in the middle of the pill rather than in
-     the middle of what is left after the chevron. text-align centres the closed
-     label in Chrome and Safari, text-align-last in Firefox — both, or it looks
-     centred on one machine and not the next. */
-  padding:7px 28px 7px 18px;text-align:center;text-align-last:center;
+  /* Symmetric padding, so the name sits in the middle of the PILL — the chevron
+     lives inside the right-hand padding rather than taking a bite out of the
+     space the label is centred in. text-align centres the closed label in Chrome
+     and Safari, text-align-last in Firefox: both, or it looks centred on one
+     machine and not the next.
+     The width comes from sizePicker() in app.js, because a <select> is otherwise
+     as wide as its LONGEST option — "Cole" in a pill built for "Firepheonix". */
+  padding:7px 26px;text-align:center;text-align-last:center;
   border-radius:999px;cursor:pointer;line-height:1.35;white-space:nowrap;transition:border-color .15s}
 .userpick:hover{border-color:var(--accent2)}
 .userpick:focus{outline:none;border-color:var(--accent2)}
@@ -313,8 +317,7 @@ footer.site a:hover{color:var(--fg)}
   .brand{flex:1 1 auto;min-width:0}
   .brand-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
   .whoami{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .userpick{flex:none;max-width:11em;font-size:.8rem;padding:6px 22px 6px 12px;
-    background-position:right 8px center;background-size:10px}
+  .userpick{flex:none;max-width:11em;font-size:.8rem;padding:6px 16px}
   /* "Viewing" is the first thing to go: the picker beside it already reads
      "Carter", so the question it answers is still answered without it. */
   .whoami{display:none}

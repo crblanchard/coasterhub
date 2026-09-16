@@ -635,6 +635,36 @@
         else location.href = userPageHref(v, perRider ? page : "profile");
       });
     }
+    // A <select> is as wide as its longest option, so the pill was built for
+    // "Firepheonix" whoever was selected and short names floated in a box with
+    // nothing in it. Measure the label that is actually showing and set the
+    // width to that. Re-measured on resize because the font size changes at the
+    // 680px breakpoint, and after every refill because the name may have moved.
+    function sizePicker(el) {
+      var opt = el.options[el.selectedIndex];
+      if (!opt) return;
+      var cs = window.getComputedStyle(el);
+      var probe = document.createElement("span");
+      probe.textContent = opt.textContent;
+      probe.style.cssText = "position:absolute;left:-9999px;top:0;white-space:nowrap;"
+        + "font-family:" + cs.fontFamily + ";font-size:" + cs.fontSize
+        + ";font-weight:" + cs.fontWeight + ";letter-spacing:" + cs.letterSpacing;
+      document.body.appendChild(probe);
+      var text = probe.getBoundingClientRect().width;
+      probe.parentNode.removeChild(probe);
+      // +1 for the sub-pixel the measurement rounds off, which otherwise shows
+      // up as an ellipsis on the longest name.
+      el.style.width = Math.ceil(text + parseFloat(cs.paddingLeft)
+        + parseFloat(cs.paddingRight) + 1) + "px";
+    }
+    if (!renderPeople.sized) {
+      renderPeople.sized = true;
+      window.addEventListener("resize", function () {
+        var el = document.querySelector("select.userpick");
+        if (el) sizePicker(el);
+      });
+    }
+
     var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
     // "Everyone" reads clearer than "All" to someone landing here for the
     // first time — it's a person picker, not a filter.
@@ -644,6 +674,7 @@
         return '<option value="' + escAttr(u.slug) + '"' + (u.slug === slug ? " selected" : "") + ">"
           + escAttr(u.name) + "</option>";
       }).join("");
+    sizePicker(sel);
   }
 
   function initNav(page) {
