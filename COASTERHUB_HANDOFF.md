@@ -259,6 +259,13 @@ with no person is not a thing, so `userPageHref(null, 'profile')` is `/riders`, 
 `profile.html` with no rider in the URL redirects: to your own page if you are signed in, to
 `/riders` if not.
 
+**`/riders` opens like a front page** (2026-09-16), because it is one: the badge and the track
+art came over from the old landing page's hero, the headline is "A home for your coaster count",
+and two paragraphs follow — the first about the site ("Welcome to Coaster Hub. Track your
+coaster count. Rank your credits. Log your rides."), the second about this page ("Pick a rider
+below…"). `.hero p + p` styles that second one quieter and closer. Its `<title>` is the site's,
+not the section's.
+
 **The riders list** is one row per person in the same shape as the identity block on a profile
 — picture, name, `@username`, then the count as a quiet line underneath ("562 credits / 2,394
 rides"). One number sits on the right: **coasters ranked**, from `/api/rankings/<slug>`, one call

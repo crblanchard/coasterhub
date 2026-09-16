@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base href="/">
-<title>Riders — Coaster Hub</title>
-<meta name="description" content="Everyone counting coasters on Coaster Hub, and how their counts compare.">
+<title>Coaster Hub — A roller coaster count, visualized</title>
+<meta name="description" content="Keep track of your roller coaster count — every credit, every re-ride, every park — and see it as maps, records and charts.">
 <link rel="stylesheet" href="/style.css?v=20260805b">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg?v=20260805b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260805b" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png?v=20260805b" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260805b">
-<meta property="og:title" content="Riders — Coaster Hub">
-<meta property="og:description" content="Everyone counting coasters on Coaster Hub.">
+<meta property="og:title" content="Coaster Hub">
+<meta property="og:description" content="A roller coaster count, visualized — credits, rides, parks, geography, and records.">
 <meta property="og:image" content="https://coasterhub.org/og-image.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -40,8 +40,16 @@
 </div></header>
 
 <section class="hero" style="padding:60px 0 30px"><div class="container">
-  <h1 style="max-width:16ch">Everyone counting.</h1>
-  <p>Pick a rider to see their count, their map and their records.</p>
+  <svg class="track" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path d="M-50 500 C 250 500, 300 120, 520 120 S 780 560, 1000 380 S 1300 90, 1500 300"
+          fill="none" stroke="var(--line)" stroke-width="4"/>
+    <path d="M-50 520 C 250 520, 300 140, 520 140 S 780 580, 1000 400 S 1300 110, 1500 320"
+          fill="none" stroke="var(--tint2)" stroke-width="2" stroke-dasharray="6 10"/>
+  </svg>
+  <span class="badge">Roller coaster counts, visualized</span>
+  <h1 style="max-width:17ch">A home for your coaster count.</h1>
+  <p><b>Welcome to Coaster Hub.</b> Track your coaster count. Rank your credits. Log your rides.</p>
+  <p>Pick a rider below to see their count, their map and their records.</p>
 </div></section>
 
 <div class="container"><div id="loading">Loading riders…</div></div>

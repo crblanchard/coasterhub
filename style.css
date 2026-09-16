@@ -92,6 +92,9 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
   color:var(--accent2);border:1px solid var(--ring);border-radius:999px;padding:6px 14px;margin-bottom:22px}
 .hero h1{font-size:clamp(2.4rem,6.5vw,4rem);line-height:1.03;font-weight:800;letter-spacing:-.02em;max-width:14ch}
 .hero p{color:var(--muted);font-size:clamp(1rem,2.2vw,1.2rem);margin:20px 0 30px;max-width:52ch}
+/* A second hero paragraph is the page talking about itself rather than the
+   site, so it is quieter and closer than the first. */
+.hero p + p{font-size:.98rem;margin:-18px 0 26px}
 .hero-sub{color:var(--accent2);font-weight:600;font-size:.95rem;margin:-14px 0 28px;letter-spacing:.01em}
 
 /* /stats splits the hero in two: who the rider is on the left, what they have
