@@ -670,38 +670,35 @@
     // querySelectorAll, not querySelector: Coasters is no longer in the header,
     // so its only links are the "Full credit list" ones in the Rides and Stats
     // heroes, and those need the rider too.
+    // Profile is always YOUR profile when we know who you are — it is the way
+    // back (Carter's call, 2026-09-16). Count and Rankings follow whoever you
+    // are reading, so that looking at Sean's count and tapping Rankings gets you
+    // Sean's; Profile is the one that breaks out of that, and landing on your
+    // own page re-remembers you, so the other two come back with you. myOwn is
+    // filled in once /api/auth/me answers, and is null for a visitor — for whom
+    // Profile keeps meaning the page they are on.
+    var myOwn = null;
     function applyRiderLinks(forSlug) {
       for (var p = 0; p < PER_RIDER.length; p++) {
-        var els = document.querySelectorAll('[data-nav="' + PER_RIDER[p] + '"]');
+        var key = PER_RIDER[p];
+        var target = (key === "profile" && myOwn) ? myOwn : forSlug;
+        var els = document.querySelectorAll('[data-nav="' + key + '"]');
         for (var q = 0; q < els.length; q++) {
-          els[q].setAttribute("href", userPageHref(forSlug, PER_RIDER[p]));
+          els[q].setAttribute("href", userPageHref(target, key));
         }
       }
     }
     applyRiderLinks(slug);
 
-    // Signed in with nobody picked? Then "Profile" means YOUR profile.
-    //
-    // With no rider chosen, every per-rider link falls back to the everyone
-    // view, which is right for Count and Rankings — those compare people. It is
-    // wrong for Profile: a profile is one person, and the one person you most
-    // likely want is you. Home clears the remembered rider by design, so Home →
-    // Profile was landing signed-in riders on a list of everybody instead of
-    // their own page.
-    //
-    // Only when nothing is picked. Viewing Sean and clicking Profile still goes
-    // to Sean — the header says whose page you are on, and it should keep its
-    // word. Async because the account comes from /api/auth/me; the link is
-    // already correct for the signed-out case, so there is no flash of a wrong
-    // destination, just a quiet retarget.
-    if (!slug) {
-      me().then(function (acct) {
-        if (!acct || !acct.slug) return;
-        var own = userPageHref(acct.slug, "profile");
-        var els = document.querySelectorAll('[data-nav="profile"]');
-        for (var i = 0; i < els.length; i++) els[i].setAttribute("href", own);
-      }).catch(function () { /* signed out, or the API is down: leave it alone */ });
-    }
+    // Who you are arrives from /api/auth/me, after the links are already on
+    // screen. Re-apply rather than patch one selector: the mobile tab bar is
+    // built further down this function and has to be pointed home too, and a
+    // later applyRiderLinks (the rider list landing) must not undo this.
+    me().then(function (acct) {
+      if (!acct || !acct.slug) return;
+      myOwn = acct.slug;
+      applyRiderLinks(slug);
+    }).catch(function () { /* signed out, or the API is down: leave it alone */ });
 
     var links = document.querySelectorAll('nav.links a[data-nav]');
     for (var i = 0; i < links.length; i++) {

@@ -209,6 +209,13 @@ On a phone the **Profile tab wears your picture** when you are signed in and hav
 `buildTabBar`), and the outline of a person when you do not — the same placeholder the riders
 list draws. Tab links carry `data-nav` so the header's retargeting reaches them too.
 
+**Profile always means YOUR profile** when you are signed in (2026-09-16) — header link and
+mobile tab alike, on every page, including while you are reading somebody else's. It is the way
+back: landing on your own page re-remembers you, so Count and Rankings come with you. Those two
+still follow whoever you are reading, which is the point of the picker. `applyRiderLinks` holds
+the rule and `myOwn` (from `/api/auth/me`) is null for a visitor, for whom Profile keeps meaning
+the page they are on.
+
 **"Viewing <name>" only appears on the three pages that show one rider** (`PER_RIDER`:
 profile, count, rankings). On `/riders` it contradicted the page, and on `/log` the rider comes
 from the form's own dropdown, so it was two answers to one question.
