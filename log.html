@@ -295,7 +295,11 @@ function boot(){
 
   $('save').onclick=save;
   $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
-  wireAdders(); wireRiderAdd(); wireNearMe(); wireMode(); setMode('day');
+  wireAdders(); wireRiderAdd(); wireNearMe(); wireMode();
+  // ?mode=list opens straight on "Coaster credits". The two modes are different
+  // jobs — tonight's laps versus filling in years of them — and the profile page
+  // links at each one by name, so the link has to be able to say which.
+  setMode(new URLSearchParams(location.search).get('mode') === 'list' ? 'list' : 'day');
   $('rider').addEventListener('change',function(){
     try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
     basket={}; renderBasket(); loadOwned();

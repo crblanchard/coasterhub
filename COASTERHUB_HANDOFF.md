@@ -209,6 +209,15 @@ Four tabs, everywhere — header, mobile bar, footer, sitemap — in one order:
 **Count** is `/rides` — the day log, every ride and the full credit list in one page. "Rides"
 read as a twin of "Log" and neither label said which one wrote.
 
+**Your own profile lists what you can do** (2026-09-16): under the two numbers, a column of
+four — Log a day, Add to your count, Update your rankings, Add a missing coaster. One accent
+button for the thing you do most, three quiet ones under it. Carter's ask was to make the
+options visible rather than scattered across a header; the page already says what you HAVE, and
+this says what you can add to it. Shown only to someone who may write to the count (its owner,
+or Carter for an unclaimed rider), because every one of those links would 401 on a visitor.
+`?mode=list` on `/log` exists for the second button — the log's two modes are different jobs and
+a link has to be able to name one.
+
 **A rider's profile is `/user/<slug>`**, not `/user/<slug>/stats`. The page opens with their
 picture, name and count: it is the person, and `stats` was a filename showing through. Their
 other pages keep the suffix because they are *about* that person — `/user/<slug>/rides`,

@@ -105,7 +105,17 @@
       <span class="badge" id="hero_badge">My Count</span>
       <h1 id="hero_h" style="max-width:20ch">Chasing credits.</h1>
       <p id="hero_p">Every ride, park, and record from my coaster count.</p>
-      <p class="logp" id="hero_logp" hidden><a class="btn" id="hero_log" href="/log">Log a day</a></p>
+      <!-- What you can do with this count, for the person who owns it. Four
+           verbs in a column beats one button and a header full of nouns: the
+           page already says what you HAVE, and this says what you can add to
+           it. Hidden for everyone else — see render(). The rankings link
+           carries data-nav so initNav points it at the right rider. -->
+      <div class="heroacts" id="hero_acts" hidden>
+        <a class="btn" href="/log">Log a day</a>
+        <a class="btn alt" href="/log?mode=list">Add to your count</a>
+        <a class="btn alt" data-nav="rankings" href="/rankings">Update your rankings</a>
+        <a class="btn alt" href="/add">Add a missing coaster</a>
+      </div>
       <p class="listp"><a id="hero_list" href="/rides?view=list">Full credit list &rarr;</a></p>
     </div>
   </div>
@@ -368,16 +378,16 @@ function render(s){
   host.style.display='block';
   CoasterHub.me().then(function(acct){
     var mine = acct && acct.slug && acct.slug===CoasterHub.currentUser();
-    // Logging moved off the header and onto this page (2026-09-16), so the way
-    // in has to be here and has to be obvious: a real button, under the number
-    // it is about to change. Only for people who can actually write to this
+    // Logging moved off the header and onto this page (2026-09-16), so the ways
+    // in have to be here and have to be obvious: real buttons, under the number
+    // they are about to change. Only for people who can actually write to this
     // count — its owner, or Carter, who logs for riders who have not claimed
-    // their page yet. A visitor gets the numbers without a button that would
-    // 401 on them.
+    // their page yet. A visitor gets the numbers without four buttons that
+    // would 401 on them.
     //
     // /log, not /user/<slug>/log: the log page picks its rider from the header
     // picker, and landing on this profile has already set it to this rider.
-    if (mine || (acct && acct.admin)) document.getElementById('hero_logp').hidden = false;
+    if (mine || (acct && acct.admin)) document.getElementById('hero_acts').hidden = false;
     CoasterHubProfile.mount(host,
       mine ? acct : { name:s.userName, slug:CoasterHub.currentUser(), bio:s.bio, avatar:s.avatar },
       { editable: !!mine,
