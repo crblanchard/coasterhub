@@ -69,10 +69,13 @@ Two decisions worth keeping:
 - **An undated row is a placeholder, so it was replaced, not added to.** "I rode this, date
   unknown" plus the dated rides for the same coaster would count the ride twice. The inserts
   top up to Carter's exact per-coaster-per-day counts, so nobody exceeds his numbers.
-- **Sean was missing three:** Supersplash (Plopsaland) and Free Fall (Nagashima) stayed off his
-  list, Roller Coaster (Hanayashiki) was added on Carter's say-so (that is his +1 credit). The
-  two left out are recorded in `RIDER_NOTES` in `stats.html`, which prints a standing note near
-  the top of his page. **Delete that entry if they're ever added.**
+- **Sean was missing three — settled 2026-09-16.** Supersplash (Plopsaland) and Free Fall
+  (Nagashima) stayed off his list, Roller Coaster (Hanayashiki) was added on Carter's say-so
+  (that is his +1 credit). The two left out were carried as a standing note in `RIDER_NOTES`
+  in `stats.html` until Carter's call that everyone on those days has them:
+  `migrations/009-sean-two-credits.sql` added both, dated to the days he was already logged at
+  those parks, and he is now at **672 credits / 723 rides**. The note is gone and `RIDER_NOTES`
+  is empty — the mechanism stays for the next one.
 
 Direct SQL bypasses `recordActivity` and the `repository_dispatch` that refreshes the static
 JSON, so activity rows were inserted by hand and the sync workflow was run manually
