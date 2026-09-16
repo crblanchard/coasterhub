@@ -279,7 +279,7 @@ function renderHub(){
       var st=CoasterHub.computeStats(coasters,parks,o.d), k=st.kpi;
       Object.keys(st.byCoaster).forEach(function(id){union[id]=(union[id]||0)+1;});
       var line=nf(k.credits)+' credits \u00b7 '+k.parks+' parks \u00b7 '+k.states+' states / '+k.countries+' countries';
-      cards+='<a class="card person-card" href="/user/'+o.u.slug+'/stats" style="text-decoration:none;display:block">'+
+      cards+='<a class="card person-card" href="'+CoasterHub.userPageHref(o.u.slug,'stats')+'" style="text-decoration:none;display:block">'+
         '<div class="meta">Rider</div><h3>'+esc(o.u.name)+'</h3>'+
         '<p class="pc-stat">'+line+'</p>'+
         '<p class="pc-links"><span style="color:var(--accent2);font-weight:600">View stats \u2192</span></p></a>';
@@ -346,7 +346,7 @@ function render(s){
   const name=esc(s.userName||'Carter');
   const mine=false;
   const who=name+'’s';
-  document.title=name+'’s Stats — Coaster Hub';
+  document.title=name+' — Coaster Hub';
 
   // A rider's own page names them once, in the profile block below. The badge
   // ("CARTER'S COUNT") and the blurb under the headline both said it again, so
@@ -384,7 +384,7 @@ function render(s){
         // The page IS this rider, so a rename has to move the address bar too
         // or a refresh lands on a URL that no longer exists.
         onRename: function(slug){
-          history.replaceState(null, '', '/user/' + slug + '/stats');
+          history.replaceState(null, '', CoasterHub.userPageHref(slug, 'stats'));
         } });
   });
 

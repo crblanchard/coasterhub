@@ -194,6 +194,33 @@ One editing session = one commit = one deploy.
 Requires a **`GITHUB_TOKEN`** Worker secret (fine-grained PAT, Contents: read+write). It is
 configured. Without it the dispatch is a silent no-op and nothing else breaks.
 
+### The nav, and a rider's URL (2026-09-16)
+
+Four tabs, everywhere — header, mobile bar, footer, sitemap — in one order:
+**Home · Rankings · Count · Profile**. They are all *places*. The two writes are not tabs:
+
+- **Log** is a button in the profile hero, under the number it changes, shown only to whoever
+  may write to that count (its owner, or Carter for riders who haven't claimed their page). It
+  keeps a footer link. It was the centre tab; a tab is somewhere you go, and this is something
+  you do, to one rider's count.
+- **Add new** stays desktop-header-and-footer, as it always was: admin only, occasional, and
+  never one-handed at a park.
+
+**Count** is `/rides` — the day log, every ride and the full credit list in one page. "Rides"
+read as a twin of "Log" and neither label said which one wrote.
+
+**A rider's profile is `/user/<slug>`**, not `/user/<slug>/stats`. The page opens with their
+picture, name and count: it is the person, and `stats` was a filename showing through. Their
+other pages keep the suffix because they are *about* that person — `/user/<slug>/rides`,
+`/user/<slug>/rankings`. `_redirects` 301s the old form to the new one (after the
+`/user/:name` rewrite line, since the first matching rule wins), and `<title>` is now
+"<Name> — Coaster Hub".
+
+Every link to a rider's page goes through `CoasterHub.userPageHref(slug, page)`. That function
+is the only place that knows the shape of these URLs — header links, the rider picker, the tab
+bar, the hub cards, the home page and `/account`'s redirects all call it. Build one by hand and
+it will be the one that rots.
+
 ### Asset paths must stay absolute
 
 `/user/<slug>/…` URLs are **200 rewrites**, so the browser keeps the pretty path. A relative

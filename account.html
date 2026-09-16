@@ -222,7 +222,7 @@ function wire(form, button, msg, build, path, done){
 function landing(slug){
   var next = new URLSearchParams(location.search).get('next');
   if (next && next.charAt(0) === '/' && next.charAt(1) !== '/') return next;
-  return slug ? '/user/' + slug + '/stats' : '/';
+  return slug ? CoasterHub.userPageHref(slug, 'stats') : '/';
 }
 
 // ---- signed out -----------------------------------------------------------
@@ -282,7 +282,7 @@ wire($('form_reset'), $('rs_go'), $('rs_msg'),
   '/api/auth/reset',
   function(d){
     try { if (d.slug) localStorage.setItem('ch_rider', d.slug); } catch (e) {}
-    location.href = d.slug ? '/user/' + d.slug + '/stats' : '/';
+    location.href = d.slug ? CoasterHub.userPageHref(d.slug, 'stats') : '/';
   });
 
 wire($('form_claim'), $('cl_go'), $('cl_msg'),
@@ -290,7 +290,7 @@ wire($('form_claim'), $('cl_go'), $('cl_msg'),
   '/api/auth/claim',
   function(d){
     try { localStorage.setItem('ch_rider', d.slug); } catch (e) {}
-    location.href = '/user/' + d.slug + '/stats';
+    location.href = CoasterHub.userPageHref(d.slug, 'stats');
   });
 
 // ---- decide what to show --------------------------------------------------
@@ -323,7 +323,7 @@ fetch('/api/auth/me', { credentials: 'same-origin' })
     // Everything that used to live on this page — picture, name, username, bio,
     // password, sign out — is on your own profile now.
     if (d && d.account) {
-      location.replace(d.account.slug ? '/user/' + d.account.slug + '/stats' : '/');
+      location.replace(d.account.slug ? CoasterHub.userPageHref(d.account.slug, 'stats') : '/');
       return;
     }
     if (!CLAIM) { show('pane_auth'); return; }

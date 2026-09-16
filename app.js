@@ -267,7 +267,9 @@
     };
   }
 
-  // Active user from a pretty path (/user/<name>/stats) or ?user=<name>. Null = Carter.
+  // Active user from a pretty path (/user/<name>, /user/<name>/rides) or
+  // ?user=<name>. Null = the everyone view. The regex stops at the slug, so the
+  // bare profile URL and the pages under it both read the same.
   function currentUser() {
     if (typeof location === "undefined") return null;
     var m = location.pathname.match(/\/user\/([^\/]+)/);
@@ -456,9 +458,18 @@
 
   // URL for a given person's page. The default user lives at the site root
   // (/stats, /coasters); everyone else lives under /user/<slug>/.
+  // Every link to a rider's page comes through here, so the shape of those URLs
+  // is decided in exactly one place.
+  //
+  // A rider's profile is /user/<slug> — not /user/<slug>/stats (2026-09-16).
+  // The page IS the person: it opens with their picture, name and count, and
+  // "stats" was a filename showing through. Their other pages keep the suffix
+  // because they are pages ABOUT that person: /user/<slug>/rides, /rankings.
+  // _redirects 301s the old /stats form here, so existing links still land.
   function userPageHref(slug, page) {
     if (page === "home") return "/";
-    return "/user/" + slug + "/" + page;   // a rider's own stats or coasters
+    if (!slug) return "/" + page;          // nobody picked: the everyone view
+    return page === "stats" ? "/user/" + slug : "/user/" + slug + "/" + page;
   }
 
   // The pages that exist per rider, i.e. everything but Home. Used for both
@@ -547,7 +558,7 @@
       var label = acct.name || acct.slug || acct.email;
       // Signed in, this goes to your own profile: that is where the account
       // lives now, and /account only holds the signed-out forms.
-      if (acct.slug) a.href = "/user/" + acct.slug + "/stats";
+      if (acct.slug) a.href = userPageHref(acct.slug, "stats");
       a.className = "acctlink on";
       a.setAttribute("aria-label", "Signed in as " + label);
       a.setAttribute("title", "Signed in as " + label);
@@ -615,7 +626,7 @@
           else window.localStorage.setItem("ch_rider", v);
         } catch (e) {}
         if (v === "__all__") location.href = perRider ? ("/" + page) : "/";
-        else location.href = perRider ? ("/user/" + v + "/" + page) : ("/user/" + v + "/stats");
+        else location.href = userPageHref(v, perRider ? page : "stats");
       });
     }
     var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
@@ -657,8 +668,7 @@
       for (var p = 0; p < PER_RIDER.length; p++) {
         var els = document.querySelectorAll('[data-nav="' + PER_RIDER[p] + '"]');
         for (var q = 0; q < els.length; q++) {
-          els[q].setAttribute("href",
-            forSlug ? "/user/" + forSlug + "/" + PER_RIDER[p] : "/" + PER_RIDER[p]);
+          els[q].setAttribute("href", userPageHref(forSlug, PER_RIDER[p]));
         }
       }
     }
@@ -749,7 +759,7 @@
     nav.className = "tabbar";
     nav.setAttribute("aria-label", "Primary");
     nav.innerHTML = TABS.map(function (t) {
-      var href = t.fixed ? t.path : (slug ? "/user/" + slug + "/" + t.k : t.path);
+      var href = (t.fixed || !slug) ? t.path : userPageHref(slug, t.k);
       return '<a href="' + href + '"' + (t.k === page ? ' class="on" aria-current="page"' : '') + '>'
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
         + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + TAB_ICONS[t.k] + '</svg>'

@@ -422,8 +422,10 @@ async function getUsers(env) {
   }
 }
 
-// The slug IS the URL (/user/<slug>/stats), so it is derived tightly and the
-// page names are refused — a rider called "Stats" would shadow a real page.
+// The slug IS the URL (/user/<slug>), so it is derived tightly and the page
+// names are refused — a rider called "Stats" would shadow a real page. This
+// matters more since the profile lost its /stats suffix: the rider segment now
+// sits one level from the site root.
 const RESERVED_SLUGS = new Set(["api","user","users","admin","new","all","everyone",
   "home","stats","rides","rankings","coasters","parks","log","add","edit","import",
   "changes","database","sitemap","index","account","accounts","login","logout",
