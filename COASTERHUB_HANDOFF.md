@@ -281,6 +281,17 @@ The whole row is the link. Underneath the list is the **recent-changes feed**, t
 filter bar and a 60s refresh; `/riders` mounts twelve rows with neither. Its CSS moved to
 `style.css` for the same reason. Add an event kind in one place now, not two.
 
+**A ranking opens read-only, even your own** (2026-09-16). `#mine` carries `.readonly` from the
+markup; whoever may edit gets an **Edit** button, which takes it off and brings back the drag
+handles, the row buttons, the Add coasters tab and Save. A ranking is read far more often than
+it is changed, and a screen of drag handles is a screen you can break by mis-tapping. It also
+means your own list looks exactly like everybody else's until you ask for it not to.
+
+Rows are deliberately tight — a ranking is scanned down a screen, so height is coasters you
+cannot see. On a phone the name and park used to wrap, which made every row a different height;
+both ellipsise now. Editing, the number tucks against the drag handle rather than sitting apart
+from it, because everything it is not is name and park.
+
 **`/rankings/all` is the whole shared list** (2026-09-16) — `rankings-all.html`, reached by a
 200 rewrite. `/rankings` shows the ten most agreed-on and links here when there are more; it is
 deliberately not in the nav. Two sort orders, because "agreed on" means two things: how many

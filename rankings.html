@@ -31,27 +31,37 @@
   input[type=search]{min-width:200px;flex:1}
 
   /* ranked list */
-  .rank{display:flex;flex-direction:column;gap:8px}
-  .rrow{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);
-        border-radius:12px;padding:10px 12px}
+  .rank{display:flex;flex-direction:column;gap:6px}
+  /* Tight on purpose: a ranking is a list you scan down, and every pixel of row
+     height is one fewer coaster on the screen. */
+  .rrow{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
+        border-radius:10px;padding:7px 11px}
   .rrow.drag{opacity:.45;border-color:var(--accent2)}
   /* Someone else's list: just the ranking, read-only. Hide the controls rather
      than disable them — a greyed drag handle still invites a drag — and say
      nothing about it. The heading already names whose list this is. */
   #mine.readonly .grip,#mine.readonly .acts,#mine.readonly #save,
-  #mine.readonly #v_add,#mine.readonly #pane_add{display:none}
+  #mine.readonly #v_add,#mine.readonly #pane_add,#mine.readonly .seg{display:none}
   #mine.readonly .rrow{cursor:default}
+  /* Edit is the read-only state's only control, and it goes away once pressed. */
+  #mine:not(.readonly) #edit{display:none}
+  /* No grip to sit beside, so the number leads the row instead. */
+  #mine.readonly .rrow .pos{margin-left:2px}
 
   .rrow.over{border-color:var(--accent2)}
-  .rrow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);min-width:2.1em;
-             text-align:right;flex:none;margin:0 6px 0 16px}
-  .rrow .grip{flex:none;color:var(--muted);cursor:grab;padding:4px 2px;touch-action:none;user-select:none;line-height:1}
+  /* Editing, the number sits right against the handle: the two of them are one
+     block on the left and everything they are not is name and park. */
+  .rrow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);min-width:1.8em;
+             text-align:right;flex:none;margin:0 4px 0 0}
+  .rrow .grip{flex:none;color:var(--muted);cursor:grab;padding:4px 0;touch-action:none;user-select:none;line-height:1}
   .rrow .grip:active{cursor:grabbing}
   .rrow .nm{flex:1;min-width:0}
-  .rrow .nm b{display:block;font-weight:600;font-size:.94rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .rrow .nm span{color:var(--muted);font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+  .rrow .nm b{display:block;font-weight:600;font-size:.9rem;line-height:1.3;
+              overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rrow .nm span{color:var(--muted);font-size:.75rem;line-height:1.3;
+                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
   .rrow .acts{display:flex;gap:4px;flex:none}
-  .rrow .acts button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;
+  .rrow .acts button{width:27px;height:27px;border-radius:8px;border:1px solid var(--line);background:transparent;
                      color:var(--muted);cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center}
   .rrow .acts button:hover{color:var(--fg);border-color:var(--accent2)}
   .rrow .acts .del:hover{color:var(--accent);border-color:var(--accent)}
@@ -143,10 +153,9 @@
     .vs{grid-template-columns:1fr;gap:8px}
     .vsx{padding:2px 0}
     .figs{grid-template-columns:1fr 1fr}
-    .rrow{flex-wrap:wrap}
-    .rrow .nm{flex:1 1 8em}
-    .rrow .nm b{white-space:normal;line-height:1.3}
-    .rrow .nm span{white-space:normal;line-height:1.35}
+    .rrow{gap:8px;padding:7px 9px}
+    .rrow .nm{flex:1 1 6em}
+    .rrow .acts button{width:26px;height:26px}
   }
 </style>
 </head>
@@ -198,13 +207,18 @@
   </div>
 
   <!-- one rider: their ranking -->
-  <div id="mine" style="display:none">
+  <!-- Starts read-only, even on your own list: a ranking is something you read
+       far more often than you change, and a page full of drag handles and delete
+       buttons is a page you can break by mis-tapping. Edit turns them on, and
+       the list then looks exactly as it did before — see #mine.readonly. -->
+  <div id="mine" class="readonly" style="display:none">
     <div class="bar">
       <div class="seg">
         <button id="v_rank" class="on">The list</button><button id="v_add">Add coasters</button>
       </div>
       <span class="spacer"></span>
       <span class="status" id="status"></span>
+      <button class="ghost" id="edit" hidden>Edit</button>
       <button class="primary" id="save" disabled>Save</button>
     </div>
 
@@ -389,11 +403,17 @@ if(!slug){
     // who predate accounts still manage their own lists.
     CoasterHub.me().then(function(acct){
       var mineToEdit = !rank.claimed || (acct && acct.slug === slug);
-      if (mineToEdit) return;
-      $('mine').classList.add('readonly');
-      // The hero promises "Drag to reorder, or compare two at a time", which is
-      // not true for a reader. Say what this page is for them instead.
-      $('hero_p').textContent = 'Best to worst, by preference \u2014 not by height or speed.';
+      // Everyone starts read-only (see #mine.readonly). The difference for
+      // whoever owns the list is that they get an Edit button, which turns the
+      // handles, the delete buttons, the Add coasters tab and Save back on.
+      if (!mineToEdit) return;
+      var edit = $('edit');
+      edit.hidden = false;
+      edit.onclick = function(){
+        $('mine').classList.remove('readonly');
+        $('hero_p').textContent = 'Best to worst, by preference \u2014 not by height or speed. '
+          + 'Drag to reorder, or compare two at a time.';
+      };
     });
     coasters.forEach(function(c){ var pk=parks[c.park];
       BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
@@ -409,7 +429,7 @@ if(!slug){
 
     var nm=esc(user.user||slug);
     $('hero_h1').textContent=nm+'’s favorites, in order.';
-    $('hero_p').textContent='Best to worst, by preference — not by height or speed. Drag to reorder, or compare two at a time.';
+    $('hero_p').textContent='Best to worst, by preference — not by height or speed.';
     document.title=nm+'’s Rankings — Coaster Hub';
 
     $('loading').style.display='none'; $('mine').style.display='block';
