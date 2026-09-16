@@ -110,15 +110,17 @@
            page already says what you HAVE, and this says what you can add to
            it. Hidden for everyone else — see render(). The rankings link
            carries data-nav so initNav points it at the right rider. -->
+      <!-- Three. Filling in old credits lives on the count page itself now, and
+           adding a missing coaster is a job on the shared list rather than on
+           yours — both were things you CAN do rather than things you come here
+           to do, and a column of six reads as a menu. -->
       <div class="heroacts" id="hero_acts">
         <a class="btn own" href="/log" hidden>Log a day</a>
-        <a class="btn alt own" href="/log?mode=list" hidden>Add to your count</a>
-        <a class="btn alt own" data-nav="rankings" href="/rankings" hidden>Update your rankings</a>
-        <a class="btn alt own" href="/add" hidden>Add a missing coaster</a>
         <!-- Always here, for whoever is reading: the numbers above are the
              summary and this is the page behind them. data-nav, so initNav
              points it at the rider whose page this is. -->
         <a class="btn alt" data-nav="rides" id="hero_view" href="/rides">View your count</a>
+        <a class="btn alt own" data-nav="rankings" href="/rankings" hidden>Update your rankings</a>
       </div>
     </div>
   </div>

@@ -209,14 +209,18 @@ Four tabs, everywhere — header, mobile bar, footer, sitemap — in one order:
 **Count** is `/rides` — the day log, every ride and the full credit list in one page. "Rides"
 read as a twin of "Log" and neither label said which one wrote.
 
-**Your own profile lists what you can do** (2026-09-16): under the two numbers, a column of
-four — Log a day, Add to your count, Update your rankings, Add a missing coaster. One accent
-button for the thing you do most, three quiet ones under it. Carter's ask was to make the
+**Your own profile lists what you can do** (2026-09-16): under the two numbers, three buttons —
+**Log a day**, **View your count**, **Update your rankings**. Carter's ask was to make the
 options visible rather than scattered across a header; the page already says what you HAVE, and
-this says what you can add to it. Shown only to someone who may write to the count (its owner,
-or Carter for an unclaimed rider), because every one of those links would 401 on a visitor.
-`?mode=list` on `/log` exists for the second button — the log's two modes are different jobs and
-a link has to be able to name one.
+this says what you do with it. It reached six and came back to three: filling in old credits is
+a button on the count page itself, and adding a missing coaster belongs to the shared list
+rather than to yours.
+
+Only "View your count" shows to everyone (it reads "View Sean's count" on his page, "See
+everyone's rides" on the hub); the two writes would 401 on a visitor, so they appear for the
+owner, or for Carter on a rider who has not claimed their page. `?mode=list` on `/log` exists
+for the count page's button — the log's two modes are different jobs and a link has to be able
+to name one.
 
 **A rider's profile is `/user/<slug>`**, not `/user/<slug>/stats`. The page opens with their
 picture, name and count: it is the person, and `stats` was a filename showing through. Their
