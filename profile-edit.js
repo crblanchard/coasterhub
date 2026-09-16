@@ -101,8 +101,9 @@
       +   '<div class="msg" data-msg="user"></div>'
       + '</form></div>'
 
-      // Log a day is gone from here — it is the middle tab and a header link
-      // already, and a profile is not a menu.
+      // Log a day is not in this card, but it IS on this page: stats.html puts
+      // the button up in the hero beside the count, where the number it changes
+      // is. This card is who you are, not what you do.
       + '<div class="panel" data-panel="pw" hidden><form data-form="pw">'
       +   '<label>Current password<input type="password" autocomplete="current-password"'
       +     ' data-el="pwcur" required></label>'

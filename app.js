@@ -705,40 +705,43 @@
     buildTabBar(page, slug);
   }
 
-  // Mobile tab bar. Built here rather than in markup so all four pages get it
-  // (and the same ordering) from one place. Hidden above 680px by the CSS.
-  // `fixed` = the same URL for everyone. Home shows all riders, and the log
-  // picks its rider from a dropdown rather than the path, so neither takes the
-  // /user/<slug>/ prefix the other tabs get.
+  // Mobile tab bar. Built here rather than in markup so every page gets it (and
+  // the same ordering) from one place. Hidden above 680px by the CSS. `fixed` =
+  // the same URL for everyone: Home shows all riders, so it takes no
+  // /user/<slug>/ prefix the way the other tabs do.
   //
-  // Log sits in the centre slot, the easiest one to hit with a thumb: it is the
-  // thing a rider does repeatedly and on a phone at a park. Add new is still
-  // not here at all — adding a park or coaster to the shared database is
-  // occasional and rarely done one-handed, and it stays in the desktop header
-  // and the footer, so it is reachable on a phone, just not holding a
-  // thumb-sized slot it does not earn.
+  // Four tabs, and they are all places rather than actions (2026-09-16). The two
+  // writes are deliberately not here:
   //
-  // The /stats tab is labelled "Profile": it is where a rider's own records,
-  // map and charts live, so it reads as their page rather than as a chart
-  // screen. The path stays /stats — only the label changed. The header nav and
-  // the footer use the same order and the same word.
+  //   Log      — you log from your own profile now, where the button sits under
+  //              the count it is about to change. It was the centre tab, but a
+  //              tab is a place you visit and this is something you DO, once a
+  //              trip, to one rider's count — yours. It stays in the footer.
+  //   Add new  — adding a coaster to the shared database is occasional, admin
+  //              only, and rarely done one-handed. Desktop header and footer, as
+  //              it has always been.
+  //
+  // "Count" is /rides: the day-by-day log, every ride, and the full credit list
+  // in one place. "Rides" undersold it and read as a twin of "Log" — one reads,
+  // one writes, and the labels never said which. "Profile" is /stats for the
+  // same reason: it is a rider's page, not a chart screen. Paths are unchanged;
+  // header, tab bar and footer all use these words, in this order.
   var TABS = [
     { k: "home",     label: "Home",     path: "/",         fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
-    { k: "log",      label: "Log",      path: "/log",      fixed: true },
-    { k: "rides",    label: "Rides",    path: "/rides" },
+    { k: "rides",    label: "Count",    path: "/rides" },
     { k: "stats",    label: "Profile",  path: "/stats" }
   ];
   // Five is the ceiling: measured at 320px (the narrowest phone) the widest
   // label, "Rankings", fills 58 of its 64px slot. A sixth tab would need
-  // shorter labels or icons only.
+  // shorter labels or icons only. At four there is room to spare.
+  // One per tab in TABS, no spares: the `coasters` and `log` paths outlived
+  // their tabs and sat here as dead SVG nobody could see.
   var TAB_ICONS = {
     home:     '<path d="M3 10.2 12 3l9 7.2V21H3z"/>',
-    coasters: '<path d="M4 6h16M4 12h16M4 18h16"/>',
     rides:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
     stats:    '<path d="M5 20v-6M12 20V6M19 20v-9"/>',
-    rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>',
-    log:      '<path d="M12 5v14M5 12h14"/>'
+    rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>'
   };
   function buildTabBar(page, slug) {
     if (typeof document === "undefined" || document.querySelector(".tabbar")) return;
