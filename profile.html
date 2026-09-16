@@ -319,6 +319,14 @@ function render(s){
   var line=function(t){ var d=document.createElement('span'); d.textContent=t; hh.appendChild(d); };
   line(nf(k.credits)+' coasters.');
   if(has.rideCounts) line(nf(k.rides)+' rides.');
+  // A ranking lives in its own table, so it arrives after the count does and the
+  // third line appears a beat later rather than holding up the first two. A
+  // rider with an empty list still gets "0 ranked." — the riders page says 0
+  // beside their name too, and a missing line would read as "unknown".
+  fetch('/api/rankings/'+encodeURIComponent(CoasterHub.currentUser()||''))
+    .then(function(r){ return r.ok ? r.json() : {order:[]}; })
+    .then(function(d){ line(nf((d.order||[]).length)+' ranked.'); })
+    .catch(function(){ /* no ranking to report is better than a wrong one */ });
   // Standing notes about a rider's own data — things known to be unresolved, kept
   // on the page so they aren't forgotten. Delete the entry once it's settled.
   var note=RIDER_NOTES[CoasterHub.currentUser()||'carter'];
