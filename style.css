@@ -304,7 +304,7 @@ select.userpick:hover{border-color:var(--accent2)}
   .brand{flex:1 1 auto;min-width:0}
   .brand-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
   .whoami{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  select.userpick{flex:none;max-width:9.5em}
+  select.userpick{flex:none;max-width:9.5em;font-size:.8rem;padding:6px 10px}
   /* "Viewing" is the first thing to go: the picker beside it already reads
      "Carter", so the question it answers is still answered without it. */
   .whoami{display:none}
