@@ -154,6 +154,10 @@
   <span class="badge">The log</span>
   <h1 style="max-width:20ch">Loading&hellip;</h1>
   <p>Every ride, day by day.</p>
+  <!-- The way in, on the page the count lives on. Shown only to whoever may
+       write to this one, and never on the everyone view — there is no single
+       count to add to there. -->
+  <p class="heroact" id="rides_act" hidden><a class="btn" href="/log?mode=list">Add to your count</a></p>
 </div></section>
 
 <section class="block" style="padding-top:20px"><div class="container">
@@ -238,6 +242,14 @@ function fail(e){console.error(e);document.getElementById('loading').style.displ
 // No rider in the URL means "Everyone", exactly like /coasters and /stats —
 // this page used to quietly fall back to Carter, which contradicted the picker.
 var slug=CoasterHub.currentUser();
+// Your own count gets an "Add to your count" button in the hero, the same rule
+// as the buttons on your profile: its owner, or Carter for a rider who has not
+// claimed their page yet. A visitor would only get a 401 out of it.
+if(slug){
+  CoasterHub.me().then(function(acct){
+    if(acct && (acct.slug===slug || acct.admin)) document.getElementById('rides_act').hidden=false;
+  }).catch(function(){ /* signed out: leave it hidden */ });
+}
 COMBINED = !slug;
 
 // Everyone = whoever is in the rider list, which includes anyone added on /log
@@ -289,7 +301,7 @@ return Promise.all([
       document.querySelector('.hero h1').textContent='Every day out across the site.';
       document.querySelector('.hero p').textContent=
         'Every rider’s logged days, newest first — filter by rider, year or park.';
-      document.title='Rides — Coaster Hub';
+      document.title='Count — Coaster Hub';
       document.getElementById('t_rides_k').textContent='Rides';
       document.getElementById('t_days_k').textContent='Days out';
     } else {
@@ -301,7 +313,7 @@ return Promise.all([
         MODE==='rides' ? 'Browse by park day or as one flat list — filter by year, park or name.'
                        : (DATED ? 'Each coaster once, on the day it was first ridden.'
                                 : 'Each coaster once, in credit order.');
-      document.title=nm+'’s Rides — Coaster Hub';
+      document.title=nm+'’s Count — Coaster Hub';
       document.getElementById('t_rides_k').textContent = MODE==='rides'?'Rides':'Credits';
       document.getElementById('t_days_k').textContent = MODE==='rides'?'Days out':'Dated days';
     }

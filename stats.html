@@ -110,13 +110,16 @@
            page already says what you HAVE, and this says what you can add to
            it. Hidden for everyone else — see render(). The rankings link
            carries data-nav so initNav points it at the right rider. -->
-      <div class="heroacts" id="hero_acts" hidden>
-        <a class="btn" href="/log">Log a day</a>
-        <a class="btn alt" href="/log?mode=list">Add to your count</a>
-        <a class="btn alt" data-nav="rankings" href="/rankings">Update your rankings</a>
-        <a class="btn alt" href="/add">Add a missing coaster</a>
+      <div class="heroacts" id="hero_acts">
+        <a class="btn own" href="/log" hidden>Log a day</a>
+        <a class="btn alt own" href="/log?mode=list" hidden>Add to your count</a>
+        <a class="btn alt own" data-nav="rankings" href="/rankings" hidden>Update your rankings</a>
+        <a class="btn alt own" href="/add" hidden>Add a missing coaster</a>
+        <!-- Always here, for whoever is reading: the numbers above are the
+             summary and this is the page behind them. data-nav, so initNav
+             points it at the rider whose page this is. -->
+        <a class="btn alt" data-nav="rides" id="hero_view" href="/rides">View your count</a>
       </div>
-      <p class="listp"><a id="hero_list" href="/rides?view=list">Full credit list &rarr;</a></p>
     </div>
   </div>
 </div></section>
@@ -230,11 +233,6 @@
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('stats');
-// The full list lives on Rides now, so point at the right rider's copy of it.
-(function(){
-  var u=CoasterHub.currentUser();
-  document.getElementById('hero_list').href=(u?('/user/'+u+'/rides'):'/rides')+'?view=list';
-})();
 const nf=n=>(n==null?'—':n.toLocaleString());
 
 // Standing notes about a rider's own data, keyed by slug. These are deliberately
@@ -272,6 +270,10 @@ function renderHub(){
   document.getElementById('hero_badge').textContent='Everyone';
   document.getElementById('hero_h').textContent="Everyone\u2019s stats.";
   document.getElementById('hero_p').textContent='Pick a rider below, or see the combined totals.';
+  var hv=document.getElementById('hero_view');
+  hv.textContent='See everyone’s rides';
+  hv.removeAttribute('data-nav');
+  hv.href='/rides';
   document.title='Stats \u2014 Coaster Hub';
   var tile=function(n,l){return '<div class="kpi"><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>';};
   // The API first, the static JSON as the fallback (fetchUser does both) — a
@@ -387,7 +389,14 @@ function render(s){
     //
     // /log, not /user/<slug>/log: the log page picks its rider from the header
     // picker, and landing on this profile has already set it to this rider.
-    if (mine || (acct && acct.admin)) document.getElementById('hero_acts').hidden = false;
+    if (mine || (acct && acct.admin)) {
+      var own = document.querySelectorAll('#hero_acts .own');
+      for (var i = 0; i < own.length; i++) own[i].hidden = false;
+    }
+    // Whose count you are about to look at. s.userName raw, not the escaped
+    // copy: this is textContent, and an escaped one would print the entities.
+    document.getElementById('hero_view').textContent =
+      mine ? 'View your count' : ('View ' + (s.userName || 'this') + '’s count');
     CoasterHubProfile.mount(host,
       mine ? acct : { name:s.userName, slug:CoasterHub.currentUser(), bio:s.bio, avatar:s.avatar },
       { editable: !!mine,
