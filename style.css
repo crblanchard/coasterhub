@@ -160,11 +160,11 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
   background-size:cover;background-position:center}
 .riderrow .who{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
 .riderrow .nm{font-weight:800;font-size:1.15rem;letter-spacing:-.01em;line-height:1.2}
-.riderrow .un{color:var(--accent2);font-size:.88rem;font-weight:600;
+.riderrow .un{color:var(--accent2);font-size:.82rem;font-weight:600;line-height:1.35;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 /* The count itself, under the username: small, quiet, and the same place a bio
    sits on a profile. */
-.riderrow .sub{color:var(--muted);font-size:.82rem;margin-top:3px;
+.riderrow .sub{color:var(--muted);font-size:.82rem;margin-top:2px;line-height:1.35;
   font-variant-numeric:tabular-nums}
 .riderrow .nums{display:flex;gap:26px;flex:none}
 .riderrow .s{display:flex;flex-direction:column;align-items:flex-end;min-width:3.5em}
@@ -176,8 +176,11 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
      to wrap under itself rather than pushing the name around. */
   .riderrow{gap:12px;padding:13px 14px}
   .riderrow .av{width:46px;height:46px;font-size:1.2rem}
-  .riderrow .s{min-width:0;max-width:5.5em}
+  .riderrow .s{min-width:0}
   .riderrow .s span{font-size:.64rem;letter-spacing:.05em;text-align:right;line-height:1.25}
+  /* Just "ranked" here: the two-word label wrapped, took the width with it, and
+     pushed the count line under the name onto a second line of its own. */
+  .riderrow .s .wide{display:none}
 }
 
 /* Activity feed (changes-feed.js) — /changes in full, /riders in short. */
