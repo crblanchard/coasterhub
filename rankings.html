@@ -269,19 +269,24 @@ if(!slug){
   $('hero_h1').textContent='Everyone’s rankings, at a glance.';
   $('hero_p').textContent='Who has ranked what, and the coasters you agree on.';
   CoasterHub.fetchUsers().then(function(){
-  return Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()].concat(
+  // Who is reading matters here: the cards say what YOU can do with each list,
+  // so the account rides along with the data rather than arriving after it and
+  // rewriting the page.
+  return Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(),
+    CoasterHub.me().catch(function(){return null;})].concat(
     CoasterHub.USERS.map(function(u){
       return fetch('/api/rankings/'+u.slug).then(function(r){return r.ok?r.json():{order:[]};})
         .catch(function(){return {order:[]};});
     })
   )).then(function(res){
-    var coasters=res[0].coasters, parks=res[1], all=res.slice(2);
+    var coasters=res[0].coasters, parks=res[1], ME=res[2], all=res.slice(3);
     coasters.forEach(function(c){ var pk=parks[c.park];
       BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
 
     // Drop ids we can't name — a merged-away coaster shouldn't break the page.
     var lists=CoasterHub.USERS.map(function(u,i){
-      return {user:u, order:(all[i].order||[]).filter(function(id){return BYID[id];})};
+      return {user:u, claimed:!!all[i].claimed,
+              order:(all[i].order||[]).filter(function(id){return BYID[id];})};
     });
     var started=lists.filter(function(l){return l.order.length;});
 
@@ -307,9 +312,19 @@ if(!slug){
     $('cards').innerHTML=lists.map(function(l){
       var href='/user/'+l.user.slug+'/rankings';
       if(!l.order.length){
+        // "Anyone can build a list — nothing is locked" dates from before
+        // accounts. A claimed rider's list is theirs alone now, so inviting a
+        // stranger to start it was a promise the API would refuse to keep.
+        // Each card says what the person reading it can actually do.
+        var yours = ME && ME.slug === l.user.slug;
+        var seedable = !yours && ME && ME.admin && !l.claimed;
+        var why = yours     ? 'Drag your favourites into order — the list is yours.'
+                : seedable  ? 'Not claimed yet — you can start it for them.'
+                : l.claimed ? 'Only ' + esc(l.user.name) + ' can build this one.'
+                :             '';
         return '<a class="card" href="'+href+'"><div class="hd"><b>'+esc(l.user.name)+'</b><em>not started</em></div>'
-          +'<div class="none">No favorites ranked yet.<em>Anyone can build a list — nothing is locked.</em></div>'
-          +'<div class="go">Start one &rarr;</div></a>';
+          +'<div class="none">No favorites ranked yet.'+(why?'<em>'+why+'</em>':'')+'</div>'
+          +'<div class="go">'+((yours||seedable) ? 'Start one &rarr;' : 'See the page &rarr;')+'</div></a>';
       }
       var top=l.order.slice(0,5).map(function(id,i){
         var c=BYID[id];

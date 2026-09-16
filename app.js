@@ -674,6 +674,29 @@
     }
     applyRiderLinks(slug);
 
+    // Signed in with nobody picked? Then "Profile" means YOUR profile.
+    //
+    // With no rider chosen, every per-rider link falls back to the everyone
+    // view, which is right for Count and Rankings — those compare people. It is
+    // wrong for Profile: a profile is one person, and the one person you most
+    // likely want is you. Home clears the remembered rider by design, so Home →
+    // Profile was landing signed-in riders on a list of everybody instead of
+    // their own page.
+    //
+    // Only when nothing is picked. Viewing Sean and clicking Profile still goes
+    // to Sean — the header says whose page you are on, and it should keep its
+    // word. Async because the account comes from /api/auth/me; the link is
+    // already correct for the signed-out case, so there is no flash of a wrong
+    // destination, just a quiet retarget.
+    if (!slug) {
+      me().then(function (acct) {
+        if (!acct || !acct.slug) return;
+        var own = userPageHref(acct.slug, "stats");
+        var els = document.querySelectorAll('[data-nav="stats"]');
+        for (var i = 0; i < els.length; i++) els[i].setAttribute("href", own);
+      }).catch(function () { /* signed out, or the API is down: leave it alone */ });
+    }
+
     var links = document.querySelectorAll('nav.links a[data-nav]');
     for (var i = 0; i < links.length; i++) {
       links[i].classList.toggle("active", links[i].getAttribute("data-nav") === page);
