@@ -833,8 +833,12 @@ async function main() {
     r = await call(db, "DELETE", "/api/credit", { body: { user: "ravi", coaster_id: 1 }, cookie: nia });
     check("removing a credit from another rider is refused", r.status === 401);
 
+    // Adding to the coaster list IS open to any account (2026-09-16) — see
+    // "Adding to the shared list" below. Editing it is the part that is not.
     r = await call(db, "POST", "/api/coaster", { body: { name: "New One", park: "Cedar Point" }, cookie: nia });
-    check("an account does NOT open the shared coaster database", r.status === 401, JSON.stringify(r.data));
+    check("an account DOES open adding to the coaster list", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/merge", { body: { from: 1, to: 2 }, cookie: nia });
+    check("...but not merging what is already on it", r.status === 401, JSON.stringify(r.data));
     r = await call(db, "POST", "/api/user", { body: { name: "Someone" }, cookie: nia });
     check("...nor adding riders by hand", r.status === 401);
   }
@@ -863,10 +867,12 @@ async function main() {
     check("...and the gate check the pages use says yes, via the account",
       r.status === 200 && r.data.via === "account", JSON.stringify(r.data));
 
-    // An ordinary rider is still nowhere near any of it.
+    // An ordinary rider may add a coaster, and nothing else here.
     r = await call(db, "POST", "/api/coaster",
-      { body: { name: "Sneaky", park: "Cedar Point" }, cookie: rider });
-    check("a plain rider account still cannot add a coaster", r.status === 401);
+      { body: { name: "Newly Ridden", park: "Cedar Point" }, cookie: rider });
+    check("a plain rider account can add a coaster", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "PUT", "/api/coaster/1", { body: { name: "Sneaky" }, cookie: rider });
+    check("...but cannot rewrite one that is already there", r.status === 401);
     r = await call(db, "POST", "/api/user", { body: { name: "Nobody" }, cookie: rider });
     check("...nor add a rider", r.status === 401);
     r = await call(db, "POST", "/api/merge", { body: { from: 1, to: 2 }, cookie: rider });
@@ -1423,6 +1429,47 @@ async function main() {
     const other = r.data.users.filter(u => u.slug === "carter")[0];
     check("...and null for anyone without one", other && other.avatar === null,
       JSON.stringify(other));
+  }
+
+  console.log("\nAdding to the shared list — an account is enough");
+  {
+    const db = freshDb();
+    const rider = await signedUp(db, "newbie@example.com", "Newbie");
+
+    let r = await callNoPassword(db, "POST", "/api/coaster",
+      { cookie: rider, body: { name: "Brand New", park: "Cedar Point", type: "Steel" } });
+    check("a signed-in rider can add a coaster nobody has heard of",
+      r.status === 200 && r.data.ok, JSON.stringify(r.data));
+    const added = r.data.id;
+    check("...and it is on the list straight away",
+      (await call(db, "GET", "/api/coasters")).data.coasters.some(c => c.id === added));
+
+    r = await callNoPassword(db, "POST", "/api/coaster", { body: { name: "Nope", park: "Cedar Point" } });
+    check("a signed-OUT visitor still cannot", r.status === 401, JSON.stringify(r.data));
+
+    r = await callNoPassword(db, "PUT", "/api/park",
+      { cookie: rider, body: { name: "Brand New Park", region: "Somewhere" } });
+    check("a signed-in rider can add a park their coaster needs",
+      r.status === 200 && (await call(db, "GET", "/api/parks")).data["Brand New Park"], JSON.stringify(r.data));
+
+    // The important half: creating is open, editing what is already there is not.
+    await callNoPassword(db, "PUT", "/api/park",
+      { cookie: rider, body: { name: "Cedar Point", region: "Moved, Nowhere", lat: 0, lon: 0 } });
+    let parks = (await call(db, "GET", "/api/parks")).data;
+    check("...but cannot move a park that already exists",
+      parks["Cedar Point"].region === "Ohio, US" && parks["Cedar Point"].lat !== 0,
+      JSON.stringify(parks["Cedar Point"]));
+
+    r = await call(db, "PUT", "/api/park",
+      { token: PW, body: { name: "Cedar Point", region: "Ohio, USA" } });
+    parks = (await call(db, "GET", "/api/parks")).data;
+    check("...while an admin still can", r.status === 200 && parks["Cedar Point"].region === "Ohio, USA",
+      JSON.stringify(parks["Cedar Point"]));
+
+    r = await callNoPassword(db, "PUT", "/api/coaster/1", { cookie: rider, body: { name: "Renamed" } });
+    check("editing an existing coaster is still admin only", r.status === 401, JSON.stringify(r.data));
+    r = await callNoPassword(db, "DELETE", "/api/coaster/1", { cookie: rider });
+    check("deleting one is too", r.status === 401, JSON.stringify(r.data));
   }
 
   console.log("\nRegression — endpoints the rest of the site depends on");

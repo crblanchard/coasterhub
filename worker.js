@@ -1456,8 +1456,26 @@ export default {
       }
 
       // ---- writes (auth required) ----
+      //
+      // Putting a missing coaster or park on the shared list is NOT an admin job
+      // (Carter's call, 2026-09-16). An account is enough — the same bar as
+      // logging your own rides. A rider who has just ridden something the site
+      // has never heard of is exactly who should be able to add it, and making
+      // them ask first is how a coaster list falls behind.
+      //
+      // Only these two, and only creating. Editing and merging what is already
+      // there stays admin: /edit rewrites rows every rider's count depends on,
+      // and a wrong merge is much harder to notice than a duplicate row.
+      const openToAccounts =
+        (request.method === "POST" && path === "/api/coaster") ||
+        (request.method === "PUT" && path === "/api/park");
       const needsAuth = path.startsWith("/api/admin/") || request.method !== "GET";
-      if (needsAuth && !adminOk(request, env, acct)) return err(401, "unauthorized");
+      if (needsAuth) {
+        const allowed = openToAccounts
+          ? (!!acct || tokenOk(request, env))
+          : adminOk(request, env, acct);
+        if (!allowed) return err(401, "unauthorized");
+      }
 
       // Invite an existing rider to claim their count. Admin only, and it hands
       // back a URL rather than mailing it — there is no mail out of this Worker.
@@ -1648,13 +1666,22 @@ export default {
       if (request.method === "PUT" && path === "/api/park") {
         const b = await request.json();
         if (!b.name) return err(400, "need name");
+        // An ordinary account may CREATE the park its new coaster needs, but not
+        // touch one that is already on the map: /add sends a name and a region,
+        // and a park that exists has both already. So for them the conflict is a
+        // no-op rather than an update — nobody moves Cedar Point by adding a
+        // coaster to it.
+        //
+        // For an admin: COALESCE, not a plain overwrite. Adding a park that
+        // already exists must never blank its coordinates. The geocoder and the
+        // parks editor still set values, they just cannot clear them from here.
+        const mayEditExisting = adminOk(request, env, acct);
         await env.DB.prepare(
-          // COALESCE, not a plain overwrite: adding a park that already exists
-          // must never blank its coordinates. The geocoder and the parks editor
-          // still set values, they just cannot clear them from here.
           "INSERT INTO parks (name,lat,lon,region) VALUES (?,?,?,?) " +
-          "ON CONFLICT(name) DO UPDATE SET lat=COALESCE(excluded.lat,lat), " +
-          "lon=COALESCE(excluded.lon,lon), region=COALESCE(excluded.region,region)"
+          (mayEditExisting
+            ? "ON CONFLICT(name) DO UPDATE SET lat=COALESCE(excluded.lat,lat), " +
+              "lon=COALESCE(excluded.lon,lon), region=COALESCE(excluded.region,region)"
+            : "ON CONFLICT(name) DO NOTHING")
         ).bind(b.name, b.lat ?? null, b.lon ?? null, b.region ?? null).run();
         return afterWrite(ctx, env, json({ ok: true }));
       }

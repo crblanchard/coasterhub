@@ -681,7 +681,21 @@ written to. Tables: `accounts`, `sessions`, `invites` (`migrations/003-accounts.
 | Your own rides and credits | your account — or `ADMIN_PASSWORD`, still |
 | Your own **rankings**, once claimed | **you alone.** No admin override at all — see below |
 | Another rider's rides | `ADMIN_PASSWORD`, or an account with `is_admin` |
-| Parks, coasters, merges, adding riders (`/add`, `/edit`, `/import`) | an `is_admin` account, or `ADMIN_PASSWORD` |
+| **Adding** a coaster or a park (`/add`) | **any account** — see below |
+| Editing, merging, deleting, adding riders (`/edit`, `/import`) | an `is_admin` account, or `ADMIN_PASSWORD` |
+
+**Adding to the shared list is open to any account (2026-09-16, Carter's call).** A rider who
+has just ridden something the site has never heard of is exactly who should be able to put it
+on the list, and making them ask first is how a coaster list falls behind. `/add` lets any
+signed-in account through its gate; signed out you get a sign-in link rather than a password
+box (the password still works, tucked behind a `<summary>`).
+
+Two routes are carved out of the blanket admin check in `worker.js` — `POST /api/coaster` and
+`PUT /api/park` — and **only creating** is open. Editing what is already there stays admin,
+because `/edit` rewrites rows every rider's count depends on and a bad merge is far harder to
+spot than a duplicate row. `PUT /api/park` enforces that split inside the handler: for an
+ordinary account the conflict clause is `DO NOTHING`, so adding a coaster to Cedar Point cannot
+move Cedar Point; for an admin it stays the `COALESCE` update that `/edit` relies on.
 
 **`ADMIN_PASSWORD` is no longer needed day to day (2026-09-15).** An admin account opens
 everything it opened — `/add`, `/edit` and `/import` skip their password gate when an

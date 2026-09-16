@@ -120,11 +120,15 @@
 
   <!-- gate -->
   <div id="gate" class="gate">
-    <h2>You&rsquo;ll need the password</h2>
-    <p>Adding to the shared database is held behind a password for now. Ask Carter
-      for it, or send him what&rsquo;s missing and he&rsquo;ll add it.</p>
-    <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
-    <button class="primary" id="unlock">Unlock</button>
+    <h2>Sign in to add</h2>
+    <p>Any account can put a missing coaster or park on the shared list &mdash; the
+      same account you log your own rides with. It takes a minute to make one.</p>
+    <p style="margin-bottom:14px"><a class="btn" id="gate_in" href="/account?next=/add">Sign in or sign up</a></p>
+    <details>
+      <summary style="cursor:pointer;color:var(--muted);font-size:.85rem">Have the old password?</summary>
+      <input id="pw" type="password" placeholder="Password" autocomplete="current-password" style="margin-top:10px">
+      <button class="primary" id="unlock">Unlock</button>
+    </details>
     <div class="msg bad" id="gate_msg"></div>
   </div>
 
@@ -204,14 +208,15 @@ function $(id){return document.getElementById(id);}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
 // ---- gate ------------------------------------------------------------------
-// Two ways in. An ADMIN ACCOUNT is the normal one now — this page writes to the
-// shared database, so an ordinary rider's account is not enough. The shared
-// password still works and still unlocks /log, /add, /edit and /import
-// together, but nobody needs to hold it day to day.
+// ANY account gets in (2026-09-16). Adding a coaster the site has never heard of
+// is the same kind of act as logging a ride on it, and the person who just rode
+// it is the one who knows. Editing what is already here is still admin-only, and
+// that lives on /edit. The shared password still works — it is tucked behind a
+// summary because nobody needs to hold it day to day.
 var ME=null;
 CoasterHub.me().then(function(acct){
   ME=acct;
-  if(acct && acct.admin){ $('gate').style.display='none'; $('app').style.display='block'; boot(); return; }
+  if(acct){ $('gate').style.display='none'; $('app').style.display='block'; boot(); return; }
   try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
   if(TOKEN) verify(TOKEN,true);
 });
