@@ -1,18 +1,23 @@
 # Pretty per-user URLs -> serve the page (JS reads the name from the path).
 # 200 = rewrite (browser keeps the pretty URL). Destinations use the CLEAN paths
-# (/stats not /stats.html) because Cloudflare Pages 301-redirects *.html to the
-# extensionless URL, which would bounce /user/<name>/stats to /stats.
+# (/profile not /profile.html) because Cloudflare Pages 301-redirects *.html to
+# the extensionless URL, which would bounce /user/<name> to /profile.
 /user/:name/count     /count      200
 /user/:name/rankings  /rankings   200
 /user/:name/add       /add        200
-/user/:name           /stats      200
+/user/:name           /profile    200
 
-# A rider's profile is /user/<name> now, not /user/<name>/stats: the page is the
+# A rider's profile is /user/<name>, not /user/<name>/stats: the page is the
 # person, and "stats" was a filename showing through. 301, not a rewrite, so
 # every old link, bookmark and search result settles on the short URL — same
 # treatment /coasters got. This has to sit AFTER the rewrite above, because the
 # first matching rule wins and /user/:name would otherwise never be reached.
 /user/:name/stats     /user/:name  301
+
+# /stats held two different pages: a rider's profile and the everyone view. They
+# are two files now — profile.html and riders.html — and the bare URL means the
+# everyone one, which is what somebody typing /stats was most likely after.
+/stats                /riders      301
 
 # The page is /count now, not /rides — it holds a rider's whole count (the day
 # log, every ride, and the full credit list), and "rides" was one of the three

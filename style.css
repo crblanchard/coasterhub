@@ -121,7 +121,7 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
 .hero .heroact .btn.alt{background:transparent;border:1px solid var(--line);color:var(--fg)}
 .hero .heroact .btn.alt:hover{border-color:var(--accent2);color:var(--accent2)}
 .heroacts{display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin:18px 0 0}
-.heroacts[hidden]{display:none}
+.heroacts[hidden],.heroacts .btn[hidden],.hero .heroact[hidden]{display:none}
 .heroacts .btn{width:238px;text-align:center;padding:10px 14px;font-size:.92rem;
   border-radius:10px;font-weight:600}
 .heroacts .btn.alt{background:transparent;border:1px solid var(--line);color:var(--fg)}
@@ -143,6 +143,36 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
   .herotop.split .herocount{margin-left:0;text-align:left}
 }
 .track{position:absolute;inset:0;z-index:-1;opacity:.5}
+
+/* The riders list (/riders). One row per person, in the same shape as the
+   identity block at the top of their profile — picture, name, @username — so
+   the list and the page it leads to read as the same thing. */
+.riderlist{display:flex;flex-direction:column;gap:10px;margin:0 0 56px}
+.riderrow{display:flex;align-items:center;gap:16px;padding:14px 18px;
+  border:1px solid var(--line);border-radius:14px;background:var(--panel);
+  color:var(--fg);text-decoration:none;transition:border-color .12s,transform .12s}
+.riderrow:hover{border-color:var(--accent2);transform:translateY(-1px)}
+/* background-COLOR, not the shorthand: the avatar rides on background-image and
+   the shorthand would wipe it — same trap as .profedit .av. */
+.riderrow .av{width:54px;height:54px;border-radius:999px;background-color:var(--soft);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:1.4rem;color:var(--accent2);flex:none;
+  background-size:cover;background-position:center}
+.riderrow .who{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+.riderrow .nm{font-weight:800;font-size:1.15rem;letter-spacing:-.01em;line-height:1.2}
+.riderrow .un{color:var(--accent2);font-size:.88rem;font-weight:600;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.riderrow .nums{display:flex;gap:26px;flex:none}
+.riderrow .s{display:flex;flex-direction:column;align-items:flex-end;min-width:3.5em}
+.riderrow .s b{font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
+.riderrow .s span{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em}
+@media (max-width:640px){
+  /* The numbers drop under the name rather than squeezing four columns into a
+     phone; the picture stays beside them, which keeps the row scannable. */
+  .riderrow{flex-wrap:wrap;gap:12px 14px}
+  .riderrow .nums{width:100%;justify-content:space-between;gap:10px}
+  .riderrow .s{align-items:flex-start;min-width:0}
+}
 
 /* Buttons */
 .btn{display:inline-block;background:var(--accent);color:var(--onaccent);padding:13px 24px;border-radius:12px;

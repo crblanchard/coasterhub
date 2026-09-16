@@ -231,6 +231,26 @@ owner, or for Carter on a rider who has not claimed their page. `?mode=list` on 
 for the count page's button — the log's two modes are different jobs and a link has to be able
 to name one.
 
+**`/stats` is gone (2026-09-16).** It used to serve two different pages from one file: a rider's
+profile and the everyone view. They are two files now.
+
+| page | file | URL |
+|---|---|---|
+| one rider | `profile.html` | `/user/<slug>` (a 200 rewrite; the browser keeps the pretty URL) |
+| everyone | `riders.html` | `/riders` |
+
+`/stats` 301s to `/riders`, which is what somebody typing it most likely wanted. The page key is
+`profile` now, not `stats` — `PER_RIDER`, `TABS`, `data-nav`, `initNav('profile')`. A profile
+with no person is not a thing, so `userPageHref(null, 'profile')` is `/riders`, and
+`profile.html` with no rider in the URL redirects: to your own page if you are signed in, to
+`/riders` if not.
+
+**The riders list** is one row per person in the same shape as the identity block on a profile
+— picture, name, `@username` under it — then coasters, rides, parks and **ranked** (the length
+of their ranking list, from `/api/rankings/<slug>`, one call each). The whole row is the link.
+What it deliberately does NOT carry: the old hub's combined-totals tiles and its "on this day"
+section. Home already does the site-wide view.
+
 **The count page is `/count`** (2026-09-16), not `/rides` — `count.html`, `initNav('count')`,
 `PER_RIDER`'s `count` key. It holds a rider's whole count (the day log, every ride, the full
 credit list) and "rides" named one of the three. Both old paths 301 — `/rides` → `/count` and

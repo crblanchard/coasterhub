@@ -333,7 +333,7 @@
   }
 
   function loadUser(userFile) {
-    // No rider in the URL means the site-owner's own page (/stats, /count).
+    // No rider in the URL means the everyone view (/riders, /count).
     // Kept in step with the seed above when that rider renames.
     if (!userFile) { var u = currentUser(); userFile = u ? u + ".json" : "crblanchard.json"; }
     var slug = userFile.replace(/\.json$/, "");
@@ -373,7 +373,7 @@
   //
   //  • The API list is merged into USERS in place, so anything holding the
   //    array (every page's boot code) sees the new rider without a deploy.
-  //  • It is cached, because home/stats/count read USERS *synchronously* at
+  //  • It is cached, because home/riders/count read USERS *synchronously* at
   //    boot — without a cache a new rider would be missing from the page that
   //    triggered the fetch and only appear on the one after. The cache holds
   //    the API's list verbatim, so a rider removed from D1 stops being merged
@@ -457,19 +457,22 @@
   }
 
   // URL for a given person's page. The default user lives at the site root
-  // (/stats, /coasters); everyone else lives under /user/<slug>/.
+  // (/riders, /count); everyone else lives under /user/<slug>/.
   // Every link to a rider's page comes through here, so the shape of those URLs
   // is decided in exactly one place.
   //
-  // A rider's profile is /user/<slug> — not /user/<slug>/stats (2026-09-16).
+  // A rider's profile is /user/<slug> — not /user/<slug>/stats (2026-09-16),
+  // and profile.html serves it.
   // The page IS the person: it opens with their picture, name and count, and
   // "stats" was a filename showing through. Their other pages keep the suffix
   // because they are pages ABOUT that person: /user/<slug>/count, /rankings.
-  // _redirects 301s the old /stats form here, so existing links still land.
+  // _redirects 301s the old /stats forms here, so existing links still land.
   function userPageHref(slug, page) {
     if (page === "home") return "/";
-    if (!slug) return "/" + page;          // nobody picked: the everyone view
-    return page === "stats" ? "/user/" + slug : "/user/" + slug + "/" + page;
+    // Nobody picked: the page's own everyone view. There is no profile without a
+    // person, so that one lands on the list of riders instead.
+    if (!slug) return page === "profile" ? "/riders" : "/" + page;
+    return page === "profile" ? "/user/" + slug : "/user/" + slug + "/" + page;
   }
 
   // The pages that exist per rider, i.e. everything but Home. Used for both
@@ -477,9 +480,9 @@
   // Pages that belong to one rider and take a /user/<slug>/ prefix. Add new is
   // deliberately absent: it edits the shared database, so it reads the same
   // whoever is looking at it.
-  var PER_RIDER = ["count", "stats", "rankings"];
+  var PER_RIDER = ["count", "profile", "rankings"];
 
-  // Wire the header for a page ("home" | "stats" | "coasters" | "rides" |
+  // Wire the header for a page ("home" | "profile" | "riders" | "count" |
   // "rankings"): point the per-rider links at the current person, mark the
   // active link, and render the rider picker (alphabetical).
   // ---- Theme ---------------------------------------------------------------
@@ -558,7 +561,7 @@
       var label = acct.name || acct.slug || acct.email;
       // Signed in, this goes to your own profile: that is where the account
       // lives now, and /account only holds the signed-out forms.
-      if (acct.slug) a.href = userPageHref(acct.slug, "stats");
+      if (acct.slug) a.href = userPageHref(acct.slug, "profile");
       a.className = "acctlink on";
       a.setAttribute("aria-label", "Signed in as " + label);
       a.setAttribute("title", "Signed in as " + label);
@@ -626,7 +629,7 @@
           else window.localStorage.setItem("ch_rider", v);
         } catch (e) {}
         if (v === "__all__") location.href = perRider ? ("/" + page) : "/";
-        else location.href = userPageHref(v, perRider ? page : "stats");
+        else location.href = userPageHref(v, perRider ? page : "profile");
       });
     }
     var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
@@ -691,8 +694,8 @@
     if (!slug) {
       me().then(function (acct) {
         if (!acct || !acct.slug) return;
-        var own = userPageHref(acct.slug, "stats");
-        var els = document.querySelectorAll('[data-nav="stats"]');
+        var own = userPageHref(acct.slug, "profile");
+        var els = document.querySelectorAll('[data-nav="profile"]');
         for (var i = 0; i < els.length; i++) els[i].setAttribute("href", own);
       }).catch(function () { /* signed out, or the API is down: leave it alone */ });
     }
@@ -756,14 +759,15 @@
   //
   // "Count" is /count: the day-by-day log, every ride, and the full credit list
   // in one place. "Rides" undersold it and read as a twin of "Log" — one reads,
-  // one writes, and the labels never said which. "Profile" is /stats for the
-  // same reason: it is a rider's page, not a chart screen. Paths are unchanged;
-  // header, tab bar and footer all use these words, in this order.
+  // one writes, and the labels never said which. "Profile" is /user/<slug> for
+  // the same reason: it is a rider's page, not a chart screen, and /stats is
+  // gone entirely — the everyone view it used to hold is /riders now. Header,
+  // tab bar and footer all use these words, in this order.
   var TABS = [
     { k: "home",     label: "Home",     path: "/",         fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
     { k: "count",    label: "Count",    path: "/count" },
-    { k: "stats",    label: "Profile",  path: "/stats" }
+    { k: "profile",  label: "Profile",  path: "/riders" }
   ];
   // Five is the ceiling: measured at 320px (the narrowest phone) the widest
   // label, "Rankings", fills 58 of its 64px slot. A sixth tab would need
@@ -773,7 +777,7 @@
   var TAB_ICONS = {
     home:     '<path d="M3 10.2 12 3l9 7.2V21H3z"/>',
     count:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
-    stats:    '<path d="M5 20v-6M12 20V6M19 20v-9"/>',
+    profile:  '<path d="M5 20v-6M12 20V6M19 20v-9"/>',
     rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>'
   };
   function buildTabBar(page, slug) {

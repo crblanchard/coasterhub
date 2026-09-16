@@ -429,7 +429,7 @@ async function getUsers(env) {
 const RESERVED_SLUGS = new Set(["api","user","users","admin","new","all","everyone",
   "home","stats","rides","count","rankings","coasters","parks","log","add","edit","import",
   "changes","database","sitemap","index","account","accounts","login","logout",
-  "signup","signin","profile","me","auth","session","settings"]);
+  "signup","signin","profile","riders","me","auth","session","settings"]);
 function slugify(s) {
   return String(s == null ? "" : s).toLowerCase()
     .normalize("NFD").replace(/[̀-ͯ]/g, "")
