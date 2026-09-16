@@ -292,6 +292,19 @@ The `/rankings` summary itself was reordered the same day: **shared favourites a
 rider's list**, which is the interesting half and was sitting under six cards of other people's
 top fives. Those cards are smaller now and show three names instead of five.
 
+**`/count` has three views** (2026-09-16): **Rides** (the day cards), **All coasters** (the credit
+list that came over from `/coasters`), **All parks**. Deep links: `?view=list` and `?view=parks`.
+
+The flat ride table went with this change — it was the same rides as the day cards with none of
+the grouping, and its sort machinery (`cols`, `buildHead`, `renderAll`) came out with it. A
+rider whose credits carry no dates has no day view, so they open on All coasters.
+
+**All parks** is every park in the count, A–Z, each one a `<details>` that opens the way a day
+does, listing the coasters ridden there with lap counts and the date each was first ridden. A
+day answers "what did I ride that afternoon"; a park answers "what have I ridden here, ever",
+which is the question you have standing in a queue somewhere you have been before. Undated
+credits DO appear here, unlike in the day view — a credit with no date still happened at a park.
+
 **The count page is `/count`** (2026-09-16), not `/rides` — `count.html`, `initNav('count')`,
 `PER_RIDER`'s `count` key. It holds a rider's whole count (the day log, every ride, the full
 credit list) and "rides" named one of the three. Both old paths 301 — `/rides` → `/count` and

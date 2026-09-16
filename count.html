@@ -175,7 +175,7 @@
     </div>
     <div class="controls">
       <div class="seg" id="seg">
-        <button id="v_day" class="on">By day</button><button id="v_all">All rides</button><button id="v_list">Full list</button>
+        <button id="v_day" class="on">Rides</button><button id="v_list">All coasters</button><button id="v_parks">All parks</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
       <select id="f_rider" style="display:none"><option value="">All riders</option></select>
@@ -185,9 +185,8 @@
     </div>
     <div class="count" id="count"></div>
     <div id="dayview"></div>
-    <div id="allview" style="display:none">
-      <div class="tbl-wrap"><table><thead><tr id="head"></tr></thead><tbody id="body"></tbody></table></div>
-    </div>
+    <!-- Every park in the count, A-Z, each one opening the way a day does. -->
+    <div id="parkview" style="display:none"></div>
     <div class="pager" id="pager"></div>
 
     <!-- Full list: every coaster in the count, once. Was its own /coasters
@@ -235,8 +234,9 @@ CoasterHub.initNav('count');
 var LOG=[];          // [{i?, c, d, num?, n?, name, park, loc}]
 var MODE='rides';    // 'rides' = dated ride log, 'credits' = credit log
 var DATED=false;     // any dates at all?
-var view='day', page=0, sortKey='d', sortDir=-1;
-var DAYS=30, ROWS=60;
+var view='day', page=0;
+// Cards per page: days newest-first, parks A-Z.
+var DAYS=30, PARKS=40;
 var COMBINED=false;  // true on /count with no rider selected = everyone
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -293,11 +293,11 @@ return Promise.all([
     // that is the whole test now. Someone who ticked a list off with dates on
     // some of it gets the day view for the part that has them, and the cards
     // read "N new credits" rather than "N rides" because no re-ride is implied.
-    // Hide just that button, not the whole switch — Full list is always there.
+    // Hide just that button, not the whole switch — the other two are always
+    // there, and All coasters is the one that reads as a credit list.
     if(!DATED){
-      view='all'; document.getElementById('v_day').style.display='none';
+      view='list'; document.getElementById('v_day').style.display='none';
     }
-    sortKey='d'; sortDir=-1;
 
     if(COMBINED){
       document.querySelector('.hero .badge').textContent='Everyone';
@@ -313,7 +313,7 @@ return Promise.all([
       document.querySelector('.hero h1').textContent =
         MODE==='rides' ? ('Every ride in '+nm+'’s count.') : (nm+'’s credits, in order.');
       document.querySelector('.hero p').textContent =
-        MODE==='rides' ? 'Browse by park day or as one flat list — filter by year, park or name.'
+        MODE==='rides' ? 'By day, by coaster or by park — filter by year, park or name.'
                        : (DATED ? 'Each coaster once, on the day it was first ridden.'
                                 : 'Each coaster once, in credit order.');
       document.title=nm+'’s Count — Coaster Hub';
@@ -321,16 +321,18 @@ return Promise.all([
       document.getElementById('t_days_k').textContent = MODE==='rides'?'Days out':'Dated days';
     }
 
-    buildFilters(); buildHead(); wire();
+    buildFilters(); wire();
     document.getElementById('loading').style.display='none';
     document.getElementById('ui').style.display='block';
     // render() first, always: it fills the four tiles as well as the log, and
     // setView('list') doesn't call it — landing straight on ?view=list used to
     // leave the tiles showing em-dashes.
     render();
-    // ?view=list opens straight on the full list — that's where /coasters and
-    // the link on Stats now point.
-    if(new URLSearchParams(location.search).get('view')==='list') setView('list');
+    // ?view=list opens straight on the coaster list — that's where /coasters and
+    // the profile's "View your count" point. ?view=parks does the same for parks.
+    var want=new URLSearchParams(location.search).get('view');
+    if(want==='list' || want==='parks') setView(want);
+    else if(!DATED) setView('list');
   });
 }).catch(fail);
 
@@ -355,34 +357,20 @@ function buildFilters(){
     document.getElementById('f_rider').dataset.hidden='1';
   }
 }
-function cols(){
-  var c=[{k:'d',t:'Date'}];
-  if(COMBINED) c.push({k:'rider',t:'Rider'});
-  c=c.concat([{k:'name',t:'Coaster',cls:'name'},{k:'park',t:'Park'},{k:'loc',t:'Location'}]);
-  return c;
-}
-function buildHead(){
-  var head=document.getElementById('head'); head.innerHTML='';
-  cols().forEach(function(c){
-    var th=document.createElement('th'); th.textContent=c.t; if(c.num)th.className='num';
-    th.onclick=function(){ if(sortKey===c.k)sortDir*=-1; else {sortKey=c.k;sortDir=c.num?-1:1;} page=0; render(); };
-    head.appendChild(th);
-  });
-}
 function wire(){
   ['q','f_rider','f_year','f_park'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){page=0;render();});});
   document.getElementById('reset').onclick=function(){
     ['q','f_rider','f_year','f_park'].forEach(function(id){document.getElementById(id).value='';}); page=0; render();
   };
   document.getElementById('v_day').onclick=function(){setView('day');};
-  document.getElementById('v_all').onclick=function(){setView('all');};
   document.getElementById('v_list').onclick=function(){setView('list');};
+  document.getElementById('v_parks').onclick=function(){setView('parks');};
 }
 function setView(v){
   view=v; page=0;
   document.getElementById('v_day').classList.toggle('on',v==='day');
-  document.getElementById('v_all').classList.toggle('on',v==='all');
   document.getElementById('v_list').classList.toggle('on',v==='list');
+  document.getElementById('v_parks').classList.toggle('on',v==='parks');
   // The full list brings its own filters, so the log's are put away rather
   // than left sitting there doing nothing.
   var listing = v==='list';
@@ -396,7 +384,7 @@ function setView(v){
   if(listing){
     // render() is what normally hides these, and it isn't running here.
     document.getElementById('dayview').style.display='none';
-    document.getElementById('allview').style.display='none';
+    document.getElementById('parkview').style.display='none';
     CreditList.open();
   } else render();
 }
@@ -432,8 +420,8 @@ function render(){
   document.getElementById('t_days').textContent=days.size.toLocaleString();
 
   document.getElementById('dayview').style.display = view==='day'?'block':'none';
-  document.getElementById('allview').style.display = view==='all'?'block':'none';
-  if(view==='day') renderDays(rows); else renderAll(rows);
+  document.getElementById('parkview').style.display = view==='parks'?'block':'none';
+  if(view==='parks') renderParks(rows); else renderDays(rows);
 }
 function renderDays(rows){
   // A day out belongs to one person, so in the combined view key the cards by
@@ -452,7 +440,7 @@ function renderDays(rows){
   var keys=Object.keys(byDay).sort().reverse();   // date leads the key, so this is newest-first
   var total=keys.length, start=page*DAYS, slice=keys.slice(start,start+DAYS);
   document.getElementById('count').innerHTML='Showing <b>'+slice.length+'</b> of '+total+' day'+(total===1?'':'s')
-    +(undated?' <span style="opacity:.7">· '+undated.toLocaleString()+' undated credit'+(undated===1?'':'s')+' in All rides</span>':'');
+    +(undated?' <span style="opacity:.7">· '+undated.toLocaleString()+' undated credit'+(undated===1?'':'s')+' in All coasters</span>':'');
   document.getElementById('dayview').innerHTML=slice.map(function(k){
     var list=byDay[k], d=k.split('|')[0];
     var laps={}; list.forEach(function(r){ laps[r.c]=(laps[r.c]||0)+1; });
@@ -491,31 +479,57 @@ function renderDays(rows){
   }).join('') || '<p class="lead">No rides match those filters.</p>';
   pager(total,DAYS);
 }
-function renderAll(rows){
-  var C=cols();
-  var sorted=rows.slice().sort(function(a,b){
-    var x=a[sortKey],y=b[sortKey];
-    if(x==null&&y==null)return 0;
-    if(x==null)return 1; if(y==null)return -1;
-    var c=(typeof x==='string')?x.localeCompare(y)*sortDir:(x-y)*sortDir;
-    return c!==0?c:String(a.name).localeCompare(String(b.name));
+// Every park in the count, A to Z, each one opening the way a day does. A day
+// answers "what did I ride that afternoon"; a park answers "what have I ridden
+// here, ever" — which is the question you have standing in the queue at a park
+// you have been to before.
+//
+// Undated credits belong here, unlike in the day view: a credit with no date
+// still happened at a park.
+function renderParks(rows){
+  var byPark={};
+  rows.forEach(function(r){
+    var k=r.park||'—';
+    (byPark[k]=byPark[k]||[]).push(r);
   });
-  var total=sorted.length, start=page*ROWS, slice=sorted.slice(start,start+ROWS);
-  document.getElementById('count').innerHTML='Showing <b>'+slice.length+'</b> of '+total.toLocaleString()+' '+(MODE==='rides'?'rides':'credits');
-  document.querySelectorAll('#head th').forEach(function(th){
-    var a=th.querySelector('.ar'); if(a)a.remove();
-    var col=C.filter(function(c){return c.t===th.textContent.replace(/[▲▼]/g,'').trim();})[0];
-    if(col&&col.k===sortKey){var sp=document.createElement('span');sp.className='ar';sp.textContent=sortDir<0?'▼':'▲';th.appendChild(sp);}
-  });
-  document.getElementById('body').innerHTML=slice.map(function(r){
-    return '<tr>'+C.map(function(col){
-      var v=r[col.k];
-      if(col.k==='d')return '<td'+(v?'':' class="muted"')+'>'+esc(fmtDate(v))+'</td>';
-      if(v==null||v==='')return '<td class="muted">—</td>';
-      return '<td class="'+(col.num?'num ':'')+(col.cls||'')+'">'+esc(v)+'</td>';
-    }).join('')+'</tr>';
-  }).join('');
-  pager(total,ROWS);
+  var keys=Object.keys(byPark).sort(function(a,b){ return a.localeCompare(b); });
+  var total=keys.length, start=page*PARKS, slice=keys.slice(start,start+PARKS);
+  document.getElementById('count').innerHTML='Showing <b>'+slice.length+'</b> of '
+    +total.toLocaleString()+' park'+(total===1?'':'s');
+
+  document.getElementById('parkview').innerHTML=slice.map(function(park){
+    var list=byPark[park];
+    // Laps per coaster, and the first time each was ridden — the two things a
+    // park card can say that the coaster list cannot.
+    var laps={}, first={}, seen={}, uniq=[];
+    list.forEach(function(r){
+      laps[r.c]=(laps[r.c]||0)+1;
+      if(r.d && (!first[r.c] || r.d<first[r.c])) first[r.c]=r.d;
+      if(!seen[r.c]){ seen[r.c]=1; uniq.push(r); }
+    });
+    uniq.sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
+    var days=[...new Set(list.map(function(r){return r.d;}).filter(Boolean))];
+    var isRides=list[0].rep;
+    var what=isRides
+      ? (list.length.toLocaleString()+' ride'+(list.length===1?'':'s')
+         +' · '+uniq.length.toLocaleString()+' coaster'+(uniq.length===1?'':'s'))
+      : (uniq.length.toLocaleString()+' credit'+(uniq.length===1?'':'s'));
+    return '<details class="day"><summary>'
+      +'<span class="dt">'+esc(park)+'</span>'
+      +'<span class="pk">'+esc(list[0].loc||'')
+        +(days.length?' <span style="opacity:.75">· '+days.length+' visit'+(days.length===1?'':'s')+'</span>':'')
+      +'</span>'
+      +'<span class="n">'+what+'</span>'
+      +'</summary><div class="inner">'
+      + uniq.map(function(r){
+          return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
+            +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')
+            +(first[r.c]?'<span class="cp">'+esc(fmtDate(first[r.c]))+'</span>':'')
+            +'</div>';
+        }).join('')
+      +'</div></details>';
+  }).join('') || '<p class="lead">No parks match those filters.</p>';
+  pager(total,PARKS);
 }
 function pager(total,per){
   var pages=Math.ceil(total/per)||1;
