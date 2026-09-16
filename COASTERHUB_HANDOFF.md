@@ -222,6 +222,13 @@ owner, or for Carter on a rider who has not claimed their page. `?mode=list` on 
 for the count page's button — the log's two modes are different jobs and a link has to be able
 to name one.
 
+**The count page is `/count`** (2026-09-16), not `/rides` — `count.html`, `initNav('count')`,
+`PER_RIDER`'s `count` key. It holds a rider's whole count (the day log, every ride, the full
+credit list) and "rides" named one of the three. Both old paths 301 — `/rides` → `/count` and
+`/user/<name>/rides` → `/user/<name>/count` — and `/coasters` now lands on `/count?view=list`.
+Its hero carries **Log a day** and **Add to your count** for whoever may write to that count.
+`count` joins `rides` in `RESERVED_SLUGS`; both stay, because both still resolve.
+
 **A rider's profile is `/user/<slug>`**, not `/user/<slug>/stats`. The page opens with their
 picture, name and count: it is the person, and `stats` was a filename showing through. Their
 other pages keep the suffix because they are *about* that person — `/user/<slug>/rides`,

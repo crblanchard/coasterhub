@@ -267,7 +267,7 @@
     };
   }
 
-  // Active user from a pretty path (/user/<name>, /user/<name>/rides) or
+  // Active user from a pretty path (/user/<name>, /user/<name>/count) or
   // ?user=<name>. Null = the everyone view. The regex stops at the slug, so the
   // bare profile URL and the pages under it both read the same.
   function currentUser() {
@@ -333,7 +333,7 @@
   }
 
   function loadUser(userFile) {
-    // No rider in the URL means the site-owner's own page (/stats, /rides).
+    // No rider in the URL means the site-owner's own page (/stats, /count).
     // Kept in step with the seed above when that rider renames.
     if (!userFile) { var u = currentUser(); userFile = u ? u + ".json" : "crblanchard.json"; }
     var slug = userFile.replace(/\.json$/, "");
@@ -373,7 +373,7 @@
   //
   //  • The API list is merged into USERS in place, so anything holding the
   //    array (every page's boot code) sees the new rider without a deploy.
-  //  • It is cached, because home/stats/rides read USERS *synchronously* at
+  //  • It is cached, because home/stats/count read USERS *synchronously* at
   //    boot — without a cache a new rider would be missing from the page that
   //    triggered the fetch and only appear on the one after. The cache holds
   //    the API's list verbatim, so a rider removed from D1 stops being merged
@@ -464,7 +464,7 @@
   // A rider's profile is /user/<slug> — not /user/<slug>/stats (2026-09-16).
   // The page IS the person: it opens with their picture, name and count, and
   // "stats" was a filename showing through. Their other pages keep the suffix
-  // because they are pages ABOUT that person: /user/<slug>/rides, /rankings.
+  // because they are pages ABOUT that person: /user/<slug>/count, /rankings.
   // _redirects 301s the old /stats form here, so existing links still land.
   function userPageHref(slug, page) {
     if (page === "home") return "/";
@@ -477,7 +477,7 @@
   // Pages that belong to one rider and take a /user/<slug>/ prefix. Add new is
   // deliberately absent: it edits the shared database, so it reads the same
   // whoever is looking at it.
-  var PER_RIDER = ["rides", "stats", "rankings"];
+  var PER_RIDER = ["count", "stats", "rankings"];
 
   // Wire the header for a page ("home" | "stats" | "coasters" | "rides" |
   // "rankings"): point the per-rider links at the current person, mark the
@@ -754,7 +754,7 @@
   //              only, and rarely done one-handed. Desktop header and footer, as
   //              it has always been.
   //
-  // "Count" is /rides: the day-by-day log, every ride, and the full credit list
+  // "Count" is /count: the day-by-day log, every ride, and the full credit list
   // in one place. "Rides" undersold it and read as a twin of "Log" — one reads,
   // one writes, and the labels never said which. "Profile" is /stats for the
   // same reason: it is a rider's page, not a chart screen. Paths are unchanged;
@@ -762,7 +762,7 @@
   var TABS = [
     { k: "home",     label: "Home",     path: "/",         fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
-    { k: "rides",    label: "Count",    path: "/rides" },
+    { k: "count",    label: "Count",    path: "/count" },
     { k: "stats",    label: "Profile",  path: "/stats" }
   ];
   // Five is the ceiling: measured at 320px (the narrowest phone) the widest
@@ -772,7 +772,7 @@
   // their tabs and sat here as dead SVG nobody could see.
   var TAB_ICONS = {
     home:     '<path d="M3 10.2 12 3l9 7.2V21H3z"/>',
-    rides:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
+    count:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
     stats:    '<path d="M5 20v-6M12 20V6M19 20v-9"/>',
     rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>'
   };

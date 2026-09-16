@@ -114,10 +114,12 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
    Sized down from the default .btn: these sit beside a name, not in the middle
    of a landing page. Fixed width so the column reads as one block rather than a
    ragged edge of different-length labels. */
-/* The same button, alone, in the Count page's hero — that page is one column,
-   so it sits under the blurb rather than in a stack on the right. */
-.hero .heroact{margin:20px 0 0}
+/* The same buttons in the count page's hero — that page is one column, so they
+   sit in a row under the blurb rather than in a stack on the right. */
+.hero .heroact{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 0}
 .hero .heroact .btn{padding:10px 18px;font-size:.92rem;border-radius:10px;font-weight:600}
+.hero .heroact .btn.alt{background:transparent;border:1px solid var(--line);color:var(--fg)}
+.hero .heroact .btn.alt:hover{border-color:var(--accent2);color:var(--accent2)}
 .heroacts{display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin:18px 0 0}
 .heroacts[hidden]{display:none}
 .heroacts .btn{width:238px;text-align:center;padding:10px 14px;font-size:.92rem;

@@ -427,7 +427,7 @@ async function getUsers(env) {
 // matters more since the profile lost its /stats suffix: the rider segment now
 // sits one level from the site root.
 const RESERVED_SLUGS = new Set(["api","user","users","admin","new","all","everyone",
-  "home","stats","rides","rankings","coasters","parks","log","add","edit","import",
+  "home","stats","rides","count","rankings","coasters","parks","log","add","edit","import",
   "changes","database","sitemap","index","account","accounts","login","logout",
   "signup","signin","profile","me","auth","session","settings"]);
 function slugify(s) {

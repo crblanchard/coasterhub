@@ -28,7 +28,7 @@
   .morelink{color:var(--accent2);font-weight:600;font-size:.92rem}
   .morelink:hover{text-decoration:underline}
   /* A day on this feed opens in place to show what was ridden, the same way the
-     day cards do on /rides. It is a <details>, so the summary row keeps the
+     day cards do on /count. It is a <details>, so the summary row keeps the
      layout the whole item used to have. */
   .fitem{background:var(--panel);border:1px solid var(--line);border-radius:12px;
          overflow:hidden;transition:border-color .15s}
@@ -111,7 +111,7 @@
   <nav class="links">
     <a href="/" data-nav="home">Home</a>
     <a href="/rankings" data-nav="rankings">Rankings</a>
-    <a href="/rides" data-nav="rides">Count</a>
+    <a href="/count" data-nav="count">Count</a>
     <a href="/stats" data-nav="stats">Profile</a>
     <a href="/add" data-nav="add">Add new</a>
   </nav>
@@ -162,11 +162,11 @@
       <p>A count brought to life &mdash; an interactive world map, a calendar of every riding day, personal records and how it all grew over time.</p>
       <span class="go">See the profile &rarr;</span>
     </a>
-    <a class="card guide" href="/rides">
-      <div class="meta">Rides</div>
+    <a class="card guide" href="/count">
+      <div class="meta">Count</div>
       <h3>The log</h3>
       <p>Day by day: which park, which coasters, how many laps. Or switch to the full list &mdash; every coaster in the count, <span id="g-coasters">&hellip;</span> in all, sortable by park, manufacturer, year, height or speed.</p>
-      <span class="go">See the rides &rarr;</span>
+      <span class="go">See the count &rarr;</span>
     </a>
     <a class="card guide" href="/add">
       <div class="meta">Add new</div>
@@ -209,7 +209,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/rides">Count</a> &nbsp;&middot;&nbsp; <a href="/stats">Profile</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/stats">Profile</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -257,7 +257,7 @@ return Promise.all([
     var k=statsBySlug[u.slug].kpi; return n+(k.rides||0);
   },0);
   // The headline is the size of the shared coaster database, not the union of
-  // what has been ridden — Carter's call, 2026-09-15, and it is what /rides
+  // what has been ridden — Carter's call, 2026-09-15, and it is what /count
   // → Full list shows too, so the two numbers agree. The consequence worth
   // knowing: adding a coaster on /add moves this number before anyone has
   // ridden it. The per-rider counts everywhere else are still rides.
@@ -280,7 +280,7 @@ return Promise.all([
       +'<span class="n">'+nf(k.credits)+'</span>'
       +'<span class="go">'
         +'<a href="'+CoasterHub.userPageHref(u.slug,'stats')+'">Profile</a>'
-        +'<a href="'+CoasterHub.userPageHref(u.slug,'rides')+'">Rides</a>'
+        +'<a href="'+CoasterHub.userPageHref(u.slug,'count')+'">Count</a>'
         +'<a href="'+CoasterHub.userPageHref(u.slug,'rankings')+'">Rankings</a>'
       +'</span>'
       +'<span class="sub">'+k.parks+' parks · '+k.states+' states / '+k.countries+' countries'
@@ -304,7 +304,7 @@ return Promise.all([
       var a=acc[d]||(acc[d]={rides:0,coasters:{},order:[],parks:{}});
       a.rides++;
       // Count the laps and remember the order they were logged in, so an opened
-      // day reads the same way it does on /rides.
+      // day reads the same way it does on /count.
       if(!a.coasters[c.id]) a.order.push(c);
       a.coasters[c.id]=(a.coasters[c.id]||0)+1;
       if(c.park)a.parks[c.park]=1;
@@ -340,7 +340,7 @@ return Promise.all([
       +'<div class="finner">'
       // A day at one park says so in the summary already. A day across two gets
       // a heading per park, so the name is said once for the block instead of
-      // once per ride — same treatment as the day cards on /rides.
+      // once per ride — same treatment as the day cards on /count.
       + (function(){
           var row=function(c){
             return '<div class="frow"><span class="cn">'+esc(c.name)+'</span>'
@@ -352,7 +352,7 @@ return Promise.all([
               + x.ridden.filter(function(c){ return c.park===park; }).map(row).join('');
           }).join('');
         })()
-      +'<a class="go" href="'+CoasterHub.userPageHref(x.slug,'rides')+'">'
+      +'<a class="go" href="'+CoasterHub.userPageHref(x.slug,'count')+'">'
       +esc(x.name)+'&rsquo;s full log &rarr;</a>'
       +'</div></details>';
   }).join('') || '<p class="lead">No dated rides yet.</p>';

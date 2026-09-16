@@ -2,7 +2,7 @@
 # 200 = rewrite (browser keeps the pretty URL). Destinations use the CLEAN paths
 # (/stats not /stats.html) because Cloudflare Pages 301-redirects *.html to the
 # extensionless URL, which would bounce /user/<name>/stats to /stats.
-/user/:name/rides     /rides      200
+/user/:name/count     /count      200
 /user/:name/rankings  /rankings   200
 /user/:name/add       /add        200
 /user/:name           /stats      200
@@ -14,7 +14,13 @@
 # first matching rule wins and /user/:name would otherwise never be reached.
 /user/:name/stats     /user/:name  301
 
-# /coasters was folded into the Rides page as its "Full list" view.
+# The page is /count now, not /rides — it holds a rider's whole count (the day
+# log, every ride, and the full credit list), and "rides" was one of the three
+# things on it. Same reasoning as the profile losing /stats.
+/user/:name/rides     /user/:name/count            301
+/rides                /count                       301
+
+# /coasters was folded into the count page as its "Full list" view.
 # 301, not 200: the old URLs should settle on the new one.
-/user/:name/coasters  /user/:name/rides?view=list  301
-/coasters             /rides?view=list             301
+/user/:name/coasters  /user/:name/count?view=list  301
+/coasters             /count?view=list             301

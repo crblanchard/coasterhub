@@ -52,7 +52,7 @@
   <nav class="links">
     <a href="/" data-nav="home">Home</a>
     <a href="/rankings" data-nav="rankings">Rankings</a>
-    <a href="/rides" data-nav="rides">Count</a>
+    <a href="/count" data-nav="count">Count</a>
     <a href="/stats" data-nav="stats">Profile</a>
     <a href="/add" data-nav="add">Add new</a>
   </nav>
@@ -77,7 +77,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/rides">Count</a> &nbsp;&middot;&nbsp; <a href="/stats">Profile</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/stats">Profile</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -158,7 +158,7 @@ function sentence(e){
     if (d.added) bits.push('ranked ' + plural(d.added, 'new coaster'));
     // Ranking something you had not logged adds it to your count (see
     // creditRanked in worker.js), and a count moving is worth saying out loud.
-    if (d.credited) bits.push('picking up ' + plural(d.credited, 'new credit'));
+    if (d.credited) bits.push('picked up ' + plural(d.credited, 'new credit'));
     if (d.removed) bits.push('dropped ' + plural(d.removed, 'coaster'));
     if (!bits.length) bits.push('reordered their rankings');
     return (who || 'Someone') + ' ' + bits.join(' and ')
@@ -179,6 +179,9 @@ function sentence(e){
   if (e.kind === 'coaster_deleted') return (sub || 'A coaster') + ' was deleted';
   if (e.kind === 'user_added')      return (sub || 'A rider') + ' joined'
     + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
+  if (e.kind === 'user_renamed')    return (sub || 'A rider') + ' is now '
+    + (e.actor ? '<b>' + esc(e.actor) + '</b> <span class="sub">/user/' + esc(e.actor) + '</span>'
+               : 'somebody else');
   if (e.kind === 'coaster_edited')  return (sub || 'A coaster') + ' had '
     + plural(e.n || (d.fields || []).length || 1, 'detail') + ' updated';
   return esc(e.kind);
