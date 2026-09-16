@@ -196,8 +196,17 @@ configured. Without it the dispatch is a silent no-op and nothing else breaks.
 
 ### The nav, and a rider's URL (2026-09-16)
 
-Four tabs, everywhere — header, mobile bar, footer, sitemap — in one order:
-**Home · Rankings · Count · Profile**. They are all *places*. The two writes are not tabs:
+**Home · Rankings · Count · Profile**, plus **Riders** in the desktop header and the footer
+(2026-09-16, replacing Add new there). They are all *places*. Riders is `/stats` with nobody in
+the URL — the everyone view, which had become hard to reach once Profile started defaulting to
+your own page; it carries `data-nav="riders"` so the rider picker leaves it alone, and
+`stats.html` calls `initNav('riders')` when there is no rider in the URL so the right tab
+lights up. The footer's Profile link carries `data-nav="stats"` for the opposite reason: it
+should follow you, and both would otherwise read `/stats` and go to different places.
+
+The mobile tab bar stays at four: Home already lists every rider on a phone.
+
+The two writes are not tabs:
 
 - **Log** is a button in the profile hero, under the number it changes, shown only to whoever
   may write to that count (its owner, or Carter for riders who haven't claimed their page). It

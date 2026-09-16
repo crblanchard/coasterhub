@@ -97,7 +97,7 @@
     <a href="/rankings" data-nav="rankings">Rankings</a>
     <a href="/count" data-nav="count">Count</a>
     <a href="/stats" data-nav="stats">Profile</a>
-    <a href="/add" data-nav="add">Add new</a>
+    <a href="/stats" data-nav="riders">Riders</a>
   </nav>
   <!-- No #people picker here on purpose: the header picker means "whose data am
        I looking at", and this page has its own Rider field meaning "whose count
@@ -132,6 +132,11 @@
   <a href="/import" class="ghost" id="importlink"
      style="margin-left:10px;text-decoration:none;display:inline-block">Import a list &rarr;</a>
   <p class="modehint" id="modehint"></p>
+  <!-- The way out of a dead end: you are staging a day and the coaster you rode
+       is not on the list. Says so where you hit it, rather than leaving you to
+       find /add in a header. Everyone sees it — any account can add now. -->
+  <p class="modehint" style="margin-top:2px">Coaster or park not in the database?
+    <a href="/add">Add it here</a>.</p>
 
   <div class="setup">
     <div class="fld"><label for="rider">Rider</label>
@@ -206,7 +211,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/stats">Profile</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/stats" data-nav="stats">Profile</a> &nbsp;&middot;&nbsp; <a href="/stats">Riders</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -476,20 +481,13 @@ function fillRiders(){
   if(!sel.value && sel.options.length) sel.selectedIndex=0;
 }
 
-// The adders on this page all write to the SHARED database (a rider, a park, a
-// coaster), which an account does not open — see the write split in worker.js.
-// Hide them rather than let someone fill a form that can only 401, and say why
-// so it reads as a boundary and not as a bug.
+// Adding a park or a coaster is open to any account now (2026-09-16), so the
+// two inline "+" buttons stay for everyone; the link under the mode switch is
+// the same job with the full form. Adding a RIDER is still admin only — hide
+// that one rather than let someone fill a form that can only 401.
 function applyAccountLimits(){
   if(!ME || ME.admin) return;
-  ['newrider','newpark','newcoaster'].forEach(function(id){
-    var el=$(id); if(el) el.style.display='none';
-  });
-  var hint=$('modehint');
-  if(hint) hint.insertAdjacentHTML('afterend',
-    '<p class="modehint" style="margin-top:2px">A park or coaster that isn\u2019t listed has to be '
-    + 'added to the shared database \u2014 ask Carter, or use <a href="/add">Add new</a> with the '
-    + 'shared password.</p>');
+  var el=$('newrider'); if(el) el.style.display='none';
 }
 
 // ---- adding a rider --------------------------------------------------------
