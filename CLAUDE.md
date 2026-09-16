@@ -58,9 +58,13 @@ those files are the fallback, and the sync overwrites them.
   the line endings and the diff becomes the entire file.
 - **Workers cap PBKDF2 at 100,000 iterations.** Node's WebCrypto does not, so a
   higher number passes every local test and 500s in production.
-- **CSS shorthands reset their longhands** (`background` kills `background-size`,
-  `font` kills `font-size`), and `.profedit button.edit` outranks `.profedit .av`,
-  `.nm`, `.un` and `.bioline`. Four separate bugs so far, all this one family.
+- **CSS shorthands reset their longhands** (`background` kills `background-image`
+  and `background-size`, `font` kills `font-size`), and a more specific selector
+  added later silently wins every property it repeats — `.profedit button.edit`
+  over `.profedit .av`/`.nm`/`.un`/`.bioline`, and a second `select.userpick`
+  rule over the first `.userpick` one, which erased the picker's chevron for
+  weeks. Five bugs so far, all this one family. Grep for an existing rule before
+  adding another for the same thing, and never use the shorthands.
 - **Don't commit a `wrangler.jsonc` binding that isn't provisioned yet** — the
   automatic deploy fails on it.
 - **Code that needs a migration must degrade to a 503 naming the file**, never a

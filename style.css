@@ -77,10 +77,19 @@ nav.links a{color:var(--muted);font-weight:500;font-size:.95rem;transition:color
 nav.links a:hover,nav.links a.active{color:var(--fg)}
 .people{flex:1 1 0;min-width:0}
 .userpick{appearance:none;-webkit-appearance:none;-moz-appearance:none;
-  background:var(--soft) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="%239fb0d6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat right 12px center;
-  border:1px solid var(--line);color:var(--fg);font:inherit;font-weight:600;font-size:.85rem;
-  padding:8px 34px 8px 16px;border-radius:999px;cursor:pointer;line-height:1;white-space:nowrap;transition:border-color .15s}
-.userpick:hover{border-color:var(--ring)}
+  /* background-COLOR and background-IMAGE, never the shorthand: a later rule
+     using `background` here is what erased this chevron once already. */
+  background-color:var(--panel);
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="%239fb0d6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+  background-repeat:no-repeat;background-position:right 11px center;
+  border:1px solid var(--line);color:var(--fg);font:inherit;font-weight:600;font-size:.88rem;
+  /* Symmetric padding so the name sits in the middle of the pill rather than in
+     the middle of what is left after the chevron. text-align centres the closed
+     label in Chrome and Safari, text-align-last in Firefox — both, or it looks
+     centred on one machine and not the next. */
+  padding:7px 28px 7px 18px;text-align:center;text-align-last:center;
+  border-radius:999px;cursor:pointer;line-height:1.35;white-space:nowrap;transition:border-color .15s}
+.userpick:hover{border-color:var(--accent2)}
 .userpick:focus{outline:none;border-color:var(--accent2)}
 .userpick option{background:var(--panel);color:var(--fg)}
 
@@ -289,9 +298,6 @@ footer.site a:hover{color:var(--fg)}
 /* Whose count am I looking at — sits next to the rider picker */
 .people{display:flex;align-items:center;gap:9px;justify-content:flex-end}
 .whoami{color:var(--muted);font-size:.82rem;white-space:nowrap}
-select.userpick{background:var(--panel);border:1px solid var(--line);color:var(--fg);
-  border-radius:999px;padding:7px 12px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit}
-select.userpick:hover{border-color:var(--accent2)}
 
 /* Mobile tab bar (built by app.js initNav) */
 .tabbar{display:none}
@@ -307,7 +313,8 @@ select.userpick:hover{border-color:var(--accent2)}
   .brand{flex:1 1 auto;min-width:0}
   .brand-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
   .whoami{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  select.userpick{flex:none;max-width:9.5em;font-size:.8rem;padding:6px 10px}
+  .userpick{flex:none;max-width:11em;font-size:.8rem;padding:6px 22px 6px 12px;
+    background-position:right 8px center;background-size:10px}
   /* "Viewing" is the first thing to go: the picker beside it already reads
      "Carter", so the question it answers is still answered without it. */
   .whoami{display:none}
