@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
+<title>The shared list — Coaster Hub</title>
+<meta name="description" content="Every coaster more than one rider has ranked, most agreed-on first.">
+<link rel="stylesheet" href="/style.css?v=20260805b">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<link rel="icon" href="/favicon.svg?v=20260805b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260805b" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png?v=20260805b" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260805b">
+<meta property="og:title" content="The shared list — Coaster Hub">
+<meta property="og:description" content="Every coaster more than one rider has ranked, most agreed-on first.">
+<meta property="og:image" content="https://coasterhub.org/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  #loading{color:var(--muted);padding:40px 0}
+  #err{display:none;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:20px;color:var(--fg)}
+  /* The same row the /rankings summary draws, with a rank in front of it. */
+  .shared{display:flex;flex-direction:column;gap:8px;margin-bottom:56px}
+  .srow{display:flex;align-items:flex-start;gap:12px;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;padding:11px 14px}
+  .srow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);
+             min-width:2.2em;text-align:right;flex:none;font-size:.95rem;margin-top:1px}
+  .srow .n{flex:1;min-width:0}
+  .srow .n b{display:block;font-weight:600;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .n span{display:block;color:var(--muted);font-size:.77rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+  .srow .meta b{display:block;color:var(--accent2);font-weight:700}
+  /* Who has it, and where they put it. Quiet: the agreement is the headline. */
+  .srow .by{color:var(--muted);font-size:.74rem;margin-top:3px;overflow:hidden;
+            text-overflow:ellipsis;white-space:nowrap}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:20px}
+  .seg button{background:transparent;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;
+    font-size:.9rem;font-family:inherit}
+  .seg button.on{background:var(--tint2);color:var(--fg)}
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260805b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/riders" data-nav="riders">Riders</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/riders" data-nav="profile">Profile</a>
+    <a href="/count" data-nav="count">Count</a>
+    <a href="/log" data-nav="log">Log</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero" style="padding:56px 0 26px"><div class="container">
+  <span class="badge">Everyone together</span>
+  <h1 style="max-width:18ch">The shared list.</h1>
+  <p id="sub">Every coaster more than one rider has ranked, most agreed-on first.</p>
+</div></section>
+
+<section class="block" style="padding-top:18px"><div class="container">
+  <!-- Two ways to read agreement, and they answer different questions: how many
+       people rate it, or how high the people who rate it put it. -->
+  <div class="seg" id="sortby">
+    <button data-s="lists" class="on">Most lists</button>
+    <button data-s="avg">Highest placed</button>
+  </div>
+  <div id="loading">Loading&hellip;</div>
+  <div id="err">
+    <strong>Couldn&rsquo;t load the rankings.</strong> This page reads the API, so it needs to be served over the web.
+  </div>
+  <div class="shared" id="list"></div>
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/riders">Riders</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/riders" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/changes">Changes</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+</div></footer>
+
+<script src="/app.js?v=20260805b"></script>
+<script>
+document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('rankings');
+
+var $=function(id){return document.getElementById(id);};
+var esc=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var nf=function(n){return n==null?'—':n.toLocaleString();};
+
+var ROWS=[], SORT='lists';
+
+// Agreement, two ways. "Most lists" is how many people have it at all, with the
+// average placing breaking ties; "Highest placed" is the average, but only among
+// coasters on more than one list — one person's number one is not a consensus.
+function sorted(){
+  return ROWS.slice().sort(function(a,b){
+    if (SORT==='avg') return (a.sum/a.n) - (b.sum/b.n) || b.n - a.n;
+    return b.n - a.n || (a.sum/a.n) - (b.sum/b.n);
+  });
+}
+
+function render(){
+  var list=sorted();
+  if(!list.length){
+    $('list').innerHTML='<div class="note">Nothing on more than one list yet.</div>';
+    return;
+  }
+  $('list').innerHTML=list.map(function(t,i){
+    var c=t.c, avg=Math.round((t.sum/t.n)*10)/10;
+    // Who put it where, newest agreement first. Names, not slugs: this is the
+    // one place the list is about the people rather than the coasters.
+    var by=t.who.map(function(w){ return esc(w.name)+' #'+w.pos; }).join(' · ');
+    return '<div class="srow">'
+      +'<span class="pos">'+(i+1)+'</span>'
+      +'<div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+(c.loc?' · '+esc(c.loc):'')+'</span>'
+        +'<div class="by">'+by+'</div></div>'
+      +'<div class="meta"><b>'+t.n+' lists</b>avg #'+avg+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+Array.prototype.forEach.call(document.querySelectorAll('#sortby button'), function(b){
+  b.addEventListener('click', function(){
+    Array.prototype.forEach.call(document.querySelectorAll('#sortby button'), function(x){
+      x.classList.toggle('on', x===b);
+    });
+    SORT=b.getAttribute('data-s');
+    render();
+  });
+});
+
+// Every rider's list, tallied. Same computation the /rankings summary does with
+// its top ten, without the slice — this page exists for when that ten stops
+// being enough.
+CoasterHub.fetchUsers().then(function(){
+  var users=CoasterHub.USERS.slice();
+  return Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()].concat(
+    users.map(function(u){
+      return fetch('/api/rankings/'+encodeURIComponent(u.slug))
+        .then(function(r){ return r.ok?r.json():{order:[]}; })
+        .catch(function(){ return {order:[]}; });
+    })
+  )).then(function(res){
+    var coasters=res[0].coasters, parks=res[1], all=res.slice(2), BYID={};
+    coasters.forEach(function(c){ var pk=parks[c.park];
+      BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
+
+    var tally={};
+    users.forEach(function(u,i){
+      (all[i].order||[]).forEach(function(id,pos){
+        if(!BYID[id]) return;              // a merged-away coaster is not a row
+        var t=tally[id]||(tally[id]={c:BYID[id],n:0,sum:0,who:[]});
+        t.n++; t.sum+=pos+1; t.who.push({name:u.name,pos:pos+1});
+      });
+    });
+    ROWS=Object.keys(tally).map(function(k){ return tally[k]; })
+      .filter(function(t){ return t.n>1; });
+    ROWS.forEach(function(t){ t.who.sort(function(a,b){ return a.pos-b.pos; }); });
+
+    var started=all.filter(function(a){ return (a.order||[]).length; }).length;
+    $('sub').textContent = ROWS.length
+      ? nf(ROWS.length)+' coasters appear on more than one of the '+started+' lists.'
+      : 'Nothing appears on more than one list yet.';
+    $('loading').style.display='none';
+    render();
+  });
+}).catch(function(e){
+  console.error(e);
+  $('loading').style.display='none';
+  $('err').style.display='block';
+});
+</script>
+</body>
+</html>

@@ -267,6 +267,17 @@ The whole row is the link. Underneath the list is the **recent-changes feed**, t
 filter bar and a 60s refresh; `/riders` mounts twelve rows with neither. Its CSS moved to
 `style.css` for the same reason. Add an event kind in one place now, not two.
 
+**`/rankings/all` is the whole shared list** (2026-09-16) — `rankings-all.html`, reached by a
+200 rewrite. `/rankings` shows the ten most agreed-on and links here when there are more; it is
+deliberately not in the nav. Two sort orders, because "agreed on" means two things: how many
+people rank it, or how high the people who rank it put it. Each row names who has it and where
+they put it. Only coasters on more than one list qualify — one person's number one is not a
+consensus.
+
+The `/rankings` summary itself was reordered the same day: **shared favourites above each
+rider's list**, which is the interesting half and was sitting under six cards of other people's
+top fives. Those cards are smaller now and show three names instead of five.
+
 **The count page is `/count`** (2026-09-16), not `/rides` — `count.html`, `initNav('count')`,
 `PER_RIDER`'s `count` key. It holds a rider's whole count (the day log, every ride, the full
 credit list) and "rides" named one of the three. Both old paths 301 — `/rides` → `/count` and

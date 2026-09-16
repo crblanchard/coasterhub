@@ -10,6 +10,10 @@
 # 200 = rewrite (browser keeps the pretty URL). Destinations use the CLEAN paths
 # (/profile not /profile.html) because Cloudflare Pages 301-redirects *.html to
 # the extensionless URL, which would bounce /user/<name> to /profile.
+# The whole shared ranking, which the /rankings summary only shows ten of. Its
+# own URL rather than a query string because it is a page you send someone.
+/rankings/all         /rankings-all 200
+
 /user/:name/count     /count      200
 /user/:name/rankings  /rankings   200
 /user/:name/add       /add        200

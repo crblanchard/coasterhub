@@ -43,7 +43,8 @@
   #mine.readonly .rrow{cursor:default}
 
   .rrow.over{border-color:var(--accent2)}
-  .rrow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);min-width:2.1em;text-align:right;flex:none}
+  .rrow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);min-width:2.1em;
+             text-align:right;flex:none;margin-left:6px}
   .rrow .grip{flex:none;color:var(--muted);cursor:grab;padding:4px 2px;touch-action:none;user-select:none;line-height:1}
   .rrow .grip:active{cursor:grabbing}
   .rrow .nm{flex:1;min-width:0}
@@ -103,8 +104,10 @@
   .sechd{margin:0 0 14px}
   .sechd h2{font-size:1.15rem;letter-spacing:-.01em}
   .sechd p{color:var(--muted);font-size:.88rem;margin-top:5px;max-width:62ch}
-  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:12px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;
+  /* Smaller since shared favourites moved above them (2026-09-16): these are a
+     glance at who has ranked what, not the point of the page. */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(214px,1fr));gap:10px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;
         display:flex;flex-direction:column;text-decoration:none}
   .card:hover{border-color:var(--accent2)}
   .card .hd{display:flex;align-items:baseline;gap:8px;margin-bottom:13px}
@@ -174,19 +177,22 @@
   <div id="master" style="display:none">
     <div class="figs" id="figs"></div>
 
-    <div class="sechd">
-      <h2>Each rider&rsquo;s list</h2>
-      <p>The top of everyone&rsquo;s ranking. Open one to see it in full.</p>
-    </div>
-    <div class="cards" id="cards"></div>
-
     <div id="shared_wrap" style="display:none">
-      <div class="sechd" style="margin-top:34px">
+      <div class="sechd">
         <h2>Shared favorites</h2>
         <p id="shared_sub"></p>
       </div>
       <div class="shared" id="shared"></div>
+      <p id="shared_more" style="margin-top:14px;display:none">
+        <a href="/rankings/all" style="color:var(--accent2);font-weight:600">The whole shared list &rarr;</a>
+      </p>
     </div>
+
+    <div class="sechd" style="margin-top:38px">
+      <h2>Each rider&rsquo;s list</h2>
+      <p>The top of everyone&rsquo;s ranking. Open one to see it in full.</p>
+    </div>
+    <div class="cards" id="cards"></div>
   </div>
 
   <!-- one rider: their ranking -->
@@ -326,7 +332,7 @@ if(!slug){
           +'<div class="none">No favorites ranked yet.'+(why?'<em>'+why+'</em>':'')+'</div>'
           +'<div class="go">'+((yours||seedable) ? 'Start one &rarr;' : 'See the page &rarr;')+'</div></a>';
       }
-      var top=l.order.slice(0,5).map(function(id,i){
+      var top=l.order.slice(0,3).map(function(id,i){
         var c=BYID[id];
         return '<div class="t"><i>'+(i+1)+'</i><div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+'</span></div></div>';
       }).join('');
@@ -337,6 +343,7 @@ if(!slug){
 
     if(shared.length){
       $('shared_sub').textContent='Coasters more than one person put on their list, most agreed-on first.';
+      $('shared_more').style.display = shared.length > 10 ? 'block' : 'none';
       $('shared').innerHTML=shared.slice(0,10).map(function(t){
         var c=BYID[t.id], avg=t.sum/t.n;
         return '<div class="srow"><div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+'</span></div>'
