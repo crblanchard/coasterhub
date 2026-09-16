@@ -315,7 +315,13 @@ if(!slug){
       fig(nf(shared.length),'On 2+ lists')
     ].join('');
 
-    $('cards').innerHTML=lists.map(function(l){
+    // Longest list first (2026-09-16). Alphabetical put whoever is early in the
+    // alphabet at the top whether or not they had ranked anything, so the section
+    // opened on empty cards. Name breaks a tie — including the tie between
+    // everyone still on nought, who settle at the bottom in the old order.
+    $('cards').innerHTML=lists.slice().sort(function(a,b){
+      return b.order.length - a.order.length || a.user.name.localeCompare(b.user.name);
+    }).map(function(l){
       var href='/user/'+l.user.slug+'/rankings';
       if(!l.order.length){
         // "Anyone can build a list — nothing is locked" dates from before
