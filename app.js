@@ -396,7 +396,7 @@
   function adoptUsers(list) {
     var fresh = [];
     (list || []).forEach(function (u) {
-      if (u && u.slug) fresh.push({ slug: u.slug, name: u.name || u.slug });
+      if (u && u.slug) fresh.push({ slug: u.slug, name: u.name || u.slug, avatar: u.avatar || null });
     });
     if (!fresh.length) return;              // never let an empty answer erase the seed
     USERS.length = 0;
@@ -410,9 +410,12 @@
       if (!u || !u.slug) return;
       if (have[u.slug]) {
         if (u.name && have[u.slug].name !== u.name) { have[u.slug].name = u.name; changed = true; }
+        if (u.avatar !== undefined && have[u.slug].avatar !== u.avatar) {
+          have[u.slug].avatar = u.avatar; changed = true;
+        }
         return;
       }
-      var rec = { slug: u.slug, name: u.name || u.slug };
+      var rec = { slug: u.slug, name: u.name || u.slug, avatar: u.avatar || null };
       USERS.push(rec); have[u.slug] = rec; changed = true;
     });
     return changed;
@@ -705,8 +708,13 @@
       links[i].classList.toggle("active", links[i].getAttribute("data-nav") === page);
     }
 
+    // "Viewing <name>" only where it means something: the three pages that show
+    // one rider (Carter's call, 2026-09-16). On /riders it contradicts the page
+    // — that one IS everyone — and on /log the rider comes from the form's own
+    // dropdown, so a second picker beside it was two answers to one question.
     var wrap = document.getElementById("people");
-    if (wrap) renderPeople(wrap, slug, page);
+    var wantsPicker = PER_RIDER.indexOf(page) >= 0;
+    if (wrap && wantsPicker) renderPeople(wrap, slug, page);
     // The links above are written from localStorage before the rider list has
     // arrived, because waiting would leave the nav dead on first paint. Once the
     // real list is here, a remembered rider who no longer exists (renamed away)
@@ -718,7 +726,7 @@
         if (page !== "home" && !urlSlug) now = window.localStorage.getItem("ch_rider") || "";
       } catch (e) { /* storage blocked: keep what we started with */ }
       if (now !== slug) { slug = now; applyRiderLinks(slug); }
-      if (wrap) renderPeople(wrap, slug, page);
+      if (wrap && wantsPicker) renderPeople(wrap, slug, page);
     });
 
     // Every page gets the same three-column header, even the ones with no rider
@@ -741,44 +749,44 @@
     buildTabBar(page, slug);
   }
 
-  // Mobile tab bar. Built here rather than in markup so every page gets it (and
-  // the same ordering) from one place. Hidden above 680px by the CSS. `fixed` =
-  // the same URL for everyone: Home shows all riders, so it takes no
-  // /user/<slug>/ prefix the way the other tabs do.
+  // The five pages, in one order, used by the header, this mobile tab bar and
+  // the footer alike (Carter's call, 2026-09-16):
   //
-  // Four tabs, and they are all places rather than actions (2026-09-16). The two
-  // writes are deliberately not here:
+  //   Riders · Rankings · Profile · Count · Log
   //
-  //   Log      — you log from your own profile now, where the button sits under
-  //              the count it is about to change. It was the centre tab, but a
-  //              tab is a place you visit and this is something you DO, once a
-  //              trip, to one rider's count — yours. It stays in the footer.
-  //   Add new  — adding a coaster to the shared database is occasional, admin
-  //              only, and rarely done one-handed. Desktop header and footer, as
-  //              it has always been.
+  // Riders is everyone, Profile is one person, and they sit either side of each
+  // other on purpose: the middle slot is the easiest to hit with a thumb, and
+  // your own page is what you reach for most. `fixed` = the same URL for
+  // everyone, so Riders and Log take no /user/<slug>/ prefix the way the other
+  // three do.
   //
-  // "Count" is /count: the day-by-day log, every ride, and the full credit list
-  // in one place. "Rides" undersold it and read as a twin of "Log" — one reads,
-  // one writes, and the labels never said which. "Profile" is /user/<slug> for
-  // the same reason: it is a rider's page, not a chart screen, and /stats is
-  // gone entirely — the everyone view it used to hold is /riders now. Header,
-  // tab bar and footer all use these words, in this order.
+  // Add new is still not here: adding a coaster to the shared list is
+  // occasional and rarely done one-handed. Header on desktop, footer
+  // everywhere, and a link on /log at the moment you find something missing.
+  //
+  // The words: "Count" is /count — the day log, every ride and the full credit
+  // list in one place, where "Rides" named one of the three and read as a twin
+  // of "Log". "Profile" is /user/<slug>, a rider's page rather than a chart
+  // screen. "Riders" is /riders, which is where /stats used to point.
   var TABS = [
-    { k: "home",     label: "Home",     path: "/",         fixed: true },
+    { k: "riders",   label: "Riders",   path: "/riders",   fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
+    { k: "profile",  label: "Profile",  path: "/riders" },
     { k: "count",    label: "Count",    path: "/count" },
-    { k: "profile",  label: "Profile",  path: "/riders" }
+    { k: "log",      label: "Log",      path: "/log",      fixed: true }
   ];
-  // Five is the ceiling: measured at 320px (the narrowest phone) the widest
-  // label, "Rankings", fills 58 of its 64px slot. A sixth tab would need
-  // shorter labels or icons only. At four there is room to spare.
-  // One per tab in TABS, no spares: the `coasters` and `log` paths outlived
-  // their tabs and sat here as dead SVG nobody could see.
+  // Five is the ceiling, and this is five: measured at 320px (the narrowest
+  // phone) the widest label, "Rankings", fills 58 of its 64px slot. A sixth tab
+  // would need shorter labels or icons only.
+  // One per tab in TABS, no spares. `profile` is the odd one out: it is drawn
+  // from the signed-in account's picture when there is one (see buildTabBar),
+  // and this outline of a person is the same placeholder /riders uses.
   var TAB_ICONS = {
-    home:     '<path d="M3 10.2 12 3l9 7.2V21H3z"/>',
+    riders:   '<path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4M15.5 4.3a3.5 3.5 0 0 1 0 6.4"/>',
+    rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>',
+    profile:  '<path d="M19 20v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>',
     count:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
-    profile:  '<path d="M5 20v-6M12 20V6M19 20v-9"/>',
-    rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>'
+    log:      '<path d="M12 5v14M5 12h14"/>'
   };
   function buildTabBar(page, slug) {
     if (typeof document === "undefined" || document.querySelector(".tabbar")) return;
@@ -787,12 +795,27 @@
     nav.setAttribute("aria-label", "Primary");
     nav.innerHTML = TABS.map(function (t) {
       var href = (t.fixed || !slug) ? t.path : userPageHref(slug, t.k);
-      return '<a href="' + href + '"' + (t.k === page ? ' class="on" aria-current="page"' : '') + '>'
+      return '<a href="' + href + '" data-nav="' + t.k + '"'
+        + (t.k === page ? ' class="on" aria-current="page"' : '') + '>'
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
         + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + TAB_ICONS[t.k] + '</svg>'
         + '<span>' + t.label + '</span></a>';
     }).join("");
     document.body.appendChild(nav);
+
+    // Your own face on the Profile tab, the way every app you already use does
+    // it. No picture, or signed out, and the outline of a person stays — the
+    // same placeholder the riders list draws.
+    me().then(function (acct) {
+      if (!acct || !acct.avatar) return;
+      var a = nav.querySelector('a[data-nav="profile"]');
+      var svg = a && a.querySelector("svg");
+      if (!svg) return;
+      var pic = document.createElement("span");
+      pic.className = "tabav";
+      pic.style.backgroundImage = 'url("/avatars/' + acct.avatar + '")';
+      svg.parentNode.replaceChild(pic, svg);
+    }).catch(function () { /* signed out: the outline is right */ });
   }
 
   var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser, me: me,

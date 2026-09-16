@@ -196,17 +196,24 @@ configured. Without it the dispatch is a silent no-op and nothing else breaks.
 
 ### The nav, and a rider's URL (2026-09-16)
 
-**Home · Rankings · Count · Profile**, plus **Riders** in the desktop header and the footer
-(2026-09-16, replacing Add new there). They are all *places*. Riders is `/stats` with nobody in
-the URL — the everyone view, which had become hard to reach once Profile started defaulting to
-your own page; it carries `data-nav="riders"` so the rider picker leaves it alone, and
-`stats.html` calls `initNav('riders')` when there is no rider in the URL so the right tab
-lights up. The footer's Profile link carries `data-nav="stats"` for the opposite reason: it
-should follow you, and both would otherwise read `/stats` and go to different places.
+Five pages, one order, everywhere — header, mobile tab bar, footer (2026-09-16, Carter's call):
 
-The mobile tab bar stays at four: Home already lists every rider on a phone.
+**Riders · Rankings · Profile · Count · Log**
 
-The two writes are not tabs:
+Riders is everyone and Profile is one person; they sit either side of the middle, which is the
+easiest slot to hit with a thumb. **Home is gone from the nav and `/` 301s to `/riders`** — the
+landing page was a tour of a site you are already on. `index.html` is untouched and still served
+at `/home`, linked from the site map.
+
+On a phone the **Profile tab wears your picture** when you are signed in and have one (see
+`buildTabBar`), and the outline of a person when you do not — the same placeholder the riders
+list draws. Tab links carry `data-nav` so the header's retargeting reaches them too.
+
+**"Viewing <name>" only appears on the three pages that show one rider** (`PER_RIDER`:
+profile, count, rankings). On `/riders` it contradicted the page, and on `/log` the rider comes
+from the form's own dropdown, so it was two answers to one question.
+
+Add new is not a tab:
 
 - **Log** is a button in the profile hero, under the number it changes, shown only to whoever
   may write to that count (its owner, or Carter for riders who haven't claimed their page). It
@@ -246,10 +253,19 @@ with no person is not a thing, so `userPageHref(null, 'profile')` is `/riders`, 
 `/riders` if not.
 
 **The riders list** is one row per person in the same shape as the identity block on a profile
-— picture, name, `@username` under it — then coasters, rides, parks and **ranked** (the length
-of their ranking list, from `/api/rankings/<slug>`, one call each). The whole row is the link.
-What it deliberately does NOT carry: the old hub's combined-totals tiles and its "on this day"
-section. Home already does the site-wide view.
+— picture, name, `@username`, then the count as a quiet line underneath ("562 credits / 2,394
+rides"). One number sits on the right: **coasters ranked**, from `/api/rankings/<slug>`, one call
+each. Parks came out; four numbers of equal weight made every rider read as a spreadsheet row.
+The whole row is the link. Underneath the list is the **recent-changes feed**, the same one
+`/changes` draws.
+
+`adoptUsers()` carries `avatar` through from `/api/users` — it used to rebuild the list as
+`{slug, name}` only, which is why every row drew an initial instead of a photo.
+
+**`changes-feed.js`** is that feed, lifted out of `changes.html` so both pages can draw it:
+`CoasterHubFeed.mount({ feed, note, filter, limit, poll })`. `/changes` mounts it whole, with its
+filter bar and a 60s refresh; `/riders` mounts twelve rows with neither. Its CSS moved to
+`style.css` for the same reason. Add an event kind in one place now, not two.
 
 **The count page is `/count`** (2026-09-16), not `/rides` — `count.html`, `initNav('count')`,
 `PER_RIDER`'s `count` key. It holds a rider's whole count (the day log, every ride, the full

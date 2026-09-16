@@ -30,11 +30,11 @@
     <span class="brand-text">Coaster <b>Hub</b></span>
   </a>
   <nav class="links">
-    <a href="/" data-nav="home">Home</a>
-    <a href="/rankings" data-nav="rankings">Rankings</a>
-    <a href="/count" data-nav="count">Count</a>
-    <a href="/riders" data-nav="profile">Profile</a>
     <a href="/riders" data-nav="riders">Riders</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/riders" data-nav="profile">Profile</a>
+    <a href="/count" data-nav="count">Count</a>
+    <a href="/log" data-nav="log">Log</a>
   </nav>
   <div class="people" id="people"></div>
 </div></header>
@@ -58,12 +58,22 @@
   <div class="riderlist" id="list"></div>
 </div>
 
+<!-- What everyone has been up to, under who everyone is. The same feed /changes
+     draws (changes-feed.js), cut to the last few days; the link goes to the full
+     one with its filters. -->
+<section class="block" style="padding-top:8px"><div class="container">
+  <span class="eyebrow">Lately</span><h2>What&rsquo;s been happening</h2>
+  <div class="feed" id="feed"><div class="empty">Loading&hellip;</div></div>
+  <p style="margin-top:18px"><a href="/changes" style="color:var(--accent2);font-weight:600">All changes &rarr;</a></p>
+</div></section>
+
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/riders" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/riders">Riders</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/riders">Riders</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/riders" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/changes">Changes</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
+<script src="/changes-feed.js?v=20260916"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('riders');
@@ -79,18 +89,23 @@ function row(u, st, ranked){
   var pic = u.avatar
     ? '<span class="av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
     : '<span class="av">' + esc((u.name || '?').charAt(0).toUpperCase()) + '</span>';
+  // The count reads as a line under the name, where a bio sits on a profile,
+  // rather than as a row of tiles: four numbers of equal weight made every rider
+  // look like a spreadsheet row. One number earns the right-hand slot — how much
+  // of their count they have actually put in order. Rides are unknown for some
+  // riders (k.rides is null there), and "— rides" reads as a fault, so that half
+  // of the line is simply absent.
+  var line = nf(k.credits) + ' credits'
+    + (k.rides == null ? '' : ' / ' + nf(k.rides) + ' rides');
   // Every number is a link's worth of information, so the whole row is the link
   // rather than a "View →" at the end of it.
-  var stat = function(v, l){ return '<div class="s"><b>' + v + '</b><span>' + l + '</span></div>'; };
   return '<a class="riderrow" href="' + CoasterHub.userPageHref(u.slug, 'profile') + '">'
     + pic
     + '<span class="who"><b class="nm">' + esc(u.name) + '</b>'
-    +   '<span class="un">@' + esc(u.slug) + '</span></span>'
+    +   '<span class="un">@' + esc(u.slug) + '</span>'
+    +   '<span class="sub">' + line + '</span></span>'
     + '<span class="nums">'
-    +   stat(nf(k.credits), 'coasters')
-    +   stat(nf(k.rides), 'rides')
-    +   stat(nf(k.parks), 'parks')
-    +   stat(nf(ranked), 'ranked')
+    +   '<div class="s"><b>' + nf(ranked) + '</b><span>coasters ranked</span></div>'
     + '</span></a>';
 }
 
@@ -124,6 +139,10 @@ CoasterHub.fetchUsers().then(function(){
   document.getElementById('loading').style.display = 'none';
   document.getElementById('err').style.display = 'block';
 });
+
+// The short feed. No filter bar and no polling — this is a glance on the way
+// past, and /changes is the page you open when you want to read it.
+CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 12 });
 </script>
 </body>
 </html>

@@ -162,16 +162,45 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
 .riderrow .nm{font-weight:800;font-size:1.15rem;letter-spacing:-.01em;line-height:1.2}
 .riderrow .un{color:var(--accent2);font-size:.88rem;font-weight:600;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+/* The count itself, under the username: small, quiet, and the same place a bio
+   sits on a profile. */
+.riderrow .sub{color:var(--muted);font-size:.82rem;margin-top:3px;
+  font-variant-numeric:tabular-nums}
 .riderrow .nums{display:flex;gap:26px;flex:none}
 .riderrow .s{display:flex;flex-direction:column;align-items:flex-end;min-width:3.5em}
 .riderrow .s b{font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
 .riderrow .s span{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em}
 @media (max-width:640px){
-  /* The numbers drop under the name rather than squeezing four columns into a
-     phone; the picture stays beside them, which keeps the row scannable. */
-  .riderrow{flex-wrap:wrap;gap:12px 14px}
-  .riderrow .nums{width:100%;justify-content:space-between;gap:10px}
-  .riderrow .s{align-items:flex-start;min-width:0}
+  /* One number now, so it stays beside the name instead of wrapping onto its
+     own row the way four of them had to. The label is two words and is allowed
+     to wrap under itself rather than pushing the name around. */
+  .riderrow{gap:12px;padding:13px 14px}
+  .riderrow .av{width:46px;height:46px;font-size:1.2rem}
+  .riderrow .s{min-width:0;max-width:5.5em}
+  .riderrow .s span{font-size:.64rem;letter-spacing:.05em;text-align:right;line-height:1.25}
+}
+
+/* Activity feed (changes-feed.js) — /changes in full, /riders in short. */
+.feed{display:flex;flex-direction:column;gap:0}
+.feed .day{color:var(--muted);font-size:.78rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;margin:22px 0 8px}
+.feed .day:first-child{margin-top:0}
+.ev{display:flex;gap:13px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
+.ev .ic{flex:none;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;
+  justify-content:center;background:var(--soft);color:var(--muted);margin-top:1px}
+.ev .ic svg{width:16px;height:16px}
+.ev.log .ic{background:var(--tint2);color:var(--accent2)}
+.ev .tx{flex:1;min-width:0;font-size:.95rem}
+.ev .tx b{font-weight:700}
+.ev .tx .sub{color:var(--accent2);font-weight:600}
+/* Which park the coaster is at — context, not the subject, so it stays quiet. */
+.ev .tx .at{color:var(--muted)}
+.ev .when{flex:none;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;
+  white-space:nowrap;margin-top:2px}
+.feed .empty{color:var(--muted);padding:26px 0}
+@media (max-width:520px){
+  .ev{gap:10px}
+  .ev .when{font-size:.74rem}
 }
 
 /* Buttons */
@@ -305,6 +334,11 @@ select.userpick:hover{border-color:var(--accent2)}
     letter-spacing:.02em;text-decoration:none}
   .tabbar a svg{width:21px;height:21px}
   .tabbar a.on{color:var(--accent2)}
+  /* The Profile tab wears the signed-in rider's picture (see buildTabBar). Same
+     21px box as the icons it replaces, so the row does not shift. */
+  .tabbar .tabav{width:21px;height:21px;border-radius:999px;background-size:cover;
+    background-position:center;background-color:var(--soft);border:1px solid var(--line)}
+  .tabbar a.on .tabav{border-color:var(--accent2)}
   .tabbar a:active{background:var(--soft)}
 }
 
