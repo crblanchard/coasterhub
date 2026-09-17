@@ -62,7 +62,7 @@
        more: it said what the list already shows, and the way to one person's
        list is the switcher on /rankings you came from, not a line of prose.
        (Carter's call, 2026-09-17.) -->
-  <span class="badge">Global</span>
+  <span class="badge" id="hero_badge">Global</span>
   <h1 style="max-width:18ch">Global rankings.</h1>
 </div></section>
 
@@ -89,6 +89,11 @@
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
+// The switcher, same as every other rankings page. currentUser() is empty here
+// — this page is the global list whatever rider you last looked at — so the
+// badge reads "Global" and the menu is the way out: a name goes to that rider's
+// list, Global goes back to /rankings.
+CoasterHub.riderBadge(document.getElementById('hero_badge'),'rankings',CoasterHub.currentUser());
 
 var $=function(id){return document.getElementById(id);};
 var esc=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){

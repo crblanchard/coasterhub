@@ -1064,6 +1064,11 @@ per-rider pages, which is the point: they behave alike.
 | `/count` | the rider, or **Global** | Global + every rider |
 | `/rankings` | the rider, or **Global** | Global + every rider |
 | `/user/<slug>` (profile) | the rider | riders only |
+| `/rankings/all` | always **Global** | Global + every rider |
+
+On `/rankings/all` the badge is passed `currentUser()`, which is empty there — that page is the
+global list whatever rider you last looked at, so it reads "Global" even with one remembered,
+and the menu is the way out: a name goes to that rider's list, Global goes back to `/rankings`.
 
 **No Global on a profile** — a profile is one person by definition, and `/profile` is not a
 page. `GLOBAL_PAGES` in `app.js` is the switch; anything not in it gets riders only.
