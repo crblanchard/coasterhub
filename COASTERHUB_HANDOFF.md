@@ -794,6 +794,34 @@ you follow; it shows everyone for now, which is right while there are six riders
 
 ---
 
+## Why a replaced avatar came back old (2026-09-17)
+
+Carter, after re-uploading his picture: "at first it looks funky but when I click on it it's
+fine — maybe old pfp is still cached?" He was right about the cache and it was not R2's.
+
+**Nothing behind `/api/` was sending `cache-control`.** That is not "do not cache": with no
+max-age and no validator, a browser falls back to **heuristic freshness** and may serve a
+cached response for a while without revalidating (Safari especially). So `/api/auth/me` came
+back from the browser cache carrying the **previous avatar key**, and the page drew that file
+— which is also still in the same browser's cache, because avatars are served
+`immutable, max-age=31536000`. Two correct caches, one wrong picture. The next real request
+fixed it, which is the "fine when I click it" half.
+
+Note what was NOT wrong, so nobody re-fixes it: the upload mints a **fresh key every time**
+(`slug + 16 random hex`) precisely so the immutable header is safe, and it deletes the old
+object. The crop is faithful too (see the crop section). The bug was only ever that the JSON
+naming the key could be stale.
+
+Now: `JSON_HEADERS` carries **`cache-control: no-store`**, so every JSON answer including
+errors is uncacheable. `/api/coasters` and `/api/parks` — ~900 rows between them, fetched by
+nearly every page, changing only when somebody adds a coaster — opt back in with an explicit
+`public, max-age=300`, which is both faster and safer than leaving a browser to guess.
+
+**A new endpoint returning live or per-user data needs nothing. One that wants caching has to
+say so.** Ten tests assert the split.
+
+---
+
 ## Top ten on a profile (2026-09-17)
 
 Under the stat tiles, a rider's ten favourites, with the **heading as the link** to their whole

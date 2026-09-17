@@ -84,6 +84,13 @@ those files are the fallback, and the sync overwrites them.
   profile.** That badge is a `<button>` built by `CoasterHub.riderBadge()` and
   writing text into it takes the chevron and the menu with it. `account.html`'s
   badge is a plain one and is fine.
+- **No `cache-control` does NOT mean "do not cache".** With no max-age and no
+  validator a browser falls back to *heuristic* freshness and may serve a
+  cached copy without asking — which is how a profile came back wearing its
+  owner's previous picture after they replaced it. Every JSON answer is
+  `no-store` by default now (`JSON_HEADERS`); `/api/coasters` and `/api/parks`
+  opt back in with an explicit short max-age. A new endpoint that returns live
+  or per-user data needs nothing; one that wants caching must say so.
 - **Don't commit a `wrangler.jsonc` binding that isn't provisioned yet** — the
   automatic deploy fails on it.
 - **Code that needs a migration must degrade to a 503 naming the file**, never a

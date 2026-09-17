@@ -138,7 +138,8 @@ async function call(db, method, path, { body, token, cookie } = {}) {
   try { data = await res.json(); } catch { /* non-JSON */ }
   // The name=value pair only, which is what a browser would send back up.
   const set = res.headers.get("set-cookie");
-  return { status: res.status, data, setCookie: set, cookie: set ? set.split(";")[0] : null };
+  return { status: res.status, data, setCookie: set, cookie: set ? set.split(";")[0] : null,
+           cache: res.headers.get("cache-control") };
 }
 
 // Sign up and return the cookie a browser would then be holding.
@@ -1609,6 +1610,31 @@ async function main() {
     check("no migration: a rename still succeeds", r.status === 200, JSON.stringify(r.data));
     r = await call(db, "GET", "/api/user/carter");
     check("no migration: the rest of the site is unaffected", r.status === 200);
+  }
+
+  // ---- nothing live may be served from a browser cache ---------------------
+  // A response with no cache-control is not "do not cache": with no max-age and
+  // no validator a browser guesses, and a profile came back wearing its owner's
+  // previous picture because /api/auth/me was answered from that guess.
+  {
+    const db = freshDb();
+    const cookie = await signedUp(db, "cache@example.com", "Cacher");
+    const live = ["/api/auth/me", "/api/users", "/api/user/carter", "/api/rides/carter",
+                  "/api/rankings/carter", "/api/follows/carter", "/api/activity"];
+    for (const path of live) {
+      const r = await call(db, "GET", path, { cookie });
+      check("no-store on " + path, r.cache === "no-store", String(r.cache));
+    }
+    // An error must not be cached either — a 404 that sticks is worse than one
+    // that does not.
+    let r = await call(db, "GET", "/api/user/nobody");
+    check("no-store on an error too", r.cache === "no-store", String(r.cache));
+    // ...and the two big lists opt back in explicitly rather than being guessed.
+    for (const path of ["/api/coasters", "/api/parks"]) {
+      r = await call(db, "GET", path);
+      check("an explicit short cache on " + path,
+        r.cache === "public, max-age=300", String(r.cache));
+    }
   }
 
   console.log("\n" + pass + " passed, " + fail + " failed\n");

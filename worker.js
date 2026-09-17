@@ -25,7 +25,27 @@
 //   MAIL_FROM      - optional; "Coaster Hub <hello@coasterhub.org>" by default,
 //                    and must be on a domain verified with Resend
 
-const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
+// no-store on every JSON answer by default.
+//
+// These responses carried NO cache-control at all, which does not mean "do not
+// cache" — with no max-age and no validator a browser falls back to HEURISTIC
+// freshness and may serve a cached copy for a while without asking. That is how
+// a profile came back wearing its owner's previous picture right after they
+// replaced it: /api/auth/me was answered from the browser cache with the old
+// avatar key in it, and the page dutifully drew the old file, which is still in
+// that browser's cache too because avatars are immutable. It corrected itself
+// on the next real request, which is exactly the "funky at first, fine when I
+// click it" shape.
+//
+// Everything behind /api/ is either live data or who you are, so none of it may
+// be served stale. The two big slow-moving lists opt back IN to a short cache
+// explicitly (see /api/coasters and /api/parks) — an explicit small max-age is
+// both faster and safer than leaving a browser to guess.
+const JSON_HEADERS = { "content-type": "application/json; charset=utf-8",
+                       "cache-control": "no-store" };
+// The coaster and park lists: ~900 rows between them, fetched by nearly every
+// page, and they change when somebody adds a coaster rather than continuously.
+const LIST_CACHE = { "cache-control": "public, max-age=300" };
 
 function json(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), { status, headers: { ...JSON_HEADERS, ...extra } });
@@ -1035,9 +1055,12 @@ export default {
       // means the static coasters.json fallback carries them too (sync-static
       // writes this response verbatim).
       if (request.method === "GET" && path === "/api/coasters") {
-        return json({ coasters: await getCoasters(env), ...(await getAliases(env)) });
+        return json({ coasters: await getCoasters(env), ...(await getAliases(env)) },
+                    200, LIST_CACHE);
       }
-      if (request.method === "GET" && path === "/api/parks") return json(await getParks(env));
+      if (request.method === "GET" && path === "/api/parks") {
+        return json(await getParks(env), 200, LIST_CACHE);
+      }
       // Who exists. Public: the rider pickers and every /user/<slug>/ page read it.
       if (request.method === "GET" && path === "/api/users") return json({ users: await getUsers(env) });
       // Public read: the feed says what changed, never who is allowed to change it.
