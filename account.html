@@ -111,8 +111,8 @@
     </form>
 
     <form id="form_up" style="display:none">
-      <label for="up_name">Your name</label>
-      <input id="up_name" type="text" autocomplete="name" maxlength="40" required>
+      <label for="up_name">Username</label>
+      <input id="up_name" type="text" autocomplete="username" maxlength="40" required>
       <p class="hint">This names your count and your page &mdash; coasterhub.org/user/&lt;you&gt;.</p>
       <label for="up_email">Email</label>
       <input id="up_email" type="email" autocomplete="username" required>
@@ -130,6 +130,16 @@
     <h2 id="claim_h">Claim your count</h2>
     <p class="sub" id="claim_p"></p>
     <form id="form_claim">
+      <!-- Name and username are chosen HERE, not inherited. Whatever the count
+           was filed under was a placeholder; this is the moment it becomes
+           somebody's own, so the fields start empty rather than prefilled with
+           a name the new owner never picked. -->
+      <label for="cl_name">Display name</label>
+      <input id="cl_name" type="text" autocomplete="name" maxlength="40" placeholder="Keltan" required>
+      <label for="cl_user">Username</label>
+      <input id="cl_user" type="text" autocomplete="username" maxlength="32" placeholder="keltan" required>
+      <p class="hint">Your page will be coasterhub.org/user/&lt;username&gt;. Letters, numbers
+        and hyphens.</p>
       <label for="cl_email">Email</label>
       <input id="cl_email" type="email" autocomplete="username" required>
       <label for="cl_pw">Choose a password</label>
@@ -287,7 +297,8 @@ wire($('form_reset'), $('rs_go'), $('rs_msg'),
   });
 
 wire($('form_claim'), $('cl_go'), $('cl_msg'),
-  function(){ return { code: CLAIM, email: $('cl_email').value, password: $('cl_pw').value }; },
+  function(){ return { code: CLAIM, name: $('cl_name').value, username: $('cl_user').value,
+                      email: $('cl_email').value, password: $('cl_pw').value }; },
   '/api/auth/claim',
   function(d){
     try { localStorage.setItem('ch_rider', d.slug); } catch (e) {}
@@ -341,9 +352,12 @@ fetch('/api/auth/me', { credentials: 'same-origin' })
         $('hero_badge').textContent = 'Invitation';
         $('hero_h').textContent = 'Claim your count.';
         $('hero_p').textContent = 'Your rides are already here. This puts them behind your own login.';
-        $('claim_h').textContent = 'You are claiming ' + res.j.name;
-        $('claim_p').textContent = 'Everything already logged for ' + res.j.name +
-          ' stays exactly as it is — this only decides who can add to it.';
+        // Deliberately does NOT print res.j.name. The invite already proves which
+        // count this is — it only opens one — and naming the placeholder here is
+        // the one thing this form exists to let somebody replace.
+        $('claim_h').textContent = 'Claim your count';
+        $('claim_p').textContent = 'Everything already logged stays exactly as it is. '
+          + 'Pick the name and username you want it under.';
         show('pane_claim');
       });
   })

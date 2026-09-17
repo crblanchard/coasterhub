@@ -719,6 +719,37 @@ the result shape faithful.
 
 ---
 
+## Claiming picks its own name and username (2026-09-17)
+
+The names the five riders arrived with are **placeholders** Carter typed to get their counts
+into the site. Claiming is where a count becomes somebody's own, so the claim form asks for a
+**display name** and a **username**, both blank rather than prefilled, and the old ones need
+never be seen. The claim pane no longer prints the rider's name either — the invite already
+proves which count it is, since it opens exactly one.
+
+Both fields are optional at the API: send neither and nothing moves, which is what the older
+tests exercise.
+
+**Order matters, and it is deliberate.** Validate → hash → rename → set the name → insert the
+account. The password is hashed before anything is written (same rule as signup: D1 has no
+transaction across these statements), and `renameRider()` runs *before* the account is
+attached, so the account is inserted against the final slug and there is never a window where
+the two disagree. A refused username — taken, reserved, too short — fails before any write, so
+the invite stays unspent and no account is made.
+
+**`renameRider(env, from, to, quiet)` gained a fourth argument.** A rename normally belongs in
+the activity feed: it is a public name changing under people's links. A rename at claim time
+does **not**, and passing `quiet` skips the row — announcing "keltan is now Kel" would publish
+the one thing claiming exists to retire. Nothing about the claim reaches the feed.
+
+Everything else already worked and is covered by tests: the rides, the ranking, the invite
+being spent, and the old `/user/<placeholder>` going to a clean 404.
+
+**Signup's first field is now labelled "Username"**, not "Your name" — it always was the thing
+that becomes `/user/<you>`, and the hint under it said so while the label did not.
+
+---
+
 ## Getting to the D1 console
 
 Asked twice now, never written down. The database is named **`coasterhub`**, id

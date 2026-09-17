@@ -526,7 +526,12 @@ async function slugProblem(env, slug, selfSlug) {
 // consequences are the ones you would expect and are the point, not a bug: a
 // link someone saved last year breaks, and the freed name can be taken by
 // anyone, inheriting nothing except the name itself.
-async function renameRider(env, from, to) {
+// `quiet` skips the activity row. A rename normally belongs in the feed — it is
+// a public name changing under people's links. A rename at CLAIM time does not:
+// the old name was a placeholder Carter typed to get the count into the site,
+// and announcing "keltan is now <their name>" would publish the one thing
+// claiming exists to retire.
+async function renameRider(env, from, to, quiet) {
   await env.DB.batch([
     env.DB.prepare("UPDATE users SET slug = ? WHERE slug = ?").bind(to, from),
     env.DB.prepare("UPDATE rides SET user_slug = ? WHERE user_slug = ?").bind(to, from),
@@ -544,7 +549,7 @@ async function renameRider(env, from, to) {
       env.DB.prepare("UPDATE follows SET followee = ? WHERE followee = ?").bind(to, from),
     ]);
   } catch (e) { /* migration 010 not applied yet */ }
-  await recordActivity(env, "user_renamed", { actor: to, subject: from });
+  if (!quiet) await recordActivity(env, "user_renamed", { actor: to, subject: from });
 }
 
 // ---- Following -------------------------------------------------------------
@@ -1317,18 +1322,50 @@ export default {
         if (taken) return err(409, "there is already an account for that email — sign in instead");
         const owned = await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?").bind(inv.slug).first();
         if (owned) return err(409, "that rider has already been claimed");
+        // The name and username a rider arrives with are PLACEHOLDERS Carter
+        // typed to get their count into the site — "Keltan", "@keltan". Claiming
+        // is the moment they become somebody's own, so both can be set here and
+        // the temporary ones need never be seen (Carter's call, 2026-09-17).
+        // Both optional: send neither and nothing moves.
+        let wantName = null, wantSlug = null;
+        if (b && b.name !== undefined && String(b.name).trim()) {
+          wantName = String(b.name).trim().replace(/\s+/g, " ");
+          if (wantName.length > 40) return err(400, "that name is too long");
+        }
+        if (b && b.username !== undefined && String(b.username).trim()) {
+          wantSlug = slugify(String(b.username));
+          // selfSlug is the rider being claimed, so keeping the existing
+          // username is not a clash with itself.
+          const bad = await slugProblem(env, wantSlug, inv.slug);
+          if (bad) return err(400, bad);
+        }
+
+        // Hash FIRST, before anything is written — same rule as signup: D1 has
+        // no transaction across these statements, so whatever can fail has to
+        // fail while nothing has moved.
         let claimHash;
         try { claimHash = await hashPassword(b.password); }
         catch (e) { return err(500, "could not secure that password: " + (e && e.message || e)); }
+
+        // Rename BEFORE the account is attached. renameRider moves every table
+        // that stores a slug — rides, rankings, activity, invites, follows — so
+        // doing it first means the account is inserted against the final name
+        // and there is no window where the two disagree.
+        let slug = inv.slug;
+        if (wantSlug && wantSlug !== slug) { await renameRider(env, slug, wantSlug, true); slug = wantSlug; }
+        if (wantName) {
+          await env.DB.prepare("UPDATE users SET name = ? WHERE slug = ?").bind(wantName, slug).run();
+        }
+
         const acctId = (await env.DB.prepare(
           "INSERT INTO accounts (email,pw,slug,is_admin,created) VALUES (?,?,?,0,datetime('now')) RETURNING id"
-        ).bind(email, claimHash, inv.slug).first()).id;
+        ).bind(email, claimHash, slug).first()).id;
         // Mark the invite spent in the same breath, so a link shared twice by
         // accident cannot make a second account for the same rider.
         await env.DB.prepare("UPDATE invites SET used = datetime('now') WHERE code = ?").bind(code).run();
-        await env.DB.prepare("UPDATE users SET email = COALESCE(email, ?) WHERE slug = ?").bind(email, inv.slug).run();
+        await env.DB.prepare("UPDATE users SET email = COALESCE(email, ?) WHERE slug = ?").bind(email, slug).run();
         const raw = await startSession(env, acctId);
-        return json({ ok: true, slug: inv.slug }, 200, { "set-cookie": setCookie(raw) });
+        return json({ ok: true, slug }, 200, { "set-cookie": setCookie(raw) });
       }
 
       // Edit your profile: display name, username, bio — any combination, each

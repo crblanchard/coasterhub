@@ -1637,6 +1637,70 @@ async function main() {
     }
   }
 
+  // ---- claiming picks its own name AND username ----------------------------
+  // The name a rider arrives with is a placeholder; claiming is where it becomes
+  // theirs. The old one has to vanish completely, feed included.
+  {
+    const db = freshDb();
+    const admin = await signedUp(db, "boss@example.com", "Boss");
+    db.prepare("UPDATE accounts SET is_admin = 1 WHERE slug = 'boss'").run();
+    // carter is the seeded rider with rides + a ranking to carry across
+    db.prepare("INSERT INTO rankings (user_slug,coaster_id,pos) VALUES ('carter',1,1)").run();
+    const before = rows(db, "SELECT COUNT(*) c FROM rides WHERE user_slug='carter'")[0].c;
+
+    let r = await call(db, "POST", "/api/admin/invite", { cookie: admin, body: { slug: "carter" } });
+    check("invite issued", r.status === 200 && /\?claim=/.test(r.data.url), JSON.stringify(r.data));
+    const code = r.data.url.split("claim=")[1];
+
+    r = await call(db, "POST", "/api/auth/claim", { body: {
+      code, name: "Carter B", username: "firephoenix",
+      email: "new@example.com", password: "riding-things" } });
+    check("claim with a new name and username", r.status === 200 && r.data.slug === "firephoenix",
+      JSON.stringify(r.data));
+
+    check("the rider moved", rows(db, "SELECT slug, name FROM users WHERE slug='firephoenix'")[0].name === "Carter B");
+    check("the old username is gone", rows(db, "SELECT slug FROM users WHERE slug='carter'").length === 0);
+    check("every ride came with it",
+      rows(db, "SELECT COUNT(*) c FROM rides WHERE user_slug='firephoenix'")[0].c === before && before > 0);
+    check("so did the ranking",
+      rows(db, "SELECT COUNT(*) c FROM rankings WHERE user_slug='firephoenix'")[0].c === 1);
+    check("the account is attached to the NEW slug",
+      rows(db, "SELECT slug FROM accounts WHERE lower(email)='new@example.com'")[0].slug === "firephoenix");
+    check("the invite is spent", rows(db, "SELECT used FROM invites WHERE code=?", code) &&
+      db.prepare("SELECT used FROM invites WHERE code = ?").get(code).used !== null);
+    // The whole point: nothing anywhere still says "carter".
+    const feed = rows(db, "SELECT kind, actor, subject FROM activity");
+    check("no rename lands in the public feed",
+      !feed.some(e => e.kind === "user_renamed"), JSON.stringify(feed));
+    check("the placeholder is nowhere in the feed",
+      !feed.some(e => e.actor === "carter" || e.subject === "carter"), JSON.stringify(feed));
+    r = await call(db, "GET", "/api/user/carter");
+    check("the old page is a 404", r.status === 404);
+
+    // Both fields are optional: a claim that sends neither keeps what was there.
+    r = await call(db, "POST", "/api/admin/invite", { cookie: admin, body: { slug: "cole" } });
+    const code2 = r.data.url.split("claim=")[1];
+    r = await call(db, "POST", "/api/auth/claim", { body: {
+      code: code2, email: "cole@example.com", password: "riding-things" } });
+    check("claiming without them keeps the old name", r.status === 200 && r.data.slug === "cole" &&
+      rows(db, "SELECT name FROM users WHERE slug='cole'")[0].name === "Cole", JSON.stringify(r.data));
+
+    // And a username somebody else holds is refused, with nothing written.
+    r = await call(db, "POST", "/api/admin/invite", { cookie: admin, body: { slug: "max" } });
+    const code3 = r.data.url.split("claim=")[1];
+    r = await call(db, "POST", "/api/auth/claim", { body: {
+      code: code3, username: "firephoenix", email: "max@example.com", password: "riding-things" } });
+    check("a taken username is refused", r.status === 400 && /taken/.test(r.data.error || ""),
+      JSON.stringify(r.data));
+    check("...and the invite is still unspent",
+      db.prepare("SELECT used FROM invites WHERE code = ?").get(code3).used === null);
+    check("...and no account was made",
+      rows(db, "SELECT id FROM accounts WHERE lower(email)='max@example.com'").length === 0);
+    r = await call(db, "POST", "/api/auth/claim", { body: {
+      code: code3, username: "api", email: "max@example.com", password: "riding-things" } });
+    check("a reserved username is refused", r.status === 400, JSON.stringify(r.data));
+  }
+
   console.log("\n" + pass + " passed, " + fail + " failed\n");
   process.exit(fail ? 1 : 0);
 }
