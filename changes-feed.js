@@ -137,31 +137,53 @@
   function clock(iso){ return isDayOnly(iso) ? '' : new Date(atTime(iso)).toLocaleTimeString(undefined,
     { hour: 'numeric', minute: '2-digit' }); }
   
-  // Ranking bursts are merged when they are written (see recordRanking in
-  // worker.js), which leaves the rows already in the table ungrouped. Fold those
-  // together the same way on the way in: one rider's ranking events chain into a
-  // single line while each is within an hour of the one before it, reported at the
-  // newest timestamp. Chaining rather than a fixed window is deliberate — an hour
-  // of steady work is one sitting, however many times it was saved.
+  // Bursts are merged when they are written (see recordRanking and recordCredits
+  // in worker.js), which leaves the rows already in the table ungrouped. Fold
+  // those together the same way on the way in: one rider's events of the same
+  // kind chain into a single line while each is within an hour of the one
+  // before it, reported at the newest timestamp. Chaining rather than a fixed
+  // window is deliberate — an hour of steady work is one sitting, however many
+  // times it was saved.
+  //
+  // Two kinds group, and the third deliberately does not. Ranking and adding
+  // credits are both one job done in installments: nobody means "I did six
+  // separate things" by ticking a park's list in six saves. A dated RIDE is
+  // different — each one is a day out, at a named park, and reads as a fact on
+  // its own.
   var GROUP_MS = 60 * 60 * 1000;
-  function groupRankings(list){
+  var GROUPS = { ranking: 1, credits: 1 };
+  function groupRuns(list){
     var out = [];
     list.forEach(function(e){
       var last = out[out.length - 1];
-      if (e.kind === 'ranking' && last && last.kind === 'ranking' && last.actor === e.actor
+      if (GROUPS[e.kind] && last && last.kind === e.kind && last.actor === e.actor
           && !isDayOnly(e.at) && !isDayOnly(last.at)
           && atTime(last.at) - atTime(e.at) < GROUP_MS) {
         var a = last.detail || {}, b = e.detail || {};
-        // `last` is the newer of the two (the list is newest-first), so its total
-        // and its timestamp are the ones that survive.
-        last.detail = {
-          added: (a.added || 0) + (b.added || 0),
-          removed: (a.removed || 0) + (b.removed || 0),
-          reordered: !!(a.reordered || b.reordered),
-          credited: (a.credited || 0) + (b.credited || 0),
-          total: a.total,
-          saves: (a.saves || 1) + (b.saves || 1)
-        };
+        // `last` is the newer of the two (the list is newest-first), so its
+        // running total and its timestamp are the ones that survive.
+        if (e.kind === 'ranking') {
+          last.detail = {
+            added: (a.added || 0) + (b.added || 0),
+            removed: (a.removed || 0) + (b.removed || 0),
+            reordered: !!(a.reordered || b.reordered),
+            credited: (a.credited || 0) + (b.credited || 0),
+            total: a.total,
+            saves: (a.saves || 1) + (b.saves || 1)
+          };
+        } else {
+          // Credits have no running total to keep; the counts simply add up.
+          // `n` is summed as well as detail.rides because a row written before
+          // this had a detail carries only n, and the sentence reads whichever
+          // it finds.
+          last.detail = {
+            rides: (a.rides || 0) + (b.rides || 0),
+            coasters: (a.coasters || 0) + (b.coasters || 0),
+            newCredits: (a.newCredits || 0) + (b.newCredits || 0),
+            saves: (a.saves || 1) + (b.saves || 1)
+          };
+          last.n = (a.rides ? 0 : (last.n || 0)) + (b.rides ? 0 : (e.n || 0));
+        }
         return;
       }
       out.push(Object.assign({}, e, { detail: Object.assign({}, e.detail) }));
@@ -177,7 +199,7 @@
     var EVENTS = [], FILTER = 'all';
 
     function render(){
-      var list = groupRankings(EVENTS.filter(function(e){
+      var list = groupRuns(EVENTS.filter(function(e){
         if (FILTER === 'riders')   return !!RIDER_KINDS[e.kind];
         if (FILTER === 'database') return !RIDER_KINDS[e.kind];
         return true;

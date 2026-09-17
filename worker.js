@@ -703,13 +703,18 @@ async function addRides(env, b) {
 
   const total = await userTotal(env, slug);
   if (inserted) {
-    await recordActivity(env, d === null ? "credits" : "rides", {
-      actor: slug,
-      subject: d === null ? null : await parkLabel(env, ids),
-      n: inserted,
-      detail: { rides: inserted, coasters: norm.length,
-                newCredits: total.credits - wasCredits, date: d },
-    });
+    if (d === null) {
+      await recordCredits(env, slug, { rides: inserted, coasters: norm.length,
+                                       newCredits: total.credits - wasCredits });
+    } else {
+      await recordActivity(env, "rides", {
+        actor: slug,
+        subject: await parkLabel(env, ids),
+        n: inserted,
+        detail: { rides: inserted, coasters: norm.length,
+                  newCredits: total.credits - wasCredits, date: d },
+      });
+    }
   }
   return {
     added: inserted,
@@ -777,6 +782,40 @@ async function recordRanking(env, slug, { added, removed, reordered, credited, t
   await recordActivity(env, "ranking", {
     actor: slug, n: added || removed || total,
     detail: { added, removed, reordered, credited: credited || 0, total, saves: 1 },
+  });
+}
+
+// Adding credits arrives in bursts too, for the same reason ranking does: you
+// tick a park's list, save, pick the next park, save again. Six saves in ten
+// minutes is one sitting, not six things that happened, and left alone it filled
+// the feed with a column of "added 1 coaster to their count".
+//
+// Merges into this rider's last credits row while that one is under an hour old,
+// exactly like recordRanking. DATED rides are deliberately NOT merged: each one
+// is a day out at a named park and reads as a fact on its own.
+async function recordCredits(env, slug, { rides, coasters, newCredits }) {
+  const now = new Date().toISOString();
+  try {
+    const prev = await env.DB.prepare(
+      "SELECT id, at, n, detail FROM activity WHERE kind = 'credits' AND actor = ? ORDER BY at DESC, id DESC LIMIT 1"
+    ).bind(slug).first();
+    if (prev && Date.parse(now) - Date.parse(prev.at) < RANKING_MERGE_MS) {
+      const d = JSON.parse(prev.detail || "{}");
+      const merged = {
+        rides: (d.rides || prev.n || 0) + rides,
+        coasters: (d.coasters || 0) + coasters,
+        newCredits: (d.newCredits || 0) + (newCredits || 0),
+        date: null,
+        saves: (d.saves || 1) + 1,
+      };
+      await env.DB.prepare("UPDATE activity SET at = ?, n = ?, detail = ? WHERE id = ?")
+        .bind(now, merged.rides, JSON.stringify(merged), prev.id).run();
+      return;
+    }
+  } catch (e) { /* fall through and just record it normally */ }
+  await recordActivity(env, "credits", {
+    actor: slug, n: rides,
+    detail: { rides, coasters, newCredits: newCredits || 0, date: null, saves: 1 },
   });
 }
 

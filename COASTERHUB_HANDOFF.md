@@ -784,6 +784,33 @@ changes neither, so there is nothing to sync.
 
 ---
 
+## Credit bursts merge in the feed; dated rides do not (2026-09-17)
+
+Ticking a park's list, saving, picking the next park and saving again is **one sitting**, not
+six things that happened — but it filled the feed with a column of "added 1 coaster to their
+count". Credits now merge exactly the way ranking bursts have since 2026-08: a save folds into
+this rider's last credits row while that row is under an hour old, chaining, so an hour of
+steady work stays one line however many times it was saved.
+
+**Dated rides are deliberately left alone.** Each is a day out at a named park and reads as a
+fact on its own; merging them would throw away the park and the date, which are the only
+interesting parts.
+
+Done in **both places**, as ranking is:
+
+- `recordCredits()` in `worker.js` merges on write, so new rows are clean.
+- `groupRuns()` in `changes-feed.js` folds adjacent same-kind, same-actor events on the way in.
+  This is the half that matters for rows **already in the table** — a server-side merge alone
+  would leave every existing "added 1 coaster" line exactly as it is. `groupRankings()` was
+  renamed and generalised; `GROUPS` is the set of kinds that fold, and adding a third means
+  adding its merge arm.
+
+One trap when testing this: the undated guard skips a coaster the rider already holds, so a
+save of one they have writes **no rows and records no event**. A test that re-ticks the same
+coaster looks like the merge failing when nothing was recorded at all.
+
+---
+
 ## Following (2026-09-17)
 
 `migrations/010-follows.sql` — **Carter still has to paste this into the D1 console.** Until

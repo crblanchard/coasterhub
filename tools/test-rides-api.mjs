@@ -1701,6 +1701,52 @@ async function main() {
     check("a reserved username is refused", r.status === 400, JSON.stringify(r.data));
   }
 
+  // ---- credit bursts merge, dated rides do not -----------------------------
+  {
+    const db = freshDb();
+    const cookie = await signedUp(db, "burst@example.com", "Burst");
+    const slug = "burst";
+    const feed = () => rows(db, "SELECT kind, n, detail FROM activity WHERE actor = '" + slug + "'");
+
+    // Three separate undated saves, the way ticking three parks goes.
+    for (const c of [[1],[2],[3]]) {
+      const r = await call(db, "POST", "/api/rides", { cookie,
+        body: { user: slug, d: null, entries: c.map(id => ({ c: id, n: 1 })) } });
+      check("credit save " + c[0] + " accepted", r.status === 200, JSON.stringify(r.data));
+    }
+    let evs = feed().filter(e => e.kind === "credits");
+    check("three credit saves collapse to one row", evs.length === 1, JSON.stringify(evs));
+    check("...and it counts all three", evs[0].n === 3, JSON.stringify(evs[0]));
+    const det = JSON.parse(evs[0].detail || "{}");
+    check("...and remembers it was three saves", det.saves === 3, evs[0].detail);
+
+    // Dated rides stay one row each — a day out is a fact on its own.
+    for (const d of ["2024-06-01", "2024-06-02"]) {
+      await call(db, "POST", "/api/rides", { cookie,
+        body: { user: slug, d, entries: [{ c: 1, n: 1 }] } });
+    }
+    evs = feed().filter(e => e.kind === "rides");
+    check("two dated saves stay two rows", evs.length === 2, JSON.stringify(evs));
+
+    // A different rider never merges into somebody else's row.
+    const other = await signedUp(db, "other@example.com", "Other");
+    await call(db, "POST", "/api/rides", { cookie: other,
+      body: { user: "other", d: null, entries: [{ c: 2, n: 1 }] } });
+    check("another rider gets their own row",
+      rows(db, "SELECT actor FROM activity WHERE kind = 'credits'").length === 2);
+
+    // An hour later is a new sitting. Needs a coaster this rider does NOT hold:
+    // the undated guard skips one they already have, which writes no rows and so
+    // records no event at all.
+    db.prepare("INSERT INTO coasters (id,name,park,type) VALUES (4,'Gemini','Cedar Point','Steel')").run();
+    db.prepare("UPDATE activity SET at = '2020-01-01T00:00:00.000Z' WHERE kind = 'credits' AND actor = ?")
+      .run(slug);
+    await call(db, "POST", "/api/rides", { cookie,
+      body: { user: slug, d: null, entries: [{ c: 4, n: 1 }] } });
+    check("a stale row is not merged into",
+      rows(db, "SELECT id FROM activity WHERE kind = 'credits' AND actor = '" + slug + "'").length === 2);
+  }
+
   console.log("\n" + pass + " passed, " + fail + " failed\n");
   process.exit(fail ? 1 : 0);
 }
