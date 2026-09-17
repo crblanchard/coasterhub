@@ -1303,11 +1303,19 @@ Two conventions he uses inside a replacement:
 
 Row ids are `r-<group>-<row>-<slug of label + live text>`, so **changing a row's live text in
 `DATA` orphans whatever he typed against it**. That is why the left column still shows the
-old copy for rows already applied — leave it alone. Rows applied in the first pass
-(2026-09-17): home h1, home badge, feedback heading and body, feed heading and link; profile
-top-ten subtitles (both deleted), the Records / Rides over time / The breakdown headings, the
-dead-link body, and the fallback headline. A later pass must skip those — their live text is
-no longer what the desk's left column claims.
+old copy for rows already applied — leave it alone.
+
+**First pass (2026-09-17):** home h1, home badge, feedback heading and body, feed heading and
+link; profile top-ten subtitles (both deleted), the Records / Rides over time / The breakdown
+headings, the dead-link body, and the fallback headline.
+
+**Second pass (2026-09-17):** the whole `/count` hero — both headlines, both subtitles, the
+credits-only subtitle deleted — plus its hero button and the view switch (`Rides / Coaster list
+/ Park list`); on `/rankings` both headlines, both subtitles, Shared favorites → **Master
+list**, Each rider's list → **Personal lists** with new subtitles, and the card's drag hint.
+
+A later pass must skip all of those — their live text is no longer what the desk's left column
+claims.
 
 ### The loading pool
 
@@ -1330,7 +1338,11 @@ The swap runs **as `app.js` executes**, not on `DOMContentLoaded`: app.js is a b
 
 Carter writes the list in the desk's **Loading lines** section — one phrase per line, saved as
 the single doc `copy/pool-loading`. It is a pool, not a replacement: whatever he types there is
-the whole list, so applying it means replacing `LOADING` in `app.js` wholesale.
+the whole list, so applying it means replacing `LOADING` in `app.js` wholesale. As of the second
+pass it is his six: Credit whoring, Reriding, Getting in line, Ropedropping, Counting rides,
+Tracking stats — **without ellipses**, which is how he typed them (the textarea's placeholder
+showed bare lines, so that is probably the placeholder's doing rather than a decision; he was
+told and left them).
 
 Four loading lines are deliberately **out** of the pool, because they name what is on its way
 rather than greeting you: `Loading riders…` on the home page, `Loading rides…` and
