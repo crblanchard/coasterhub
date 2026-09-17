@@ -23,9 +23,9 @@
   /* The same row the /rankings summary draws, with a rank in front of it.
      The row opens, so .srow is only the card: the flex layout it used to carry
      lives on .stog, the button that is the whole row. */
-  .shared{display:flex;flex-direction:column;gap:8px;margin-bottom:56px}
+  .shared{display:flex;flex-direction:column;gap:6px;margin-bottom:56px}
   .srow{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .stog{display:flex;align-items:flex-start;gap:12px;width:100%;padding:11px 14px;
+  .stog{display:flex;align-items:flex-start;gap:12px;width:100%;padding:9px 12px;
         background:transparent;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
   /* Only where a pointer can actually hover — on a phone a :hover background
      sticks to the last thing tapped. --tint, not --tint2: the open row keeps
@@ -34,18 +34,20 @@
   .srow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);
              min-width:2.2em;text-align:right;flex:none;font-size:.95rem;margin-top:1px}
   .srow .n{flex:1;min-width:0}
-  .srow .n b{display:block;font-weight:600;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .srow .n span{display:block;color:var(--muted);font-size:.77rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .n b{display:block;font-weight:600;font-size:.93rem;line-height:1.3;
+             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Where it is: the park and its region lead, the model follows on the same
+     line. Named for what they are, not "the span inside .n" — the row has
+     gained and lost spans twice now (CLAUDE.md). */
+  .srow .n .sub{display:block;color:var(--muted);font-size:.77rem;line-height:1.35;
+                overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Literal, not \00b7 — CSS eats the space that terminates a hex escape,
+     so the escaped form loses the gap after the dot. */
+  .srow .n .mk::before{content:" · "}
   .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;font-variant-numeric:tabular-nums}
   .srow .meta b{display:block;color:var(--accent2);font-weight:700}
-  /* Who has it, and where they put it. Quiet: the agreement is the headline. */
-  .srow .by{color:var(--muted);font-size:.74rem;margin-top:3px;overflow:hidden;
-            text-overflow:ellipsis;white-space:nowrap}
   .srow .chev{color:var(--muted);flex:none;margin-top:4px;transition:transform .15s ease}
   .stog[aria-expanded="true"] .chev{transform:rotate(180deg)}
-  /* The teaser is the closed state's answer. Once the row is open the list
-     below says the same thing in full, so the line just costs height. */
-  .stog[aria-expanded="true"] .by{display:none}
   /* Opened: everyone who ranked it, best placing first, each a way into that
      rider's own list. Scoped to .srow because .who is also a profile class. */
   .srow .who{border-top:1px solid var(--line);padding:2px 14px 6px}
@@ -57,6 +59,16 @@
   .srow .wn{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .srow .wp{color:var(--accent2);font-weight:700;font-size:.84rem;flex:none;
             font-variant-numeric:tabular-nums}
+  /* A phone never has room for park, region and model on one line, and
+     truncating it loses the model every time. Give the model its own line
+     there and drop the separator that joined them. */
+  @media (max-width:560px){
+    .stog{padding:8px 11px;gap:10px}
+    .srow .n .sub{overflow:visible;text-overflow:clip;white-space:normal}
+    .srow .n .pl,.srow .n .mk{display:block;overflow:hidden;
+                              text-overflow:ellipsis;white-space:nowrap}
+    .srow .n .mk::before{content:none}
+  }
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:20px}
   .seg button{background:transparent;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;
     font-size:.9rem;font-family:inherit}
@@ -144,11 +156,11 @@ function render(){
     return;
   }
   $('list').innerHTML=list.map(function(t,i){
-    var c=t.c, avg=Math.round((t.sum/t.n)*10)/10;
-    // The summary line is a teaser — one line, clipped on a phone after two or
-    // three names. Opening the row is where the actual answer lives: everyone
-    // who ranked it and where, each name a link to that rider's own list.
-    var by=t.who.map(function(w){ return esc(w.name)+' #'+w.pos; }).join(' · ');
+    var c=t.c, avg=Math.round((t.sum/t.n)*10)/10, mk=CoasterHub.maker(c);
+    // No teaser of who ranked it: it was clipped after two names on a phone and
+    // said less than the row costs (Carter, 2026-09-17). Opening the row is
+    // where the answer lives — everyone who ranked it and where, each name a
+    // link to that rider's own list.
     var full=t.who.map(function(w){
       return '<a class="wrow" href="'+CoasterHub.userPageHref(w.slug,'rankings')+'">'
         +'<span class="wn">'+esc(w.name)+'</span>'
@@ -157,9 +169,9 @@ function render(){
     return '<div class="srow">'
       +'<button class="stog" type="button" aria-expanded="false" data-i="'+i+'">'
         +'<span class="pos">'+(i+1)+'</span>'
-        +'<span class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+(c.loc?' · '+esc(c.loc):'')
-          +(CoasterHub.maker(c)?' · '+esc(CoasterHub.maker(c)):'')+'</span>'
-          +'<span class="by">'+by+'</span></span>'
+        +'<span class="n"><b>'+esc(c.name)+'</b><span class="sub">'
+          +'<span class="pl">'+esc(c.park)+(c.loc?' \u00b7 '+esc(c.loc):'')+'</span>'
+          +(mk?'<span class="mk">'+esc(mk)+'</span>':'')+'</span></span>'
         +'<span class="meta"><b>'+t.n+' lists</b>avg #'+avg+'</span>'
         +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" '
           +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '

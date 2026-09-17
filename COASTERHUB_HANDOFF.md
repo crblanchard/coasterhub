@@ -1282,6 +1282,26 @@ Shape, and why:
 Tested in the harness at desktop and 390px, dark and light, on both pages: opens, closes, two
 rows open at once, names link to `/user/<slug>/rankings`, no horizontal overflow on a phone.
 
+### The closed row, tightened (2026-09-17)
+
+Carter, from a phone screenshot: *"Don't show rankings from people until we click on it … park /
+location then model on the line below … tighten pull size around the text and narrow space
+between pills so you can fit more coasters per page. On desktop keep location and model on the
+same line."* So:
+
+- **The teaser is gone**, on both lists. It was clipped after two names on a phone — "Firepheonix
+  #1 · Keltan Kemp #…" — which is the shape of an answer without being one. Opening the row is
+  the answer now.
+- **`.pl` (park · region) and `.mk` (model)** replace the anonymous `<span>` inside `.n`, wrapped
+  in `.sub`. One line on desktop, joined by a `::before` separator on `.mk`; under 560px `.mk`
+  becomes a block and the separator goes. Write that separator as a **literal `·`**: CSS eats the
+  whitespace that terminates a hex escape, so `content:" \00b7 "` loses the space after the dot.
+- **Tighter:** card gap 8→6px, row padding 11/14→9/12px (8/11 on a phone), explicit line-heights.
+  A phone row went 90px → 71px, five rows on the first screen instead of four.
+
+The selectors are named for what they hold rather than for being a span inside `.n` — that row
+has gained and lost spans three times now, and CLAUDE.md has the scars.
+
 ---
 
 ## The copy desk, and the loading-line pool (2026-09-17)

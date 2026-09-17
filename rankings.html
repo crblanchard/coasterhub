@@ -158,19 +158,34 @@
   .card .none em{font-style:normal;display:block;margin-top:6px;font-size:.8rem}
 
   /* shared favorites */
-  .shared{display:flex;flex-direction:column;gap:8px}
+  .shared{display:flex;flex-direction:column;gap:6px}
   /* The row opens to say who has it and where, the same as /rankings/all, so
      .srow is only the card and .stog — a button wrapping the whole row — is the
      flex layout. Reset every button default or it renders as a system button. */
   .srow{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .stog{display:flex;align-items:flex-start;gap:12px;width:100%;padding:11px 14px;
+  .stog{display:flex;align-items:flex-start;gap:12px;width:100%;padding:9px 12px;
         background:transparent;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
   @media (hover:hover){ .stog:hover{background:var(--tint)} }
   .srow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);
              min-width:2.2em;text-align:right;flex:none;font-size:.95rem;margin-top:1px}
   .srow .n{flex:1;min-width:0}
-  .srow .n b{display:block;font-weight:600;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .srow .n span{display:block;color:var(--muted);font-size:.77rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .n b{display:block;font-weight:600;font-size:.93rem;line-height:1.3;
+             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Park and region lead, the model follows on the same line — and on its own
+     line on a phone, where all three never fit. Named for what they are, not
+     "the span inside .n" (CLAUDE.md). Same row as /rankings/all draws. */
+  .srow .n .sub{display:block;color:var(--muted);font-size:.77rem;line-height:1.35;
+                overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Literal, not \00b7 — CSS eats the space that terminates a hex escape,
+     so the escaped form loses the gap after the dot. */
+  .srow .n .mk::before{content:" · "}
+  @media (max-width:560px){
+    .stog{padding:8px 11px;gap:10px}
+    .srow .n .sub{overflow:visible;text-overflow:clip;white-space:normal}
+    .srow .n .pl,.srow .n .mk{display:block;overflow:hidden;
+                              text-overflow:ellipsis;white-space:nowrap}
+    .srow .n .mk::before{content:none}
+  }
   .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;font-variant-numeric:tabular-nums}
   .srow .meta b{display:block;color:var(--accent2);font-weight:700}
   .srow .chev{color:var(--muted);flex:none;margin-top:4px;transition:transform .15s ease}
@@ -431,7 +446,7 @@ if(!slug){
       $('shared_sub').textContent='Coasters ranked by 2+ users';
       $('shared_more').style.display = shared.length > 10 ? 'block' : 'none';
       $('shared').innerHTML=shared.slice(0,10).map(function(t,i){
-        var c=BYID[t.id], avg=t.sum/t.n;
+        var c=BYID[t.id], avg=t.sum/t.n, mk=CoasterHub.maker(c);
         // Opening the row is the answer to the obvious question a shared list
         // raises — who, and how high? Each name goes to that rider's own list.
         var full=t.who.slice().sort(function(a,b){return a.pos-b.pos;}).map(function(w){
@@ -444,7 +459,9 @@ if(!slug){
         return '<div class="srow">'
           +'<button class="stog" type="button" aria-expanded="false">'
             +'<span class="pos">'+(i+1)+'</span>'
-            +'<span class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+'</span></span>'
+            +'<span class="n"><b>'+esc(c.name)+'</b><span class="sub">'
+              +'<span class="pl">'+esc(c.park)+(c.loc?' \u00b7 '+esc(c.loc):'')+'</span>'
+              +(mk?'<span class="mk">'+esc(mk)+'</span>':'')+'</span></span>'
             +'<span class="meta"><b>'+t.n+' lists</b>avg #'+(Math.round(avg*10)/10)+'</span>'
             +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" '
               +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
