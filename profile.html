@@ -606,7 +606,8 @@ function render(s){
       var loc=pk&&pk.region?pk.region:'';
       return '<div class="trow"><span class="pos">'+(i+1)+'</span>'
         +'<span class="n"><b>'+esc(c.name)+'</b>'
-        +'<span>'+esc(c.park||'')+(loc?' · '+esc(loc):'')+'</span></span></div>';
+        +'<span>'+esc(c.park||'')+(loc?' · '+esc(loc):'')
+          +(CoasterHub.maker(c)?' · '+esc(CoasterHub.maker(c)):'')+'</span></span></div>';
     }).join('');
     sec.style.display='';
     // The tiles carry a tightened top padding because they used to lead the

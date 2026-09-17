@@ -477,7 +477,8 @@ function renderRank(){
     return '<div class="rrow" data-i="'+i+'">'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">⠿</span>'
       +'<span class="pos">'+(i+1)+'</span>'
-      +'<span class="nm"><b>'+esc(c.name||('#'+id))+'</b><span>'+esc(c.park||'')+(c.loc?' · '+esc(c.loc):'')+'</span></span>'
+      +'<span class="nm"><b>'+esc(c.name||('#'+id))+'</b><span>'+esc(c.park||'')+(c.loc?' · '+esc(c.loc):'')
+        +(CoasterHub.maker(c)?' · '+esc(CoasterHub.maker(c)):'')+'</span></span>'
       +'<span class="acts">'
         +'<button data-up="'+i+'" title="Move up" aria-label="Move up">↑</button>'
         +'<button data-down="'+i+'" title="Move down" aria-label="Move down">↓</button>'

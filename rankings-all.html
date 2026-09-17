@@ -124,7 +124,8 @@ function render(){
     var by=t.who.map(function(w){ return esc(w.name)+' #'+w.pos; }).join(' · ');
     return '<div class="srow">'
       +'<span class="pos">'+(i+1)+'</span>'
-      +'<div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+(c.loc?' · '+esc(c.loc):'')+'</span>'
+      +'<div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+(c.loc?' · '+esc(c.loc):'')
+        +(CoasterHub.maker(c)?' · '+esc(CoasterHub.maker(c)):'')+'</span>'
         +'<div class="by">'+by+'</div></div>'
       +'<div class="meta"><b>'+t.n+' lists</b>avg #'+avg+'</div>'
       +'</div>';

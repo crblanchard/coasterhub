@@ -959,7 +959,16 @@
     }).catch(function () { /* signed out: the outline is right */ });
   }
 
-  var api = { computeStats: computeStats, loadUser: loadUser, currentUser: currentUser, me: me,
+  // "Gerstlauer Shuttle" — maker and model as one phrase, skipping whichever is
+  // missing so a half-filled row reads as a fact rather than a gap. 110 coasters
+  // have neither, and those get an empty string and no separator anywhere.
+  function maker(c) {
+    if (!c) return "";
+    var m = String(c.manu || "").trim(), mo = String(c.model || "").trim();
+    return m && mo ? m + " " + mo : (m || mo);
+  }
+
+  var api = { computeStats: computeStats, maker: maker, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers,
