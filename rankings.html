@@ -136,15 +136,32 @@
 
   /* shared favorites */
   .shared{display:flex;flex-direction:column;gap:8px}
-  .srow{display:flex;align-items:flex-start;gap:12px;background:var(--panel);border:1px solid var(--line);
-        border-radius:12px;padding:11px 14px}
+  /* The row opens to say who has it and where, the same as /rankings/all, so
+     .srow is only the card and .stog — a button wrapping the whole row — is the
+     flex layout. Reset every button default or it renders as a system button. */
+  .srow{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .stog{display:flex;align-items:flex-start;gap:12px;width:100%;padding:11px 14px;
+        background:transparent;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+  @media (hover:hover){ .stog:hover{background:var(--tint)} }
   .srow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);
-             min-width:2.1em;text-align:right;flex:none;font-size:.95rem;margin-top:1px}
+             min-width:2.2em;text-align:right;flex:none;font-size:.95rem;margin-top:1px}
   .srow .n{flex:1;min-width:0}
   .srow .n b{display:block;font-weight:600;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .srow .n span{display:block;color:var(--muted);font-size:.77rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;font-variant-numeric:tabular-nums}
   .srow .meta b{display:block;color:var(--accent2);font-weight:700}
+  .srow .chev{color:var(--muted);flex:none;margin-top:4px;transition:transform .15s ease}
+  .stog[aria-expanded="true"] .chev{transform:rotate(180deg)}
+  /* Scoped to .srow: .who is also a class on the profile and the rider rows. */
+  .srow .who{border-top:1px solid var(--line);padding:2px 14px 6px}
+  .srow .wrow{display:flex;align-items:center;justify-content:space-between;gap:12px;
+              padding:9px 0;text-decoration:none;color:var(--fg);
+              border-bottom:1px solid var(--line)}
+  .srow .wrow:last-child{border-bottom:0}
+  .srow .wrow:hover .wn{color:var(--accent2)}
+  .srow .wn{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .wp{color:var(--accent2);font-weight:700;font-size:.84rem;flex:none;
+            font-variant-numeric:tabular-nums}
   .note{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:62ch;
         color:var(--muted);font-size:.9rem}
   .note b{color:var(--fg)}
@@ -314,8 +331,9 @@ if(!slug){
     var tally={};
     lists.forEach(function(l){
       l.order.forEach(function(id,i){
-        var t=tally[id]||(tally[id]={id:id,n:0,sum:0});
+        var t=tally[id]||(tally[id]={id:id,n:0,sum:0,who:[]});
         t.n++; t.sum+=i+1;
+        t.who.push({name:l.user.name,slug:l.user.slug,pos:i+1});
       });
     });
     var ids=Object.keys(tally);
@@ -372,12 +390,36 @@ if(!slug){
       $('shared_more').style.display = shared.length > 10 ? 'block' : 'none';
       $('shared').innerHTML=shared.slice(0,10).map(function(t,i){
         var c=BYID[t.id], avg=t.sum/t.n;
+        // Opening the row is the answer to the obvious question a shared list
+        // raises — who, and how high? Each name goes to that rider's own list.
+        var full=t.who.slice().sort(function(a,b){return a.pos-b.pos;}).map(function(w){
+          return '<a class="wrow" href="'+CoasterHub.userPageHref(w.slug,'rankings')+'">'
+            +'<span class="wn">'+esc(w.name)+'</span>'
+            +'<span class="wp">#'+w.pos+'</span></a>';
+        }).join('');
         // Ranked, so number them: this is a top ten and the position is half of
         // what it says. /rankings/all numbers the same way.
-        return '<div class="srow"><span class="pos">'+(i+1)+'</span>'
-          +'<div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+'</span></div>'
-          +'<div class="meta"><b>'+t.n+' lists</b>avg #'+(Math.round(avg*10)/10)+'</div></div>';
+        return '<div class="srow">'
+          +'<button class="stog" type="button" aria-expanded="false">'
+            +'<span class="pos">'+(i+1)+'</span>'
+            +'<span class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+'</span></span>'
+            +'<span class="meta"><b>'+t.n+' lists</b>avg #'+(Math.round(avg*10)/10)+'</span>'
+            +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" '
+              +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
+              +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+          +'</button>'
+          +'<div class="who" hidden>'+full+'</div>'
+          +'</div>';
       }).join('');
+      // Independent toggles: closing the row you opened this one to compare
+      // against is the one thing you never want.
+      Array.prototype.forEach.call($('shared').querySelectorAll('.stog'), function(btn){
+        btn.addEventListener('click', function(){
+          var open = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+          btn.parentNode.querySelector('.who').hidden = open;
+        });
+      });
     } else {
       $('shared_sub').textContent='';
       $('shared').innerHTML='<div class="note">'+(started.length<2

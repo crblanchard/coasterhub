@@ -1247,15 +1247,19 @@ coasters you already own render inert there, so they never reach the basket.
 
 ---
 
-## A row on /rankings/all opens (2026-09-17)
+## A shared-ranking row opens (2026-09-17)
 
 Carter: *"If you click on a coaster in the ranking list show everyone that has it in a list and
-where they rank it."* He picked **expand in place** over a separate page, and **the shared list
-only** — `/rankings/all`. A per-rider list is one person's opinion; the global list is the only
-place the question "who else, and where?" has an answer.
+where they rank it."* He picked **expand in place** over a separate page. It runs on both
+shared lists — the **Shared favorites** ten on `/rankings` and the full list on
+`/rankings/all` — and on neither per-rider list, where the question has no answer: one person's
+list is one person's opinion.
 
-The tally already carried `who` for the one-line teaser under each coaster. It now carries the
-slug too, so each name in the opened panel is a link straight to that rider's own rankings.
+On `/rankings/all` the tally already carried `who` for the one-line teaser under each coaster;
+it now carries the slug too, so each name in the opened panel links straight to that rider's own
+rankings. `/rankings` counted lists without recording who was on them, so its tally grows the
+same `who` array. The summary row there stays teaser-free — it is the tighter of the two by
+design, and opening it is the payoff.
 
 Shape, and why:
 
@@ -1275,8 +1279,8 @@ Shape, and why:
   under `.riderrow` and `.profedit`. Same lesson as every other specificity trap in CLAUDE.md —
   grep before you name.
 
-Tested in the harness at 1100px and 390px, dark and light: opens, closes, both rows open at
-once, names link to `/user/<slug>/rankings`, no horizontal overflow on a phone.
+Tested in the harness at desktop and 390px, dark and light, on both pages: opens, closes, two
+rows open at once, names link to `/user/<slug>/rankings`, no horizontal overflow on a phone.
 
 ---
 
