@@ -988,9 +988,21 @@
   // is a blocking <script> at the end of <body>, before the hero is painted.
   // Doing it on DOMContentLoaded would show the markup's line first and then
   // visibly change it.
+  //
+  // One shuffle per page load, dealt out in document order rather than a fresh
+  // pick each time: a page with both a hero line and a smaller one below it
+  // would otherwise sometimes print the same phrase twice, which reads as a bug
+  // rather than as a joke.
   if (typeof document !== "undefined") {
     var _load = document.querySelectorAll("[data-loading]");
-    for (var _i = 0; _i < _load.length; _i++) _load[_i].textContent = loadingLine();
+    if (_load.length) {
+      var _bag = LOADING.slice();
+      for (var _s = _bag.length - 1; _s > 0; _s--) {
+        var _r = Math.floor(Math.random() * (_s + 1)), _t = _bag[_s];
+        _bag[_s] = _bag[_r]; _bag[_r] = _t;
+      }
+      for (var _i = 0; _i < _load.length; _i++) _load[_i].textContent = _bag[_i % _bag.length];
+    }
   }
 
   var api = { computeStats: computeStats, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,

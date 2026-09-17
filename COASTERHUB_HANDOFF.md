@@ -1310,9 +1310,15 @@ no longer what the desk's left column claims.
 The big line a hero wears before its numbers arrive is no longer a fixed word. `app.js` holds
 one `LOADING` array for the whole site and swaps it into anything carrying **`data-loading`**:
 
-- `profile.html` `#hero_h`, `count.html`'s hero `h1`, `rankings.html` `#hero_h1`.
+- The heroes: `profile.html` `#hero_h`, `count.html`'s hero `h1`, `rankings.html` `#hero_h1`.
+- The small lines under them: `#loading` on the profile, rankings and `/rankings/all`, and the
+  feed's `.empty` on the home page and `/changes`.
 - On `/rankings` (the everyone view) the headline is set synchronously, so the pool never shows
-  there; on `/user/<slug>/rankings` it does, because that headline waits on a fetch.
+  in the hero there; on `/user/<slug>/rankings` it does, because that headline waits on a fetch.
+
+The pool is **shuffled once per page load and dealt out in document order**, not picked afresh
+per element. A profile has a hero line and a smaller one below it, and independent picks would
+sometimes print the same phrase twice on one screen — which reads as a bug rather than a joke.
 
 The swap runs **as `app.js` executes**, not on `DOMContentLoaded`: app.js is a blocking
 `<script>` at the end of `<body>`, so it lands before the hero is painted. On
@@ -1322,8 +1328,10 @@ Carter writes the list in the desk's **Loading lines** section — one phrase pe
 the single doc `copy/pool-loading`. It is a pool, not a replacement: whatever he types there is
 the whole list, so applying it means replacing `LOADING` in `app.js` wholesale.
 
-The small `Loading…` lines in page bodies (`#loading`, the feed's `.empty`) are deliberately
-**not** in the pool — they are quiet muted text, not a greeting.
+Four loading lines are deliberately **out** of the pool, because they name what is on its way
+rather than greeting you: `Loading riders…` on the home page, `Loading rides…` and
+`Loading the full list…` on `/count`, and `Loading database…` on `/database`. Replacing those
+with a random phrase would lose what they are telling you.
 
 ---
 
