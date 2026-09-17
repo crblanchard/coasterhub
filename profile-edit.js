@@ -354,6 +354,32 @@
 
     var CROP = { img: null, zoom: 1, x: 0, y: 0, base: 1, vw: 0 };
 
+    // The working copy is a CANVAS, never the <img>, and this is the whole
+    // reason avatars came out cropped wrong from a phone.
+    //
+    // A photo taken upright on a phone is not stored upright. It is a landscape
+    // bitmap — 4032x3024 — plus an EXIF tag saying "rotate this 90 degrees".
+    // Browsers apply that when they DISPLAY the <img>, so naturalWidth/Height
+    // report the upright 3024x4032 and the preview, which is CSS background
+    // sizing, looks perfectly right. But drawImage()'s nine-argument form, the
+    // one that takes a source rectangle, has a long history in WebKit of reading
+    // those coordinates in the RAW unrotated space. The preview then frames one
+    // region and the canvas saves a different, rotated one, and no amount of
+    // dragging fixes it because both halves are behaving consistently with
+    // themselves.
+    //
+    // It is invisible to a test: a synthetic PNG carries no EXIF at all, so
+    // Chromium and every check run here agreed the maths was right. It was.
+    //
+    // Baking the photo onto a canvas first settles it by construction. The
+    // browser applies the orientation once, in the plain three-argument draw
+    // that every engine gets right, and a canvas carries no metadata — so every
+    // measurement after this point and the final crop are in the same space.
+    // The copy is also capped at BAKE_MAX on its long edge: the output is 256px
+    // so nothing is lost, and it keeps a 12-megapixel photo well under iOS's
+    // canvas limits.
+    var BAKE_MAX = 1800;
+
     function loadImage(file) {
       return new Promise(function (resolve, reject) {
         var img = new Image();
@@ -365,7 +391,22 @@
             ". If it is a HEIC photo, export it as JPEG first, or try Safari."));
         };
         img.src = URL.createObjectURL(file);
-      });
+      }).then(bake);
+    }
+
+    function bake(img) {
+      var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      if (!w || !h) throw new Error("that image has no size");
+      var k = Math.min(1, BAKE_MAX / Math.max(w, h));
+      var c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(w * k));
+      c.height = Math.max(1, Math.round(h * k));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      try { URL.revokeObjectURL(img.src); } catch (e) {}
+      // The preview paints it as a CSS background, which needs a URL; a canvas
+      // has none, so one is made here and reused rather than per repaint.
+      c.previewUrl = c.toDataURL("image/jpeg", 0.85);
+      return c;
     }
     // The crop viewport's width is measured once, on open, and EVERY number in
     // here is expressed in terms of it — the scale, the offsets, and the size of
@@ -397,7 +438,7 @@
       syncView();
       clamp();
       var s = CROP.base * CROP.zoom;
-      c.img.style.backgroundImage = 'url("' + CROP.img.src + '")';
+      c.img.style.backgroundImage = 'url("' + CROP.img.previewUrl + '")';
       c.img.style.backgroundSize = (CROP.img.width * s) + "px " + (CROP.img.height * s) + "px";
       c.img.style.backgroundPosition = CROP.x + "px " + CROP.y + "px";
     }
@@ -433,8 +474,7 @@
 
     function closeCrop() {
       wrap.hidden = true;
-      if (CROP.img) { try { URL.revokeObjectURL(CROP.img.src); } catch (e) {} }
-      CROP.img = null;
+      CROP.img = null;   // the object URL was revoked in bake()
       el.file.value = "";
     }
     // Zoom about the CENTRE, so what you are looking at stays put rather than

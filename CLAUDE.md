@@ -56,6 +56,16 @@ those files are the fallback, and the sync overwrites them.
 - **CRLF files:** `README.md`, `index.html`, `stats.html`, `style.css`,
   `tools/import-credits.js`. Edit them in binary mode; a text-mode write flattens
   the line endings and the diff becomes the entire file.
+- **A phone photo is not the shape it looks.** It is a landscape bitmap plus an
+  EXIF tag saying "rotate 90". Browsers apply that when DISPLAYING an `<img>`,
+  so `naturalWidth/Height` and CSS backgrounds are upright — but
+  `drawImage()`'s nine-argument source-rectangle form has a WebKit history of
+  reading those coordinates in the RAW unrotated space, which crops a
+  different region than the preview showed. `profile-edit.js` bakes every
+  upload onto a canvas first (orientation applied once, in the plain
+  three-argument draw) and measures that. **A synthetic PNG has no EXIF, so no
+  test here can see this class of bug** — if you touch the crop, test with
+  `rotated.jpg` in the scratchpad, not a generated image.
 - **Workers cap PBKDF2 at 100,000 iterations.** Node's WebCrypto does not, so a
   higher number passes every local test and 500s in production.
 - **CSS shorthands reset their longhands** (`background` kills `background-image`

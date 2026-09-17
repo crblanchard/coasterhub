@@ -911,6 +911,45 @@ fits one screen.
 
 ---
 
+## The avatar crop bakes the photo first (2026-09-17)
+
+Carter, after re-uploading many times: "still having the issue with photos not cropping
+properly". Three separate checks had said the maths was right, and they were all correct —
+about the wrong file.
+
+**A photo taken upright on a phone is not stored upright.** It is a landscape bitmap —
+4032x3024 — with an EXIF tag saying "rotate this 90 degrees". Browsers apply that when they
+*display* an `<img>`, so `naturalWidth/Height` report the upright shape and the crop preview,
+which is CSS background sizing, looks perfectly right. But `drawImage()`'s **nine-argument**
+form, the one that takes a source rectangle, has a long WebKit history of reading those
+coordinates in the **raw, unrotated** space. The preview frames one region and the canvas saves
+a different, rotated one, and dragging cannot fix it because both halves are behaving
+consistently with themselves.
+
+`loadImage()` now **bakes** the photo onto a canvas before anything measures it: the browser
+applies the orientation once, in the plain three-argument draw that every engine gets right,
+and a canvas carries no metadata, so every later measurement and the final crop are in the same
+space by construction. The working copy is capped at **1800px** on its long edge — the output
+is 256px so nothing is lost, and it keeps a 12-megapixel photo well under iOS's canvas limits.
+The preview's background comes from a data URL made once at bake time (`canvas.previewUrl`),
+since a canvas has no `.src`.
+
+### Why nothing here caught it, and what to do about that
+
+**A synthetic PNG carries no EXIF at all.** Every test written for this — the eight-band
+image, the three zoom levels — ran in Chromium against a generated file and agreed the crop
+was faithful. It was. The bug lives entirely in the gap between a rotated source and an engine
+that disagrees about which space a source rectangle is in.
+
+`scratchpad/rotated.jpg` (built by `mkexif.mjs`) is a landscape JPEG carrying Orientation=6,
+with four labelled colour quadrants so the saved region is readable from its pixels. **Use it,
+not a generated image, if you touch this code.** Note its limit: Chromium handles the
+nine-argument form correctly, so the test produces identical output before and after the fix —
+it proves the bake does not regress anything, not that Safari is fixed. Reproducing that needs
+a real iOS device.
+
+---
+
 ## The avatar crop opens near the top of a portrait (2026-09-17)
 
 Carter said his picture was "cropped weird". **The crop pipeline is faithful** — verified by
