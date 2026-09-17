@@ -113,10 +113,14 @@
 </div></section>
 
 <div id="gate" class="gate">
-  <h2>Locked</h2>
-  <p>Enter the admin password to import a list.</p>
-  <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
-  <button class="primary" id="unlock">Unlock</button>
+  <h2>Sign in to import</h2>
+  <p>An import goes to the count of whoever is signed in, so it lands in the right place.</p>
+  <a class="primary" id="gosignin" href="/account?next=/import"
+     style="display:block;text-align:center;text-decoration:none;box-sizing:border-box">Sign in</a>
+  <p style="margin:16px 0 10px">Riders who haven&rsquo;t claimed an account yet can still use the
+     shared password.</p>
+  <input id="pw" type="password" placeholder="Shared password" autocomplete="current-password">
+  <button class="ghost" id="unlock" style="width:100%">Unlock</button>
   <div class="msg bad" id="gate_msg"></div>
 </div>
 
@@ -193,16 +197,20 @@ var TOKEN='', COASTERS=[], PARKS={}, ALIAS=[], PALIAS=[], OWNED={}, ROWS={}, FIX
 function $(id){return document.getElementById(id);}
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
-// ---- gate (shared with /log, /add, /edit) ----------------------------------
 // ---- gate ------------------------------------------------------------------
-// Two ways in. An ADMIN ACCOUNT is the normal one now — this page writes to the
-// shared database, so an ordinary rider's account is not enough. The shared
-// password still works and still unlocks /log, /add, /edit and /import
-// together, but nobody needs to hold it day to day.
+// ANY signed-in account, same as /log (2026-09-17). Importing a list is just
+// logging a lot of rides at once, and everybody who would do it is signed in.
+// It is not a hole: the Worker's mayWriteRider() still decides whose count can
+// be written to, so an ordinary account importing for somebody else gets a 401
+// however this page is dressed. What the account level changes here is the
+// RIDER PICKER — see applyAccountLimits().
+//
+// The shared password still works and still unlocks /log, /add, /edit and
+// /import together, for riders who have not claimed an account yet.
 var ME=null;
 CoasterHub.me().then(function(acct){
   ME=acct;
-  if(acct && acct.admin){ $('gate').style.display='none'; $('app').style.display='block'; boot(); return; }
+  if(acct){ $('gate').style.display='none'; $('app').style.display='block'; boot(); return; }
   try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
   if(TOKEN) verify(TOKEN,true);
 });
@@ -442,6 +450,7 @@ async function readXlsx(buf){
 // ---- boot ------------------------------------------------------------------
 function boot(){
   fillRiders();
+  applyAccountLimits();
   // The rider list lives in D1, so someone added on /log (or right here) can be
   // imported for straight away. USERS is the offline fallback.
   CoasterHub.fetchUsers().then(function(){ fillRiders(); loadOwned(); });
@@ -468,11 +477,30 @@ function boot(){
 
 function fillRiders(){
   var sel=$('rider'), cur=sel.value;
+  // Signed in as a rider there is nothing to choose: the API would refuse a
+  // write to anyone else, so offering the list would only be a way to get a
+  // 401. Admins keep the full list, and so does the shared password, which
+  // knows no name at all until one is picked.
+  if(ME && !ME.admin){
+    sel.innerHTML='<option value="'+esc(ME.slug)+'">'+esc(ME.name||ME.slug)+'</option>';
+    sel.value=ME.slug;
+    sel.disabled=true;
+    sel.title='An import goes to your own count';
+    return;
+  }
+  sel.disabled=false;
   sel.innerHTML=CoasterHub.USERS.slice().sort(function(a,b){return a.name.localeCompare(b.name);})
     .map(function(u){ return '<option value="'+esc(u.slug)+'">'+esc(u.name)+'</option>'; }).join('');
   var remembered=cur; if(!remembered){ try{ remembered=localStorage.getItem('ch_rider')||''; }catch(e){} }
   if(remembered) sel.value=remembered;
   if(!sel.value && sel.options.length) sel.selectedIndex=0;
+}
+
+// Adding a RIDER is still admin only — hide the button rather than let someone
+// fill a form that can only 401.
+function applyAccountLimits(){
+  if(!ME || ME.admin) return;
+  var el=$('newrider'); if(el) el.style.display='none';
 }
 
 // Every park that has coasters, for the "no park" default and for the park box

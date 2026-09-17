@@ -939,6 +939,43 @@ If you add a page, give its hero `--hero-t`/`--hero-b`, not `padding`.
 
 ---
 
+## /import is open to any signed-in account (2026-09-17)
+
+It used to demand the **admin** password or an admin account. Carter's call: everybody who
+would use it is signed in, so the password was a wall in front of a door that is already
+locked. Signed out you still get a gate, and it now offers **Sign in** first with the shared
+password underneath, the same shape as `/log`'s.
+
+**This is not a hole.** The Worker's `mayWriteRider()` decides whose count may be written to,
+and it sits on `/api/rides` *above* the admin gate — an ordinary account importing for someone
+else gets a 401 however the page is dressed. What the account level changes is the **rider
+picker**: signed in as a rider it is locked to you and disabled, because offering the list
+would only be a way to earn that 401. Admins and the shared password keep the full list.
+"+ Person" (which calls the admin-only `POST /api/user`) stays hidden for everyone else.
+
+---
+
+## The log page, decluttered (2026-09-17)
+
+Carter: "I like the functionality but the look is too cluttered." Four text rows came out
+between the top of the page and the first control:
+
+- **"Coaster or park not in the database? Add it here"** — deleted. The job it pointed at is
+  already on screen at the moment you need it: **+ Park** beside the picker, **+ Coaster not
+  listed** over the coaster list.
+- **The two uppercase field labels** (`PARK`, `OR SEARCH ALL COASTERS`) are no longer drawn.
+  The controls under them already say what they are — "— pick a park —", "Search every
+  coaster…". The `<label>` elements are still there, carrying `.vh`, so a screen reader still
+  gets them; this is a visual change, not a semantic one. **Do not delete the labels.**
+- **The mode hints** are one line each now. The long one pointed at `/import`, which is a link
+  two inches above it, and spelled out what the `+` buttons already show.
+
+Also: the "Import a list →" link carried `class="ghost"`, which on that page is a **button**
+selector (`button.ghost{}`), so it had no styling at all and rendered as bare text beside a
+pill switch. It has its own rule now.
+
+---
+
 ## Near me, and finding a park at all (2026-09-17)
 
 `/log`'s park field has three ways in now, and the point of all three is not scrolling 247

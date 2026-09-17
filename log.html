@@ -31,6 +31,12 @@
                  font-size:.88rem;padding:8px 14px;border-radius:9px;cursor:pointer}
   .modesw button:hover{color:var(--fg)}
   .modesw button.on{background:var(--accent2);color:var(--well);font-weight:700}
+  /* Beside the switch, not under it, and quiet: a third way in, not a third
+     mode. It used to carry class="ghost", which is a BUTTON selector on this
+     page, so it had no styling at all. */
+  #importlink{color:var(--accent2);font-size:.88rem;font-weight:600;margin-left:14px;
+    white-space:nowrap}
+  #importlink:hover{text-decoration:underline}
   .modehint{color:var(--muted);font-size:.83rem;margin:0 0 16px;max-width:74ch}
   /* Whose count, as a sentence. A second pill beside the header's rider picker
      was the thing that made this page confusing; a line of text is not. */
@@ -50,9 +56,12 @@
   .nearpick.on{border-color:var(--accent2);color:var(--accent2);font-weight:700}
   .nearpick .mi{color:var(--muted);font-weight:400;margin-left:5px}
   .nearpick.on .mi{color:var(--accent2)}
-  .setup{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:0 0 18px}
+  .setup{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:0 0 16px}
   .fld{display:flex;flex-direction:column;gap:5px}
   .fld label{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+  /* Said, not shown: the control underneath already names itself. */
+  .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+      clip:rect(0 0 0 0);white-space:nowrap;border:0}
   .grid{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
   .panel h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
@@ -150,14 +159,13 @@
     <button type="button" class="on" data-mode="day">Log rides</button>
     <button type="button" data-mode="list">Add credits</button>
   </div>
-  <a href="/import" class="ghost" id="importlink"
-     style="margin-left:10px;text-decoration:none;display:inline-block">Import a list &rarr;</a>
+  <a href="/import" id="importlink">Import a list &rarr;</a>
   <p class="modehint" id="modehint"></p>
-  <!-- The way out of a dead end: you are staging a day and the coaster you rode
-       is not on the list. Says so where you hit it, rather than leaving you to
-       find /add in a header. Everyone sees it — any account can add now. -->
-  <p class="modehint" style="margin-top:2px">Coaster or park not in the database?
-    <a href="/add">Add it here</a>.</p>
+  <!-- The "coaster or park not in the database? Add it here" line that used to
+       sit here is gone (2026-09-17): the page was reading as a wall of text
+       before you got to a control, and the job it pointed at is already on
+       screen where you hit it — "+ Park" beside the picker, "+ Coaster not
+       listed" over the coaster list. -->
 
   <!-- Whose count this writes to. Normally there is nothing to decide — it is
        yours — so it is a sentence, not a control. The picker only opens for the
@@ -174,8 +182,12 @@
     <p class="note">Rides go to this rider&rsquo;s count. Yours unless you change it.</p>
   </div>
 
+  <!-- No uppercase field labels any more. Two of them, over controls that
+       already say what they are ("— pick a park —", "Search every coaster"),
+       were two rows of shouting between you and the thing you came to press.
+       The labels are still THERE for a screen reader, just not drawn. -->
   <div class="setup">
-    <div class="fld" style="flex:1;min-width:240px"><label for="park">Park</label>
+    <div class="fld" style="flex:1;min-width:240px"><label class="vh" for="park">Park</label>
       <div style="display:flex;gap:8px">
         <select id="park" style="flex:1;min-width:0"></select>
         <button class="ghost" id="nearme" type="button" title="Sort by how close they are to you"
@@ -189,7 +201,8 @@
              autocomplete="off" style="width:100%;margin-top:8px">
       <p class="geonote" id="geonote"></p>
     </div>
-    <div class="fld" style="flex:1;min-width:200px"><label for="search">Or search all coasters</label><input id="search" type="search" placeholder="Type 2+ letters&hellip;" style="width:100%"></div>
+    <div class="fld" style="flex:1;min-width:200px"><label class="vh" for="search">Search all coasters</label>
+      <input id="search" type="search" placeholder="Search every coaster&hellip;" style="width:100%"></div>
   </div>
 
   <div class="miniform" id="riderform">
@@ -393,9 +406,11 @@ function setMode(m){
   var btns=$('modesw').querySelectorAll('button');
   for(var i=0;i<btns.length;i++) btns[i].classList.toggle('on',btns[i].getAttribute('data-mode')===m);
   $('datefld').style.display = m==='day' ? '' : 'none';
+  // One line each. The long version pointed at /import, which is now a link
+  // two inches above it, and spelled out what the + buttons already show.
   $('modehint').textContent = m==='day'
-    ? 'A dated visit. Every lap counts — tap + once per ride, re-rides included.'
-    : 'For filling in what you have ridden before. No dates and no ride counts — just tick everything you have been on, park by park. Got the whole thing written down already? Import it instead.';
+    ? 'A dated visit — tap + once per ride, re-rides included.'
+    : 'Everything you have ridden before. No dates, no ride counts.';
   $('save').textContent = m==='day' ? 'Save day' : 'Add to my count';
   $('baskethead').textContent = m==='day' ? 'This day' : 'Staged';
   // Laps mean nothing in list mode and a tick means nothing in day mode, so
