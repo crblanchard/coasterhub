@@ -20,10 +20,17 @@
 <style>
   #loading{color:var(--muted);padding:40px 0}
   #err{display:none;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:20px;color:var(--fg)}
-  /* The same row the /rankings summary draws, with a rank in front of it. */
+  /* The same row the /rankings summary draws, with a rank in front of it.
+     The row opens, so .srow is only the card: the flex layout it used to carry
+     lives on .stog, the button that is the whole row. */
   .shared{display:flex;flex-direction:column;gap:8px;margin-bottom:56px}
-  .srow{display:flex;align-items:flex-start;gap:12px;background:var(--panel);border:1px solid var(--line);
-        border-radius:12px;padding:11px 14px}
+  .srow{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .stog{display:flex;align-items:flex-start;gap:12px;width:100%;padding:11px 14px;
+        background:transparent;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+  /* Only where a pointer can actually hover — on a phone a :hover background
+     sticks to the last thing tapped. --tint, not --tint2: the open row keeps
+     its wash while the cursor sits on it and it should stay a whisper. */
+  @media (hover:hover){ .stog:hover{background:var(--tint)} }
   .srow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);
              min-width:2.2em;text-align:right;flex:none;font-size:.95rem;margin-top:1px}
   .srow .n{flex:1;min-width:0}
@@ -34,6 +41,22 @@
   /* Who has it, and where they put it. Quiet: the agreement is the headline. */
   .srow .by{color:var(--muted);font-size:.74rem;margin-top:3px;overflow:hidden;
             text-overflow:ellipsis;white-space:nowrap}
+  .srow .chev{color:var(--muted);flex:none;margin-top:4px;transition:transform .15s ease}
+  .stog[aria-expanded="true"] .chev{transform:rotate(180deg)}
+  /* The teaser is the closed state's answer. Once the row is open the list
+     below says the same thing in full, so the line just costs height. */
+  .stog[aria-expanded="true"] .by{display:none}
+  /* Opened: everyone who ranked it, best placing first, each a way into that
+     rider's own list. Scoped to .srow because .who is also a profile class. */
+  .srow .who{border-top:1px solid var(--line);padding:2px 14px 6px}
+  .srow .wrow{display:flex;align-items:center;justify-content:space-between;gap:12px;
+              padding:9px 0;text-decoration:none;color:var(--fg);
+              border-bottom:1px solid var(--line)}
+  .srow .wrow:last-child{border-bottom:0}
+  .srow .wrow:hover .wn{color:var(--accent2)}
+  .srow .wn{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .wp{color:var(--accent2);font-weight:700;font-size:.84rem;flex:none;
+            font-variant-numeric:tabular-nums}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:20px}
   .seg button{background:transparent;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;
     font-size:.9rem;font-family:inherit}
@@ -122,17 +145,38 @@ function render(){
   }
   $('list').innerHTML=list.map(function(t,i){
     var c=t.c, avg=Math.round((t.sum/t.n)*10)/10;
-    // Who put it where, newest agreement first. Names, not slugs: this is the
-    // one place the list is about the people rather than the coasters.
+    // The summary line is a teaser — one line, clipped on a phone after two or
+    // three names. Opening the row is where the actual answer lives: everyone
+    // who ranked it and where, each name a link to that rider's own list.
     var by=t.who.map(function(w){ return esc(w.name)+' #'+w.pos; }).join(' · ');
+    var full=t.who.map(function(w){
+      return '<a class="wrow" href="'+CoasterHub.userPageHref(w.slug,'rankings')+'">'
+        +'<span class="wn">'+esc(w.name)+'</span>'
+        +'<span class="wp">#'+w.pos+'</span></a>';
+    }).join('');
     return '<div class="srow">'
-      +'<span class="pos">'+(i+1)+'</span>'
-      +'<div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+(c.loc?' · '+esc(c.loc):'')
-        +(CoasterHub.maker(c)?' · '+esc(CoasterHub.maker(c)):'')+'</span>'
-        +'<div class="by">'+by+'</div></div>'
-      +'<div class="meta"><b>'+t.n+' lists</b>avg #'+avg+'</div>'
+      +'<button class="stog" type="button" aria-expanded="false" data-i="'+i+'">'
+        +'<span class="pos">'+(i+1)+'</span>'
+        +'<span class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+(c.loc?' · '+esc(c.loc):'')
+          +(CoasterHub.maker(c)?' · '+esc(CoasterHub.maker(c)):'')+'</span>'
+          +'<span class="by">'+by+'</span></span>'
+        +'<span class="meta"><b>'+t.n+' lists</b>avg #'+avg+'</span>'
+        +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" '
+          +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
+          +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+      +'</button>'
+      +'<div class="who" hidden>'+full+'</div>'
       +'</div>';
   }).join('');
+  // One open at a time would hide the comparison you just opened it to make,
+  // so they are independent toggles.
+  Array.prototype.forEach.call($('list').querySelectorAll('.stog'), function(btn){
+    btn.addEventListener('click', function(){
+      var open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      btn.parentNode.querySelector('.who').hidden = open;
+    });
+  });
 }
 
 Array.prototype.forEach.call(document.querySelectorAll('#sortby button'), function(b){
@@ -166,7 +210,7 @@ CoasterHub.fetchUsers().then(function(){
       (all[i].order||[]).forEach(function(id,pos){
         if(!BYID[id]) return;              // a merged-away coaster is not a row
         var t=tally[id]||(tally[id]={c:BYID[id],n:0,sum:0,who:[]});
-        t.n++; t.sum+=pos+1; t.who.push({name:u.name,pos:pos+1});
+        t.n++; t.sum+=pos+1; t.who.push({name:u.name,slug:u.slug,pos:pos+1});
       });
     });
     ROWS=Object.keys(tally).map(function(k){ return tally[k]; })

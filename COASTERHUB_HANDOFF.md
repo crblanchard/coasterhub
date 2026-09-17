@@ -1247,6 +1247,39 @@ coasters you already own render inert there, so they never reach the basket.
 
 ---
 
+## A row on /rankings/all opens (2026-09-17)
+
+Carter: *"If you click on a coaster in the ranking list show everyone that has it in a list and
+where they rank it."* He picked **expand in place** over a separate page, and **the shared list
+only** — `/rankings/all`. A per-rider list is one person's opinion; the global list is the only
+place the question "who else, and where?" has an answer.
+
+The tally already carried `who` for the one-line teaser under each coaster. It now carries the
+slug too, so each name in the opened panel is a link straight to that rider's own rankings.
+
+Shape, and why:
+
+- `.srow` is only the card now — background, border, `overflow:hidden` so the opened panel is
+  clipped to the rounded corners. The **flex row moved to `.stog`**, a `<button>` wrapping the
+  whole row, because the entire row is the target and a button is what a keyboard and a screen
+  reader expect. It resets every button default (`background`, `border`, `color`, `font`,
+  `text-align`, `padding`) — miss one and it renders as a grey system button.
+- **The rows toggle independently.** One-open-at-a-time would close the row you opened this one
+  to compare against, which is the whole reason to open two.
+- `aria-expanded` on the button is both the accessibility state and the styling hook: it spins
+  the chevron and hides the teaser line (`.by`), which says the same thing the opened list says
+  in full and only costs height once the panel is there.
+- `:hover` is inside `@media (hover:hover)` — on a phone a hover background sticks to the last
+  thing tapped and the row looks stuck open after you close it.
+- Everything new is scoped under `.srow` on purpose: `.who` is already a class in `style.css`
+  under `.riderrow` and `.profedit`. Same lesson as every other specificity trap in CLAUDE.md —
+  grep before you name.
+
+Tested in the harness at 1100px and 390px, dark and light: opens, closes, both rows open at
+once, names link to `/user/<slug>/rankings`, no horizontal overflow on a phone.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**
