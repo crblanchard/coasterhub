@@ -367,6 +367,24 @@
         img.src = URL.createObjectURL(file);
       });
     }
+    // The crop viewport's width is measured once, on open, and EVERY number in
+    // here is expressed in terms of it — the scale, the offsets, and the size of
+    // the square that gets saved. So if it ever moves and nothing notices, the
+    // preview keeps filling the box you can see while the save uses the old
+    // width, and the picture you get is not the one you framed.
+    //
+    // It does move. On a phone the layout can still be settling when this opens
+    // (the photo picker sheet is animating away), and turning the phone resizes
+    // it outright. So re-measure and rescale instead of carrying on with a stale
+    // number. Cheap, and it makes the whole thing self-correcting.
+    function syncView() {
+      var nv = c.view.clientWidth;
+      if (!nv || nv === CROP.vw) return;
+      if (!CROP.vw) { CROP.vw = nv; return; }
+      var k = nv / CROP.vw;
+      CROP.base *= k; CROP.x *= k; CROP.y *= k; CROP.vw = nv;
+    }
+
     // Keep the image covering the viewport, or it can be dragged off its own
     // frame and cropped down to a corner of empty background.
     function clamp() {
@@ -375,6 +393,8 @@
       CROP.y = Math.min(0, Math.max(V - CROP.img.height * s, CROP.y));
     }
     function paint() {
+      if (!CROP.img) return;
+      syncView();
       clamp();
       var s = CROP.base * CROP.zoom;
       c.img.style.backgroundImage = 'url("' + CROP.img.src + '")';
@@ -403,7 +423,14 @@
         ? Math.max(CROP.vw - sh, -sh * 0.10)
         : (CROP.vw - sh) / 2;
       paint();
+      // Once more after the browser has laid the dialog out, in case the width
+      // this was all measured against was not final yet.
+      if (window.requestAnimationFrame) window.requestAnimationFrame(paint);
     }
+
+    // Turning the phone, or any other resize, while the dialog is open.
+    function onResize() { if (CROP.img && !wrap.hidden) paint(); }
+
     function closeCrop() {
       wrap.hidden = true;
       if (CROP.img) { try { URL.revokeObjectURL(CROP.img.src); } catch (e) {} }
@@ -449,9 +476,16 @@
       if (e.key === "Escape" && !wrap.hidden) closeCrop();
     });
 
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+
     c.ok.addEventListener("click", function () {
       c.ok.disabled = true;
       say(cropMsg, "");
+      // Against the live width, not one captured when the dialog opened: this
+      // has to be the same square the preview is showing.
+      syncView();
+      clamp();
       var s = CROP.base * CROP.zoom, V = CROP.vw;
       var canvas = document.createElement("canvas");
       canvas.width = canvas.height = PIC_PX;

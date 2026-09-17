@@ -366,6 +366,11 @@
       stats.userName = user.user;
       stats.bio = user.bio || null;
       stats.avatar = user.avatar || null;
+      // Whether anybody owns this page. The ride TOTALS are hidden until they
+      // do — see the note on claimedSlugs() in worker.js. The static fallback
+      // file carries no such field, so an offline read is treated as unclaimed,
+      // which is the quieter of the two wrong answers.
+      stats.claimed = !!user.claimed;
       stats.coasters = coasters;
       stats.parks = parks;
       stats.rides = user.rides || [];
@@ -415,7 +420,8 @@
   function adoptUsers(list) {
     var fresh = [];
     (list || []).forEach(function (u) {
-      if (u && u.slug) fresh.push({ slug: u.slug, name: u.name || u.slug, avatar: u.avatar || null });
+      if (u && u.slug) fresh.push({ slug: u.slug, name: u.name || u.slug, avatar: u.avatar || null,
+                                    claimed: !!u.claimed });
     });
     if (!fresh.length) return;              // never let an empty answer erase the seed
     USERS.length = 0;
@@ -432,9 +438,13 @@
         if (u.avatar !== undefined && have[u.slug].avatar !== u.avatar) {
           have[u.slug].avatar = u.avatar; changed = true;
         }
+        if (u.claimed !== undefined && have[u.slug].claimed !== !!u.claimed) {
+          have[u.slug].claimed = !!u.claimed; changed = true;
+        }
         return;
       }
-      var rec = { slug: u.slug, name: u.name || u.slug, avatar: u.avatar || null };
+      var rec = { slug: u.slug, name: u.name || u.slug, avatar: u.avatar || null,
+                  claimed: !!u.claimed };
       USERS.push(rec); have[u.slug] = rec; changed = true;
     });
     return changed;

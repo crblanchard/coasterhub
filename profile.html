@@ -556,8 +556,14 @@ function render(s){
     if(page) d.href=CoasterHub.userPageHref(CoasterHub.currentUser(),page);
     d.textContent=t; hh.appendChild(d);
   };
+  // Rides are shown only for a rider who has claimed their page — see the note
+  // on claimedSlugs() in worker.js. Unclaimed, the number is one row per
+  // imported credit rather than a count anybody kept, so it is hidden rather
+  // than deleted: the real figures stay in the table and appear the day the
+  // page is claimed.
+  var showRides = has.rideCounts && s.claimed;
   line(nf(k.credits)+' coasters.','count');
-  if(has.rideCounts) line(nf(k.rides)+' rides.','count');
+  if(showRides) line(nf(k.rides)+' rides.','count');
   // A ranking lives in its own table, so it arrives after the count does and the
   // third line appears a beat later rather than holding up the first two. A
   // rider with an empty list still gets "0 ranked." — the riders page says 0
@@ -609,8 +615,8 @@ function render(s){
   document.getElementById('k_parks').textContent=k.parks;
   document.getElementById('k_geo').textContent=k.states+' / '+k.countries;
 
-  // Total Rides tile only when ride counts are known.
-  if(has.rideCounts){
+  // Total Rides tile only when ride counts are known AND mean something.
+  if(showRides){
     document.getElementById('k_rides').textContent=nf(k.rides);
   } else {
     document.getElementById('kpi_rides').style.display='none';

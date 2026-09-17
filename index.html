@@ -141,8 +141,14 @@ function row(u, st, ranked){
   // of their count they have actually put in order. Rides are unknown for some
   // riders (k.rides is null there), and "— rides" reads as a fault, so that half
   // of the line is simply absent.
+  // The ride total is only shown for a rider who has CLAIMED their page. An
+  // unclaimed rider's rides came in from a spreadsheet import, mostly one row
+  // per credit, so the number is an artifact of how the data arrived rather
+  // than something anybody counted. Nothing is deleted — the real counts that
+  // were entered by hand are still there, and the number appears the day they
+  // claim the page. (Carter's call, 2026-09-17.)
   var line = nf(k.credits) + ' credits'
-    + (k.rides == null ? '' : ' / ' + nf(k.rides) + ' rides');
+    + (!u.claimed || k.rides == null ? '' : ' / ' + nf(k.rides) + ' rides');
   // Every number is a link's worth of information, so the whole row is the link
   // rather than a "View →" at the end of it.
   return '<a class="riderrow" href="' + CoasterHub.userPageHref(u.slug, 'profile') + '">'

@@ -413,6 +413,25 @@ async function getParks(env) {
   for (const p of results) out[p.name] = { lat: p.lat, lon: p.lon, region: p.region };
   return out;
 }
+// Which riders have claimed their page. Used to decide whether a RIDE COUNT is
+// worth showing at all: an unclaimed rider's rides came in from a spreadsheet
+// import, mostly one row per credit, so "596 rides" is an artifact of how the
+// data arrived rather than a number anybody counted. It becomes real the day
+// they claim the page and start logging, and the real counts already entered by
+// hand (the Europe and Japan trips) stay in the table either way — this hides a
+// number, it never deletes a row. Carter's call, 2026-09-17.
+//
+// Returns a Set of slugs, or null when there is no accounts table yet, which
+// the callers treat as "nobody has claimed anything".
+async function claimedSlugs(env) {
+  if (!await haveAccounts(env)) return null;
+  try {
+    const { results } = await env.DB.prepare(
+      "SELECT slug FROM accounts WHERE slug IS NOT NULL").all();
+    return new Set(results.map(r => r.slug));
+  } catch (e) { return null; }
+}
+
 async function getUser(env, slug) {
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
   if (!u) return null;
@@ -420,7 +439,9 @@ async function getUser(env, slug) {
   // SELECT * above, so bio/avatar arrive on their own once migration 008 has
   // run and are simply undefined before that. Null rather than undefined in the
   // response, so the pages have one thing to test for.
+  const claimed = await claimedSlugs(env);
   return { user: u.name, slug: slug, bio: u.bio || null, avatar: u.avatar || null,
+           claimed: !!(claimed && claimed.has(slug)),
            rides: results.map(x => ({ c: x.coaster_id, d: x.d })) };
 }
 
@@ -432,13 +453,16 @@ async function getUsers(env) {
   // Tried with the profile columns and retried without: this is the one query
   // every page makes, and it must not start failing the moment it runs against
   // a database where migration 008 has not been applied.
+  const claimed = await claimedSlugs(env);
+  const own = (slug) => !!(claimed && claimed.has(slug));
   try {
     const { results } = await env.DB.prepare(
       "SELECT slug, name, avatar FROM users ORDER BY name").all();
-    return results.map(u => ({ slug: u.slug, name: u.name, avatar: u.avatar || null }));
+    return results.map(u => ({ slug: u.slug, name: u.name, avatar: u.avatar || null,
+                               claimed: own(u.slug) }));
   } catch (e) {
     const { results } = await env.DB.prepare("SELECT slug, name FROM users ORDER BY name").all();
-    return results.map(u => ({ slug: u.slug, name: u.name }));
+    return results.map(u => ({ slug: u.slug, name: u.name, claimed: own(u.slug) }));
   }
 }
 
