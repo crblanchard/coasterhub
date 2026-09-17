@@ -1199,6 +1199,22 @@ the number you are working against on a trip.
 
 Modes are named for the jobs now: **Log rides** and **Add credits**.
 
+**Add credits takes an optional first-ridden date** (2026-09-17). The field stays on screen in
+both modes; only its meaning changes. Day mode: "Date", defaults to today, required. Credits
+mode: "First ridden", **blank**, optional — blank still writes an undated row exactly as
+before, and a date writes it onto the rows in that batch.
+
+It is deliberately **not** defaulted to today in credits mode. Today is almost never the answer
+when backfilling years of riding, and a prefilled date is one you have to notice to remove —
+which is how every coaster somebody ever rode ends up stamped with the afternoon they typed it
+in. The date is kept between batches though, so a trip can be entered park by park without
+retyping it.
+
+No API change was needed: `addRides` already took `d` or null on any write. Note the guard it
+documents — an *undated* entry is skipped when the rider already holds that coaster, a *dated*
+one is not, because riding something twice in a day is real. Credits mode cannot hit that:
+coasters you already own render inert there, so they never reach the basket.
+
 ---
 
 ## Open tasks

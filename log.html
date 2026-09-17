@@ -253,8 +253,12 @@
       <div class="tot"><span id="tot_c">0 coasters</span><span id="tot_r">0 rides</span></div>
       <!-- The date sits at the end because it is the last thing you decide: pick
            a park, stage the rides, then say which day they were. -->
-      <div class="fld" id="datefld" style="margin:0 0 12px"><label for="date">Date</label>
-        <input id="date" type="date" style="width:100%"></div>
+      <div class="fld" id="datefld" style="margin:0 0 12px">
+        <label for="date" id="datelbl">Date</label>
+        <input id="date" type="date" style="width:100%">
+        <p class="note" id="datehint" style="display:none;margin:2px 0 0">Optional — leave it
+          blank if you don&rsquo;t remember.</p>
+      </div>
       <button class="primary" id="save" disabled>Save day</button>
       <button class="ghost" id="clear" style="margin-left:8px">Clear</button>
       <div class="msg" id="msg"></div>
@@ -275,7 +279,8 @@ CoasterHub.initNav('log');
 
 var TOKEN='', COASTERS=[], BYID={}, PARKS={}, basket={};   // basket: coasterId -> laps
 var PCOUNT={};   // park name -> how many coasters, for the dropdown labels
-var MODE='day';  // 'day' = a dated visit with laps; 'list' = undated backfill
+var MODE='day';  // 'day' = a dated visit with laps; 'list' = a backfill
+var TODAY='';    // today in LOCAL time, the default only day mode wants
 var OWNED={};    // coaster id -> true, what this rider already has in their count
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -329,7 +334,8 @@ function boot(){
   // would roll back a day for anyone west of UTC after ~5pm.
   var now=new Date();
   var local=new Date(now.getTime()-now.getTimezoneOffset()*60000);
-  $('date').value=local.toISOString().slice(0,10);
+  TODAY=local.toISOString().slice(0,10);
+  $('date').value=TODAY;
 
   fillRiders();
   applyAccountLimits();
@@ -405,7 +411,18 @@ function setMode(m){
   MODE=m;
   var btns=$('modesw').querySelectorAll('button');
   for(var i=0;i<btns.length;i++) btns[i].classList.toggle('on',btns[i].getAttribute('data-mode')===m);
-  $('datefld').style.display = m==='day' ? '' : 'none';
+  // Credits mode keeps the date field, optional and blank: filling in a trip you
+  // remember the day of is worth recording, and a credit with a first-ridden
+  // date is a better row than one without. Blank stays undated, as before.
+  //
+  // It is NOT defaulted to today in credits mode on purpose. Today is almost
+  // never the answer when you are backfilling years of riding, and a prefilled
+  // date is one you have to notice to remove — that is how every coaster you
+  // ever rode ends up stamped with the afternoon you typed it in.
+  var credits = m !== 'day';
+  $('datelbl').textContent = credits ? 'First ridden' : 'Date';
+  $('datehint').style.display = credits ? '' : 'none';
+  $('date').value = credits ? '' : TODAY;
   // One line each. The long version pointed at /import, which is now a link
   // two inches above it, and spelled out what the + buttons already show.
   $('modehint').textContent = m==='day'
@@ -877,9 +894,12 @@ function save(){
   var rider=$('rider').value, date=$('date').value;
   // Undated is a deliberate null, not an omitted field — the server tells the
   // two apart and rejects a malformed date rather than silently blanking it.
-  var d = MODE==='day' ? date : null;
-  if(MODE==='day' && !/^\d{4}-\d{2}-\d{2}$/.test(d)){
+  // Day mode needs one; credits mode takes one if you have it.
+  var d = date || null;
+  if(MODE==='day' && !/^\d{4}-\d{2}-\d{2}$/.test(d||'')){
     $('msg').className='msg bad'; $('msg').textContent='Pick a valid date.'; return; }
+  if(d && !/^\d{4}-\d{2}-\d{2}$/.test(d)){
+    $('msg').className='msg bad'; $('msg').textContent='That date is not valid.'; return; }
   $('save').disabled=true; $('msg').className='msg'; $('msg').textContent='Saving…';
   api('POST','/api/rides',{user:rider,d:d,entries:entries})
     .then(function(r){
