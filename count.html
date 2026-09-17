@@ -48,6 +48,24 @@
   .day .row .cp{color:var(--muted);font-size:.82rem;margin-left:auto;flex:none;
                 white-space:nowrap;padding-left:10px}
   .lap{color:var(--accent);font-variant-numeric:tabular-nums;font-size:.82rem}
+  /* Status and years, pushed to the far edge of a park row. The status is the
+     coloured part — teal for running, red for gone, the site's own two accents
+     — and the years stay in the body colour, because the years are the fact and
+     the status is only the flag on it. */
+  .day .row .life{margin-left:auto;flex:none;display:flex;align-items:baseline;gap:9px;
+    padding-left:10px;white-space:nowrap}
+  .day .row .life .stat{font-size:.68rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.06em}
+  .day .row .life .stat.on{color:var(--accent2)}
+  .day .row .life .stat.off{color:var(--accent)}
+  .day .row .life .yrs{color:var(--fg);font-size:.8rem;font-variant-numeric:tabular-nums}
+  /* A phone has no room for a word and a span side by side with the name, so
+     the status becomes a dot and the years carry the meaning. */
+  @media (max-width:560px){
+    .day .row .life{gap:7px}
+    .day .row .life .stat{font-size:0;line-height:0}
+    .day .row .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
+  }
   .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
   /* Full-list table (came over with the old /coasters page) */
   .pill{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
@@ -272,9 +290,14 @@ return Promise.all([
       log.rides.forEach(function(r){ if(seen[r.c]) repeats=true; seen[r.c]=1; });
       log.rides.forEach(function(r){
         var c=byId[r.c]||{}, pk=parks[c.park];
+        // The coaster's OWN dates, not the rider's: when it opened and, if it
+        // is gone, when it closed. `yr` is the opening year where the full
+        // date is not known, so fall back to it rather than showing nothing.
+        var op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):'');
         LOG.push({i:r.i, c:r.c, d:r.d||null,
                   rider:log.user, rep:repeats,
                   name:c.name||('#'+r.c), park:c.park||'—',
+                  op:op, cl:c.closed?String(c.closed).slice(0,4):'',
                   loc:(pk&&pk.region)?pk.region:''});
       });
     });
@@ -464,6 +487,26 @@ function renderDays(rows){
 //
 // Undated credits belong here, unlike in the day view: a credit with no date
 // still happened at a park.
+// Is it still standing, and how long has it been there? Two facts a park card
+// can carry that the coaster's name cannot, and the ones you actually wonder
+// about looking down a list: "is that still open" and "how old is it".
+//
+// A coaster is defunct when it has a closing date. Running: the opening year on
+// its own. Closed: the span it existed for, 1980–2013, which says more than
+// either year alone. The status carries the colour (teal for running, red for
+// gone — the site's two accents) and the years stay in the body colour, because
+// the years are the fact and the status is the flag on it.
+function life(r){
+  var gone=!!r.cl;
+  if(!r.op && !r.cl) return '';          // nothing known; say nothing
+  var years = gone
+    ? (r.op ? esc(r.op)+'–'+esc(r.cl) : 'closed '+esc(r.cl))
+    : esc(r.op);
+  return '<span class="life">'
+    + '<span class="stat'+(gone?' off':' on')+'">'+(gone?'Defunct':'Operating')+'</span>'
+    + '<span class="yrs">'+years+'</span></span>';
+}
+
 function renderParks(rows){
   var byPark={};
   rows.forEach(function(r){
@@ -511,6 +554,7 @@ function renderParks(rows){
       + uniq.map(function(r){
           return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
             +((laps[r.c]>1 && !COMBINED)?'<span class="lap">×'+laps[r.c]+'</span>':'')
+            +life(r)
             +'</div>';
         }).join('')
       +'</div></details>';

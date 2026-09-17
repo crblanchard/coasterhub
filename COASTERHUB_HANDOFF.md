@@ -321,6 +321,16 @@ ridden, and nobody could read it: on a park card the obvious meaning is "when I 
 park visited three times showed three different dates down one column. Dates belong to the
 Rides view, which is organised by them. Carter's call.
 
+**Status and lifespan on a park row** (2026-09-17). What replaced it, and note it is a
+different fact entirely: the COASTER's own years, not the rider's. Running coasters show the
+opening year; defunct ones show the span they existed for — `1980–2013` — which says more than
+either year alone. "Defunct" means the row has a closing date. The status word carries the
+colour (`--accent2` teal for running, `--accent` red for gone, the site's own two accents) and
+the years stay in the body colour, because the years are the fact and the status is the flag on
+it. Both scopes, global and per rider. Below 560px the word collapses to a coloured dot — a
+phone row has no width for a word, a span and a name. `opened` falls back to `yr` when only the
+year is known, and a coaster with neither shows nothing rather than an empty gap.
+
 **The global view drops every number that is a sum** (2026-09-17). Viewing everyone, "3 visits"
 is not a trip anybody took, "21 rides" is six people's rides added together, and "×3" is not a
 re-ride — so visits, the ride total and the per-coaster lap counts are all absent there. How many
