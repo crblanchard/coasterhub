@@ -803,7 +803,7 @@
   // of "Log". "Profile" is /user/<slug>, a rider's page rather than a chart
   // screen. "Riders" is /riders, which is where /stats used to point.
   var TABS = [
-    { k: "riders",   label: "Riders",   path: "/riders",   fixed: true },
+    { k: "riders",   label: "Home",     path: "/",         fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
     { k: "profile",  label: "Profile",  path: "/account" },
     { k: "count",    label: "Count",    path: "/count" },

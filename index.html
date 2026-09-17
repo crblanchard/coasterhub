@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
 <title>Coaster Hub — A roller coaster count, visualized</title>
-<meta name="description" content="Coaster Hub — an interactive look at roller coaster counts: credits, rides, parks, geography, and records.">
+<meta name="description" content="Keep track of your roller coaster count — every credit, every re-ride, every park — and see it as maps, records and charts.">
 <link rel="stylesheet" href="/style.css?v=20260805b">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg?v=20260805b" type="image/svg+xml">
@@ -17,89 +18,9 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <style>
-  /* --- "what's here" page guide --- */
-  .card.guide{display:flex;flex-direction:column;transition:border-color .15s,transform .15s}
-  .card.guide:hover{border-color:var(--accent2);transform:translateY(-2px)}
-  .card.guide h3{margin:2px 0 8px}
-  .card.guide p{color:var(--muted);flex:1}
-  .card.guide .go{color:var(--accent2);font-weight:600;font-size:.88rem;margin-top:14px}
-  /* --- recent activity feed --- */
-  .feed{display:flex;flex-direction:column;gap:8px}
-  .morelink{color:var(--accent2);font-weight:600;font-size:.92rem}
-  .morelink:hover{text-decoration:underline}
-  /* A day on this feed opens in place to show what was ridden, the same way the
-     day cards do on /count. It is a <details>, so the summary row keeps the
-     layout the whole item used to have. */
-  .fitem{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-         overflow:hidden;transition:border-color .15s}
-  .fitem:hover{border-color:var(--accent2)}
-  .fitem > summary{display:flex;align-items:center;gap:14px;padding:12px 15px;
-         cursor:pointer;list-style:none}
-  .fitem > summary::-webkit-details-marker{display:none}
-  .fitem[open] > summary{border-bottom:1px solid var(--line)}
-  .fitem .when{min-width:6.2em;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;flex:none}
-  .fitem .who{font-weight:700;min-width:4.6em;flex:none}
-  .fitem .where{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.92rem}
-  .fitem .what{color:var(--accent2);font-size:.82rem;white-space:nowrap;flex:none}
-  /* The caret is the only thing saying "this opens", so it has to survive the
-     summary wrapping on a phone — hence flex:none and its own column. */
-  .fitem .caret{flex:none;color:var(--muted);font-size:.7rem;transition:transform .15s}
-  .fitem[open] .caret{transform:rotate(90deg)}
-  .finner{padding:6px 15px 12px}
-  .frow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--soft);font-size:.9rem}
-  .frow:last-of-type{border-bottom:0}
-  .frow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .frow .lap{color:var(--accent2);font-weight:700;font-size:.8rem;flex:none}
-  .fgrp{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;
-        letter-spacing:.06em;margin:12px 0 1px}
-  .finner > .fgrp:first-child{margin-top:4px}
-  .finner .go{display:inline-block;margin-top:10px;font-size:.85rem;color:var(--accent2);font-weight:600}
-  /* --- leaderboard --- */
-  .lb{display:flex;flex-direction:column;gap:10px}
-  .lbrow{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
-         border-radius:14px;padding:14px 16px}
-  .lbrow .rank{color:var(--muted);font-weight:800;font-size:.9rem;min-width:1.4em;flex:none}
-  .lbrow .who{min-width:0;flex:none;width:5.5em}
-  .lbrow .who a{font-weight:700;font-size:1.02rem}
-  .lbrow .who a:hover{color:var(--accent2)}
-  .lbrow .bar{flex:1;min-width:60px;height:8px;background:var(--soft2);border-radius:999px;overflow:hidden}
-  .lbrow .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:999px}
-  .lbrow .n{font-weight:800;font-variant-numeric:tabular-nums;min-width:3.4em;text-align:right;flex:none}
-  .lbrow .sub{color:var(--muted);font-size:.78rem;width:100%;margin-top:2px}
-  .lbrow .go{display:flex;gap:12px;font-size:.82rem;flex:none}
-  .lbrow .go a{color:var(--muted)} .lbrow .go a:hover{color:var(--fg)}
-  @media (max-width:680px){
-    /* The flex row is the SUMMARY now, not .fitem itself — pointing this at
-       .fitem left the row unable to wrap, and everything past the date ran off
-       the side of the phone. Two lines: date + who + caret, then park + count.
-       margin-left:auto on the caret eats the slack, which is what forces the
-       break rather than hoping the widths land right. */
-    .fitem > summary{flex-wrap:wrap;gap:6px 10px;padding:11px 13px}
-    .fitem .when{order:1;min-width:0}
-    .fitem .who{order:2;min-width:0}
-    /* The caret is last in the markup — where a screen reader wants it — but on
-       a phone it belongs on the first line, so it is reordered up and given the
-       slack. Without that it ends up stranded on a third line of its own. */
-    .fitem .caret{order:3;margin-left:auto}
-    .fitem .where{order:4;flex:1 1 60%;white-space:normal}
-    .fitem .what{order:5}
-    .fbcard{flex-direction:column;align-items:flex-start;gap:14px}
-    .fbcard .go{width:100%;text-align:center}
-    .finner{padding:6px 13px 12px}
-    .lbrow{flex-wrap:wrap}
-    .lbrow .bar{order:5;flex-basis:100%;margin-top:6px}
-    .lbrow .go{width:100%;margin-top:4px}
-  }
-  /* Feedback card. Same panel vocabulary as the guide cards above it, laid out
-     as a row so the button sits beside the ask rather than under it. */
-  .fbcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;
-    display:flex;align-items:center;gap:22px;flex-wrap:wrap}
-  .fbcard h2{font-size:1.15rem;margin:0 0 4px}
-  .fbcard p{color:var(--muted);font-size:.92rem;margin:0;max-width:56ch}
-  .fbcard .spacer{flex:1 1 auto}
-  .fbcard .go{flex:none;background:var(--accent2);color:var(--well);font-weight:700;
-    border-radius:10px;padding:11px 18px;font-size:.92rem;text-decoration:none;white-space:nowrap}
-  .fbcard .go:hover{filter:brightness(1.08)}
+  #loading{color:var(--muted);padding:40px 0}
+  /* Hidden until something actually fails — same rule the other pages carry. */
+  #err{display:none;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:20px;color:var(--fg)}
 </style>
 </head>
 <body>
@@ -109,7 +30,7 @@
     <span class="brand-text">Coaster <b>Hub</b></span>
   </a>
   <nav class="links">
-    <a href="/riders" data-nav="riders">Riders</a>
+    <a href="/" data-nav="riders">Home</a>
     <a href="/rankings" data-nav="rankings">Rankings</a>
     <a href="/account" data-nav="profile">Profile</a>
     <a href="/count" data-nav="count">Count</a>
@@ -118,7 +39,7 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero" style="padding-bottom:30px"><div class="container">
+<section class="hero" style="padding:60px 0 30px"><div class="container">
   <svg class="track" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <path d="M-50 500 C 250 500, 300 120, 520 120 S 780 560, 1000 380 S 1300 90, 1500 300"
           fill="none" stroke="var(--line)" stroke-width="4"/>
@@ -126,102 +47,69 @@
           fill="none" stroke="var(--tint2)" stroke-width="2" stroke-dasharray="6 10"/>
   </svg>
   <span class="badge">Roller coaster counts, visualized</span>
-  <h1><span id="combo">…</span> unique coasters and counting.</h1>
-  <p>Coaster Hub is where you keep track of your roller coaster count — every credit, every re-ride, every park visit — and see it as maps, records and charts instead of rows in a spreadsheet.</p>
-  <p class="hero-sub" id="combo-sub"></p>
+  <h1 class="wide">A home for your coaster count.</h1>
+  <p class="wide"><b>Welcome to Coaster Hub.</b> Track your coaster count. Rank your credits. Log your rides.</p>
+  <!-- Signed out only: the two things a visitor can do about any of this. Shown
+       by the script below once /api/auth/me has answered, so a signed-in rider
+       never sees a "Log in" button flash past. -->
+  <p class="herojoin" id="joinrow" hidden>
+    <a class="btn" href="/account?tab=up">Create account</a>
+    <a class="btn alt" href="/account">Log in</a>
+  </p>
+  <p class="wide">Pick a rider to see their count, stats, and rankings.</p>
 </div></section>
 
-<section class="block" style="padding-top:26px;padding-bottom:0"><div class="container">
+<div class="container"><div id="loading">Loading riders…</div></div>
+
+<div class="container"><div id="err">
+  <strong>Couldn't load the data.</strong> This page reads external data files, so it needs to be served over the web — opening the file directly won't work.
+  View it on the live site, or run a local server from this folder: <code>python -m http.server</code> then open <code>localhost:8000/index.html</code>.
+</div></div>
+
+<div class="container">
+  <!-- One row per rider, in the same shape as the identity block at the top of
+       a profile: picture, name, @username under it. The numbers sit on the
+       right on a desktop and wrap under the name on a phone. -->
+  <div class="riderlist" id="list"></div>
+</div>
+
+<!-- The way to reach a person, under the list of people. The address is
+     assembled in script rather than written here: a mailto in the page source is
+     the easiest thing in the world for an address harvester to walk off with. -->
+<div class="container">
   <div class="fbcard">
     <div>
-      <h2>Feedback?</h2>
-      <p>Something broken, a number that looks wrong, or a stat worth adding &mdash; it all helps.</p>
+      <h2>Missing rides or stats?</h2>
+      <p>Something broken, a number that looks wrong, or an idea for a feature &mdash; it all helps.</p>
     </div>
     <span class="spacer"></span>
-    <!-- href is set by the script below rather than written here: a mailto in
-         the page source is the easiest thing in the world for an address
-         harvester to walk off with. -->
-    <a class="go" id="fb_link" rel="nofollow">Email us &rarr;</a>
+    <a class="go" id="fb_link" rel="nofollow">Contact us &rarr;</a>
   </div>
-</div></section>
+</div>
 
-<section class="block" style="padding-top:34px;padding-bottom:8px"><div class="container">
-  <span class="eyebrow">What's here</span>
-  <h2>Four ways to look at a count</h2>
-  <p class="lead">Every page works two ways: for <b>everyone combined</b>, or for one rider. Use the picker in the top&nbsp;right to switch — this page always shows everyone.</p>
-  <div class="grid">
-    <a class="card guide" href="/rankings">
-      <div class="meta">Rankings</div>
-      <h3>The favorites</h3>
-      <p>Not tallest or fastest &mdash; best. Each rider puts the coasters they&rsquo;ve ridden in their own order, either by dragging or by picking between two at a time.</p>
-      <span class="go">See the rankings &rarr;</span>
-    </a>
-    <a class="card guide" href="/riders">
-      <div class="meta">Profile</div>
-      <h3>The picture</h3>
-      <p>A count brought to life &mdash; an interactive world map, a calendar of every riding day, personal records and how it all grew over time.</p>
-      <span class="go">See the profile &rarr;</span>
-    </a>
-    <a class="card guide" href="/count">
-      <div class="meta">Count</div>
-      <h3>The log</h3>
-      <p>Day by day: which park, which coasters, how many laps. Or switch to the full list &mdash; every coaster in the count, <span id="g-coasters">&hellip;</span> in all, sortable by park, manufacturer, year, height or speed.</p>
-      <span class="go">See the count &rarr;</span>
-    </a>
-    <a class="card guide" href="/add">
-      <div class="meta">Add new</div>
-      <h3>Your turn</h3>
-      <p>Log a park day or a single coaster, then rank it straight away or leave it for later. <b>Coming soon.</b></p>
-      <span class="go">See what&rsquo;s planned &rarr;</span>
-    </a>
-  </div>
-</div></section>
-
-<section class="block" style="padding-bottom:8px"><div class="container">
-  <span class="eyebrow">The riders</span>
-  <h2>Whose count do you want?</h2>
-  <p class="lead">Every rider, every count, all with the same maps, records and calendars.</p>
-  <div class="lb" id="riders"><p class="lead">Loading counts…</p></div>
-  <p class="lead" style="margin-top:20px">Want your own count on here?
-    <a href="/account" style="color:var(--accent2)">Create an account</a> &mdash; it takes a minute,
-    and only you can log rides against it.</p>
-</div></section>
-
-<section class="block" style="padding-bottom:8px"><div class="container">
-  <span class="eyebrow">Lately</span>
-  <h2>Recent days out</h2>
-  <p class="lead">The latest logged park days across everyone's counts.</p>
-  <div class="feed" id="feed"><p class="lead">Loading…</p></div>
-  <!-- This feed is only dated park days. /changes is everything: rankings,
-       credits ticked off a list, and every fix to the shared coaster list. -->
-  <p style="margin-top:16px"><a href="/changes" class="morelink">Everything that&rsquo;s changed &rarr;</a></p>
-</div></section>
-
-<section class="block"><div class="container prose">
-  <span class="eyebrow">The idea</span>
-  <h2>Why Coaster Hub</h2>
-  <!-- Deliberately not a number. It said "four people" while there were five,
-       and riders can be added from /log and /import now, so a count here goes
-       stale on its own. -->
-  <p>This started as one meticulously kept spreadsheet and grew into something a few of us share.</p>
-  <p>Every number on the site comes from a ride someone actually logged &mdash; no estimates, no rounding, nothing filled in from memory. That&rsquo;s the point of keeping it this carefully: the totals are worth trusting, so the maps and records built on them are too. Every edit is on the record, too &mdash; <a href="/changes" style="color:var(--accent2)">see what&rsquo;s changed lately</a>.</p>
+<!-- What everyone has been up to, under who everyone is. The same feed /changes
+     draws (changes-feed.js), cut to the last few days; the link goes to the full
+     one with its filters. -->
+<section class="block" style="padding-top:8px"><div class="container">
+  <span class="eyebrow">Lately</span><h2>What&rsquo;s been happening</h2>
+  <div class="feed" id="feed"><div class="empty">Loading&hellip;</div></div>
+  <p style="margin-top:18px"><a href="/changes" style="color:var(--accent2);font-weight:600">All changes &rarr;</a></p>
 </div></section>
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/riders">Riders</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/account" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/changes">Changes</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/account" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
+<script src="/changes-feed.js?v=20260916"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
-CoasterHub.initNav('home');
+CoasterHub.initNav('riders');
 
-// Feedback link. The address is assembled here instead of sitting in the HTML,
-// which stops the simplest scrapers; anyone determined will still find it, so
-// this is a speed bump rather than a lock. The subject is prefilled so replies
-// are findable later, and the page URL goes in the body because "it's broken"
-// is much easier to act on when you know where they were standing.
+// The subject is prefilled so replies are findable later, and the page URL goes
+// in the body because "it's broken" is much easier to act on when you know where
+// they were standing.
 (function(){
   var a=document.getElementById('fb_link');
   if(!a) return;
@@ -230,134 +118,78 @@ CoasterHub.initNav('home');
     +'?subject='+encodeURIComponent('Coaster Hub feedback')
     +'&body='+encodeURIComponent('\n\n---\nSent from '+location.href);
 })();
-var nf=function(n){return n==null?'—':n.toLocaleString();};
-// Wait for the rider list before loading anyone: a rider added on /log or
-// /import exists in D1 only, and reading USERS a beat too early would leave
-// them off the leaderboard until the next reload.
-CoasterHub.fetchUsers().then(function(){
-return Promise.all([
-  CoasterHub.fetchCoasters(),
-  CoasterHub.fetchParks()
-  // A rider with no static <slug>.json yet must not take the page down with
-  // them, so a failed read becomes an empty log rather than a rejection.
-].concat(CoasterHub.USERS.map(function(u){
-  return CoasterHub.fetchUser(u.slug).catch(function(){return {user:u.name,rides:[]};});
-})))
-.then(function(res){
-  var coasters=res[0].coasters, parks=res[1], users=res.slice(2);
-  var parkUnion={}, statsBySlug={};
-  CoasterHub.USERS.forEach(function(u,i){
-    var st=CoasterHub.computeStats(coasters,parks,users[i]);
-    statsBySlug[u.slug]=st;
-    st.parksGeo.forEach(function(p){parkUnion[p.park]=true;});
-  });
-  var uParks=Object.keys(parkUnion).length;
-  // Only Carter has a real ride log today; sum whatever rides anyone has.
-  var totalRides=CoasterHub.USERS.reduce(function(n,u){
-    var k=statsBySlug[u.slug].kpi; return n+(k.rides||0);
-  },0);
-  // The headline is the size of the shared coaster database, not the union of
-  // what has been ridden — Carter's call, 2026-09-15, and it is what /count
-  // → Full list shows too, so the two numbers agree. The consequence worth
-  // knowing: adding a coaster on /add moves this number before anyone has
-  // ridden it. The per-rider counts everywhere else are still rides.
-  document.getElementById('combo').textContent=nf(coasters.length);
-  document.getElementById('g-coasters').textContent=nf(coasters.length);
-  document.getElementById('combo-sub').textContent=CoasterHub.USERS.length+' riders · '+uParks+' parks · '+nf(totalRides)+' rides logged';
-  // ---- leaderboard: ranked by credits, bar relative to the leader ----------
-  var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
-  var ranked=CoasterHub.USERS.slice().sort(function(a,b){
-    return statsBySlug[b.slug].kpi.credits-statsBySlug[a.slug].kpi.credits;
-  });
-  var top=statsBySlug[ranked[0].slug].kpi.credits||1;
-  document.getElementById('riders').innerHTML=ranked.map(function(u,i){
-    var k=statsBySlug[u.slug].kpi;
-    var pct=Math.round((k.credits/top)*100);
-    return '<div class="lbrow">'
-      +'<span class="rank">'+(i+1)+'</span>'
-      +'<span class="who"><a href="'+CoasterHub.userPageHref(u.slug,'profile')+'">'+esc(u.name)+'</a></span>'
-      +'<span class="bar"><i style="width:'+pct+'%"></i></span>'
-      +'<span class="n">'+nf(k.credits)+'</span>'
-      +'<span class="go">'
-        +'<a href="'+CoasterHub.userPageHref(u.slug,'profile')+'">Profile</a>'
-        +'<a href="'+CoasterHub.userPageHref(u.slug,'count')+'">Count</a>'
-        +'<a href="'+CoasterHub.userPageHref(u.slug,'rankings')+'">Rankings</a>'
-      +'</span>'
-      +'<span class="sub">'+k.parks+' parks · '+k.states+' states / '+k.countries+' countries'
-        +(k.rides!=null?' · '+nf(k.rides)+' rides':'')+'</span>'
-      +'</div>';
-  }).join('');
 
-  // ---- recent activity: most recent dated days across every rider ----------
-  // Carter's dated ride log gives real park days; the others' first-ridden
-  // dates give the day they picked up new credits. Both are worth surfacing.
-  var byId={}; coasters.forEach(function(c){byId[c.id]=c;});
-  var days=[];
-  CoasterHub.USERS.forEach(function(u,i){
-    var data=users[i], mode=data.rides?'rides':'credits';
-    var entries=data.rides||data.credits||[];
-    var acc={};
-    entries.forEach(function(e){
-      var d=(mode==='rides')?e.d:(typeof e==='object'?e.first:null);
-      if(!d)return;
-      var c=byId[(typeof e==='object')?e.c:e]; if(!c)return;
-      var a=acc[d]||(acc[d]={rides:0,coasters:{},order:[],parks:{}});
-      a.rides++;
-      // Count the laps and remember the order they were logged in, so an opened
-      // day reads the same way it does on /count.
-      if(!a.coasters[c.id]) a.order.push(c);
-      a.coasters[c.id]=(a.coasters[c.id]||0)+1;
-      if(c.park)a.parks[c.park]=1;
-    });
-    Object.keys(acc).forEach(function(d){
-      days.push({d:d,slug:u.slug,name:u.name,mode:mode,
-                 rides:acc[d].rides,
-                 nc:acc[d].order.length,
-                 laps:acc[d].coasters,
-                 ridden:acc[d].order,
-                 parks:Object.keys(acc[d].parks)});
-    });
+// The join pills, for whoever is not signed in yet.
+CoasterHub.me().then(function(acct){
+  if (!acct) document.getElementById('joinrow').hidden = false;
+}).catch(function(){ /* API down: no pills rather than wrong pills */ });
+
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nf=n=>(n==null?'—':n.toLocaleString());
+
+// A rider's row. `avatar` is an R2 object key the Worker serves at /avatars/<key>
+// (migration 008); without one we draw the same initial-in-a-circle the rest of
+// the site draws, rather than a broken image.
+function row(u, st, ranked){
+  var k = st.kpi;
+  var pic = u.avatar
+    ? '<span class="av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
+    : '<span class="av">' + esc((u.name || '?').charAt(0).toUpperCase()) + '</span>';
+  // The count reads as a line under the name, where a bio sits on a profile,
+  // rather than as a row of tiles: four numbers of equal weight made every rider
+  // look like a spreadsheet row. One number earns the right-hand slot — how much
+  // of their count they have actually put in order. Rides are unknown for some
+  // riders (k.rides is null there), and "— rides" reads as a fault, so that half
+  // of the line is simply absent.
+  var line = nf(k.credits) + ' credits'
+    + (k.rides == null ? '' : ' / ' + nf(k.rides) + ' rides');
+  // Every number is a link's worth of information, so the whole row is the link
+  // rather than a "View →" at the end of it.
+  return '<a class="riderrow" href="' + CoasterHub.userPageHref(u.slug, 'profile') + '">'
+    + pic
+    + '<span class="who"><b class="nm">' + esc(u.name) + '</b>'
+    +   '<span class="un">@' + esc(u.slug) + '</span>'
+    +   '<span class="sub">' + line + '</span></span>'
+    + '<span class="nums">'
+    +   '<div class="s"><b>' + nf(ranked) + '</b>'
+    +     '<span><span class="wide">coasters </span>ranked</span></div>'
+    + '</span></a>';
+}
+
+// Everyone, with the three things a count is measured in plus the length of
+// their ranking list. The rankings come from their own endpoint, one call per
+// rider, because a ranking is not part of a rider's ride data.
+CoasterHub.fetchUsers().then(function(){
+  var users = CoasterHub.USERS.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
+  return Promise.all([
+    CoasterHub.fetchCoasters(),
+    CoasterHub.fetchParks(),
+    Promise.all(users.map(function(u){
+      // A rider with no data yet is a rider with an empty count, not an error:
+      // a brand-new account would otherwise take the whole page down with it.
+      return CoasterHub.fetchUser(u.slug).catch(function(){ return { user: u.name, rides: [] }; });
+    })),
+    Promise.all(users.map(function(u){
+      return fetch('/api/rankings/' + encodeURIComponent(u.slug))
+        .then(function(r){ return r.ok ? r.json() : { order: [] }; })
+        .catch(function(){ return { order: [] }; });
+    }))
+  ]).then(function(res){
+    var coasters = res[0].coasters, parks = res[1], datas = res[2], ranks = res[3];
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('list').innerHTML = users.map(function(u, i){
+      return row(u, CoasterHub.computeStats(coasters, parks, datas[i]), (ranks[i].order || []).length);
+    }).join('');
   });
-  days.sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:0;});
-  var fmt=function(d){var p=d.split('-');
-    return new Date(Date.UTC(+p[0],+p[1]-1,+p[2]))
-      .toLocaleDateString(undefined,{timeZone:'UTC',year:'numeric',month:'short',day:'numeric'});};
-  document.getElementById('feed').innerHTML=days.slice(0,8).map(function(x){
-    var what=(x.mode==='rides')
-      ? (x.nc+' coaster'+(x.nc===1?'':'s')+' · '+x.rides+' ride'+(x.rides===1?'':'s'))
-      : (x.nc+' new credit'+(x.nc===1?'':'s'));
-    // The row used to be a link straight to that rider's log. It opens in place
-    // now — the coasters are the thing you actually wanted — and the link to the
-    // full log moved inside, so nothing that was reachable stopped being so.
-    return '<details class="fitem">'
-      +'<summary>'
-      +'<span class="when">'+fmt(x.d)+'</span>'
-      +'<span class="who">'+esc(x.name)+'</span>'
-      +'<span class="where">'+esc(x.parks.join(' · ')||'—')+'</span>'
-      +'<span class="what">'+what+'</span>'
-      +'<span class="caret">&#9654;</span>'
-      +'</summary>'
-      +'<div class="finner">'
-      // A day at one park says so in the summary already. A day across two gets
-      // a heading per park, so the name is said once for the block instead of
-      // once per ride — same treatment as the day cards on /count.
-      + (function(){
-          var row=function(c){
-            return '<div class="frow"><span class="cn">'+esc(c.name)+'</span>'
-              +(x.laps[c.id]>1?'<span class="lap">&times;'+x.laps[c.id]+'</span>':'')+'</div>';
-          };
-          if(x.parks.length<2) return x.ridden.map(row).join('');
-          return x.parks.map(function(park){
-            return '<div class="fgrp">'+esc(park)+'</div>'
-              + x.ridden.filter(function(c){ return c.park===park; }).map(row).join('');
-          }).join('');
-        })()
-      +'<a class="go" href="'+CoasterHub.userPageHref(x.slug,'count')+'">'
-      +esc(x.name)+'&rsquo;s full log &rarr;</a>'
-      +'</div></details>';
-  }).join('') || '<p class="lead">No dated rides yet.</p>';
+}).catch(function(e){
+  console.error(e);
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('err').style.display = 'block';
 });
-}).catch(function(e){console.error(e);});
+
+// The short feed. No filter bar and no polling — this is a glance on the way
+// past, and /changes is the page you open when you want to read it.
+CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 12 });
 </script>
 </body>
 </html>

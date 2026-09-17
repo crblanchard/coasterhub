@@ -1,10 +1,7 @@
-# The front door is the riders list (2026-09-16). The old landing page was a
-# tour of a site you are already on — "what's here" cards and a guide — and the
-# useful thing to see first is who is counting and what has happened lately,
-# which /riders now carries. index.html is still there and still served at
-# /home, linked from the site map; nothing about it was thrown away.
-/                     /riders     301
-/home                 /index.html 200
+# / is the home page itself now — index.html, the riders list — so there is no
+# redirect here at all. /riders was its address for a day; keep it working.
+/riders               /           301
+/home                 /           301
 
 # Pretty per-user URLs -> serve the page (JS reads the name from the path).
 # 200 = rewrite (browser keeps the pretty URL). Destinations use the CLEAN paths

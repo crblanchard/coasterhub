@@ -15,10 +15,6 @@
 <meta property="og:title" content="Coaster Hub — Count">
 <meta property="og:image" content="https://coasterhub.org/og-image.png">
 <style>
-  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:6px 0 20px}
-  .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-  .tile .v{font-size:1.5rem;font-weight:800;letter-spacing:-.02em}
-  .tile .k{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
   .controls{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
   .controls input,.controls select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem}
   .controls input{min-width:220px;flex:1}
@@ -77,7 +73,6 @@
   .sortpick{display:none}
   td.cmeta,td.criders{display:none}
   @media (max-width:680px){
-    .tiles{grid-template-columns:repeat(2,1fr)}
     .day summary{gap:8px}
     .day .dt{min-width:100%}
     .sortpick{display:block}
@@ -141,7 +136,7 @@
     <span class="brand-text">Coaster <b>Hub</b></span>
   </a>
   <nav class="links">
-    <a href="/riders" data-nav="riders">Riders</a>
+    <a href="/" data-nav="riders">Home</a>
     <a href="/rankings" data-nav="rankings">Rankings</a>
     <a href="/account" data-nav="profile">Profile</a>
     <a href="/count" data-nav="count">Count</a>
@@ -167,12 +162,6 @@
   <div id="err"><strong>Couldn&rsquo;t load the data.</strong> This page reads external data files, so it needs to be served over the web.</div>
   <div id="loading">Loading rides&hellip;</div>
   <div id="ui" style="display:none">
-    <div class="tiles">
-      <div class="tile"><div class="v" id="t_rides">—</div><div class="k" id="t_rides_k">Rides</div></div>
-      <div class="tile"><div class="v" id="t_coasters">—</div><div class="k">Coasters</div></div>
-      <div class="tile"><div class="v" id="t_parks">—</div><div class="k">Parks</div></div>
-      <div class="tile"><div class="v" id="t_days">—</div><div class="k" id="t_days_k">Days out</div></div>
-    </div>
     <div class="controls">
       <div class="seg" id="seg">
         <button id="v_day" class="on">Rides</button><button id="v_list">All coasters</button><button id="v_parks">All parks</button>
@@ -223,7 +212,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/riders">Riders</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/account" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/changes">Changes</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/account" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -305,8 +294,6 @@ return Promise.all([
       document.querySelector('.hero p').textContent=
         'Every rider’s logged days, newest first — filter by rider, year or park.';
       document.title='Count — Coaster Hub';
-      document.getElementById('t_rides_k').textContent='Rides';
-      document.getElementById('t_days_k').textContent='Days out';
     } else {
       var nm=esc(logs[0].user||'Carter');
       document.querySelector('.hero .badge').textContent = MODE==='rides'?'The log':'The credit log';
@@ -317,8 +304,6 @@ return Promise.all([
                        : (DATED ? 'Each coaster once, on the day it was first ridden.'
                                 : 'Each coaster once, in credit order.');
       document.title=nm+'’s Count — Coaster Hub';
-      document.getElementById('t_rides_k').textContent = MODE==='rides'?'Rides':'Credits';
-      document.getElementById('t_days_k').textContent = MODE==='rides'?'Days out':'Dated days';
     }
 
     buildFilters(); wire();
@@ -408,17 +393,6 @@ function fmtDate(d){
 }
 function render(){
   var rows=filtered();
-  // tiles recount live against the current filter
-  var uniq=new Set(rows.map(function(r){return r.c;}));
-  var parks=new Set(rows.map(function(r){return r.park;}).filter(function(p){return p&&p!=='—';}));
-  var days=new Set(rows.map(function(r){return r.d;}).filter(Boolean));
-  // one row per ride, always — an undated row is one ride we know happened
-  var rideCount = rows.length;
-  document.getElementById('t_rides').textContent=rideCount.toLocaleString();
-  document.getElementById('t_coasters').textContent=uniq.size.toLocaleString();
-  document.getElementById('t_parks').textContent=parks.size.toLocaleString();
-  document.getElementById('t_days').textContent=days.size.toLocaleString();
-
   document.getElementById('dayview').style.display = view==='day'?'block':'none';
   document.getElementById('parkview').style.display = view==='parks'?'block':'none';
   if(view==='parks') renderParks(rows); else renderDays(rows);

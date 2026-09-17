@@ -109,6 +109,29 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
    site, so it is quieter and closer than the first. */
 .hero p + p{font-size:.98rem;margin:-18px 0 26px}
 .hero-sub{color:var(--accent2);font-weight:600;font-size:.95rem;margin:-14px 0 28px;letter-spacing:.01em}
+/* The front page's copy runs the full width of the container rather than the
+   measure the rest of the site's heroes use — it is the one paragraph anybody
+   reads cold, and breaking it early left a ragged column with empty space beside
+   it. The headline drops a step so it still lands on two lines. */
+.hero h1.wide{max-width:none;font-size:clamp(2.2rem,5.6vw,3.5rem)}
+.hero p.wide{max-width:none}
+/* The signed-out pair on the front page. Sized like the profile's buttons —
+   this is an invitation, not a landing-page call to action. */
+.hero .herojoin{display:flex;flex-wrap:wrap;gap:10px;margin:-14px 0 24px;max-width:none}
+.hero .herojoin[hidden]{display:none}
+.hero .herojoin .btn{padding:10px 18px;font-size:.92rem;border-radius:10px;font-weight:600}
+.hero .herojoin .btn.alt{background:transparent;border:1px solid var(--line);color:var(--fg)}
+.hero .herojoin .btn.alt:hover{border-color:var(--accent2);color:var(--accent2)}
+
+/* Feedback card. Laid out as a row so the button sits beside the ask. */
+.fbcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px;
+  display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin:6px 0 40px}
+.fbcard h2{font-size:1.1rem;margin:0 0 4px}
+.fbcard p{color:var(--muted);font-size:.9rem;margin:0;max-width:56ch}
+.fbcard .spacer{flex:1 1 auto}
+.fbcard .go{flex:none;background:var(--accent2);color:var(--well);font-weight:700;
+  border-radius:10px;padding:11px 18px;font-size:.92rem;text-decoration:none;white-space:nowrap}
+.fbcard .go:hover{filter:brightness(1.08)}
 
 /* /stats splits the hero in two: who the rider is on the left, what they have
    ridden on the right. The hub (/stats with nobody in the URL) has no profile

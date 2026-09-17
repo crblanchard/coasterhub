@@ -335,6 +335,14 @@ is the only place that knows the shape of these URLs — header links, the rider
 bar, the hub cards, the home page and `/account`'s redirects all call it. Build one by hand and
 it will be the one that rots.
 
+### Wanted, not built yet: pages for a park and for a coaster (2026-09-17)
+
+Carter's, for later: open a park or a coaster as its own page — the global ranking it sits at,
+how many riders here have it, who has ridden it and where they put it, the specs. The data is
+already there (`/api/coasters`, `/api/parks`, every rider's rides and rankings); what is missing
+is the URL scheme (`/park/<slug>`, `/coaster/<id>`?) and a decision about what leads each page.
+Nothing on the site links to such a page yet, so it can be built whole rather than in pieces.
+
 ### Asset paths must stay absolute
 
 `/user/<slug>/…` URLs are **200 rewrites**, so the browser keeps the pretty path. A relative
