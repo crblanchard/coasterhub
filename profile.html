@@ -386,6 +386,14 @@ function mountFollows(host, slug){
 
   function draw(){
     line.hidden=false;
+    // The line's negative top margin exists to hug the bio, which it continues.
+    // With no bio to hug it pulled straight up into the name and username
+    // instead — which is what an unclaimed rider's page looked like. Read the
+    // bio's real visibility rather than its text: your own bio is a button that
+    // shows even when empty, because an editable thing showing nothing cannot
+    // be found.
+    var showing = bio && getComputedStyle(bio).display !== 'none';
+    line.classList.toggle('nobio', !showing);
     line.innerHTML = count(D.followers.length,'followers')+' &middot; '+count(D.following.length,'following');
     line.querySelectorAll('a').forEach(function(a){
       a.onclick=function(){

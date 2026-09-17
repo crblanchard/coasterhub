@@ -660,11 +660,19 @@
     }
     // Refilled rather than rebuilt: this runs once before the rider list has
     // loaded, so the badge reads something immediately, and again once it has.
+    //
+    // Global is PINNED above the scroll rather than being the first row in it.
+    // It is not one of the riders — it is the way out of looking at a rider —
+    // and at seven riders it had already scrolled off the top of its own menu,
+    // which is the one thing it exists to not do.
     function fill() {
       label.textContent = nameFor(slug);
       var rows = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
-      menu.innerHTML = (GLOBAL_PAGES[page] ? item("__all__", "Global", !slug) : "")
-        + rows.map(function (u) { return item(u.slug, u.name, u.slug === slug); }).join("");
+      menu.innerHTML =
+        (GLOBAL_PAGES[page] ? '<div class="rbpin">' + item("__all__", "Global", !slug) + "</div>" : "")
+        + '<div class="rbscroll">'
+        + rows.map(function (u) { return item(u.slug, u.name, u.slug === slug); }).join("")
+        + "</div>";
     }
     fill();
     fetchUsers().then(fill).catch(function () { /* the badge still reads a name */ });
@@ -673,6 +681,21 @@
       menu.hidden = !on;
       wrap.classList.toggle("open", on);
       btn.setAttribute("aria-expanded", on ? "true" : "false");
+      if (!on) return;
+      // Open onto whoever you are reading, centred, so a name a long way down
+      // the list is not something you have to go hunting for.
+      //
+      // Measured from rects and applied as a DELTA. scrollTop by hand rather
+      // than scrollIntoView(), which is entitled to scroll the page as well as
+      // the box; and rects rather than offsetTop, which is measured from the
+      // nearest positioned ancestor — that is .rbmenu, not the scroll box, so
+      // it silently included the pinned Global above it and centred on the
+      // wrong row.
+      var box = menu.querySelector(".rbscroll");
+      var cur = box && box.querySelector(".rbitem.on");
+      if (!cur) return;
+      var r = cur.getBoundingClientRect(), b = box.getBoundingClientRect();
+      box.scrollTop += (r.top - b.top) - (b.height - r.height) / 2;
     }
     btn.addEventListener("click", function (e) {
       e.stopPropagation();
