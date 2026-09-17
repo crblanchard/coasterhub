@@ -67,6 +67,14 @@ those files are the fallback, and the sync overwrites them.
   adding another for the same thing, and never use the shorthands. (That picker
   is gone as of 2026-09-17 — the rider switcher is the hero badge — but the
   lesson is not.)
+- **A CSS rule that names an element rather than what it means** breaks the day
+  the element changes. `.herocount h1 span{display:block}` was what put one hero
+  number per line; the numbers became links, and all three collapsed onto one
+  line. Same family as the shorthands above — sixth instance.
+- **An inline `padding` beats every stylesheet rule, media query included.** The
+  heroes set `--hero-t`/`--hero-b` and let `style.css` do the padding, which is
+  the only reason the phone layout can tighten it. Give a new page those, not a
+  `padding`.
 - **Nothing may set `.hero .badge`'s `textContent` on `/count`, `/rankings` or a
   profile.** That badge is a `<button>` built by `CoasterHub.riderBadge()` and
   writing text into it takes the chevron and the menu with it. `account.html`'s

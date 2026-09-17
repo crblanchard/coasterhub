@@ -120,7 +120,7 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero" style="padding:60px 0 36px"><div class="container">
+<section class="hero" style="--hero-t:60px;--hero-b:36px"><div class="container">
   <!-- Two columns on a rider's page: who they are on the left, their two
        numbers on the right. `.split` is added by render(), which is also the
        only thing that runs here — a URL with no rider redirects away.
@@ -505,16 +505,28 @@ function render(s){
   var hh=document.getElementById('hero_h');
   hh.textContent='';
   hh.removeAttribute('style');
-  var line=function(t){ var d=document.createElement('span'); d.textContent=t; hh.appendChild(d); };
-  line(nf(k.credits)+' coasters.');
-  if(has.rideCounts) line(nf(k.rides)+' rides.');
+  // Each line is the way to the page behind it: the coaster and ride totals go
+  // to this rider's count, the ranked total to their list. Built as real links
+  // with a real href rather than click handlers, so they middle-click, they can
+  // be copied, and they say where they go in the status bar.
+  //
+  // The href is built here rather than left to initNav's data-nav pass: that
+  // runs before render() exists to create these, so a data-nav attribute would
+  // never be resolved and the link would point at the bare page.
+  var line=function(t,page){
+    var d=document.createElement(page?'a':'span');
+    if(page) d.href=CoasterHub.userPageHref(CoasterHub.currentUser(),page);
+    d.textContent=t; hh.appendChild(d);
+  };
+  line(nf(k.credits)+' coasters.','count');
+  if(has.rideCounts) line(nf(k.rides)+' rides.','count');
   // A ranking lives in its own table, so it arrives after the count does and the
   // third line appears a beat later rather than holding up the first two. A
   // rider with an empty list still gets "0 ranked." — the riders page says 0
   // beside their name too, and a missing line would read as "unknown".
   fetch('/api/rankings/'+encodeURIComponent(CoasterHub.currentUser()||''))
     .then(function(r){ return r.ok ? r.json() : {order:[]}; })
-    .then(function(d){ line(nf((d.order||[]).length)+' ranked.'); })
+    .then(function(d){ line(nf((d.order||[]).length)+' ranked.','rankings'); })
     .catch(function(){ /* no ranking to report is better than a wrong one */ });
   // Standing notes about a rider's own data — things known to be unresolved, kept
   // on the page so they aren't forgotten. Delete the entry once it's settled.

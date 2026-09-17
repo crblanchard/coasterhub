@@ -78,7 +78,12 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
 .people{flex:1 1 0;min-width:0}
 
 /* Hero */
-.hero{position:relative;overflow:hidden;padding:96px 0 84px;
+/* Each page sets --hero-t/--hero-b inline rather than `padding` itself, so
+   the padding declaration lives HERE, where the phone rule below can reach
+   it — an inline padding beats any stylesheet rule, media query or not. */
+.hero{position:relative;overflow:hidden;
+  padding-top:var(--hero-t,96px);padding-bottom:var(--hero-b,84px);
+  padding-left:0;padding-right:0;
   background:radial-gradient(1000px 500px at 75% -10%,var(--hero1),transparent 60%),
              radial-gradient(800px 460px at 0% 120%,var(--hero2),transparent 55%)}
 .hero .badge{display:inline-block;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
@@ -150,7 +155,17 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
 /* Big, but not hero-headline big — this sits BESIDE a name rather than above
    the page. Each number is its own span so the two lines stack without a <br>. */
 .herotop.split .herocount h1{font-size:clamp(1.6rem,3.4vw,2.3rem);max-width:none;line-height:1.2}
-.herotop.split .herocount h1 span{display:block}
+/* One number per line. The `a` is here for a reason: two of the three lines
+   are links now, and a rule naming only `span` collapsed all three onto one
+   line the moment they became anchors. */
+.herotop.split .herocount h1 span,.herotop.split .herocount h1 a{display:block}
+/* A link, without looking like one. The number is the destination — tapping
+   "562 coasters." goes to the count — and an underline under a 2.3rem
+   headline reads as damage, so the cue is colour on hover instead. */
+.herocount h1 a{color:inherit;text-decoration:none;cursor:pointer}
+.herocount h1 a:hover{color:var(--accent2)}
+.herocount h1 a:focus-visible{outline:2px solid var(--accent2);outline-offset:4px;
+  border-radius:8px}
 /* Beats `.hero p`, which is sized for a paragraph of lead copy. */
 /* What you can do with this count: a column of verbs under the two numbers, on
    your own page only. One accent button for the thing you do most and three
@@ -193,6 +208,14 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
   /* Stacked: the numbers sit under the profile, so right-aligning them would
      leave the two blocks pointing opposite ways. */
   .herotop.split .herocount{margin-left:0;text-align:left}
+}
+@media(max-width:680px){
+  /* A phone screen is the scarce thing here, and 56px of empty gradient above
+     a one-line badge was the most expensive thing on it — the rider picker,
+     which is the first thing you want to reach, started a third of the way
+     down. Longhands, so each page's --hero-b still decides the bottom. */
+  .hero{padding-top:18px}
+  .hero .badge,.riderbadge{margin-bottom:14px}
 }
 .track{position:absolute;inset:0;z-index:-1;opacity:.5}
 

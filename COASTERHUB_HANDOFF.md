@@ -794,6 +794,77 @@ you follow; it shows everyone for now, which is right while there are six riders
 
 ---
 
+## The hero numbers are the navigation (2026-09-17)
+
+On a profile, "562 coasters." and "2,394 rides." go to that rider's count and "125 ranked." to
+their list. Carter's call: he did not want a row of link-coloured lines under them saying the
+same thing twice.
+
+Real `<a>` elements with a real `href`, not click handlers, so they middle-click and copy and
+say where they go. **The href is built in `render()`**, not left to `initNav`'s `data-nav` pass
+— that pass runs before `render()` has created these, so a `data-nav` attribute would never be
+resolved and every one would point at the bare `/count`.
+
+Styled `color:inherit;text-decoration:none`, with colour on hover as the only cue: an underline
+under a 2.3rem headline reads as damage.
+
+**The trap this walked into.** `.herotop.split .herocount h1 span{display:block}` is what puts
+one number per line. The moment those spans became anchors all three collapsed onto one line,
+because the rule named `span`. The selector now names `span` and `a`. Sixth instance of the
+family in CLAUDE.md's list: a rule that names an element rather than what it means.
+
+---
+
+## Hero padding, and why it is not inline any more (2026-09-17)
+
+Every page used to carry `style="padding:56px 0 26px"` on its hero. **An inline padding beats
+any stylesheet rule, media query or not**, so there was no way to tighten the top of the page on
+a phone without an `!important` or an edit to eleven files every time the number changed.
+
+Each hero now sets **`--hero-t` and `--hero-b`** inline instead, and `.hero` in `style.css`
+reads them with longhand `padding-top` / `padding-bottom`. Every page's desktop value is
+unchanged (52–60 top, 20–36 bottom); the difference is that the declaration now lives
+somewhere a media query can reach.
+
+Below 680px the top drops to **18px** and the badge's bottom margin to 14px. 56px of empty
+gradient above a one-line badge was the most expensive thing on a phone screen, and the rider
+picker — the first thing you want to reach — started a third of the way down. Each page's
+`--hero-b` still decides its own bottom.
+
+If you add a page, give its hero `--hero-t`/`--hero-b`, not `padding`.
+
+---
+
+## Near me, and finding a park at all (2026-09-17)
+
+`/log`'s park field has three ways in now, and the point of all three is not scrolling 247
+options.
+
+**The three nearest parks are buttons**, not a sentence. It used to name the closest one
+("Closest: Oakland Zoo, 7.9 mi") and then leave you to go and find it in the dropdown, which
+is the scroll the button existed to save. All three are pressable, the selected one is marked,
+and `choosePark()` is the single way in for every path that picks a park for you — a button,
+the standing-in-a-park auto-pick, or a filter that narrows to one match.
+
+**A filter under the select** narrows the dropdown rather than being a second list beside it,
+so the park is still chosen in exactly one place. Two rules worth keeping:
+
+- the park you have already chosen always survives the filter, or typing silently blanks your
+  selection and empties the coaster list under it;
+- at two or more characters, a single remaining match is selected for you — typing IS choosing
+  once there is nothing left to choose. Two, not one, so a keystroke cannot land you in a park
+  by accident.
+
+The match count rides in the select's placeholder ("— 3 of 247 parks —"), which is chrome the
+select already had, so the filter needs no label of its own.
+
+**"Don't worry about the stats."** The add-a-coaster form says so outright now. People were
+treating a missing height and speed as something they had to go and look up before they could
+log the ride they just took; name and type is all the form asks for, and the rest gets filled
+in later.
+
+---
+
 ## The profile on a phone (2026-09-17) — **a draft**
 
 Carter's words: "works for me — design will change, so do that as a draft." So this is the

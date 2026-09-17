@@ -37,8 +37,19 @@
   .riderline{color:var(--muted);font-size:.84rem;margin:0 0 14px}
   .riderline b{color:var(--fg);font-weight:600}
   .riderline a{color:var(--accent2);cursor:pointer}
-  .geonote{color:var(--muted);font-size:.76rem;margin:5px 0 0;min-height:1em}
+  .geonote{color:var(--muted);font-size:.76rem;margin:6px 0 0;min-height:1em}
   .geonote a{color:var(--accent2);cursor:pointer}
+  /* The nearest parks, as things you can press. A line that only NAMED the
+     closest park still left you to go and find it in a 247-long dropdown. */
+  .nearrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 0}
+  .nearrow .lbl{color:var(--muted);font-size:.76rem}
+  .nearpick{background-color:transparent;border:1px solid var(--line);color:var(--fg);
+    font-family:inherit;font-size:.78rem;padding:5px 10px;border-radius:999px;cursor:pointer;
+    white-space:nowrap;transition:border-color .12s,color .12s}
+  .nearpick:hover{border-color:var(--accent2);color:var(--accent2)}
+  .nearpick.on{border-color:var(--accent2);color:var(--accent2);font-weight:700}
+  .nearpick .mi{color:var(--muted);font-weight:400;margin-left:5px}
+  .nearpick.on .mi{color:var(--accent2)}
   .setup{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:0 0 18px}
   .fld{display:flex;flex-direction:column;gap:5px}
   .fld label{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
@@ -114,7 +125,7 @@
        am I writing to". Two rider controls side by side would be a trap. -->
 </div></header>
 
-<section class="hero" style="padding:52px 0 20px"><div class="container">
+<section class="hero" style="--hero-t:52px;--hero-b:20px"><div class="container">
   <span class="badge">Log</span>
   <h1 style="max-width:20ch">Add to your count.</h1>
   <p>Rides from a day at a park, or credits you already have.</p>
@@ -171,6 +182,11 @@
                 style="flex:none;padding:10px 12px">Near me</button>
         <button class="ghost" id="newpark" type="button" style="flex:none;padding:10px 12px">+ Park</button>
       </div>
+      <!-- 247 parks is a long scroll to reach one you can already name. Types
+           straight into the dropdown above rather than being a second list to
+           choose from, so there is still only one place the park is chosen. -->
+      <input id="parkq" type="search" placeholder="Filter parks by name&hellip;"
+             autocomplete="off" style="width:100%;margin-top:8px">
       <p class="geonote" id="geonote"></p>
     </div>
     <div class="fld" style="flex:1;min-width:200px"><label for="search">Or search all coasters</label><input id="search" type="search" placeholder="Type 2+ letters&hellip;" style="width:100%"></div>
@@ -212,6 +228,8 @@
         <button class="primary" id="nc_save" type="button">Add</button>
         <button class="ghost" id="nc_cancel" type="button">Cancel</button>
         <p class="note" id="nc_note"></p>
+        <p class="note">Name and type is all we need &mdash; don&rsquo;t worry about the stats.
+          Height, speed, length and the rest get filled in for you later.</p>
         <p class="err" id="nc_err"></p>
       </div>
       <div class="clist" id="clist"><div class="hint">Pick a park, or search for a coaster.</div></div>
@@ -336,7 +354,7 @@ function boot(){
 
   $('save').onclick=save;
   $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
-  wireAdders(); wireRiderAdd(); wireRiderLine(); wireNearMe(); wireMode();
+  wireAdders(); wireRiderAdd(); wireRiderLine(); wireNearMe(); wireParkFilter(); wireMode();
   // ?mode=list opens straight on "Coaster credits". The two modes are different
   // jobs — tonight's laps versus filling in years of them — and the profile page
   // links at each one by name, so the link has to be able to say which.
@@ -431,25 +449,50 @@ function setHere(pos,quiet){
   fillParks();
   var n=$('geonote');
   if(!pos){ n.textContent=''; return; }
-  // Name the nearest one: it is the fastest way to see whether the fix is sane
-  // before trusting the order.
-  var best=null;
-  Object.keys(PCOUNT).forEach(function(p){
-    var mi=parkMiles(p); if(mi!=null&&(!best||mi<best.mi)) best={p:p,mi:mi};
-  });
+  var near=nearest();
   // Standing inside a park, picking it is the whole point of the button — but
   // only when nothing is chosen yet, so this can never move a park you set
   // yourself, and only from close enough that there is no doubt.
-  var picked=false;
-  if(best&&best.mi<=1&&!sel().value){
-    sel().value=best.p; picked=true;
-    if(typeof renderList==='function'){ $('search').value=''; renderList(); }
-  }
-  n.innerHTML=(best
-      ? ((picked?'You look like you&rsquo;re at <b>':'Closest: <b>')+esc(best.p)+'</b>, '+showMiles(best.mi)+'. ')
-      : '')
-    +'<a id="geoclear">Back to A&ndash;Z</a>';
+  if(near.length&&near[0].mi<=1&&!sel().value) choosePark(near[0].p);
+  // Each of the three is a BUTTON, not a name. Naming the closest park still
+  // left you to go and find it in a 247-long dropdown, which is the scroll the
+  // button was meant to save.
+  n.innerHTML=(near.length
+      ? '<span class="nearrow"><span class="lbl">Nearest you:</span>'
+        + near.map(function(x){
+            return '<button type="button" class="nearpick'+(sel().value===x.p?' on':'')
+              +'" data-p="'+esc(x.p)+'">'+esc(x.p)
+              +'<span class="mi">'+showMiles(x.mi)+'</span></button>';
+          }).join('')
+        + '<a id="geoclear">Back to A&ndash;Z</a></span>'
+      : '<a id="geoclear">No park has coordinates yet — back to A&ndash;Z</a>');
+  Array.prototype.forEach.call(n.querySelectorAll('.nearpick'), function(b){
+    b.onclick=function(){ choosePark(b.getAttribute('data-p')); };
+  });
   $('geoclear').onclick=function(){ setHere(null); };
+}
+
+// The three closest parks that can be placed at all. Always three, however far
+// away they are — see fillParks().
+function nearest(){
+  return Object.keys(PCOUNT).map(function(p){ return {p:p,mi:parkMiles(p)}; })
+    .filter(function(x){ return x.mi!=null; })
+    .sort(function(a,b){ return a.mi-b.mi; })
+    .slice(0,NEAR_N);
+}
+
+// One way in for every path that picks a park for you — a nearest-you button,
+// the geolocation auto-pick, a filter that narrows to a single match. Clears
+// the coaster search, because a park and a search are two different questions
+// and the search wins in currentList().
+function choosePark(name){
+  sel().value=name;
+  $('search').value='';
+  renderList();
+  // The pressed one is the selected one: the row is state, not just a shortcut.
+  Array.prototype.forEach.call(document.querySelectorAll('.nearpick'), function(b){
+    b.classList.toggle('on', b.getAttribute('data-p')===name);
+  });
 }
 function wireNearMe(){
   $('nearme').onclick=function(){
@@ -471,6 +514,13 @@ function wireNearMe(){
 function fillParks(keep){
   var sel=$('park'), cur=keep!=null?keep:sel.value;
   var names=Object.keys(PCOUNT).sort(function(a,b){return a.localeCompare(b);});
+  // The filter narrows the dropdown rather than being a second list beside it,
+  // so the park is still chosen in exactly one place. The park you have ALREADY
+  // chosen always survives the filter — otherwise typing would silently blank
+  // your selection and empty the coaster list under it.
+  var q=$('parkq') ? $('parkq').value.trim().toLowerCase() : '';
+  var all=names.length;
+  if(q) names=names.filter(function(p){ return p.toLowerCase().indexOf(q)>=0 || p===cur; });
   var body;
   if(HERE){
     // Two groups: the three closest parks, nearest first, then the rest, still
@@ -497,8 +547,27 @@ function fillParks(keep){
   } else {
     body=names.map(function(p){ return '<option value="'+esc(p)+'">'+esc(p)+' ('+PCOUNT[p]+')</option>'; }).join('');
   }
-  sel.innerHTML='<option value="">— pick a park —</option>'+body;
+  // The placeholder carries the match count while filtering: it is the one bit
+  // of chrome the select already has, so the filter needs no label of its own.
+  var head = q
+    ? ('— ' + names.length + ' of ' + all + ' parks —')
+    : '— pick a park —';
+  sel.innerHTML='<option value="">'+esc(head)+'</option>'+body;
   if(cur) sel.value=cur;
+}
+
+// Typing is choosing, once there is only one thing left to choose. Two letters
+// minimum so a single keystroke cannot land you in a park by accident.
+function wireParkFilter(){
+  var q=$('parkq');
+  q.addEventListener('input',function(){
+    fillParks();
+    var t=q.value.trim().toLowerCase();
+    if(t.length<2) return;
+    var hits=Object.keys(PCOUNT).filter(function(p){ return p.toLowerCase().indexOf(t)>=0; });
+    if(hits.length===1 && sel().value!==hits[0]) choosePark(hits[0]);
+    else renderList();
+  });
 }
 
 // The sentence over the picker. Kept in step with the select rather than
@@ -650,7 +719,7 @@ function wireAdders(){
 // SHOWN is the park the list on screen was built for. Keeping it lets the page
 // notice a park it was never told about (see the restore note in boot).
 var SHOWN=null;
-function pickPark(){ $('search').value=''; renderList(); }
+function pickPark(){ choosePark($('park').value); }
 function syncPark(){ if($('park').value!==SHOWN) renderList(); }
 
 function currentList(){
