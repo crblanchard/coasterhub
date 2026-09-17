@@ -321,10 +321,13 @@ ridden, and nobody could read it: on a park card the obvious meaning is "when I 
 park visited three times showed three different dates down one column. Dates belong to the
 Rides view, which is organised by them. Carter's call.
 
-**Maker and model on every list row** (2026-09-17). `CoasterHub.maker(c)` joins `manu` and
-`model` into one phrase — "Gerstlauer Shuttle" — skipping whichever is missing, so a
-half-filled row reads as a fact rather than a gap and the ~110 coasters with neither show
-nothing at all. It is used in four places: the `/count` park rows (beside the name, before the
+**The model on every list row** (2026-09-17). `CoasterHub.maker(c)` returns the **model**, not
+"manufacturer model": most models already carry the maker's name ("RMC Hybrid"), so the pair
+read as a stutter — "Rocky Mountain Construction RMC Hybrid". A coaster with a manufacturer
+and **no** model falls back to the manufacturer, because there is no stutter to remove there
+and "Philadelphia Toboggan Coasters" beats an empty space; with neither filled it returns an
+empty string and no separator appears anywhere. `migrations/011-4d-models.sql` folded the maker
+into the model for the three 4D coasters, whose model was the bare and meaningless "4D". It is used in four places: the `/count` park rows (beside the name, before the
 status), and the sub-line of the three ranking lists — `/rankings`, `/rankings/all` and the
 profile's top ten — where it follows the park and region. One definition in `app.js`, because
 four copies of the same join is how they drift.

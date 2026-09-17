@@ -959,13 +959,18 @@
     }).catch(function () { /* signed out: the outline is right */ });
   }
 
-  // "Gerstlauer Shuttle" — maker and model as one phrase, skipping whichever is
-  // missing so a half-filled row reads as a fact rather than a gap. 110 coasters
-  // have neither, and those get an empty string and no separator anywhere.
+  // The MODEL, not "manufacturer model" — most models already carry the maker's
+  // name ("RMC Hybrid", "S&S 4D") and the pair read as a stutter: "Rocky
+  // Mountain Construction RMC Hybrid". Carter's call, 2026-09-17.
+  //
+  // A coaster with a manufacturer and no model falls back to the manufacturer,
+  // because there is no stutter to remove there and "Philadelphia Toboggan
+  // Coasters" beats an empty space. Neither filled gives an empty string and no
+  // separator anywhere.
   function maker(c) {
     if (!c) return "";
-    var m = String(c.manu || "").trim(), mo = String(c.model || "").trim();
-    return m && mo ? m + " " + mo : (m || mo);
+    var mo = String(c.model || "").trim();
+    return mo || String(c.manu || "").trim();
   }
 
   var api = { computeStats: computeStats, maker: maker, loadUser: loadUser, currentUser: currentUser, me: me,
