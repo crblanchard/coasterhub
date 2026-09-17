@@ -391,7 +391,17 @@
       CROP.vw = c.view.clientWidth;
       CROP.base = Math.max(CROP.vw / img.width, CROP.vw / img.height);
       CROP.x = (CROP.vw - img.width * CROP.base) / 2;
-      CROP.y = (CROP.vw - img.height * CROP.base) / 2;
+      // Vertically, centred is the wrong default for a PORTRAIT photo. Faces
+      // live in the upper third of one; centring the window reliably framed
+      // somebody's chest, and the crop then looked wrong for a reason nobody
+      // could name — the saved file is a faithful copy of the frame, the frame
+      // was just started in the wrong place. So a tall image opens with the
+      // window near the top, where the face is, and a wide or square one still
+      // opens centred. Drag from there as before; nothing else changes.
+      var sh = img.height * CROP.base;
+      CROP.y = img.height > img.width
+        ? Math.max(CROP.vw - sh, -sh * 0.10)
+        : (CROP.vw - sh) / 2;
       paint();
     }
     function closeCrop() {

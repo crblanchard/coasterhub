@@ -67,6 +67,11 @@ those files are the fallback, and the sync overwrites them.
   adding another for the same thing, and never use the shorthands. (That picker
   is gone as of 2026-09-17 — the rider switcher is the hero badge — but the
   lesson is not.)
+- **`.hero p + p` outranks a bare class.** The follow line is a `<p>` after the
+  bio's `<p>`, so that rule — one class, two elements — was silently deciding
+  both its margins and everything `.followline{}` said about them was dead. The
+  rules are `.hero .followline` now. Seventh instance: before adding a rule,
+  check what *already* matches the element, not just what you are writing.
 - **A CSS rule that names an element rather than what it means** breaks the day
   the element changes. `.herocount h1 span{display:block}` was what put one hero
   number per line; the numbers became links, and all three collapsed onto one

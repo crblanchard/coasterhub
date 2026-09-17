@@ -436,6 +436,12 @@ footer.site a:hover{color:var(--fg)}
   border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem;font-family:inherit}
 .profedit button.ghost:hover{color:var(--fg)}
 .profedit .msg{margin-top:12px;font-size:.88rem;min-height:1.2em}
+/* min-height reserves a line so a message does not shove the card about —
+   but there is one of these at the BOTTOM of the card, empty on every visit,
+   holding 29px of nothing under everybody's profile forever. Collapsed while
+   empty: the one small shift when a save reports back is cheaper than the
+   permanent gap, and it lands on the thing you just did. */
+.profedit .msg:empty{display:none}
 .profedit .msg.ok{color:var(--accent2)} .profedit .msg.bad{color:var(--accent)}
 .profedit .hint{color:var(--muted);font-size:.8rem;margin:-6px 0 14px;text-transform:none;
   letter-spacing:normal;font-weight:400}
@@ -498,10 +504,20 @@ footer.site a:hover{color:var(--fg)}
    same muted colour — because it is one more line about who this rider is, not
    a widget bolted under one. The counts are links: the interesting question
    about a follower count is always WHO. */
-.followline{color:var(--muted);font-size:.98rem;line-height:1.55;margin:-8px 0 14px}
+/* .hero .followline, not .followline: this is a <p> that follows the bio's
+   <p>, so `.hero p + p` up at the top of this file — one class, two elements
+   — outranks a bare single class and was quietly deciding both margins.
+   Two classes and an element beats it outright. Same family as the traps in
+   CLAUDE.md; keep the .hero on every rule here. */
+.hero .followline{color:var(--muted);font-size:.98rem;line-height:1.55;
+  /* -18px is what `.hero p + p` was giving this line before these rules were
+     scoped to win, and it is the spacing under a bio that Carter signed off,
+     so it is kept deliberately rather than reverting to the -8px that never
+     actually applied. */
+  margin-top:-18px;margin-bottom:14px}
 /* No bio above it, so there is nothing to hug and the pull-up becomes a
    collision with the name. Set by draw() off the bio's real visibility. */
-.followline.nobio{margin-top:12px}
+.hero .followline.nobio{margin-top:12px}
 .followline a{color:var(--muted);cursor:pointer;border-bottom:1px solid transparent}
 .followline a:hover{color:var(--fg);border-bottom-color:var(--line)}
 .followline a.on{color:var(--fg);border-bottom-color:var(--accent2)}

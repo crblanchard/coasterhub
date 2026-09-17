@@ -39,6 +39,23 @@
   .panel.wide{grid-column:1/-1}
   .cwrap{position:relative;height:300px}
   .records{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:8px}
+  /* The top ten. The same row the rankings pages draw, so a list looks like a
+     list wherever you meet it. */
+  .toplist{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+  .trow{display:flex;align-items:center;gap:12px;background:var(--panel);
+        border:1px solid var(--line);border-radius:11px;padding:9px 13px}
+  .trow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);
+             min-width:1.7em;text-align:right;flex:none;font-size:.95rem}
+  .trow .n{flex:1;min-width:0}
+  .trow .n b{display:block;font-weight:600;font-size:.93rem;line-height:1.3;
+             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .trow .n span{display:block;color:var(--muted);font-size:.77rem;line-height:1.3;
+                overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* The heading IS the link to the whole list. Underlined on hover only, so it
+     reads as a heading first. */
+  .toplink{color:inherit;text-decoration:none}
+  .toplink:hover{color:var(--accent2)}
+  .toplink .arw{color:var(--accent2);font-weight:400;margin-left:8px;font-size:.8em}
   .rec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
   .rec .tag{color:var(--accent2);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
   .rec .rname{font-weight:700;font-size:1.05rem;margin:8px 0 2px}
@@ -64,18 +81,28 @@
   @media (max-width:680px){
     #content{display:flex;flex-direction:column}
     #sec_kpis{order:1}
-    #sec_geo{order:2}
-    #morewrap{order:3;display:block;padding:2px 0 22px}
-    #sec_otd{order:4}
-    #sec_records{order:5}
-    #sec_activity{order:6}
-    #sec_overtime{order:7}
-    #sec_breakdown{order:8}
+    #sec_top{order:2}
+    #sec_geo{order:3}
+    #morewrap{order:4;display:block;padding:2px 0 22px}
+    #sec_otd{order:5}
+    #sec_records{order:6}
+    #sec_activity{order:7}
+    #sec_overtime{order:8}
+    #sec_breakdown{order:9}
     body.moreclosed #sec_otd,body.moreclosed #sec_records,body.moreclosed #sec_activity,
     body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
     /* Two up, not "as many as fit": at 320px auto-fit drops to one column and
        five tiles become five screens. */
     .kpis{grid-template-columns:1fr 1fr}
+    /* Close the gaps. On a phone the hero is five short blocks stacked — name,
+       bio, follows, account buttons, numbers — and the desktop spacing between
+       them added up to most of a screen of nothing. */
+    .herotop{gap:12px 40px}
+    .heroacts{margin-top:10px}
+    /* .hero-scoped for the same reason the base rule is — see style.css. */
+    .hero .followline{margin-bottom:8px}
+    .profedit .who{margin-bottom:6px}
+    .profedit .rowlinks{margin-bottom:0}
   }
   .morebtn{width:100%;background-color:transparent;border:1px solid var(--line);
     color:var(--fg);font-family:inherit;font-size:.95rem;font-weight:600;
@@ -198,6 +225,17 @@
     <div class="kpi"><div class="num" id="k_geo"></div><div class="lbl">States / Countries</div></div>
     <div class="kpi"><div class="num" id="k_miles"></div><div class="lbl" id="k_miles_lbl">Total Distance Ridden</div><div class="sub" id="k_inv"></div></div>
   </div>
+</div></section>
+
+<!-- Their ten favourites, under the tiles. The heading is the link to the whole
+     list, so the section needs no "see all" button of its own. Hidden entirely
+     when there is nothing ranked — an empty top ten is not a fact about
+     somebody, it just means they have not got round to it. -->
+<section class="block" id="sec_top" style="display:none"><div class="container">
+  <span class="eyebrow">Ranked</span>
+  <h2><a class="toplink" id="top_h" href="/rankings">Top ten</a></h2>
+  <p class="lead" id="top_sub"></p>
+  <div class="toplist" id="toplist"></div>
 </div></section>
 
 <section class="block" id="sec_otd"><div class="container">
@@ -526,8 +564,41 @@ function render(s){
   // beside their name too, and a missing line would read as "unknown".
   fetch('/api/rankings/'+encodeURIComponent(CoasterHub.currentUser()||''))
     .then(function(r){ return r.ok ? r.json() : {order:[]}; })
-    .then(function(d){ line(nf((d.order||[]).length)+' ranked.','rankings'); })
+    .then(function(d){
+      line(nf((d.order||[]).length)+' ranked.','rankings');
+      renderTop(d.order||[]);
+    })
     .catch(function(){ /* no ranking to report is better than a wrong one */ });
+
+  // Their ten favourites. Rendered off the SAME fetch as the "N ranked." line
+  // above rather than asking again, and from s.coasters, which loadUser has
+  // already brought in — so the whole section costs nothing extra.
+  function renderTop(order){
+    var sec=document.getElementById('sec_top');
+    var byId={}; (s.coasters||[]).forEach(function(c){ byId[c.id]=c; });
+    // A merged-away coaster is not a row: an id can outlive the thing it named.
+    var known=order.map(function(id){ return byId[id]; }).filter(Boolean);
+    if(!known.length) return;                  // stays display:none
+    var ten=known.slice(0,10);
+    var slug=CoasterHub.currentUser();
+    var who=s.userName||'this rider';
+    var h=document.getElementById('top_h');
+    h.href=CoasterHub.userPageHref(slug,'rankings');
+    h.innerHTML = (ten.length<10 ? ('Top '+ten.length) : 'Top ten')
+      + '<span class="arw">' + (known.length>ten.length
+          ? ('all '+nf(known.length)+' &rarr;') : 'the whole list &rarr;') + '</span>';
+    document.getElementById('top_sub').textContent = known.length>ten.length
+      ? (who+'’s ten favourites, out of '+nf(known.length)+' ranked.')
+      : (who+'’s favourites, best first.');
+    document.getElementById('toplist').innerHTML=ten.map(function(c,i){
+      var pk=(s.parks||{})[c.park];
+      var loc=pk&&pk.region?pk.region:'';
+      return '<div class="trow"><span class="pos">'+(i+1)+'</span>'
+        +'<span class="n"><b>'+esc(c.name)+'</b>'
+        +'<span>'+esc(c.park||'')+(loc?' · '+esc(loc):'')+'</span></span></div>';
+    }).join('');
+    sec.style.display='';
+  }
   // Standing notes about a rider's own data — things known to be unresolved, kept
   // on the page so they aren't forgotten. Delete the entry once it's settled.
   var note=RIDER_NOTES[CoasterHub.currentUser()||'carter'];

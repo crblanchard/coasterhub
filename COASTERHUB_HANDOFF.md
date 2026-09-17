@@ -794,6 +794,68 @@ you follow; it shows everyone for now, which is right while there are six riders
 
 ---
 
+## Top ten on a profile (2026-09-17)
+
+Under the stat tiles, a rider's ten favourites, with the **heading as the link** to their whole
+list — Carter did not want a separate "see all" button repeating it. The `<h2>` carries an
+`<a class="toplink">` whose href is built in `render()` (same reason as the hero numbers: the
+`data-nav` pass has already run). The trailing arrow reads "all 14 →" when there are more than
+ten and "the whole list →" when there are not.
+
+**It costs nothing extra.** Both the rows and the "N ranked." hero line come off the *same*
+`/api/rankings/<slug>` fetch, and the names come from `s.coasters`, which `loadUser()` has
+already brought in.
+
+Hidden outright when nothing is ranked (`#sec_top` starts `display:none` and `renderTop()`
+simply returns): an empty top ten is not a fact about somebody, it just means they have not got
+round to it. Ids that no longer resolve to a coaster are dropped — an id can outlive the thing
+it named.
+
+---
+
+## Closing the gaps on a phone (2026-09-17)
+
+Carter, on the phone profile: "close all those gaps." Three of them, and only one was a
+spacing value:
+
+1. **`.hero p + p` was overriding `.followline`.** The follow line is a `<p>` that follows the
+   bio's `<p>`, and that selector — one class plus two elements — outranks a bare single
+   class, so *every margin `.followline{}` declared was dead*. Its real spacing had been
+   coming from a rule meant for a second hero paragraph. Now `.hero .followline`. The
+   `margin-top` is deliberately **−18px**, which is what that rule had been giving it and what
+   Carter signed off on — not the −8px that never applied.
+2. **An empty `.profedit .msg` was holding 29px under every profile, forever.** Its
+   `min-height:1.2em` is there so a save message does not shove the card about, but there is
+   one at the *bottom* of the card that is empty on every visit. `:empty{display:none}` now
+   collapses it; the one small shift when a save reports back is cheaper than the permanent
+   gap, and it lands on the thing you just did.
+3. The actual spacing: `.herotop` row gap 26 → 12, `.heroacts` margin-top 16 → 10, the follow
+   line 14 → 8, all inside the 680px block.
+
+The hero went from 357px to 339px on a 390px screen with the tiles no longer pushed off it, and
+on your own page — which also carries the bio and the account buttons — the whole thing now
+fits one screen.
+
+---
+
+## The avatar crop opens near the top of a portrait (2026-09-17)
+
+Carter said his picture was "cropped weird". **The crop pipeline is faithful** — verified by
+framing the middle square of an eight-band test image and reading the saved 256px JPEG back:
+bands 2–5, exactly as framed. Nothing between the canvas and R2 distorts anything, and no
+avatar box can crop it either, because a square image in a square box under `cover` is an exact
+fit.
+
+What was wrong was where the frame *started*. `openCrop()` centred the window vertically, and
+faces live in the upper third of a portrait photo, not the middle — so the default reliably
+framed somebody's chest, and the result looked wrong for a reason nobody could name. A tall
+image now opens with the window near the top (`-sh * 0.10`, clamped); wide and square images
+still open centred. Dragging is unchanged.
+
+Anyone whose picture predates this can just re-upload it.
+
+---
+
 ## The hero numbers are the navigation (2026-09-17)
 
 On a profile, "562 coasters." and "2,394 rides." go to that rider's count and "125 ranked." to
