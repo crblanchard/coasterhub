@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base href="/">
-<title>The shared list — Coaster Hub</title>
+<title>Global rankings — Coaster Hub</title>
 <meta name="description" content="Every coaster more than one rider has ranked, most agreed-on first.">
 <link rel="stylesheet" href="/style.css?v=20260805b">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
@@ -12,7 +12,7 @@
 <link rel="icon" href="/favicon-32.png?v=20260805b" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png?v=20260805b" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260805b">
-<meta property="og:title" content="The shared list — Coaster Hub">
+<meta property="og:title" content="Global rankings — Coaster Hub">
 <meta property="og:description" content="Every coaster more than one rider has ranked, most agreed-on first.">
 <meta property="og:image" content="https://coasterhub.org/og-image.png">
 <meta property="og:type" content="website">
@@ -57,9 +57,13 @@
 </div></header>
 
 <section class="hero" style="--hero-t:56px;--hero-b:26px"><div class="container">
-  <span class="badge">Everyone together</span>
-  <h1 style="max-width:18ch">The shared list.</h1>
-  <p id="sub">Every coaster more than one rider has ranked, most agreed-on first.</p>
+  <!-- The badge names the scope and the headline names the page, the same way
+       round as every other per-rider page. There is no sentence under it any
+       more: it said what the list already shows, and the way to one person's
+       list is the switcher on /rankings you came from, not a line of prose.
+       (Carter's call, 2026-09-17.) -->
+  <span class="badge">Global</span>
+  <h1 style="max-width:18ch">Global rankings.</h1>
 </div></section>
 
 <section class="block" style="padding-top:18px"><div class="container">
@@ -89,7 +93,6 @@ CoasterHub.initNav('rankings');
 var $=function(id){return document.getElementById(id);};
 var esc=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
-var nf=function(n){return n==null?'—':n.toLocaleString();};
 
 var ROWS=[], SORT='lists';
 
@@ -161,10 +164,6 @@ CoasterHub.fetchUsers().then(function(){
       .filter(function(t){ return t.n>1; });
     ROWS.forEach(function(t){ t.who.sort(function(a,b){ return a.pos-b.pos; }); });
 
-    var started=all.filter(function(a){ return (a.order||[]).length; }).length;
-    $('sub').textContent = ROWS.length
-      ? nf(ROWS.length)+' coasters appear on more than one of the '+started+' lists.'
-      : 'Nothing appears on more than one list yet.';
     $('loading').style.display='none';
     render();
   });
