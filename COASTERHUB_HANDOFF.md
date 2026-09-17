@@ -834,8 +834,9 @@ say so.** Ten tests assert the split.
 
 ## Top ten on a profile (2026-09-17)
 
-Under the stat tiles, a rider's ten favourites, with the **heading as the link** to their whole
-list — Carter did not want a separate "see all" button repeating it. The `<h2>` carries an
+**Above** the stat tiles (moved there 2026-09-17, Carter's call: what somebody liked best is
+more interesting than how many states they have been to), a rider's ten favourites, with the
+**heading as the link** to their whole list — Carter did not want a separate "see all" button repeating it. The `<h2>` carries an
 `<a class="toplink">` whose href is built in `render()` (same reason as the hero numbers: the
 `data-nav` pass has already run). The trailing arrow reads "all 14 →" when there are more than
 ten and "the whole list →" when there are not.
@@ -844,8 +845,11 @@ ten and "the whole list →" when there are not.
 `/api/rankings/<slug>` fetch, and the names come from `s.coasters`, which `loadUser()` has
 already brought in.
 
-Hidden outright when nothing is ranked (`#sec_top` starts `display:none` and `renderTop()`
-simply returns): an empty top ten is not a fact about somebody, it just means they have not got
+It also takes the tightened `padding-top:28px` that belonged to the tiles as the first block
+after the hero, and `renderTop()` clears the tiles' own tightened padding when it reveals
+itself — so whichever of the two leads the page gets the tight spacing and the other gets the
+normal 64px. Hidden outright when nothing is ranked (`#sec_top` starts `display:none` and
+`renderTop()` simply returns), and then the tiles lead again with their tight padding intact: an empty top ten is not a fact about somebody, it just means they have not got
 round to it. Ids that no longer resolve to a coaster are dropped — an id can outlive the thing
 it named.
 

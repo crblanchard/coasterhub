@@ -80,8 +80,8 @@
   #morewrap{display:none}
   @media (max-width:680px){
     #content{display:flex;flex-direction:column}
-    #sec_kpis{order:1}
-    #sec_top{order:2}
+    #sec_top{order:1}
+    #sec_kpis{order:2}
     #sec_geo{order:3}
     #morewrap{order:4;display:block;padding:2px 0 22px}
     #sec_otd{order:5}
@@ -97,8 +97,11 @@
     /* Close the gaps. On a phone the hero is five short blocks stacked — name,
        bio, follows, account buttons, numbers — and the desktop spacing between
        them added up to most of a screen of nothing. */
-    .herotop{gap:12px 40px}
-    .heroacts{margin-top:10px}
+    /* The three numbers want room to read as their own block rather than as
+       something wedged between two rows of buttons — gap is the air above
+       them, heroacts the air below. */
+    .herotop{gap:20px 40px}
+    .heroacts{margin-top:18px}
     /* .hero-scoped for the same reason the base rule is — see style.css. */
     .hero .followline{margin-bottom:8px}
     .profedit .who{margin-bottom:6px}
@@ -217,6 +220,19 @@
 
 <main id="content" style="display:none">
 <div class="container"><p class="ridernote" id="ridernote" style="display:none"></p></div>
+<!-- Their ten favourites, ABOVE the tiles (Carter's call, 2026-09-17): what
+     somebody liked best is more interesting than how many states they have been
+     to. The heading is the link to the whole list, so the section needs no "see
+     all" button of its own. Hidden entirely when there is nothing ranked — an
+     empty top ten is not a fact about somebody, it just means they have not got
+     round to it, and then the tiles lead as before. -->
+<section class="block" id="sec_top" style="display:none;padding-top:28px"><div class="container">
+  <span class="eyebrow">Ranked</span>
+  <h2><a class="toplink" id="top_h" href="/rankings">Top ten</a></h2>
+  <p class="lead" id="top_sub"></p>
+  <div class="toplist" id="toplist"></div>
+</div></section>
+
 <section class="block" id="sec_kpis" style="padding-top:28px"><div class="container">
   <div class="kpis">
     <div class="kpi"><div class="num" id="k_credits"></div><div class="lbl">Credits</div><div class="sub" id="k_split"></div></div>
@@ -225,17 +241,6 @@
     <div class="kpi"><div class="num" id="k_geo"></div><div class="lbl">States / Countries</div></div>
     <div class="kpi"><div class="num" id="k_miles"></div><div class="lbl" id="k_miles_lbl">Total Distance Ridden</div><div class="sub" id="k_inv"></div></div>
   </div>
-</div></section>
-
-<!-- Their ten favourites, under the tiles. The heading is the link to the whole
-     list, so the section needs no "see all" button of its own. Hidden entirely
-     when there is nothing ranked — an empty top ten is not a fact about
-     somebody, it just means they have not got round to it. -->
-<section class="block" id="sec_top" style="display:none"><div class="container">
-  <span class="eyebrow">Ranked</span>
-  <h2><a class="toplink" id="top_h" href="/rankings">Top ten</a></h2>
-  <p class="lead" id="top_sub"></p>
-  <div class="toplist" id="toplist"></div>
 </div></section>
 
 <section class="block" id="sec_otd"><div class="container">
@@ -604,6 +609,11 @@ function render(s){
         +'<span>'+esc(c.park||'')+(loc?' · '+esc(loc):'')+'</span></span></div>';
     }).join('');
     sec.style.display='';
+    // The tiles carry a tightened top padding because they used to lead the
+    // page. They do not any more, so give them the normal space between
+    // blocks — but only when this section is actually showing, since with
+    // nothing ranked the tiles lead again and want the tight one back.
+    document.getElementById('sec_kpis').style.paddingTop='';
   }
   // Standing notes about a rider's own data — things known to be unresolved, kept
   // on the page so they aren't forgotten. Delete the entry once it's settled.
