@@ -287,8 +287,27 @@
   // following a stale link used to get advice about running a local web server,
   // because r.json() on the missing snapshot threw a parse error and every
   // failure looked alike.
-  function fetchJSON(apiPath, staticPath) {
-    return fetch(apiPath).then(function (r) {
+  // Every API read goes out with cache:"no-store".
+  //
+  // The Worker sends `cache-control: no-store` now, but a response cached
+  // BEFORE it started doing so is still in people's browsers, and heuristic
+  // freshness will keep serving it. That is not hypothetical: the riders list
+  // kept drawing Carter's previous profile picture — from a cached /api/users
+  // naming the old avatar key — while the header, off a different endpoint,
+  // showed the new one. Two avatars of the same person on one screen.
+  //
+  // This asks the browser to skip its HTTP cache for the request itself, so a
+  // stale entry cannot be used or revalidated into use, and nobody has to know
+  // to hard-refresh. Belt and braces with the header, deliberately: the header
+  // stops new stale entries, this gets past the old ones.
+  var LIVE = { cache: "no-store" };
+
+  // opts is LIVE for anything per-rider or per-account. The coaster and park
+  // lists are deliberately left to the HTTP cache: the Worker gives them an
+  // explicit `max-age=300` now, so there is no heuristic guessing to escape,
+  // and they are ~900 rows that nearly every page asks for.
+  function fetchJSON(apiPath, staticPath, opts) {
+    return fetch(apiPath, opts).then(function (r) {
       if (!r.ok) { var e = new Error("api " + r.status); e.status = r.status; throw e; }
       return r.json();
     }).catch(function (apiErr) {
@@ -305,13 +324,13 @@
   }
   function fetchCoasters() { return fetchJSON("/api/coasters", "/coasters.json"); }
   function fetchParks() { return fetchJSON("/api/parks", "/parks.json"); }
-  function fetchUser(slug) { return fetchJSON("/api/user/" + slug, "/" + slug + ".json"); }
+  function fetchUser(slug) { return fetchJSON("/api/user/" + slug, "/" + slug + ".json", LIVE); }
 
   // Ride log for one rider: { user, mode, rides:[{i?, c, d, num?, n?}] }.
   // The API returns that shape directly; the static fallback file is the older
   // per-rider shape, so normalise it here and both paths render identically.
   function fetchRides(slug) {
-    return fetch("/api/rides/" + slug)
+    return fetch("/api/rides/" + slug, LIVE)
       .then(function (r) { if (!r.ok) throw new Error("api " + r.status); return r.json(); })
       .catch(function () {
         return fetch("/" + slug + ".json").then(function (r) { return r.json(); }).then(function (u) {
@@ -442,7 +461,7 @@
   var usersPromise = null;
   function fetchUsers() {
     if (!usersPromise) {
-      usersPromise = fetch("/api/users")
+      usersPromise = fetch("/api/users", LIVE)
         .then(function (r) { if (!r.ok) throw new Error("api " + r.status); return r.json(); })
         .then(function (j) {
           var list = (j && j.users) || [];
@@ -540,7 +559,7 @@
   var mePromise = null;
   function me() {
     if (!mePromise) {
-      mePromise = fetch("/api/auth/me", { credentials: "same-origin" })
+      mePromise = fetch("/api/auth/me", { credentials: "same-origin", cache: "no-store" })
         .then(function (r) { return r.ok ? r.json() : { account: null }; })
         .then(function (d) { return (d && d.account) || null; })
         .catch(function () { return null; });   // offline, or the API is down
