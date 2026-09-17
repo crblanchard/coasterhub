@@ -646,8 +646,17 @@
     menu.setAttribute("role", "menu");
 
     wrap.appendChild(btn);
-    wrap.appendChild(menu);
     host.parentNode.replaceChild(wrap, host);
+    // The MENU lives at the end of <body>, not inside the badge.
+    //
+    // `.hero` is `overflow:hidden` (it clips its own gradients and the track
+    // SVG), so a menu absolutely positioned inside it is clipped at the hero's
+    // bottom edge. On a desktop the hero is tall enough to hide the problem; on
+    // a phone — more so since the hero padding was tightened — the list was cut
+    // off mid-way and the last rider could not be reached or scrolled to at all.
+    // Exactly the trap profile-edit.js records for the crop dialog: nesting
+    // something that has to escape its parent inside a box that clips.
+    document.body.appendChild(menu);
 
     function nameFor(s) {
       if (!s) return "Global";
@@ -677,11 +686,31 @@
     fill();
     fetchUsers().then(fill).catch(function () { /* the badge still reads a name */ });
 
+    // Positioned against the button's rect each time it opens, because it is no
+    // longer inside the badge and cannot inherit its place. Fixed, not absolute:
+    // the page can scroll under it, and the one thing this must never do again
+    // is get clipped by an ancestor.
+    function place() {
+      var r = btn.getBoundingClientRect();
+      menu.style.position = "fixed";
+      menu.style.left = Math.round(r.left) + "px";
+      menu.style.top = Math.round(r.bottom + 6) + "px";
+      // Then, if that would run off the bottom, lift it until it fits. Measured
+      // after it is visible, or the height is 0 and this does nothing.
+      var h = menu.offsetHeight;
+      var room = window.innerHeight - 8;
+      if (r.bottom + 6 + h > room) {
+        // Above the badge if there is room up there, otherwise pinned to the
+        // bottom of the screen — never off it.
+        menu.style.top = Math.round(r.top - 6 - h >= 8 ? r.top - 6 - h : Math.max(8, room - h)) + "px";
+      }
+    }
     function open(on) {
       menu.hidden = !on;
       wrap.classList.toggle("open", on);
       btn.setAttribute("aria-expanded", on ? "true" : "false");
       if (!on) return;
+      place();
       // Open onto whoever you are reading, centred, so a name a long way down
       // the list is not something you have to go hunting for.
       //
@@ -720,6 +749,13 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && !menu.hidden) { open(false); btn.focus(); }
     });
+    // A fixed menu does not travel with the page, so scrolling away from the
+    // badge would leave it floating over the middle of the screen. Close it
+    // instead of chasing the button. The scroll box inside it has
+    // overscroll-behavior:contain, so scrolling the LIST does not reach here.
+    window.addEventListener("scroll", function () { if (!menu.hidden) open(false); },
+      { passive: true });
+    window.addEventListener("resize", function () { if (!menu.hidden) place(); });
   }
 
   function initNav(page) {

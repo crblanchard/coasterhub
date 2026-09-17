@@ -995,7 +995,17 @@ right and a badge over the headline — was one too many, and the header one was
 looked at. The answer belongs beside the words it changes.
 
 `CoasterHub.riderBadge(host, page, slug)` replaces a `<span class="badge">` with a button
-wearing the same pill, plus a chevron, and a menu of riders under it. It is on all three
+wearing the same pill, plus a chevron, and a menu of riders under it.
+
+**The menu lives at the end of `<body>`, positioned `fixed` by `place()`** — not inside the
+badge. `.hero` is `overflow:hidden` (it clips its own gradients and the track SVG), so a menu
+absolutely positioned within it is cut off at the hero's bottom edge. On a desktop the hero was
+tall enough to hide that; on a phone, and more so after the hero padding was tightened to 18px,
+the list was sliced in half and **the last rider could not be reached or scrolled to at all**.
+That is the same trap `profile-edit.js` already records for the crop dialog. `place()` measures
+the button on every open and lifts the menu if it would run off the bottom of the screen;
+scrolling closes it rather than leaving it floating, and the scroll box's
+`overscroll-behavior:contain` keeps scrolling the *list* from reaching that handler. It is on all three
 per-rider pages, which is the point: they behave alike.
 
 | page | badge reads | menu |

@@ -100,7 +100,11 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
 .hero .riderbadge .badge:focus-visible{outline:2px solid var(--accent2);outline-offset:3px}
 .riderbadge .rbarrow{transition:transform .14s;flex:none}
 .riderbadge.open .rbarrow{transform:rotate(180deg)}
-.rbmenu{position:absolute;top:calc(100% + 6px);left:0;z-index:40;min-width:190px;
+/* Lives at the end of <body> and is positioned by place() in app.js, because
+   `.hero` is overflow:hidden and clipped it — on a phone that cut the list off
+   mid-way and put the last rider out of reach. Fixed, so nothing can clip it
+   again; z-index above the sticky header and the mobile tab bar. */
+.rbmenu{position:fixed;z-index:60;min-width:190px;
   background-color:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;
   box-shadow:0 18px 40px rgba(0,0,0,.35)}
 .rbmenu[hidden]{display:none}

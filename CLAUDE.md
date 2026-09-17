@@ -84,6 +84,11 @@ those files are the fallback, and the sync overwrites them.
   profile.** That badge is a `<button>` built by `CoasterHub.riderBadge()` and
   writing text into it takes the chevron and the menu with it. `account.html`'s
   badge is a plain one and is fine.
+- **`.hero` is `overflow:hidden`.** Anything that has to escape it — a dropdown,
+  a popover — gets clipped at the hero's bottom edge, and the shorter phone hero
+  hides less of the damage. The rider menu lives at the end of `<body>` and is
+  positioned `fixed` for exactly this reason, the same lesson `profile-edit.js`
+  records for the crop dialog. Do not nest the next one inside the hero.
 - **No `cache-control` does NOT mean "do not cache".** With no max-age and no
   validator a browser falls back to *heuristic* freshness and may serve a
   cached copy without asking — which is how a profile came back wearing its
