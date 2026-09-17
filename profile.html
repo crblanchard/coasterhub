@@ -220,7 +220,7 @@
 
 <main id="content" style="display:none">
 <div class="container"><p class="ridernote" id="ridernote" style="display:none"></p></div>
-<!-- Their ten favourites, ABOVE the tiles (Carter's call, 2026-09-17): what
+<!-- Their ten favorites, ABOVE the tiles (Carter's call, 2026-09-17): what
      somebody liked best is more interesting than how many states they have been
      to. The heading is the link to the whole list, so the section needs no "see
      all" button of its own. Hidden entirely when there is nothing ranked — an
@@ -581,7 +581,7 @@ function render(s){
     })
     .catch(function(){ /* no ranking to report is better than a wrong one */ });
 
-  // Their ten favourites. Rendered off the SAME fetch as the "N ranked." line
+  // Their ten favorites. Rendered off the SAME fetch as the "N ranked." line
   // above rather than asking again, and from s.coasters, which loadUser has
   // already brought in — so the whole section costs nothing extra.
   function renderTop(order){
@@ -599,8 +599,8 @@ function render(s){
       + '<span class="arw">' + (known.length>ten.length
           ? ('all '+nf(known.length)+' &rarr;') : 'the whole list &rarr;') + '</span>';
     document.getElementById('top_sub').textContent = known.length>ten.length
-      ? (who+'’s ten favourites, out of '+nf(known.length)+' ranked.')
-      : (who+'’s favourites, best first.');
+      ? (who+'’s ten favorites, out of '+nf(known.length)+' ranked.')
+      : (who+'’s favorites, best first.');
     document.getElementById('toplist').innerHTML=ten.map(function(c,i){
       var pk=(s.parks||{})[c.park];
       var loc=pk&&pk.region?pk.region:'';

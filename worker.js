@@ -815,7 +815,7 @@ async function parkLabel(env, ids) {
 
 // ---- Rankings -------------------------------------------------------------
 // A rider's personal order of the coasters they've ridden, best first. Stored as
-// (user, coaster, pos) with pos 1 = favourite.
+// (user, coaster, pos) with pos 1 = favorite.
 //
 // Writes are OPEN on purpose. Carter's call (2026-07-30): gating them made his
 // own rankings page demand a password to reorder his own list, which is friction
@@ -907,7 +907,7 @@ async function putRankings(env, slug, body) {
   // ride they have not been on.
   //
   // It only ever ADDS. Un-ranking something does not delete the credit, and
-  // that asymmetry is deliberate: dropping a coaster off your favourites list
+  // that asymmetry is deliberate: dropping a coaster off your favorites list
   // says something about the ranking, not about whether you rode it, and a
   // reorder must never be able to destroy ride history. Removing a credit
   // stays an explicit act on /log.
@@ -1121,7 +1121,7 @@ export default {
       //
       // A claimed rider's order is theirs ALONE — this is the one write on the
       // site with no admin override, by Carter's call on 2026-09-15 when he
-      // found he could reorder someone else's favourites. Everywhere else an
+      // found he could reorder someone else's favorites. Everywhere else an
       // admin override earns its keep because the data can need repairing: a
       // mistyped ride, a merged coaster, a park in the wrong place. A ranking
       // cannot be wrong. It is one person's opinion of what they enjoyed, and

@@ -299,7 +299,7 @@ people rank it, or how high the people who rank it put it. Each row names who ha
 they put it. Only coasters on more than one list qualify — one person's number one is not a
 consensus.
 
-The `/rankings` summary itself was reordered the same day: **shared favourites above each
+The `/rankings` summary itself was reordered the same day: **shared favorites above each
 rider's list**, which is the interesting half and was sitting under six cards of other people's
 top fives. Those cards are smaller now and show three names instead of five.
 
@@ -699,7 +699,7 @@ Carter's call (2026-07-30), after briefly gating everything and disliking it:
 | `/log` — logging rides | **yes** | writes counts every other page reads |
 | `/add` — new parks/coasters | **yes** | writes the list everyone shares, and there's no undo outside `/edit` |
 | `/edit` — merges, deletes, geocode | **yes** | destructive |
-| **rankings** | **no** | ranking is the enjoyable part; asking Carter for a password to reorder his own favourites was friction in the wrong place |
+| **rankings** | **no** | ranking is the enjoyable part; asking Carter for a password to reorder his own favorites was friction in the wrong place |
 
 The rankings exposure, plainly: anyone who finds `PUT /api/rankings/:slug` can reorder any
 rider's list. It reaches nothing else — only the `rankings` table, counts are untouched, and a
@@ -874,7 +874,7 @@ say so.** Ten tests assert the split.
 ## Top ten on a profile (2026-09-17)
 
 **Above** the stat tiles (moved there 2026-09-17, Carter's call: what somebody liked best is
-more interesting than how many states they have been to), a rider's ten favourites, with the
+more interesting than how many states they have been to), a rider's ten favorites, with the
 **heading as the link** to their whole list — Carter did not want a separate "see all" button repeating it. The `<h2>` carries an
 `<a class="toplink">` whose href is built in `render()` (same reason as the hero numbers: the
 `data-nav` pass has already run). The trailing arrow reads "all 14 →" when there are more than
@@ -1272,7 +1272,7 @@ before this the two lists could disagree — a new account could rank twenty coa
 show a count of zero, which is exactly what the first open sign-up looked like.
 
 **It only ever adds.** Un-ranking does not delete the credit, and clearing a whole ranking
-removes nothing. Dropping a coaster off your favourites says something about the ranking, not
+removes nothing. Dropping a coaster off your favorites says something about the ranking, not
 about whether you rode it, and no reorder should be able to destroy ride history. Removing a
 credit stays an explicit act on `/log`.
 
@@ -1283,7 +1283,7 @@ chunked by `SQL_VARS` like every other id list here. The count rides along insid
 rider should read as one line.
 
 **A claimed rider's ranking has NO admin override** (2026-09-15) — the only write on the site
-that does not. Carter's call, on finding he could reorder someone else's favourites. Everywhere
+that does not. Carter's call, on finding he could reorder someone else's favorites. Everywhere
 else an override earns its keep because the data can be wrong and need repairing: a mistyped
 ride, a merged coaster, a park in the wrong place. A ranking cannot be wrong. It is one
 person's opinion of what they enjoyed, and no support request ends in someone else reordering
