@@ -698,6 +698,32 @@ the result shape faithful.
 
 ---
 
+## Getting to the D1 console
+
+Asked twice now, never written down. The database is named **`coasterhub`**, id
+**`d4742d82-f606-498a-8520-bcbfec7dcf91`** (both from `wrangler.jsonc`).
+
+Straight there, without picking the account first:
+
+```
+https://dash.cloudflare.com/?to=/:account/workers/d1/databases/d4742d82-f606-498a-8520-bcbfec7dcf91
+```
+
+The `?to=/:account/...` form lets the dashboard fill in the account id itself. Then the
+**Console** tab, paste, **Execute**.
+
+By hand: dash.cloudflare.com → **Storage & Databases** → **D1 SQL Database** → **coasterhub**
+→ **Console**. Cloudflare moves that left-hand menu around (it has been under "Workers & Pages"
+and under "Storage & Databases"); if the label has changed again, search the dashboard for
+"D1" or use the link above.
+
+**After raw SQL, the static JSON is stale.** A D1 console write does not go through the Worker,
+so it records no activity and fires no repo-dispatch — run the **Sync static JSON** action by
+hand if the change touched counts or rankings. A schema-only migration (a new table, an index)
+changes neither, so there is nothing to sync.
+
+---
+
 ## Following (2026-09-17)
 
 `migrations/010-follows.sql` — **Carter still has to paste this into the D1 console.** Until
