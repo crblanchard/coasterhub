@@ -98,7 +98,14 @@
        /account is signed-out only now, so this is also where you change your
        picture, name, username, bio and password, and where you sign out. -->
   <div class="herotop" id="herotop">
-    <div id="profilehead" style="display:none"></div>
+    <div>
+      <!-- The rider switcher, above the name, the same control /count and
+           /rankings wear over their headlines. There is no "Global" in this
+           one: a profile is one person by definition. app.js replaces this
+           span with the real thing. -->
+      <span class="badge" id="hero_badge">Profile</span>
+      <div id="profilehead" style="display:none"></div>
+    </div>
 
     <div class="herocount" id="herocount">
       <h1 id="hero_h" style="max-width:20ch">Chasing credits.</h1>
@@ -220,6 +227,7 @@
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('profile');
+CoasterHub.riderBadge(document.getElementById('hero_badge'),'profile',CoasterHub.currentUser());
 const nf=n=>(n==null?'—':n.toLocaleString());
 
 // Standing notes about a rider's own data, keyed by slug. These are deliberately

@@ -76,26 +76,6 @@ nav.links{display:flex;gap:26px;flex:0 0 auto;justify-content:center}
 nav.links a{color:var(--muted);font-weight:500;font-size:.95rem;transition:color .15s}
 nav.links a:hover,nav.links a.active{color:var(--fg)}
 .people{flex:1 1 0;min-width:0}
-.userpick{appearance:none;-webkit-appearance:none;-moz-appearance:none;
-  /* background-COLOR, never the shorthand — a later rule using `background` here
-     is what erased this pill's dropdown chevron for weeks. There is no chevron
-     now on purpose: the pill shrink-wraps its name and centres it, and an arrow
-     inside that either crowds the name or pushes it off centre. To bring one
-     back, give it its own padding-right rather than borrowing the label's. */
-  background-color:var(--panel);
-  border:1px solid var(--line);color:var(--fg);font:inherit;font-weight:600;font-size:.88rem;
-  /* Symmetric padding, so the name sits in the middle of the PILL — the chevron
-     lives inside the right-hand padding rather than taking a bite out of the
-     space the label is centred in. text-align centres the closed label in Chrome
-     and Safari, text-align-last in Firefox: both, or it looks centred on one
-     machine and not the next.
-     The width comes from sizePicker() in app.js, because a <select> is otherwise
-     as wide as its LONGEST option — "Cole" in a pill built for "Firepheonix". */
-  padding:7px 26px;text-align:center;text-align-last:center;
-  border-radius:999px;cursor:pointer;line-height:1.35;white-space:nowrap;transition:border-color .15s}
-.userpick:hover{border-color:var(--accent2)}
-.userpick:focus{outline:none;border-color:var(--accent2)}
-.userpick option{background:var(--panel);color:var(--fg)}
 
 /* Hero */
 .hero{position:relative;overflow:hidden;padding:96px 0 84px;
@@ -103,6 +83,27 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
              radial-gradient(800px 460px at 0% 120%,var(--hero2),transparent 55%)}
 .hero .badge{display:inline-block;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
   color:var(--accent2);border:1px solid var(--ring);border-radius:999px;padding:6px 14px;margin-bottom:22px}
+/* The badge over the headline is the rider switcher on the three per-rider
+   pages (2026-09-17). It replaced the "Viewing <name>" pill in the header:
+   two controls answering "whose page is this?" was one too many, and this is
+   the one next to the words it changes. The wrapper carries the badge's old
+   bottom margin so the hero spacing is untouched. */
+.riderbadge{position:relative;display:inline-block;margin-bottom:22px}
+.hero .riderbadge .badge{margin-bottom:0;display:inline-flex;align-items:center;gap:7px;
+  background-color:transparent;font-family:inherit;cursor:pointer;transition:border-color .15s}
+.hero .riderbadge .badge:hover{border-color:var(--accent2)}
+.hero .riderbadge .badge:focus-visible{outline:2px solid var(--accent2);outline-offset:3px}
+.riderbadge .rbarrow{transition:transform .14s;flex:none}
+.riderbadge.open .rbarrow{transform:rotate(180deg)}
+.rbmenu{position:absolute;top:calc(100% + 6px);left:0;z-index:40;min-width:190px;
+  background-color:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;
+  box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.rbmenu[hidden]{display:none}
+.rbitem{display:block;width:100%;text-align:left;background-color:transparent;
+  border-style:none;color:var(--fg);font-family:inherit;font-size:.92rem;padding:9px 12px;
+  border-radius:8px;cursor:pointer}
+.rbitem:hover{background-color:var(--soft)}
+.rbitem.on{color:var(--accent2);font-weight:700}
 .hero h1{font-size:clamp(2.4rem,6.5vw,4rem);line-height:1.03;font-weight:800;letter-spacing:-.02em;max-width:14ch}
 .hero p{color:var(--muted);font-size:clamp(1rem,2.2vw,1.2rem);margin:20px 0 30px;max-width:52ch}
 /* A second hero paragraph is the page talking about itself rather than the
@@ -328,16 +329,15 @@ footer.site a:hover{color:var(--fg)}
 :root[data-theme="light"] .themetoggle .i-sun{display:block}
 :root[data-theme="light"] .themetoggle .i-moon{display:none}
 
-/* Whose count am I looking at — sits next to the rider picker */
+/* The theme toggle and the account avatar. The rider picker that used to
+   live here is the hero badge now — see .riderbadge. */
 .people{display:flex;align-items:center;gap:9px;justify-content:flex-end}
-.whoami{color:var(--muted);font-size:.82rem;white-space:nowrap}
 
 /* Mobile tab bar (built by app.js initNav) */
 .tabbar{display:none}
 @media (max-width:680px){
   nav.links{display:none}                 /* replaced by the bottom bar */
   .nav-inner{flex-wrap:nowrap;height:60px;padding-top:0;padding-bottom:0;row-gap:0;gap:10px}
-  /* The short "Viewing" label leaves room for the wordmark down to 320px. */
   .brand-text{font-size:1.05rem}
   /* The controls take the width they need and the brand gives way, rather than
      .people shrinking below its contents — with justify-content:flex-end that
@@ -345,11 +345,6 @@ footer.site a:hover{color:var(--fg)}
   .people{flex:none;justify-content:flex-end}
   .brand{flex:1 1 auto;min-width:0}
   .brand-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
-  .whoami{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .userpick{flex:none;max-width:11em;font-size:.8rem;padding:6px 16px}
-  /* "Viewing" is the first thing to go: the picker beside it already reads
-     "Carter", so the question it answers is still answered without it. */
-  .whoami{display:none}
   .themetoggle,.acctlink{width:31px;height:31px}
   .themetoggle svg,.acctlink svg{width:16px;height:16px}
 }

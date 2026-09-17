@@ -64,7 +64,13 @@ those files are the fallback, and the sync overwrites them.
   over `.profedit .av`/`.nm`/`.un`/`.bioline`, and a second `select.userpick`
   rule over the first `.userpick` one, which erased the picker's chevron for
   weeks. Five bugs so far, all this one family. Grep for an existing rule before
-  adding another for the same thing, and never use the shorthands.
+  adding another for the same thing, and never use the shorthands. (That picker
+  is gone as of 2026-09-17 — the rider switcher is the hero badge — but the
+  lesson is not.)
+- **Nothing may set `.hero .badge`'s `textContent` on `/count`, `/rankings` or a
+  profile.** That badge is a `<button>` built by `CoasterHub.riderBadge()` and
+  writing text into it takes the chevron and the menu with it. `account.html`'s
+  badge is a plain one and is fine.
 - **Don't commit a `wrangler.jsonc` binding that isn't provisioned yet** — the
   automatic deploy fails on it.
 - **Code that needs a migration must degrade to a 503 naming the file**, never a

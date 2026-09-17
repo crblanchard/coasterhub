@@ -757,6 +757,41 @@ you follow; it shows everyone for now, which is right while there are six riders
 
 ---
 
+## The rider switcher is the hero badge now (2026-09-17)
+
+The "Viewing <name>" pill in the header is **gone**, and with it `renderPeople()`, `sizePicker()`
+and the `.userpick` / `.whoami` CSS. Two controls answering "whose page is this?" — a pill top
+right and a badge over the headline — was one too many, and the header one was the one nobody
+looked at. The answer belongs beside the words it changes.
+
+`CoasterHub.riderBadge(host, page, slug)` replaces a `<span class="badge">` with a button
+wearing the same pill, plus a chevron, and a menu of riders under it. It is on all three
+per-rider pages, which is the point: they behave alike.
+
+| page | badge reads | menu |
+|---|---|---|
+| `/count` | the rider, or **Global** | Global + every rider |
+| `/rankings` | the rider, or **Global** | Global + every rider |
+| `/user/<slug>` (profile) | the rider | riders only |
+
+**No Global on a profile** — a profile is one person by definition, and `/profile` is not a
+page. `GLOBAL_PAGES` in `app.js` is the switch; anything not in it gets riders only.
+
+Picking a rider does exactly what the old `<select>` did: remembers the choice in `ch_rider`
+so the rest of the nav follows you, then goes to `userPageHref(slug, page)`. Global clears the
+memory and goes to `/<page>`.
+
+**Nothing may write to `.hero .badge` on these pages any more.** Setting its `textContent`
+takes the chevron and the menu with it. `count.html` had two such lines ("The log" / "The
+credit log" / "Everyone") and `rankings.html` one ("Everyone"); all three are deleted, and the
+headline under the badge already names the rider and the page. `account.html` has its own
+`#hero_badge` and does **not** call `riderBadge` — leave its `textContent` writes alone.
+
+`#people` still exists in every header. It is the third column that keeps the menu centred, and
+it holds the theme toggle and the account avatar.
+
+---
+
 ## The log page, rebuilt around the park (2026-09-17)
 
 Five complaints, one shape: the page made you answer questions before it would let you do the

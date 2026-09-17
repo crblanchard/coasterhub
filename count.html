@@ -146,7 +146,9 @@
 </div></header>
 
 <section class="hero" style="padding:56px 0 26px"><div class="container">
-  <span class="badge">The log</span>
+  <!-- Replaced by app.js with the rider switcher: whose count this is, and the
+       way to somebody else's. The headline under it already says "the log". -->
+  <span class="badge" id="hero_badge">The log</span>
   <h1 style="max-width:20ch">Loading&hellip;</h1>
   <p>Every ride, day by day.</p>
   <!-- The way in, on the page the count lives on. Shown only to whoever may
@@ -219,6 +221,7 @@
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('count');
+CoasterHub.riderBadge(document.getElementById('hero_badge'),'count',CoasterHub.currentUser());
 
 var LOG=[];          // [{i?, c, d, num?, n?, name, park, loc}]
 var MODE='rides';    // 'rides' = dated ride log, 'credits' = credit log
@@ -288,15 +291,16 @@ return Promise.all([
       view='list'; document.getElementById('v_day').style.display='none';
     }
 
+    // The badge is the rider switcher now (app.js builds it over #hero_badge),
+    // so nothing here writes to it — setting its textContent would take the
+    // chevron and the menu with it. The headline says whose count this is.
     if(COMBINED){
-      document.querySelector('.hero .badge').textContent='Everyone';
       document.querySelector('.hero h1').textContent='Every day out across the site.';
       document.querySelector('.hero p').textContent=
         'Every rider’s logged days, newest first — filter by rider, year or park.';
       document.title='Count — Coaster Hub';
     } else {
       var nm=esc(logs[0].user||'Carter');
-      document.querySelector('.hero .badge').textContent = MODE==='rides'?'The log':'The credit log';
       document.querySelector('.hero h1').textContent =
         MODE==='rides' ? ('Every ride in '+nm+'’s count.') : (nm+'’s credits, in order.');
       document.querySelector('.hero p').textContent =

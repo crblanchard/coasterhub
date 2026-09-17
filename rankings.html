@@ -272,6 +272,7 @@
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
+CoasterHub.riderBadge(document.getElementById('hero_badge'),'rankings',CoasterHub.currentUser());
 
 var $=function(id){return document.getElementById(id);};
 var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
@@ -285,7 +286,6 @@ var BYID={}, MINE=[], ORDER=[], dirty=false, view='rank';
 if(!slug){
   // Everyone = a summary of where every list stands. The combined master
   // ranking comes later; it needs more than one list to mean anything.
-  $('hero_badge').textContent='Everyone';
   $('hero_h1').textContent='Everyone’s rankings, at a glance.';
   $('hero_p').textContent='Who has ranked what, and the coasters you agree on.';
   CoasterHub.fetchUsers().then(function(){

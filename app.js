@@ -606,76 +606,97 @@
     else wrap.appendChild(b);
   }
 
-  // The header's rider picker. Built once and then refilled in place: the theme
-  // toggle is inserted into the same wrapper, so replacing the wrapper's
-  // innerHTML on a refresh would throw the toggle away with it.
-  function renderPeople(wrap, slug, page) {
-    var sel = wrap.querySelector("select.userpick");
-    if (!sel) {
-      // Label the control, and let the dropdown carry the value — "Viewing"
-      // beside a picker reading "Max" says it once. On a phone the page hero
-      // scrolls away, so this keeps "who am I looking at?" answered on screen.
-      var who = document.createElement("span");
-      who.className = "whoami";
-      who.textContent = "Viewing";
-      wrap.appendChild(who);
-      sel = document.createElement("select");
-      sel.className = "userpick";
-      sel.setAttribute("aria-label", "Select rider");
-      wrap.appendChild(sel);
-      // Switching riders keeps you on the page you're already reading. Home is
-      // the only page with no per-rider version, so it stays put.
-      var perRider = PER_RIDER.indexOf(page) >= 0;
-      sel.addEventListener("change", function () {
-        var v = sel.value;
-        try {
-          if (v === "__all__") window.localStorage.removeItem("ch_rider");
-          else window.localStorage.setItem("ch_rider", v);
-        } catch (e) {}
-        if (v === "__all__") location.href = perRider ? ("/" + page) : "/";
-        else location.href = userPageHref(v, perRider ? page : "profile");
-      });
-    }
-    // A <select> is as wide as its longest option, so the pill was built for
-    // "Firepheonix" whoever was selected and short names floated in a box with
-    // nothing in it. Measure the label that is actually showing and set the
-    // width to that. Re-measured on resize because the font size changes at the
-    // 680px breakpoint, and after every refill because the name may have moved.
-    function sizePicker(el) {
-      var opt = el.options[el.selectedIndex];
-      if (!opt) return;
-      var cs = window.getComputedStyle(el);
-      var probe = document.createElement("span");
-      probe.textContent = opt.textContent;
-      probe.style.cssText = "position:absolute;left:-9999px;top:0;white-space:nowrap;"
-        + "font-family:" + cs.fontFamily + ";font-size:" + cs.fontSize
-        + ";font-weight:" + cs.fontWeight + ";letter-spacing:" + cs.letterSpacing;
-      document.body.appendChild(probe);
-      var text = probe.getBoundingClientRect().width;
-      probe.parentNode.removeChild(probe);
-      // +1 for the sub-pixel the measurement rounds off, which otherwise shows
-      // up as an ellipsis on the longest name.
-      el.style.width = Math.ceil(text + parseFloat(cs.paddingLeft)
-        + parseFloat(cs.paddingRight) + 1) + "px";
-    }
-    if (!renderPeople.sized) {
-      renderPeople.sized = true;
-      window.addEventListener("resize", function () {
-        var el = document.querySelector("select.userpick");
-        if (el) sizePicker(el);
-      });
-    }
+  // The rider switcher, worn as the hero badge.
+  //
+  // It used to be a "Viewing <name>" pill in the header. Two controls answering
+  // "whose page is this?" — a pill top right and a badge over the headline —
+  // was one too many, and the header one was the one nobody looked at: the
+  // answer belongs beside the words it changes (Carter's call, 2026-09-17).
+  //
+  // Global is only offered where there IS an everyone view. /count and
+  // /rankings both have one; a profile is one person by definition, so its
+  // menu is riders only.
+  var GLOBAL_PAGES = { count: 1, rankings: 1 };
 
-    var sorted = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
-    // "Everyone" reads clearer than "All" to someone landing here for the
-    // first time — it's a person picker, not a filter.
-    // Names are typed by whoever added the rider, so they are escaped here.
-    sel.innerHTML = '<option value="__all__"' + (slug ? "" : " selected") + ">Everyone</option>"
-      + sorted.map(function (u) {
-        return '<option value="' + escAttr(u.slug) + '"' + (u.slug === slug ? " selected" : "") + ">"
-          + escAttr(u.name) + "</option>";
-      }).join("");
-    sizePicker(sel);
+  function riderBadge(host, page, slug) {
+    if (!host || typeof document === "undefined") return;
+    slug = slug || "";
+
+    var wrap = document.createElement("div");
+    wrap.className = "riderbadge";
+    if (host.id) wrap.id = host.id;
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "badge pick";
+    btn.setAttribute("aria-haspopup", "true");
+    btn.setAttribute("aria-expanded", "false");
+    var label = document.createElement("span");
+    btn.appendChild(label);
+    // A chevron, because a badge has been decoration everywhere else on the
+    // site and nothing about this one otherwise says there is a list behind it.
+    btn.insertAdjacentHTML("beforeend",
+      '<svg class="rbarrow" viewBox="0 0 24 24" width="12" height="12" fill="none"'
+      + ' stroke="currentColor" stroke-width="3" stroke-linecap="round"'
+      + ' stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>');
+
+    var menu = document.createElement("div");
+    menu.className = "rbmenu";
+    menu.hidden = true;
+    menu.setAttribute("role", "menu");
+
+    wrap.appendChild(btn);
+    wrap.appendChild(menu);
+    host.parentNode.replaceChild(wrap, host);
+
+    function nameFor(s) {
+      if (!s) return "Global";
+      for (var i = 0; i < USERS.length; i++) if (USERS[i].slug === s) return USERS[i].name;
+      return s;                           // the list has not arrived yet
+    }
+    function item(value, text, on) {
+      return '<button type="button" role="menuitem" class="rbitem' + (on ? " on" : "")
+        + '" data-v="' + escAttr(value) + '">' + escAttr(text) + "</button>";
+    }
+    // Refilled rather than rebuilt: this runs once before the rider list has
+    // loaded, so the badge reads something immediately, and again once it has.
+    function fill() {
+      label.textContent = nameFor(slug);
+      var rows = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+      menu.innerHTML = (GLOBAL_PAGES[page] ? item("__all__", "Global", !slug) : "")
+        + rows.map(function (u) { return item(u.slug, u.name, u.slug === slug); }).join("");
+    }
+    fill();
+    fetchUsers().then(fill).catch(function () { /* the badge still reads a name */ });
+
+    function open(on) {
+      menu.hidden = !on;
+      wrap.classList.toggle("open", on);
+      btn.setAttribute("aria-expanded", on ? "true" : "false");
+    }
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      open(menu.hidden);
+    });
+    menu.addEventListener("click", function (e) {
+      var b = e.target;
+      while (b && b !== menu && !(b.className && String(b.className).indexOf("rbitem") >= 0)) {
+        b = b.parentNode;
+      }
+      if (!b || b === menu) return;
+      var v = b.getAttribute("data-v");
+      // Same bookkeeping the old header picker did: the choice is remembered so
+      // the rest of the nav follows you to the next page.
+      try {
+        if (v === "__all__") window.localStorage.removeItem("ch_rider");
+        else window.localStorage.setItem("ch_rider", v);
+      } catch (e2) {}
+      window.location.href = v === "__all__" ? ("/" + page) : userPageHref(v, page);
+    });
+    document.addEventListener("click", function () { if (!menu.hidden) open(false); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !menu.hidden) { open(false); btn.focus(); }
+    });
   }
 
   function initNav(page) {
@@ -741,13 +762,12 @@
       links[i].classList.toggle("active", links[i].getAttribute("data-nav") === page);
     }
 
-    // "Viewing <name>" only where it means something: the three pages that show
-    // one rider (Carter's call, 2026-09-16). On /riders it contradicts the page
-    // — that one IS everyone — and on /log the rider comes from the form's own
-    // dropdown, so a second picker beside it was two answers to one question.
+    // No rider picker in the header any more (2026-09-17). Whose page this is
+    // is now asked and answered by the hero badge, next to the headline it
+    // changes. #people still exists on every page — it is the third column that
+    // keeps the menu centred, and it holds the theme toggle and the account
+    // avatar.
     var wrap = document.getElementById("people");
-    var wantsPicker = PER_RIDER.indexOf(page) >= 0;
-    if (wrap && wantsPicker) renderPeople(wrap, slug, page);
     // The links above are written from localStorage before the rider list has
     // arrived, because waiting would leave the nav dead on first paint. Once the
     // real list is here, a remembered rider who no longer exists (renamed away)
@@ -759,7 +779,6 @@
         if (page !== "home" && !urlSlug) now = window.localStorage.getItem("ch_rider") || "";
       } catch (e) { /* storage blocked: keep what we started with */ }
       if (now !== slug) { slug = now; applyRiderLinks(slug); }
-      if (wrap && wantsPicker) renderPeople(wrap, slug, page);
     });
 
     // Every page gets the same three-column header, even the ones with no rider
@@ -856,7 +875,7 @@
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers,
-              adoptUsers: adoptUsers };
+              adoptUsers: adoptUsers, riderBadge: riderBadge };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);
