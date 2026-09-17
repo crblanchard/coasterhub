@@ -44,9 +44,13 @@
   /* Literal, not \00b7 — CSS eats the space that terminates a hex escape,
      so the escaped form loses the gap after the dot. */
   .srow .n .mk::before{content:" · "}
-  .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+  /* Centred against the row, not hung from its top: the left-hand side is two
+     lines on a desktop and three on a phone, and the count has no reason to sit
+     against whichever one happens to be first. */
+  .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;
+              font-variant-numeric:tabular-nums;align-self:center}
   .srow .meta b{display:block;color:var(--accent2);font-weight:700}
-  .srow .chev{color:var(--muted);flex:none;margin-top:4px;transition:transform .15s ease}
+  .srow .chev{color:var(--muted);flex:none;align-self:center;transition:transform .15s ease}
   .stog[aria-expanded="true"] .chev{transform:rotate(180deg)}
   /* Opened: everyone who ranked it, best placing first, each a way into that
      rider's own list. Scoped to .srow because .who is also a profile class. */

@@ -58,8 +58,17 @@
   .rrow .nm{flex:1;min-width:0}
   .rrow .nm b{display:block;font-weight:600;font-size:.9rem;line-height:1.3;
               overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .rrow .nm span{color:var(--muted);font-size:.75rem;line-height:1.3;
+  /* Same split as the shared rows: park and region on one line, the model
+     joining them on a desktop and taking its own line on a phone. */
+  .rrow .nm .sub{color:var(--muted);font-size:.75rem;line-height:1.3;
                  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+  .rrow .nm .mk::before{content:" · "}
+  @media (max-width:560px){
+    .rrow .nm .sub{overflow:visible;text-overflow:clip;white-space:normal}
+    .rrow .nm .pl,.rrow .nm .mk{display:block;overflow:hidden;
+                                text-overflow:ellipsis;white-space:nowrap}
+    .rrow .nm .mk::before{content:none}
+  }
   .rrow .acts{display:flex;gap:4px;flex:none}
   .rrow .acts button{width:27px;height:27px;border-radius:8px;border:1px solid var(--line);background:transparent;
                      color:var(--muted);cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center}
@@ -186,9 +195,13 @@
                               text-overflow:ellipsis;white-space:nowrap}
     .srow .n .mk::before{content:none}
   }
-  .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+  /* Centred against the row, not hung from its top: the left-hand side is two
+     lines on a desktop and three on a phone, and the count has no reason to sit
+     against whichever one happens to be first. */
+  .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;
+              font-variant-numeric:tabular-nums;align-self:center}
   .srow .meta b{display:block;color:var(--accent2);font-weight:700}
-  .srow .chev{color:var(--muted);flex:none;margin-top:4px;transition:transform .15s ease}
+  .srow .chev{color:var(--muted);flex:none;align-self:center;transition:transform .15s ease}
   .stog[aria-expanded="true"] .chev{transform:rotate(180deg)}
   /* Scoped to .srow: .who is also a class on the profile and the rider rows. */
   .srow .who{border-top:1px solid var(--line);padding:2px 14px 6px}
@@ -603,8 +616,10 @@ function renderRank(){
     return '<div class="rrow" data-i="'+i+'">'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">⠿</span>'
       +'<span class="pos">'+(i+1)+'</span>'
-      +'<span class="nm"><b>'+esc(c.name||('#'+id))+'</b><span>'+esc(c.park||'')+(c.loc?' · '+esc(c.loc):'')
-        +(CoasterHub.maker(c)?' · '+esc(CoasterHub.maker(c)):'')+'</span></span>'
+      +'<span class="nm"><b>'+esc(c.name||('#'+id))+'</b><span class="sub">'
+        +'<span class="pl">'+esc(c.park||'')+(c.loc?' \u00b7 '+esc(c.loc):'')+'</span>'
+        +(CoasterHub.maker(c)?'<span class="mk">'+esc(CoasterHub.maker(c))+'</span>':'')
+        +'</span></span>'
       +'<span class="acts">'
         +'<button data-up="'+i+'" title="Move up" aria-label="Move up">↑</button>'
         +'<button data-down="'+i+'" title="Move down" aria-label="Move down">↓</button>'

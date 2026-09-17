@@ -1302,6 +1302,17 @@ same line."* So:
 The selectors are named for what they hold rather than for being a span inside `.n` — that row
 has gained and lost spans three times now, and CLAUDE.md has the scars.
 
+Then, from the next screenshot: **the count on the right is `align-self:center`**, along with
+the chevron, whose `margin-top:4px` went with it. The left-hand side is two lines on a desktop
+and three on a phone, and "3 lists / avg #1.3" has no reason to hang off whichever one comes
+first.
+
+The same `.sub` / `.pl` / `.mk` split now draws **every ranking row on the site**, not only the
+shared ones: `.rrow` (the list you edit on `/user/<name>/rankings`) and `.trow` (the top ten on
+a profile). Three copies of the same five rules, one per page's `<style>`, because each page
+carries its own — if a fourth list ever wants it, that is the moment to move them into
+`style.css` rather than paste them again.
+
 ---
 
 ## The copy desk, and the loading-line pool (2026-09-17)
