@@ -32,6 +32,11 @@
   .modesw button:hover{color:var(--fg)}
   .modesw button.on{background:var(--accent2);color:var(--well);font-weight:700}
   .modehint{color:var(--muted);font-size:.83rem;margin:0 0 16px;max-width:74ch}
+  /* Whose count, as a sentence. A second pill beside the header's rider picker
+     was the thing that made this page confusing; a line of text is not. */
+  .riderline{color:var(--muted);font-size:.84rem;margin:0 0 14px}
+  .riderline b{color:var(--fg);font-weight:600}
+  .riderline a{color:var(--accent2);cursor:pointer}
   .geonote{color:var(--muted);font-size:.76rem;margin:5px 0 0;min-height:1em}
   .geonote a{color:var(--accent2);cursor:pointer}
   .setup{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:0 0 18px}
@@ -67,6 +72,11 @@
      is what gets pushed to the far edge. */
   .basket .brow .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .basket .brow .x{color:var(--accent);cursor:pointer;padding:0 4px;margin-left:auto;flex:none}
+  /* You can stage more than one park before saving, so the basket says which
+     park each row came from once there is more than one to tell apart. */
+  .basket .bpark{color:var(--muted);font-size:.72rem;text-transform:uppercase;
+                 letter-spacing:.06em;margin:12px 0 0;padding-top:8px;border-top:1px solid var(--soft)}
+  .basket .bpark.first{margin-top:0;padding-top:0;border-top:0}
   /* Inline "add a park / add a coaster" forms. Hidden until asked for, so the
      normal logging flow is unchanged. */
   .miniform{display:none;gap:8px;flex-wrap:wrap;align-items:flex-end;
@@ -126,8 +136,8 @@
 <!-- app -->
 <section class="block" id="app" style="display:none;padding:8px 0 60px"><div class="container">
   <div class="modesw" id="modesw">
-    <button type="button" class="on" data-mode="day">Coaster rides</button>
-    <button type="button" data-mode="list">Coaster credits</button>
+    <button type="button" class="on" data-mode="day">Log rides</button>
+    <button type="button" data-mode="list">Add credits</button>
   </div>
   <a href="/import" class="ghost" id="importlink"
      style="margin-left:10px;text-decoration:none;display:inline-block">Import a list &rarr;</a>
@@ -138,14 +148,22 @@
   <p class="modehint" style="margin-top:2px">Coaster or park not in the database?
     <a href="/add">Add it here</a>.</p>
 
+  <!-- Whose count this writes to. Normally there is nothing to decide — it is
+       yours — so it is a sentence, not a control. The picker only opens for the
+       two cases that can write to somebody else: an admin, and the shared
+       password, which knows no name at all until one is chosen. -->
+  <p class="riderline" id="riderline" style="display:none">Logging for
+    <b id="ridername">&mdash;</b> &middot; <a id="riderchange">change</a></p>
+
+  <div class="miniform" id="riderpick">
+    <div class="fld grow"><label for="rider">Rider</label>
+      <select id="rider" style="width:100%"></select></div>
+    <button class="ghost" id="newrider" type="button">+ New rider</button>
+    <button class="ghost" id="rp_done" type="button">Done</button>
+    <p class="note">Rides go to this rider&rsquo;s count. Yours unless you change it.</p>
+  </div>
+
   <div class="setup">
-    <div class="fld"><label for="rider">Rider</label>
-      <div style="display:flex;gap:8px">
-        <select id="rider" style="flex:1;min-width:0"></select>
-        <button class="ghost" id="newrider" type="button" style="flex:none;padding:10px 12px">+</button>
-      </div>
-    </div>
-    <div class="fld" id="datefld"><label for="date">Date</label><input id="date" type="date"></div>
     <div class="fld" style="flex:1;min-width:240px"><label for="park">Park</label>
       <div style="display:flex;gap:8px">
         <select id="park" style="flex:1;min-width:0"></select>
@@ -199,9 +217,13 @@
       <div class="clist" id="clist"><div class="hint">Pick a park, or search for a coaster.</div></div>
     </div>
     <div class="panel basket">
-      <h3>This day</h3>
+      <h3 id="baskethead">This day</h3>
       <div id="basket"><div class="hint" style="padding:6px 0">Nothing staged yet.</div></div>
       <div class="tot"><span id="tot_c">0 coasters</span><span id="tot_r">0 rides</span></div>
+      <!-- The date sits at the end because it is the last thing you decide: pick
+           a park, stage the rides, then say which day they were. -->
+      <div class="fld" id="datefld" style="margin:0 0 12px"><label for="date">Date</label>
+        <input id="date" type="date" style="width:100%"></div>
       <button class="primary" id="save" disabled>Save day</button>
       <button class="ghost" id="clear" style="margin-left:8px">Clear</button>
       <div class="msg" id="msg"></div>
@@ -294,19 +316,34 @@ function boot(){
     // A location from earlier today is applied here, once the parks it sorts
     // have actually arrived. wireNearMe() only reads it.
     if(HERE) setHere(HERE); else fillParks();
-    $('park').addEventListener('change',function(){ $('search').value=''; renderList(); });
+    // change AND input: some mobile browsers fire only one of the two when a
+    // park is chosen from the native picker, and a park that does not open its
+    // coaster list is the whole page not working. Rendering twice is harmless —
+    // renderList() is a pure redraw — so both are wired rather than guessing.
+    $('park').addEventListener('change',pickPark);
+    $('park').addEventListener('input',pickPark);
     $('search').addEventListener('input',renderList);
+    // And the reason a park could silently do nothing: browsers restore the
+    // value of a <select> across a reload or a back button, and they do it
+    // after this script has already filled the options. You then arrive with
+    // "Cedar Point" in the box and the empty "pick a park" list beside it — and
+    // picking Cedar Point again fires no change event, because for the browser
+    // nothing changed. Nothing you can click fixes it. So the restored value is
+    // reconciled here instead of waiting to be told about it.
+    syncPark(); setTimeout(syncPark,0);
+    window.addEventListener('pageshow',syncPark);
   });
 
   $('save').onclick=save;
   $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
-  wireAdders(); wireRiderAdd(); wireNearMe(); wireMode();
+  wireAdders(); wireRiderAdd(); wireRiderLine(); wireNearMe(); wireMode();
   // ?mode=list opens straight on "Coaster credits". The two modes are different
   // jobs — tonight's laps versus filling in years of them — and the profile page
   // links at each one by name, so the link has to be able to say which.
   setMode(new URLSearchParams(location.search).get('mode') === 'list' ? 'list' : 'day');
   $('rider').addEventListener('change',function(){
     try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
+    showRider();
     basket={}; renderBasket(); loadOwned();
   });
   loadOwned();
@@ -342,6 +379,7 @@ function setMode(m){
     ? 'A dated visit. Every lap counts — tap + once per ride, re-rides included.'
     : 'For filling in what you have ridden before. No dates and no ride counts — just tick everything you have been on, park by park. Got the whole thing written down already? Import it instead.';
   $('save').textContent = m==='day' ? 'Save day' : 'Add to my count';
+  $('baskethead').textContent = m==='day' ? 'This day' : 'Staged';
   // Laps mean nothing in list mode and a tick means nothing in day mode, so
   // the basket does not survive the switch.
   basket={}; renderList(); renderBasket(); $('msg').textContent='';
@@ -360,7 +398,7 @@ function setMode(m){
 var HERE=null;                      // {lat, lon} once known
 function sel(){ return $('park'); }
 var GEO_KEY='ch_here', GEO_TTL=2*60*60*1000;
-var NEAR_MI=60;                     // "nearby" really means nearby
+var NEAR_N=3;                       // how many get lifted to the top
 
 function miBetween(a,b,c,d){
   // Haversine, in miles. Earth radius 3958.8mi.
@@ -435,21 +473,25 @@ function fillParks(keep){
   var names=Object.keys(PCOUNT).sort(function(a,b){return a.localeCompare(b);});
   var body;
   if(HERE){
-    // Two groups. Anything genuinely close, nearest first; then the rest, still
-    // A–Z so it stays scannable. A park with no coordinates can't be placed, so
-    // it lives in the second group rather than being dropped.
+    // Two groups: the three closest parks, nearest first, then the rest, still
+    // A–Z so it stays scannable. Always three, however far away they are — a
+    // distance cutoff meant that away from a park the button did nothing, which
+    // is exactly when you most want to know what is nearest. A park with no
+    // coordinates can't be placed, so it lives in the second group rather than
+    // being dropped.
     var near=names.map(function(p){ return {p:p,mi:parkMiles(p)}; })
-      .filter(function(x){ return x.mi!=null&&x.mi<=NEAR_MI; })
-      .sort(function(a,b){ return a.mi-b.mi; });
+      .filter(function(x){ return x.mi!=null; })
+      .sort(function(a,b){ return a.mi-b.mi; })
+      .slice(0,NEAR_N);
     var seen={}; near.forEach(function(x){ seen[x.p]=1; });
     var opt=function(p,mi){
       return '<option value="'+esc(p)+'">'+esc(p)+' ('+PCOUNT[p]+')'
         +(mi!=null?' · '+showMiles(mi):'')+'</option>';
     };
     body=(near.length
-        ? '<optgroup label="Near you">'+near.map(function(x){ return opt(x.p,x.mi); }).join('')+'</optgroup>'
+        ? '<optgroup label="Nearest you">'+near.map(function(x){ return opt(x.p,x.mi); }).join('')+'</optgroup>'
         : '')
-      +'<optgroup label="'+(near.length?'Everywhere else':'Nothing within '+NEAR_MI+' miles — everywhere else')+'">'
+      +'<optgroup label="'+(near.length?'Everywhere else':'Everywhere')+'">'
       +names.filter(function(p){ return !seen[p]; }).map(function(p){ return opt(p,null); }).join('')
       +'</optgroup>';
   } else {
@@ -457,6 +499,13 @@ function fillParks(keep){
   }
   sel.innerHTML='<option value="">— pick a park —</option>'+body;
   if(cur) sel.value=cur;
+}
+
+// The sentence over the picker. Kept in step with the select rather than
+// replacing it, so everything that reads $('rider').value still works.
+function showRider(){
+  var sel=$('rider'), o=sel.options[sel.selectedIndex];
+  $('ridername').textContent=o?o.textContent:'\u2014';
 }
 
 function fillRiders(){
@@ -470,6 +519,7 @@ function fillRiders(){
     sel.value=ME.slug;
     sel.disabled=true;
     sel.title='Rides go to your own count';
+    showRider();
     return;
   }
   sel.disabled=false;
@@ -479,6 +529,7 @@ function fillRiders(){
   if(ME && ME.admin && ME.slug) remembered=remembered||ME.slug;
   if(remembered) sel.value=remembered;
   if(!sel.value && sel.options.length) sel.selectedIndex=0;
+  showRider();
 }
 
 // Adding a park or a coaster is open to any account now (2026-09-16), so the
@@ -486,8 +537,18 @@ function fillRiders(){
 // the same job with the full form. Adding a RIDER is still admin only — hide
 // that one rather than let someone fill a form that can only 401.
 function applyAccountLimits(){
-  if(!ME || ME.admin) return;
-  var el=$('newrider'); if(el) el.style.display='none';
+  // Signed in as yourself there is nothing to choose and nothing to say: the
+  // API would refuse a write to anyone else anyway. The line and its picker
+  // only appear for the two cases that can write to somebody else.
+  if(ME && !ME.admin){ $('riderline').style.display='none'; return; }
+  $('riderline').style.display='';
+  if(!ME){ var el=$('newrider'); if(el) el.style.display='none'; }
+}
+
+function wireRiderLine(){
+  var f=$('riderpick');
+  $('riderchange').onclick=function(){ f.classList.toggle('on'); };
+  $('rp_done').onclick=function(){ f.classList.remove('on'); };
 }
 
 // ---- adding a rider --------------------------------------------------------
@@ -586,6 +647,12 @@ function wireAdders(){
 }
 
 // ---- coaster list ----------------------------------------------------------
+// SHOWN is the park the list on screen was built for. Keeping it lets the page
+// notice a park it was never told about (see the restore note in boot).
+var SHOWN=null;
+function pickPark(){ $('search').value=''; renderList(); }
+function syncPark(){ if($('park').value!==SHOWN) renderList(); }
+
 function currentList(){
   var q=$('search').value.trim().toLowerCase(), park=$('park').value;
   if(q.length>=2){
@@ -606,6 +673,7 @@ function currentList(){
 }
 function renderList(){
   var list=currentList(), el=$('clist');
+  SHOWN=$('park').value;
   // "+ Coaster not listed" only makes sense with a park chosen — a new coaster
   // needs a park to belong to, and search mode spans all of them.
   var park=$('park').value, searching=$('search').value.trim().length>=2;
@@ -677,20 +745,40 @@ function renderList(){
 }
 
 // ---- basket ----------------------------------------------------------------
+// Staging is not tied to the park picker: change parks and what you have
+// already ticked stays. So the basket groups by park and counts them, which is
+// also the number that matters when you are filling in a trip rather than a day.
 function renderBasket(){
   var ids=Object.keys(basket);
   var rides=ids.reduce(function(a,k){return a+basket[k];},0);
+  var order=[], byPark={};
+  ids.forEach(function(k){
+    var pk=(BYID[k]||{}).park||'—';
+    if(!byPark[pk]){ byPark[pk]=[]; order.push(pk); }
+    byPark[pk].push(k);
+  });
+  order.sort(function(a,b){ return a.localeCompare(b); });
+
   $('tot_c').textContent=ids.length+' coaster'+(ids.length===1?'':'s');
   // List mode has no ride count to report — one tick is "I have ridden this",
-  // not "I rode this once", and showing "12 rides" would invent a fact.
-  $('tot_r').textContent = MODE==='day' ? (rides+' ride'+(rides===1?'':'s')) : 'no dates';
+  // not "I rode this once", and showing "12 rides" would invent a fact. Parks
+  // are the honest second number there.
+  $('tot_r').textContent = MODE==='day'
+    ? (rides+' ride'+(rides===1?'':'s'))
+    : (order.length+' park'+(order.length===1?'':'s'));
   $('save').disabled=!ids.length;
   if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">Nothing staged yet.</div>'; return; }
-  $('basket').innerHTML=ids.map(function(k){
-    var c=BYID[k]||{};
-    return '<div class="brow"><span class="n">'+esc(c.name||('#'+k))+'</span>'
-      +(MODE==='day'?'<span class="lap">×'+basket[k]+'</span>':'')
-      +'<span class="x" data-id="'+k+'" title="Remove">×</span></div>';
+
+  // One park needs no heading — the picker above already says which it is.
+  var multi=order.length>1;
+  $('basket').innerHTML=order.map(function(pk,i){
+    var head=multi?('<div class="bpark'+(i?'':' first')+'">'+esc(pk)+'</div>'):'';
+    return head+byPark[pk].map(function(k){
+      var c=BYID[k]||{};
+      return '<div class="brow"><span class="n">'+esc(c.name||('#'+k))+'</span>'
+        +(MODE==='day'?'<span class="lap">×'+basket[k]+'</span>':'')
+        +'<span class="x" data-id="'+k+'" title="Remove">×</span></div>';
+    }).join('');
   }).join('');
   $('basket').querySelectorAll('.x').forEach(function(x){
     x.onclick=function(){ delete basket[x.dataset.id]; renderList(); renderBasket(); };
