@@ -978,6 +978,9 @@
   // with the same word every time. Carter writes these in the copy desk; the
   // list lives here and nowhere else, so a new page only has to put
   // data-loading on its <h1> to join in.
+  // The ellipsis belongs to the loading state, not to the phrase, so it is added
+  // here rather than asked of whoever writes the list: a line in the copy desk
+  // reads "Reriding" and the page shows "Reriding…".
   var LOADING = [
     "Credit whoring",
     "Reriding",
@@ -985,7 +988,7 @@
     "Ropedropping",
     "Counting rides",
     "Tracking stats"
-  ];
+  ].map(function (t) { return t.replace(/[.\u2026]+$/, "") + "\u2026"; });
   function loadingLine() { return LOADING[Math.floor(Math.random() * LOADING.length)]; }
 
   // Swapped in as app.js runs — before any page's own script and, because this

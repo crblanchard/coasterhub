@@ -1340,9 +1340,13 @@ Carter writes the list in the desk's **Loading lines** section — one phrase pe
 the single doc `copy/pool-loading`. It is a pool, not a replacement: whatever he types there is
 the whole list, so applying it means replacing `LOADING` in `app.js` wholesale. As of the second
 pass it is his six: Credit whoring, Reriding, Getting in line, Ropedropping, Counting rides,
-Tracking stats — **without ellipses**, which is how he typed them (the textarea's placeholder
-showed bare lines, so that is probably the placeholder's doing rather than a decision; he was
-told and left them).
+Tracking stats.
+
+**The ellipsis is not his to type.** He wrote the six bare, following the textarea's
+placeholder, and then asked for ellipses; rather than editing his words, `LOADING` appends one
+(stripping any trailing `.` or `…` first, so a line typed with one does not end up with two). A
+line in the desk reads `Reriding` and the page shows `Reriding…`, which keeps the desk the
+source of truth and means the next pass can paste his list in unchanged.
 
 Four loading lines are deliberately **out** of the pool, because they name what is on its way
 rather than greeting you: `Loading riders…` on the home page, `Loading rides…` and
