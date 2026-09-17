@@ -474,10 +474,12 @@ function saveCoaster(){
 
   // Everyone sees this and there is no undo from this page, so it is worth one
   // deliberate click.
-  if(!confirm('Add "'+name+'" to '+park+' in the shared coaster list?\n\n'
-    +'Everyone sees this. It can be deleted in /edit while nobody has ridden it — '
-    +'once someone logs a ride it can only be merged, not removed. '
-    +'Check the spelling and that it is not already listed under another name.')) return;
+  // One question, two sentences. The paragraph that used to follow explained
+  // merge-versus-delete and /edit — true, and none of it is a decision the
+  // person tapping OK is making. What they can get wrong is adding something
+  // that is already here under another name, so that is all it asks.
+  if(!confirm('Add "'+name+'" to '+park+' in the shared coaster list?'
+    +' Only add a ride here if it does not already exist in the database.')) return;
 
   $('c_save').disabled=true; $('c_msg').textContent='Adding…';
   api('POST','/api/coaster',body).then(function(r){
