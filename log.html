@@ -70,7 +70,21 @@
   .crow:last-child{border-bottom:0}
   .crow .nm{flex:1;min-width:0}
   .crow .nm b{display:block;font-weight:600;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .crow .nm span{color:var(--muted);font-size:.78rem}
+  /* Where it is and what it is, then the flag. The text clips, the flag never
+     does — it is one word and it is the thing you are scanning for. */
+  .crow .nm .sub{display:flex;align-items:baseline;gap:8px;min-width:0;
+                 color:var(--muted);font-size:.78rem}
+  .crow .nm .sub .txt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* The same flag /count uses, down to the colours: a coloured word, and a
+     coloured dot where a phone has no room for one. */
+  .crow .nm .sub .stat{flex:none;font-size:.68rem;font-weight:700;
+                       text-transform:uppercase;letter-spacing:.06em}
+  .crow .nm .sub .stat.on{color:var(--accent2)}
+  .crow .nm .sub .stat.off{color:var(--accent)}
+  @media (max-width:560px){
+    .crow .nm .sub .stat{font-size:0;line-height:0}
+    .crow .nm .sub .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
+  }
   .stepper{display:flex;align-items:center;gap:8px;flex:none}
   .stepper button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center}
   .stepper button:hover{border-color:var(--accent2)}
@@ -759,19 +773,28 @@ var SHOWN=null;
 function pickPark(){ choosePark($('park').value); }
 function syncPark(){ if($('park').value!==SHOWN) renderList(); }
 
+// Closed for good. Nothing else about a coaster changes where it sits in the
+// list, so this is the only test the sorts need.
+function gone(c){ return !!c.closed; }
+// Defunct sinks, then A-Z. Ahead of the slice in search mode so a park full of
+// closed rides cannot eat the 200 you are allowed to see.
+function byLife(a,b){ return (gone(a)?1:0)-(gone(b)?1:0) || a.name.localeCompare(b.name); }
+
 function currentList(){
   var q=$('search').value.trim().toLowerCase(), park=$('park').value;
   if(q.length>=2){
     return COASTERS.filter(function(c){
       return (c.name+' '+(c.park||'')).toLowerCase().indexOf(q)>=0;
-    }).slice(0,200);
+    }).sort(byLife).slice(0,200);
   }
   if(park){
-    var list=COASTERS.filter(function(c){return c.park===park;})
-      .sort(function(a,b){return a.name.localeCompare(b.name);});
+    var list=COASTERS.filter(function(c){return c.park===park;}).sort(byLife);
     // In list mode float what you have NOT got to the top. A park you have
     // mostly done otherwise buries the two or three you came to tick under a
-    // screenful of rows you cannot act on.
+    // screenful of rows you cannot act on. Outside the defunct sink, not
+    // inside it: a closed coaster you have never logged is still one you can
+    // tick, and an operating one you already hold is not. Sort is stable, so
+    // this re-split keeps the defunct-last order within each half.
     if(MODE==='list') list.sort(function(a,b){ return (OWNED[a.id]?1:0)-(OWNED[b.id]?1:0); });
     return list;
   }
@@ -796,6 +819,29 @@ function renderList(){
     ? ('Search — '+list.length+' match'+(list.length===1?'':'es'))
     : (park+' — '+list.length+(MODE==='list'?(' · '+have+' in your count'):''));
 
+  // Steel/Wood said almost nothing — every row in a park reads the same. The
+  // model is the interesting half, and the park only earns its place when you
+  // are searching across all of them; picking one already put its name at the
+  // top of the panel (Carter, 2026-09-17).
+  function sub(c,searching){
+    var bits=[];
+    if(searching && c.park) bits.push(c.park);
+    var mk=CoasterHub.maker(c); if(mk) bits.push(mk);
+    return bits.join(' \u00b7 ');
+  }
+  // Say nothing when nothing is known — the same rule /count's life() follows.
+  function flag(c){
+    if(c.closed) return '<span class="stat off">Defunct</span>';
+    if(c.opened||c.yr) return '<span class="stat on">Operating</span>';
+    return '';
+  }
+  // No second line at all rather than an empty one that still takes its height:
+  // a coaster with no model and no dates is just its name.
+  function under(c,searching){
+    var t=sub(c,searching), f=flag(c);
+    if(!t && !f) return '';
+    return '<span class="sub">'+(t?'<span class="txt">'+esc(t)+'</span>':'')+f+'</span>';
+  }
   el.innerHTML=list.map(function(c){
     var n=basket[c.id]||0, owned=!!OWNED[c.id];
     // Day mode: a stepper, because you can re-ride something you already have.
@@ -818,7 +864,7 @@ function renderList(){
     var cls='crow'+(MODE==='list'&&!owned?' pick':'')+(MODE==='list'&&owned?' owned':'');
     return '<div class="'+cls+'" data-id="'+c.id+'"'
       +(MODE==='list'&&!owned?' role="checkbox" tabindex="0" aria-checked="'+(n?'true':'false')+'"':'')+'>'
-      +'<span class="nm"><b>'+esc(c.name)+'</b><span>'+esc(c.park||'—')+(c.type?' · '+esc(c.type):'')+'</span></span>'
+      +'<span class="nm"><b>'+esc(c.name)+'</b>'+under(c,searching)+'</span>'
       +ctrl+'</div>';
   }).join('');
 

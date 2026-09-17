@@ -1430,6 +1430,31 @@ matches those filters" rather than "Nothing left to add".
 
 ---
 
+## The /log coaster rows (2026-09-17)
+
+Carter: *"Take out wood/steel replace with model and squeeze in status somewhere?
+(Operating/defunct). Auto sort defunct to the bottom."*
+
+- **Model replaces the type.** `Steel` / `Wood` was the same word on nearly every row in a park;
+  the model is the half worth reading. Same `CoasterHub.maker()` every other list uses, so it
+  falls back to the manufacturer when there is no model.
+- **The park drops out when a park is picked.** That was the other half of "squeeze in": picking
+  a park already writes its name across the top of the panel, so repeating it on all nine rows
+  was the line's cheapest tenant. Searching spans every park, so there it stays.
+- **The status is the flag /count already uses**, down to the colours — a coloured word, and a
+  coloured dot under 560px where a phone has no room for one. Nothing is drawn when neither a
+  closing nor an opening date is known, the same rule `life()` follows on `/count`.
+- **A row with neither a model nor a date gets no second line at all**, rather than an empty one
+  that still takes its height.
+- **Defunct sinks**, by `byLife` (closed last, then A–Z). In search mode the sort runs **before**
+  the 200-row slice, so a query full of closed rides cannot eat the cap.
+
+The list-mode float of what you have *not* got stays **outside** the defunct sink: a closed
+coaster you have never logged is still one you can tick, and an operating one you already hold
+is not. `Array.sort` is stable, so that second pass keeps defunct-last inside each half.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**
