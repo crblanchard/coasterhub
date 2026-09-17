@@ -170,7 +170,7 @@
     </div>
 
     <div class="herocount" id="herocount">
-      <h1 id="hero_h" style="max-width:20ch">Chasing credits.</h1>
+      <h1 id="hero_h" style="max-width:20ch">Credit whoring&hellip;</h1>
       <!-- What you can do with this count, for the person who owns it. Four
            verbs in a column beats one button and a header full of nouns: the
            page already says what you HAVE, and this says what you can add to
@@ -210,9 +210,7 @@
      dead /user/<name>/ link is now an ordinary thing to land on. -->
 <div class="container"><div id="nouser" style="display:none">
   <p class="lead" style="margin-bottom:10px"><strong id="nouser_h">No rider here.</strong></p>
-  <p class="lead" style="margin-bottom:16px">Nobody on Coaster Hub is using that name.
-     If you followed an old link, whoever it pointed at may have changed their username &mdash;
-     old addresses aren&rsquo;t kept.</p>
+  <p class="lead" style="margin-bottom:16px">This username is inactive.</p>
   <p><a class="go" href="/">See everyone on Coaster Hub &rarr;</a></p>
 </div></div>
 
@@ -229,7 +227,6 @@
 <section class="block" id="sec_top" style="display:none;padding-top:28px"><div class="container">
   <span class="eyebrow">Ranked</span>
   <h2><a class="toplink" id="top_h" href="/rankings">Top ten</a></h2>
-  <p class="lead" id="top_sub"></p>
   <div class="toplist" id="toplist"></div>
 </div></section>
 
@@ -244,12 +241,12 @@
 </div></section>
 
 <section class="block" id="sec_otd"><div class="container">
-  <span class="eyebrow">On this day</span><h2 id="otd_h">On this day</h2>
+  <h2>On this day</h2>
   <div id="otd"></div>
 </div></section>
 
 <section class="block" id="sec_records"><div class="container">
-  <span class="eyebrow">The records</span><h2>Personal bests</h2>
+  <span class="eyebrow">Stats</span><h2>Records</h2>
   <div class="records" id="records"></div>
 </div></section>
 
@@ -281,7 +278,7 @@
 </div></section>
 
 <section class="block" id="sec_overtime"><div class="container">
-  <span class="eyebrow">Over time</span><h2>The story so far</h2>
+  <span class="eyebrow">History</span><h2>Rides over time</h2>
   <div class="chart-grid">
     <div class="panel wide"><h3>Credits over time</h3><div class="cap">Cumulative new coasters ridden by year</div><div class="cwrap"><canvas id="cCum"></canvas></div></div>
     <div class="panel" id="panel_rides_year"><h3>Rides per year</h3><div class="cap">Total rides incl. re-rides</div><div class="cwrap"><canvas id="cRides"></canvas></div></div>
@@ -290,7 +287,7 @@
 </div></section>
 
 <section class="block" id="sec_breakdown"><div class="container">
-  <span class="eyebrow">Parks, makers &amp; big days</span><h2>The breakdown</h2>
+  <span class="eyebrow">Stats</span><h2>The breakdown</h2>
   <div class="chart-grid">
     <div class="panel"><h3 id="parks_title">Top parks by rides</h3><div class="cap">Home turf</div><div class="cwrap" style="height:360px"><canvas id="cParks"></canvas></div></div>
     <div class="panel"><h3>Top manufacturers</h3><div class="cap">By credits ridden</div><div class="cwrap" style="height:360px"><canvas id="cManu"></canvas></div></div>
@@ -598,9 +595,6 @@ function render(s){
     h.innerHTML = (ten.length<10 ? ('Top '+ten.length) : 'Top ten')
       + '<span class="arw">' + (known.length>ten.length
           ? ('all '+nf(known.length)+' &rarr;') : 'the whole list &rarr;') + '</span>';
-    document.getElementById('top_sub').textContent = known.length>ten.length
-      ? (who+'’s ten favorites, out of '+nf(known.length)+' ranked.')
-      : (who+'’s favorites, best first.');
     document.getElementById('toplist').innerHTML=ten.map(function(c,i){
       var pk=(s.parks||{})[c.park];
       var loc=pk&&pk.region?pk.region:'';
@@ -661,7 +655,8 @@ function render(s){
     var now=new Date();
     var mmdd=String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
     var dayLabel=now.toLocaleDateString(undefined,{month:'long',day:'numeric'});
-    document.getElementById('otd_h').textContent='On this day — '+dayLabel;
+    // The heading is plain markup now — the date lives in the lines below it,
+    // not in the title (Carter's copy pass, 2026-09-17).
     var cy=now.getFullYear();
     function otdCards(list,key,label){
       return '<div class="records">'+list.map(function(c){var y=c[key].slice(0,4);var age=cy-parseInt(y,10);
