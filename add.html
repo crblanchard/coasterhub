@@ -504,8 +504,11 @@ function savePark(){
   if(checkPark()) return void($('p_msg').className='msg bad',
     $('p_msg').textContent='That looks like a duplicate — see above.');
 
-  if(!confirm('Add "'+name+'"'+(region?' ('+region+')':'')+' to the shared park list?\n\n'
-    +'Everyone sees this, and removing it again means /edit.')) return;
+  // Same shape as the coaster confirm: one question, and the only thing the
+  // person tapping OK can actually get wrong. Where it can be undone from is
+  // not their problem.
+  if(!confirm('Add "'+name+'"'+(region?' ('+region+')':'')+' to the shared park list?'
+    +' Only add a park here if it does not already exist in the database.')) return;
 
   $('p_save').disabled=true; $('p_msg').textContent='Adding…';
   api('PUT','/api/park',{name:name,region:region||null}).then(function(){
