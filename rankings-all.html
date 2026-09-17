@@ -70,8 +70,8 @@
   <!-- Two ways to read agreement, and they answer different questions: how many
        people rate it, or how high the people who rate it put it. -->
   <div class="seg" id="sortby">
-    <button data-s="lists" class="on">Most lists</button>
-    <button data-s="avg">Highest placed</button>
+    <button data-s="avg" class="on">Highest placed</button>
+    <button data-s="lists">Most lists</button>
   </div>
   <div id="loading">Loading&hellip;</div>
   <div id="err">
@@ -99,11 +99,14 @@ var $=function(id){return document.getElementById(id);};
 var esc=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
 
-var ROWS=[], SORT='lists';
+var ROWS=[], SORT='avg';
 
-// Agreement, two ways. "Most lists" is how many people have it at all, with the
-// average placing breaking ties; "Highest placed" is the average, but only among
-// coasters on more than one list — one person's number one is not a consensus.
+// Agreement, two ways, and the default is the AVERAGE (Carter's call,
+// 2026-09-17). "Highest placed" is the average placing among the coasters on
+// more than one list — the 2+ filter is what makes an average mean anything,
+// since one person's number one is not a consensus. "Most lists" is still here
+// as the other question, but it answers where people have BEEN rather than what
+// is best: six riders having done Steel Vengeance says Cedar Point is popular.
 function sorted(){
   return ROWS.slice().sort(function(a,b){
     if (SORT==='avg') return (a.sum/a.n) - (b.sum/b.n) || b.n - a.n;

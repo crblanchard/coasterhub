@@ -319,9 +319,15 @@ if(!slug){
       });
     });
     var ids=Object.keys(tally);
+    // Best AVERAGE placing first, among the coasters on more than one list
+    // (Carter's call, 2026-09-17). Sorting by how many lists a coaster is on
+    // just ranked the famous ones: six people having ridden Steel Vengeance is
+    // a fact about where people go, not about which coaster is better. The 2+
+    // filter is what makes an average mean anything — one person's number one
+    // is not a consensus — and list count now only breaks a tie.
     var shared=ids.filter(function(id){return tally[id].n>1;})
       .map(function(id){return tally[id];})
-      .sort(function(a,b){ return (b.n-a.n) || (a.sum/a.n - b.sum/b.n); });
+      .sort(function(a,b){ return (a.sum/a.n - b.sum/b.n) || (b.n-a.n); });
 
     $('figs').innerHTML=[
       fig(started.length+' <small style="font-size:.55em;color:var(--muted);font-weight:600">of '+lists.length+'</small>','Lists started'),
@@ -362,7 +368,7 @@ if(!slug){
     }).join('');
 
     if(shared.length){
-      $('shared_sub').textContent='Coasters more than one person put on their list, most agreed-on first.';
+      $('shared_sub').textContent='Coasters more than one person ranked, best average placing first.';
       $('shared_more').style.display = shared.length > 10 ? 'block' : 'none';
       $('shared').innerHTML=shared.slice(0,10).map(function(t,i){
         var c=BYID[t.id], avg=t.sum/t.n;
