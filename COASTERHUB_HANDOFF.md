@@ -1360,7 +1360,9 @@ with a random phrase would lose what they are telling you.
 Carter, on the picker inside a ranking's **Add coasters** tab: filter by park or
 manufacturer; make the search box find a maker; and give the makers a panel showing his most
 common with how many are left to place — *"Vekoma 10/50 unranked … then you can click on those
-rows"* — as checkboxes, so he can look at every GCI, CCI and RMC at once, with a Clear.
+rows"* — as checkboxes, so he can look at every GCI, CCI and RMC at once, with a Clear. Then:
+*"do the same thing for location"*, which is why the panel is a **facet** and not a
+manufacturer widget.
 
 Four pieces, all in `rankings.html`:
 
@@ -1370,21 +1372,30 @@ Four pieces, all in `rankings.html`:
   (`Cedar Point (82)`). Rebuilt when *Search all coasters* flips, keeping the current pick if it
   survives — refilling a `<select>` drops its value silently and re-picking the same option
   fires no `change`, which is the trap `/log` already documents.
-- **A Manufacturers panel**, `#mfpanel`, opened from a button that wears the number of ticks.
-  Each row is a `<label>` — the whole row is the hit target — with a checkbox, the maker, and
+- **Facet panels** — **Manufacturers** and **Locations** — each opened from a button that wears
+  its number of ticks. `FACETS` is a list of `{id, label, sel, key}`; everything else
+  (`facetRows`, `renderFacet`, the pool filter, the wiring) loops over it, so a third facet is
+  a key function and two `<div>`s, not another copy of the machinery. Element ids are derived
+  from the `id`: `<id>panel`, `<id>list`, `<id>note`, `<id>_clear`, `<id>_toggle`.
+  Each row is a `<label>` — the whole row is the hit target — with a checkbox, the name, and
   `<left>/<total> unranked`. Sorted by **total descending**, because the one you have ridden
   most is the one you came to find; `Unknown` is pinned last whatever its size, since it is a
-  gap in the data rather than a maker. A maker with nothing left keeps its row (`0/80` is an
+  gap in the data rather than an answer. One with nothing left keeps its row (`0/80` is an
   answer) but goes muted.
-- **Clear**, disabled until something is ticked, empties the ticks and nothing else. The park
-  select and the search box have their own obvious ways back.
+- **One panel open at a time** — two of them push the list off the screen. The button keeps its
+  highlight while its ticks are set, so closing a panel never hides that it is still filtering.
+- **Ticks inside a panel widen, panels narrow each other**: Vekoma OR Intamin, but a Vekoma IN
+  Ohio. That is the way round you would say it out loud, and it is what makes two panels worth
+  having.
+- **Clear**, one per panel, disabled until something is ticked, empties that panel's ticks and
+  nothing else. The park select and the search box have their own obvious ways back.
 
 The counts come from `scoped()` — scope plus the park filter — and deliberately **not** from
-the finished pool. Applying the ticks to their own counts would hide every maker not yet
-picked, and applying the search box would collapse the panel out from under you as you typed a
-maker's name into it. A ticked maker that the park filter leaves empty still gets its row, so
-an empty result reads as "none here" rather than as a bug, and the list below says
-"Nothing unranked matches those filters" rather than "Nothing left to add".
+the finished pool. Applying a panel's ticks to its own counts would hide every row not yet
+picked, and applying the search box would collapse a panel out from under you as you typed a
+maker's name into it. A ticked row that the park filter leaves empty still appears, so an empty
+result reads as "none here" rather than as a bug, and the list below says "Nothing unranked
+matches those filters" rather than "Nothing left to add".
 
 ---
 

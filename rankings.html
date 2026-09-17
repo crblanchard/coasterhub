@@ -88,28 +88,28 @@
   .list{max-height:62vh;overflow-y:auto}
   .hint{color:var(--muted);padding:22px 4px;font-size:.9rem}
 
-  /* Manufacturers: a facet panel rather than another dropdown. The counts are
-     the point — "10/50 unranked" is how much of a maker you have left to
-     place — and they are checkboxes because the question is usually about a
+  /* Facet panels — manufacturers, locations — rather than more dropdowns. The
+     counts are the point: "10/50 unranked" is how much of a maker or a state
+     you have left to place. Checkboxes because the question is usually about a
      family (every GCI, CCI and RMC at once), not about one name. */
-  .mfpanel{border:1px solid var(--line);border-radius:12px;background:var(--panel);
-           padding:8px 12px 6px;margin:0 0 16px}
-  .mfbar{display:flex;align-items:center;gap:10px;padding-bottom:6px;border-bottom:1px solid var(--soft)}
-  .mfbar .status{flex:1;min-width:0}
-  .mfbar button.ghost{padding:5px 11px;font-size:.82rem}
-  .mflist{max-height:260px;overflow-y:auto;display:flex;flex-direction:column}
-  .mfrow{display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;
-         border-bottom:1px solid var(--soft)}
-  .mfrow:last-child{border-bottom:0}
-  .mfrow input{flex:none;margin:0;accent-color:var(--accent2);cursor:pointer}
-  .mfrow .mn{flex:1;min-width:0;font-size:.87rem;font-weight:600;
-             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .mfrow .mc{flex:none;color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums}
-  .mfrow .mc b{color:var(--accent2);font-weight:700}
-  /* Nothing left to place under this maker: still listed, because "0/30" is an
+  .facetbox{border:1px solid var(--line);border-radius:12px;background:var(--panel);
+            padding:8px 12px 6px;margin:0 0 16px}
+  .facetbar{display:flex;align-items:center;gap:10px;padding-bottom:6px;border-bottom:1px solid var(--soft)}
+  .facetbar .status{flex:1;min-width:0}
+  .facetbar button.ghost{padding:5px 11px;font-size:.82rem}
+  .facetlist{max-height:260px;overflow-y:auto;display:flex;flex-direction:column}
+  .facetrow{display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;
+            border-bottom:1px solid var(--soft)}
+  .facetrow:last-child{border-bottom:0}
+  .facetrow input{flex:none;margin:0;accent-color:var(--accent2);cursor:pointer}
+  .facetrow .fn{flex:1;min-width:0;font-size:.87rem;font-weight:600;
+                overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .facetrow .fc{flex:none;color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums}
+  .facetrow .fc b{color:var(--accent2);font-weight:700}
+  /* Nothing left to place under this one: still listed, because "0/30" is an
      answer, but it stops competing with the rows that have something in them. */
-  .mfrow.done .mn,.mfrow.done .mc b{color:var(--muted);font-weight:600}
-  #mf_toggle.on{color:var(--fg);border-color:var(--accent2);background:var(--tint)}
+  .facetrow.done .fn,.facetrow.done .fc b{color:var(--muted);font-weight:600}
+  button.facettog.on{color:var(--fg);border-color:var(--accent2);background:var(--tint)}
 
   /* head to head */
   .hh{position:fixed;inset:0;background:var(--veil2);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -277,18 +277,27 @@
           <option value="park">Park</option>
         </select>
         <select id="f_addpark"><option value="">All parks</option></select>
-        <button class="ghost" type="button" id="mf_toggle" aria-expanded="false"
+        <button class="ghost facettog" type="button" id="mf_toggle" aria-expanded="false"
                 aria-controls="mfpanel">Manufacturers</button>
+        <button class="ghost facettog" type="button" id="loc_toggle" aria-expanded="false"
+                aria-controls="locpanel">Locations</button>
         <label class="status" style="display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="all_coasters"> Search all coasters
         </label>
       </div>
-      <div class="mfpanel" id="mfpanel" hidden>
-        <div class="mfbar">
+      <div class="facetbox" id="mfpanel" hidden>
+        <div class="facetbar">
           <span class="status" id="mfnote"></span>
           <button class="ghost" type="button" id="mf_clear" disabled>Clear</button>
         </div>
-        <div class="mflist" id="mflist"></div>
+        <div class="facetlist" id="mflist"></div>
+      </div>
+      <div class="facetbox" id="locpanel" hidden>
+        <div class="facetbar">
+          <span class="status" id="locnote"></span>
+          <button class="ghost" type="button" id="loc_clear" disabled>Clear</button>
+        </div>
+        <div class="facetlist" id="loclist"></div>
       </div>
       <div class="count status" id="addcount"></div>
       <div class="list" id="addlist"></div>
@@ -530,13 +539,21 @@ function wire(){
   $('sort').addEventListener('change',renderAdd);
   $('f_addpark').addEventListener('change',renderAdd);
   $('all_coasters').addEventListener('change',function(){ buildAddParks(); renderAdd(); });
-  $('mf_toggle').onclick=function(){
-    var open=$('mfpanel').hidden;
-    $('mfpanel').hidden=!open;
-    $('mf_toggle').setAttribute('aria-expanded',String(open));
-    renderMakers();
-  };
-  $('mf_clear').onclick=function(){ MFSEL={}; renderAdd(); };
+  // One panel at a time: two of them open push the list off the screen, and
+  // the button keeps its highlight while its ticks are set, so closing one
+  // never hides that it is still filtering.
+  FACETS.forEach(function(f){
+    $(f.id+'_toggle').onclick=function(){
+      var open=$(f.id+'panel').hidden;
+      FACETS.forEach(function(g){
+        var show = g===f && open;
+        $(g.id+'panel').hidden=!show;
+        $(g.id+'_toggle').setAttribute('aria-expanded',String(show));
+      });
+      FACETS.forEach(renderFacet);
+    };
+    $(f.id+'_clear').onclick=function(){ f.sel={}; renderAdd(); };
+  });
   buildAddParks();
   $('save').onclick=save;
   $('hh_cancel').onclick=closeHH;
@@ -680,12 +697,18 @@ function endDrag(){
 }
 
 // ------------------------------------------------------------- add panel ----
-var MFSEL={};   // manufacturers ticked in the panel, by name
-
-// A coaster with no manufacturer is still somebody's credit, so it gets a row
-// rather than vanishing — otherwise the counts do not add up to the list.
-function manuOf(c){ return String(c&&c.manu||'').trim() || 'Unknown'; }
-function mfPicked(){ return Object.keys(MFSEL).filter(function(k){return MFSEL[k];}); }
+// Two panels, one machine. A facet is a way of grouping the coasters you could
+// add — by who built them, by where they are — plus the ticks against it. A
+// coaster missing the field still gets a row under 'Unknown' rather than
+// vanishing: otherwise the counts do not add up to the list they filter.
+var FACETS=[
+  { id:'mf',  label:'Manufacturers', sel:{},
+    key:function(c){ return String(c&&c.manu||'').trim() || 'Unknown'; } },
+  { id:'loc', label:'Locations', sel:{},
+    key:function(c){ return String(c&&c.loc||'').trim() || 'Unknown'; } }
+];
+function picked(f){ return Object.keys(f.sel).filter(function(k){return f.sel[k];}); }
+function anyPicked(){ return FACETS.some(function(f){ return picked(f).length>0; }); }
 
 // Everything in scope — ranked and unranked both — narrowed only by whose
 // coasters and which park. The maker counts are taken from HERE and not from
@@ -716,43 +739,41 @@ function buildAddParks(){
   sel.value = seen[keep] ? keep : '';
 }
 
-function makerRows(){
+function facetRows(f){
   var ranked={}; ORDER.forEach(function(id){ranked[id]=1;});
   var rows={};
   scoped().forEach(function(c){
-    var r=rows[manuOf(c)]||(rows[manuOf(c)]={name:manuOf(c),total:0,left:0});
+    var k=f.key(c), r=rows[k]||(rows[k]={name:k,total:0,left:0});
     r.total++; if(!ranked[c.id]) r.left++;
   });
-  // A maker you ticked keeps its row even when the park filter leaves it with
+  // One you ticked keeps its row even when the park filter leaves it with
   // nothing, so an empty list reads as "none here" rather than as a bug.
-  mfPicked().forEach(function(n){ if(!rows[n]) rows[n]={name:n,total:0,left:0}; });
+  picked(f).forEach(function(n){ if(!rows[n]) rows[n]={name:n,total:0,left:0}; });
   return Object.keys(rows).map(function(k){return rows[k];}).sort(function(a,b){
     // Most of what you have ridden first — that is the row you came to find.
-    // Unknown is last whatever its size: it is a gap in the data, not a maker.
+    // Unknown is last whatever its size: it is a gap in the data, not an answer.
     if((a.name==='Unknown')!==(b.name==='Unknown')) return a.name==='Unknown'?1:-1;
     return b.total-a.total || a.name.localeCompare(b.name);
   });
 }
 
-function renderMakers(){
-  var rows=makerRows(), picked=mfPicked();
-  $('mflist').innerHTML=rows.length?rows.map(function(r){
-    return '<label class="mfrow'+(r.left?'':' done')+'">'
-      +'<input type="checkbox" data-mf="'+esc(r.name)+'"'+(MFSEL[r.name]?' checked':'')+'>'
-      +'<span class="mn">'+esc(r.name)+'</span>'
-      +'<span class="mc"><b>'+nf(r.left)+'</b>/'+nf(r.total)+' unranked</span>'
+function renderFacet(f){
+  var rows=facetRows(f), on=picked(f);
+  $(f.id+'list').innerHTML=rows.length?rows.map(function(r){
+    return '<label class="facetrow'+(r.left?'':' done')+'">'
+      +'<input type="checkbox" data-pick="'+esc(r.name)+'"'+(f.sel[r.name]?' checked':'')+'>'
+      +'<span class="fn">'+esc(r.name)+'</span>'
+      +'<span class="fc"><b>'+nf(r.left)+'</b>/'+nf(r.total)+' unranked</span>'
       +'</label>';
-  }).join(''):'<div class="hint">No manufacturers here.</div>';
-  $('mfnote').textContent = picked.length
-    ? picked.length+' selected'
+  }).join(''):'<div class="hint">Nothing here.</div>';
+  $(f.id+'note').textContent = on.length
+    ? on.length+' selected'
     : 'Tick as many as you like — the list below narrows to them.';
-  $('mf_clear').disabled = !picked.length;
-  $('mf_toggle').textContent = picked.length ? 'Manufacturers · '+picked.length : 'Manufacturers';
-  $('mf_toggle').classList.toggle('on', !$('mfpanel').hidden || picked.length>0);
-  Array.prototype.forEach.call($('mflist').querySelectorAll('[data-mf]'),function(b){
-    b.addEventListener('change',function(){
-      MFSEL[b.dataset.mf]=b.checked; renderAdd();
-    });
+  $(f.id+'_clear').disabled = !on.length;
+  $(f.id+'_toggle').textContent = on.length ? f.label+' · '+on.length : f.label;
+  $(f.id+'_toggle').classList.toggle('on', !$(f.id+'panel').hidden || on.length>0);
+  Array.prototype.forEach.call($(f.id+'list').querySelectorAll('[data-pick]'),function(b){
+    b.addEventListener('change',function(){ f.sel[b.dataset.pick]=b.checked; renderAdd(); });
   });
 }
 
@@ -760,11 +781,13 @@ function pool(){
   var ranked={}; ORDER.forEach(function(id){ranked[id]=1;});
   var q=$('q').value.trim().toLowerCase();
   var list=scoped().filter(function(c){ return !ranked[c.id]; });
-  var picked=mfPicked();
-  if(picked.length){
-    var pick={}; picked.forEach(function(k){pick[k]=1;});
-    list=list.filter(function(c){ return pick[manuOf(c)]; });
-  }
+  // Ticks inside one panel widen (Vekoma OR Intamin); the panels narrow each
+  // other (a Vekoma IN Ohio), which is the way round you would say it out loud.
+  FACETS.forEach(function(f){
+    var on=picked(f); if(!on.length) return;
+    var want={}; on.forEach(function(k){want[k]=1;});
+    list=list.filter(function(c){ return want[f.key(c)]; });
+  });
   // The search reads the maker and the model as well as the name and the park,
   // so typing "Vekoma" or "Raptor" turns up the coasters without anyone having
   // to open the panel first.
@@ -785,7 +808,7 @@ function pool(){
   return list;
 }
 function renderAdd(){
-  renderMakers();
+  FACETS.forEach(renderFacet);
   var list=pool(), shown=list.slice(0,300);
   $('addcount').textContent=list.length
     ? (nf(list.length)+($('all_coasters').checked?' coasters':' of your coasters')+' not ranked yet'
@@ -806,7 +829,7 @@ function renderAdd(){
       +'<button class="ghost" data-add="'+c.id+'">Add</button></span>'
       +'</div>';
   }).join('') : ('<div class="hint">'+(
-      ($('q').value.trim()||$('f_addpark').value||mfPicked().length)
+      ($('q').value.trim()||$('f_addpark').value||anyPicked())
         ? 'Nothing unranked matches those filters.'
         : 'Nothing left to add.')+'</div>');
   $('addlist').querySelectorAll('[data-add]').forEach(function(b){
