@@ -472,9 +472,10 @@
   // _redirects 301s the old /stats forms here, so existing links still land.
   function userPageHref(slug, page) {
     if (page === "home") return "/";
-    // Nobody picked: the page's own everyone view. There is no profile without a
-    // person, so that one lands on the list of riders instead.
-    if (!slug) return page === "profile" ? "/riders" : "/" + page;
+    // Nobody picked: the page's own everyone view. A profile needs a person, and
+    // with nobody signed in the useful answer is the page that gets you one —
+    // /account, which bounces a signed-in visitor to their own page anyway.
+    if (!slug) return page === "profile" ? "/account" : "/" + page;
     return page === "profile" ? "/user/" + slug : "/user/" + slug + "/" + page;
   }
 
@@ -712,7 +713,11 @@
     function applyRiderLinks(forSlug) {
       for (var p = 0; p < PER_RIDER.length; p++) {
         var key = PER_RIDER[p];
-        var target = (key === "profile" && myOwn) ? myOwn : forSlug;
+        // Profile is YOURS, always: your page when we know who you are, the
+        // sign-in page when we do not. Never the rider you happen to be reading
+        // — signed out that made "Profile" a link to Cole, or on /riders a link
+        // to the page you were already standing on.
+        var target = (key === "profile") ? myOwn : forSlug;
         var els = document.querySelectorAll('[data-nav="' + key + '"]');
         for (var q = 0; q < els.length; q++) {
           els[q].setAttribute("href", userPageHref(target, key));
@@ -775,6 +780,7 @@
     if (themeHost && !themeHost.querySelector(".acctlink")) buildAccountLink(themeHost);
 
     buildTabBar(page, slug);
+    applyRiderLinks(slug);
   }
 
   // The five pages, in one order, used by the header, this mobile tab bar and
@@ -799,7 +805,7 @@
   var TABS = [
     { k: "riders",   label: "Riders",   path: "/riders",   fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
-    { k: "profile",  label: "Profile",  path: "/riders" },
+    { k: "profile",  label: "Profile",  path: "/account" },
     { k: "count",    label: "Count",    path: "/count" },
     { k: "log",      label: "Log",      path: "/log",      fixed: true }
   ];
