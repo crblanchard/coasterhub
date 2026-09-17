@@ -973,7 +973,27 @@
     return mo || String(c.manu || "").trim();
   }
 
-  var api = { computeStats: computeStats, maker: maker, loadUser: loadUser, currentUser: currentUser, me: me,
+  // The line a hero wears while its numbers are still on the way. One pool for
+  // the whole site, picked at random per page load, so it does not greet you
+  // with the same word every time. Carter writes these in the copy desk; the
+  // list lives here and nowhere else, so a new page only has to put
+  // data-loading on its <h1> to join in.
+  var LOADING = [
+    "Credit whoring\u2026",
+    "Loading\u2026"
+  ];
+  function loadingLine() { return LOADING[Math.floor(Math.random() * LOADING.length)]; }
+
+  // Swapped in as app.js runs — before any page's own script and, because this
+  // is a blocking <script> at the end of <body>, before the hero is painted.
+  // Doing it on DOMContentLoaded would show the markup's line first and then
+  // visibly change it.
+  if (typeof document !== "undefined") {
+    var _load = document.querySelectorAll("[data-loading]");
+    for (var _i = 0; _i < _load.length; _i++) _load[_i].textContent = loadingLine();
+  }
+
+  var api = { computeStats: computeStats, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers,

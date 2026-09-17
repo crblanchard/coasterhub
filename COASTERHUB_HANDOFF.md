@@ -1280,6 +1280,53 @@ once, names link to `/user/<slug>/rankings`, no horizontal overflow on a phone.
 
 ---
 
+## The copy desk, and the loading-line pool (2026-09-17)
+
+Carter is rewriting the site's copy in an artifact — the **Coaster Hub Copy Desk**,
+`https://claude.ai/artifact/DpmK3FrUXVCBpj5peW2Ekz`. Every user-visible string is a row:
+what is live on the left, an autosaving textarea on the right. Rows save to the artifact's
+`db` under collection `copy`, one doc per row, `{text, at}`. He fills it in whenever; a pass
+happens when he asks, by reading that collection and editing the repo. **Never write to that
+collection** — his text stays there after a pass so he can see what he asked for.
+
+Two conventions he uses inside a replacement:
+
+- **`[arrow]`** — keep the arrow. Becomes `→` (the "go do this" arrow the site ends links
+  with). The two directional ones, `← Prev` / `Next →` on the count pager and `↗` on
+  `/edit`, keep whichever they already have.
+- **`[]`** on its own — delete that string from the site. Remove the whole element, not its
+  text: an empty `<p>` still takes its margin and an empty `.badge` still draws a pill.
+
+Row ids are `r-<group>-<row>-<slug of label + live text>`, so **changing a row's live text in
+`DATA` orphans whatever he typed against it**. That is why the left column still shows the
+old copy for rows already applied — leave it alone. Rows applied in the first pass
+(2026-09-17): home h1, home badge, feedback heading and body, feed heading and link; profile
+top-ten subtitles (both deleted), the Records / Rides over time / The breakdown headings, the
+dead-link body, and the fallback headline. A later pass must skip those — their live text is
+no longer what the desk's left column claims.
+
+### The loading pool
+
+The big line a hero wears before its numbers arrive is no longer a fixed word. `app.js` holds
+one `LOADING` array for the whole site and swaps it into anything carrying **`data-loading`**:
+
+- `profile.html` `#hero_h`, `count.html`'s hero `h1`, `rankings.html` `#hero_h1`.
+- On `/rankings` (the everyone view) the headline is set synchronously, so the pool never shows
+  there; on `/user/<slug>/rankings` it does, because that headline waits on a fetch.
+
+The swap runs **as `app.js` executes**, not on `DOMContentLoaded`: app.js is a blocking
+`<script>` at the end of `<body>`, so it lands before the hero is painted. On
+`DOMContentLoaded` you would see the markup's line and then watch it change.
+
+Carter writes the list in the desk's **Loading lines** section — one phrase per line, saved as
+the single doc `copy/pool-loading`. It is a pool, not a replacement: whatever he types there is
+the whole list, so applying it means replacing `LOADING` in `app.js` wholesale.
+
+The small `Loading…` lines in page bodies (`#loading`, the feed's `.empty`) are deliberately
+**not** in the pool — they are quiet muted text, not a greeting.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**
