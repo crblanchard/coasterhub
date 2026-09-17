@@ -477,32 +477,40 @@ function renderParks(rows){
 
   document.getElementById('parkview').innerHTML=slice.map(function(park){
     var list=byPark[park];
-    // Laps per coaster, and the first time each was ridden — the two things a
-    // park card can say that the coaster list cannot.
-    var laps={}, first={}, seen={}, uniq=[];
+    // Laps per coaster. There used to be a first-ridden date on each row too,
+    // and nobody could tell what it meant: on a park card the obvious reading
+    // is "when I was there", and it was the earliest ride of THAT coaster, so a
+    // park visited three times showed three different dates down one column.
+    // The Rides view is where dates belong. (Carter's call, 2026-09-17.)
+    var laps={}, seen={}, uniq=[];
     list.forEach(function(r){
       laps[r.c]=(laps[r.c]||0)+1;
-      if(r.d && (!first[r.c] || r.d<first[r.c])) first[r.c]=r.d;
       if(!seen[r.c]){ seen[r.c]=1; uniq.push(r); }
     });
     uniq.sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
     var days=[...new Set(list.map(function(r){return r.d;}).filter(Boolean))];
     var isRides=list[0].rep;
-    var what=isRides
-      ? (list.length.toLocaleString()+' ride'+(list.length===1?'':'s')
-         +' · '+uniq.length.toLocaleString()+' coaster'+(uniq.length===1?'':'s'))
-      : (uniq.length.toLocaleString()+' credit'+(uniq.length===1?'':'s'));
+    // Everyone's parks at once: visits, rides and laps are sums across six
+    // people and mean nothing as a number — "3 visits" is not a trip anybody
+    // took and "×3" is not a re-ride. How many coasters the park has between
+    // you is the one figure that survives being added up, so on the global view
+    // it is the only one shown.
+    var what = COMBINED
+      ? (uniq.length.toLocaleString()+' coaster'+(uniq.length===1?'':'s'))
+      : isRides
+        ? (list.length.toLocaleString()+' ride'+(list.length===1?'':'s')
+           +' · '+uniq.length.toLocaleString()+' coaster'+(uniq.length===1?'':'s'))
+        : (uniq.length.toLocaleString()+' credit'+(uniq.length===1?'':'s'));
     return '<details class="day"><summary>'
       +'<span class="dt">'+esc(park)+'</span>'
       +'<span class="pk">'+esc(list[0].loc||'')
-        +(days.length?' <span style="opacity:.75">· '+days.length+' visit'+(days.length===1?'':'s')+'</span>':'')
+        +((days.length && !COMBINED)?' <span style="opacity:.75">· '+days.length+' visit'+(days.length===1?'':'s')+'</span>':'')
       +'</span>'
       +'<span class="n">'+what+'</span>'
       +'</summary><div class="inner">'
       + uniq.map(function(r){
           return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
-            +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')
-            +(first[r.c]?'<span class="cp">'+esc(fmtDate(first[r.c]))+'</span>':'')
+            +((laps[r.c]>1 && !COMBINED)?'<span class="lap">×'+laps[r.c]+'</span>':'')
             +'</div>';
         }).join('')
       +'</div></details>';

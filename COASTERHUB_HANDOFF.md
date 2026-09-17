@@ -311,10 +311,21 @@ the grouping, and its sort machinery (`cols`, `buildHead`, `renderAll`) came out
 rider whose credits carry no dates has no day view, so they open on All coasters.
 
 **All parks** is every park in the count, A–Z, each one a `<details>` that opens the way a day
-does, listing the coasters ridden there with lap counts and the date each was first ridden. A
-day answers "what did I ride that afternoon"; a park answers "what have I ridden here, ever",
-which is the question you have standing in a queue somewhere you have been before. Undated
-credits DO appear here, unlike in the day view — a credit with no date still happened at a park.
+does, listing the coasters ridden there with lap counts. A day answers "what did I ride that
+afternoon"; a park answers "what have I ridden here, ever", which is the question you have
+standing in a queue somewhere you have been before. Undated credits DO appear here, unlike in
+the day view — a credit with no date still happened at a park.
+
+**No dates on a park row** (2026-09-17). Each row used to carry the date that coaster was first
+ridden, and nobody could read it: on a park card the obvious meaning is "when I was here", so a
+park visited three times showed three different dates down one column. Dates belong to the
+Rides view, which is organised by them. Carter's call.
+
+**The global view drops every number that is a sum** (2026-09-17). Viewing everyone, "3 visits"
+is not a trip anybody took, "21 rides" is six people's rides added together, and "×3" is not a
+re-ride — so visits, the ride total and the per-coaster lap counts are all absent there. How many
+coasters the park has between you survives being added up, so it is the one figure the card
+keeps. A single rider's view is unchanged and keeps all four.
 
 **The count page is `/count`** (2026-09-16), not `/rides` — `count.html`, `initNav('count')`,
 `PER_RIDER`'s `count` key. It holds a rider's whole count (the day log, every ride, the full
