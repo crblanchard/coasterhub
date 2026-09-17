@@ -178,7 +178,7 @@
        count to add to there. -->
   <p class="heroact" id="rides_act" hidden>
     <a class="btn" href="/log">Log a day</a>
-    <a class="btn alt" href="/log?mode=list">Add to your count</a>
+    <a class="btn alt" href="/log?mode=list">Add missing credits</a>
   </p>
 </div></section>
 
@@ -188,7 +188,7 @@
   <div id="ui" style="display:none">
     <div class="controls">
       <div class="seg" id="seg">
-        <button id="v_day" class="on">Rides</button><button id="v_list">All coasters</button><button id="v_parks">All parks</button>
+        <button id="v_day" class="on">Rides</button><button id="v_list">Coaster list</button><button id="v_parks">Park list</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
       <select id="f_rider" style="display:none"><option value="">All riders</option></select>
@@ -314,7 +314,7 @@ return Promise.all([
     // some of it gets the day view for the part that has them, and the cards
     // read "N new credits" rather than "N rides" because no re-ride is implied.
     // Hide just that button, not the whole switch — the other two are always
-    // there, and All coasters is the one that reads as a credit list.
+    // there, and Coaster list is the one that reads as a credit list.
     if(!DATED){
       view='list'; document.getElementById('v_day').style.display='none';
     }
@@ -322,19 +322,22 @@ return Promise.all([
     // The badge is the rider switcher now (app.js builds it over #hero_badge),
     // so nothing here writes to it — setting its textContent would take the
     // chevron and the menu with it. The headline says whose count this is.
+    // The credits view carries no subtitle any more (Carter's copy pass,
+    // 2026-09-17) — the headline already says what the list is. An empty <p>
+    // still takes its margin, so hide it rather than blanking it.
+    function heroSub(t){
+      var p=document.querySelector('.hero p');
+      p.textContent=t; p.style.display = t ? '' : 'none';
+    }
     if(COMBINED){
-      document.querySelector('.hero h1').textContent='All users, all rides.';
-      document.querySelector('.hero p').textContent=
-        'Every rider’s logged days, newest first — filter by rider, year or park.';
+      document.querySelector('.hero h1').textContent='Tracked days';
+      heroSub('Every rider’s logged days at the park — filter below.');
       document.title='Count — Coaster Hub';
     } else {
       var nm=esc(logs[0].user||'Carter');
       document.querySelector('.hero h1').textContent =
-        MODE==='rides' ? ('Every ride in '+nm+'’s count.') : (nm+'’s credits, in order.');
-      document.querySelector('.hero p').textContent =
-        MODE==='rides' ? 'By day, by coaster or by park — filter by year, park or name.'
-                       : (DATED ? 'Each coaster once, on the day it was first ridden.'
-                                : 'Each coaster once, in credit order.');
+        MODE==='rides' ? ('Every ride in '+nm+'’s count.') : (nm+'’s full credit list.');
+      heroSub(MODE==='rides' ? ('Full list of '+nm+'’s logged rides on the site.') : '');
       document.title=nm+'’s Count — Coaster Hub';
     }
 
@@ -446,7 +449,7 @@ function renderDays(rows){
   var keys=Object.keys(byDay).sort().reverse();   // date leads the key, so this is newest-first
   var total=keys.length, start=page*DAYS, slice=keys.slice(start,start+DAYS);
   document.getElementById('count').innerHTML='Showing <b>'+slice.length+'</b> of '+total+' day'+(total===1?'':'s')
-    +(undated?' <span style="opacity:.7">· '+undated.toLocaleString()+' undated credit'+(undated===1?'':'s')+' in All coasters</span>':'');
+    +(undated?' <span style="opacity:.7">· '+undated.toLocaleString()+' undated credit'+(undated===1?'':'s')+' in Coaster list</span>':'');
   document.getElementById('dayview').innerHTML=slice.map(function(k){
     var list=byDay[k], d=k.split('|')[0];
     var laps={}; list.forEach(function(r){ laps[r.c]=(laps[r.c]||0)+1; });

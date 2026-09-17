@@ -207,7 +207,7 @@
 
     <div id="shared_wrap" style="display:none">
       <div class="sechd">
-        <h2>Shared favorites</h2>
+        <h2>Master list</h2>
         <p id="shared_sub"></p>
       </div>
       <div class="shared" id="shared"></div>
@@ -217,8 +217,8 @@
     </div>
 
     <div class="sechd" style="margin-top:38px">
-      <h2>Each rider&rsquo;s list</h2>
-      <p>The top of everyone&rsquo;s ranking. Open one to see it in full.</p>
+      <h2>Personal lists</h2>
+      <p>Open any list to see it in full.</p>
     </div>
     <div class="cards" id="cards"></div>
   </div>
@@ -303,8 +303,8 @@ var BYID={}, MINE=[], ORDER=[], dirty=false, view='rank';
 if(!slug){
   // Everyone = a summary of where every list stands. The combined master
   // ranking comes later; it needs more than one list to mean anything.
-  $('hero_h1').textContent='Everyone’s rankings, at a glance.';
-  $('hero_p').textContent='Who has ranked what, and the coasters you agree on.';
+  $('hero_h1').textContent='Combined rankings.';
+  $('hero_p').textContent='Full list of ranked coasters sitewide.';
   CoasterHub.fetchUsers().then(function(){
   // Who is reading matters here: the cards say what YOU can do with each list,
   // so the account rides along with the data rather than arriving after it and
@@ -368,7 +368,7 @@ if(!slug){
         // Each card says what the person reading it can actually do.
         var yours = ME && ME.slug === l.user.slug;
         var seedable = !yours && ME && ME.admin && !l.claimed;
-        var why = yours     ? 'Drag your favorites into order — the list is yours.'
+        var why = yours     ? 'Judgment-free zone'
                 : seedable  ? 'Not claimed yet — you can start it for them.'
                 : l.claimed ? 'Only ' + esc(l.user.name) + ' can build this one.'
                 :             '';
@@ -386,7 +386,7 @@ if(!slug){
     }).join('');
 
     if(shared.length){
-      $('shared_sub').textContent='Coasters more than one person ranked, best average placing first.';
+      $('shared_sub').textContent='Coasters ranked by 2+ users';
       $('shared_more').style.display = shared.length > 10 ? 'block' : 'none';
       $('shared').innerHTML=shared.slice(0,10).map(function(t,i){
         var c=BYID[t.id], avg=t.sum/t.n;
@@ -461,7 +461,9 @@ if(!slug){
         + '<b>Rank</b> finds its spot by comparison.';
       edit.onclick = function(){
         $('mine').classList.remove('readonly');
-        $('hero_p').textContent = 'Best to worst, by preference \u2014 not by height or speed. '
+        // The read-only line, plus the one thing edit mode has to say: that
+        // the list is draggable.
+        $('hero_p').textContent = 'Judgment-free zone. '
           + 'Drag to reorder, or compare two at a time.';
       };
     });
@@ -478,8 +480,8 @@ if(!slug){
     ORDER=(rank.order||[]).filter(function(id){return BYID[id];});
 
     var nm=esc(user.user||slug);
-    $('hero_h1').textContent=nm+'’s favorites, in order.';
-    $('hero_p').textContent='Best to worst, by preference — not by height or speed.';
+    $('hero_h1').textContent=nm+'’s favorites, ranked.';
+    $('hero_p').textContent='Judgment-free zone.';
     document.title=nm+'’s Rankings — Coaster Hub';
 
     $('loading').style.display='none'; $('mine').style.display='block';

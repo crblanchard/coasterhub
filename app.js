@@ -979,8 +979,12 @@
   // list lives here and nowhere else, so a new page only has to put
   // data-loading on its <h1> to join in.
   var LOADING = [
-    "Credit whoring\u2026",
-    "Loading\u2026"
+    "Credit whoring",
+    "Reriding",
+    "Getting in line",
+    "Ropedropping",
+    "Counting rides",
+    "Tracking stats"
   ];
   function loadingLine() { return LOADING[Math.floor(Math.random() * LOADING.length)]; }
 
