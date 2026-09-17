@@ -209,7 +209,6 @@
      Renaming a username deletes the old one outright (see renameRider), so a
      dead /user/<name>/ link is now an ordinary thing to land on. -->
 <div class="container"><div id="nouser" style="display:none">
-  <p class="lead" style="margin-bottom:10px"><strong id="nouser_h">No rider here.</strong></p>
   <p class="lead" style="margin-bottom:16px">This username is inactive.</p>
   <p><a class="go" href="/">See everyone on Coaster Hub &rarr;</a></p>
 </div></div>
@@ -354,9 +353,9 @@ if(CoasterHub.currentUser()){
     // advice about running a local web server.
     var gone = !!(e && e.missing);
     if(gone){
-      var who=CoasterHub.currentUser();
-      document.getElementById('nouser_h').textContent =
-        'No rider called \u201C' + who + '\u201D.';
+      // No heading naming the username any more (Carter's copy pass,
+      // 2026-09-17): the address bar already says which name was asked for,
+      // and the line below says what happened to it.
       document.title = 'Not found \u2014 Coaster Hub';
       document.getElementById('nouser').style.display='block';
     } else {
