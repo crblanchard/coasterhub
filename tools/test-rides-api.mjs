@@ -16,12 +16,20 @@
  */
 import { DatabaseSync } from "node:sqlite";
 import { readFile, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PW = "test-password";
+
+// The tables the older migrations made are written out longhand in freshDb();
+// this one is applied from the file Carter pastes into the D1 console, so what
+// the tests run against is literally what production got. If the file stops
+// being valid SQLite, or stops making the shape the Worker queries, these tests
+// fail rather than the site does.
+const MIGRATION_010 = readFileSync(join(ROOT, "migrations", "010-follows.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
 // D1 rejects a statement with more bound parameters than SQLite's compiled-in
@@ -97,6 +105,18 @@ function freshDb() {
       ('carter',1,'2024-06-01'),('carter',1,'2024-06-01'),('carter',2,'2024-06-02'),
       ('cole',1,'2023-05-05'),('max',1,NULL);
   `);
+  // Twice, because the file claims to be re-runnable and a migration that is
+  // not is a bad afternoon in the D1 console.
+  db.exec(MIGRATION_010);
+  db.exec(MIGRATION_010);
+  return db;
+}
+
+// The same database WITHOUT migration 010, for the window between this Worker
+// deploying and the migration being run.
+function dbWithoutFollows() {
+  const db = freshDb();
+  db.exec("DROP TABLE follows");
   return db;
 }
 
@@ -1487,6 +1507,108 @@ async function main() {
     r = await call(db, "GET", "/api/user/cole");
     check("/api/user/:slug returns rides for everyone — no credits key",
       r.status === 200 && r.data.rides.length === 1 && r.data.credits === undefined, JSON.stringify(r.data));
+  }
+
+  // ---- following ----------------------------------------------------------
+  {
+    const db = freshDb();
+    const ada = await signedUp(db, "ada@example.com", "Ada");
+    const bo  = await signedUp(db, "bo@example.com", "Bo");
+
+    let r = await call(db, "GET", "/api/follows/bo");
+    check("follows: readable signed out", r.status === 200
+      && r.data.followers.length === 0 && r.data.following.length === 0);
+    check("follows: signed-out reader is nobody, so nothing to act on",
+      r.data.me === null && r.data.you === false, JSON.stringify(r.data));
+    check("follows: an account makes a page claimed", r.data.claimed === true);
+
+    r = await call(db, "GET", "/api/follows/carter");
+    check("follows: a rider with no account is unclaimed", r.data.claimed === false);
+
+    r = await call(db, "POST", "/api/follow/bo", { cookie: ada });
+    check("follow: writes and answers with the fresh lists", r.status === 200
+      && r.data.you === true && r.data.followers.length === 1
+      && r.data.followers[0].slug === "ada", JSON.stringify(r.data));
+    check("follow: one row, and it is the pair",
+      rows(db, "SELECT follower, followee FROM follows").length === 1
+      && rows(db, "SELECT follower FROM follows")[0].follower === "ada");
+
+    r = await call(db, "POST", "/api/follow/bo", { cookie: ada });
+    check("follow: doing it twice is not an error and not a second row",
+      r.status === 200 && rows(db, "SELECT 1 FROM follows").length === 1);
+
+    r = await call(db, "GET", "/api/follows/bo", { cookie: ada });
+    check("follows: the follower is told they follow", r.data.you === true);
+    r = await call(db, "GET", "/api/follows/ada", { cookie: ada });
+    check("follows: and it shows on the other side as following",
+      r.data.following.length === 1 && r.data.following[0].slug === "bo"
+      && r.data.you === false, JSON.stringify(r.data));
+
+    // The three refusals.
+    r = await call(db, "POST", "/api/follow/ada", { cookie: ada });
+    check("follow: you cannot follow yourself", r.status === 400);
+    r = await call(db, "POST", "/api/follow/carter", { cookie: ada });
+    check("follow: you cannot follow an unclaimed rider", r.status === 409, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/follow/bo");
+    check("follow: signed out is refused", r.status === 401);
+    r = await call(db, "POST", "/api/follow/bo", { token: PW });
+    check("follow: the shared admin password is nobody, so it cannot follow either",
+      r.status === 401, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/follow/nobody-at-all", { cookie: ada });
+    check("follow: an unknown rider is a 404", r.status === 404);
+    check("follow: none of the refusals wrote anything",
+      rows(db, "SELECT 1 FROM follows").length === 1);
+
+    // A follow is not a coaster fact, so it stays out of the changes feed.
+    const acts = rows(db, "SELECT kind FROM activity").map(a => a.kind);
+    check("follow: nothing lands in the activity feed",
+      !acts.some(k => String(k).includes("follow")), acts.join(","));
+
+    // A rename has to carry both sides or a follow detaches from its person.
+    r = await call(db, "POST", "/api/account/profile", { cookie: bo, body: { username: "bojangles" } });
+    check("rename: the rename itself works with follows present", r.status === 200,
+      JSON.stringify(r.data));
+    check("rename: the followee moved with it",
+      rows(db, "SELECT followee FROM follows")[0].followee === "bojangles",
+      JSON.stringify(rows(db, "SELECT * FROM follows")));
+    r = await call(db, "POST", "/api/account/profile", { cookie: ada, body: { username: "adalovelace" } });
+    check("rename: the follower moved too",
+      rows(db, "SELECT follower FROM follows")[0].follower === "adalovelace");
+    r = await call(db, "GET", "/api/follows/bojangles");
+    check("rename: and the list still names a real person",
+      r.data.followers.length === 1 && r.data.followers[0].slug === "adalovelace",
+      JSON.stringify(r.data));
+
+    r = await call(db, "DELETE", "/api/follow/bojangles", { cookie: ada });
+    check("unfollow: removes the row and says so", r.status === 200
+      && r.data.you === false && rows(db, "SELECT 1 FROM follows").length === 0);
+    r = await call(db, "DELETE", "/api/follow/bojangles", { cookie: ada });
+    check("unfollow: unfollowing what you do not follow is fine", r.status === 200);
+  }
+
+  // ---- the window before the migration is run ------------------------------
+  // There is always one: the Worker deploys, the SQL has not been pasted yet.
+  // Every route must say which file is missing rather than 500, and nothing
+  // else on the site may break.
+  {
+    const db = dbWithoutFollows();
+    const ada = await signedUp(db, "ada@example.com", "Ada");
+
+    let r = await call(db, "GET", "/api/follows/carter");
+    check("no migration: reading follows is a 503 naming the file",
+      r.status === 503 && /010-follows\.sql/.test(r.data.error || ""), JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/follow/carter", { cookie: ada });
+    check("no migration: following is a 503 naming the file",
+      r.status === 503 && /010-follows\.sql/.test(r.data.error || ""), JSON.stringify(r.data));
+    r = await call(db, "DELETE", "/api/follow/carter", { cookie: ada });
+    check("no migration: unfollowing is a 503 naming the file", r.status === 503);
+
+    // The rename puts its follows updates in their own guarded batch precisely
+    // so this still works.
+    r = await call(db, "POST", "/api/account/profile", { cookie: ada, body: { username: "adalovelace" } });
+    check("no migration: a rename still succeeds", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/user/carter");
+    check("no migration: the rest of the site is unaffected", r.status === 200);
   }
 
   console.log("\n" + pass + " passed, " + fail + " failed\n");
