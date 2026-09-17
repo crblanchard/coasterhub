@@ -165,6 +165,12 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
   border-radius:10px;font-weight:600}
 .heroacts .btn.alt{background:transparent;border:1px solid var(--line);color:var(--fg)}
 .heroacts .btn.alt:hover{border-color:var(--accent2);color:var(--accent2)}
+/* Follow is an action, not a link, so it is a real <button> — which resets
+   the font it inherits nowhere else in .heroacts. Less specific than the
+   .btn.alt rule above it, so Unfollow keeps its outline. */
+.heroacts button.btn{font-family:inherit;font-size:.92rem;font-weight:600;
+  border-style:none;cursor:pointer}
+.heroacts button.btn:disabled{opacity:.55;cursor:default;transform:none}
 @media(max-width:640px){
   /* One column, and both halves take the full width. Without the explicit
      stretch the hero's two blocks stay shrink-to-fit after wrapping, so the
@@ -464,6 +470,30 @@ footer.site a:hover{color:var(--fg)}
 .profedit .bioline{color:var(--muted);font-size:.98rem;line-height:1.55;margin:0 0 16px;
   width:100%;max-width:52ch}
 .profedit .bioline.empty{font-style:italic;opacity:.75}
+/* Following. Sits right under the bio and in the bio's own voice — same size,
+   same muted colour — because it is one more line about who this rider is, not
+   a widget bolted under one. The counts are links: the interesting question
+   about a follower count is always WHO. */
+.followline{color:var(--muted);font-size:.98rem;line-height:1.55;margin:-8px 0 14px}
+.followline a{color:var(--muted);cursor:pointer;border-bottom:1px solid transparent}
+.followline a:hover{color:var(--fg);border-bottom-color:var(--line)}
+.followline a.on{color:var(--fg);border-bottom-color:var(--accent2)}
+.followline b{color:var(--fg);font-weight:700;font-variant-numeric:tabular-nums}
+.followlist{margin:0 0 16px;max-width:52ch}
+.followlist .fr{display:flex;align-items:center;gap:10px;padding:7px 0;
+  border-bottom:1px solid var(--soft)}
+.followlist .fr:last-child{border-bottom:0}
+/* background-color and background-image kept apart on purpose: the shorthand
+   would wipe the inline picture the moment this rule changed. */
+.followlist .fav{width:32px;height:32px;border-radius:50%;flex:none;
+  background-color:var(--soft);background-size:cover;background-position:center;
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+  font-size:.8rem;color:var(--muted)}
+.followlist .fr a{font-weight:600;font-size:.93rem;color:var(--fg);text-decoration:none}
+.followlist .fr a:hover{color:var(--accent2)}
+.followlist .fr .u{color:var(--muted);font-size:.8rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.followlist .none{color:var(--muted);font-size:.9rem;padding:7px 0}
 .profedit .panel{border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 16px;
   background:var(--well)}
 .profedit .panel .msg{margin-bottom:0}

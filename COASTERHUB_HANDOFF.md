@@ -698,6 +698,100 @@ the result shape faithful.
 
 ---
 
+## Following (2026-09-17)
+
+`migrations/010-follows.sql` — **Carter still has to paste this into the D1 console.** Until
+he does, `/api/follows/:slug` and `/api/follow/:slug` both answer **503 naming the file** and
+the profile page draws no follow line and no button at all. That is the designed state, not a
+broken one: the page is exactly what it was before.
+
+One table, one row per "A follows B", both sides a **slug**:
+
+```sql
+CREATE TABLE follows (follower TEXT, followee TEXT, at TEXT, PRIMARY KEY (follower, followee));
+CREATE INDEX follows_followee ON follows(followee);
+```
+
+Slugs rather than account ids because everything else here is keyed by slug and a rename
+already rewrites them everywhere — `renameRider()` moves `follows` too, in its **own**
+try/caught batch rather than the main one, so a rename still works on a database that has not
+run 010.
+
+The pair is the primary key, so following twice is a no-op (`ON CONFLICT DO NOTHING`), which
+is what two tabs and a double tap actually do.
+
+### The rules, and where they live
+
+| rule | enforced | why not in SQL |
+|---|---|---|
+| you cannot follow yourself | Worker, 400 | product rule, not a data rule |
+| you cannot follow an **unclaimed** rider | Worker, 409 | Carter's call, 2026-09-17: there is nobody on the other end of a page nobody has claimed. It relaxes on its own the day they claim it — no migration, no code change |
+| you must be signed in **as a rider** | Worker, 401 | the shared admin password is not a person, and following is one rider doing something to another |
+
+`GET /api/follows/:slug` is public and answers the whole question in one round trip: both
+lists as people (`slug`, `name`, `avatar`), plus `claimed`, `me` and `you`, so the button
+never has to work out whether it should exist. `POST`/`DELETE /api/follow/:slug` return the
+**fresh lists** with the answer, so the count under the bio moves in the same frame as the
+button above it.
+
+**Deliberately not in `activity`.** That feed is what changed about the coasters and the
+counts; a column of "Carter followed Cole" would bury the rides. Revisit only if the feed
+grows a social tab.
+
+**No `afterWrite()` on a follow.** The static JSON snapshots are counts and rankings; a follow
+changes neither, so there is nothing to re-sync and no reason to spend a repo-dispatch on it.
+
+### On the page
+
+Under the bio, in the bio's own voice — `.followline` copies `.bioline`'s size and colour
+because it is one more line about who this rider is. Both counts are links; clicking one opens
+the list of who underneath, clicking it again closes it. The button lives in `#hero_acts`
+above "View <name>'s count": **red** (`.btn`, same as "Log a day") while you are not
+following, **outline** (`.btn.alt`) once you are — the loud one is always the thing you have
+not done yet. It is a real `<button>`, which is why `style.css` has a
+`.heroacts button.btn` rule giving back the font a button resets; it is deliberately *less*
+specific than `.heroacts .btn.alt` so Unfollow keeps its outline.
+
+Follower counts are not on `/` yet. The eventual idea is that the home page shows only people
+you follow; it shows everyone for now, which is right while there are six riders.
+
+---
+
+## The log page, rebuilt around the park (2026-09-17)
+
+Five complaints, one shape: the page made you answer questions before it would let you do the
+thing.
+
+**The bug that made a park do nothing.** Browsers restore the value of a `<select>` across a
+reload or a back button, and they do it *after* the script has filled the options. You arrive
+with a park in the box and the empty "pick a park" list beside it — and picking that same park
+again fires **no** change event, because as far as the browser is concerned nothing changed.
+There is no way out of it by clicking, which is exactly what Carter reported. `renderList()`
+now records the park it drew (`SHOWN`) and `syncPark()` reconciles the select against it on
+load, on a `setTimeout(…,0)` after the fill, and on `pageshow`. The picker also listens for
+`input` as well as `change`, since mobile browsers disagree about which they send.
+
+**The rider pill is gone.** Signed in as yourself there was never anything to choose — the API
+refuses a write to anyone else — so it was a control that could only be wrong. Admins and the
+shared password still need it and get a sentence instead: "Logging for Carter · change", which
+opens the old picker. The `<select id="rider">` is still in the DOM, so everything that reads
+`$('rider').value` is untouched.
+
+**"Near me" always lifts the three nearest parks**, however far away they are. The old 60-mile
+cutoff meant the button did nothing at all unless you were already at a park, which is when
+you least need it.
+
+**The date moved down beside Save**, because it is the last thing you decide: pick a park,
+stage the rides, then say which day.
+
+**The basket groups by park and counts them.** Staging has always survived a change of park —
+nothing said so. Credits mode totals "3 coasters / 2 parks" instead of "no dates", which is
+the number you are working against on a trip.
+
+Modes are named for the jobs now: **Log rides** and **Add credits**.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

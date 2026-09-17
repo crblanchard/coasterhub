@@ -113,6 +113,11 @@
            to do, and a column of six reads as a menu. -->
       <div class="heroacts" id="hero_acts">
         <a class="btn own" href="/log" hidden>Log a day</a>
+        <!-- Someone else's page, and you are signed in. Red like "Log a day"
+             while you are not following, an outline once you are: the loud one
+             is always the thing you have not done yet. mountFollows() decides
+             whether it appears at all. -->
+        <button class="btn" id="hero_follow" type="button" hidden>Follow</button>
         <!-- Always here, for whoever is reading: the numbers above are the
              summary and this is the page behind them. data-nav, so initNav
              points it at the rider whose page this is. -->
@@ -254,6 +259,107 @@ if(CoasterHub.currentUser()){
     location.replace(acct && acct.slug ? CoasterHub.userPageHref(acct.slug,'profile') : '/riders');
   }).catch(function(){ location.replace('/riders'); });
 }
+// ---- following --------------------------------------------------------------
+// Two pieces of one thing: the counts under the bio, and the button with the
+// other actions. Both come from a single GET of /api/follows/<slug>, which also
+// answers whether the reader can act at all, so nothing here has to work that
+// out a second time.
+//
+// A database without migrations/010-follows.sql answers 503. That is not an
+// error worth showing anybody — it means the feature is not switched on yet —
+// so the line and the button simply never appear and the page is what it was.
+function mountFollows(host, slug){
+  if(!slug) return;
+  var btn=document.getElementById('hero_follow');
+  var line=document.createElement('p'); line.className='followline'; line.hidden=true;
+  var list=document.createElement('div'); list.className='followlist'; list.hidden=true;
+  // Right after the bio, which is the sentence this line continues. Falls back
+  // to the end of the card if the bio is ever not drawn.
+  var bio=host.querySelector('[data-el="bio"]');
+  if(bio && bio.parentNode){
+    bio.parentNode.insertBefore(line, bio.nextSibling);
+    line.parentNode.insertBefore(list, line.nextSibling);
+  } else { host.appendChild(line); host.appendChild(list); }
+
+  var D=null, OPEN=null, busy=false;
+
+  var esc=function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+
+  function people(rows, empty){
+    if(!rows.length) return '<div class="none">'+empty+'</div>';
+    return rows.map(function(u){
+      var av=u.avatar
+        ? ' style="background-image:url(&quot;/avatars/'+esc(u.avatar)+'&quot;)"'
+        : '';
+      var initial=u.avatar ? '' : esc(String(u.name||u.slug||'?').trim().charAt(0).toUpperCase());
+      return '<div class="fr"><span class="fav"'+av+'>'+initial+'</span>'
+        +'<a href="/user/'+encodeURIComponent(u.slug)+'">'+esc(u.name||u.slug)+'</a>'
+        +'<span class="u">@'+esc(u.slug)+'</span></div>';
+    }).join('');
+  }
+
+  function drawList(){
+    if(!OPEN){ list.hidden=true; list.innerHTML=''; return; }
+    list.hidden=false;
+    list.innerHTML = OPEN==='followers'
+      ? people(D.followers, 'Nobody yet.')
+      : people(D.following, 'Not following anyone yet.');
+  }
+
+  function count(n, word){
+    return '<a data-f="'+word+'" class="'+(OPEN===word?'on':'')+'"><b>'+n+'</b> '
+      + (word==='followers' ? ('follower'+(n===1?'':'s')) : 'following') + '</a>';
+  }
+
+  function draw(){
+    line.hidden=false;
+    line.innerHTML = count(D.followers.length,'followers')+' &middot; '+count(D.following.length,'following');
+    line.querySelectorAll('a').forEach(function(a){
+      a.onclick=function(){
+        var w=a.getAttribute('data-f');
+        OPEN = OPEN===w ? null : w;      // clicking the open one closes it again
+        draw(); drawList();
+      };
+    });
+    drawList();
+
+    // The button only means something for a signed-in reader looking at
+    // somebody else's claimed page. Everywhere else it would be a control that
+    // can only say no: your own page has nobody to follow, and a page nobody
+    // has claimed has nobody on the other end of it.
+    if(!btn) return;
+    var canFollow = D.me && D.me !== slug && D.claimed;
+    btn.hidden = !canFollow;
+    if(!canFollow) return;
+    btn.textContent = D.you ? 'Unfollow' : 'Follow';
+    btn.className = D.you ? 'btn alt' : 'btn';
+    btn.disabled = busy;
+  }
+
+  function act(){
+    if(busy) return;
+    busy=true; draw();
+    fetch('/api/follow/'+encodeURIComponent(slug),
+      { method: D.you ? 'DELETE' : 'POST', credentials:'same-origin' })
+      .then(function(r){ return r.json().then(function(j){
+        if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); })
+      .then(function(j){
+        // The answer carries the fresh lists, so the count under the bio moves
+        // in the same frame as the button above it.
+        D.you=j.you; D.followers=j.followers; D.following=j.following;
+      })
+      .catch(function(e){ console.error(e); })
+      .then(function(){ busy=false; draw(); });
+  }
+  if(btn) btn.onclick=act;
+
+  fetch('/api/follows/'+encodeURIComponent(slug), { credentials:'same-origin' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){ if(!d) return; D=d; draw(); })
+    .catch(function(){ /* not switched on, or offline: the page is fine without it */ });
+}
+
 function render(s){
   document.getElementById('loading').style.display='none';
   document.getElementById('content').style.display='block';
@@ -302,6 +408,9 @@ function render(s){
         onRename: function(slug){
           history.replaceState(null, '', CoasterHub.userPageHref(slug, 'profile'));
         } });
+    // Under the bio, so it goes up after the card has drawn one. mount() is
+    // synchronous, so the bio is already there to insert against.
+    mountFollows(host, CoasterHub.currentUser());
   });
 
   // Two numbers, two lines, and nothing else. The headline used to be prose —

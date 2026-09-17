@@ -491,7 +491,47 @@ async function renameRider(env, from, to) {
     env.DB.prepare("UPDATE activity SET actor = ? WHERE actor = ?").bind(to, from),
     env.DB.prepare("UPDATE invites SET slug = ? WHERE slug = ?").bind(to, from),
   ]);
+  // Separately, and only if the table is there: putting these in the batch
+  // above would make a rename fail outright on a database that has not run
+  // migration 010, and a rename matters more than a follow does.
+  try {
+    await env.DB.batch([
+      env.DB.prepare("UPDATE follows SET follower = ? WHERE follower = ?").bind(to, from),
+      env.DB.prepare("UPDATE follows SET followee = ? WHERE followee = ?").bind(to, from),
+    ]);
+  } catch (e) { /* migration 010 not applied yet */ }
   await recordActivity(env, "user_renamed", { actor: to, subject: from });
+}
+
+// ---- Following -------------------------------------------------------------
+// One row per "A follows B", both slugs (migrations/010-follows.sql).
+//
+// Everything here degrades on a database that has not run that migration yet
+// rather than 500ing: there is always a window where this Worker is live and
+// the migration is not, and the profile page treats a 503 as "no follow UI".
+//
+// Deliberately NOT recorded in `activity`. That feed is what changed about the
+// coasters and the counts; who is following whom is neither, and a column of
+// "Carter followed Cole" would bury the rides.
+async function haveFollows(env) {
+  try { await env.DB.prepare("SELECT 1 FROM follows LIMIT 1").first(); return true; }
+  catch (e) { return false; }
+}
+
+// Both directions at once, as people rather than slugs — the page shows faces
+// and names on both lists, and one query per side here saves it a fetch per
+// name. Retried without `avatar` for the same reason getUsers() is: a database
+// without migration 008 must still answer.
+async function getFollows(env, slug) {
+  const SQL = (cols, join, where) =>
+    "SELECT " + cols + " FROM follows f JOIN users u ON u.slug = f." + join +
+    " WHERE f." + where + " = ? ORDER BY u.name";
+  const ask = async (cols) => ({
+    followers: (await env.DB.prepare(SQL(cols, "follower", "followee")).bind(slug).all()).results,
+    following: (await env.DB.prepare(SQL(cols, "followee", "follower")).bind(slug).all()).results,
+  });
+  try { return await ask("u.slug AS slug, u.name AS name, u.avatar AS avatar"); }
+  catch (e) { return await ask("u.slug AS slug, u.name AS name"); }
 }
 
 // ---- Ride log -------------------------------------------------------------
@@ -1045,6 +1085,61 @@ export default {
         const out = await putRankings(env, km[1].toLowerCase(), await request.json());
         if (out.bad) return err(out.bad[0], out.bad[1]);
         return afterWrite(ctx, env, json(out));
+      }
+
+      // ---- following ----
+      // Public to read: the counts sit under every bio, including for people
+      // who are not signed in.
+      const fm = path.match(/^\/api\/follows\/([A-Za-z0-9_-]+)$/);
+      if (request.method === "GET" && fm) {
+        if (!await haveFollows(env)) return err(503, "run migrations/010-follows.sql first");
+        const slug = fm[1].toLowerCase();
+        const out = await getFollows(env, slug);
+        // Whether the reader can act, answered here rather than left for the
+        // button to work out: you cannot follow yourself, and you cannot follow
+        // a rider whose page nobody has claimed — there is no one on the other
+        // end of it yet. Both relax on their own as people claim their pages.
+        const claimed = await haveAccounts(env)
+          ? !!await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?").bind(slug).first()
+          : false;
+        const me = acct && acct.slug || null;
+        return json({ slug, followers: out.followers, following: out.following, claimed,
+                      me, you: me ? out.followers.some(f => f.slug === me) : false });
+      }
+
+      // Follow and unfollow. Needs an account with a rider of its own: this is
+      // one rider following another, and the shared admin password is nobody.
+      // Sits above the write gate because that gate is admin-shaped and this is
+      // the most ordinary thing a signed-in person can do.
+      const fw = path.match(/^\/api\/follow\/([A-Za-z0-9_-]+)$/);
+      if (fw && (request.method === "POST" || request.method === "DELETE")) {
+        if (!await haveFollows(env)) return err(503, "run migrations/010-follows.sql first");
+        if (!(acct && acct.slug)) return err(401, "sign in to follow someone");
+        const slug = fw[1].toLowerCase();
+        if (slug === acct.slug) return err(400, "you cannot follow yourself");
+        const them = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(slug).first();
+        if (!them) return err(404, "no such rider");
+        if (request.method === "POST") {
+          const claimed = await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?")
+            .bind(slug).first();
+          if (!claimed) return err(409, "nobody has claimed that page yet");
+          // DO NOTHING, so following twice — two tabs, a double tap — is the
+          // same as following once rather than a constraint error.
+          await env.DB.prepare(
+            "INSERT INTO follows (follower,followee,at) VALUES (?,?,?) ON CONFLICT DO NOTHING")
+            .bind(acct.slug, slug, new Date().toISOString()).run();
+        } else {
+          await env.DB.prepare("DELETE FROM follows WHERE follower = ? AND followee = ?")
+            .bind(acct.slug, slug).run();
+        }
+        // The fresh lists come back with the answer: the page has to redraw the
+        // counts and both lists anyway, and a second fetch to do it would show
+        // the button flip before the number under it moved.
+        const out = await getFollows(env, slug);
+        // No afterWrite(): the static JSON snapshots are counts and rankings,
+        // and a follow changes neither, so there is nothing to re-sync.
+        return json({ ok: true, you: request.method === "POST", slug,
+                      followers: out.followers, following: out.following });
       }
 
       // Bootstrap seed: allowed WITHOUT a token while the DB is still empty, so
