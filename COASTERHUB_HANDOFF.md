@@ -757,6 +757,38 @@ you follow; it shows everyone for now, which is right while there are six riders
 
 ---
 
+## The profile on a phone (2026-09-17) — **a draft**
+
+Carter's words: "works for me — design will change, so do that as a draft." So this is the
+shape, not the finish. Expect to move things; do not treat the order below as settled.
+
+Below 680px the profile reads:
+
+1. **the person** — picture, name, username, followers, the three numbers, the buttons
+2. **the five tiles**, two up
+3. **the map**
+4. **"More stats"** — one button, and behind it: On this day, Personal bests, the calendar,
+   and both rows of charts
+
+Everything is done with **`order`** on `#content` inside the 680px media query, not by moving
+the markup: the desktop page keeps reading in the order it was written, and there is one page
+rather than two. `body.moreclosed` is added on load by the script — always, because the class
+does nothing above 680px, so there is no width to test and nothing to get wrong when the phone
+turns sideways.
+
+**The one trap.** Chart.js measures its canvas when it draws, and the hidden sections are
+`display:none`, so a chart drawn while closed comes back a pixel tall. `drawCharts()` fills in
+`MORE_RESIZE()` and the toggle calls it on the way out. If you add anything else that measures
+itself — a chart, a map, a virtualised list — behind that button, it needs the same treatment.
+
+The heatmap is fine: it is an SVG built at a fixed cell size, and `.hm-wrap` already scrolls
+sideways.
+
+The tiles are forced to `1fr 1fr` rather than left on `auto-fit minmax(140px,1fr)`, which drops
+to a single column at 320px and turns five tiles into five screens.
+
+---
+
 ## The rider switcher is the hero badge now (2026-09-17)
 
 The "Viewing <name>" pill in the header is **gone**, and with it `renderPeople()`, `sizePicker()`

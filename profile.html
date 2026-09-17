@@ -49,6 +49,38 @@
   .leaflet-popup-content{margin:12px 14px}
   .pp b{font-size:1rem}.pp small{color:var(--muted)}
   .hm-wrap{overflow-x:auto;padding-bottom:8px}
+
+  /* ---- the phone shape (2026-09-17, draft) --------------------------------
+     A first screen that is the person: picture, name, the three numbers, the
+     buttons. Then the five tiles two-up, then the map. Everything after that is
+     a stat you go looking for, so it waits behind "More stats".
+
+     Done with `order` rather than by moving the markup, so the desktop page
+     keeps reading in the order it was written and there is one page, not two.
+     The hidden sections are hidden with display:none, so the charts inside them
+     come back measuring zero — MORE_RESIZE() in the script tells them to
+     measure again on the way out. */
+  #morewrap{display:none}
+  @media (max-width:680px){
+    #content{display:flex;flex-direction:column}
+    #sec_kpis{order:1}
+    #sec_geo{order:2}
+    #morewrap{order:3;display:block;padding:2px 0 22px}
+    #sec_otd{order:4}
+    #sec_records{order:5}
+    #sec_activity{order:6}
+    #sec_overtime{order:7}
+    #sec_breakdown{order:8}
+    body.moreclosed #sec_otd,body.moreclosed #sec_records,body.moreclosed #sec_activity,
+    body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
+    /* Two up, not "as many as fit": at 320px auto-fit drops to one column and
+       five tiles become five screens. */
+    .kpis{grid-template-columns:1fr 1fr}
+  }
+  .morebtn{width:100%;background-color:transparent;border:1px solid var(--line);
+    color:var(--fg);font-family:inherit;font-size:.95rem;font-weight:600;
+    padding:14px 18px;border-radius:12px;cursor:pointer}
+  .morebtn:hover{border-color:var(--accent2);color:var(--accent2)}
   .hm-year{display:flex;align-items:center;gap:10px;margin-bottom:3px}
   .hm-lbl{width:38px;color:var(--muted);font-size:.75rem;text-align:right;flex:none}
   .hm-cell{stroke:var(--hmline);stroke-width:.5;cursor:pointer}
@@ -158,7 +190,7 @@
 
 <main id="content" style="display:none">
 <div class="container"><p class="ridernote" id="ridernote" style="display:none"></p></div>
-<section class="block" style="padding-top:28px"><div class="container">
+<section class="block" id="sec_kpis" style="padding-top:28px"><div class="container">
   <div class="kpis">
     <div class="kpi"><div class="num" id="k_credits"></div><div class="lbl">Credits</div><div class="sub" id="k_split"></div></div>
     <div class="kpi" id="kpi_rides"><div class="num" id="k_rides"></div><div class="lbl">Total Rides</div></div>
@@ -168,21 +200,30 @@
   </div>
 </div></section>
 
-<section class="block"><div class="container">
+<section class="block" id="sec_otd"><div class="container">
   <span class="eyebrow">On this day</span><h2 id="otd_h">On this day</h2>
   <div id="otd"></div>
 </div></section>
 
-<section class="block"><div class="container">
+<section class="block" id="sec_records"><div class="container">
   <span class="eyebrow">The records</span><h2>Personal bests</h2>
   <div class="records" id="records"></div>
 </div></section>
 
-<section class="block"><div class="container">
+<section class="block" id="sec_geo"><div class="container">
   <span class="eyebrow">Geography</span><h2>Everywhere I've ridden</h2>
   <p class="lead" id="geo_sub"></p>
   <div id="map"></div>
 </div></section>
+
+<!-- Phones only; see the 680px block in this page's <style>. On a small screen
+     the page is picture, numbers, buttons, tiles, map — and then stops. Records,
+     the calendar and the six charts are things you go looking for rather than
+     things you came for, so they wait behind one tap instead of eight screens of
+     scrolling. On a desktop this button does not exist and nothing is hidden. -->
+<div id="morewrap"><div class="container">
+  <button type="button" id="morebtn" class="morebtn" aria-expanded="false">More stats</button>
+</div></div>
 
 <section class="block" id="sec_activity"><div class="container">
   <span class="eyebrow">Activity</span><h2>Every riding day</h2>
@@ -205,7 +246,7 @@
   </div>
 </div></section>
 
-<section class="block"><div class="container">
+<section class="block" id="sec_breakdown"><div class="container">
   <span class="eyebrow">Parks, makers &amp; big days</span><h2>The breakdown</h2>
   <div class="chart-grid">
     <div class="panel"><h3 id="parks_title">Top parks by rides</h3><div class="cap">Home turf</div><div class="cwrap" style="height:360px"><canvas id="cParks"></canvas></div></div>
@@ -228,6 +269,29 @@
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('profile');
 CoasterHub.riderBadge(document.getElementById('hero_badge'),'profile',CoasterHub.currentUser());
+
+// ---- "More stats", on phones ------------------------------------------------
+// Closed from the start, always: the class does nothing above 680px, so there is
+// no width to test and nothing to get wrong when the phone is turned sideways.
+// Set here rather than on the <body> tag so a page that never reaches render()
+// still gets it.
+//
+// Chart.js measures its canvas when it draws. A canvas that was display:none at
+// the time comes back one pixel tall, so the charts are told to measure again on
+// the way out — MORE_RESIZE is filled in by drawCharts() and stays null until
+// there are charts to resize.
+var MORE_RESIZE=null;
+document.body.classList.add('moreclosed');
+(function(){
+  var btn=document.getElementById('morebtn');
+  if(!btn) return;
+  btn.onclick=function(){
+    var open=document.body.classList.toggle('moreclosed')===false;
+    btn.textContent=open?'Fewer stats':'More stats';
+    btn.setAttribute('aria-expanded',open?'true':'false');
+    if(open && MORE_RESIZE) MORE_RESIZE();
+  };
+})();
 const nf=n=>(n==null?'—':n.toLocaleString());
 
 // Standing notes about a rider's own data, keyed by slug. These are deliberately
@@ -627,6 +691,9 @@ function render(s){
   // the computed variables, and rebuild on a theme change so the axes and fills
   // follow the toggle instead of going stale until the next reload.
   const CH=[];
+  // See "More stats" above: a chart drawn inside a display:none section has no
+  // size, and only a resize call gets it back.
+  MORE_RESIZE=function(){ CH.forEach(function(c){ c.resize(); }); };
   function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
   function drawCharts(){
   while(CH.length) CH.pop().destroy();   // a live chart on a reused canvas throws
