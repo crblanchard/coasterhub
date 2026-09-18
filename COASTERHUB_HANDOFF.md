@@ -1414,9 +1414,12 @@ Four pieces, all in `rankings.html`:
   from the `id`: `<id>panel`, `<id>list`, `<id>note`, `<id>_clear`, `<id>_toggle`.
   Each row is a `<label>` — the whole row is the hit target — with a checkbox, the name, and
   `<left>/<total> unranked`. Sorted by **total descending**, because the one you have ridden
-  most is the one you came to find; `Unknown` is pinned last whatever its size, since it is a
-  gap in the data rather than an answer. One with nothing left keeps its row (`0/80` is an
-  answer) but goes muted.
+  most is the one you came to find. Two things sink below that, in order: **a row with nothing
+  left** (`B&M 0/55` was riding second on its size alone, above every maker that still had
+  coasters to place — the row stays, since `0/55` is an answer, but it stops holding the top),
+  and then `Unknown`, which is a gap in the data rather than an answer. Unknown sits *below* the
+  sink, not above it: an Unknown you still have coasters under is worth more than a maker you
+  have finished. A finished row is muted as well as sunk.
 - **One panel open at a time** — two of them push the list off the screen. The button keeps its
   highlight while its ticks are set, so closing a panel never hides that it is still filtering.
 - **Ticks inside a panel widen, panels narrow each other**: Vekoma OR Intamin, but a Vekoma IN

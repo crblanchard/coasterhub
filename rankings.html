@@ -828,9 +828,16 @@ function facetRows(f){
   // nothing, so an empty list reads as "none here" rather than as a bug.
   picked(f).forEach(function(n){ if(!rows[n]) rows[n]={name:n,total:0,left:0}; });
   return Object.keys(rows).map(function(k){return rows[k];}).sort(function(a,b){
-    // Most of what you have ridden first — that is the row you came to find.
-    // Unknown is last whatever its size: it is a gap in the data, not an answer.
+    // Nothing left to place sinks, whatever the total (Carter, 2026-09-18):
+    // "B&M 0/55" was riding second on its size alone, above every maker with
+    // coasters still to put somewhere. The row stays — 0/55 is an answer — but
+    // it stops holding the top of the list.
+    if((a.left===0)!==(b.left===0)) return a.left===0?1:-1;
+    // Then Unknown, which is a gap in the data rather than an answer. Below the
+    // sink, not above it: an Unknown you still have coasters under is worth
+    // more than a maker you have finished.
     if((a.name==='Unknown')!==(b.name==='Unknown')) return a.name==='Unknown'?1:-1;
+    // Most of what you have ridden first — that is the row you came to find.
     return b.total-a.total || a.name.localeCompare(b.name);
   });
 }
