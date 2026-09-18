@@ -19,3 +19,6 @@ max-import-*.xlsx
 
 # Local dev database (tools/dev-server.mjs)
 .dev.db
+
+# Generated staging seed (regenerate with tools/staging-seed.mjs)
+staging-seed.sql

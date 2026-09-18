@@ -193,7 +193,12 @@ function seed() {
 // script rather than by clearing a module cache.
 const live = join(tmpdir(), "coasterhub-dev-worker.mjs");
 await writeFile(live, readFileSync(join(ROOT, "worker.js"), "utf8"));
-const worker = (await import("file://" + live)).default;
+const mod = await import("file://" + live);
+const worker = mod.default;
+// The same skin the hosted scratch copy injects. worker.js only reaches its own
+// copy of this through env.ASSETS, which this server does not use — it serves
+// the files itself — so it has to staple it on here.
+const DEV_SKIN = mod.DEV_SKIN || "";
 
 // R2, faked: avatars live in a Map for as long as the process does.
 const bucket = new Map();
@@ -205,7 +210,11 @@ const R2 = {
   },
   async delete(k) { bucket.delete(k); },
 };
-const env = { DB: new FakeD1(db), ADMIN_PASSWORD: PW, AVATARS: R2 };
+// DEV_AS is what turns off accounts: the Worker treats every request as this
+// rider, as an admin, and staples the plain black/white header onto every page.
+// Same variable the hosted scratch copy sets, so local and staging behave and
+// LOOK the same — which is the point of having both.
+const env = { DB: new FakeD1(db), ADMIN_PASSWORD: PW, AVATARS: R2, DEV_AS: "carter" };
 const ctx = { waitUntil() {} };
 
 const TYPES = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript",
@@ -216,25 +225,19 @@ createServer(async (req, res) => {
   const url = new URL(req.url, "http://127.0.0.1");
   let p = url.pathname;
 
-  // A back door for setting up a scenario without clicking through the UI.
-  // Local only, and it is why this script must never be pointed at real data.
-  if (p === "/__admin") {
-    db.exec("UPDATE accounts SET is_admin = 1");
-    res.writeHead(200, { "content-type": "application/json" }); res.end('{"ok":true}'); return;
-  }
+  // Switch which rider you are, without a login: /__be?slug=cole. Everything
+  // else about accounts is off — DEV_AS above means you arrive already signed
+  // in, so there is nothing to sign into.
   if (p === "/__be") {
-    // Become a rider: attach your newest account to their slug, so you can edit
-    // Carter's ranking without inventing a login for him.
     const slug = (url.searchParams.get("slug") || "carter").toLowerCase();
-    try {
-      db.exec("UPDATE accounts SET slug = NULL WHERE slug = '" + slug.replace(/'/g, "") + "'");
-      db.prepare("UPDATE accounts SET slug = ? WHERE id = (SELECT MAX(id) FROM accounts)").run(slug);
-      res.writeHead(200, { "content-type": "application/json" }); res.end('{"ok":true,"slug":"' + slug + '"}');
-    } catch (e) {
-      res.writeHead(500, { "content-type": "application/json" });
-      res.end(JSON.stringify({ error: e.message }));
+    const known = db.prepare("SELECT slug FROM users WHERE slug = ?").get(slug);
+    if (!known) {
+      res.writeHead(404, { "content-type": "application/json" });
+      res.end(JSON.stringify({ error: "no rider called " + slug })); return;
     }
-    return;
+    env.DEV_AS = slug;
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify({ ok: true, slug })); return;
   }
 
   if (p.startsWith("/api/") || p.startsWith("/avatars/")) {
@@ -269,13 +272,17 @@ createServer(async (req, res) => {
   if (!file.startsWith(ROOT) || !existsSync(file)) { res.writeHead(404).end("not found"); return; }
   res.writeHead(200, { "content-type": TYPES[extname(p)] || "application/octet-stream",
                        "cache-control": "no-store" });
-  res.end(readFileSync(file));
+  let out = readFileSync(file);
+  if (extname(p) === ".html" && env.DEV_AS) {
+    const html = String(out);
+    if (html.includes("</head>")) out = Buffer.from(html.replace("</head>", DEV_SKIN + "</head>"));
+  }
+  res.end(out);
 }).listen(PORT, () => {
   console.log("\n  Coaster Hub, locally:  http://127.0.0.1:" + PORT);
   console.log("  database:              " + DB_FILE + (FRESH ? "  (fresh)" : ""));
   console.log("  admin password:        " + PW + "   (for /edit)");
-  console.log("\n  Make an account at /account, then:");
-  console.log("    http://127.0.0.1:" + PORT + "/__admin           make it an admin");
-  console.log("    http://127.0.0.1:" + PORT + "/__be?slug=carter  and make it Carter");
+  console.log("  signed in as:          " + env.DEV_AS + "  (admin, no login needed)");
+  console.log("\n  Be somebody else:      /__be?slug=cole");
   console.log("\n  --fresh wipes the database and reseeds from the repo's JSON.\n");
 });

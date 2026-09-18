@@ -1,0 +1,50 @@
+// A throwaway copy of coasterhub.org, for trying things out before they are
+// real. Deployed BY HAND and only by hand:
+//
+//     npx wrangler deploy -c wrangler.staging.jsonc
+//
+// It is a separate file rather than an `env` block inside wrangler.jsonc on
+// purpose. Cloudflare's git integration reads wrangler.jsonc on every push to
+// main, and a binding named there that does not exist yet fails the deploy of
+// the REAL site (CLAUDE.md remembers that one). Nothing reads this file unless
+// you point wrangler at it, so a half-finished staging setup cannot take
+// production down.
+//
+// Before the first deploy, both of these have to exist in the dashboard:
+//   - a D1 database called coasterhub-staging, and its id pasted below
+//   - migrations 003, 008, 010, 012 run against it (see STAGING.md)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "coasterhub-staging",
+  "main": "worker.js",
+  "compatibility_date": "2026-07-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  },
+
+  // No login, ever: every request is Carter, as an admin. This is a complete
+  // bypass of authentication and it is why this copy must not be left open to
+  // the internet — put Cloudflare Access in front of it. The absence of this
+  // variable is the only thing keeping production honest, so it appears in this
+  // file and in no other.
+  "vars": {
+    "DEV_AS": "carter"
+  },
+
+  // No R2. Avatars 404 here, which the Worker already handles, and a second
+  // bucket is a second thing to keep in step for a feature this copy is not
+  // for testing. Add one later if it ever is.
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "coasterhub-staging",
+      // PASTE THE STAGING DATABASE ID HERE. Not production's — one wrong
+      // character and a scratch copy is writing to the real site.
+      "database_id": "PUT-THE-STAGING-D1-ID-HERE"
+    }
+  ]
+}

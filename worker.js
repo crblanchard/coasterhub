@@ -215,6 +215,67 @@ function cookieToken(request) {
 // Who is signed in, or null. Resolved once per request in fetch() and passed
 // around: every call costs a SHA-256 and a join, and the write routes would
 // otherwise each redo it.
+// ---- scratch-copy mode ----------------------------------------------------
+//
+// DEV_AS turns the whole site into one signed-in rider with no login at all:
+// set it to a slug and every request is that person, as an admin. It exists so
+// a throwaway copy of the site can be poked at without inventing accounts.
+//
+// It is a COMPLETE bypass of authentication. Production must never set it, and
+// nothing here tries to guess whether it is production — the variable's absence
+// IS the guard, which is why it lives in wrangler.staging.jsonc and in no other
+// config. The skin it forces onto every page (plain black or plain white
+// header, DEV beside the wordmark) is not decoration: it is how you know which
+// copy you are looking at before you type something into it.
+function devAs(env) { return String(env && env.DEV_AS || "").trim().toLowerCase(); }
+
+async function devAccount(env) {
+  const slug = devAs(env);
+  if (!slug) return null;
+  const u = await env.DB.prepare("SELECT slug, name FROM users WHERE slug = ?").bind(slug).first();
+  let bio = null, avatar = null;
+  try {
+    const p = await env.DB.prepare("SELECT bio, avatar FROM users WHERE slug = ?").bind(slug).first();
+    if (p) { bio = p.bio || null; avatar = p.avatar || null; }
+  } catch (e) { /* migration 008 not applied */ }
+  return { id: 0, email: slug + "@dev.local", slug: slug, name: (u && u.name) || slug,
+           admin: true, bio: bio, avatar: avatar, dev: true };
+}
+
+// Stapled into every HTML page this copy serves. Exported so tools/dev-server
+// can staple the same thing on — local and the hosted copy have to look alike
+// or the skin stops meaning "not production" and starts meaning "not my laptop".
+export const DEV_SKIN =
+  '<style id="devskin">' +
+  // Plain black in the dark and plain white in the light, blur off, so a
+  // screenshot is never ambiguous about which site it came from.
+  //
+  // ONE light selector, not a prefers-color-scheme fallback as well: this site
+  // is dark until you press the toggle and ignores the OS entirely (see
+  // readTheme in app.js). Honouring the OS here would put a white header on a
+  // dark page for anybody whose laptop is in light mode.
+  'header.nav{background:#000 !important;border-bottom:1px solid rgba(255,255,255,.22) !important;' +
+  'backdrop-filter:none !important;-webkit-backdrop-filter:none !important}' +
+  ':root[data-theme="light"] header.nav{background:#fff !important;' +
+  'border-bottom:1px solid rgba(0,0,0,.18) !important}' +
+  // The word, inside the header so it cannot collide with the mobile tab bar.
+  '.brand-text::after{content:" DEV";color:#ff5a5f;font-weight:800;font-size:.6em;' +
+  'letter-spacing:.16em;vertical-align:.35em;margin-left:6px}' +
+  '</style>';
+
+// Only text/html, and only the <head> — an asset that is not a page is passed
+// straight back, and a page with no </head> is left exactly as it was.
+async function devSkin(res, env) {
+  if (!devAs(env)) return res;
+  const type = res.headers.get("content-type") || "";
+  if (!type.includes("text/html")) return res;
+  const html = await res.text();
+  if (!html.includes("</head>")) return new Response(html, res);
+  const out = new Response(html.replace("</head>", DEV_SKIN + "</head>"), res);
+  out.headers.set("content-type", type);
+  return out;
+}
+
 async function currentAccount(request, env) {
   const raw = cookieToken(request);
   if (!raw) return null;
@@ -1153,14 +1214,16 @@ export default {
       });
     }
 
-    if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
+    if (!path.startsWith("/api/")) return devSkin(await env.ASSETS.fetch(request), env);
     if (!env.DB) return err(503, "database not bound yet");
 
     try {
       // Who is signed in, resolved once for the whole request. Skipped entirely
       // when there is no cookie, so the public read paths — which is most
       // traffic — cost no extra query.
-      const acct = cookieToken(request) ? await currentAccount(request, env) : null;
+      const acct = devAs(env)
+        ? await devAccount(env)
+        : (cookieToken(request) ? await currentAccount(request, env) : null);
 
       // ---- public reads ----
       // Aliases ride along with the coaster list rather than living on their own
