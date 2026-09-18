@@ -76,7 +76,7 @@
 
   <div id="app">
     <header class="bar">
-      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button></div>
+      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button><button id="mClones">Clones</button></div>
       <input id="q" placeholder="Search…" style="max-width:220px">
       <label class="cbrow" id="fIncWrap"><input type="checkbox" id="incOnly"> Only incomplete</label>
       <label class="cbrow" id="fGeoWrap"><input type="checkbox" id="ungeoOnly"> Only un-geocoded</label>
@@ -96,7 +96,8 @@
   <script>
   var TOKEN = "";
   var state = { mode:"coasters", coasters: [], byId: {}, sel: null, opts: { manu:[], model:[] },
-                geo: {}, parks: [], selPark: null };
+                geo: {}, parks: [], selPark: null,
+                clones: [], suggest: [], cloneErr: "" };
 
   var FIELDS = [
     ["name","Name","text"], ["park","Park","text"], ["type","Type","type"],
@@ -202,6 +203,7 @@
     document.getElementById('geo').addEventListener('click', geocode);
     document.getElementById('mCoasters').addEventListener('click', function(){ setMode('coasters'); });
     document.getElementById('mParks').addEventListener('click', function(){ setMode('parks'); });
+    document.getElementById('mClones').addEventListener('click', function(){ setMode('clones'); });
     document.getElementById('list').addEventListener('click', function(e){
       var row = e.target.closest ? e.target.closest('.row[data-id]') : null;
       if (!row) return;
@@ -215,13 +217,132 @@
     state.mode = m;
     document.getElementById('mCoasters').classList.toggle('on', m==='coasters');
     document.getElementById('mParks').classList.toggle('on', m==='parks');
+    document.getElementById('mClones').classList.toggle('on', m==='clones');
     document.getElementById('fIncWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('fGeoWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('editor').innerHTML = '<div class="empty">Select an item to edit.</div>';
-    if (m==='parks' && !state.parks.length) loadParks(); else render();
+    if (m==='parks' && !state.parks.length) loadParks();
+    else if (m==='clones') loadClones();
+    else render();
   }
 
-  function render(){ if (state.mode==='coasters') renderCoasters(); else renderParks(); updateGeoSummary(); }
+  function render(){
+    if (state.mode==='coasters') renderCoasters();
+    else if (state.mode==='parks') renderParks();
+    else renderClones();
+    updateGeoSummary();
+  }
+
+  // ---------- clone groups ----------
+  // Which coasters are the SAME RIDE at different parks. Curated, not computed:
+  // name alone puts a B&M Invert, a FreeSpin and an SLC under "Batman: The
+  // Ride", and model alone makes every B&M Invert one ride. The server suggests
+  // name+model families; answering them is the job of this pane.
+  async function loadClones(){
+    try {
+      var got = await Promise.all([api("GET","/api/clones"), api("GET","/api/admin/clones/suggest")]);
+      state.clones = got[0].groups || [];
+      state.suggest = got[1].groups || [];
+    } catch(e){ state.clones = []; state.suggest = []; state.cloneErr = e.message; }
+    render();
+  }
+  function cname(id){
+    var c = state.coasters.find(function(x){ return x.id===id; });
+    return c ? (c.name + " \u2014 " + (c.park||"?")) : ("#" + id);
+  }
+  function renderClones(){
+    var q = document.getElementById('q').value.trim().toLowerCase();
+    var groups = state.clones.filter(function(g){ return !q || g.name.toLowerCase().indexOf(q)>=0; });
+    var sug = state.suggest.filter(function(g){ return !q || g.name.toLowerCase().indexOf(q)>=0; });
+    document.getElementById('count').textContent =
+      groups.length + " group" + (groups.length===1?"":"s") + " \u00b7 " + sug.length + " suggested";
+    document.getElementById('list').innerHTML =
+      (state.cloneErr ? '<div class="row"><b>' + esc(state.cloneErr) + '</b></div>' : '')
+      + (groups.length ? groups.map(function(g){
+          return '<div class="row" data-cg="'+g.id+'"><b>'+esc(g.name)+'</b>'
+            + '<span class="sub">' + (g.note ? esc(g.note) + ' \u00b7 ' : '')
+            + g.ids.length + ' rides</span></div>'; }).join('')
+        : '<div class="row"><span class="sub">No groups yet.</span></div>')
+      + (sug.length ? '<div class="row"><b>Suggested</b><span class="sub">name + model, not yet answered</span></div>'
+          + sug.map(function(g,i){
+          return '<div class="row" data-sg="'+i+'"><b>'+esc(g.name)+'</b>'
+            + '<span class="sub">'+esc(g.note)+' \u00b7 '+g.members.length+' rides</span></div>'; }).join('')
+        : '');
+    document.getElementById('list').querySelectorAll('[data-cg]').forEach(function(r){
+      r.onclick = function(){ showGroup(+r.getAttribute('data-cg')); }; });
+    document.getElementById('list').querySelectorAll('[data-sg]').forEach(function(r){
+      r.onclick = function(){ showSuggestion(+r.getAttribute('data-sg')); }; });
+  }
+  function showSuggestion(i){
+    var g = state.suggest[i]; if (!g) return;
+    document.getElementById('editor').innerHTML =
+      '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(g.name)+'</h2>'
+      + '<p class="hint">'+esc(g.note)+' \u2014 '+g.members.length+' coasters share this name and model. '
+      + 'Accept and they become one row in everybody\u2019s ranking.</p>'
+      + '<div class="grid" style="margin:10px 0">' + g.members.map(function(m){
+          return '<div class="fld full"><label>'+esc(cname(m.id))+'</label></div>'; }).join('') + '</div>'
+      + '<div class="actions"><button id="acc">Accept as a group</button>'
+      + '<span class="toast" id="ctoast"></span></div>';
+    document.getElementById('acc').onclick = async function(){
+      try {
+        await api("POST","/api/clones",{ name:g.name, note:g.note, ids:g.members.map(function(m){return m.id;}) });
+        await loadClones();
+      } catch(e){ document.getElementById('ctoast').textContent = e.message; }
+    };
+  }
+  function showGroup(id){
+    var g = state.clones.find(function(x){ return x.id===id; }); if (!g) return;
+    document.getElementById('editor').innerHTML =
+      '<h2 style="margin:0 0 10px;font-size:1.15rem">'+esc(g.name)+'</h2>'
+      + '<div class="grid">'
+      + '<div class="fld full"><label>Name \u2014 what the collapsed row says</label>'
+      + '<input id="cgname" value="'+esc(g.name)+'"></div>'
+      + '<div class="fld full"><label>Note \u2014 why they are one, e.g. "B&amp;M Invert"</label>'
+      + '<input id="cgnote" value="'+esc(g.note||'')+'"></div></div>'
+      + '<p class="hint">Members. Untick to drop one; search below to add another.</p>'
+      + '<div class="grid" id="cgmem">' + g.ids.map(function(cid){
+          return '<div class="fld full"><label class="cbrow">'
+            + '<input type="checkbox" data-mem="'+cid+'" checked> '+esc(cname(cid))+'</label></div>'; }).join('')
+      + '</div>'
+      + '<div class="inline"><input id="cgadd" placeholder="Add a coaster by name\u2026" style="flex:1">'
+      + '</div><div class="grid" id="cghits"></div>'
+      + '<div class="actions"><button id="cgsave">Save group</button>'
+      + '<button class="danger" id="cgdel">Delete group</button>'
+      + '<span class="toast" id="ctoast"></span></div>';
+    var extra = [];
+    function redrawHits(){
+      var q = document.getElementById('cgadd').value.trim().toLowerCase();
+      var hits = q.length < 2 ? [] : state.coasters.filter(function(c){
+        return (c.name||'').toLowerCase().indexOf(q) >= 0; }).slice(0, 8);
+      document.getElementById('cghits').innerHTML = hits.map(function(c){
+        return '<div class="fld full"><label class="cbrow"><input type="checkbox" data-mem="'+c.id+'"'
+          + (extra.indexOf(c.id)>=0?' checked':'') + '> '+esc(cname(c.id))+'</label></div>'; }).join('');
+      document.getElementById('cghits').querySelectorAll('[data-mem]').forEach(function(b){
+        b.onchange = function(){
+          var cid = +b.getAttribute('data-mem');
+          if (b.checked) { if (extra.indexOf(cid)<0) extra.push(cid); }
+          else extra = extra.filter(function(x){ return x!==cid; });
+        };
+      });
+    }
+    document.getElementById('cgadd').addEventListener('input', redrawHits);
+    document.getElementById('cgsave').onclick = async function(){
+      var ids = [];
+      document.getElementById('cgmem').querySelectorAll('[data-mem]').forEach(function(b){
+        if (b.checked) ids.push(+b.getAttribute('data-mem')); });
+      extra.forEach(function(x){ if (ids.indexOf(x)<0) ids.push(x); });
+      try {
+        await api("PUT","/api/clones/"+g.id,{ name:document.getElementById('cgname').value,
+          note:document.getElementById('cgnote').value, ids:ids });
+        await loadClones();
+      } catch(e){ document.getElementById('ctoast').textContent = e.message; }
+    };
+    document.getElementById('cgdel').onclick = async function(){
+      if (!confirm('Delete "'+g.name+'"? The coasters stay; they just stop being one row.')) return;
+      try { await api("DELETE","/api/clones/"+g.id); await loadClones(); }
+      catch(e){ document.getElementById('ctoast').textContent = e.message; }
+    };
+  }
   function updateGeoSummary(){
     var total = Object.keys(state.coasters.reduce(function(a,c){ if(c.park) a[c.park]=1; return a; }, {})).length;
     var on = Object.keys(state.geo).length;

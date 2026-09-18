@@ -567,6 +567,51 @@ async function haveFollows(env) {
   catch (e) { return false; }
 }
 
+async function haveClones(env) {
+  try { await env.DB.prepare("SELECT 1 FROM clone_groups LIMIT 1").first(); return true; }
+  catch (e) { return false; }
+}
+
+// Every group with its members. One query, grouped in JS: there are tens of
+// these, not thousands, and two round trips to D1 cost more than the loop.
+async function getClones(env) {
+  const { results } = await env.DB.prepare(
+    "SELECT g.id AS id, g.name AS name, g.note AS note, m.coaster AS coaster " +
+    "FROM clone_groups g LEFT JOIN clone_members m ON m.group_id = g.id " +
+    "ORDER BY g.id"
+  ).all();
+  const by = new Map();
+  for (const r of results) {
+    let g = by.get(r.id);
+    if (!g) { g = { id: r.id, name: r.name, note: r.note || "", ids: [] }; by.set(r.id, g); }
+    if (r.coaster != null) g.ids.push(r.coaster);
+  }
+  return [...by.values()];
+}
+
+// Coasters that share a name AND a model, which is the only automatic signal
+// worth trusting: name alone puts three different rides under "Batman: The
+// Ride" (a B&M Invert, a FreeSpin and an SLC) and five under "Goliath", while
+// model alone lumps every B&M Invert in the world together. Anything already
+// in a group is left out — a suggestion you have answered is not a suggestion.
+async function suggestClones(env) {
+  const { results } = await env.DB.prepare(
+    "SELECT c.id AS id, c.name AS name, c.park AS park, c.model AS model " +
+    "FROM coasters c LEFT JOIN clone_members m ON m.coaster = c.id " +
+    "WHERE m.coaster IS NULL AND c.name <> '' AND c.model IS NOT NULL AND c.model <> '' " +
+    "ORDER BY c.name, c.park"
+  ).all();
+  const by = new Map();
+  for (const c of results) {
+    const key = String(c.name).trim().toLowerCase() + " | " + String(c.model).trim();
+    if (!by.has(key)) by.set(key, { name: String(c.name).trim(), note: String(c.model).trim(), members: [] });
+    by.get(key).members.push({ id: c.id, park: c.park || "" });
+  }
+  return [...by.values()]
+    .filter((g) => g.members.length > 1)
+    .sort((a, b) => b.members.length - a.members.length || a.name.localeCompare(b.name));
+}
+
 // Both directions at once, as people rather than slugs — the page shows faces
 // and names on both lists, and one query per side here saves it a fetch per
 // name. Retried without `avatar` for the same reason getUsers() is: a database
@@ -1128,6 +1173,15 @@ export default {
       }
       if (request.method === "GET" && path === "/api/parks") {
         return json(await getParks(env), 200, LIST_CACHE);
+      }
+      // Which coasters are the same ride. Public and cacheable for the same
+      // reason the coaster list is: it changes when Carter curates it, not when
+      // anybody rides anything. An empty list before the migration rather than
+      // a 503 — a ranking page that cannot collapse clones still works, and
+      // failing it would take the whole editor down for a nicety.
+      if (request.method === "GET" && path === "/api/clones") {
+        if (!await haveClones(env)) return json({ groups: [] }, 200, LIST_CACHE);
+        return json({ groups: await getClones(env) }, 200, LIST_CACHE);
       }
       // Who exists. Public: the rider pickers and every /user/<slug>/ page read it.
       if (request.method === "GET" && path === "/api/users") return json({ users: await getUsers(env) });
@@ -1709,6 +1763,90 @@ export default {
         await env.DB.prepare("INSERT INTO invites (code,slug,created) VALUES (?,?,datetime('now'))")
           .bind(code, slug).run();
         return json({ ok: true, slug: slug, name: u.name, url: url.origin + "/account?claim=" + code });
+      }
+
+      // ---- clone groups (admin) ------------------------------------------
+      //
+      // Curated here rather than computed, because no rule gets it right on its
+      // own: name alone puts a B&M Invert, a FreeSpin and an SLC under "Batman:
+      // The Ride", and model alone makes every B&M Invert one ride. The suggest
+      // endpoint proposes name+model families and Carter answers them.
+      const CLONE_503 = "run migrations/012-clone-groups.sql first";
+
+      if (request.method === "GET" && path === "/api/admin/clones/suggest") {
+        if (!await haveClones(env)) return err(503, CLONE_503);
+        return json({ groups: await suggestClones(env) });
+      }
+
+      // Shared by create and replace: a group is a name and at least two real
+      // coasters, none of which belongs to somebody else's family. Everything is
+      // checked before anything is written — D1 has no transaction across these
+      // statements, so whatever can fail has to fail while nothing has moved.
+      const readGroup = async (b, selfId) => {
+        const name = String(b && b.name || "").trim().replace(/\s+/g, " ");
+        if (!name) return { bad: err(400, "a group needs a name") };
+        if (name.length > 60) return { bad: err(400, "that name is too long") };
+        const note = String(b && b.note || "").trim().slice(0, 60);
+        const ids = Array.from(new Set((Array.isArray(b && b.ids) ? b.ids : [])
+          .map((x) => Number(x)).filter((x) => Number.isInteger(x) && x > 0)));
+        // One coaster is not a family — it is just a coaster, and collapsing it
+        // would hide a row behind a disclosure for no reason.
+        if (ids.length < 2) return { bad: err(400, "a group needs at least two coasters") };
+        const marks = ids.map(() => "?").join(",");
+        const { results: found } = await env.DB.prepare(
+          "SELECT id FROM coasters WHERE id IN (" + marks + ")").bind(...ids).all();
+        if (found.length !== ids.length) return { bad: err(404, "one of those coasters does not exist") };
+        const { results: taken } = await env.DB.prepare(
+          "SELECT m.coaster AS coaster, g.name AS name FROM clone_members m " +
+          "JOIN clone_groups g ON g.id = m.group_id WHERE m.coaster IN (" + marks + ")" +
+          (selfId ? " AND m.group_id <> ?" : "")
+        ).bind(...(selfId ? [...ids, selfId] : ids)).all();
+        if (taken.length) {
+          return { bad: err(409, "already in " + taken[0].name + ": coaster " + taken[0].coaster) };
+        }
+        return { name, note, ids };
+      };
+
+      if (request.method === "POST" && path === "/api/clones") {
+        if (!await haveClones(env)) return err(503, CLONE_503);
+        const g = await readGroup(await request.json(), null);
+        if (g.bad) return g.bad;
+        const id = (await env.DB.prepare(
+          "INSERT INTO clone_groups (name,note,created) VALUES (?,?,datetime('now')) RETURNING id"
+        ).bind(g.name, g.note || null).first()).id;
+        await env.DB.batch(g.ids.map((cid) => env.DB.prepare(
+          "INSERT INTO clone_members (coaster,group_id) VALUES (?,?)").bind(cid, id)));
+        await recordActivity(env, "clone_set", { subject: g.name, n: g.ids.length });
+        return afterWrite(ctx, env, json({ ok: true, id, name: g.name, note: g.note, ids: g.ids }));
+      }
+
+      const cg = path.match(/^\/api\/clones\/(\d+)$/);
+      if (cg && (request.method === "PUT" || request.method === "DELETE")) {
+        if (!await haveClones(env)) return err(503, CLONE_503);
+        const gid = Number(cg[1]);
+        const row = await env.DB.prepare("SELECT id, name FROM clone_groups WHERE id = ?")
+          .bind(gid).first();
+        if (!row) return err(404, "no such group");
+
+        if (request.method === "DELETE") {
+          // Members first: no foreign keys here, so a group deleted on its own
+          // would leave its members pointing at nothing and every coaster in it
+          // invisible to the suggester forever.
+          await env.DB.prepare("DELETE FROM clone_members WHERE group_id = ?").bind(gid).run();
+          await env.DB.prepare("DELETE FROM clone_groups WHERE id = ?").bind(gid).run();
+          await recordActivity(env, "clone_removed", { subject: row.name });
+          return afterWrite(ctx, env, json({ ok: true }));
+        }
+
+        const g = await readGroup(await request.json(), gid);
+        if (g.bad) return g.bad;
+        await env.DB.prepare("UPDATE clone_groups SET name = ?, note = ? WHERE id = ?")
+          .bind(g.name, g.note || null, gid).run();
+        await env.DB.prepare("DELETE FROM clone_members WHERE group_id = ?").bind(gid).run();
+        await env.DB.batch(g.ids.map((cid) => env.DB.prepare(
+          "INSERT INTO clone_members (coaster,group_id) VALUES (?,?)").bind(cid, gid)));
+        await recordActivity(env, "clone_set", { subject: g.name, n: g.ids.length });
+        return afterWrite(ctx, env, json({ ok: true, id: gid, name: g.name, note: g.note, ids: g.ids }));
       }
 
       // login check (lets the /edit page validate the password)

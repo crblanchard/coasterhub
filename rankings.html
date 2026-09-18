@@ -74,6 +74,28 @@
                      color:var(--muted);cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center}
   .rrow .acts button:hover{color:var(--fg);border-color:var(--accent2)}
   .rrow .acts .del:hover{color:var(--accent);border-color:var(--accent)}
+  /* A clone group: one row for the five Batmans, numbered with the span it
+     holds. Tinted rather than outlined — it is still a row of the same list,
+     not a box sitting in it. */
+  .rrow.grp{background:var(--tint);border-color:var(--accent2);flex-wrap:wrap}
+  .rrow .pos.rng{min-width:auto;font-size:.82rem;letter-spacing:-.02em}
+  .rrow .nm b .cnt{color:var(--accent2);font-weight:800;font-size:.8rem;margin-left:7px}
+  .rrow .acts .exp{font-weight:700}
+  .rrow .members{flex:0 0 100%;margin:7px 0 1px;padding-top:7px;border-top:1px solid var(--line)}
+  .rrow .mrow{display:flex;align-items:center;gap:9px;padding:4px 0}
+  .rrow .mrow .mp{color:var(--accent2);font-weight:700;font-size:.75rem;
+                  font-variant-numeric:tabular-nums;min-width:2.2em;text-align:right;flex:none}
+  .rrow .mrow .mn{flex:1;min-width:0;font-size:.82rem;overflow:hidden;
+                  text-overflow:ellipsis;white-space:nowrap}
+  .rrow .mrow .mn span{color:var(--muted);margin-left:7px;font-size:.76rem}
+  .rrow .mrow .del{flex:none;width:24px;height:24px;border-radius:7px;border:1px solid var(--line);
+                   background:transparent;color:var(--muted);cursor:pointer;font-size:.85rem;line-height:1;
+                   display:flex;align-items:center;justify-content:center}
+  .rrow .mrow .del:hover{color:var(--accent);border-color:var(--accent)}
+  .gbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px;padding:10px 13px;
+        background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        color:var(--muted);font-size:.86rem}
+  .gbar span{flex:1;min-width:0}
 
   /* add panel */
   /* Two lines, tight. The name gets the full width — running under the
@@ -291,6 +313,12 @@
     </div>
 
     <div id="pane_rank">
+      <!-- Only shown when a clone family is split across the list — an existing
+           ranking is never rearranged on load. -->
+      <div class="gbar" id="gatherbar" style="display:none">
+        <span>Some rides that are the same appear in more than one place.</span>
+        <button class="ghost" type="button" id="gather">Gather them</button>
+      </div>
       <div class="rank" id="ranklist"></div>
       <div class="hint" id="rank_empty" style="display:none">Nothing ranked yet.</div>
     </div>
@@ -507,9 +535,15 @@ if(!slug){
 } else {
   Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(),
                CoasterHub.fetchUser(slug),
-               fetch('/api/rankings/'+slug).then(function(r){return r.ok?r.json():{order:[]};}).catch(function(){return {order:[]};})])
+               fetch('/api/rankings/'+slug).then(function(r){return r.ok?r.json():{order:[]};}).catch(function(){return {order:[]};}),
+               // Which coasters are the same ride. Never fatal: a ranking page
+               // that cannot collapse clones is the page as it was last week.
+               fetch('/api/clones').then(function(r){return r.ok?r.json():{groups:[]};}).catch(function(){return {groups:[]};})])
   .then(function(res){
     var coasters=res[0].coasters, parks=res[1], user=res[2], rank=res[3];
+    (res[4].groups||[]).forEach(function(g){
+      g.ids.forEach(function(id){ CLONE[id]=g; });
+    });
     // A ranking is one person's opinion, so only that person may change it —
     // there is no admin override on this write (see the PUT in worker.js). The
     // page has to know that up front: offering drag handles and a Save button
@@ -584,6 +618,7 @@ function wire(){
     };
     $(f.id+'_clear').onclick=function(){ f.sel={}; renderAdd(); };
   });
+  $('gather').onclick=gather;
   buildAddParks();
   $('save').onclick=save;
   $('hh_cancel').onclick=closeHH;
@@ -611,30 +646,119 @@ function markDirty(){
 function renderRank(){
   var el=$('ranklist');
   $('rank_empty').style.display=ORDER.length?'none':'block';
-  el.innerHTML=ORDER.map(function(id,i){
-    var c=BYID[id]||{};
-    return '<div class="rrow" data-i="'+i+'">'
-      +'<span class="grip" data-grip="'+i+'" aria-hidden="true">⠿</span>'
-      +'<span class="pos">'+(i+1)+'</span>'
-      +'<span class="nm"><b>'+esc(c.name||('#'+id))+'</b><span class="sub">'
-        +'<span class="pl">'+esc(c.park||'')+(c.loc?' \u00b7 '+esc(c.loc):'')+'</span>'
-        +(CoasterHub.maker(c)?'<span class="mk">'+esc(CoasterHub.maker(c))+'</span>':'')
+  var bs=blocks();
+  el.innerHTML=bs.map(function(b,i){
+    var one=BYID[b.ids[0]]||{};
+    // A run of the same ride is one row: "Batman: The Ride x5", numbered with
+    // the span it occupies. It still holds five positions — the list saved is
+    // unchanged — you just answer for it once.
+    var head = b.g
+      ? '<span class="pos rng">'+(b.from+1)+'\u2013'+(b.to+1)+'</span>'
+        +'<span class="nm"><b>'+esc(b.g.name)+'<span class="cnt">\u00d7'+b.ids.length+'</span></b>'
+        +'<span class="sub"><span class="pl">'+esc(b.g.note||'the same ride at '+b.ids.length+' parks')+'</span>'
         +'</span></span>'
+      : '<span class="pos">'+(b.from+1)+'</span>'
+        +'<span class="nm"><b>'+esc(one.name||('#'+b.ids[0]))+'</b><span class="sub">'
+        +'<span class="pl">'+esc(one.park||'')+(one.loc?' \u00b7 '+esc(one.loc):'')+'</span>'
+        +(CoasterHub.maker(one)?'<span class="mk">'+esc(CoasterHub.maker(one))+'</span>':'')
+        +'</span></span>';
+    var members = b.g ? '<div class="members"'+(OPEN[b.g.id]?'':' hidden')+'>'
+      +b.ids.map(function(id,k){ var c=BYID[id]||{};
+        return '<div class="mrow"><span class="mp">'+(b.from+k+1)+'</span>'
+          +'<span class="mn">'+esc(c.name||('#'+id))+'<span>'+esc(c.park||'')+'</span></span>'
+          +'<button class="del" data-dropone="'+id+'" title="Remove this one" '
+          +'aria-label="Remove this one">\u00d7</button></div>'; }).join('')
+      +'</div>' : '';
+    return '<div class="rrow'+(b.g?' grp':'')+'" data-i="'+i+'">'
+      +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
+      +head
       +'<span class="acts">'
-        +'<button data-up="'+i+'" title="Move up" aria-label="Move up">↑</button>'
-        +'<button data-down="'+i+'" title="Move down" aria-label="Move down">↓</button>'
-        +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">×</button>'
-      +'</span></div>';
+        +(b.g?'<button class="exp" data-exp="'+b.g.id+'" aria-expanded="'+(OPEN[b.g.id]?'true':'false')+'" '
+              +'title="Show the rides in this group" aria-label="Show the rides in this group">'
+              +(OPEN[b.g.id]?'\u2212':'+')+'</button>':'')
+        +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
+        +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
+        +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
+      +'</span>'+members+'</div>';
   }).join('');
+  $('gatherbar').style.display = scattered() ? 'flex' : 'none';
   el.querySelectorAll('[data-up]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.up,-1); }; });
   el.querySelectorAll('[data-down]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.down,1); }; });
+  el.querySelectorAll('[data-exp]').forEach(function(b){ b.onclick=function(){
+    var k=+b.dataset.exp; OPEN[k]=!OPEN[k]; renderRank(); }; });
+  // The whole run comes out: it is one item on the list now, and taking five
+  // rides off one at a time is what the group exists to save you.
   el.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){
-    ORDER.splice(+b.dataset.del,1); markDirty(); renderRank(); renderAdd(); }; });
+    var blk=blocks()[+b.dataset.del]; if(!blk) return;
+    ORDER.splice(blk.from,blk.ids.length); markDirty(); renderRank(); renderAdd(); }; });
+  // ...unless you open it and drop one, which leaves the rest where they are.
+  el.querySelectorAll('[data-dropone]').forEach(function(b){ b.onclick=function(){
+    var k=ORDER.indexOf(+b.dataset.dropone);
+    if(k>=0){ ORDER.splice(k,1); markDirty(); renderRank(); renderAdd(); } }; });
   el.querySelectorAll('[data-grip]').forEach(function(g){ g.addEventListener('pointerdown',startDrag); });
 }
+// coasterId -> the clone group it belongs to, filled once the groups load.
+var CLONE={}, OPEN={};
+
+// ORDER stays a flat list of coaster ids — that is what is saved, and what the
+// shared list and the 2+ averages read. Blocks are a VIEW of it: a run of
+// neighbours from the same clone group is one thing to move, one thing to
+// number, one row to read. Only a CONTIGUOUS run folds; a family scattered
+// through an existing list stays scattered until Gather is pressed, because
+// silently hauling somebody's ranking about on load is not a thing a page
+// should do.
+function blocks(){
+  var out=[], i=0;
+  while(i<ORDER.length){
+    var g=CLONE[ORDER[i]], j=i+1;
+    if(g){ while(j<ORDER.length && CLONE[ORDER[j]]===g) j++; }
+    out.push({ ids:ORDER.slice(i,j), from:i, to:j-1, g:(j-i>1)?g:null });
+    i=j;
+  }
+  return out;
+}
+
+// Is any family split across the list? Only then is Gather worth offering.
+function scattered(){
+  var seen={}, split=false;
+  blocks().forEach(function(b){
+    var g=b.g||CLONE[b.ids[0]];
+    if(!g) return;
+    if(seen[g.id]) split=true; else seen[g.id]=1;
+  });
+  return split;
+}
+
+// Pull every family together at its best-placed member, keeping the order the
+// members are already in. Nothing else moves.
+function gather(){
+  var best={}, out=[];
+  ORDER.forEach(function(id,i){
+    var g=CLONE[id]; if(!g) return;
+    if(best[g.id]===undefined) best[g.id]=i;
+  });
+  var used={};
+  ORDER.forEach(function(id,i){
+    var g=CLONE[id];
+    if(!g){ out.push(id); return; }
+    if(best[g.id]!==i) return;             // a later member: it comes with the first
+    if(used[g.id]) return;
+    used[g.id]=1;
+    ORDER.forEach(function(x){ if(CLONE[x]===g) out.push(x); });
+  });
+  ORDER=out; markDirty(); renderRank();
+}
+
+// Move the block CONTAINING position i by one block in direction d.
 function move(i,d){
-  var j=i+d; if(j<0||j>=ORDER.length) return;
-  var t=ORDER[i]; ORDER[i]=ORDER[j]; ORDER[j]=t;
+  var bs=blocks(), at=-1, k;
+  for(k=0;k<bs.length;k++) if(i>=bs[k].from&&i<=bs[k].to){ at=k; break; }
+  if(at<0) return;
+  var j=at+d; if(j<0||j>=bs.length) return;
+  var a=bs[at], b=bs[j];
+  var lo=Math.min(at,j), hi=Math.max(at,j);
+  var head=ORDER.slice(0,bs[lo].from), tail=ORDER.slice(bs[hi].to+1);
+  ORDER=head.concat(d>0?b.ids.concat(a.ids):a.ids.concat(b.ids)).concat(tail);
   markDirty(); renderRank();
 }
 
@@ -679,8 +803,13 @@ function reorderTo(y){
     if(i===rows.length-1&&y>r.bottom){ to=rows.length-1; break; }
   }
   if(to===dragFrom) return;
-  var item=ORDER.splice(dragFrom,1)[0];
-  ORDER.splice(to,0,item);
+  // Blocks, not ids: a clone group moves as the one thing it reads as. The
+  // flat ORDER is rebuilt from them, so what gets saved is unchanged in shape.
+  var bs=blocks();
+  var item=bs.splice(dragFrom,1)[0];
+  if(!item) return;
+  bs.splice(to,0,item);
+  ORDER=[]; bs.forEach(function(x){ ORDER=ORDER.concat(x.ids); });
   dragFrom=to;
   markDirty(); renderRank();
   // keep dragging against the freshly rendered row

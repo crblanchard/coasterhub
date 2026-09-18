@@ -30,6 +30,7 @@ const PW = "test-password";
 // being valid SQLite, or stops making the shape the Worker queries, these tests
 // fail rather than the site does.
 const MIGRATION_010 = readFileSync(join(ROOT, "migrations", "010-follows.sql"), "utf8");
+const MIGRATION_012 = readFileSync(join(ROOT, "migrations", "012-clone-groups.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
 // D1 rejects a statement with more bound parameters than SQLite's compiled-in
@@ -109,6 +110,17 @@ function freshDb() {
   // not is a bad afternoon in the D1 console.
   db.exec(MIGRATION_010);
   db.exec(MIGRATION_010);
+  db.exec(MIGRATION_012);
+  db.exec(MIGRATION_012);
+  return db;
+}
+
+// Without migration 012, for the window between this Worker deploying and the
+// migration being run.
+function dbWithoutClones() {
+  const db = freshDb();
+  db.exec("DROP TABLE clone_members");
+  db.exec("DROP TABLE clone_groups");
   return db;
 }
 
@@ -1745,6 +1757,93 @@ async function main() {
       body: { user: slug, d: null, entries: [{ c: 4, n: 1 }] } });
     check("a stale row is not merged into",
       rows(db, "SELECT id FROM activity WHERE kind = 'credits' AND actor = '" + slug + "'").length === 2);
+  }
+
+  // ---- clone groups -------------------------------------------------------
+  {
+    const db = freshDb();
+    // Three Batmans that ARE one ride, one that is not: same name, different
+    // model. The suggester has to tell them apart, which is the whole reason
+    // this is curated and not computed.
+    db.exec(`
+      INSERT INTO coasters (id,name,park,type,manu,model) VALUES
+        (11,'Batman: The Ride','Six Flags Great America','Steel','B&M','B&M Invert'),
+        (12,'Batman: The Ride','Six Flags Great Adventure','Steel','B&M','B&M Invert'),
+        (13,'Batman: The Ride','Six Flags Fiesta Texas','Steel','S&S','FreeSpin'),
+        (14,'Boomerang','Six Flags St. Louis','Steel','Vekoma','Boomerang'),
+        (15,'Boomerang','Knott''s','Steel','Vekoma','Boomerang');
+    `);
+    const cookie = await signedUp(db, "clone@example.com", "Cloner");
+    db.prepare("UPDATE accounts SET is_admin = 1").run();
+
+    let r = await call(db, "GET", "/api/admin/clones/suggest", { cookie });
+    const fams = r.data.groups || [];
+    const batman = fams.find((g) => g.name === "Batman: The Ride");
+    check("suggests a name+model family", !!batman && batman.members.length === 2,
+      JSON.stringify(fams.map((g) => g.name + " x" + g.members.length)));
+    check("does not put a FreeSpin in with the B&M Inverts",
+      !!batman && !batman.members.some((m) => m.id === 13));
+
+    r = await call(db, "POST", "/api/clones",
+      { cookie, body: { name: "Batman: The Ride", note: "B&M Invert", ids: [11, 12] } });
+    check("creates a group", r.status === 200 && r.data.ok, r.status + " " + JSON.stringify(r.data));
+    const gid = r.data.id;
+
+    r = await call(db, "GET", "/api/clones");
+    check("the group reads back with its members",
+      r.data.groups.length === 1 && r.data.groups[0].ids.sort().join() === "11,12",
+      JSON.stringify(r.data.groups));
+
+    r = await call(db, "GET", "/api/admin/clones/suggest", { cookie });
+    check("an answered family stops being suggested",
+      !(r.data.groups || []).some((g) => g.name === "Batman: The Ride"));
+
+    r = await call(db, "POST", "/api/clones",
+      { cookie, body: { name: "Somebody else's", ids: [11, 14] } });
+    check("a coaster cannot join two families", r.status === 409, r.status + " " + JSON.stringify(r.data));
+
+    r = await call(db, "POST", "/api/clones", { cookie, body: { name: "Lonely", ids: [14] } });
+    check("one coaster is not a group", r.status === 400);
+    r = await call(db, "POST", "/api/clones", { cookie, body: { name: "", ids: [14, 15] } });
+    check("a group needs a name", r.status === 400);
+    r = await call(db, "POST", "/api/clones", { cookie, body: { name: "Ghosts", ids: [14, 999] } });
+    check("a group cannot hold a coaster that does not exist", r.status === 404);
+
+    r = await call(db, "PUT", "/api/clones/" + gid,
+      { cookie, body: { name: "Batman clones", note: "B&M Invert", ids: [11, 12, 13] } });
+    check("replacing the members works", r.status === 200 && r.data.ids.length === 3,
+      r.status + " " + JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/clones");
+    check("and leaves no orphans behind",
+      rows(db, "SELECT coaster FROM clone_members").length === 3 &&
+      r.data.groups[0].name === "Batman clones");
+
+    r = await call(db, "DELETE", "/api/clones/" + gid, { cookie });
+    check("deleting a group takes its members with it",
+      r.status === 200 && rows(db, "SELECT coaster FROM clone_members").length === 0);
+    r = await call(db, "DELETE", "/api/clones/" + gid, { cookie });
+    check("deleting it twice is a 404, not a 500", r.status === 404);
+
+    // Signed in but not admin: curating the shared list is not open to accounts
+    // the way adding a missing coaster is.
+    const plain = await signedUp(db, "plain@example.com", "Plain");
+    r = await callNoPassword(db, "POST", "/api/clones",
+      { cookie: plain, body: { name: "Mine", ids: [14, 15] } });
+    check("a plain account cannot curate clones", r.status === 401, String(r.status));
+  }
+
+  // The window where the code is live and the migration is not.
+  {
+    const db = dbWithoutClones();
+    let r = await call(db, "GET", "/api/clones");
+    check("no migration yet: the public read is empty, not an error",
+      r.status === 200 && Array.isArray(r.data.groups) && r.data.groups.length === 0);
+    const cookie = await signedUp(db, "pre@example.com", "Pre");
+    db.prepare("UPDATE accounts SET is_admin = 1").run();
+    r = await call(db, "POST", "/api/clones", { cookie, body: { name: "X", ids: [1, 2] } });
+    check("no migration yet: a write is a 503 naming the file",
+      r.status === 503 && /012-clone-groups\.sql/.test(r.data.error || ""),
+      r.status + " " + JSON.stringify(r.data));
   }
 
   console.log("\n" + pass + " passed, " + fail + " failed\n");

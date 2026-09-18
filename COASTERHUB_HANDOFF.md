@@ -1514,6 +1514,68 @@ chasing a phantom "upward drag scrolls the wrong way" for a while — it was the
 
 ---
 
+## Clone groups (2026-09-18)
+
+Carter: *"similar coasters stored together — Batman clones is one item but would take up
+110-120 in my rankings."* Answering one question instead of eleven, without lying about how
+many positions the family holds.
+
+**The decision that shapes everything else: a ranking is still a flat list of coaster ids.**
+`ORDER` is untouched, so positions, `/rankings/all`, the 2+ averages and "N ranked" all keep
+working and none of them has to know groups exist. A group only decides how the *editor*
+presents a contiguous run of that list.
+
+### Where the definition lives
+
+Shared, curated in `/edit`, admin-only (Carter's call). "These five are the same ride" is a fact
+about the coasters, not an opinion about them, so it is stored with the coaster data and every
+rider's list can collapse the same families. `migrations/012-clone-groups.sql`:
+`clone_groups(id,name,note,created)` and `clone_members(coaster PRIMARY KEY, group_id)` — the
+primary key on `coaster` alone is what makes "one group per coaster" a failed insert rather than
+a coaster quietly in two families. No foreign keys (D1 has them off), so deleting a group has to
+clear its members in the same breath; the Worker does both.
+
+### Why it is curated and not computed
+
+Neither obvious rule works, and the data says so:
+
+- **Name alone**: "Batman: The Ride" is a B&M Invert, a FreeSpin *and* an SLC. "Goliath" spans
+  five models.
+- **Model alone**: "B&M Invert" is 19 coasters — Batman, Raptor, Montu, Afterburn. "Kiddie" is 43.
+- **Name + model** is the honest signal: 30 families, 75 coasters. `suggestClones()` proposes
+  exactly those, skipping anything already in a group, and Carter accepts or ignores each. It
+  misses clones under different names (the SLCs, the Boomerangs), which is what hand-building in
+  the Clones pane is for.
+
+### The API
+
+`GET /api/clones` is public and cacheable like `/api/coasters`; before the migration it answers
+an empty list rather than a 503, because a ranking page that cannot collapse clones is just last
+week's page. Every write 503s naming the file. `GET /api/admin/clones/suggest`, `POST
+/api/clones`, `PUT|DELETE /api/clones/:id` are admin. A group needs a name and **two** members —
+one coaster is not a family, and collapsing it would hide a row behind a disclosure for nothing.
+
+### In the editor
+
+`blocks()` folds a **contiguous** run of one group into a single `.rrow.grp`, numbered with the
+span it holds (`3–7`), captioned with the note, and carrying `×5`. Move, drag and delete all act
+on the block; the expander opens the members with their real positions and a × that drops just
+one.
+
+**Nothing is rearranged on load.** A family scattered through an existing ranking stays scattered
+— silently hauling somebody's list about because a group was defined last night is not a thing a
+page should do. Instead `scattered()` shows one bar offering **Gather them**, which pulls each
+family to its best-placed member's position and leaves everything else alone.
+
+### Not done yet
+
+The **Add coasters** panel still lists a group's members as separate rows — ticking one adds one.
+Adding a family as a block is the obvious next piece. The shared list also still counts each
+clone separately, which is correct today (every coaster keeps its own position) but is the place
+to look if "Batman: The Ride" should ever appear once on `/rankings/all`.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**
