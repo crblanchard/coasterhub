@@ -27,6 +27,8 @@
     edited:   '<path d="M4 20h4L19 9l-4-4L4 16zM14 5l4 4"/>',
     merged:   '<path d="M7 4v6a4 4 0 0 0 4 4h6M17 10l3 4-3 4"/>',
     deleted:  '<path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/>',
+    // Layers: several rides answering as one.
+    stack:    '<path d="M12 3 3 8l9 5 9-5-9-5M3 13l9 5 9-5M3 18l9 5 9-5"/>',
     // A person with a tick: somebody is now behind a page that was already here.
     claimed:  '<path d="M15 20v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M8.5 7a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7M16 11l2 2 4-4"/>'
   };
@@ -39,6 +41,8 @@
           : kind === 'coaster_added' || kind === 'user_added' ? 'added'
           : kind === 'coaster_edited' || kind === 'coaster_renamed' ? 'edited'
           : kind === 'coaster_merged' ? 'merged'
+          : kind === 'clone_removed' ? 'deleted'
+          : kind === 'clone_set' ? 'stack'
           : kind === 'coaster_deleted' ? 'deleted'
           : kind;
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
@@ -107,6 +111,12 @@
         + ' was merged into ' + (sub || 'another coaster') + parkOf(e);
     }
     if (e.kind === 'coaster_deleted') return (sub || 'A coaster') + ' was deleted';
+    if (e.kind === 'clone_set'){
+      var made = !!d.made, again = (d.saves || 1) > 1;
+      return (sub || 'A category') + ' category '
+        + (made && again ? 'created and modified' : made ? 'created' : 'modified');
+    }
+    if (e.kind === 'clone_removed') return (sub || 'A category') + ' category deleted';
     if (e.kind === 'user_added')      return (sub || 'A rider') + ' joined'
       + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
     if (e.kind === 'claimed')         return (sub || 'A rider') + ' created an account'
@@ -154,16 +164,30 @@
   // separate things" by ticking a park's list in six saves. A dated RIDE is
   // different — each one is a day out, at a named park, and reads as a fact on
   // its own.
+  //
+  // A category is the third: it is edited a few times in a row while you get it
+  // right, and six rows saying "Batman clones category modified" is noise about
+  // one afternoon's decision. It chains on the SUBJECT rather than the actor,
+  // because the actor on an admin write is nobody.
   var GROUP_MS = 60 * 60 * 1000;
-  var GROUPS = { ranking: 1, credits: 1 };
+  var GROUPS = { ranking: 1, credits: 1, clone_set: 1 };
+  var BY_SUBJECT = { clone_set: 1 };
   function groupRuns(list){
     var out = [];
     list.forEach(function(e){
       var last = out[out.length - 1];
-      if (GROUPS[e.kind] && last && last.kind === e.kind && last.actor === e.actor
+      var same = BY_SUBJECT[e.kind] ? (last && last.subject === e.subject)
+                                    : (last && last.actor === e.actor);
+      if (GROUPS[e.kind] && last && last.kind === e.kind && same
           && !isDayOnly(e.at) && !isDayOnly(last.at)
           && atTime(last.at) - atTime(e.at) < GROUP_MS) {
         var a = last.detail || {}, b = e.detail || {};
+        // Whichever half of the run created it, the run created it. `last` is
+        // the newer, so its member count is the one that survives.
+        if (e.kind === 'clone_set') {
+          last.detail = { made: !!(a.made || b.made), saves: (a.saves || 1) + (b.saves || 1) };
+          return;
+        }
         // `last` is the newer of the two (the list is newest-first), so its
         // running total and its timestamp are the ones that survive.
         if (e.kind === 'ranking') {

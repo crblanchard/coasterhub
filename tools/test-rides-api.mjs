@@ -1936,16 +1936,21 @@ async function main() {
 
     // Preferences: what is switched off, and what shows numbers.
     r = await call(db, "PUT", "/api/categories/" + slug + "/prefs",
-      { cookie, body: { on: true, off: ["c1"], nums: ["r" + mine, "nonsense"] } });
+      { cookie, body: { on: true, off: ["c1"], nums: ["r" + mine, "nonsense"],
+                        pulled: [23, 0, "x", 23] } });
     check("saves preferences, dropping a key that is not one",
       r.status === 200 && r.data.off.length === 1 && r.data.nums.length === 1,
       JSON.stringify(r.data));
+    check("...and the rides ranked on their own, deduped and cleaned",
+      r.data.pulled.length === 1 && r.data.pulled[0] === 23, JSON.stringify(r.data.pulled));
 
     r = await call(db, "GET", "/api/categories/" + slug);
     const site = r.data.categories.filter((c) => c.official)[0];
     check("the site's category comes back switched off for this rider",
       site.off === true && r.data.categories.filter((c) => !c.official)[0].nums === true,
       JSON.stringify(r.data.categories));
+    check("...and so does what is ranked on its own",
+      Array.isArray(r.data.pulled) && r.data.pulled[0] === 23, JSON.stringify(r.data.pulled));
 
     // Switching the site's one off makes those rides ordinary rows for this
     // rider. It does NOT let them be rebuilt as a private copy — that is the

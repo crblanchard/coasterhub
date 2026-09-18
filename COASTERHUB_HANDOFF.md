@@ -1883,6 +1883,61 @@ too, six times over. Use `click()` for anything that removes itself.
 
 ---
 
+### Categories, live on /rankings (2026-09-18)
+
+The artifact's design, on the real page. `/user/<slug>/rankings` reads
+**`GET /api/categories/<slug>`** now instead of `/api/clones`, and `CLONE[id]` is the category
+a coaster folds into **right now** — a category switched off, or a ride pulled out of one,
+is simply absent from that map and every drawing rule below needs to know nothing else.
+
+Open a category row and you get, in the row itself:
+
+- **Same rank / Numbered**, per category. Default `~`. The rides do not move either way, only
+  what the column says, so an order set under `~` survives the switch.
+- **↑ ↓ inside the category.** Members are contiguous in ORDER, so it is the same swap
+  the whole list does — the flat list stays flat, which is what keeps every position honest.
+- **↗ pull one out.** It stays IN the category (that is what lets the panel say where it
+  went) and stops folding into it.
+- **Reset order** — back to alphabetical by park then name, the order the category is
+  stored in.
+- **Ranked separately: Six Flags Great America (−1)**, green above the category and red
+  below, counted from the category's own block — and **Pull all back in**, which was
+  Carter's. Both new this pass; the rest came from the artifact.
+
+`snug()` is load-bearing: a ride that stops folding moves next to the category's remaining run
+rather than staying put. Without it, pulling one out of the MIDDLE splits the category into two
+rows with the same name.
+
+**`pulled` is stored, not inferred.** It lives in `category_prefs` beside `on`, `off` and
+`nums`. "Not next to the others" and "deliberately somewhere else" are different things, and
+only the second should survive a drag that happens to land next to the family again.
+
+**Two writes, one button.** Save PUTs the order, and then — only once that has succeeded
+— PUTs the preferences. The order is the one that matters; preferences are how the same
+list is *drawn*, so a failure there is worth a line and never worth losing the save that
+already worked.
+
+The `--up` / `--down` colours are defined on `.rrow` in `rankings.html` rather than in
+`style.css`: the site has no green, this is the only page that draws them, and `style.css` is
+CRLF and not worth opening for two lines.
+
+### Category events read like sentences now (2026-09-18)
+
+`/changes` was showing a raw `clone_set` per save — twelve identical rows for one
+afternoon. Now:
+
+> **Wacky Worms** category created and modified
+> **Batman clones** category created
+
+A create records `detail: {made: true}`; an edit records nothing, which also makes every row
+already in the table read as "modified" without a migration. `groupRuns` chains them within the
+hour like ranking and credits bursts, but on the **subject** rather than the actor — the
+actor on an admin write is nobody. `BY_SUBJECT` in `changes-feed.js` is that switch. A run that
+contains the create says "created and modified"; `clone_removed` says "category deleted". Both
+get a layers icon.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

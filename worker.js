@@ -715,6 +715,9 @@ async function getCategories(env, slug) {
 
   const off = new Set(Array.isArray(prefs.off) ? prefs.off : []);
   const nums = new Set(Array.isArray(prefs.nums) ? prefs.nums : []);
+  // Rides that belong to a category but are ranked on their own.
+  const pulled = (Array.isArray(prefs.pulled) ? prefs.pulled : [])
+    .map((x) => Number(x)).filter((x) => Number.isInteger(x) && x > 0);
   const dress = (g, key) => ({
     key, id: g.id, name: g.name, note: g.note || "", ids: g.ids,
     official: key.charAt(0) === "c", off: off.has(key), nums: nums.has(key),
@@ -725,6 +728,7 @@ async function getCategories(env, slug) {
     // category still a deliberate choice is the middle: the machinery is ready,
     // and an empty list is what somebody who has chosen nothing gets.
     on: prefs.on !== false,
+    pulled,
     categories: site.map((g) => dress(g, "c" + g.id))
       .concat(own.map((g) => dress(g, "r" + g.id))),
   };
@@ -1392,7 +1396,10 @@ export default {
           const b = await request.json();
           const keys = (a) => Array.from(new Set((Array.isArray(a) ? a : [])
             .map((x) => String(x)).filter((x) => /^[cr][0-9]{1,9}$/.test(x)))).slice(0, 500);
-          const prefs = { on: b && b.on !== false, off: keys(b && b.off), nums: keys(b && b.nums) };
+          const ids = (a) => Array.from(new Set((Array.isArray(a) ? a : [])
+            .map((x) => Number(x)).filter((x) => Number.isInteger(x) && x > 0))).slice(0, 2000);
+          const prefs = { on: b && b.on !== false, off: keys(b && b.off),
+                          nums: keys(b && b.nums), pulled: ids(b && b.pulled) };
           await env.DB.prepare(
             "INSERT INTO category_prefs (user_slug,prefs,updated) VALUES (?,?,datetime('now')) " +
             "ON CONFLICT(user_slug) DO UPDATE SET prefs = excluded.prefs, updated = excluded.updated"
@@ -2109,7 +2116,8 @@ export default {
         ).bind(g.name, g.note || null).first()).id;
         await env.DB.batch(g.ids.map((cid) => env.DB.prepare(
           "INSERT INTO clone_members (coaster,group_id) VALUES (?,?)").bind(cid, id)));
-        await recordActivity(env, "clone_set", { subject: g.name, n: g.ids.length });
+        await recordActivity(env, "clone_set",
+          { subject: g.name, n: g.ids.length, detail: { made: true } });
         return afterWrite(ctx, env, json({ ok: true, id, name: g.name, note: g.note, ids: g.ids }));
       }
 

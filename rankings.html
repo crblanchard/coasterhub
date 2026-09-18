@@ -92,6 +92,42 @@
                    background:transparent;color:var(--muted);cursor:pointer;font-size:.85rem;line-height:1;
                    display:flex;align-items:center;justify-content:center}
   .rrow .mrow .del:hover{color:var(--accent);border-color:var(--accent)}
+  /* Better and worse than the category it came out of. The site has no green,
+     and these live here rather than in style.css because this is the only page
+     that draws them — style.css is CRLF and not worth opening for two lines. */
+  .rrow{--up:#3ddc97; --down:#ff7a7e}
+  @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .rrow{--up:#0a7a4a; --down:#c22127} }
+  :root[data-theme="light"] .rrow{--up:#0a7a4a; --down:#c22127}
+
+  /* The controls that belong to one category, inside the row it opens. */
+  .rrow .mhead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0;
+               padding:1px 0 8px;color:var(--muted);font-size:.76rem}
+  .rrow .mhead .mseg{display:inline-flex;border:1px solid var(--line);border-radius:9px;
+                     overflow:hidden}
+  .rrow .mhead .mseg button{background:transparent;border:0;border-left:1px solid var(--line);
+        color:var(--muted);padding:4px 10px;cursor:pointer;font:inherit;font-size:.75rem}
+  .rrow .mhead .mseg button:first-child{border-left:0}
+  .rrow .mhead .mseg button.on{background:var(--tint2);color:var(--fg);font-weight:600}
+  .rrow .mhead .tiny{background:transparent;border:1px solid var(--line);border-radius:8px;
+        color:var(--muted);padding:4px 9px;cursor:pointer;font:inherit;font-size:.75rem}
+  .rrow .mhead .tiny:hover{color:var(--fg);border-color:var(--accent2)}
+  .rrow .mrow .mp.tilde{color:var(--muted);font-weight:600}
+  .rrow .mrow .macts{display:flex;gap:4px;flex:none;margin-left:auto}
+  .rrow .mrow .macts button{flex:none;width:24px;height:24px;border-radius:7px;
+        border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;
+        font-size:.8rem;line-height:1;display:flex;align-items:center;justify-content:center;
+        font-family:inherit}
+  .rrow .mrow .macts button:hover{color:var(--fg);border-color:var(--accent2)}
+  .rrow .mrow .macts button:disabled{opacity:.3;cursor:default}
+  /* What the category still owns but is not ranking here. */
+  .rrow .excl{flex:0 0 100%;min-width:0;color:var(--muted);font-size:.75rem;margin-top:7px;
+              padding-top:7px;border-top:1px dashed var(--line)}
+  .rrow .excl > b{display:block;color:var(--fg);font-weight:600;margin-bottom:3px}
+  .rrow .xrow{display:flex;align-items:baseline;gap:6px;padding:1px 0}
+  .rrow .xrow .xp{color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rrow .xd{flex:none;font-weight:700;font-variant-numeric:tabular-nums}
+  .rrow .xd.up{color:var(--up)}
+  .rrow .xd.down{color:var(--down)}
   .gbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px;padding:10px 13px;
         background:var(--panel);border:1px solid var(--line);border-radius:12px;
         color:var(--muted);font-size:.86rem}
@@ -536,14 +572,16 @@ if(!slug){
   Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(),
                CoasterHub.fetchUser(slug),
                fetch('/api/rankings/'+slug).then(function(r){return r.ok?r.json():{order:[]};}).catch(function(){return {order:[]};}),
-               // Which coasters are the same ride. Never fatal: a ranking page
-               // that cannot collapse clones is the page as it was last week.
-               fetch('/api/clones').then(function(r){return r.ok?r.json():{groups:[]};}).catch(function(){return {groups:[]};})])
+               // This rider's categories: the site's, their own, and what they
+               // have done with each. Never fatal — a ranking page that cannot
+               // fold anything is the page as it was last week.
+               fetch('/api/categories/'+slug).then(function(r){
+                 return r.ok?r.json():{categories:[],pulled:[],on:true}; })
+                 .catch(function(){ return {categories:[],pulled:[],on:true}; })])
   .then(function(res){
     var coasters=res[0].coasters, parks=res[1], user=res[2], rank=res[3];
-    (res[4].groups||[]).forEach(function(g){
-      g.ids.forEach(function(id){ CLONE[id]=g; });
-    });
+    CATS = res[4];
+    buildClone();
     // A ranking is one person's opinion, so only that person may change it —
     // there is no admin override on this write (see the PUT in worker.js). The
     // page has to know that up front: offering drag handles and a Save button
@@ -662,20 +700,53 @@ function renderRank(){
         +'<span class="pl">'+esc(one.park||'')+(one.loc?' \u00b7 '+esc(one.loc):'')+'</span>'
         +(CoasterHub.maker(one)?'<span class="mk">'+esc(CoasterHub.maker(one))+'</span>':'')
         +'</span></span>';
-    var members = b.g ? '<div class="members"'+(OPEN[b.g.id]?'':' hidden')+'>'
+    var key = b.g ? catKey(b.g) : '';
+    var numbered = b.g ? !!NUMS[key] : false;
+    var gone = b.g ? strays(b.g, b) : [];
+    var members = b.g ? '<div class="members"'+(OPEN[key]?'':' hidden')+'>'
+      // Whether the rides inside carry their real positions or all read ~ is a
+      // fact about THIS category, so the switch lives in it rather than in a
+      // setting somewhere else. Default off: the point of a category is that
+      // you did not want to argue about which Batman was 113th.
+      +'<div class="mhead"><span>In this group</span>'
+        +'<span class="mseg"><button type="button" data-nums="'+key+'" data-v="0"'
+          +(numbered?'':' class="on"')+'>Same rank</button>'
+        +'<button type="button" data-nums="'+key+'" data-v="1"'
+          +(numbered?' class="on"':'')+'>Numbered</button></span>'
+        +'<button class="tiny" type="button" data-reset="'+key+'" '
+          +'title="Back to alphabetical, by park">Reset order</button></div>'
       +b.ids.map(function(id,k){ var c=BYID[id]||{};
-        return '<div class="mrow"><span class="mp">'+(b.from+k+1)+'</span>'
-          +'<span class="mn">'+esc(c.name||('#'+id))+'<span>'+esc(c.park||'')+'</span></span>'
+        return '<div class="mrow"><span class="mp'+(numbered?'':' tilde')+'">'
+          +(numbered?(b.from+k+1):'~')+'</span>'
+          // The park leads: inside a category the ride name is the same five
+          // times over and the park is the only thing telling them apart.
+          +'<span class="mn">'+esc(c.park||'')
+          +(c.name && c.name!==b.g.name ? '<span>'+esc(c.name)+'</span>' : '')+'</span>'
+          +'<span class="macts">'
+          +'<button data-pull="'+id+'" title="Rank this one on its own" '
+            +'aria-label="Rank this one on its own">\u2197</button>'
+          +'<button data-mup="'+(b.from+k)+'" title="Move up inside this group" '
+            +'aria-label="Move up inside this group"'+(k===0?' disabled':'')+'>\u2191</button>'
+          +'<button data-mdown="'+(b.from+k)+'" title="Move down inside this group" '
+            +'aria-label="Move down inside this group"'
+            +(k===b.ids.length-1?' disabled':'')+'>\u2193</button>'
           +'<button class="del" data-dropone="'+id+'" title="Remove this one" '
-          +'aria-label="Remove this one">\u00d7</button></div>'; }).join('')
+            +'aria-label="Remove this one">\u00d7</button></span></div>'; }).join('')
+      +(gone.length ? '<div class="excl"><b>Ranked separately:</b>'
+          +gone.map(function(x){ var c=BYID[x.id]||{};
+            return '<div class="xrow"><span class="xp">'+esc(c.park||c.name||('#'+x.id))+'</span>'
+              +'<span class="xd '+(x.up?'up':'down')+'">('+(x.up?'+':'\u2212')+x.d+')</span></div>';
+          }).join('')
+          +'<button class="tiny" type="button" data-allback="'+key+'" '
+          +'style="margin-top:7px">Pull all back in</button></div>' : '')
       +'</div>' : '';
     return '<div class="rrow'+(b.g?' grp':'')+'" data-i="'+i+'">'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
       +head
       +'<span class="acts">'
-        +(b.g?'<button class="exp" data-exp="'+b.g.id+'" aria-expanded="'+(OPEN[b.g.id]?'true':'false')+'" '
+        +(b.g?'<button class="exp" data-exp="'+key+'" aria-expanded="'+(OPEN[key]?'true':'false')+'" '
               +'title="Show the rides in this group" aria-label="Show the rides in this group">'
-              +(OPEN[b.g.id]?'\u2212':'+')+'</button>':'')
+              +(OPEN[key]?'\u2212':'+')+'</button>':'')
         +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
         +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
         +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
@@ -685,7 +756,7 @@ function renderRank(){
   el.querySelectorAll('[data-up]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.up,-1); }; });
   el.querySelectorAll('[data-down]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.down,1); }; });
   el.querySelectorAll('[data-exp]').forEach(function(b){ b.onclick=function(){
-    var k=+b.dataset.exp; OPEN[k]=!OPEN[k]; renderRank(); }; });
+    var k=b.dataset.exp; OPEN[k]=!OPEN[k]; renderRank(); }; });
   // The whole run comes out: it is one item on the list now, and taking five
   // rides off one at a time is what the group exists to save you.
   el.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){
@@ -696,9 +767,119 @@ function renderRank(){
     var k=ORDER.indexOf(+b.dataset.dropone);
     if(k>=0){ ORDER.splice(k,1); markDirty(); renderRank(); renderAdd(); } }; });
   el.querySelectorAll('[data-grip]').forEach(function(g){ g.addEventListener('pointerdown',startDrag); });
+
+  // Numbers on or off for this category. The rides do not move either way —
+  // only what the column says — so an order set here survives the switch.
+  el.querySelectorAll('[data-nums]').forEach(function(b){ b.onclick=function(){
+    var g=catById(b.dataset.nums); if(!g) return;
+    g.nums = b.dataset.v==='1'; buildClone(); markPrefs(); renderRank(); }; });
+
+  // Inside a category, one ride swaps with its neighbour. Members are
+  // contiguous in ORDER, so this is the same swap the whole list does — the
+  // flat list stays flat, which is what keeps every position honest.
+  var swap=function(i,j){ var t=ORDER[i]; ORDER[i]=ORDER[j]; ORDER[j]=t;
+    markDirty(); renderRank(); };
+  el.querySelectorAll('[data-mup]').forEach(function(b){ b.onclick=function(){
+    var i=+b.dataset.mup; swap(i,i-1); }; });
+  el.querySelectorAll('[data-mdown]').forEach(function(b){ b.onclick=function(){
+    var i=+b.dataset.mdown; swap(i,i+1); }; });
+
+  // Back to the order the category is stored in: alphabetical by park, then
+  // name. The tiebreak that makes "all the same rank" a display idea rather
+  // than a change to what is saved.
+  el.querySelectorAll('[data-reset]').forEach(function(b){ b.onclick=function(){
+    var g=catById(b.dataset.reset); if(!g) return;
+    var bs=blocks(), blk=null;
+    bs.forEach(function(x){ if(x.g===g) blk=x; });
+    if(!blk) return;
+    var sorted=blk.ids.slice().sort(function(x,y){
+      var a=BYID[x]||{}, c=BYID[y]||{};
+      return (a.park||'').localeCompare(c.park||'', undefined, {sensitivity:'base'})
+          || (a.name||'').localeCompare(c.name||'', undefined, {sensitivity:'base'}); });
+    ORDER=ORDER.slice(0,blk.from).concat(sorted).concat(ORDER.slice(blk.to+1));
+    markDirty(); renderRank(); }; });
+
+  // Rank one on its own. It stays IN the category — that is what lets the row
+  // below say where it went — it just stops folding into it.
+  el.querySelectorAll('[data-pull]').forEach(function(b){ b.onclick=function(){
+    var id=+b.dataset.pull, g=CLONE[id]; if(!g) return;
+    PULLED[id]=1; CATS.pulled=(CATS.pulled||[]).concat([id]);
+    delete CLONE[id];
+    snug(id,g); markPrefs(); renderRank(); renderAdd(); }; });
+
+  // And the other direction, for all of them at once: the button you want
+  // after trying it and deciding the category was right.
+  el.querySelectorAll('[data-allback]').forEach(function(b){ b.onclick=function(){
+    var g=catById(b.dataset.allback); if(!g) return;
+    CATS.pulled=(CATS.pulled||[]).filter(function(id){ return g.ids.indexOf(id)<0; });
+    buildClone();
+    // Each one rejoins next to the others, so the category is one run again.
+    g.ids.forEach(function(id){ if(CLONE[id]===g) snug(id,g); });
+    markPrefs(); renderRank(); renderAdd(); }; });
 }
-// coasterId -> the clone group it belongs to, filled once the groups load.
-var CLONE={}, OPEN={};
+
+function catById(key){
+  var found=null;
+  (CATS.categories||[]).forEach(function(g){ if(catKey(g)===key) found=g; });
+  return found;
+}
+// What the server said about this rider's categories, and the map the list is
+// actually drawn from. CLONE[id] is the category a coaster folds into RIGHT
+// NOW — so a category switched off, or a ride pulled out of one, is simply
+// absent from it and every drawing rule below needs to know nothing else.
+var CATS={categories:[],pulled:[],on:true};
+var CLONE={}, OPEN={}, PULLED={}, NUMS={}, prefsDirty=false;
+
+function buildClone(){
+  CLONE={}; PULLED={}; NUMS={};
+  (CATS.pulled||[]).forEach(function(id){ PULLED[id]=1; });
+  if (CATS.on === false) return;
+  (CATS.categories||[]).forEach(function(g){
+    if (g.nums) NUMS[g.key]=1;
+    if (g.off) return;
+    g.ids.forEach(function(id){ if(!PULLED[id]) CLONE[id]=g; });
+  });
+}
+
+// Which category OWNS a coaster, whether or not it is folding it today. Needed
+// for "ranked separately": a pulled-out ride is still the category's.
+function ownerOf(id){
+  var found=null;
+  (CATS.categories||[]).forEach(function(g){
+    if (found) return;
+    if (g.ids.indexOf(id) >= 0) found=g;
+  });
+  return found;
+}
+
+function catKey(g){ return g.key || ('c'+g.id); }
+
+// Everything a category owns that is ranked somewhere else, with how far from
+// the category's own block it ended up.
+function strays(g, blk){
+  var out=[];
+  g.ids.forEach(function(id){
+    if (!PULLED[id]) return;
+    var at=ORDER.indexOf(id);
+    if (at<0) return;                       // owned, but not in this ranking
+    var up = at < blk.from, d = up ? (blk.from-at) : (at-blk.to);
+    out.push({ id:id, up:up, d:d });
+  });
+  return out.sort(function(a,b){ return (a.up===b.up) ? a.d-b.d : (a.up?-1:1); });
+}
+
+// A ride that stops folding — pulled out, or set aside — moves next to the
+// category's remaining run rather than staying put. Without this, pulling one
+// out of the MIDDLE splits the category into two rows with the same name.
+function snug(id, g){
+  var at=ORDER.indexOf(id); if(at<0) return;
+  ORDER.splice(at,1);
+  var last=-1;
+  for(var i=0;i<ORDER.length;i++) if(CLONE[ORDER[i]]===g) last=i;
+  ORDER.splice(last>=0?last+1:Math.min(at,ORDER.length),0,id);
+}
+
+function markPrefs(){ prefsDirty=true; markDirty(); }
 
 // ORDER stays a flat list of coaster ids — that is what is saved, and what the
 // shared list and the 2+ averages read. Blocks are a VIEW of it: a run of
@@ -1136,6 +1317,23 @@ function closeHH(){ hh=null; $('hh').style.display='none'; }
 function signInHref(){
   return '/account?next=' + encodeURIComponent(location.pathname + location.search);
 }
+// On/off, numbers and what is ranked separately — everything that changes how
+// the list reads without changing the list. Fire-and-forget after the order is
+// safely saved; the button has already gone green by then.
+function savePrefs(){
+  var off=[], nums=[];
+  (CATS.categories||[]).forEach(function(g){
+    if (g.off) off.push(catKey(g));
+    if (g.nums) nums.push(catKey(g));
+  });
+  return fetch('/api/categories/'+slug+'/prefs',{method:'PUT',credentials:'same-origin',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({ on:CATS.on!==false, off:off, nums:nums,
+                            pulled:(CATS.pulled||[]) })})
+    .then(function(r){ if(r.ok) prefsDirty=false; return r.ok; })
+    .catch(function(){ return false; });
+}
+
 function save(){
   $('save').disabled=true;
   $('status').className='status'; $('status').textContent='Saving…';
@@ -1147,6 +1345,11 @@ function save(){
       return j; }); })
     .then(function(j){
       dirty=false;
+      // The order and what you did with your categories are two writes, and
+      // the order is the one that matters: preferences are how the same list is
+      // DRAWN, so a failure here is worth a line and never worth losing the
+      // save that already worked.
+      if (prefsDirty) savePrefs();
       $('status').className='status ok';
       // Ranking something you had not logged adds it to your count, so say so
       // rather than letting the number move silently on another page.

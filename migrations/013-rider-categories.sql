@@ -47,11 +47,15 @@ CREATE INDEX IF NOT EXISTS rider_category_members_cat ON rider_category_members(
 
 -- Everything a rider has decided ABOUT categories, as one JSON blob per rider:
 --
---   {"on":true,"off":["c1","r7"],"nums":["c2"]}
+--   {"on":true,"off":["c1","r7"],"nums":["c2"],"pulled":[74,133]}
 --
 -- `c1` is clone_groups id 1, `r7` is rider_categories id 7 — two id spaces that
 -- would otherwise collide. `off` is a category they keep but are not using;
--- `nums` is one showing real positions instead of ~.
+-- `nums` is one showing real positions instead of ~; `pulled` is coaster ids
+-- that belong to a category but are ranked on their own. `pulled` is stored
+-- rather than inferred from the order, because "not next to the others" and
+-- "deliberately somewhere else" are different things, and only the second
+-- should survive a drag that happens to land next to the family again.
 --
 -- A blob rather than a row per preference because nothing ever queries across
 -- riders' preferences: the ranking page reads one rider's and writes one
