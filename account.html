@@ -128,14 +128,13 @@
     <h2 id="claim_h">Claim your count</h2>
     <p class="sub" id="claim_p"></p>
     <form id="form_claim">
-      <!-- Name and username are chosen HERE, not inherited. Whatever the count
-           was filed under was a placeholder; this is the moment it becomes
-           somebody's own, so the fields start empty rather than prefilled with
-           a name the new owner never picked.
-           The placeholders say nothing in particular ON PURPOSE. They read
-           "Keltan"/"keltan" for a while, which is a stranger's name to everyone
-           who claimed after him, and filling them from the invite would show
-           the very placeholder slug this form exists to retire. -->
+      <!-- Name and username are chosen HERE, not inherited. The fields start
+           EMPTY — whatever the count was filed under is not what the new owner
+           picked — but the name placeholder greys in the name the rides are
+           already under, so the page recognises who it is talking to
+           (Carter, 2026-09-18). It is a placeholder, so nothing is submitted
+           unless it is typed. The USERNAME placeholder stays the plain word:
+           the @handle is the part nobody should be nudged into keeping. -->
       <label for="cl_name">Display name</label>
       <input id="cl_name" type="text" autocomplete="name" maxlength="40" placeholder="Your name" required>
       <label for="cl_user">Username</label>
@@ -354,9 +353,10 @@ fetch('/api/auth/me', { credentials: 'same-origin' })
         $('hero_badge').textContent = 'Invitation';
         $('hero_h').textContent = 'Claim your count.';
         $('hero_p').textContent = 'Your rides are already here. This puts them behind your own login.';
-        // Deliberately does NOT print res.j.name. The invite already proves which
-        // count this is — it only opens one — and naming the placeholder here is
-        // the one thing this form exists to let somebody replace.
+        // The name the rides are filed under, greyed into the name field so the
+        // page knows who it is talking to. Placeholder only — never .value —
+        // so it is never submitted by someone who meant to type their own.
+        if (res.j.name) $('cl_name').placeholder = res.j.name;
         $('claim_h').textContent = 'Claim your count';
         $('claim_p').textContent = 'Everything already logged stays exactly as it is. '
           + 'Pick the name and username you want it under.';
