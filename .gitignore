@@ -16,3 +16,6 @@ max-import-*.xlsx
 # Local working/temp files
 ~$*
 *.xlsx
+
+# Local dev database (tools/dev-server.mjs)
+.dev.db
