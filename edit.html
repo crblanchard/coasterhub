@@ -76,7 +76,7 @@
 
   <div id="app">
     <header class="bar">
-      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button><button id="mClones">Clones</button></div>
+      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button><button id="mClones">Categories</button></div>
       <input id="q" placeholder="Search…" style="max-width:220px">
       <label class="cbrow" id="fIncWrap"><input type="checkbox" id="incOnly"> Only incomplete</label>
       <label class="cbrow" id="fGeoWrap"><input type="checkbox" id="ungeoOnly"> Only un-geocoded</label>
@@ -255,18 +255,22 @@
     var groups = state.clones.filter(function(g){ return !q || g.name.toLowerCase().indexOf(q)>=0; });
     var sug = state.suggest.filter(function(g){ return !q || g.name.toLowerCase().indexOf(q)>=0; });
     document.getElementById('count').textContent =
-      groups.length + " group" + (groups.length===1?"":"s") + " \u00b7 " + sug.length + " suggested";
+      groups.length + " categor" + (groups.length===1?"y":"ies") + " \u00b7 " + sug.length + " suggested";
     document.getElementById('list').innerHTML =
       (state.cloneErr ? '<div class="row"><b>' + esc(state.cloneErr) + '</b></div>' : '')
       + (groups.length ? groups.map(function(g){
-          return '<div class="row" data-cg="'+g.id+'"><b>'+esc(g.name)+'</b>'
-            + '<span class="sub">' + (g.note ? esc(g.note) + ' \u00b7 ' : '')
-            + g.ids.length + ' rides</span></div>'; }).join('')
-        : '<div class="row"><span class="sub">No groups yet.</span></div>')
-      + (sug.length ? '<div class="row"><b>Suggested</b><span class="sub">name + model, not yet answered</span></div>'
+          return '<div class="row" data-cg="'+g.id+'">'
+            + '<div class="nm">'+esc(g.name)+'</div>'
+            + '<div class="pk">' + (g.note ? esc(g.note) + ' \u00b7 ' : '')
+            + g.ids.length + ' rides</div></div>'; }).join('')
+        : '<div class="row"><div class="pk">No categories yet. Take one from the '
+            + 'suggestions below, or build one a ride at a time.</div></div>')
+      + (sug.length ? '<div class="row"><div class="nm">Suggested</div>'
+          + '<div class="pk">rides sharing a name AND a model \u2014 not yet answered</div></div>'
           + sug.map(function(g,i){
-          return '<div class="row" data-sg="'+i+'"><b>'+esc(g.name)+'</b>'
-            + '<span class="sub">'+esc(g.note)+' \u00b7 '+g.members.length+' rides</span></div>'; }).join('')
+          return '<div class="row" data-sg="'+i+'">'
+            + '<div class="nm">'+esc(g.name)+'</div>'
+            + '<div class="pk">'+esc(g.note)+' \u00b7 '+g.members.length+' rides</div></div>'; }).join('')
         : '');
     document.getElementById('list').querySelectorAll('[data-cg]').forEach(function(r){
       r.onclick = function(){ showGroup(+r.getAttribute('data-cg')); }; });
@@ -278,10 +282,11 @@
     document.getElementById('editor').innerHTML =
       '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(g.name)+'</h2>'
       + '<p class="hint">'+esc(g.note)+' \u2014 '+g.members.length+' coasters share this name and model. '
-      + 'Accept and they become one row in everybody\u2019s ranking.</p>'
+      + 'Accept and this becomes a Coaster Hub category: everybody is offered it, and '
+      + 'anyone who takes it gets these rides as one row.</p>'
       + '<div class="grid" style="margin:10px 0">' + g.members.map(function(m){
           return '<div class="fld full"><label>'+esc(cname(m.id))+'</label></div>'; }).join('') + '</div>'
-      + '<div class="actions"><button id="acc">Accept as a group</button>'
+      + '<div class="actions"><button id="acc">Accept as a category</button>'
       + '<span class="toast" id="ctoast"></span></div>';
     document.getElementById('acc').onclick = async function(){
       try {
@@ -306,8 +311,8 @@
       + '</div>'
       + '<div class="inline"><input id="cgadd" placeholder="Add a coaster by name\u2026" style="flex:1">'
       + '</div><div class="grid" id="cghits"></div>'
-      + '<div class="actions"><button id="cgsave">Save group</button>'
-      + '<button class="danger" id="cgdel">Delete group</button>'
+      + '<div class="actions"><button id="cgsave">Save category</button>'
+      + '<button class="danger" id="cgdel">Delete category</button>'
       + '<span class="toast" id="ctoast"></span></div>';
     var extra = [];
     function redrawHits(){
