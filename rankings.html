@@ -42,6 +42,12 @@
      nothing about it. The heading already names whose list this is. */
   #mine.readonly .grip,#mine.readonly .acts,#mine.readonly #save,
   #mine.readonly #v_add,#mine.readonly #pane_add,#mine.readonly .seg{display:none}
+  /* A category still OPENS while the list is read-only — looking at what is
+     inside one is reading, not editing. What goes is everything that changes
+     it: without this you could press "Numbered" on a list you cannot save, and
+     nothing would appear to take the change anywhere. */
+  #mine.readonly .rrow .mhead,#mine.readonly .rrow .mrow .macts,
+  #mine.readonly .rrow .excl .tiny{display:none}
   #mine.readonly .rrow{cursor:default}
   /* Edit is the read-only state's only control, and it goes away once pressed. */
   #mine:not(.readonly) #edit{display:none}
@@ -77,7 +83,14 @@
   /* A clone group: one row for the five Batmans, numbered with the span it
      holds. Tinted rather than outlined — it is still a row of the same list,
      not a box sitting in it. */
-  .rrow.grp{background:var(--tint);border-color:var(--accent2);flex-wrap:wrap}
+  .rrow.grp{background:var(--tint);border-color:var(--accent2);flex-wrap:wrap;cursor:pointer}
+  #mine.readonly .rrow.grp{cursor:default}
+  .rrow .chev{flex:none;color:var(--muted);margin-left:6px;vertical-align:-1px;
+              transition:transform .15s ease}
+  .rrow.grp.open .chev{transform:rotate(180deg)}
+  @media (prefers-reduced-motion: reduce){ .rrow .chev{transition:none} }
+  .rrow .mrow .grip{font-size:.85rem;opacity:.8}
+  .rrow .mrow.drag{opacity:.45}
   .rrow .pos.rng{min-width:auto;font-size:.82rem;letter-spacing:-.02em}
   .rrow .nm b .cnt{color:var(--accent2);font-weight:800;font-size:.8rem;margin-left:7px}
   .rrow .acts .exp{font-weight:700}
@@ -692,7 +705,8 @@ function renderRank(){
     // unchanged — you just answer for it once.
     var head = b.g
       ? '<span class="pos rng">'+(b.from+1)+'\u2013'+(b.to+1)+'</span>'
-        +'<span class="nm"><b>'+esc(b.g.name)+'<span class="cnt">\u00d7'+b.ids.length+'</span></b>'
+        +'<span class="nm"><b>'+esc(b.g.name)+'<span class="cnt">\u00d7'+b.ids.length+'</span>'
+        +CHEV+'</b>'
         +'<span class="sub"><span class="pl">'+esc(b.g.note||'the same ride at '+b.ids.length+' parks')+'</span>'
         +'</span></span>'
       : '<span class="pos">'+(b.from+1)+'</span>'
@@ -716,7 +730,9 @@ function renderRank(){
         +'<button class="tiny" type="button" data-reset="'+key+'" '
           +'title="Back to alphabetical, by park">Reset order</button></div>'
       +b.ids.map(function(id,k){ var c=BYID[id]||{};
-        return '<div class="mrow"><span class="mp'+(numbered?'':' tilde')+'">'
+        return '<div class="mrow" data-mid="'+id+'">'
+          +'<span class="grip" data-mgrip="'+id+'" aria-hidden="true">\u283f</span>'
+          +'<span class="mp'+(numbered?'':' tilde')+'">'
           +(numbered?(b.from+k+1):'~')+'</span>'
           // The park leads: inside a category the ride name is the same five
           // times over and the park is the only thing telling them apart.
@@ -740,13 +756,13 @@ function renderRank(){
           +'<button class="tiny" type="button" data-allback="'+key+'" '
           +'style="margin-top:7px">Pull all back in</button></div>' : '')
       +'</div>' : '';
-    return '<div class="rrow'+(b.g?' grp':'')+'" data-i="'+i+'">'
+    return '<div class="rrow'+(b.g?' grp':'')+(b.g&&OPEN[key]?' open':'')+'" data-i="'+i+'"'
+      +(b.g?' data-open="'+key+'" role="button" tabindex="0" aria-expanded="'
+            +(OPEN[key]?'true':'false')+'"':'')+'>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
       +head
       +'<span class="acts">'
-        +(b.g?'<button class="exp" data-exp="'+key+'" aria-expanded="'+(OPEN[key]?'true':'false')+'" '
-              +'title="Show the rides in this group" aria-label="Show the rides in this group">'
-              +(OPEN[key]?'\u2212':'+')+'</button>':'')
+
         +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
         +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
         +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
@@ -755,8 +771,20 @@ function renderRank(){
   $('gatherbar').style.display = scattered() ? 'flex' : 'none';
   el.querySelectorAll('[data-up]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.up,-1); }; });
   el.querySelectorAll('[data-down]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.down,1); }; });
-  el.querySelectorAll('[data-exp]').forEach(function(b){ b.onclick=function(){
-    var k=b.dataset.exp; OPEN[k]=!OPEN[k]; renderRank(); }; });
+  // The whole card is the way in. Every control sitting on it stops the click,
+  // or moving a category up the list would also open it — and the grips are
+  // controls too, or a drag that ends on the card toggles it.
+  el.querySelectorAll('[data-open]').forEach(function(r){
+    var toggle=function(ev){
+      if(ev.target.closest('button, input, select, textarea, .grip')) return;
+      if(Date.now()-dragEnded < 300) return;
+      var k=r.dataset.open; OPEN[k]=!OPEN[k]; renderRank();
+    };
+    r.onclick=toggle;
+    r.onkeydown=function(ev){
+      if(ev.key===' '||ev.key==='Enter'){ ev.preventDefault(); toggle(ev); }
+    };
+  });
   // The whole run comes out: it is one item on the list now, and taking five
   // rides off one at a time is what the group exists to save you.
   el.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){
@@ -766,7 +794,8 @@ function renderRank(){
   el.querySelectorAll('[data-dropone]').forEach(function(b){ b.onclick=function(){
     var k=ORDER.indexOf(+b.dataset.dropone);
     if(k>=0){ ORDER.splice(k,1); markDirty(); renderRank(); renderAdd(); } }; });
-  el.querySelectorAll('[data-grip]').forEach(function(g){ g.addEventListener('pointerdown',startDrag); });
+  el.querySelectorAll('[data-grip],[data-mgrip]').forEach(function(g){
+    g.addEventListener('pointerdown',startDrag); });
 
   // Numbers on or off for this category. The rides do not move either way —
   // only what the column says — so an order set here survives the switch.
@@ -853,6 +882,10 @@ function ownerOf(id){
 }
 
 function catKey(g){ return g.key || ('c'+g.id); }
+
+var CHEV = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" '
+  + 'stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" '
+  + 'aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
 
 // Everything a category owns that is ranked somewhere else, with how far from
 // the category's own block it ended up.
@@ -945,12 +978,20 @@ function move(i,d){
 
 // Pointer-based drag: works with touch and mouse alike (HTML5 drag-and-drop
 // doesn't fire on mobile Safari at all, which is where this gets used most).
-var dragFrom=-1, dragY=0, dragPid=null, dragRAF=0;
+var dragFrom=-1, dragY=0, dragPid=null, dragRAF=0, dragEnded=0;
 // Edge-scroll state: when the finger entered the band, the last frame's
 // timestamp, and the sub-pixel remainder scrollBy cannot take.
 var edgeT0=0, edgeLast=0, edgeAcc=0;
 
+// Two things can be dragged and they are not the same thing. A CARD moves a
+// whole block against the other blocks. A RIDE inside an open category moves
+// against its neighbours in that category — and if you take it past the card's
+// edge it leaves the category entirely and carries on as a card, which is the
+// gesture people try first.
 function startDrag(e){
+  var mg=e.currentTarget.dataset.mgrip;
+  if(mg!==undefined){ return startMemberDrag(e, +mg); }
+  dragMember=0;
   dragFrom=+e.currentTarget.dataset.grip;
   dragY=e.clientY; dragPid=e.pointerId;
   e.currentTarget.setPointerCapture(e.pointerId);
@@ -964,9 +1005,95 @@ function startDrag(e){
 }
 
 function onDrag(e){
+  if(dragMember){ dragY=e.clientY; memberTo(dragY); return; }
   if(dragFrom<0) return;
   dragY=e.clientY;
   reorderTo(dragY);
+}
+
+// The ride being dragged, by coaster id — an id survives a re-render where an
+// index does not, and this re-renders on every step.
+var dragMember=0;
+
+function startMemberDrag(e, id){
+  dragMember=id; dragFrom=-1;
+  dragY=e.clientY; dragPid=e.pointerId;
+  e.currentTarget.setPointerCapture(e.pointerId);
+  e.currentTarget.addEventListener('pointermove',onDrag);
+  e.currentTarget.addEventListener('pointerup',endDrag);
+  e.currentTarget.addEventListener('pointercancel',endDrag);
+  var row=$('ranklist').querySelector('.mrow[data-mid="'+id+'"]');
+  if(row) row.classList.add('drag');
+  edgeT0=0; edgeLast=0; edgeAcc=0;
+  if(!dragRAF) dragRAF=requestAnimationFrame(edgeScroll);
+  e.preventDefault();
+}
+
+// Re-attach the pointer to whichever grip now represents what is being dragged.
+// Every step re-renders, which throws away the element the gesture started on.
+function recapture(sel, cls){
+  var g=$('ranklist').querySelector(sel);
+  if(!g) return false;
+  if(dragPid!=null){ try{ g.setPointerCapture(dragPid); }catch(err){} }
+  g.addEventListener('pointermove',onDrag);
+  g.addEventListener('pointerup',endDrag);
+  g.addEventListener('pointercancel',endDrag);
+  var row=g.closest(cls); if(row) row.classList.add('drag');
+  return true;
+}
+
+function memberTo(y){
+  var id=dragMember, g=CLONE[id];
+  if(!g) return;
+  var card=$('ranklist').querySelector('.rrow.grp.open');
+  if(!card) return;
+  var box=card.getBoundingClientRect();
+
+  // Past the edge of the card: it stops being one of these rides. Pull it out,
+  // then carry on as an ordinary card drag from wherever it landed, so the
+  // gesture does not have to be restarted.
+  if(y<box.top || y>box.bottom){
+    PULLED[id]=1; CATS.pulled=(CATS.pulled||[]).concat([id]);
+    delete CLONE[id];
+    snug(id,g); markPrefs(); renderRank(); renderAdd();
+    var bs=blocks();
+    for(var i=0;i<bs.length;i++){
+      if(bs[i].ids.length===1 && bs[i].ids[0]===id){
+        dragMember=0; dragFrom=i;
+        recapture('[data-grip="'+i+'"]', '.rrow');
+        reorderTo(y);
+        return;
+      }
+    }
+    dragMember=0;
+    return;
+  }
+
+  var rows=[].slice.call(card.querySelectorAll('.mrow'));
+  var at=-1, to=-1, k;
+  for(k=0;k<rows.length;k++){
+    if(+rows[k].dataset.mid===id) at=k;
+    var r=rows[k].getBoundingClientRect();
+    if(y>=r.top && y<=r.bottom) to=k;
+  }
+  if(at<0) return;
+  if(to<0){                                  // between rows, inside the card
+    var first=rows[0].getBoundingClientRect();
+    var last=rows[rows.length-1].getBoundingClientRect();
+    to = y<first.top ? 0 : (y>last.bottom ? rows.length-1 : at);
+  }
+  if(to===at) return;
+
+  // Members are contiguous in ORDER, so moving one inside the category is a
+  // splice within its own run and nothing outside it shifts.
+  var from0=ORDER.indexOf(+rows[0].dataset.mid);
+  if(from0<0) return;
+  var run=ORDER.slice(from0, from0+rows.length);
+  run.splice(run.indexOf(id),1);
+  run.splice(to,0,id);
+  ORDER=ORDER.slice(0,from0).concat(run).concat(ORDER.slice(from0+rows.length));
+  markDirty(); renderRank();
+  recapture('[data-mgrip="'+id+'"]', '.mrow');
 }
 
 // Move the dragged row to whatever is under `y` now. Split out of onDrag so the
@@ -1078,7 +1205,11 @@ function edgeScroll(ts){
 }
 
 function endDrag(){
-  dragFrom=-1; dragPid=null;
+  // A drag that started on a grip and ended on another one fires a click on
+  // their common ancestor — which is the card, whose job is to open and close.
+  // Without this, dragging a ride inside a category shuts the category.
+  dragEnded=Date.now();
+  dragFrom=-1; dragPid=null; dragMember=0;
   edgeT0=0; edgeLast=0; edgeAcc=0;
   if(dragRAF){ cancelAnimationFrame(dragRAF); dragRAF=0; }
   renderRank();
