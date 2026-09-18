@@ -146,8 +146,46 @@ function seed() {
     for (const r of (j.rides || [])) { ir.run(slug, r.c, r.d ?? null); rides++; }
   }
 
+  // A coaster nobody has ridden. Every one of the 1,114 real ones is in
+  // somebody's count, so without this the /edit delete UI can only ever show
+  // its "N riders still have this — merge it instead" branch and the other half
+  // of that screen is unreachable. The stub this server replaced kept id 999001
+  // free for the same reason.
+  ic.run(999001, "Nobody's Ridden This", "Cedar Point", "Steel", "Test", "Test",
+         100, 50, 2000, 0, 90, 1, 2026, "2026-05-01", "day", null, null);
+
+  // A feed with the shapes that have actually broken /changes before. This is
+  // the one thing the old stub had that a real database does not hand you: a
+  // fresh table is empty, and these rows are a regression test written as data.
+  const ia = db.prepare(
+    "INSERT INTO activity (at,actor,kind,subject,n,detail) VALUES (?,?,?,?,?,?)");
+  const ago = (min) => new Date(Date.now() - min * 60000).toISOString();
+  const J = (o) => JSON.stringify(o);
+  // Three ranking saves minutes apart: /changes has to fold these into one line.
+  ia.run(ago(2),  "carter", "ranking", null, 1, J({ added:1, removed:0, reordered:false, total:108, saves:1 }));
+  ia.run(ago(4),  "carter", "ranking", null, 1, J({ added:1, removed:0, reordered:false, total:107, saves:1 }));
+  ia.run(ago(21), "carter", "ranking", null, 3, J({ added:3, removed:0, reordered:true,  total:106, saves:1 }));
+  // Credit bursts, which fold the same way but say something different.
+  ia.run(ago(30), "cole", "credits", null, 2, J({ rides:2, coasters:2, newCredits:2, date:null }));
+  ia.run(ago(33), "cole", "credits", null, 1, J({ rides:1, coasters:1, newCredits:1, date:null }));
+  ia.run(ago(1500), "sean", "rides", "Universal Studios Hollywood", 2,
+         J({ rides:2, coasters:1, newCredits:1, date:"2026-08-02" }));
+  // A rename written today carries its own park...
+  ia.run(ago(300), null, "coaster_renamed", "Top Thrill 2",  null,
+         J({ id:1, from:"Top Thrill Dragster", park:"Cedar Point" }));
+  // ...while a backfilled one has only the coaster id, so /changes has to look
+  // the park up from the coaster list. Both have to print it.
+  ia.run("2026-08-05", null, "coaster_renamed", "Thunder Striker", null,
+         J({ id:96, from:"Intimidator", backfilled:true }));
+  ia.run("2026-08-05", null, "coaster_merged", "Batgirl Batarang", null,
+         J({ id:1020, from:"Batgirl", backfilled:true }));
+  // A bare date and no actor at all — the shape that used to push the day
+  // headings out of order.
+  ia.run("2026-07-30", null, "coaster_added", "Hyperia", null,
+         J({ park:"Thorpe Park", backfilled:true }));
+
   console.log("seeded " + list.length + " coasters, " + Object.keys(parks).length +
-              " parks, " + rides.toLocaleString() + " rides");
+              " parks, " + rides.toLocaleString() + " rides, 10 feed events");
 }
 
 // ---- the real Worker -------------------------------------------------------
