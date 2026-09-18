@@ -758,10 +758,9 @@ function renderRank(){
           +'<span class="grip" data-mgrip="'+id+'" aria-hidden="true">\u283f</span>'
           +'<span class="mp'+(numbered?'':' tilde')+'">'
           +(numbered?(b.from+k+1):'~')+'</span>'
-          // The park leads: inside a category the ride name is the same five
-          // times over and the park is the only thing telling them apart.
-          +'<span class="mn">'+esc(c.park||'')
-          +(c.name && c.name!==b.g.name ? '<span>'+esc(c.name)+'</span>' : '')+'</span>'
+          // Name then park, the same way every other row on the site reads.
+          +'<span class="mn">'+esc(c.name||'')
+          +(c.park ? '<span>'+esc(c.park)+'</span>' : '')+'</span>'
           +'<span class="macts">'
           +'<button data-pull="'+id+'" title="Rank this one on its own" '
             +'aria-label="Rank this one on its own">\u2197</button>'

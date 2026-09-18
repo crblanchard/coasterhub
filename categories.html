@@ -99,8 +99,8 @@
 </div></header>
 
 <section class="hero" style="--hero-t:56px;--hero-b:20px"><div class="container">
-  <span class="badge">Categories</span>
-  <h1 style="max-width:20ch" id="hero_h">The same ride, ranked once.</h1>
+  <span class="badge" id="hero_badge">Categories</span>
+  <h1 style="max-width:20ch" id="hero_h">Categories.</h1>
   <p id="hero_p" data-loading>Loading…</p>
 </div></section>
 
@@ -223,9 +223,9 @@ function catCard(g){
     h+='<div class="body">'
       +g.ids.map(function(id){ var c=BY[id]||{};
         return '<div class="mrow'+(RIDDEN[id]?'':' unridden')+'">'
-          +'<span class="mp">'+esc(c.park||('#'+id))
-          +(c.name&&c.name!==g.name?'<i>'+esc(c.name)+'</i>':'')
-          +(RIDDEN[id]?'':'<i>not ridden</i>')+'</span>'
+          +'<span class="mp">'+esc(c.name||('#'+id))
+          +'<i>'+esc(c.park||'')+'</i>'
+          +(RIDDEN[id]?'':'<i>\u00b7 not ridden</i>')+'</span>'
           +(own?'<button class="mini" data-drop="'+g.key+':'+id+'" title="Take it out" '
                +'aria-label="Take it out">−</button>':'')+'</div>'; }).join('')
       +(own?'<div class="foot">'
@@ -408,8 +408,14 @@ CoasterHub.me().then(function(acct){
       (res[2].rides||[]).forEach(function(x){
         var id=(typeof x==='object')?x.c:x; if(BY[id]) RIDDEN[id]=1; });
       CATS=res[3];
-      $('hero_p').textContent='Pick the ones you want, or write your own. '
-        +'Your ranking folds them into a single row each.';
+      var who=acct.name||acct.slug;
+      $('hero_badge').textContent=who+'\u2019s rankings';
+      $('hero_h').textContent=who+'\u2019s categories.';
+      document.title=who+'\u2019s Categories — Coaster Hub';
+      $('hero_p').textContent='Use any (or none) of our preset categories for your '
+        +'list or create your own! Each category displays as a single row in your '
+        +'ranking, and you are able to rank certain rides outside of their category '
+        +'if you\u2019d like.';
       $('ui').style.display='block';
       render();
     });
