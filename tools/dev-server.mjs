@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 /* A whole Coaster Hub on your laptop.
  *
- *   node tools/dev-server.mjs           →  http://127.0.0.1:8100
+ *   node tools/dev-server.mjs           →  http://127.0.0.1:8099
  *   node tools/dev-server.mjs --fresh   →  ...starting from an empty database
- *   node tools/dev-server.mjs --port 9000
+ *   PORT=9000 node tools/dev-server.mjs
+ *
+ * This replaced a stub of the same name that faked the API off the JSON files.
+ * Everything it did, this does; what it could not do was auth, D1, /edit's
+ * writes or anything the real Worker decides, which is most of what there now
+ * is to test.
  *
  * It serves the repo's files exactly as Cloudflare does — the same pretty URLs,
  * the same rewrites — and runs the REAL worker.js for /api/* and /avatars/*,
@@ -31,7 +36,11 @@ import { tmpdir } from "node:os";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
-const PORT = Number((argv[argv.indexOf("--port") + 1] || "").match(/^\d+$/)?.[0] || 8100);
+// PORT= is how the old stub took it, so keep that working; --port is here
+// because typing it inline is easier to remember than exporting a variable.
+const PORT = Number(process.env.PORT
+  || (argv[argv.indexOf("--port") + 1] || "").match(/^\d+$/)?.[0]
+  || 8099);
 const FRESH = argv.includes("--fresh");
 const DB_FILE = join(ROOT, ".dev.db");
 const PW = "letmein";                       // the admin password locally; never production's

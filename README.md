@@ -4,7 +4,7 @@ Coaster Hub website
 ## Running it locally
 
 ```sh
-node tools/dev-server.mjs          # http://127.0.0.1:8100
+node tools/dev-server.mjs          # http://127.0.0.1:8099
 node tools/dev-server.mjs --fresh  # ...from an empty database
 ```
 
