@@ -1748,6 +1748,43 @@ first-run offers, is the remaining piece.
 
 ---
 
+### Making an account reaches /changes (2026-09-18)
+
+Signing up already recorded `user_added` — "Wren joined" — because the rider row is new.
+**Claiming an invite records no rider**, so it recorded nothing at all, and somebody taking
+ownership of the page that has been about them for months went by in silence. Sean claimed his
+on 2026-09-18 and the feed never mentioned it.
+
+New kind **`claimed`**: "Cole created an account /user/cole", with a person-and-tick icon, in
+the Riders feed beside `user_added`. `migrations/014-claimed-accounts.sql` backfills one row
+per existing account, dated from `accounts.created` rather than from today, so the feed reads
+in the order things happened. Guarded on the row not already existing, so it is safe to run
+again.
+
+### The dev server builds its schema from the migration files now
+
+It used to write the tables out longhand, and that copy had drifted **four** times:
+
+- `rankings` had the JSON `ord` column the Worker has never used — `/rankings` 500ed here.
+- `sessions` had `account_id` where the Worker writes `account` — claiming an invite
+  half-succeeded: the account row and the activity row were written, then `startSession` threw.
+- `users` had no `created`, which `addUser()` writes — **signup 500ed**.
+- (and `000-base-schema.sql`, which STAGING.md tells Carter to run on a fresh D1, had the same
+  first and third bugs, so a staging database built by the book would have had neither working
+  rankings nor working signup.)
+
+All four were invisible because `tools/test-rides-api.mjs` carries a THIRD copy of the schema,
+and that one is right. `tools/dev-server.mjs` now runs `000, 003, 007, 010, 012, 013, 014` from
+`migrations/` — the order STAGING.md gives — twice each. A migration that is not
+re-runnable, or that does not make the shape the Worker queries, now fails when the dev server
+starts instead of in the D1 console.
+
+**The harness is still a fourth copy.** It builds its tables inline because it wants a
+deliberately minimal fixture, and it is the one that has never been wrong — but if a fifth
+drift ever shows up, that is where to look next.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

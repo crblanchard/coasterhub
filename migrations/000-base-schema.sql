@@ -54,12 +54,13 @@ CREATE TABLE IF NOT EXISTS parks (
 );
 
 CREATE TABLE IF NOT EXISTS users (
-  slug   TEXT PRIMARY KEY,
-  name   TEXT,
-  mode   TEXT,           -- vestigial since 001; every rider is 'rides' now
-  email  TEXT,
-  bio    TEXT,
-  avatar TEXT
+  slug    TEXT PRIMARY KEY,
+  name    TEXT,
+  mode    TEXT,          -- vestigial since 001; every rider is 'rides' now
+  email   TEXT,
+  created TEXT,          -- addUser() writes this; signup 500s without it
+  bio     TEXT,
+  avatar  TEXT
 );
 
 -- One row per lap. An undated row is a credit somebody ticked off a list from

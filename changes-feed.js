@@ -26,11 +26,13 @@
     added:    '<path d="M12 5v14M5 12h14"/>',
     edited:   '<path d="M4 20h4L19 9l-4-4L4 16zM14 5l4 4"/>',
     merged:   '<path d="M7 4v6a4 4 0 0 0 4 4h6M17 10l3 4-3 4"/>',
-    deleted:  '<path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/>'
+    deleted:  '<path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/>',
+    // A person with a tick: somebody is now behind a page that was already here.
+    claimed:  '<path d="M15 20v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M8.5 7a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7M16 11l2 2 4-4"/>'
   };
   // Which of the two feeds an event belongs to: something a rider did to their own
   // count, or something that changed the shared list everyone draws from.
-  var RIDER_KINDS = { rides:1, credits:1, ranking:1, ride_removed:1, user_added:1 };
+  var RIDER_KINDS = { rides:1, credits:1, ranking:1, ride_removed:1, user_added:1, claimed:1 };
   
   function icon(kind){
     var k = kind === 'ride_removed' ? 'removed'
@@ -106,6 +108,8 @@
     }
     if (e.kind === 'coaster_deleted') return (sub || 'A coaster') + ' was deleted';
     if (e.kind === 'user_added')      return (sub || 'A rider') + ' joined'
+      + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
+    if (e.kind === 'claimed')         return (sub || 'A rider') + ' created an account'
       + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
     if (e.kind === 'user_renamed')    return (sub || 'A rider') + ' is now '
       + (e.actor ? '<b>' + esc(e.actor) + '</b> <span class="sub">/user/' + esc(e.actor) + '</span>'

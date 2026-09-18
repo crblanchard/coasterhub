@@ -1723,8 +1723,12 @@ export default {
         // accident cannot make a second account for the same rider.
         await env.DB.prepare("UPDATE invites SET used = datetime('now') WHERE code = ?").bind(code).run();
         await env.DB.prepare("UPDATE users SET email = COALESCE(email, ?) WHERE slug = ?").bind(email, slug).run();
+        // The news here is not a new rider — that page has existed for months —
+        // it is that the person it is about now owns it.
+        const who = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(slug).first();
+        await recordActivity(env, "claimed", { actor: slug, subject: who && who.name || slug });
         const raw = await startSession(env, acctId);
-        return json({ ok: true, slug }, 200, { "set-cookie": setCookie(raw) });
+        return afterWrite(ctx, env, json({ ok: true, slug }, 200, { "set-cookie": setCookie(raw) }));
       }
 
       // Edit your profile: display name, username, bio — any combination, each

@@ -1002,6 +1002,15 @@ async function main() {
     check("...and Carter's rides are untouched",
       rows(db, "SELECT * FROM rides WHERE user_slug = 'carter'").length === 3);
     check("...and no second rider was created", rows(db, "SELECT * FROM users").length === 3);
+    // Signing up records `user_added` because the rider is new. Claiming makes
+    // no rider, so before this it recorded nothing and somebody taking over
+    // their own page never reached /changes.
+    {
+      const said = rows(db, "SELECT actor, subject FROM activity WHERE kind = 'claimed'");
+      check("...and the feed says somebody made an account",
+        said.length === 1 && said[0].actor === "carter" && said[0].subject === "Carter",
+        JSON.stringify(said));
+    }
 
     const carter = r.cookie;
     r = await call(db, "POST", "/api/rides",

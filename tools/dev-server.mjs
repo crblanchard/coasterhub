@@ -69,40 +69,23 @@ if (FRESH && existsSync(DB_FILE)) rmSync(DB_FILE);
 const seeding = !existsSync(DB_FILE);
 const db = new DatabaseSync(DB_FILE);
 
-// The tables the early migrations made, written out longhand: 001-009 are data
-// fixes against a shape that no longer exists anywhere, so there is nothing to
-// replay. Everything from 010 on IS replayed from the file below, which means a
-// migration that is not re-runnable fails here rather than in the D1 console.
-db.exec(`
-  CREATE TABLE IF NOT EXISTS coasters (id INTEGER PRIMARY KEY, name TEXT, park TEXT, type TEXT,
-    manu TEXT, model TEXT, h REAL, s REAL, l REAL, inv INTEGER, dur INTEGER, laps INTEGER,
-    yr INTEGER, opened TEXT, openedPrec TEXT, closed TEXT, closedPrec TEXT);
-  CREATE TABLE IF NOT EXISTS parks (name TEXT PRIMARY KEY, lat REAL, lon REAL, region TEXT);
-  CREATE TABLE IF NOT EXISTS users (slug TEXT PRIMARY KEY, name TEXT, mode TEXT,
-    email TEXT, bio TEXT, avatar TEXT);
-  CREATE TABLE IF NOT EXISTS rides (id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_slug TEXT, coaster_id INTEGER, d TEXT);
-  CREATE TABLE IF NOT EXISTS rankings (user_slug TEXT NOT NULL, coaster_id INTEGER NOT NULL,
-    pos INTEGER NOT NULL, PRIMARY KEY (user_slug, coaster_id));
-  CREATE TABLE IF NOT EXISTS activity (id INTEGER PRIMARY KEY AUTOINCREMENT,
-    at TEXT, actor TEXT, kind TEXT, subject TEXT, n INTEGER, detail TEXT);
-  CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE, pw TEXT, slug TEXT UNIQUE, is_admin INTEGER DEFAULT 0, created TEXT);
-  CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT,
-    account_id INTEGER, token TEXT UNIQUE, created TEXT, seen TEXT);
-  CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, slug TEXT NOT NULL,
-    created TEXT NOT NULL, used TEXT);
-  CREATE TABLE IF NOT EXISTS resets (token TEXT PRIMARY KEY, account_id INTEGER,
-    created TEXT, used TEXT);
-  -- Renames keep the old name working, and /api/coasters reads both of these on
-  -- every request — without them the shared list 500s and nothing loads.
-  CREATE TABLE IF NOT EXISTS coaster_aliases (coaster_id INTEGER, former_name TEXT);
-  CREATE TABLE IF NOT EXISTS park_aliases (park TEXT, former_name TEXT);
-`);
-
-// Schema migrations, applied in order and applied TWICE — the file claims to be
-// re-runnable and this is where that claim gets tested. Add new ones here.
-const SCHEMA = ["010-follows.sql", "012-clone-groups.sql", "013-rider-categories.sql"];
+// The schema comes from the migration FILES, in the order STAGING.md gives for
+// a brand new database. Nothing is written out longhand here any more.
+//
+// It used to be, and the copy drifted three times: `rankings` was declared with
+// a JSON `ord` column the Worker has never used (so /rankings 500ed here),
+// `sessions` had `account_id` where the Worker writes `account` (so claiming an
+// invite half-succeeded), and `users` had no `created`. Every one of those was
+// invisible because the tests carry their own third copy. Reading the files is
+// the only version of this that cannot drift — and it means a migration that is
+// not re-runnable, or that does not make the shape the Worker queries, fails
+// HERE rather than in the D1 console.
+//
+// 001-009 that are missing from this list are data fixes against a shape that no
+// longer exists; 000 subsumes 002 and 008. Add a new migration to the end.
+const SCHEMA = ["000-base-schema.sql", "003-accounts.sql", "007-password-resets.sql",
+                "010-follows.sql", "012-clone-groups.sql", "013-rider-categories.sql",
+                "014-claimed-accounts.sql"];
 for (const f of SCHEMA) {
   const p = join(ROOT, "migrations", f);
   if (!existsSync(p)) { console.warn("! missing migration " + f); continue; }
