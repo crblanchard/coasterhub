@@ -1858,6 +1858,31 @@ reads a `LIST_CACHE` endpoint after writing to it needs the same.
 
 ---
 
+### The members list is the truth (2026-09-18)
+
+Sorting the rides in a category by name was the ask; the rest followed from Carter's next
+sentence — *"when something's in the list make it not come up in search"*.
+
+- **Sorted by name, then park.** Within a clone family every name is identical, so the park is
+  what actually separates them; a hand-built category (every SLC) is the other way round. Both
+  keys, in that order. The members list and the search results use the same comparator.
+- **Search cannot offer a ride the category already has.** It is filtered out.
+- **A ride you tick moves straight up into Members**, marked `· new` until saved. The
+  `extra` array is gone: it let a ride be ticked below and absent above at the same time, and a
+  save could send something the page was not showing. Now `#cgmem` IS what gets saved.
+- **A ride in a DIFFERENT category is shown, disabled, "already in Batman: The Ride"** —
+  not hidden. The API refuses it on save anyway, and a ride that silently never appears in
+  search leaves you wondering; naming the category that holds it answers the question.
+- **The row you tick stays where it is**, ticked and dead, instead of being pulled out of the
+  list. With six Goliaths on screen, a list that reflows on every tick is a mis-tap waiting to
+  happen on a phone. The exclusion happens on the NEXT search, which is where it belongs.
+
+Found while testing: Playwright's `check()` fights a list that re-renders under it — it
+clicks, asserts, finds the element gone, resolves `.first()` to the NEXT row and clicks that
+too, six times over. Use `click()` for anything that removes itself.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

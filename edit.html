@@ -273,6 +273,11 @@
     var c = state.coasters.find(function(x){ return x.id===id; });
     return c ? (c.name + " \u2014 " + (c.park||"?")) : ("#" + id);
   }
+  function byName(a, b){
+    var x = state.byId[a] || {}, y = state.byId[b] || {};
+    return (x.name||"").localeCompare(y.name||"", undefined, { sensitivity:"base" })
+        || (x.park||"").localeCompare(y.park||"", undefined, { sensitivity:"base" });
+  }
   function renderClones(){
     var q = document.getElementById('q').value.trim().toLowerCase();
     var groups = state.clones.filter(function(g){ return !q || g.name.toLowerCase().indexOf(q)>=0; });
@@ -350,37 +355,85 @@
       + '<div class="fld full"><label>Note \u2014 why they are one, e.g. "B&amp;M Invert"</label>'
       + '<input id="cgnote" value="'+esc(g.note||'')+'"></div></div>'
       + (made ? '' : '<p class="hint">Members. Untick to drop one; search below to add another.</p>')
-      + '<div class="grid" id="cgmem">' + g.ids.map(function(cid){
-          return '<div class="fld full"><label class="cbrow">'
-            + '<input type="checkbox" data-mem="'+cid+'" checked> '+esc(cname(cid))+'</label></div>'; }).join('')
-      + '</div>'
+      + '<div class="grid" id="cgmem"></div>'
       + '<div class="inline"><input id="cgadd" placeholder="Add a coaster by name\u2026" style="flex:1">'
       + '</div><div class="grid" id="cghits"></div>'
       + '<div class="actions"><button id="cgsave">Save category</button>'
       + (made ? '' : '<button class="danger" id="cgdel">Delete category</button>')
       + '<span class="toast" id="ctoast"></span></div>';
-    var extra = [];
-    function redrawHits(){
-      var q = document.getElementById('cgadd').value.trim().toLowerCase();
-      var hits = q.length < 2 ? [] : state.coasters.filter(function(c){
-        return (c.name||'').toLowerCase().indexOf(q) >= 0; }).slice(0, 8);
-      document.getElementById('cghits').innerHTML = hits.map(function(c){
-        return '<div class="fld full"><label class="cbrow"><input type="checkbox" data-mem="'+c.id+'"'
-          + (extra.indexOf(c.id)>=0?' checked':'') + '> '+esc(cname(c.id))+'</label></div>'; }).join('');
-      document.getElementById('cghits').querySelectorAll('[data-mem]').forEach(function(b){
+    // Everything in the category right now — saved or ticked a second ago.
+    // `added` is only used to mark the new ones, never to decide what is saved.
+    var members = g.ids.slice(), added = {};
+
+    // Which OTHER category owns a coaster. Shown rather than hidden: the API
+    // refuses it on save anyway, and "already in Batman: The Ride" answers the
+    // question, where a ride that silently never appears in search does not.
+    var owner = {};
+    state.clones.forEach(function(c){
+      if (c.id === g.id) return;
+      c.ids.forEach(function(cid){ owner[cid] = c.name; });
+    });
+
+    function redrawMembers(){
+      document.getElementById('cgmem').innerHTML =
+        members.slice().sort(byName).map(function(cid){
+          return '<div class="fld full"><label class="cbrow">'
+            + '<input type="checkbox" data-mem="'+cid+'" checked> '+esc(cname(cid))
+            + (added[cid] ? ' <span class="sub">\u00b7 new</span>' : '')
+            + '</label></div>'; }).join('')
+        || '<div class="fld full"><span class="hint">Nothing in it yet. '
+           + 'Search below.</span></div>';
+      document.getElementById('cgmem').querySelectorAll('[data-mem]').forEach(function(b){
         b.onchange = function(){
+          if (b.checked) return;                  // unticking is "drop on save"
           var cid = +b.getAttribute('data-mem');
-          if (b.checked) { if (extra.indexOf(cid)<0) extra.push(cid); }
-          else extra = extra.filter(function(x){ return x!==cid; });
+          members = members.filter(function(x){ return x !== cid; });
+          delete added[cid];
+          redrawMembers(); redrawHits();          // and it is searchable again
         };
       });
     }
+
+    function redrawHits(){
+      var q = document.getElementById('cgadd').value.trim().toLowerCase();
+      var hits = q.length < 2 ? [] : state.coasters.filter(function(c){
+        return (c.name||'').toLowerCase().indexOf(q) >= 0
+            && members.indexOf(c.id) < 0; })      // it is already up there
+        .sort(function(a, b){ return byName(a.id, b.id); }).slice(0, 8);
+      document.getElementById('cghits').innerHTML = hits.map(function(c){
+        var taken = owner[c.id];
+        return '<div class="fld full"><label class="cbrow">'
+          + '<input type="checkbox" data-add="'+c.id+'"'+(taken?' disabled':'')+'> '
+          + esc(cname(c.id))
+          + (taken ? ' <span class="sub">\u00b7 already in '+esc(taken)+'</span>' : '')
+          + '</label></div>'; }).join('')
+        || (q.length < 2 ? '' : '<div class="fld full"><span class="hint">'
+            + 'Nothing else matches.</span></div>');
+      document.getElementById('cghits').querySelectorAll('[data-add]').forEach(function(b){
+        b.onchange = function(){
+          if (!b.checked) return;
+          var cid = +b.getAttribute('data-add');
+          if (members.indexOf(cid) < 0) members.push(cid);
+          added[cid] = 1;
+          redrawMembers();
+          // The row you just ticked STAYS, ticked and dead, rather than being
+          // pulled out from under the next tap — with six Goliaths on screen,
+          // a list that reflows on every tick is a mis-tap waiting to happen.
+          // It is gone from the next search; that is where "not in the list
+          // twice" is enforced.
+          b.disabled = true;
+          var tag = document.createElement('span');
+          tag.className = 'sub'; tag.textContent = ' \u00b7 added';
+          b.parentNode.appendChild(tag);
+        };
+      });
+    }
+    redrawMembers();
     document.getElementById('cgadd').addEventListener('input', redrawHits);
     document.getElementById('cgsave').onclick = async function(){
       var ids = [];
       document.getElementById('cgmem').querySelectorAll('[data-mem]').forEach(function(b){
         if (b.checked) ids.push(+b.getAttribute('data-mem')); });
-      extra.forEach(function(x){ if (ids.indexOf(x)<0) ids.push(x); });
       var body = { name:document.getElementById('cgname').value,
                    note:document.getElementById('cgnote').value, ids:ids };
       try {
