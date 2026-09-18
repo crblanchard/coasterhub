@@ -641,6 +641,9 @@ function move(i,d){
 // Pointer-based drag: works with touch and mouse alike (HTML5 drag-and-drop
 // doesn't fire on mobile Safari at all, which is where this gets used most).
 var dragFrom=-1, dragY=0, dragPid=null, dragRAF=0;
+// Edge-scroll state: when the finger entered the band, the last frame's
+// timestamp, and the sub-pixel remainder scrollBy cannot take.
+var edgeT0=0, edgeLast=0, edgeAcc=0;
 
 function startDrag(e){
   dragFrom=+e.currentTarget.dataset.grip;
@@ -650,6 +653,7 @@ function startDrag(e){
   e.currentTarget.addEventListener('pointerup',endDrag);
   e.currentTarget.addEventListener('pointercancel',endDrag);
   var row=$('ranklist').children[dragFrom]; if(row) row.classList.add('drag');
+  edgeT0=0; edgeLast=0; edgeAcc=0;
   if(!dragRAF) dragRAF=requestAnimationFrame(edgeScroll);
   e.preventDefault();
 }
@@ -696,25 +700,66 @@ function reorderTo(y){
 // so the last ~74px of the viewport is covered on a phone and a finger there is
 // already past the last row it can see. Both are measured rather than assumed,
 // since the tab bar only exists below 680px and carries a safe-area inset.
-function edgeScroll(){
+// Dragging a coaster to the bottom of a long list is the hard case: a hundred
+// rows is thousands of pixels, and the old fixed 22px-per-frame ramp meant
+// holding at the edge for ten seconds (Carter, on a phone, 2026-09-18).
+// Three things fix it, and they are separate on purpose:
+//   - px per SECOND, not per frame. A 120Hz phone scrolled twice as fast as a
+//     60Hz one for exactly the same gesture.
+//   - an eased ramp, so the band is gentle where you enter it and quick at the
+//     rim, instead of linear all the way.
+//   - wind-up: hold at the edge and it accelerates, the way every native list
+//     does. A constant speed is what makes a long list feel unreachable.
+function edgeScroll(ts){
   dragRAF=0;
-  if(dragFrom<0) return;
+  if(dragFrom<0){ edgeT0=0; edgeLast=0; edgeAcc=0; return; }
   var topInset=0, bottomInset=0, el;
   el=document.querySelector('header.nav');
   if(el) topInset=el.getBoundingClientRect().height;
   el=document.querySelector('.tabbar');
   if(el&&getComputedStyle(el).display!=='none') bottomInset=el.getBoundingClientRect().height;
 
-  var ZONE=80, MAX=22;                       // px of trigger band, px per frame
+  // A thumb cannot get as close to the edge of a phone as a mouse pointer can,
+  // so give a touch a wider band to find.
+  var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches;
+  var ZONE=coarse?130:90, RATE=2000, WIND=2.4, WINDMS=1100;
+
+  var now=ts||(window.performance&&performance.now())||Date.now();
+  // First frame has no interval, and a backgrounded tab must not bank a huge
+  // one and jump the list on return.
+  var dt=edgeLast?Math.min((now-edgeLast)/1000,0.05):0;
+  edgeLast=now;
+
   var toBottom=(window.innerHeight-bottomInset)-dragY;
   var toTop=dragY-topInset;
-  var dy=0;
-  if(toBottom<ZONE) dy=Math.ceil(MAX*(1-Math.max(toBottom,0)/ZONE));
-  else if(toTop<ZONE) dy=-Math.ceil(MAX*(1-Math.max(toTop,0)/ZONE));
+  var dir=0, depth=0;
+  if(toBottom<ZONE){ dir=1;  depth=1-Math.max(toBottom,0)/ZONE; }
+  else if(toTop<ZONE){ dir=-1; depth=1-Math.max(toTop,0)/ZONE; }
+
+  if(!dir){
+    edgeT0=0; edgeAcc=0;
+    dragRAF=requestAnimationFrame(edgeScroll);
+    return;
+  }
+  if(!edgeT0) edgeT0=now;
+
+  var speed=RATE*depth*depth*(1+(WIND-1)*Math.min((now-edgeT0)/WINDMS,1));
+  // scrollBy takes whole pixels; keep the remainder so a slow crawl near the
+  // edge of the band still moves rather than rounding to nothing every frame.
+  edgeAcc+=dir*speed*dt;
+  var dy=edgeAcc>0?Math.floor(edgeAcc):Math.ceil(edgeAcc);
+  edgeAcc-=dy;
 
   if(dy){
     var before=window.pageYOffset;
-    window.scrollBy(0,dy);
+    // behavior:'instant', NOT the default. style.css sets
+    // html{scroll-behavior:smooth}, which makes a plain scrollBy an ANIMATION
+    // — and asking for a new one sixty times a second replaces each before it
+    // has travelled, so the page crawls however large the numbers are. This
+    // was the whole of "it doesn't go down fast enough": 5,531px asked for
+    // over two seconds, 70px delivered.
+    try { window.scrollBy({ top: dy, left: 0, behavior: 'instant' }); }
+    catch (err) { window.scrollBy(0, dy); }
     // Only re-evaluate if the page actually moved; at the very top or bottom
     // scrollBy is a no-op and re-running would thrash the list for nothing.
     if(window.pageYOffset!==before) reorderTo(dragY);
@@ -724,6 +769,7 @@ function edgeScroll(){
 
 function endDrag(){
   dragFrom=-1; dragPid=null;
+  edgeT0=0; edgeLast=0; edgeAcc=0;
   if(dragRAF){ cancelAnimationFrame(dragRAF); dragRAF=0; }
   renderRank();
 }

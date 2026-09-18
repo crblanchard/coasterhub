@@ -1478,6 +1478,39 @@ what the page is.
 
 ---
 
+## Dragging to the bottom of a ranking (2026-09-18)
+
+Carter, on a phone: *"when I drag a coaster to the bottom it doesn't go down fast enough."*
+
+**The cause was not the speed.** `style.css` has `html{scroll-behavior:smooth}`, so every
+`window.scrollBy` in `edgeScroll` was an *animation* — and asking for a new one on each of
+sixty frames a second replaced each before it had travelled. Measured in the harness: 5,531px
+requested over two seconds, **70px** delivered. `behavior:'instant'` is the fix, and it is now
+in CLAUDE.md because it applies to any scroll the code drives itself.
+
+Three things were wrong with the ramp as well, and they are worth keeping separate:
+
+- **Pixels per second, not per frame.** The old `MAX=22` per frame meant a 120Hz phone scrolled
+  twice as fast as a 60Hz one for exactly the same gesture.
+- **An eased ramp** (`depth²`), so entering the band is gentle and the rim is quick, rather than
+  linear across the whole 80px.
+- **Wind-up**: holding at the edge accelerates to 2.4× over 1.1s, the way a native list does. A
+  constant speed is what makes a long list feel unreachable.
+
+The band is also wider on a touch screen (130px vs 90px) — a thumb cannot get as close to the
+edge of a phone as a pointer can — and the sub-pixel remainder is carried between frames so a
+slow crawl near the top of the band still moves instead of rounding to nothing.
+
+Measured after, 60 rows on a 390px phone: **0 → 4,135px (the bottom) in under two seconds**,
+against 370px in three seconds before. Held 110px into the band it still creeps at ~84px/s, so
+fine placement survives. Up works the same, ~2,800px/s at the rim.
+
+One trap for whoever tests this next: `scrollTo` is animated too, so a test that sets a scroll
+position and immediately reads `pageYOffset` reads the middle of an animation. That sent me
+chasing a phantom "upward drag scrolls the wrong way" for a while — it was the test.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

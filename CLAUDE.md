@@ -106,6 +106,13 @@ those files are the fallback, and the sync overwrites them.
   `no-store` by default now (`JSON_HEADERS`); `/api/coasters` and `/api/parks`
   opt back in with an explicit short max-age. A new endpoint that returns live
   or per-user data needs nothing; one that wants caching must say so.
+- **`html{scroll-behavior:smooth}` makes every programmatic scroll an ANIMATION.**
+  `scrollBy`/`scrollTo` do not jump, and a new call replaces the running animation
+  before it has travelled — so anything that scrolls in a loop (the drag-to-reorder
+  edge scroll) crawls no matter how big the numbers are. It asked for 5,531px over
+  two seconds and moved 70. Pass `behavior:'instant'` for any scroll the code
+  drives itself. It also confounds tests: read `pageYOffset` right after a
+  `scrollTo` and you get a value from the middle of the animation.
 - **Don't commit a `wrangler.jsonc` binding that isn't provisioned yet** — the
   automatic deploy fails on it.
 - **Code that needs a migration must degrade to a 503 naming the file**, never a
