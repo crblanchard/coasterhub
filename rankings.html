@@ -28,6 +28,11 @@
   button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:9px 14px;cursor:pointer;font-size:.88rem;font-family:inherit}
   button.ghost:hover{color:var(--fg)}
   input[type=search],select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem;font-family:inherit}
+  /* A <select> sizes to its WIDEST OPTION unless told not to, and the park
+     filter holds "St. Louis's Incredible Pizza Company". At 400px it was 412px
+     wide and the whole page scrolled sideways — the one thing the layout rules
+     say must never happen. Pre-existing; found while measuring something else. */
+  select{max-width:100%}
   input[type=search]{min-width:200px;flex:1}
 
   /* ranked list */
@@ -141,6 +146,10 @@
   .rrow .xd{flex:none;font-weight:700;font-variant-numeric:tabular-nums}
   .rrow .xd.up{color:var(--up)}
   .rrow .xd.down{color:var(--down)}
+  /* A folded family in the pool wears the same wash and count badge it will
+     wear in the list, so what you are about to add looks like what you get. */
+  .addrow.grp{background:var(--tint);border-color:var(--accent2)}
+  .addrow .cnt{color:var(--accent2);font-weight:800;font-size:.8rem;margin-left:7px}
   .catpill{display:inline-flex;align-items:center;gap:8px;background:var(--panel);
            border:1px solid var(--line);border-radius:99px;padding:7px 14px;margin:0 0 12px;
            color:var(--fg);font-size:.85rem;font-weight:600;text-decoration:none}
@@ -1353,12 +1362,51 @@ function pool(){
 }
 function renderAdd(){
   FACETS.forEach(renderFacet);
-  var list=pool(), shown=list.slice(0,300);
+  // The pool folds the same way the ranking does. Five Batmans you have not
+  // ranked are one decision, not five, and adding them one at a time is exactly
+  // the work a category exists to save — so they arrive together, contiguous,
+  // and the list shows them folded the moment they land.
+  //
+  // Folded only when TWO or more are still unranked: one left is not a family,
+  // it is a coaster, and it reads better as itself. The facets narrow the group
+  // with everything else, so a Vekoma filter showing three of the five says
+  // three.
+  var list=pool(), rows=[], seenG={};
+  list.forEach(function(c){
+    var g=CLONE[c.id];
+    if(!g){ rows.push({c:c}); return; }
+    if(seenG[g.key]) return;
+    var mates=list.filter(function(x){ return CLONE[x.id]===g; });
+    if(mates.length<2){ rows.push({c:c}); return; }
+    seenG[g.key]=1;
+    rows.push({ g:g, c:c, ids:mates.map(function(x){ return x.id; }) });
+  });
+  var shown=rows.slice(0,300);
+  // Coasters, not rows: folding nine Batmans and Boomerangs into two rows does
+  // not mean seven went missing. The cap is on ROWS, so that is what the
+  // "showing the first" clause has to count, and it only speaks when the cap
+  // actually bit.
+  var folded=rows.length-list.length;
   $('addcount').textContent=list.length
     ? (nf(list.length)+($('all_coasters').checked?' coasters':' of your coasters')+' not ranked yet'
-       +(shown.length<list.length?' — showing the first '+shown.length:''))
+       +(folded<0?' \u00b7 '+(-folded+seenCount())+' of them in '+seenCount()
+                   +' categor'+(seenCount()===1?'y':'ies'):'')
+       +(shown.length<rows.length?' — showing the first '+shown.length+' rows':''))
     : '';
-  $('addlist').innerHTML=shown.length?shown.map(function(c){
+  function seenCount(){ var n=0; for(var k in seenG) if(seenG[k]) n++; return n; }
+  $('addlist').innerHTML=shown.length?shown.map(function(row){
+    if(row.g){
+      var g=row.g, n=row.ids.length, have=g.ids.length;
+      return '<div class="addrow grp">'
+        +'<span class="nm">'+esc(g.name)+'<span class="cnt">\u00d7'+n+'</span></span>'
+        +'<span class="meta"><span class="pk">'
+        +(n<have ? n+' of '+have+' left' : 'the same ride at '+n+' parks')
+        +(g.note?' \u00b7 '+esc(g.note):'')+'</span></span>'
+        +'<span class="acts"><button class="ghost" data-hhg="'+g.key+'">Rank</button>'
+        +'<button class="ghost" data-addg="'+g.key+'">Add '+n+'</button></span>'
+        +'</div>';
+    }
+    var c=row.c;
     // Height and speed are separate so speed can be dropped on its own — it's
     // the first thing to give up when the park needs the room.
     var h=c.h!=null?Math.round(c.h)+' ft':'', s=c.s!=null?Math.round(c.s)+' mph':'';
@@ -1382,6 +1430,24 @@ function renderAdd(){
   $('addlist').querySelectorAll('[data-hh]').forEach(function(b){
     b.onclick=function(){ openHH(+b.dataset.hh); };
   });
+  // The whole family, in one go and next to each other, so it is already one
+  // row by the time you look at the list.
+  $('addlist').querySelectorAll('[data-addg]').forEach(function(b){
+    b.onclick=function(){
+      var r=rowFor(b.dataset.addg); if(!r) return;
+      ORDER=ORDER.concat(r.ids); markDirty(); renderRank(); renderAdd(); };
+  });
+  // Compare ONE of them against the list — placing five identical rides by
+  // comparison would be the same question five times — then the rest follow it
+  // into the spot it won.
+  $('addlist').querySelectorAll('[data-hhg]').forEach(function(b){
+    b.onclick=function(){
+      var r=rowFor(b.dataset.hhg); if(!r) return;
+      openHH(r.ids[0], r.ids.slice(1)); };
+  });
+  function rowFor(key){
+    var f=null; rows.forEach(function(r){ if(r.g && r.g.key===key) f=r; }); return f;
+  }
   fitMeta();
 }
 
@@ -1412,9 +1478,11 @@ function fitMeta(){
 // contradicts the inference, the range reopens and the search carries on, which
 // means the spot is always settled by comparisons the rider actually made.
 var hh=null;
-function openHH(id){
-  if(!ORDER.length){ ORDER.push(id); markDirty(); renderRank(); renderAdd(); setView('rank'); return; }
-  hh={id:id, lo:0, hi:ORDER.length, asked:0, cmp:{},
+function openHH(id, mates){
+  mates=mates||[];
+  if(!ORDER.length){ ORDER=ORDER.concat([id]).concat(mates);
+    markDirty(); renderRank(); renderAdd(); setView('rank'); return; }
+  hh={id:id, mates:mates, lo:0, hi:ORDER.length, asked:0, cmp:{},
       most:Math.ceil(Math.log2(ORDER.length+1))+2};
   $('hh').style.display='flex';
   stepHH();
@@ -1430,7 +1498,7 @@ function stepHH(){
   if(!hh) return;
   var mid=nextHH();
   if(mid<0){
-    ORDER.splice(hh.lo,0,hh.id);
+    ORDER.splice.apply(ORDER,[hh.lo,0,hh.id].concat(hh.mates||[]));
     closeHH(); markDirty(); renderRank(); renderAdd(); setView('rank');
     return;
   }

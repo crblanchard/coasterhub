@@ -1988,6 +1988,40 @@ count arriving at once — is the bar described under "the first time somebody r
 
 ---
 
+### Add coasters folds too (2026-09-18)
+
+The gap the clone work left open, closed. **Five Batmans you have not ranked are one decision,
+not five**, and adding them one at a time is exactly the work a category exists to save.
+
+The pool folds the same way the ranking does. A live category with **two or more** members still
+unranked becomes one row — `Batman: The Ride ×5`, in the same wash and with the same
+count badge it will wear once it lands — and:
+
+- **Add 5** appends them together and contiguously, so they are already one row by the time you
+  look at the list.
+- **Rank** compares ONE of them against your list (placing five identical rides by comparison
+  would be the same question five times) and the rest follow it into the spot it won. `openHH`
+  takes a `mates` array now and splices them in behind the winner.
+
+One left is not a family, it is a coaster, and it reads better as itself. The facets narrow a
+group with everything else, so a Vekoma filter over five Batmans says three.
+
+The count line counts COASTERS and says the rest: *"559 of your coasters not ranked yet · 9
+of them in 2 categories — showing the first 300 rows"*. It used to compare rows against
+coasters and claim it was truncating when it was not.
+
+### A pre-existing bug found while measuring
+
+**`/rankings` scrolled sideways on a phone, and had nothing to do with categories.** A bare
+`<select>` sizes to its widest OPTION unless told otherwise, and the park filter holds
+"St. Louis's Incredible Pizza Company": 412px wide inside a 400px viewport. `select{max-width:100%}`.
+
+The only reason this turned up is that the browser check measures
+`scrollWidth - clientWidth` on every run. Keep doing that — it costs one line and it found a
+bug nobody had reported on the most-used page on the site.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**
