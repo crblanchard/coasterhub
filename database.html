@@ -17,20 +17,17 @@
              text-decoration:none;border:1px solid var(--line);border-radius:10px;
              padding:7px 13px;white-space:nowrap}
   .qcbar .go:hover{border-color:var(--accent2)}
-  /* Brand, tag and the way to /edit do not fit one phone line. Wrap rather
-     than shrink: the row was 454px wide at 390 and scrolled the whole page. */
   @media (max-width:560px){
-    .qcbar{flex-wrap:wrap;height:auto;padding:12px 0;gap:9px 10px}
-    .qcbar .go{margin-left:0;order:3}
+    .qcbar{height:60px;gap:9px}
     .qcbar .brand-text{font-size:1.05rem}
+    .qcbar .go{padding:6px 11px}
   }
   /* The site's own brand, not a one-off wordmark: this page looked like a
-     different website (Carter, 2026-09-18). What the page IS goes in a tag
-     beside it, the way the heroes wear a badge. */
+     different website (Carter, 2026-09-18). The lead paragraph under it says
+     what the page is, so nothing here has to. */
   .qcbar .brand{flex:0 0 auto}
-  .qcbar .tag{font-family:inherit;font-size:.72rem;font-weight:700;letter-spacing:.1em;
-              text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
-              border-radius:99px;padding:4px 11px;white-space:nowrap}
+  /* The same corner every other header wears. app.js fills it. */
+  .qcbar .people{flex:none;display:flex;align-items:center;gap:9px}
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0}
   .controls input[type=search],.controls select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem}
   .controls input[type=search]{min-width:240px;flex:1}
@@ -64,8 +61,8 @@
       <img src="/mark.svg?v=20260805b" alt="" class="brand-mark" width="40" height="40">
       <span class="brand-text">Coaster <b>Hub</b></span>
     </a>
-    <span class="tag">Database</span>
-    <a class="go" href="/edit">Edit the list &rarr;</a>
+    <a class="go" href="/edit">Edit</a>
+    <div class="people" id="people"></div>
   </div>
 </div>
 
@@ -85,7 +82,12 @@
   </div>
 </div></section>
 
+<script src="/app.js?v=20260805b"></script>
 <script>
+// No site nav on this page, but the corner is the corner: the theme toggle and
+// your own face, in the same place they sit everywhere else.
+CoasterHub.accountCorner(document.getElementById('people'));
+
 const COLS=[
  {k:'id',t:'ID',num:true},
  {k:'name',t:'Name',cls:'name'},

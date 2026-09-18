@@ -1459,6 +1459,25 @@ is not. `Array.sort` is stable, so that second pass keeps defunct-last inside ea
 
 ---
 
+## /database wears the site's header (2026-09-18)
+
+It had a one-off `Coaster database — QC` wordmark and read as a different website. It now uses
+the same mark and **Coaster Hub** lockup as every other page, with **Edit** on the right (one
+word, not "Edit the list →": the corner has to hold the account controls too) and the same
+theme-toggle-plus-avatar corner.
+
+`initNav` was the only way to get that corner, and it brings the whole site nav and the mobile
+tab bar with it. So the pair is split out as **`CoasterHub.accountCorner(host)`** — `initNav`
+calls it, and a page with its own header calls it directly. `/database` loads `app.js` purely
+for that.
+
+The bar is one line at every width: brand, Edit, toggle, avatar. It briefly wrapped on a phone
+when it also carried a "Database" tag and the longer link — 454px of content on a 390px screen,
+scrolling the whole page sideways. Both are gone; the lead paragraph under the bar already says
+what the page is.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

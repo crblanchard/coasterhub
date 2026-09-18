@@ -883,11 +883,20 @@
         inner.appendChild(themeHost);
       }
     }
-    if (themeHost && !themeHost.querySelector(".themetoggle")) buildThemeToggle(themeHost, true);
-    if (themeHost && !themeHost.querySelector(".acctlink")) buildAccountLink(themeHost);
+    accountCorner(themeHost);
 
     buildTabBar(page, slug);
     applyRiderLinks(slug);
+  }
+
+  // The two controls every header carries on its right: the theme toggle and
+  // whoever is signed in. Split out of initNav so a page with its own header
+  // and no site nav — /database — can wear the same corner without inheriting
+  // the rest of it (Carter, 2026-09-18).
+  function accountCorner(host) {
+    if (!host) return;
+    if (!host.querySelector(".themetoggle")) buildThemeToggle(host, true);
+    if (!host.querySelector(".acctlink")) buildAccountLink(host);
   }
 
   // The five pages, in one order, used by the header, this mobile tab bar and
@@ -1016,7 +1025,7 @@
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers,
-              adoptUsers: adoptUsers, riderBadge: riderBadge };
+              adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);
