@@ -1785,6 +1785,46 @@ drift ever shows up, that is where to look next.
 
 ---
 
+### What was actually slow, and what was just sitting there (2026-09-18)
+
+Carter asked for a purge to speed the site up. Measured first, with the dev server and a
+headless browser, and **dead code was not the problem** — nothing meaningful was dead, and
+the Worker's own size costs a page nothing.
+
+What every page loads, biggest first, is the same thing every time: **`/api/coasters`, 268 KB
+decoded** (about 30 KB over the wire gzipped, `public, max-age=300`). Everything the site
+writes itself — `app.js` 51 KB, `style.css` 36 KB — is a rounding error beside it.
+
+**The home page asked for it twice**, because `index.html` fetches the coaster list and so does
+`loadUser()`. 790 KB → **523 KB**, one fewer request. `fetchCoasters()` and `fetchParks()`
+now share a promise **while a request is in flight** and drop it the moment it settles. That is
+deliberate and the comment says so: `/add` and `/import` both fetch, write, and fetch again, and
+a cache that outlived the request would show them the list from before their own edit.
+
+**1.1 MB of artwork nothing links to** was being deployed and served: `logo-original.png` (1 MB
+on its own), `logo.png`, `logo.svg`, `favicon-small.svg`. Nothing requested them, so no page was
+ever slowed by them — they were just in the bundle. They are in `.assetsignore` now and
+still in git; `logo-original.png` is the master the others were cut from. Delete a line to put
+one back.
+
+**And the notes were public.** `CLAUDE.md`, `README.md`, `STAGING.md`, `wrangler.staging.jsonc`
+and `.gitignore` were all being served from coasterhub.org. `STAGING.md` explains what `DEV_AS`
+does and where it lives — not a hole, since the variable is not set in production, but it is
+internal reading on a public URL. All five are ignored now. `COASTERHUB_HANDOFF.md` already was.
+
+**Kept, deliberately, after asking:** the staging kit (`wrangler.staging.jsonc`, `STAGING.md`,
+`tools/staging-seed.mjs`) because beta-testing the categories UI with Max and Cole is still
+ahead of us; every import tool in `tools/`, because that is how coasters get into the database;
+and the static `<rider>.json` and `coasters.json` files, which are the API's fallback, the dev
+server's seed and the migration dry-run source all at once.
+
+**If more speed is ever wanted**, the honest next move is a slimmer `/api/coasters` for pages
+that only need `id, name, park, model`, keeping the full one for `/count` and `/edit`. It was
+left alone because it touches `computeStats()`, and a broken stat is the kind of thing nobody
+notices for a week.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

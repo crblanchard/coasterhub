@@ -5,3 +5,22 @@ wrangler.jsonc
 tools/
 migrations/
 COASTERHUB_HANDOFF.md
+
+# Artwork nothing links to. logo-original.png alone is 1 MB, and all four were
+# being deployed and served on a domain where no page has ever asked for one.
+# They stay in git — logo-original.png is the master the others were cut from —
+# they are just not part of the site any more. Delete a line to put one back.
+logo-original.png
+logo.png
+logo.svg
+favicon-small.svg
+
+# Notes to ourselves, not site content. Every one of these was being served from
+# coasterhub.org — STAGING.md in particular explains what DEV_AS does and where
+# it lives, which is internal reading whether or not the variable is set in
+# production. The handoff was already excluded; these are the rest of them.
+CLAUDE.md
+README.md
+STAGING.md
+wrangler.staging.jsonc
+.gitignore

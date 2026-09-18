@@ -322,8 +322,26 @@
       });
     });
   }
-  function fetchCoasters() { return fetchJSON("/api/coasters", "/coasters.json"); }
-  function fetchParks() { return fetchJSON("/api/parks", "/parks.json"); }
+  // The shared list and the park list are the two biggest things any page
+  // loads, and more than one part of a page wants them: the home page asked for
+  // all 1,114 coasters TWICE on every visit, because index.html fetches them and
+  // so does loadUser().
+  //
+  // Deliberately only while the request is IN FLIGHT. A finished one is dropped,
+  // so a page that adds a coaster and asks again gets the new list — /add and
+  // /import both do exactly that, and a longer-lived cache would quietly show
+  // them the list from before their own edit.
+  var inFlight = {};
+  function shared(key, apiPath, staticPath) {
+    if (inFlight[key]) return inFlight[key];
+    var p = fetchJSON(apiPath, staticPath);
+    inFlight[key] = p;
+    var done = function () { delete inFlight[key]; };
+    p.then(done, done);
+    return p;
+  }
+  function fetchCoasters() { return shared("coasters", "/api/coasters", "/coasters.json"); }
+  function fetchParks() { return shared("parks", "/api/parks", "/parks.json"); }
   function fetchUser(slug) { return fetchJSON("/api/user/" + slug, "/" + slug + ".json", LIVE); }
 
   // Ride log for one rider: { user, mode, rides:[{i?, c, d, num?, n?}] }.
