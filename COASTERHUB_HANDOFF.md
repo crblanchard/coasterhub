@@ -1825,6 +1825,39 @@ notices for a week.
 
 ---
 
+### /edit read its own writes from cache (2026-09-18)
+
+Carter saved a category with a ride he had just ticked, and the ride did not appear in the
+members list. The save was fine — the server had it. **The re-read came out of the browser
+cache.**
+
+`/api/clones`, `/api/coasters` and `/api/parks` are sent with `public, max-age=300`, which is
+right for a reader and wrong for the page that just changed them. So `loadClones()` got the
+copy from before the save, the toast said "Saved", and the editor showed the old list for up to
+five minutes. `api()` in `edit.html` passes **`cache: "no-store"`** now.
+
+This is the same family as the avatar that came back wearing its owner's previous picture
+(CLAUDE.md, JSON_HEADERS). The rule there was about endpoints that forgot to say anything;
+this is the other half: **an endpoint that correctly asks to be cached still has one caller who
+must never get the cached copy — the editor that writes it.** Any future admin page that
+reads a `LIST_CACHE` endpoint after writing to it needs the same.
+
+### The rest of that pass
+
+- **`+ New category`** in the toolbar. Accepting a suggestion only ever gets the 30 families a
+  name+model match can find; the ones worth having — every SLC, every Wacky Worm — are
+  named differently at every park and can only be built by hand. Same editor with nothing in
+  it, no Delete button until it exists, POST instead of PUT.
+- **Saving reopens the category from fresh data**, so a ride ticked out of the search results
+  appears where it now lives: in Members, at the top. Accepting a suggestion opens what it just
+  made rather than leaving you on the suggestion you have answered. Deleting clears the editor.
+- **The left list has real dividers.** `LIVE ON THE SITE` in the accent colour at the top, then
+  `RIDERS' OWN` and `SUGGESTED · NOT LIVE` as sticky grey headers with a heavy top border.
+  Before this, "Suggested" was just another row and there was no way to see where live stopped.
+  The open category carries `.sel`.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

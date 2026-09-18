@@ -38,6 +38,15 @@
   .row { padding:9px 16px; border-bottom:1px solid #f0e9dd; cursor:pointer; font-size:.9rem; }
   .row:hover { background:#f6f0e6; }
   .row.sel { background:#efe7d9; }
+  .sec { padding:14px 16px 7px; cursor:default; border-top:2px solid #d9cdb8;
+         background:#f2ece1; position:sticky; top:0; }
+  .sec:hover { background:#f2ece1; }
+  .sec .nm { text-transform:uppercase; letter-spacing:.09em; font-size:.72rem;
+             font-weight:700; color:#6b6355; }
+  .sec .pk { font-size:.76rem; }
+  .live { padding:14px 16px 7px; cursor:default; }
+  .live .nm { text-transform:uppercase; letter-spacing:.09em; font-size:.72rem;
+              font-weight:700; color:var(--accent, #1f7a6f); }
   .row .nm { font-weight:600; }
   .row .pk { color:var(--muted); font-size:.82rem; }
   .pin { font-size:.9rem; margin-right:5px; }
@@ -78,6 +87,7 @@
     <header class="bar">
       <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button><button id="mClones">Categories</button></div>
       <input id="q" placeholder="Search…" style="max-width:220px">
+      <button class="ghost" id="newcat">+ New category</button>
       <label class="cbrow" id="fIncWrap"><input type="checkbox" id="incOnly"> Only incomplete</label>
       <label class="cbrow" id="fGeoWrap"><input type="checkbox" id="ungeoOnly"> Only un-geocoded</label>
       <span class="count" id="count"></span>
@@ -97,7 +107,7 @@
   var TOKEN = "";
   var state = { mode:"coasters", coasters: [], byId: {}, sel: null, opts: { manu:[], model:[] },
                 geo: {}, parks: [], selPark: null,
-                clones: [], suggest: [], riderCats: [], cloneErr: "" };
+                clones: [], suggest: [], riderCats: [], selClone: 0, cloneErr: "" };
 
   var FIELDS = [
     ["name","Name","text"], ["park","Park","text"], ["type","Type","type"],
@@ -138,8 +148,16 @@
 
   // TOKEN is '' when an admin account got in: the session cookie authorizes the
   // request instead, and the Worker falls through to it when the header is empty.
+  // `cache: "no-store"` because /api/coasters, /api/parks and /api/clones are all
+  // sent with `public, max-age=300` — right for a reader, wrong for the page
+  // that just changed them. Without it, saving a category and re-reading the
+  // list gave the browser's copy from before the save: the toast said "Saved",
+  // the server had the new ride, and the editor showed the old one for five
+  // minutes. Same family as the avatar that came back wearing its old picture
+  // (CLAUDE.md); this is the editor's answer to it.
   async function api(method, path, body){
-    var opt = { method: method, credentials: "same-origin", headers: { "x-admin-token": TOKEN } };
+    var opt = { method: method, credentials: "same-origin", cache: "no-store",
+                headers: { "x-admin-token": TOKEN } };
     if (body){ opt.headers["content-type"]="application/json"; opt.body=JSON.stringify(body); }
     var r = await fetch(path, opt);
     var data = null; try { data = await r.json(); } catch(e){}
@@ -204,6 +222,7 @@
     document.getElementById('mCoasters').addEventListener('click', function(){ setMode('coasters'); });
     document.getElementById('mParks').addEventListener('click', function(){ setMode('parks'); });
     document.getElementById('mClones').addEventListener('click', function(){ setMode('clones'); });
+    document.getElementById('newcat').addEventListener('click', function(){ showGroup(0); });
     document.getElementById('list').addEventListener('click', function(e){
       var row = e.target.closest ? e.target.closest('.row[data-id]') : null;
       if (!row) return;
@@ -220,6 +239,8 @@
     document.getElementById('mClones').classList.toggle('on', m==='clones');
     document.getElementById('fIncWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('fGeoWrap').style.display = m==='coasters' ? '' : 'none';
+    document.getElementById('newcat').style.display = m==='clones' ? '' : 'none';
+    state.selClone = 0;
     document.getElementById('editor').innerHTML = '<div class="empty">Select an item to edit.</div>';
     if (m==='parks' && !state.parks.length) loadParks();
     else if (m==='clones') loadClones();
@@ -260,14 +281,16 @@
       groups.length + " categor" + (groups.length===1?"y":"ies") + " \u00b7 " + sug.length + " suggested";
     document.getElementById('list').innerHTML =
       (state.cloneErr ? '<div class="row"><b>' + esc(state.cloneErr) + '</b></div>' : '')
-      + (groups.length ? groups.map(function(g){
-          return '<div class="row" data-cg="'+g.id+'">'
+      + '<div class="row live"><div class="nm">Live on the site</div>'
+        + '<div class="pk">' + (groups.length
+            ? 'every rider is offered these'
+            : 'nothing yet \u2014 take one from the suggestions below') + '</div></div>'
+      + groups.map(function(g){
+          return '<div class="row' + (state.selClone === g.id ? ' sel' : '') + '" data-cg="'+g.id+'">'
             + '<div class="nm">'+esc(g.name)+'</div>'
             + '<div class="pk">' + (g.note ? esc(g.note) + ' \u00b7 ' : '')
             + g.ids.length + ' rides</div></div>'; }).join('')
-        : '<div class="row"><div class="pk">No categories yet. Take one from the '
-            + 'suggestions below, or build one a ride at a time.</div></div>')
-      + (state.riderCats.length ? '<div class="row"><div class="nm">Riders\u2019 own</div>'
+      + (state.riderCats.length ? '<div class="row sec"><div class="nm">Riders\u2019 own</div>'
           + '<div class="pk">read only \u2014 two riders writing the same one is the '
           + 'case for making it a Coaster Hub category</div></div>'
           + state.riderCats.map(function(c){
@@ -276,7 +299,7 @@
                 + '</div><div class="pk">'+esc(c.who)+' \u00b7 '+c.n+' rides'
                 + (c.note ? ' \u00b7 '+esc(c.note) : '')+'</div></div>'; }).join('')
         : '')
-      + (sug.length ? '<div class="row"><div class="nm">Suggested</div>'
+      + (sug.length ? '<div class="row sec"><div class="nm">Suggested \u00b7 not live</div>'
           + '<div class="pk">rides sharing a name AND a model \u2014 not yet answered</div></div>'
           + sug.map(function(g,i){
           return '<div class="row" data-sg="'+i+'">'
@@ -301,21 +324,32 @@
       + '<span class="toast" id="ctoast"></span></div>';
     document.getElementById('acc').onclick = async function(){
       try {
-        await api("POST","/api/clones",{ name:g.name, note:g.note, ids:g.members.map(function(m){return m.id;}) });
+        var made = await api("POST","/api/clones",
+          { name:g.name, note:g.note, ids:g.members.map(function(m){return m.id;}) });
         await loadClones();
+        showGroup(made.id);
+        var t = document.getElementById('ctoast');
+        if (t) { t.textContent = "Live \u2014 every rider is offered it now"; }
       } catch(e){ document.getElementById('ctoast').textContent = e.message; }
     };
   }
   function showGroup(id){
-    var g = state.clones.find(function(x){ return x.id===id; }); if (!g) return;
+    var made = !id;
+    var g = made ? { id:0, name:"", note:"", ids:[] }
+                 : state.clones.find(function(x){ return x.id===id; });
+    if (!g) return;
+    state.selClone = g.id; renderClones();
     document.getElementById('editor').innerHTML =
-      '<h2 style="margin:0 0 10px;font-size:1.15rem">'+esc(g.name)+'</h2>'
+      '<h2 style="margin:0 0 10px;font-size:1.15rem">'
+        + (made ? 'New category' : esc(g.name)) + '</h2>'
+      + (made ? '<p class="hint">Name it, then search below for the rides that belong in it. '
+        + 'Two or more, and none of them already in another category.</p>' : '')
       + '<div class="grid">'
       + '<div class="fld full"><label>Name \u2014 what the collapsed row says</label>'
       + '<input id="cgname" value="'+esc(g.name)+'"></div>'
       + '<div class="fld full"><label>Note \u2014 why they are one, e.g. "B&amp;M Invert"</label>'
       + '<input id="cgnote" value="'+esc(g.note||'')+'"></div></div>'
-      + '<p class="hint">Members. Untick to drop one; search below to add another.</p>'
+      + (made ? '' : '<p class="hint">Members. Untick to drop one; search below to add another.</p>')
       + '<div class="grid" id="cgmem">' + g.ids.map(function(cid){
           return '<div class="fld full"><label class="cbrow">'
             + '<input type="checkbox" data-mem="'+cid+'" checked> '+esc(cname(cid))+'</label></div>'; }).join('')
@@ -323,7 +357,7 @@
       + '<div class="inline"><input id="cgadd" placeholder="Add a coaster by name\u2026" style="flex:1">'
       + '</div><div class="grid" id="cghits"></div>'
       + '<div class="actions"><button id="cgsave">Save category</button>'
-      + '<button class="danger" id="cgdel">Delete category</button>'
+      + (made ? '' : '<button class="danger" id="cgdel">Delete category</button>')
       + '<span class="toast" id="ctoast"></span></div>';
     var extra = [];
     function redrawHits(){
@@ -347,15 +381,22 @@
       document.getElementById('cgmem').querySelectorAll('[data-mem]').forEach(function(b){
         if (b.checked) ids.push(+b.getAttribute('data-mem')); });
       extra.forEach(function(x){ if (ids.indexOf(x)<0) ids.push(x); });
+      var body = { name:document.getElementById('cgname').value,
+                   note:document.getElementById('cgnote').value, ids:ids };
       try {
-        await api("PUT","/api/clones/"+g.id,{ name:document.getElementById('cgname').value,
-          note:document.getElementById('cgnote').value, ids:ids });
+        var saved = made ? await api("POST","/api/clones", body)
+                         : await api("PUT","/api/clones/"+g.id, body);
         await loadClones();
+        showGroup(made ? saved.id : g.id);
+        var t = document.getElementById('ctoast');
+        if (t) { t.textContent = made ? "Created \u2014 it is live" : "Saved"; }
       } catch(e){ document.getElementById('ctoast').textContent = e.message; }
     };
-    document.getElementById('cgdel').onclick = async function(){
+    if (document.getElementById('cgdel')) document.getElementById('cgdel').onclick = async function(){
       if (!confirm('Delete "'+g.name+'"? The coasters stay; they just stop being one row.')) return;
-      try { await api("DELETE","/api/clones/"+g.id); await loadClones(); }
+      try { await api("DELETE","/api/clones/"+g.id); await loadClones();
+        state.selClone = 0; renderClones();
+        document.getElementById('editor').innerHTML = '<div class="empty">Select an item to edit.</div>'; }
       catch(e){ document.getElementById('ctoast').textContent = e.message; }
     };
   }
