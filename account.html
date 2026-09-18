@@ -131,11 +131,15 @@
       <!-- Name and username are chosen HERE, not inherited. Whatever the count
            was filed under was a placeholder; this is the moment it becomes
            somebody's own, so the fields start empty rather than prefilled with
-           a name the new owner never picked. -->
+           a name the new owner never picked.
+           The placeholders say nothing in particular ON PURPOSE. They read
+           "Keltan"/"keltan" for a while, which is a stranger's name to everyone
+           who claimed after him, and filling them from the invite would show
+           the very placeholder slug this form exists to retire. -->
       <label for="cl_name">Display name</label>
-      <input id="cl_name" type="text" autocomplete="name" maxlength="40" placeholder="Keltan" required>
+      <input id="cl_name" type="text" autocomplete="name" maxlength="40" placeholder="Your name" required>
       <label for="cl_user">Username</label>
-      <input id="cl_user" type="text" autocomplete="username" maxlength="32" placeholder="keltan" required>
+      <input id="cl_user" type="text" autocomplete="username" maxlength="32" placeholder="username" required>
       <p class="hint">Your page will be coasterhub.org/user/&lt;username&gt;. Letters, numbers
         and hyphens.</p>
       <label for="cl_email">Email</label>
