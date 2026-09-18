@@ -157,7 +157,7 @@
 <!-- gate -->
 <div id="gate" class="gate">
   <h2>Sign in to log rides</h2>
-  <p>Rides go to the count of whoever is signed in, so they land in the right place.</p>
+  <p>You must be logged in to log rides in the database.</p>
   <a class="primary" id="gosignin" href="/account?next=/log"
      style="display:block;text-align:center;text-decoration:none;box-sizing:border-box">Sign in</a>
   <p style="margin:16px 0 10px">Riders who haven&rsquo;t claimed an account yet can still use the
@@ -282,7 +282,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/account" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/account" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/database">Database</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -441,7 +441,7 @@ function setMode(m){
   // two inches above it, and spelled out what the + buttons already show.
   $('modehint').textContent = m==='day'
     ? 'A dated visit — tap + once per ride, re-rides included.'
-    : 'Everything you have ridden before. No dates, no ride counts.';
+    : 'All the coasters on your count. No need to add dates or ride counts.';
   $('save').textContent = m==='day' ? 'Save day' : 'Add to my count';
   $('baskethead').textContent = m==='day' ? 'This day' : 'Staged';
   // Laps mean nothing in list mode and a tick means nothing in day mode, so

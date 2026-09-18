@@ -12,6 +12,11 @@
 <link rel="icon" href="/favicon-32.png?v=20260805b" sizes="32x32" type="image/png">
 <style>
   .qcbar{display:flex;align-items:center;gap:12px;height:56px}
+  /* The way on from reading to fixing: QC finds the gap, /edit fills it. */
+  .qcbar .go{margin-left:auto;color:var(--accent2);font-weight:600;font-size:.9rem;
+             text-decoration:none;border:1px solid var(--line);border-radius:10px;
+             padding:7px 13px;white-space:nowrap}
+  .qcbar .go:hover{border-color:var(--accent2)}
   .qcbar .brand-mark{height:34px;width:34px}
   .qcbar .t{font-weight:800;letter-spacing:-.01em}
   .qcbar .t b{color:var(--accent2)}
@@ -48,6 +53,7 @@
       <img src="/mark.svg?v=20260805b" alt="" class="brand-mark">
       <span class="t">Coaster <b>database</b> — QC</span>
     </a>
+    <a class="go" href="/edit">Edit the list &rarr;</a>
   </div>
 </div>
 

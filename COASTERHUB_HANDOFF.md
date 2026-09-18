@@ -1345,6 +1345,10 @@ credits-only subtitle deleted — plus its hero button and the view switch (`Rid
 / Park list`); on `/rankings` both headlines, both subtitles, Shared favorites → **Master
 list**, Each rider's list → **Personal lists** with new subtitles, and the card's drag hint.
 
+**Third pass (2026-09-18):** the site-map headline and subtitle; on `/log` the sign-in body and
+the add-credits hint; on `/import` the headline and subtitle; the signup password hint on
+`/account`.
+
 A later pass must skip all of those — their live text is no longer what the desk's left column
 claims.
 
