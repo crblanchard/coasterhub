@@ -141,6 +141,13 @@
   .rrow .xd{flex:none;font-weight:700;font-variant-numeric:tabular-nums}
   .rrow .xd.up{color:var(--up)}
   .rrow .xd.down{color:var(--down)}
+  .catpill{display:inline-flex;align-items:center;gap:8px;background:var(--panel);
+           border:1px solid var(--line);border-radius:99px;padding:7px 14px;margin:0 0 12px;
+           color:var(--fg);font-size:.85rem;font-weight:600;text-decoration:none}
+  .catpill:hover{border-color:var(--accent2)}
+  .catpill .n{color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums}
+  .catpill .n.off{color:var(--muted);font-weight:600}
+  .catpill svg{color:var(--muted);flex:none}
   .gbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px;padding:10px 13px;
         background:var(--panel);border:1px solid var(--line);border-radius:12px;
         color:var(--muted);font-size:.86rem}
@@ -362,6 +369,14 @@
     </div>
 
     <div id="pane_rank">
+      <!-- The only thing /rankings gains for categories: one row, and every
+           word of explanation behind it. It shows for everybody, because it is
+           the only way anyone finds out the feature is there. -->
+      <a class="catpill" id="catpill" href="/categories">Categories
+        <span class="n" id="catn"></span>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+          stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6"/></svg></a>
       <!-- Only shown when a clone family is split across the list — an existing
            ranking is never rearranged on load. -->
       <div class="gbar" id="gatherbar" style="display:none">
@@ -429,7 +444,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/account" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/database">Database</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/rankings">Rankings</a> &nbsp;&middot;&nbsp; <a href="/categories">Categories</a> &nbsp;&middot;&nbsp; <a href="/account" data-nav="profile">Profile</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/log">Log</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/database">Database</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -769,6 +784,9 @@ function renderRank(){
       +'</span>'+members+'</div>';
   }).join('');
   $('gatherbar').style.display = scattered() ? 'flex' : 'none';
+  var live=(CATS.categories||[]).filter(function(g){ return !g.off; }).length;
+  $('catn').textContent = CATS.on===false ? 'off' : live;
+  $('catn').className = CATS.on===false ? 'n off' : 'n';
   el.querySelectorAll('[data-up]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.up,-1); }; });
   el.querySelectorAll('[data-down]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.down,1); }; });
   // The whole card is the way in. Every control sitting on it stops the click,

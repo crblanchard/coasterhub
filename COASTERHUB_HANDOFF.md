@@ -1938,6 +1938,56 @@ get a layers icon.
 
 ---
 
+### /categories — every rider's own page (2026-09-18)
+
+The settings screen from the artifact, made real. `CoasterHub.me()` for the slug, then
+`/api/categories/<slug>` — the API already handed the site's and the rider's own back as
+**one list with `official` on each**, so the page never has to know there are two tables.
+
+- **Use categories** — the master switch, a real checkbox next to the words, in a card that
+  lights up when on.
+- **Coaster Hub categories** — all of Carter's, each with a tick, the seal, and
+  **"5 of 5 ridden"**. Sorted by how much of it you have actually been on, and the ones where
+  that is 0 or 1 sit behind *"Show N more you have barely ridden"*: a category of five Batmans
+  is worth nothing to somebody who has ridden one, and the row should say so rather than let
+  them wonder why their list did not change. Open one and you see its rides, with the ones you
+  have not ridden greyed and labelled. **You cannot edit its members** — the card says why.
+- **Your own** — create, rename, add a ride, take one out, delete. The picker searches
+  **your count**, not the database: a category is about rides you have been on, and 1,114 rows
+  is not a list anybody scrolls. A ride the site already groups comes back disabled and
+  labelled with the category holding it, which is the 409 the API would return anyway, said
+  before you press the button.
+- Taking a ride out of one of yours is refused client-side below two members, with "delete it
+  instead" — the same rule the API enforces, in words.
+
+Every change writes immediately: this is a settings page, not a document, so there is no Save
+button. `pulled` is carried through the prefs PUT untouched — it is set on the ranking page
+and this page has no business moving where somebody ranked something.
+
+**The way in** is a `Categories 3` pill above the ranking list (grey `off` when the master
+switch is off), and a footer link on all eleven pages. `/categories` resolves to
+`categories.html` through Cloudflare's own extensionless mapping, so it needed no route.
+
+### Two notes that were wrong
+
+- **The CRLF list in CLAUDE.md named `index.html` and `stats.html`.** `index.html` is LF and
+  has been since before this session; `stats.html` does not exist any more. The real list is
+  `README.md`, `style.css`, `tools/import-credits.js`. Check with
+  `git show HEAD:<file> | grep -c $'\r'` rather than trusting the note.
+- A **full-page screenshot draws a `position:fixed` bar wherever the scroll happens to be**, so
+  the mobile tab bar appeared to be sitting on top of the page's own content. Measured instead:
+  the content ends at 604px and the bar starts at 793px. Measure before believing a full-page
+  screenshot about anything fixed.
+
+### Next: choosing a category while you rank
+
+Not built. The moment that matters is placing the FIRST member of a category into a list that
+has none of it yet: *"Batman: The Ride is one of 5 in a category. Put the whole group here?"*,
+defaulting to **not numbered**. Carter's words, 2026-09-18. The second moment — a whole
+count arriving at once — is the bar described under "the first time somebody ranks" above.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

@@ -53,9 +53,11 @@ those files are the fallback, and the sync overwrites them.
 
 ## Traps that have each cost a deploy
 
-- **CRLF files:** `README.md`, `index.html`, `stats.html`, `style.css`,
-  `tools/import-credits.js`. Edit them in binary mode; a text-mode write flattens
-  the line endings and the diff becomes the entire file.
+- **CRLF files:** `README.md`, `style.css`, `tools/import-credits.js`. Edit them
+  in binary mode; a text-mode write flattens the line endings and the diff
+  becomes the entire file. (Checked 2026-09-18: `index.html` is LF and has been
+  for a while, and `stats.html` is gone — this list used to name both. Check with
+  `git show HEAD:<file> | grep -c $'\r'` rather than trusting it.)
 - **A phone photo is not the shape it looks.** It is a landscape bitmap plus an
   EXIF tag saying "rotate 90". Browsers apply that when DISPLAYING an `<img>`,
   so `naturalWidth/Height` and CSS backgrounds are upright — but
