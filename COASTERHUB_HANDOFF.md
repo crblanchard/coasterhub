@@ -1576,6 +1576,68 @@ to look if "Batman: The Ride" should ever appear once on `/rankings/all`.
 
 ---
 
+## Categories, designed in an artifact first (2026-09-18)
+
+The clone-group code that shipped on 2026-09-18 was the *mechanism*. What it is going to look
+like was worked out somewhere else entirely — a prototype published as a Claude artifact,
+because the whole question is subjective and a screenshot beats an argument.
+
+**The Batman Problem** — <https://claude.ai/artifact/FHbmGbCGi3SWos2VNPcGBH>
+Carter's real rides, the real families the suggester finds, and Coaster Hub's own tokens, so a
+judgement made there transfers. Twelve versions of back-and-forth. What came out of it:
+
+- **One pill above the list**, reading `Categories 3` or a grey `Categories off`, and *nothing
+  else*. Every word of explanation lives behind it. `/rankings` gains one row and no settings,
+  and the pill shows for everybody — it is the only way anyone finds out the feature exists.
+- **A categories screen** behind the pill: a master checkbox next to the word, how-it-works,
+  your categories (each with its own tick, a pencil, and an expander for adding and removing
+  rides), the suggester's output with a `+`, and how to write your own.
+- **Unticking loses nothing.** A category you switch off puts its rides back as ordinary rows
+  in the order you left them; ticking it again brings your order back. This is the promise the
+  whole design rests on, and it is only keepable because a ranking stays a flat list of ids.
+- **`~` instead of numbers** while a category is on *Same rank*. The rides still hold an order
+  underneath and can still be reordered — only the numbers are hidden. Default is off:
+  the point of a category is that you did not want to argue about which Batman was 113th.
+- **A pulled-out ride** is listed under its category as `Six Flags Great America (+3)` —
+  green above the category, red below, counted from the category's own block.
+- **A ride that leaves a live run gets moved next to it.** Without that, pulling a ride out of
+  the middle splits the category into two rows with the same name. Same for setting one aside,
+  and the reverse when one joins.
+- Vocabulary is **category** everywhere a reader sees it, except the label inside an open row,
+  which Carter chose himself: **In this group**.
+
+### Two traps the prototype caught, both of which apply to the real pages
+
+- **`flex: 0 0 100%` is not 100%.** `min-width` defaults to `auto`, so a panel that is wide at
+  its narrowest refuses to shrink and drags its right-hand controls past the card's edge. It
+  needs `min-width: 0` as well. This is what put a button outside its own card on a phone.
+- **`↩` and `↗` are emoji.** U+21A9 renders as a blue tile in iOS WebKit, and U+2197's text
+  form comes out a hairline next to a drawn icon. Both are inline SVG now, like the pencil.
+  `↑` and `↓` are safe.
+
+### The premade categories are Carter's to write
+
+**Category Desk** — <https://claude.ai/artifact/DFR3LQkedD5PbRPYtkQpfQ>
+An artifact with the `db` capability holding one document per category
+(`cats/<slug>` = `{name, note, why, status, members[], updated}`), so the work survives and can
+be read back with `ArtifactData` to generate the migration. It carries the whole of
+`coasters.json` flattened to index arrays (1,114 rows, 44KB), the 30 name+model families as
+suggestions, and a picker that filters by model.
+
+**Why a person has to write these:** 545 of the 1,114 coasters carry **no model at all**, so
+name+model finds 30 families over 75 coasters and can never find more. The twelve Suspended
+Looping Coasters are called Batman: The Ride, Condor, DareDeviler, Kong, Mind Eraser, Vampire
+and six other things. Do not offer to generate the list — it was explicitly asked for as his
+job, and the taste is the whole point.
+
+### Still dormant
+
+`migrations/012-clone-groups.sql` is **not run**. The clone code on `main` stays dormant, and
+the commitment stands: **purge it when the real category feature lands** rather than growing a
+second system beside it.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**
