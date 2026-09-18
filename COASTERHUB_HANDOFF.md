@@ -1638,6 +1638,44 @@ second system beside it.
 
 ---
 
+### The editor already exists; the mark and the first run (2026-09-18)
+
+**`/edit` → Categories** is the admin editor, and it has been since the clone code landed
+— accept a suggestion, rename it, tick members off, search for more, Save, Delete. It was
+called "Clones" and it is called Categories now. Driven end to end against the real worker
+with `node:sqlite`: accept, rename, save, and `/api/clones` returns the group with its five
+members. **The only thing it needs is `migrations/012-clone-groups.sql` pasted into the D1
+console.** Before that it 503s naming the file, which is the rule for this repo.
+
+**The mark.** A **Coaster Hub category** — one Carter wrote in `/edit` — carries a
+small teal check-in-a-circle after its name. One a rider invented carries nothing. Marking
+the preset is the right way round: the fact worth showing is "Max has this one too", and a
+category you made yourself is just your list. Not a star (reads as favourite) and not a lock
+(nothing is locked — your copy of a preset is yours to rename, trim and pull rides out of).
+
+**The first time somebody ranks.** Two moments, both offers, neither of them a tour:
+
+1. **Building a list a ride at a time** — nothing happens until they place the SECOND
+   member of a preset. Then one card where the row would go: *Same ride, twice. You just
+   ranked Batman: The Ride at Six Flags Great Adventure. You already have the one at Six
+   Flags Great America — and there are three more you have been on.* Make them one row /
+   Keep them separate.
+2. **A whole count arriving at once** (an import, which is how Sean, Max and Cole arrive)
+   — one bar at the top of the ranking: *6 sets of the same ride. 23 of your rides are
+   the same ride at different parks. They could be 6 rows.* Review them / Not now.
+
+Answering once sets the default: yes and the next pair folds on its own with a quiet
+**Boomerang grouped — undo**; no and the feature goes off, the offer never returns and
+only the grey pill remains. Only Coaster Hub categories are ever offered — a rider's own
+are never suggested to anybody, including them. And it still never rearranges an existing
+list.
+
+**Not built yet: per-rider categories.** Everything above assumes a rider can make their own,
+which needs its own table and endpoints. `clone_groups` is the shared set only. When that
+lands, `/api/clones` should mark which set a category came from rather than the page guessing.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**
