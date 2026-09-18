@@ -1676,6 +1676,78 @@ lands, `/api/clones` should mark which set a category came from rather than the 
 
 ---
 
+### A rider's own categories, and the rule that keeps them simple (2026-09-18)
+
+`migrations/013-rider-categories.sql` — three tables. `rider_categories` and
+`rider_category_members` (a coaster in at most one of a rider's, enforced by the primary key,
+the same way `clone_members` does it), and `category_prefs`, one JSON blob per rider:
+`{"on":true,"off":["c1","r7"],"nums":["c2"]}`. `c1` is `clone_groups` id 1 and `r7` is
+`rider_categories` id 7 — two id spaces that would collide the moment a rider's third
+category met the site's third, so every preference is keyed by that string.
+
+A blob rather than rows because **nothing queries across riders' preferences**: the ranking
+page reads one rider's and writes one rider's. `rankings` is rows because the shared list
+JOINs them; this does not.
+
+**THE RULE (Carter, 2026-09-18): a rider cannot build their own category out of coasters that
+are in one of the site's.** Not "should not" — the Worker refuses it with a 409 naming the
+ride and its park. Forking "Batman: The Ride" into a private near-copy means two definitions
+of the same thing, a merge every time the site's changes, and no answer to "have you been on
+more Batmans than me". Don't want the site's? Switch it off and those rides are ordinary rows
+again. Switching it off does **not** then free them to be rebuilt as your own — that is
+the same fork by another route, and there is a test for it.
+
+What a rider may do to one of the site's categories: **switch it off**, and **pull single
+rides out of it in their ranking** (the `(+3)` / `(−2)` design). Neither of those changes
+the definition, which is why both are fine.
+
+### The API
+
+    GET    /api/categories/:slug          public, like a ranking
+    PUT    /api/categories/:slug/prefs    on/off + which show numbers
+    POST   /api/categories/:slug          make one of your own
+    PUT    /api/categories/:slug/:id      replace one of your own
+    DELETE /api/categories/:slug/:id      delete one of your own
+    GET    /api/admin/categories          what riders have built (admin, read only)
+
+The read returns **one flat `categories` array**, the site's and the rider's together, each
+carrying `official`, `off` and `nums`. The page should not have to know there are two tables;
+it does need to know which is which, because an official one wears the mark.
+
+Writes use **the ranking gate, not the admin gate**: once a rider has claimed their page, only
+they write their categories — no admin override, by the same 2026-09-15 call that put
+rankings out of Carter's reach. Someone else's category id is a **404, not a 403**: there is
+nothing to learn from the difference.
+
+`/api/admin/categories` is not a moderation tool, it is a **source**. It counts how many
+different riders wrote a category by the same name, and `/edit` shows it as `Wacky Worms
+×2 riders`. Two riders writing the same one by hand is the strongest case there is for
+making it a Coaster Hub category, and nothing else on the site would ever say so.
+
+### A bug this turned up: the base schema had `rankings` wrong
+
+`migrations/000-base-schema.sql` and `tools/dev-server.mjs` both declared
+`rankings(user_slug PRIMARY KEY, ord TEXT, updated TEXT)`. The Worker reads and writes
+`rankings(user_slug, coaster_id, pos)`. Both are mine, from the session that wrote 000, and
+the effect was that **`/rankings` 500ed on the dev server** and a staging database built by
+following STAGING.md would have had no working rankings at all. The test harness had it right,
+which is why 394 tests passed over it. Both files now match the harness, primary key
+`(user_slug, coaster_id)` — which is also what stops one coaster appearing twice in a list.
+
+If a schema has to be written down in more than one place again, make the test harness read it
+from the file rather than restating it.
+
+### Next: the /rankings UI
+
+The API and the editor exist; **the rider-facing UI does not**. What is needed is the artifact's
+design ported onto `/rankings`: the Categories pill, the categories screen behind it, and
+`renderRank()` folding on `getCategories()` instead of the dormant `CLONE` map. The folding
+half already exists in `rankings.html` from the clone work — `blocks()`, `scattered()`,
+`gather()`, the block-aware `move()`. Rewiring it to the new endpoint, with the mark and the
+first-run offers, is the remaining piece.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

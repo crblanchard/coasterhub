@@ -97,7 +97,7 @@
   var TOKEN = "";
   var state = { mode:"coasters", coasters: [], byId: {}, sel: null, opts: { manu:[], model:[] },
                 geo: {}, parks: [], selPark: null,
-                clones: [], suggest: [], cloneErr: "" };
+                clones: [], suggest: [], riderCats: [], cloneErr: "" };
 
   var FIELDS = [
     ["name","Name","text"], ["park","Park","text"], ["type","Type","type"],
@@ -240,10 +240,12 @@
   // name+model families; answering them is the job of this pane.
   async function loadClones(){
     try {
-      var got = await Promise.all([api("GET","/api/clones"), api("GET","/api/admin/clones/suggest")]);
+      var got = await Promise.all([api("GET","/api/clones"), api("GET","/api/admin/clones/suggest"),
+                                   api("GET","/api/admin/categories")]);
       state.clones = got[0].groups || [];
       state.suggest = got[1].groups || [];
-    } catch(e){ state.clones = []; state.suggest = []; state.cloneErr = e.message; }
+      state.riderCats = got[2].categories || [];
+    } catch(e){ state.clones = []; state.suggest = []; state.riderCats = []; state.cloneErr = e.message; }
     render();
   }
   function cname(id){
@@ -265,6 +267,15 @@
             + g.ids.length + ' rides</div></div>'; }).join('')
         : '<div class="row"><div class="pk">No categories yet. Take one from the '
             + 'suggestions below, or build one a ride at a time.</div></div>')
+      + (state.riderCats.length ? '<div class="row"><div class="nm">Riders\u2019 own</div>'
+          + '<div class="pk">read only \u2014 two riders writing the same one is the '
+          + 'case for making it a Coaster Hub category</div></div>'
+          + state.riderCats.map(function(c){
+              return '<div class="row"><div class="nm">'+esc(c.name)
+                + (c.riders > 1 ? ' <span class="sub">\u00d7'+c.riders+' riders</span>' : '')
+                + '</div><div class="pk">'+esc(c.who)+' \u00b7 '+c.n+' rides'
+                + (c.note ? ' \u00b7 '+esc(c.note) : '')+'</div></div>'; }).join('')
+        : '')
       + (sug.length ? '<div class="row"><div class="nm">Suggested</div>'
           + '<div class="pk">rides sharing a name AND a model \u2014 not yet answered</div></div>'
           + sug.map(function(g,i){

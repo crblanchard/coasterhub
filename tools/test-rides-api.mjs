@@ -31,6 +31,7 @@ const PW = "test-password";
 // fail rather than the site does.
 const MIGRATION_010 = readFileSync(join(ROOT, "migrations", "010-follows.sql"), "utf8");
 const MIGRATION_012 = readFileSync(join(ROOT, "migrations", "012-clone-groups.sql"), "utf8");
+const MIGRATION_013 = readFileSync(join(ROOT, "migrations", "013-rider-categories.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
 // D1 rejects a statement with more bound parameters than SQLite's compiled-in
@@ -112,6 +113,8 @@ function freshDb() {
   db.exec(MIGRATION_010);
   db.exec(MIGRATION_012);
   db.exec(MIGRATION_012);
+  db.exec(MIGRATION_013);
+  db.exec(MIGRATION_013);
   return db;
 }
 
@@ -121,6 +124,15 @@ function dbWithoutClones() {
   const db = freshDb();
   db.exec("DROP TABLE clone_members");
   db.exec("DROP TABLE clone_groups");
+  return db;
+}
+
+// Without migration 013, for the same window.
+function dbWithoutRiderCats() {
+  const db = freshDb();
+  db.exec("DROP TABLE rider_category_members");
+  db.exec("DROP TABLE rider_categories");
+  db.exec("DROP TABLE category_prefs");
   return db;
 }
 
@@ -1843,6 +1855,125 @@ async function main() {
     r = await call(db, "POST", "/api/clones", { cookie, body: { name: "X", ids: [1, 2] } });
     check("no migration yet: a write is a 503 naming the file",
       r.status === 503 && /012-clone-groups\.sql/.test(r.data.error || ""),
+      r.status + " " + JSON.stringify(r.data));
+  }
+
+  // ---- a rider's own categories --------------------------------------------
+  {
+    const db = freshDb();
+    db.exec(`
+      INSERT INTO coasters (id,name,park,type,manu,model) VALUES
+        (21,'Batman: The Ride','Six Flags Great America','Steel','B&M','B&M Invert'),
+        (22,'Batman: The Ride','Six Flags Great Adventure','Steel','B&M','B&M Invert'),
+        (23,'Wacky Worm','Some Fair','Steel','SBF','Wacky Worm'),
+        (24,'Wacky Worm','Another Fair','Steel','SBF','Wacky Worm'),
+        (25,'Sea Serpent','A Pier','Steel','Vekoma','Boomerang');
+      -- The site's own category, as /edit would have written it.
+      INSERT INTO clone_groups (id,name,note,created) VALUES (1,'Batman: The Ride','B&M Invert','2026-09-18');
+      INSERT INTO clone_members (coaster,group_id) VALUES (21,1),(22,1);
+    `);
+    const cookie = await signedUp(db, "own@example.com", "Riley");
+    const slug = db.prepare("SELECT slug FROM accounts WHERE email = 'own@example.com'").get().slug;
+
+    let r = await call(db, "GET", "/api/categories/" + slug);
+    check("reads the site's categories without signing in",
+      r.status === 200 && r.data.categories.length === 1 &&
+      r.data.categories[0].key === "c1" && r.data.categories[0].official === true,
+      JSON.stringify(r.data));
+    check("a category is on until somebody says otherwise", r.data.on === true);
+
+    r = await call(db, "GET", "/api/categories/nobody");
+    check("an unknown rider is a 404", r.status === 404);
+
+    // The rule Carter asked for: you cannot build your own out of the site's.
+    r = await call(db, "POST", "/api/categories/" + slug,
+      { cookie, body: { name: "My Batmans", ids: [21, 22] } });
+    check("cannot fork a Coaster Hub category into your own",
+      r.status === 409 && /Coaster Hub category/.test(r.data.error || ""),
+      r.status + " " + JSON.stringify(r.data));
+
+    r = await call(db, "POST", "/api/categories/" + slug,
+      { cookie, body: { name: "Wacky Worms", note: "the same worm", ids: [23, 24] } });
+    check("creates one of your own", r.status === 200 && r.data.key === "r1",
+      r.status + " " + JSON.stringify(r.data));
+    const mine = r.data.id;
+
+    r = await call(db, "POST", "/api/categories/" + slug,
+      { cookie, body: { name: "Worms again", ids: [23, 25] } });
+    check("a ride cannot be in two of your categories",
+      r.status === 409 && /already in your/.test(r.data.error || ""),
+      r.status + " " + JSON.stringify(r.data));
+
+    r = await call(db, "POST", "/api/categories/" + slug, { cookie, body: { name: "Solo", ids: [23] } });
+    check("one ride is not a category", r.status === 400);
+    r = await call(db, "POST", "/api/categories/" + slug, { cookie, body: { name: "", ids: [23, 24] } });
+    check("a category needs a name", r.status === 400);
+    r = await call(db, "POST", "/api/categories/" + slug, { cookie, body: { name: "Ghosts", ids: [23, 9999] } });
+    check("a category of rides that do not exist is a 404", r.status === 404);
+
+    r = await call(db, "GET", "/api/categories/" + slug);
+    const own = r.data.categories.filter((c) => !c.official);
+    check("yours comes back beside the site's, marked as yours",
+      r.data.categories.length === 2 && own.length === 1 &&
+      own[0].name === "Wacky Worms" && own[0].ids.length === 2,
+      JSON.stringify(r.data.categories));
+
+    r = await call(db, "PUT", "/api/categories/" + slug + "/" + mine,
+      { cookie, body: { name: "Every worm", ids: [23, 24, 25] } });
+    check("replacing one keeps its id and swaps its members",
+      r.status === 200 && r.data.id === mine &&
+      rows(db, "SELECT coaster FROM rider_category_members").length === 3,
+      r.status + " " + JSON.stringify(r.data));
+
+    // Preferences: what is switched off, and what shows numbers.
+    r = await call(db, "PUT", "/api/categories/" + slug + "/prefs",
+      { cookie, body: { on: true, off: ["c1"], nums: ["r" + mine, "nonsense"] } });
+    check("saves preferences, dropping a key that is not one",
+      r.status === 200 && r.data.off.length === 1 && r.data.nums.length === 1,
+      JSON.stringify(r.data));
+
+    r = await call(db, "GET", "/api/categories/" + slug);
+    const site = r.data.categories.filter((c) => c.official)[0];
+    check("the site's category comes back switched off for this rider",
+      site.off === true && r.data.categories.filter((c) => !c.official)[0].nums === true,
+      JSON.stringify(r.data.categories));
+
+    // Switching the site's one off makes those rides ordinary rows for this
+    // rider. It does NOT let them be rebuilt as a private copy — that is the
+    // same fork by another route, and it is refused the same way.
+    r = await call(db, "POST", "/api/categories/" + slug, { cookie, body: { name: "Mine", ids: [21, 22] } });
+    check("switching it off is still not a way to copy it", r.status === 409,
+      r.status + " " + JSON.stringify(r.data));
+
+    // Somebody else's account.
+    const other = await signedUp(db, "other@example.com", "Wren");
+    r = await call(db, "POST", "/api/categories/" + slug,
+      { cookie: other, body: { name: "Yours now", ids: [23, 24] } });
+    check("another rider cannot write your categories", r.status === 401);
+    r = await call(db, "DELETE", "/api/categories/" + slug + "/" + mine, { cookie: other });
+    check("another rider cannot delete your categories", r.status === 401);
+
+    const wrenSlug = db.prepare("SELECT slug FROM accounts WHERE email = 'other@example.com'").get().slug;
+    r = await call(db, "DELETE", "/api/categories/" + wrenSlug + "/" + mine, { cookie: other });
+    check("somebody else's category id is a 404, not a 403", r.status === 404);
+
+    r = await call(db, "DELETE", "/api/categories/" + slug + "/" + mine, { cookie });
+    check("deleting one takes its members with it",
+      r.status === 200 && rows(db, "SELECT coaster FROM rider_category_members").length === 0);
+  }
+
+  // The window where the code is live and 013 is not.
+  {
+    const db = dbWithoutRiderCats();
+    let r = await call(db, "GET", "/api/categories/carter");
+    check("no migration yet: the read still answers",
+      r.status === 200 && Array.isArray(r.data.categories) && r.data.on === true,
+      r.status + " " + JSON.stringify(r.data));
+    const cookie = await signedUp(db, "pre13@example.com", "Prethirteen");
+    const slug = db.prepare("SELECT slug FROM accounts WHERE email = 'pre13@example.com'").get().slug;
+    r = await call(db, "POST", "/api/categories/" + slug, { cookie, body: { name: "X", ids: [1, 2] } });
+    check("no migration yet: a write is a 503 naming the file",
+      r.status === 503 && /013-rider-categories\.sql/.test(r.data.error || ""),
       r.status + " " + JSON.stringify(r.data));
   }
 

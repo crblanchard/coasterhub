@@ -673,6 +673,63 @@ async function suggestClones(env) {
     .sort((a, b) => b.members.length - a.members.length || a.name.localeCompare(b.name));
 }
 
+async function haveRiderCats(env) {
+  try { await env.DB.prepare("SELECT 1 FROM rider_categories LIMIT 1").first(); return true; }
+  catch (e) { return false; }
+}
+
+// Everything the ranking page needs to draw one rider's categories, as ONE flat
+// list: the site's set and that rider's own, each carrying whether it is
+// official, whether they have it switched off, and whether it shows numbers.
+//
+// The page should not have to know there are two tables. It does need to know
+// which is which — an official one is the same on everybody's list, which is
+// the whole reason it wears a mark — so that is a field, not a second array.
+//
+// `c1` is clone_groups id 1 and `r7` is rider_categories id 7: two id spaces
+// that would otherwise collide the moment a rider's third category met the
+// site's third. Every preference is keyed by that string.
+async function getCategories(env, slug) {
+  const site = await haveClones(env) ? await getClones(env) : [];
+  let own = [], prefs = {};
+
+  if (await haveRiderCats(env)) {
+    const { results } = await env.DB.prepare(
+      "SELECT c.id AS id, c.name AS name, c.note AS note, m.coaster AS coaster " +
+      "FROM rider_categories c LEFT JOIN rider_category_members m ON m.cat_id = c.id " +
+      "WHERE c.user_slug = ? ORDER BY c.id"
+    ).bind(slug).all();
+    const by = new Map();
+    for (const r of results) {
+      let g = by.get(r.id);
+      if (!g) { g = { id: r.id, name: r.name, note: r.note || "", ids: [] }; by.set(r.id, g); }
+      if (r.coaster != null) g.ids.push(r.coaster);
+    }
+    own = [...by.values()];
+    const row = await env.DB.prepare(
+      "SELECT prefs FROM category_prefs WHERE user_slug = ?").bind(slug).first();
+    // A blob somebody hand-edited in the D1 console should not take the ranking
+    // page down: unreadable preferences are no preferences.
+    if (row && row.prefs) { try { prefs = JSON.parse(row.prefs) || {}; } catch (e) { prefs = {}; } }
+  }
+
+  const off = new Set(Array.isArray(prefs.off) ? prefs.off : []);
+  const nums = new Set(Array.isArray(prefs.nums) ? prefs.nums : []);
+  const dress = (g, key) => ({
+    key, id: g.id, name: g.name, note: g.note || "", ids: g.ids,
+    official: key.charAt(0) === "c", off: off.has(key), nums: nums.has(key),
+  });
+  return {
+    slug,
+    // Off by default would mean nobody ever sees this. On by default with every
+    // category still a deliberate choice is the middle: the machinery is ready,
+    // and an empty list is what somebody who has chosen nothing gets.
+    on: prefs.on !== false,
+    categories: site.map((g) => dress(g, "c" + g.id))
+      .concat(own.map((g) => dress(g, "r" + g.id))),
+  };
+}
+
 // Both directions at once, as people rather than slugs — the page shows faces
 // and names on both lists, and one query per side here saves it a fetch per
 // name. Retried without `avatar` for the same reason getUsers() is: a database
@@ -1295,6 +1352,152 @@ export default {
         return afterWrite(ctx, env, json(out));
       }
 
+      // ---- categories ----------------------------------------------------
+      //
+      // Two kinds, one endpoint. The site's categories (012) are Carter's and
+      // the same for everybody; a rider's own (013) are theirs alone. What a
+      // rider may do to the site's is switch it off and pull single rides out
+      // of it in their ranking — NOT rename it, NOT change its members. Forking
+      // one into a private copy is the thing this deliberately does not allow:
+      // two definitions of "Batman: The Ride" means a merge every time the
+      // site's changes and no answer to "have you been on more than me".
+      //
+      // Reading is public, exactly as a ranking is — a category is part of how
+      // somebody's list reads, and that list is already open to look at.
+      const ctm = path.match(/^\/api\/categories\/([a-z0-9-]+)(?:\/(prefs|\d+))?$/i);
+      if (ctm) {
+        const slug = ctm[1].toLowerCase();
+        const tail = ctm[2] || "";
+
+        if (request.method === "GET" && !tail) {
+          const who = await env.DB.prepare("SELECT slug FROM users WHERE slug = ?")
+            .bind(slug).first();
+          if (!who) return err(404, "no such user");
+          return json(await getCategories(env, slug));
+        }
+
+        // The same gate a ranking has, for the same reason and by the same
+        // 2026-09-15 call: once a rider has claimed their page, what they think
+        // of their own rides is theirs, with no admin override. Before they
+        // claim it, it is as open as their order already is.
+        const claimed = await haveAccounts(env)
+          ? await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?").bind(slug).first()
+          : null;
+        if (claimed && !(acct && acct.slug === slug)) return err(401, "unauthorized");
+        if (!await haveRiderCats(env)) return err(503, "run migrations/013-rider-categories.sql first");
+
+        // What is switched off, and what shows numbers. One blob, replaced
+        // whole — there is nothing here worth merging field by field.
+        if (request.method === "PUT" && tail === "prefs") {
+          const b = await request.json();
+          const keys = (a) => Array.from(new Set((Array.isArray(a) ? a : [])
+            .map((x) => String(x)).filter((x) => /^[cr][0-9]{1,9}$/.test(x)))).slice(0, 500);
+          const prefs = { on: b && b.on !== false, off: keys(b && b.off), nums: keys(b && b.nums) };
+          await env.DB.prepare(
+            "INSERT INTO category_prefs (user_slug,prefs,updated) VALUES (?,?,datetime('now')) " +
+            "ON CONFLICT(user_slug) DO UPDATE SET prefs = excluded.prefs, updated = excluded.updated"
+          ).bind(slug, JSON.stringify(prefs)).run();
+          return json({ ok: true, ...prefs });
+        }
+
+        // Shared by create and replace. Everything is checked before anything is
+        // written: D1 has no transaction across these statements, so whatever
+        // can fail has to fail while nothing has moved.
+        const readCat = async (b, selfId) => {
+          const name = String(b && b.name || "").trim().replace(/\s+/g, " ");
+          if (!name) return { bad: err(400, "a category needs a name") };
+          if (name.length > 60) return { bad: err(400, "that name is too long") };
+          const note = String(b && b.note || "").trim().slice(0, 60);
+          const ids = Array.from(new Set((Array.isArray(b && b.ids) ? b.ids : [])
+            .map((x) => Number(x)).filter((x) => Number.isInteger(x) && x > 0)));
+          if (ids.length < 2) return { bad: err(400, "a category needs at least two rides") };
+          if (ids.length > 200) return { bad: err(400, "that is too many rides for one category") };
+          const marks = ids.map(() => "?").join(",");
+
+          const { results: found } = await env.DB.prepare(
+            "SELECT id, name, park FROM coasters WHERE id IN (" + marks + ")").bind(...ids).all();
+          if (found.length !== ids.length) return { bad: err(404, "one of those rides does not exist") };
+          // Named with its park in the refusals below: a clone family is five
+          // rides with the SAME name, so "Batman: The Ride is already in Batman:
+          // The Ride" tells nobody which one.
+          const rideName = (cid) => {
+            const c = found.filter((f) => f.id === cid)[0];
+            return c ? c.name + (c.park ? " at " + c.park : "") : "that ride";
+          };
+
+          // The rule. A ride that is in one of the site's categories cannot be
+          // in one of yours — switch that one off and it is an ordinary row
+          // again, which is the supported way to disagree with it.
+          if (await haveClones(env)) {
+            const { results: site } = await env.DB.prepare(
+              "SELECT m.coaster AS coaster, g.name AS name FROM clone_members m " +
+              "JOIN clone_groups g ON g.id = m.group_id WHERE m.coaster IN (" + marks + ")"
+            ).bind(...ids).all();
+            if (site.length) {
+              return { bad: err(409, rideName(site[0].coaster) + " is in the Coaster Hub " +
+                "category \u201c" + site[0].name + "\u201d. Switch that one off first.") };
+            }
+          }
+
+          const { results: mine } = await env.DB.prepare(
+            "SELECT m.coaster AS coaster, c.name AS name FROM rider_category_members m " +
+            "JOIN rider_categories c ON c.id = m.cat_id " +
+            "WHERE m.user_slug = ? AND m.coaster IN (" + marks + ")" +
+            (selfId ? " AND m.cat_id <> ?" : "")
+          ).bind(...(selfId ? [slug, ...ids, selfId] : [slug, ...ids])).all();
+          if (mine.length) {
+            return { bad: err(409, rideName(mine[0].coaster) + " is already in your " +
+              "\u201c" + mine[0].name + "\u201d category") };
+          }
+          return { name, note, ids };
+        };
+
+        if (request.method === "POST" && !tail) {
+          const g = await readCat(await request.json(), null);
+          if (g.bad) return g.bad;
+          const id = (await env.DB.prepare(
+            "INSERT INTO rider_categories (user_slug,name,note,created) " +
+            "VALUES (?,?,?,datetime('now')) RETURNING id"
+          ).bind(slug, g.name, g.note || null).first()).id;
+          await env.DB.batch(g.ids.map((cid) => env.DB.prepare(
+            "INSERT INTO rider_category_members (user_slug,coaster,cat_id) VALUES (?,?,?)")
+            .bind(slug, cid, id)));
+          return json({ ok: true, key: "r" + id, id, name: g.name, note: g.note, ids: g.ids });
+        }
+
+        if (tail && tail !== "prefs" && (request.method === "PUT" || request.method === "DELETE")) {
+          const cid = Number(tail);
+          const row = await env.DB.prepare(
+            "SELECT id, name FROM rider_categories WHERE id = ? AND user_slug = ?")
+            .bind(cid, slug).first();
+          // Scoped to the slug, so somebody else's category id is a 404 rather
+          // than a 403 — there is nothing to learn from the difference.
+          if (!row) return err(404, "no such category");
+
+          if (request.method === "DELETE") {
+            // Members first: no foreign keys here, so a category deleted on its
+            // own would leave rows pointing at nothing and those rides stuck in
+            // a category that does not exist.
+            await env.DB.prepare("DELETE FROM rider_category_members WHERE cat_id = ? AND user_slug = ?")
+              .bind(cid, slug).run();
+            await env.DB.prepare("DELETE FROM rider_categories WHERE id = ? AND user_slug = ?")
+              .bind(cid, slug).run();
+            return json({ ok: true });
+          }
+
+          const g = await readCat(await request.json(), cid);
+          if (g.bad) return g.bad;
+          await env.DB.prepare("UPDATE rider_categories SET name = ?, note = ? WHERE id = ? AND user_slug = ?")
+            .bind(g.name, g.note || null, cid, slug).run();
+          await env.DB.prepare("DELETE FROM rider_category_members WHERE cat_id = ? AND user_slug = ?")
+            .bind(cid, slug).run();
+          await env.DB.batch(g.ids.map((c2) => env.DB.prepare(
+            "INSERT INTO rider_category_members (user_slug,coaster,cat_id) VALUES (?,?,?)")
+            .bind(slug, c2, cid)));
+          return json({ ok: true, key: "r" + cid, id: cid, name: g.name, note: g.note, ids: g.ids });
+        }
+      }
+
       // ---- following ----
       // Public to read: the counts sit under every bio, including for people
       // who are not signed in.
@@ -1835,6 +2038,29 @@ export default {
       // The Ride", and model alone makes every B&M Invert one ride. The suggest
       // endpoint proposes name+model families and Carter answers them.
       const CLONE_503 = "run migrations/012-clone-groups.sql first";
+
+      if (request.method === "GET" && path === "/api/admin/categories") {
+        if (!await haveRiderCats(env)) return json({ categories: [] });
+        const { results } = await env.DB.prepare(
+          "SELECT c.id AS id, c.user_slug AS slug, u.name AS who, c.name AS name, " +
+          "c.note AS note, c.created AS created, COUNT(m.coaster) AS n " +
+          "FROM rider_categories c LEFT JOIN users u ON u.slug = c.user_slug " +
+          "LEFT JOIN rider_category_members m ON m.cat_id = c.id " +
+          "GROUP BY c.id ORDER BY LOWER(c.name), c.id"
+        ).all();
+        // How many DIFFERENT riders wrote a category by this name. Two or more
+        // and it has stopped being one person's opinion.
+        const seen = new Map();
+        for (const r of results) {
+          const k = String(r.name).trim().toLowerCase();
+          if (!seen.has(k)) seen.set(k, new Set());
+          seen.get(k).add(r.slug);
+        }
+        return json({ categories: results.map((r) => ({
+          id: r.id, slug: r.slug, who: r.who || r.slug, name: r.name, note: r.note || "",
+          n: r.n, riders: seen.get(String(r.name).trim().toLowerCase()).size,
+        })) });
+      }
 
       if (request.method === "GET" && path === "/api/admin/clones/suggest") {
         if (!await haveClones(env)) return err(503, CLONE_503);

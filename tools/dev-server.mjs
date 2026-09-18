@@ -82,7 +82,8 @@ db.exec(`
     email TEXT, bio TEXT, avatar TEXT);
   CREATE TABLE IF NOT EXISTS rides (id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_slug TEXT, coaster_id INTEGER, d TEXT);
-  CREATE TABLE IF NOT EXISTS rankings (user_slug TEXT PRIMARY KEY, ord TEXT, updated TEXT);
+  CREATE TABLE IF NOT EXISTS rankings (user_slug TEXT NOT NULL, coaster_id INTEGER NOT NULL,
+    pos INTEGER NOT NULL, PRIMARY KEY (user_slug, coaster_id));
   CREATE TABLE IF NOT EXISTS activity (id INTEGER PRIMARY KEY AUTOINCREMENT,
     at TEXT, actor TEXT, kind TEXT, subject TEXT, n INTEGER, detail TEXT);
   CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,7 +102,7 @@ db.exec(`
 
 // Schema migrations, applied in order and applied TWICE — the file claims to be
 // re-runnable and this is where that claim gets tested. Add new ones here.
-const SCHEMA = ["010-follows.sql", "012-clone-groups.sql"];
+const SCHEMA = ["010-follows.sql", "012-clone-groups.sql", "013-rider-categories.sql"];
 for (const f of SCHEMA) {
   const p = join(ROOT, "migrations", f);
   if (!existsSync(p)) { console.warn("! missing migration " + f); continue; }

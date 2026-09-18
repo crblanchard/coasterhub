@@ -72,13 +72,19 @@ CREATE TABLE IF NOT EXISTS rides (
   d          TEXT
 );
 
--- A ranking is one JSON array of coaster ids. Flat on purpose: every coaster
--- keeps its own position, so the shared list and the averages can read it
--- without knowing anything about how it was edited.
+-- A ranking is one row per coaster, in position order. Flat on purpose: every
+-- coaster keeps its own position, so the shared list, the 2+ averages and
+-- "N ranked" can read it without knowing anything about how it was edited.
+--
+-- One row per position, NOT a JSON array: the shared list joins across every
+-- rider's rankings, and a JSON blob cannot be joined. `PRIMARY KEY
+-- (user_slug, coaster_id)` is what stops the same coaster appearing twice in
+-- one list — a whole class of bug the writer would otherwise have to prevent.
 CREATE TABLE IF NOT EXISTS rankings (
-  user_slug TEXT PRIMARY KEY,
-  ord       TEXT,
-  updated   TEXT
+  user_slug  TEXT NOT NULL,
+  coaster_id INTEGER NOT NULL,
+  pos        INTEGER NOT NULL,
+  PRIMARY KEY (user_slug, coaster_id)
 );
 
 -- The feed. Created here as well as in 002 (both IF NOT EXISTS) because 002 is
