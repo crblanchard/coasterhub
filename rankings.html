@@ -176,6 +176,8 @@
   .rrow .xd.down{color:var(--down)}
   /* A folded family in the pool wears the same wash and count badge it will
      wear in the list, so what you are about to add looks like what you get. */
+  .addsec{padding:9px 2px 5px;color:var(--muted);font-size:.72rem;font-weight:700;
+          text-transform:uppercase;letter-spacing:.09em}
   .addrow.grp{background:var(--tint);border-color:var(--accent2)}
   .addrow .cnt{color:var(--accent2);font-weight:800;font-size:.8rem;margin-left:7px}
   .catpill{display:inline-flex;align-items:center;gap:8px;background:var(--panel);
@@ -1413,6 +1415,14 @@ function renderAdd(){
     seenG[g.key]=1;
     rows.push({ g:g, c:c, ids:mates.map(function(x){ return x.id; }) });
   });
+  // Categories to the top, whatever the sort says. A category has no height to
+  // sort by, and "Tallest first" over 300 rows buried the six of them at
+  // arbitrary depths — which is exactly backwards, because they are the rows
+  // that save the most work. Five Batmans added in one tap is the point of the
+  // feature; it should not have to be hunted for.
+  var cats=rows.filter(function(r){ return !!r.g; });
+  var solo=rows.filter(function(r){ return !r.g; });
+  rows=cats.concat(solo);
   var shown=rows.slice(0,300);
   // Coasters, not rows: folding nine Batmans and Boomerangs into two rows does
   // not mean seven went missing. The cap is on ROWS, so that is what the
@@ -1426,10 +1436,17 @@ function renderAdd(){
        +(shown.length<rows.length?' — showing the first '+shown.length+' rows':''))
     : '';
   function seenCount(){ var n=0; for(var k in seenG) if(seenG[k]) n++; return n; }
-  $('addlist').innerHTML=shown.length?shown.map(function(row){
+  $('addlist').innerHTML=shown.length?shown.map(function(row,ix){
+    // One line to say why the order is what it is, and one to hand the rest
+    // back to the sort. Neither appears when there is nothing to separate.
+    var head='';
+    if(cats.length && ix===0) head='<div class="addsec">'+cats.length+' categor'
+      +(cats.length===1?'y':'ies')+' \u2014 each one adds every ride in it at once</div>';
+    if(cats.length && solo.length && ix===cats.length)
+      head='<div class="addsec">Everything else</div>';
     if(row.g){
       var g=row.g, n=row.ids.length, have=g.ids.length;
-      return '<div class="addrow grp">'
+      return head+'<div class="addrow grp">'
         +'<span class="nm">'+esc(g.name)+'<span class="cnt">\u00d7'+n+'</span></span>'
         +'<span class="meta"><span class="pk">'
         +(n<have ? n+' of '+have+' left' : 'the same ride at '+n+' parks')
@@ -1439,6 +1456,7 @@ function renderAdd(){
         +'</div>';
     }
     var c=row.c;
+    var pre=head;
     // Height and speed are separate so speed can be dropped on its own — it's
     // the first thing to give up when the park needs the room.
     var h=c.h!=null?Math.round(c.h)+' ft':'', s=c.s!=null?Math.round(c.s)+' mph':'';
@@ -1446,7 +1464,7 @@ function renderAdd(){
       ? '<span class="st">'+(h?'<span class="h">'+h+'</span>':'')
         +(s?'<span class="s">'+(h?' · ':'')+s+'</span>':'')+'</span>'
       : '';
-    return '<div class="addrow">'
+    return pre+'<div class="addrow">'
       +'<span class="nm">'+esc(c.name)+'</span>'
       +'<span class="meta"><span class="pk">'+esc(c.park||'—')+'</span>'+stat+'</span>'
       +'<span class="acts"><button class="ghost" data-hh="'+c.id+'">Rank</button>'
