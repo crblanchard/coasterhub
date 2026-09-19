@@ -667,15 +667,22 @@
       // one; a shared NAME alone is how a B&M Invert, a FreeSpin and an SLC all
       // end up called Batman: The Ride, so it is worth knowing which you are
       // looking at before you tick it.
+      var hitModel = function(c){ return !!(c.model && models[c.model]); };
+      var hitName = function(c){ return !!(c.name && names[String(c.name).trim().toLowerCase()]); };
+      // A shared MODEL is the signal worth trusting; a shared name alone is how
+      // a B&M Invert, a FreeSpin and an SLC all end up called Batman: The Ride.
+      // So model matches sort above name-only ones, ALWAYS — and the ranking
+      // has to happen before the slice, or twelve alphabetical name matches
+      // crowd the real answers off the end of the list.
+      var rank = function(c){ return hitModel(c) ? (hitName(c) ? 0 : 1) : 2; };
+      var why = function(c){
+        return rank(c)===0 ? 'same name and model'
+             : rank(c)===1 ? 'same model' : 'same name only';
+      };
       var sug = state.coasters.filter(function(c){
         if(members.indexOf(c.id)>=0 || owner[c.id]) return false;
-        return (c.model && models[c.model])
-            || (c.name && names[String(c.name).trim().toLowerCase()]);
-      }).sort(function(a,b){ return byName(a.id,b.id); }).slice(0,12);
-      var why = function(c){
-        var m = c.model && models[c.model], n = c.name && names[String(c.name).trim().toLowerCase()];
-        return m && n ? 'same name and model' : m ? 'same model' : 'same name only';
-      };
+        return hitModel(c) || hitName(c);
+      }).sort(function(a,b){ return rank(a)-rank(b) || byName(a.id,b.id); }).slice(0,12);
       el.innerHTML = sug.length
         ? '<p class="hint" style="margin-top:12px">Suggested \u2014 same model or the '
           + 'same name as something already in this category. Tick what belongs; '

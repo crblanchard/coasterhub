@@ -2050,6 +2050,12 @@ tagged **same model** / **same name only** / **same name and model**. That tag i
 value: a half-built Batman category suggests the FreeSpins and the B&M Inverts too, and "same
 name only" is what stops you ticking them.
 
+**Model matches sort above name-only ones, always, and the ranking happens BEFORE the slice.**
+Carter's call, 2026-09-19, and it was hiding real answers: alphabetically, "Batman: The Ride —
+Discovery Kingdom" and "— Fiesta Texas" took the first two of twelve slots and pushed two
+actual SLCs off the end of the list. Seeding a category with two SLCs now suggests all ten
+remaining SLCs first and the name-only Batmans last.
+
 Two bugs worth remembering:
 
 - **`hits.map(pickRow)` passes the INDEX as the second argument.** `pickRow(c, why)` took it as
