@@ -117,7 +117,11 @@
      than the park, so the park is still there when the name has gone to an
      ellipsis. */
   .rrow .mrow .mn{flex:1;min-width:0;font-size:.82rem;display:flex;align-items:baseline}
-  .rrow .mrow .mn .t{flex:1 6 auto;min-width:5.5em;overflow:hidden;
+  /* 0, not 1: the name must SHRINK six times faster than the park, but it must
+     not GROW. `flex:1` made it fill the row and shove the park out to the far
+     right — "Pepsi Orange Streak . . . . . . Nickelodeon Universe" — instead of
+     sitting next to it. My own regression from making .mn a flex container. */
+  .rrow .mrow .mn .t{flex:0 6 auto;min-width:5.5em;overflow:hidden;
                      text-overflow:ellipsis;white-space:nowrap}
   .rrow .mrow .mn span{flex:0 1 auto;min-width:0;color:var(--muted);margin-left:7px;
                        font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -150,9 +154,17 @@
         color:var(--muted);padding:4px 10px;cursor:pointer;font:inherit;font-size:.75rem}
   .rrow .mhead .mseg button:first-child{border-left:0}
   .rrow .mhead .mseg button.on{background:var(--tint2);color:var(--fg);font-weight:600}
-  .rrow .mhead .tiny{background:transparent;border:1px solid var(--line);border-radius:8px;
-        color:var(--muted);padding:4px 9px;cursor:pointer;font:inherit;font-size:.75rem}
-  .rrow .mhead .tiny:hover{color:var(--fg);border-color:var(--accent2)}
+  /* Scoped to .rrow, NOT to .mhead. "Pull all back in" is the same little
+     button and it lives in .excl, so a rule named for where the first one
+     happened to sit left it rendering as a raw browser <button> — serif face,
+     square border, nothing like the page. Eighth instance of a selector that
+     names the place instead of the thing (CLAUDE.md).
+     `font:inherit` is a shorthand and would reset the font-size that follows
+     it; the longhand cannot. */
+  .rrow .tiny{background:transparent;border:1px solid var(--line);border-radius:8px;
+        color:var(--muted);padding:4px 9px;cursor:pointer;
+        font-family:inherit;font-size:.75rem;line-height:1.4}
+  .rrow .tiny:hover{color:var(--fg);border-color:var(--accent2)}
   .rrow .mrow .mp.tilde{color:var(--muted);font-weight:600}
   .rrow .mrow .macts{display:flex;gap:4px;flex:none;margin-left:auto}
   .rrow .mrow .macts button{flex:none;width:24px;height:24px;border-radius:7px;

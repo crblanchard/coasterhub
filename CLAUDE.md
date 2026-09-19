@@ -87,7 +87,12 @@ those files are the fallback, and the sync overwrites them.
 - **A CSS rule that names an element rather than what it means** breaks the day
   the element changes. `.herocount h1 span{display:block}` was what put one hero
   number per line; the numbers became links, and all three collapsed onto one
-  line. Same family as the shorthands above — sixth instance.
+  line. Same family as the shorthands above — sixth instance. **Eighth
+  instance, 2026-09-19:** `.rrow .mhead .tiny` styled the little buttons inside
+  a category's header, so when "Pull all back in" was added to `.excl` — the
+  same button, a few lines down — it rendered as a raw browser `<button>`, serif
+  face and all. The rule is `.rrow .tiny` now. Scope to the thing, not the
+  place it first appeared.
 - **An inline `padding` beats every stylesheet rule, media query included.** The
   heroes set `--hero-t`/`--hero-b` and let `style.css` do the padding, which is
   the only reason the phone layout can tighten it. Give a new page those, not a
