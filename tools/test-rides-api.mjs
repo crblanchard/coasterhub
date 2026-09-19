@@ -32,6 +32,7 @@ const PW = "test-password";
 const MIGRATION_010 = readFileSync(join(ROOT, "migrations", "010-follows.sql"), "utf8");
 const MIGRATION_012 = readFileSync(join(ROOT, "migrations", "012-clone-groups.sql"), "utf8");
 const MIGRATION_013 = readFileSync(join(ROOT, "migrations", "013-rider-categories.sql"), "utf8");
+const MIGRATION_015 = readFileSync(join(ROOT, "migrations", "015-category-triage.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
 // D1 rejects a statement with more bound parameters than SQLite's compiled-in
@@ -115,6 +116,8 @@ function freshDb() {
   db.exec(MIGRATION_012);
   db.exec(MIGRATION_013);
   db.exec(MIGRATION_013);
+  db.exec(MIGRATION_015);
+  db.exec(MIGRATION_015);
   return db;
 }
 
@@ -1974,6 +1977,52 @@ async function main() {
     r = await call(db, "DELETE", "/api/categories/" + slug + "/" + mine, { cookie });
     check("deleting one takes its members with it",
       r.status === 200 && rows(db, "SELECT coaster FROM rider_category_members").length === 0);
+  }
+
+  // ---- triage ---------------------------------------------------------------
+  {
+    const db = freshDb();
+    const cookie = await signedUp(db, "triage@example.com", "Tri");
+    db.prepare("UPDATE accounts SET is_admin = 1").run();
+
+    let r = await call(db, "GET", "/api/admin/categories/skipped", { cookie });
+    check("nothing set aside to begin with", r.status === 200 && r.data.ids.length === 0);
+
+    r = await call(db, "POST", "/api/admin/categories/skipped", { cookie, body: { ids: [1, 2, 2] } });
+    check("setting some aside dedupes them", r.status === 200 && r.data.n === 2,
+      JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/admin/categories/skipped", { cookie, body: { ids: [1] } });
+    check("...and doing it twice is not an error", r.status === 200);
+
+    r = await call(db, "GET", "/api/admin/categories/skipped", { cookie });
+    check("they come back", r.status === 200 && r.data.ids.length === 2,
+      JSON.stringify(r.data.ids));
+
+    r = await call(db, "POST", "/api/admin/categories/skipped",
+      { cookie, body: { ids: [1], on: false } });
+    check("putting one back into the queue", r.status === 200 && r.data.on === false);
+    r = await call(db, "GET", "/api/admin/categories/skipped", { cookie });
+    check("...leaves the other", r.data.ids.length === 1 && r.data.ids[0] === 2,
+      JSON.stringify(r.data.ids));
+
+    r = await call(db, "POST", "/api/admin/categories/skipped", { cookie, body: { ids: [] } });
+    check("no coasters is a 400", r.status === 400);
+    r = await call(db, "GET", "/api/admin/categories/skipped");
+    check("triage needs an admin", r.status === 401);
+
+    // Before the migration: the read still answers, the write names the file.
+    const old = freshDb();
+    old.exec("DROP TABLE category_skipped");
+    const c2 = await signedUp(old, "pre15@example.com", "Pre");
+    old.prepare("UPDATE accounts SET is_admin = 1").run();
+    r = await call(old, "GET", "/api/admin/categories/skipped", { cookie: c2 });
+    check("no migration yet: the read is empty, not an error",
+      r.status === 200 && r.data.ids.length === 0 && /015/.test(r.data.need || ""),
+      JSON.stringify(r.data));
+    r = await call(old, "POST", "/api/admin/categories/skipped", { cookie: c2, body: { ids: [1] } });
+    check("no migration yet: the write is a 503 naming the file",
+      r.status === 503 && /015-category-triage\.sql/.test(r.data.error || ""),
+      r.status + " " + JSON.stringify(r.data));
   }
 
   // ---- models ---------------------------------------------------------------

@@ -2311,6 +2311,46 @@ export default {
       }
 
       // every park referenced by a coaster, with coords (null = not on the map yet) + coaster count
+      // ---- triage -------------------------------------------------------
+      //
+      // Which coasters have been LOOKED AT and deliberately left out of every
+      // category. With clone_members, that is enough to split the whole
+      // database three ways — in a category, set aside, not looked at — and
+      // the third one is the work queue. A coaster added tomorrow lands there
+      // by doing nothing, which is the point.
+      if (request.method === "GET" && path === "/api/admin/categories/skipped") {
+        try {
+          const { results } = await env.DB.prepare(
+            "SELECT coaster FROM category_skipped").all();
+          return json({ ids: results.map((r) => r.coaster) });
+        } catch (e) {
+          // Before the migration: nothing is set aside, which is true, and the
+          // page still works — it just shows a longer queue.
+          return json({ ids: [], need: "015-category-triage.sql" });
+        }
+      }
+
+      if (request.method === "POST" && path === "/api/admin/categories/skipped") {
+        const b = await request.json();
+        const ids = Array.from(new Set((Array.isArray(b && b.ids) ? b.ids : [])
+          .map((x) => Number(x)).filter((x) => Number.isInteger(x) && x > 0))).slice(0, 500);
+        if (!ids.length) return err(400, "which coasters?");
+        const marks = ids.map(() => "?").join(",");
+        try {
+          if (b && b.on === false) {
+            await env.DB.prepare(
+              "DELETE FROM category_skipped WHERE coaster IN (" + marks + ")").bind(...ids).run();
+          } else {
+            await env.DB.batch(ids.map((id) => env.DB.prepare(
+              "INSERT OR REPLACE INTO category_skipped (coaster,at) VALUES (?,datetime('now'))")
+              .bind(id)));
+          }
+        } catch (e) {
+          return err(503, "run migrations/015-category-triage.sql first");
+        }
+        return json({ ok: true, n: ids.length, on: !(b && b.on === false) });
+      }
+
       // ---- models -------------------------------------------------------
       //
       // Every distinct `model` with how many coasters carry it and which makers

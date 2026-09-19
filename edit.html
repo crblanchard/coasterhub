@@ -85,9 +85,10 @@
 
   <div id="app">
     <header class="bar">
-      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button><button id="mClones">Categories</button><button id="mModels">Models</button></div>
+      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button><button id="mClones">Categories</button><button id="mModels">Models</button><button id="mTriage">Triage</button></div>
       <input id="q" placeholder="Search…" style="max-width:220px">
       <button class="ghost" id="newcat">+ New category</button>
+      <div class="seg" id="trseg"><button data-tf="todo" class="on">To look at</button><button data-tf="done">In a category</button><button data-tf="aside">Set aside</button></div>
       <label class="cbrow" id="fIncWrap"><input type="checkbox" id="incOnly"> Only incomplete</label>
       <label class="cbrow" id="fGeoWrap"><input type="checkbox" id="ungeoOnly"> Only un-geocoded</label>
       <span class="count" id="count"></span>
@@ -108,7 +109,8 @@
   var state = { mode:"coasters", coasters: [], byId: {}, sel: null, opts: { manu:[], model:[] },
                 geo: {}, parks: [], selPark: null,
                 clones: [], suggest: [], riderCats: [], selClone: 0, cloneErr: "",
-                models: [], blankModels: 0, selModel: "" };
+                models: [], blankModels: 0, selModel: "",
+                skipped: {}, triageNeed: "", triageFilter: "todo" };
 
   var FIELDS = [
     ["name","Name","text"], ["park","Park","text"], ["type","Type","type"],
@@ -224,6 +226,18 @@
     document.getElementById('mParks').addEventListener('click', function(){ setMode('parks'); });
     document.getElementById('mClones').addEventListener('click', function(){ setMode('clones'); });
     document.getElementById('mModels').addEventListener('click', function(){ setMode('models'); });
+    document.getElementById('mTriage').addEventListener('click', function(){ setMode('triage'); });
+    document.getElementById('trseg').querySelectorAll('[data-tf]').forEach(function(b){
+      b.addEventListener('click', function(){
+        state.triageFilter = b.getAttribute('data-tf');
+        document.getElementById('trseg').querySelectorAll('[data-tf]').forEach(function(x){
+          x.classList.toggle('on', x===b); });
+        state.sel = null;
+        document.getElementById('editor').innerHTML =
+          '<div class="empty">Select a coaster.</div>';
+        renderTriage();
+      });
+    });
     document.getElementById('newcat').addEventListener('click', function(){ showGroup(0); });
     document.getElementById('list').addEventListener('click', function(e){
       var row = e.target.closest ? e.target.closest('.row[data-id]') : null;
@@ -240,14 +254,17 @@
     document.getElementById('mParks').classList.toggle('on', m==='parks');
     document.getElementById('mClones').classList.toggle('on', m==='clones');
     document.getElementById('mModels').classList.toggle('on', m==='models');
+    document.getElementById('mTriage').classList.toggle('on', m==='triage');
     document.getElementById('fIncWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('fGeoWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('newcat').style.display = m==='clones' ? '' : 'none';
+    document.getElementById('trseg').style.display = m==='triage' ? '' : 'none';
     state.selClone = 0;
     document.getElementById('editor').innerHTML = '<div class="empty">Select an item to edit.</div>';
     if (m==='parks' && !state.parks.length) loadParks();
     else if (m==='clones') loadClones();
     else if (m==='models') loadModels();
+    else if (m==='triage') loadTriage();
     else render();
   }
 
@@ -255,6 +272,7 @@
     if (state.mode==='coasters') renderCoasters();
     else if (state.mode==='parks') renderParks();
     else if (state.mode==='models') renderModels();
+    else if (state.mode==='triage') renderTriage();
     else renderClones();
     updateGeoSummary();
   }
@@ -274,6 +292,143 @@
     } catch(e){ state.clones = []; state.suggest = []; state.riderCats = []; state.cloneErr = e.message; }
     render();
   }
+  // ---------- triage ----------
+  // Every coaster is in exactly one of three states, and only two of them are
+  // written down anywhere: clone_members says which are IN a category,
+  // category_skipped says which were looked at and left out, and what is in
+  // neither is the queue. A coaster added to the shared list tomorrow lands in
+  // the queue by doing nothing, which is the whole point — it is a list of
+  // decisions, not a flag, so a new row is untouched by definition.
+  async function loadTriage(){
+    if (!state.clones.length && !state.suggest.length) { try { await loadClones(); } catch(e){} }
+    try {
+      var d = await api("GET","/api/admin/categories/skipped");
+      state.skipped = {}; (d.ids||[]).forEach(function(i){ state.skipped[i]=1; });
+      state.triageNeed = d.need || "";
+    } catch(e){ state.skipped = {}; state.triageNeed = ""; state.cloneErr = e.message; }
+    render();
+  }
+  function inCat(){
+    var m = {};
+    state.clones.forEach(function(g){ g.ids.forEach(function(i){ m[i]=g; }); });
+    return m;
+  }
+  function triageBuckets(){
+    var own = inCat(), todo = [], done = [], aside = [];
+    state.coasters.forEach(function(c){
+      if (own[c.id]) done.push(c);
+      else if (state.skipped[c.id]) aside.push(c);
+      else todo.push(c);
+    });
+    return { todo:todo, done:done, aside:aside, own:own };
+  }
+  function renderTriage(){
+    var q = document.getElementById('q').value.trim().toLowerCase();
+    var b = triageBuckets();
+    var pick = b[state.triageFilter==='done' ? 'done' : state.triageFilter==='aside' ? 'aside' : 'todo'];
+    var rows = pick.filter(function(c){
+      return !q || ((c.name||'')+' '+(c.park||'')+' '+(c.manu||'')+' '+(c.model||''))
+        .toLowerCase().indexOf(q)>=0; });
+
+    document.getElementById('count').textContent =
+      b.todo.length + " to look at \u00b7 " + b.done.length + " in a category \u00b7 "
+      + b.aside.length + " set aside";
+
+    document.getElementById('list').innerHTML =
+      (state.triageNeed ? '<div class="row"><div class="nm">Set aside is not stored yet</div>'
+        + '<div class="pk">run migrations/'+esc(state.triageNeed)+' \u2014 until then every '
+        + 'coaster outside a category shows as still to look at</div></div>' : '')
+      + '<div class="row live"><div class="nm">'
+        + (state.triageFilter==='done' ? 'In a category'
+           : state.triageFilter==='aside' ? 'Set aside' : 'Still to look at')
+        + '</div><div class="pk">'+rows.length+' of '+pick.length
+        + ' \u00b7 switch with the buttons on the right</div></div>'
+      + (rows.length ? rows.slice(0,400).map(function(c){
+          var g = b.own[c.id];
+          return '<div class="row'+(state.sel===c.id?' sel':'')+'" data-tri="'+c.id+'">'
+            + '<div class="nm">'+esc(c.name)+'</div>'
+            + '<div class="pk">'+esc(c.park||'\u2014')
+            + (c.model?' \u00b7 '+esc(c.model):'')
+            + (g?' \u00b7 in '+esc(g.name):'')+'</div></div>'; }).join('')
+          + (rows.length>400 ? '<div class="row"><div class="pk">\u2026 and '+(rows.length-400)
+              + ' more. Search to narrow it.</div></div>' : '')
+        : '<div class="row"><div class="pk">Nothing here.</div></div>');
+    document.getElementById('list').querySelectorAll('[data-tri]').forEach(function(r){
+      r.onclick = function(){ showTriage(+r.getAttribute('data-tri')); }; });
+  }
+  function showTriage(id){
+    var c = state.byId[id]; if(!c) return;
+    state.sel = id; renderTriage();
+    var b = triageBuckets(), g = b.own[id], aside = !!state.skipped[id];
+    document.getElementById('editor').innerHTML =
+      '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(c.name)+'</h2>'
+      + '<p class="hint">'+esc(c.park||'?')+(c.manu?' \u00b7 '+esc(c.manu):'')
+        + (c.model?' \u00b7 '+esc(c.model):'')+'</p>'
+      + '<p class="hint">'+(g ? 'In <b>'+esc(g.name)+'</b>.'
+          : aside ? 'Set aside \u2014 looked at, belongs in no category.'
+          : 'Not looked at yet.')+'</p>'
+      + '<div class="grid"><div class="fld full"><label>Put it in a category</label>'
+      + '<select id="trcat"><option value="">\u2014 pick one \u2014</option>'
+      + state.clones.map(function(x){
+          return '<option value="'+x.id+'"'+(g&&g.id===x.id?' selected':'')+'>'
+            + esc(x.name)+' ('+x.ids.length+')</option>'; }).join('')
+      + '</select></div></div>'
+      + '<div class="actions">'
+      + '<button id="traside">'+(aside?'Back to the queue':'Set aside')+'</button>'
+      + '<button class="ghost" id="trnext">Next in the queue</button>'
+      + '<span class="toast" id="trtoast"></span></div>'
+      + '<div class="toolbar"><h3>Others with the same model</h3>'
+      + '<p class="hint">'+(c.model
+          ? 'Often the fastest way to see whether this one belongs with something.'
+          : 'This coaster has no model, so there is nothing to compare it to. '
+            + 'The Models tab is where that gets fixed.')+'</p>'
+      + '<div class="grid">' + (c.model ? state.coasters.filter(function(x){
+          return x.id!==id && (x.model||'')===c.model; }).slice(0,20).map(function(x){
+          var xg = b.own[x.id];
+          return '<div class="fld full"><label>'+esc(x.name)+' \u2014 '+esc(x.park||'?')
+            + (xg?' \u00b7 in '+esc(xg.name):'')+'</label></div>'; }).join('') : '')
+      + '</div></div>';
+
+    document.getElementById('trcat').onchange = async function(){
+      var gid = +this.value; if(!gid) return;
+      var into = state.clones.filter(function(x){ return x.id===gid; })[0]; if(!into) return;
+      var t = document.getElementById('trtoast'); t.textContent='Saving\u2026';
+      try {
+        await api("PUT","/api/clones/"+gid,
+          { name:into.name, note:into.note, ids:into.ids.concat([id]) });
+        if(state.skipped[id]) await api("POST","/api/admin/categories/skipped",{ ids:[id], on:false });
+        await loadClones(); await loadTriage(); nextTodo(id);
+      } catch(e){ t.className='toast bad'; t.textContent=e.message; }
+    };
+    document.getElementById('traside').onclick = async function(){
+      var t = document.getElementById('trtoast'); t.textContent='Saving\u2026';
+      try {
+        await api("POST","/api/admin/categories/skipped",{ ids:[id], on:!aside });
+        await loadTriage();
+        if(!aside) nextTodo(id); else showTriage(id);
+      } catch(e){ t.className='toast bad'; t.textContent=e.message; }
+    };
+    document.getElementById('trnext').onclick = function(){ nextTodo(id); };
+  }
+  // Straight on to the next one. Triage is a queue, and stopping to find your
+  // place again after every decision is most of the work.
+  function nextTodo(after){
+    var b = triageBuckets();
+    var q = document.getElementById('q').value.trim().toLowerCase();
+    var list = b.todo.filter(function(c){
+      return !q || ((c.name||'')+' '+(c.park||'')+' '+(c.manu||'')+' '+(c.model||''))
+        .toLowerCase().indexOf(q)>=0; });
+    if(!list.length){
+      state.sel = null; renderTriage();
+      document.getElementById('editor').innerHTML =
+        '<div class="empty">Nothing left to look at.</div>';
+      return;
+    }
+    var at = -1;
+    for(var i=0;i<list.length;i++) if(list[i].id===after){ at=i; break; }
+    showTriage(list[Math.min(at+1, list.length-1)].id);
+  }
+
   // ---------- models ----------
   // `model` is free text typed into /add and /edit, so one layout ends up under
   // three names — "SLC", "Suspended Looping Coaster", "Vekoma SLC". That reads
