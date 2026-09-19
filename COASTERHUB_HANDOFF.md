@@ -2022,6 +2022,45 @@ bug nobody had reported on the most-used page on the site.
 
 ---
 
+### Three tools for curating categories (2026-09-19)
+
+**`/edit` → Models.** `model` is free text typed into `/add` and `/edit`, so one layout ends
+up under three names — SLC, Suspended Looping Coaster, Vekoma SLC. Every distinct model with
+its count, how many makers build it, how many are defunct, and the number carrying none at all
+(**121 models, 545 coasters with none**). Open one to see what carries it, then rename it —
+or type a name that already exists and the two merge. One `UPDATE` either way; the answer says
+which it was, and the feed says it too.
+
+**`/edit` → Triage.** `migrations/015-category-triage.sql` adds `category_skipped`, which
+records the OTHER answer: "I looked at this one and it belongs in none". With `clone_members`
+that splits the whole database three ways — **in a category, set aside, not looked at** —
+and the third is the work queue. It is a table of DECISIONS rather than a flag on `coasters`
+precisely so a coaster added tomorrow lands in the queue by doing nothing.
+
+Open one and you get a dropdown to file it and a **Set aside** button, both of which move
+straight on to the next — stopping to find your place after every decision is most of the
+work. Under that, **"Others with the same model"**: open the SLC at Six Flags Mexico and the
+other eleven are right there. Nothing rider-facing reads any of it.
+
+**Filters and suggestions in the category editor.** The picker takes a **maker** and a
+**model** alongside the name search, and either works on its own — choosing "Suspended
+Looping Coaster" lists all twelve without having to guess a name they do not share. Below it,
+**Suggested**: coasters sharing a model or a name with something already in the category, each
+tagged **same model** / **same name only** / **same name and model**. That tag is the whole
+value: a half-built Batman category suggests the FreeSpins and the B&M Inverts too, and "same
+name only" is what stops you ticking them.
+
+Two bugs worth remembering:
+
+- **`hits.map(pickRow)` passes the INDEX as the second argument.** `pickRow(c, why)` took it as
+  the reason, so every search result came out tagged "· 1", "· 2", "· 3". Wrap it:
+  `map(function(c){ return pickRow(c); })`.
+- A browser test against a **file-backed** dev database carries state from the last run. The
+  second run of the picker test failed because the coasters it wanted were already categorised
+  by the first. `rm -f .dev.db` before a run that asserts on counts.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**
