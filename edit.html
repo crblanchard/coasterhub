@@ -656,32 +656,43 @@
     // uses, applied to a half-built category instead of the whole database —
     // put one Batman in and the other four are simply there, no search needed.
     // Offered, never applied: the answer is often "no, that one is different".
-    function redrawSug(){
-      var el = document.getElementById('cgsug'); if(!el) return;
-      if(!members.length){ el.innerHTML=''; return; }
+    // How well a coaster matches what is ALREADY in this category. A shared
+    // MODEL is the signal worth trusting; a shared name alone is how a B&M
+    // Invert, a FreeSpin and an SLC all end up called Batman: The Ride. So a
+    // model match sorts above a name-only one ALWAYS, in the suggestions and in
+    // the search alike — both lists are answering the same question, and
+    // ordering them differently would be answering it two ways.
+    //
+    // Rebuilt on every call rather than cached: ticking one more member changes
+    // what matches, which is most of the value.
+    function affinity(){
       var models={}, names={};
       members.forEach(function(cid){ var c=state.byId[cid]; if(!c) return;
         if(c.model) models[c.model]=1;
         if(c.name) names[String(c.name).trim().toLowerCase()]=1; });
-      // Which signal caught it, said out loud. A shared MODEL is the strong
-      // one; a shared NAME alone is how a B&M Invert, a FreeSpin and an SLC all
-      // end up called Batman: The Ride, so it is worth knowing which you are
-      // looking at before you tick it.
-      var hitModel = function(c){ return !!(c.model && models[c.model]); };
-      var hitName = function(c){ return !!(c.name && names[String(c.name).trim().toLowerCase()]); };
-      // A shared MODEL is the signal worth trusting; a shared name alone is how
-      // a B&M Invert, a FreeSpin and an SLC all end up called Batman: The Ride.
-      // So model matches sort above name-only ones, ALWAYS — and the ranking
-      // has to happen before the slice, or twelve alphabetical name matches
-      // crowd the real answers off the end of the list.
-      var rank = function(c){ return hitModel(c) ? (hitName(c) ? 0 : 1) : 2; };
-      var why = function(c){
-        return rank(c)===0 ? 'same name and model'
-             : rank(c)===1 ? 'same model' : 'same name only';
-      };
+      var m = function(c){ return !!(c.model && models[c.model]); };
+      var n = function(c){ return !!(c.name && names[String(c.name).trim().toLowerCase()]); };
+      // Four tiers, not three: a search turns up coasters matching NEITHER, and
+      // they were sorting level with the name matches — "Batman Gotham City
+      // Escape", which shares nothing, came out above five Batman: The Rides.
+      var rank = function(c){ return m(c) ? (n(c) ? 0 : 1) : (n(c) ? 2 : 3); };
+      return { model:m, name:n, rank:rank, any:function(c){ return m(c)||n(c); },
+        why:function(c){
+          var r = rank(c);
+          return r===0 ? 'same name and model'
+               : r===1 ? 'same model'
+               : r===2 ? 'same name only' : ''; } };
+    }
+
+    function redrawSug(){
+      var el = document.getElementById('cgsug'); if(!el) return;
+      if(!members.length){ el.innerHTML=''; return; }
+      var A = affinity(), rank = A.rank, why = A.why;
+      // The ranking has to happen before the slice, or twelve alphabetical name
+      // matches crowd the real answers off the end of the list.
       var sug = state.coasters.filter(function(c){
         if(members.indexOf(c.id)>=0 || owner[c.id]) return false;
-        return hitModel(c) || hitName(c);
+        return A.any(c);
       }).sort(function(a,b){ return rank(a)-rank(b) || byName(a.id,b.id); }).slice(0,12);
       el.innerHTML = sug.length
         ? '<p class="hint" style="margin-top:12px">Suggested \u2014 same model or the '
@@ -700,17 +711,19 @@
       // should list all twelve without also having to guess a name they share,
       // which is exactly the thing they do not have.
       var any = q.length >= 2 || manu || model;
+      var A2 = affinity();
       var hits = !any ? [] : state.coasters.filter(function(c){
         if (members.indexOf(c.id) >= 0) return false;   // it is already up there
         if (manu && (c.manu||'') !== manu) return false;
         if (model && (c.model||'') !== model) return false;
         return q.length < 2 || (c.name||'').toLowerCase().indexOf(q) >= 0;
-      }).sort(function(a, b){ return byName(a.id, b.id); }).slice(0, 40);
+      }).sort(function(a, b){ return A2.rank(a)-A2.rank(b) || byName(a.id, b.id); })
+        .slice(0, 40);
       // NOT hits.map(pickRow): map passes the INDEX as the second argument, and
       // pickRow's second argument is the reason a coaster was suggested — every
       // search result came out tagged "· 1", "· 2", "· 3".
       document.getElementById('cghits').innerHTML =
-        hits.map(function(c){ return pickRow(c); }).join('')
+        hits.map(function(c){ return pickRow(c, A2.why(c)); }).join('')
         || (!any ? '' : '<div class="fld full"><span class="hint">'
             + 'Nothing else matches.</span></div>');
       wirePick(document.getElementById('cghits'));

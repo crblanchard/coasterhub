@@ -2056,6 +2056,14 @@ Discovery Kingdom" and "— Fiesta Texas" took the first two of twelve slots and
 actual SLCs off the end of the list. Seeding a category with two SLCs now suggests all ten
 remaining SLCs first and the name-only Batmans last.
 
+**The SEARCH results are ranked the same way** (2026-09-19). Both lists answer "which of these
+belongs with what I already have", and ordering them differently was answering it two ways.
+One `affinity()` per redraw serves both, rebuilt each time because ticking one more member
+changes what matches — which is most of the value. Four tiers, not three: same name AND
+model, same model, same name only, neither. The fourth one mattered — with three tiers a
+coaster matching NOTHING sorted level with the name matches, so "Batman Gotham City Escape"
+came out above five Batman: The Rides.
+
 Two bugs worth remembering:
 
 - **`hits.map(pickRow)` passes the INDEX as the second argument.** `pickRow(c, why)` took it as
