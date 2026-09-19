@@ -99,13 +99,37 @@
   .rrow .pos.rng{min-width:auto;font-size:.82rem;letter-spacing:-.02em}
   .rrow .nm b .cnt{color:var(--accent2);font-weight:800;font-size:.8rem;margin-left:7px}
   .rrow .acts .exp{font-weight:700}
-  .rrow .members{flex:0 0 100%;margin:7px 0 1px;padding-top:7px;border-top:1px solid var(--line)}
+  /* `flex: 0 0 100%` is NOT 100%: min-width defaults to auto, so this panel
+     refused to shrink below its widest content and dragged the whole page
+     sideways — 454px inside a 400px viewport — the moment the member rows grew
+     a second line of text. Latent since the clone work; it only bit when the
+     rows started showing the ride AND the park. Same bug the handoff records
+     from the artifact, in the file I did not apply the lesson to. */
+  .rrow .members{flex:0 0 100%;min-width:0;margin:7px 0 1px;padding-top:7px;
+                 border-top:1px solid var(--line)}
   .rrow .mrow{display:flex;align-items:center;gap:9px;padding:4px 0}
   .rrow .mrow .mp{color:var(--accent2);font-weight:700;font-size:.75rem;
                   font-variant-numeric:tabular-nums;min-width:2.2em;text-align:right;flex:none}
-  .rrow .mrow .mn{flex:1;min-width:0;font-size:.82rem;overflow:hidden;
-                  text-overflow:ellipsis;white-space:nowrap}
-  .rrow .mrow .mn span{color:var(--muted);margin-left:7px;font-size:.76rem}
+  /* Name then park, and the NAME is what gives way when the row is tight.
+     Inside a category the five names are identical and the park is the only
+     thing telling them apart — a narrow phone showing five rows of
+     "Batman: The…" tells you nothing at all. The name shrinks six times faster
+     than the park, so the park is still there when the name has gone to an
+     ellipsis. */
+  .rrow .mrow .mn{flex:1;min-width:0;font-size:.82rem;display:flex;align-items:baseline}
+  .rrow .mrow .mn .t{flex:1 6 auto;min-width:5.5em;overflow:hidden;
+                     text-overflow:ellipsis;white-space:nowrap}
+  .rrow .mrow .mn span{flex:0 1 auto;min-width:0;color:var(--muted);margin-left:7px;
+                       font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* On a phone there is no width for a name, a park, a grip, a tilde and four
+     buttons on one line — squeezed together they came out "Batman:… S…", which
+     is two truncations and no information. So they stack, the same way the park
+     and the maker already stack on the rows above. Same breakpoint, same idea. */
+  @media (max-width:560px){
+    .rrow .mrow .mn{display:block}
+    .rrow .mrow .mn .t{display:block;min-width:0}
+    .rrow .mrow .mn span{display:block;margin-left:0;line-height:1.3}
+  }
   .rrow .mrow .del{flex:none;width:24px;height:24px;border-radius:7px;border:1px solid var(--line);
                    background:transparent;color:var(--muted);cursor:pointer;font-size:.85rem;line-height:1;
                    display:flex;align-items:center;justify-content:center}
@@ -142,7 +166,11 @@
               padding-top:7px;border-top:1px dashed var(--line)}
   .rrow .excl > b{display:block;color:var(--fg);font-weight:600;margin-bottom:3px}
   .rrow .xrow{display:flex;align-items:baseline;gap:6px;padding:1px 0}
-  .rrow .xrow .xp{color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rrow .xrow .xp{color:var(--fg);min-width:0;display:flex;align-items:baseline}
+  .rrow .xrow .xp .t{flex:1 6 auto;min-width:5.5em;overflow:hidden;
+                     text-overflow:ellipsis;white-space:nowrap}
+  .rrow .xrow .xp i{flex:0 1 auto;min-width:0;color:var(--muted);font-style:normal;
+                    margin-left:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .rrow .xd{flex:none;font-weight:700;font-variant-numeric:tabular-nums}
   .rrow .xd.up{color:var(--up)}
   .rrow .xd.down{color:var(--down)}
@@ -759,7 +787,7 @@ function renderRank(){
           +'<span class="mp'+(numbered?'':' tilde')+'">'
           +(numbered?(b.from+k+1):'~')+'</span>'
           // Name then park, the same way every other row on the site reads.
-          +'<span class="mn">'+esc(c.name||'')
+          +'<span class="mn"><span class="t">'+esc(c.name||'')+'</span>'
           +(c.park ? '<span>'+esc(c.park)+'</span>' : '')+'</span>'
           +'<span class="macts">'
           +'<button data-pull="'+id+'" title="Rank this one on its own" '
@@ -773,7 +801,12 @@ function renderRank(){
             +'aria-label="Remove this one">\u00d7</button></span></div>'; }).join('')
       +(gone.length ? '<div class="excl"><b>Ranked separately:</b>'
           +gone.map(function(x){ var c=BYID[x.id]||{};
-            return '<div class="xrow"><span class="xp">'+esc(c.park||c.name||('#'+x.id))+'</span>'
+            // The ride, then where it is — the same black-then-grey every other
+            // row reads. The number is the point of the line, so it keeps its
+            // width and the name gives way first.
+            return '<div class="xrow"><span class="xp"><span class="t">'
+              +esc(c.name||('#'+x.id))+'</span>'
+              +(c.park?'<i>'+esc(c.park)+'</i>':'')+'</span>'
               +'<span class="xd '+(x.up?'up':'down')+'">('+(x.up?'+':'\u2212')+x.d+')</span></div>';
           }).join('')
           +'<button class="tiny" type="button" data-allback="'+key+'" '
