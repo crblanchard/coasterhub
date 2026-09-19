@@ -2090,6 +2090,36 @@ sits together, so the real question is "better than the Boomerangs?". Carter's w
 
 A ride that is not in a category still reads as itself, with its park.
 
+### The row you are moving stays under your finger (2026-09-19)
+
+Carter: *"I just had to click vekoma boomerang three times to sort another category below it."*
+
+The arithmetic was never wrong. One press already moves a block past a **whole** other block:
+
+```
+start:   1 Steel Vengeance | 2-5 Boomerang x4 | 6-10 Batman x5 | 11 Millennium Force
+press 1: 1 Steel Vengeance | 2-6 Batman x5    | 7-10 Boomerang x4 | 11 Millennium Force
+```
+
+What was wrong is where the button went. A five-ride category jumping past another travels
+about 200px down the page, so the arrow leaves the pointer, and the next press lands on
+whatever slid up into that space — usually the block just jumped, whose own arrow sends the
+first one straight back. Press, press, press, and you have moved one place. Reproduced by
+clicking a **fixed screen coordinate** three times, which is what a finger actually does;
+locating the row again between presses, as the earlier test did, hid the bug completely.
+
+So `keepPut(sel, change)`: note where the row sits, make the change, scroll by exactly how far
+it moved. The row does not move on screen; the list moves around it. Every `.rrow` carries
+`data-rid="<first coaster id>"` and every `.mrow` a `data-mid` for this — an id survives the
+re-render, a DOM node does not. It wraps both the card `move()` and the member `swap()`.
+
+`behavior:'instant'` is not optional here, for the reason already recorded above:
+`html{scroll-behavior:smooth}` turns every programmatic scroll into an animation, and a quick
+second press would replace the running one before it had travelled.
+
+Measured after: the card's top holds at 556→557px across three presses and the pointer stays
+on its own arrow each time; a member row holds at 341px and walks 3→2→1→0, then stops.
+
 ---
 
 ## Open tasks

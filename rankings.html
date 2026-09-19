@@ -827,6 +827,7 @@ function renderRank(){
           +'style="margin-top:7px">Pull all back in</button></div>' : '')
       +'</div>' : '';
     return '<div class="rrow'+(b.g?' grp':'')+(b.g&&OPEN[key]?' open':'')+'" data-i="'+i+'"'
+      +' data-rid="'+b.ids[0]+'"'
       +(b.g?' data-open="'+key+'" role="button" tabindex="0" aria-expanded="'
             +(OPEN[key]?'true':'false')+'"':'')+'>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
@@ -879,8 +880,12 @@ function renderRank(){
   // Inside a category, one ride swaps with its neighbour. Members are
   // contiguous in ORDER, so this is the same swap the whole list does — the
   // flat list stays flat, which is what keeps every position honest.
-  var swap=function(i,j){ var t=ORDER[i]; ORDER[i]=ORDER[j]; ORDER[j]=t;
-    markDirty(); renderRank(); };
+  var swap=function(i,j){
+    keepPut('.mrow[data-mid="'+ORDER[i]+'"]', function(){
+      var t=ORDER[i]; ORDER[i]=ORDER[j]; ORDER[j]=t;
+      markDirty(); renderRank();
+    });
+  };
   el.querySelectorAll('[data-mup]').forEach(function(b){ b.onclick=function(){
     var i=+b.dataset.mup; swap(i,i-1); }; });
   el.querySelectorAll('[data-mdown]').forEach(function(b){ b.onclick=function(){
@@ -1036,6 +1041,37 @@ function gather(){
   ORDER=out; markDirty(); renderRank();
 }
 
+// Where a row sits on screen right now, found by a coaster it contains — an id
+// survives the re-render, a DOM node does not.
+function screenTop(sel){
+  var el=$('ranklist').querySelector(sel);
+  return el ? el.getBoundingClientRect().top : null;
+}
+
+// Keep the thing you are moving under your finger.
+//
+// A press moves a block past a WHOLE other block, which is right — but a
+// five-ride category jumping past another one travels about 200px, so the
+// button leaves the cursor and the next press lands on whatever slid into that
+// space. Usually that is the block you just jumped, whose own arrow sends you
+// straight back. Carter pressed a category down three times and watched it
+// oscillate.
+//
+// So: note where the row is, make the change, and scroll by exactly how far it
+// moved. The row stays put on screen and the arrow stays under the pointer.
+// `behavior:'instant'` is not optional — html{scroll-behavior:smooth} turns
+// every programmatic scroll into an animation, and a second press would replace
+// the running one before it had travelled (CLAUDE.md).
+function keepPut(sel, change){
+  var before=screenTop(sel);
+  change();
+  var after=screenTop(sel);
+  if(before===null||after===null||after===before) return;
+  var dy=after-before;
+  try { window.scrollBy({ top:dy, left:0, behavior:'instant' }); }
+  catch(e){ window.scrollBy(0,dy); }
+}
+
 // Move the block CONTAINING position i by one block in direction d.
 function move(i,d){
   var bs=blocks(), at=-1, k;
@@ -1044,9 +1080,11 @@ function move(i,d){
   var j=at+d; if(j<0||j>=bs.length) return;
   var a=bs[at], b=bs[j];
   var lo=Math.min(at,j), hi=Math.max(at,j);
-  var head=ORDER.slice(0,bs[lo].from), tail=ORDER.slice(bs[hi].to+1);
-  ORDER=head.concat(d>0?b.ids.concat(a.ids):a.ids.concat(b.ids)).concat(tail);
-  markDirty(); renderRank();
+  keepPut('[data-rid="'+a.ids[0]+'"]', function(){
+    var head=ORDER.slice(0,bs[lo].from), tail=ORDER.slice(bs[hi].to+1);
+    ORDER=head.concat(d>0?b.ids.concat(a.ids):a.ids.concat(b.ids)).concat(tail);
+    markDirty(); renderRank();
+  });
 }
 
 // Pointer-based drag: works with touch and mouse alike (HTML5 drag-and-drop
