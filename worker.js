@@ -2311,6 +2311,50 @@ export default {
       }
 
       // every park referenced by a coaster, with coords (null = not on the map yet) + coaster count
+      // ---- models -------------------------------------------------------
+      //
+      // Every distinct `model` with how many coasters carry it and which makers
+      // build it. A model is free text typed into /add and /edit, so "SLC",
+      // "Suspended Looping Coaster" and "Vekoma SLC" are three strings for one
+      // thing — which matters twice over now: the shared list reads worse for
+      // it, and a category is far easier to assemble by filtering on a model
+      // that means what it says.
+      if (request.method === "GET" && path === "/api/admin/models") {
+        const { results } = await env.DB.prepare(
+          "SELECT model, COUNT(*) AS n, COUNT(DISTINCT manu) AS makers, " +
+          "  MIN(manu) AS manu, SUM(CASE WHEN closed IS NOT NULL THEN 1 ELSE 0 END) AS gone " +
+          "FROM coasters WHERE model IS NOT NULL AND TRIM(model) <> '' " +
+          "GROUP BY model ORDER BY n DESC, model"
+        ).all();
+        const blank = await env.DB.prepare(
+          "SELECT COUNT(*) AS n FROM coasters WHERE model IS NULL OR TRIM(model) = ''"
+        ).first();
+        return json({ models: results, blank: (blank && blank.n) || 0 });
+      }
+
+      // Rename one model, or merge it into another by renaming it to a name
+      // that already exists. One statement either way — the only difference is
+      // whether the target was already there, which is what the answer says.
+      if (request.method === "POST" && path === "/api/admin/models/rename") {
+        const b = await request.json();
+        const from = String(b && b.from || "").trim();
+        const to = String(b && b.to || "").trim().replace(/\s+/g, " ").slice(0, 60);
+        if (!from) return err(400, "which model?");
+        if (!to) return err(400, "a model needs a name");
+        if (from === to) return err(400, "that is the name it already has");
+        const had = await env.DB.prepare(
+          "SELECT COUNT(*) AS n FROM coasters WHERE model = ?").bind(from).first();
+        if (!had || !had.n) return err(404, "no coaster carries that model");
+        const into = await env.DB.prepare(
+          "SELECT COUNT(*) AS n FROM coasters WHERE model = ?").bind(to).first();
+        const merged = !!(into && into.n);
+        await env.DB.prepare("UPDATE coasters SET model = ? WHERE model = ?").bind(to, from).run();
+        await recordActivity(env, merged ? "model_merged" : "model_renamed",
+          { subject: to, n: had.n, detail: { from: from } });
+        return afterWrite(ctx, env, json({ ok: true, from, to, moved: had.n, merged,
+                                           total: had.n + ((into && into.n) || 0) }));
+      }
+
       if (request.method === "GET" && path === "/api/parks-all") {
         const { results } = await env.DB.prepare(
           "SELECT c.park AS name, p.lat AS lat, p.lon AS lon, p.region AS region, COUNT(*) AS coasters " +

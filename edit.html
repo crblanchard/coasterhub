@@ -85,7 +85,7 @@
 
   <div id="app">
     <header class="bar">
-      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button><button id="mClones">Categories</button></div>
+      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button><button id="mClones">Categories</button><button id="mModels">Models</button></div>
       <input id="q" placeholder="Search…" style="max-width:220px">
       <button class="ghost" id="newcat">+ New category</button>
       <label class="cbrow" id="fIncWrap"><input type="checkbox" id="incOnly"> Only incomplete</label>
@@ -107,7 +107,8 @@
   var TOKEN = "";
   var state = { mode:"coasters", coasters: [], byId: {}, sel: null, opts: { manu:[], model:[] },
                 geo: {}, parks: [], selPark: null,
-                clones: [], suggest: [], riderCats: [], selClone: 0, cloneErr: "" };
+                clones: [], suggest: [], riderCats: [], selClone: 0, cloneErr: "",
+                models: [], blankModels: 0, selModel: "" };
 
   var FIELDS = [
     ["name","Name","text"], ["park","Park","text"], ["type","Type","type"],
@@ -222,6 +223,7 @@
     document.getElementById('mCoasters').addEventListener('click', function(){ setMode('coasters'); });
     document.getElementById('mParks').addEventListener('click', function(){ setMode('parks'); });
     document.getElementById('mClones').addEventListener('click', function(){ setMode('clones'); });
+    document.getElementById('mModels').addEventListener('click', function(){ setMode('models'); });
     document.getElementById('newcat').addEventListener('click', function(){ showGroup(0); });
     document.getElementById('list').addEventListener('click', function(e){
       var row = e.target.closest ? e.target.closest('.row[data-id]') : null;
@@ -237,6 +239,7 @@
     document.getElementById('mCoasters').classList.toggle('on', m==='coasters');
     document.getElementById('mParks').classList.toggle('on', m==='parks');
     document.getElementById('mClones').classList.toggle('on', m==='clones');
+    document.getElementById('mModels').classList.toggle('on', m==='models');
     document.getElementById('fIncWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('fGeoWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('newcat').style.display = m==='clones' ? '' : 'none';
@@ -244,12 +247,14 @@
     document.getElementById('editor').innerHTML = '<div class="empty">Select an item to edit.</div>';
     if (m==='parks' && !state.parks.length) loadParks();
     else if (m==='clones') loadClones();
+    else if (m==='models') loadModels();
     else render();
   }
 
   function render(){
     if (state.mode==='coasters') renderCoasters();
     else if (state.mode==='parks') renderParks();
+    else if (state.mode==='models') renderModels();
     else renderClones();
     updateGeoSummary();
   }
@@ -269,6 +274,84 @@
     } catch(e){ state.clones = []; state.suggest = []; state.riderCats = []; state.cloneErr = e.message; }
     render();
   }
+  // ---------- models ----------
+  // `model` is free text typed into /add and /edit, so one layout ends up under
+  // three names — "SLC", "Suspended Looping Coaster", "Vekoma SLC". That reads
+  // badly on the shared list and it makes a category far harder to assemble
+  // than it should be, because the obvious filter does not gather the obvious
+  // thing.
+  async function loadModels(){
+    try {
+      var d = await api("GET","/api/admin/models");
+      state.models = d.models || []; state.blankModels = d.blank || 0;
+    } catch(e){ state.models = []; state.blankModels = 0; state.cloneErr = e.message; }
+    render();
+  }
+  function renderModels(){
+    var q = document.getElementById('q').value.trim().toLowerCase();
+    var rows = state.models.filter(function(m){ return !q || m.model.toLowerCase().indexOf(q)>=0; });
+    document.getElementById('count').textContent =
+      rows.length + " model" + (rows.length===1?"":"s")
+      + (state.blankModels ? " \u00b7 " + state.blankModels + " coasters with none" : "");
+    document.getElementById('list').innerHTML = rows.length
+      ? rows.map(function(m){
+          return '<div class="row'+(state.selModel===m.model?' sel':'')+'" data-mdl="'+esc(m.model)+'">'
+            + '<div class="nm">'+esc(m.model)+'</div>'
+            + '<div class="pk">'+m.n+' coaster'+(m.n===1?'':'s')
+            + (m.makers>1 ? ' \u00b7 '+m.makers+' makers' : (m.manu?' \u00b7 '+esc(m.manu):''))
+            + (m.gone ? ' \u00b7 '+m.gone+' defunct' : '')+'</div></div>'; }).join('')
+      : '<div class="row"><div class="pk">No model matches that.</div></div>';
+    document.getElementById('list').querySelectorAll('[data-mdl]').forEach(function(r){
+      r.onclick = function(){ showModel(r.getAttribute('data-mdl')); }; });
+  }
+  function showModel(name){
+    var m = state.models.filter(function(x){ return x.model===name; })[0]; if(!m) return;
+    state.selModel = name; renderModels();
+    // Which coasters carry it, so a merge is never a guess about what moves.
+    var carry = state.coasters.filter(function(c){ return (c.model||'')===name; })
+      .sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+    document.getElementById('editor').innerHTML =
+      '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(name)+'</h2>'
+      + '<p class="hint">'+m.n+' coaster'+(m.n===1?'':'s')
+        + (m.makers>1 ? ' from '+m.makers+' different makers' : '')
+        + '. Renaming rewrites every one of them.</p>'
+      + '<div class="grid"><div class="fld full"><label>Rename to \u2014 an existing '
+        + 'name merges the two</label><input id="mdlto" value="'+esc(name)+'" list="dl_models">'
+        + '<datalist id="dl_models">'
+        + state.models.map(function(x){ return '<option value="'+esc(x.model)+'">'; }).join('')
+        + '</datalist></div></div>'
+      + '<div class="actions"><button id="mdlsave">Save</button>'
+        + '<span class="toast" id="mdltoast"></span></div>'
+      + '<div class="toolbar"><h3>What carries it</h3>'
+        + '<div class="grid">' + carry.slice(0,60).map(function(c){
+            return '<div class="fld full"><label>'+esc(c.name)+' \u2014 '+esc(c.park||'?')
+              + (c.manu?' \u00b7 '+esc(c.manu):'')+'</label></div>'; }).join('')
+        + (carry.length>60 ? '<div class="fld full"><label>\u2026 and '+(carry.length-60)
+            + ' more</label></div>' : '')
+        + '</div></div>';
+    document.getElementById('mdlsave').onclick = async function(){
+      var to = document.getElementById('mdlto').value.trim();
+      var t = document.getElementById('mdltoast');
+      if(to===name){ t.textContent='That is the name it already has.'; return; }
+      t.textContent='Saving\u2026';
+      try {
+        var out = await api("POST","/api/admin/models/rename",{ from:name, to:to });
+        // The coaster list this page holds is now wrong in `moved` places, so
+        // fix it here rather than re-fetching 1,114 rows for a string swap.
+        state.coasters.forEach(function(c){ if((c.model||'')===name) c.model = to; });
+        state.opts = { manu:distinct("manu"), model:distinct("model") };
+        state.selModel = to;
+        await loadModels();
+        showModel(to);
+        var t2 = document.getElementById('mdltoast');
+        if(t2){ t2.className='toast good';
+          t2.textContent = out.merged
+            ? 'Merged \u2014 '+out.moved+' moved, '+out.total+' carry it now'
+            : 'Renamed \u2014 '+out.moved+' updated'; }
+      } catch(e){ t.className='toast bad'; t.textContent = e.message; }
+    };
+  }
+
   function cname(id){
     var c = state.coasters.find(function(x){ return x.id===id; });
     return c ? (c.name + " \u2014 " + (c.park||"?")) : ("#" + id);

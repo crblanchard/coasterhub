@@ -43,6 +43,8 @@
           : kind === 'coaster_merged' ? 'merged'
           : kind === 'clone_removed' ? 'deleted'
           : kind === 'clone_set' ? 'stack'
+          : kind === 'model_renamed' ? 'edited'
+          : kind === 'model_merged' ? 'merged'
           : kind === 'coaster_deleted' ? 'deleted'
           : kind;
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
@@ -117,6 +119,10 @@
         + (made && again ? 'created and modified' : made ? 'created' : 'modified');
     }
     if (e.kind === 'clone_removed') return (sub || 'A category') + ' category deleted';
+    if (e.kind === 'model_renamed') return esc(d.from || 'A model') + ' is now '
+      + (sub || 'something else') + ' \u2014 ' + plural(e.n || 0, 'coaster');
+    if (e.kind === 'model_merged') return esc(d.from || 'A model') + ' was merged into '
+      + (sub || 'another model') + ' \u2014 ' + plural(e.n || 0, 'coaster') + ' moved';
     if (e.kind === 'user_added')      return (sub || 'A rider') + ' joined'
       + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
     if (e.kind === 'claimed')         return (sub || 'A rider') + ' created an account'

@@ -1976,6 +1976,53 @@ async function main() {
       r.status === 200 && rows(db, "SELECT coaster FROM rider_category_members").length === 0);
   }
 
+  // ---- models ---------------------------------------------------------------
+  {
+    const db = freshDb();
+    db.exec(`
+      INSERT INTO coasters (id,name,park,type,manu,model) VALUES
+        (41,'Mind Eraser','Elitch Gardens','Steel','Vekoma','SLC'),
+        (42,'Kong','Six Flags Discovery Kingdom','Steel','Vekoma','SLC'),
+        (43,'T3','Kentucky Kingdom','Steel','Vekoma','Suspended Looping Coaster'),
+        (44,'Nameless','Somewhere','Steel','Maker',NULL);
+    `);
+    const cookie = await signedUp(db, "models@example.com", "Mo");
+    db.prepare("UPDATE accounts SET is_admin = 1").run();
+
+    let r = await call(db, "GET", "/api/admin/models", { cookie });
+    const slc = r.data.models.filter((m) => m.model === "SLC")[0];
+    check("lists each model with a count", r.status === 200 && slc && slc.n === 2,
+      JSON.stringify(r.data.models));
+    // The three fixture coasters have no model either, so this is 4 and not 1 —
+    // which is the point of the number: it is the size of the job.
+    check("...and counts the ones with no model at all", r.data.blank === 4,
+      JSON.stringify(r.data.blank));
+
+    r = await call(db, "POST", "/api/admin/models/rename",
+      { cookie, body: { from: "SLC", to: "Suspended Looping Coaster" } });
+    check("merging into a model that exists says so",
+      r.status === 200 && r.data.merged === true && r.data.moved === 2 && r.data.total === 3,
+      JSON.stringify(r.data));
+    check("...and every coaster moved",
+      rows(db, "SELECT id FROM coasters WHERE model = 'Suspended Looping Coaster'").length === 3);
+
+    r = await call(db, "POST", "/api/admin/models/rename",
+      { cookie, body: { from: "Suspended Looping Coaster", to: "Vekoma SLC" } });
+    check("renaming to a name nobody uses is a rename, not a merge",
+      r.status === 200 && r.data.merged === false && r.data.moved === 3, JSON.stringify(r.data));
+
+    r = await call(db, "POST", "/api/admin/models/rename", { cookie, body: { from: "Ghost", to: "X" } });
+    check("a model nobody carries is a 404", r.status === 404);
+    r = await call(db, "POST", "/api/admin/models/rename", { cookie, body: { from: "Vekoma SLC", to: "" } });
+    check("a model still needs a name", r.status === 400);
+    r = await call(db, "POST", "/api/admin/models/rename",
+      { cookie, body: { from: "Vekoma SLC", to: "Vekoma SLC" } });
+    check("renaming it to itself is refused rather than silently doing nothing", r.status === 400);
+
+    r = await call(db, "GET", "/api/admin/models");
+    check("the model list needs an admin", r.status === 401, r.status + "");
+  }
+
   // The window where the code is live and 013 is not.
   {
     const db = dbWithoutRiderCats();
