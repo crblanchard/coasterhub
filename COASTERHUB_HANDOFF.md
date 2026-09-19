@@ -2075,6 +2075,23 @@ Two bugs worth remembering:
 
 ---
 
+### The comparison card names the category, on both sides (2026-09-19)
+
+Placing a category head-to-head showed whichever member the binary search happened to land on
+— "Great Nor'Easter, Morey's Piers" — which asks a question about one ride when the
+answer moves five. Both sides name the **category** and its **note** now:
+
+> **Batman: The Ride** / B&M Invert    vs    **Boomerang** / Vekoma Boomerang
+
+The right side matters as much as the left: a position inside a category is one of a run that
+sits together, so the real question is "better than the Boomerangs?". Carter's words —
+*"a boomerang just came up, I don't even recognize the ride"*. The subtitle says
+`Placing Batman: The Ride (5 rides, as one)`, and `Pick 1 · against your #5` is unchanged.
+
+A ride that is not in a category still reads as itself, with its park.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

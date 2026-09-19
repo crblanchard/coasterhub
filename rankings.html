@@ -1493,7 +1493,7 @@ function renderAdd(){
   $('addlist').querySelectorAll('[data-hhg]').forEach(function(b){
     b.onclick=function(){
       var r=rowFor(b.dataset.hhg); if(!r) return;
-      openHH(r.ids[0], r.ids.slice(1)); };
+      openHH(r.ids[0], r.ids.slice(1), r.g); };
   });
   function rowFor(key){
     var f=null; rows.forEach(function(r){ if(r.g && r.g.key===key) f=r; }); return f;
@@ -1528,11 +1528,11 @@ function fitMeta(){
 // contradicts the inference, the range reopens and the search carries on, which
 // means the spot is always settled by comparisons the rider actually made.
 var hh=null;
-function openHH(id, mates){
+function openHH(id, mates, g){
   mates=mates||[];
   if(!ORDER.length){ ORDER=ORDER.concat([id]).concat(mates);
     markDirty(); renderRank(); renderAdd(); setView('rank'); return; }
-  hh={id:id, mates:mates, lo:0, hi:ORDER.length, asked:0, cmp:{},
+  hh={id:id, mates:mates, g:g||null, lo:0, hi:ORDER.length, asked:0, cmp:{},
       most:Math.ceil(Math.log2(ORDER.length+1))+2};
   $('hh').style.display='flex';
   stepHH();
@@ -1554,9 +1554,29 @@ function stepHH(){
   }
   var a=BYID[hh.id]||{}, b=BYID[ORDER[mid]]||{};
   var confirming=hh.lo>=hh.hi;
-  $('hh_sub').textContent='Placing '+(a.name||'')+' — every pick narrows it to one exact spot.';
-  $('hh_a').innerHTML='<b>'+esc(a.name||'')+'</b><span>'+esc(a.park||'')+'</span>';
-  $('hh_b').innerHTML='<b>'+esc(b.name||'')+'</b><span>'+esc(b.park||'')+'</span>';
+  // Placing a CATEGORY is one decision about five rides, so the card says the
+  // category and what it is — not whichever member happened to lead the run,
+  // which read as a question about Great Nor'Easter alone.
+  var n=(hh.mates||[]).length+1;
+  var aName = hh.g ? hh.g.name : (a.name||'');
+  var aSub  = hh.g ? (hh.g.note || (n+' rides')) : (a.park||'');
+  // The same on the right. A position inside a category is one of a run that
+  // sits together, so the real question is "better than the Boomerangs?" —
+  // naming whichever Boomerang the binary search happened to land on asks
+  // about a ride nobody recognises.
+  var bg = CLONE[ORDER[mid]];
+  var bName = bg ? bg.name : (b.name||'');
+  var bSub;
+  if (bg){
+    var bn=0; ORDER.forEach(function(x){ if(CLONE[x]===bg) bn++; });
+    bSub = bg.note || (bn+' rides');
+  } else {
+    bSub = b.park||'';
+  }
+  $('hh_sub').textContent='Placing '+aName
+    +(hh.g ? ' ('+n+' rides, as one)' : '')+' — every pick narrows it to one exact spot.';
+  $('hh_a').innerHTML='<b>'+esc(aName)+'</b><span>'+esc(aSub)+'</span>';
+  $('hh_b').innerHTML='<b>'+esc(bName)+'</b><span>'+esc(bSub)+'</span>';
   $('hh_prog').textContent='Pick '+(hh.asked+1)+' · '
     +(confirming?'confirming against your #':'against your #')+(mid+1);
   $('hh_a').onclick=function(){ answerHH(mid,true); };   // candidate is better
