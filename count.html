@@ -93,12 +93,9 @@
     .day .row .life{gap:7px}
     .day .row .life .stat{font-size:0;line-height:0}
     .day .row .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
-    /* Who built it goes, so the name can be read. Only the park rows carry a
-       maker at all, and on a 390px screen it was taking enough width to clip
-       half of them — "Boomerang: Coast t\2026", "Road Runn\2026". The name is the
-       thing you are looking for in the list; the maker is a detail you can get
-       from the coaster's own page. */
-    .day .row .mk{display:none}
+    /* The model no longer competes with the name for width — it is on the line
+       below — so it stays on a phone now. It was hidden here back when the two
+       shared a row and the names were the ones getting clipped. */
   }
   /* Every coaster and park named on this page is a way in to its own page.
      The link inherits the row's colour rather than turning the list into a wall
@@ -147,8 +144,15 @@
   #parkview.flat .day .n .nrid.none{color:var(--muted);font-weight:400}
   #parkview.flat .day .inner{border-top:0;padding:0 2px 12px}
   /* A tick per coaster: what you have of this park. Fixed width so the names
-     below it still line up on the ones you have not ridden. */
-  .day .row .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
+     below it still line up on the ones you have not ridden. Top-aligned now
+     that a row is two lines tall. */
+  .day .row .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);
+    font-size:.82rem;align-self:flex-start;padding-top:1px}
+  /* Name over model. The name is what you scan for; the model is what it is. */
+  .day .row .cmain{flex:1;min-width:0;display:flex;flex-direction:column}
+  .day .row .cmain .mk{font-size:.74rem;line-height:1.25}
+  .day .row{align-items:flex-start}
+  .day .row .life{align-self:flex-start}
   /* Dimmed rather than hidden, the same way an unridden row reads on
      /categories: the ones you are missing are the point of the list. */
   .day .row.miss .cn{color:var(--muted)}
@@ -176,7 +180,7 @@
   #loading{color:var(--muted);padding:40px 0}
   #err{display:none;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:20px}
   .sortpick{display:none}
-  td.cmeta,td.criders{display:none}
+  td.cmodel{display:none}
   @media (max-width:680px){
     .day summary{gap:8px}
     .day .dt{min-width:100%}
@@ -214,10 +218,12 @@
                             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #c_body td[data-k=loc]{display:block;grid-column:2;grid-row:2;color:var(--muted);
                            font-size:.76rem;text-align:right;white-space:nowrap}
-    #c_body td.cmeta{display:block;grid-column:1;grid-row:3;color:var(--accent2);
-                     font-size:.74rem;font-variant-numeric:tabular-nums;min-width:0;
-                     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    #c_body td.cmeta:empty{display:none}
+    /* What the thing is, under where it is. Spans both columns now that the
+       riders line is gone from beside it. */
+    #c_body td.cmodel{display:block;grid-column:1/-1;grid-row:3;color:var(--accent2);
+                      font-size:.74rem;min-width:0;
+                      overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #c_body td.cmodel:empty{display:none}
     /* Top right, clear of the chevron, and always there — open or closed. */
     #c_body td[data-k=status]{display:block;grid-column:2;grid-row:1;text-align:right;
                               padding-right:17px}
@@ -227,9 +233,6 @@
     #c_body td[data-k=status] .pill{border:0;padding:0;font-size:.68rem;font-weight:700;
                                     text-transform:uppercase;letter-spacing:.06em}
     #c_body td[data-k=status] .cyear{font-size:.74rem;margin-left:4px}
-    #c_body td.criders{display:block;grid-column:2;grid-row:3;color:var(--muted);
-                       font-size:.73rem;text-align:right;white-space:nowrap}
-    #c_body td.criders:empty{display:none}
 
     /* Tap a card to see the columns the phone layout hides. The chevron is the
        affordance; :not() keeps the four summary cells out of the generic rule
@@ -239,15 +242,14 @@
       width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
       transform:rotate(45deg);transition:transform .15s}
     #c_body tr.open td[data-k=name]::after{transform:rotate(-135deg);top:15px}
-    #c_body tr.open td.cmeta{display:none}
-    #c_body tr.open td.criders{grid-row:auto;grid-column:1/-1;text-align:left;order:99}
+    #c_body tr.open td.cmodel{display:none}
     /* Status is excluded too now: it is pinned top right whether the row is
        open or shut, so repeating it as a labelled line below would be saying
        the same thing twice. */
-    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmeta):not(.criders){
+    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmodel){
       display:flex;grid-column:1/-1;justify-content:space-between;align-items:baseline;gap:14px;
       text-align:left;font-size:.78rem;color:var(--fg);padding:4px 0 0;white-space:normal}
-    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmeta):not(.criders)::before{
+    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmodel)::before{
       content:attr(data-label);color:var(--muted);flex:none}
     #c_body td.muted[data-k=park],#c_body td.muted[data-k=loc]{color:var(--muted)}
   }
@@ -290,7 +292,7 @@
   <div id="ui" style="display:none">
     <div class="controls">
       <div class="seg" id="seg">
-        <button id="v_day" class="on">Rides</button><button id="v_list">Coasters</button><button id="v_parks">Parks</button>
+        <button id="v_day" class="on">Rides</button><button id="v_parks">Parks</button><button id="v_list">Coasters</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
       <select id="f_rider" style="display:none"><option value="">All riders</option></select>
@@ -498,8 +500,11 @@ return Promise.all([
       p.textContent=t; p.style.display = t ? '' : 'none';
     }
     if(COMBINED){
-      document.querySelector('.hero h1').textContent='Tracked days';
-      heroSub('Every rider’s logged days at the park — filter below.');
+      document.querySelector('.hero h1').textContent='Database';
+      // The subtitle named one of the three views and pointed at filters two
+      // of them no longer show. What this page is, on the everyone view, is
+      // the shared list.
+      heroSub('Every ride, park and coaster on the site.');
       document.title='Count — Coaster Hub';
     } else {
       var nm=esc(logs[0].user||'Carter');
@@ -809,11 +814,17 @@ function parkBody(park){
     + card.all.map(function(r){
         var mk=CoasterHub.maker(r);
         var got = MINE ? !!MINE[r.c] : !!laps[r.c];
+        // The model goes UNDER the name rather than beside it (Carter,
+        // 2026-09-20). Beside it, it competed with the name for a phone's
+        // width and the names were the ones that got clipped, which is why it
+        // was hidden on a phone at all.
         return '<div class="row'+(MINE?(got?' got':' miss'):'')+'">'
           +(MINE?'<span class="tick">'+(got?'\u2713':'')+'</span>':'')
-          +'<span class="cn">'+clink(r)+'</span>'
+          +'<span class="cmain">'
+            +'<span class="cn">'+clink(r)+'</span>'
+            +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
+          +'</span>'
           +((laps[r.c]>1 && !COMBINED)?'<span class="lap">\u00d7'+laps[r.c]+'</span>':'')
-          +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
           +life(r)
           +'</div>';
       }).join('');
@@ -839,7 +850,6 @@ function pager(total,per){
 // ---------------------------------------------------------------------------
 var CreditList=(function(){
   var DATA=[], COLS=[], sortKey='park', sortDir=1, ready=false, loading=false;
-  var RIDERN={}, NRIDERS=0;   // coaster id -> how many riders have it
   var FILTS=['c_q','c_f_status','c_f_type','c_f_manu','c_f_model','c_f_park','c_f_loc'];
   var $=function(id){return document.getElementById(id);};
   var ALLCOLS=[
@@ -853,33 +863,14 @@ var CreditList=(function(){
   function open(){
     if(ready||loading) return;
     loading=true;
+    // Every rider's file used to be fetched here too, purely to say "3 of 5
+    // riders have ridden this" on each card. That line is gone, and so are the
+    // half-dozen requests it cost every time this view was opened.
     var main=CoasterHub.currentUser() ? forRider() : forEveryone();
-    // Rider counts need every rider's list, not just the one being viewed.
-    // Fetched alongside the main load and allowed to fail on its own — a
-    // missing count should not take the whole list down with it.
-    Promise.all([main, riderCounts().catch(function(){return null;})])
-      .then(build).catch(function(e){
+    main.then(build).catch(function(e){
         console.error(e); loading=false;
         $('c_loading').textContent='Couldn’t load the full list.';
       });
-  }
-  function riderCounts(){
-    return Promise.all(CoasterHub.USERS.map(function(u){
-      return CoasterHub.fetchUser(u.slug).catch(function(){return null;});
-    })).then(function(all){
-      var n={}, got=0;
-      all.forEach(function(j){
-        if(!j) return;
-        got++;
-        // Carter's file is a ride log with repeats, so count each rider once.
-        var seen={};
-        (j.credits||j.rides||[]).forEach(function(x){
-          var id=(typeof x==='object')?x.c:x;
-          if(id!=null&&!seen[id]){ seen[id]=1; n[id]=(n[id]||0)+1; }
-        });
-      });
-      RIDERN=n; NRIDERS=got;
-    });
   }
   function forRider(){
     return CoasterHub.loadUser().then(function(s){
@@ -1010,26 +1001,14 @@ var CreditList=(function(){
         if(col.k==='park')return '<td'+k+'>'+plink(v)+'</td>';
         return '<td class="'+(col.num?'num':'')+' '+(col.cls||'')+'"'+k+'>'+esc(v)+'</td>';
       }).join('');
-      // One extra cell holding the numbers as a single line. display:none on
-      // desktop, so it costs nothing there and saves the phone layout from
-      // trying to lay six numeric columns out on a 340px screen.
-      var bits=[];
-      if(c.yr!=null) bits.push(c.yr);
-      if(c.h!=null) bits.push(Math.round(c.h)+' ft');
-      if(c.s!=null) bits.push(Math.round(c.s)+' mph');
-      if(c.rides!=null) bits.push(c.rides+(c.rides===1?' ride':' rides'));
-      // first-ridden is deliberately left out — it pushed this line past the
-      // half-width column and everything after it clipped.
-      // Phone-only line: how many of the riders have this one. No good place
-      // for it in the desktop table, so it is display:none there.
-      var rn=RIDERN[c.id]||0;
-      // Short, because it shares row 3 with the specs and is the wider of the
-      // two: "3 of 5 riders have ridden this" crowded a coaster carrying a
-      // year, a height and a speed.
-      var who=NRIDERS ? (rn+' of '+NRIDERS+' rider'+(NRIDERS===1?'':'s')) : '';
+      // One extra cell, phone-only (display:none on desktop, where the real
+      // Model column is on screen). It used to carry year · height · speed,
+      // and a count of how many riders had the coaster; Carter's call
+      // 2026-09-20 is that under a name and a park the useful third line is
+      // what the thing IS. maker() is the model, falling back to the
+      // manufacturer for a row that has no model on file.
       return '<tr>'+cells
-        +'<td class="cmeta" data-k="_meta">'+esc(bits.join(' · '))+'</td>'
-        +'<td class="criders" data-k="_riders">'+esc(who)+'</td></tr>';
+        +'<td class="cmodel" data-k="_model">'+esc(CoasterHub.maker(c))+'</td></tr>';
     }).join('');
   }
   return {open:open};
