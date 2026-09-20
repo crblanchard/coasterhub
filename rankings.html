@@ -221,6 +221,9 @@
                     white-space:nowrap;flex:none}
   /* Set per row by fitMeta() when the park would otherwise be clipped. */
   .addrow.tight .meta .st .s{display:none}
+  /* A ride that joins a category already in the list. Accented like the
+     category rows it belongs to, because it is the same kind of easy win. */
+  .addrow .meta .jn{color:var(--accent2);font-size:.77rem;white-space:nowrap;flex:none}
   .addrow .acts{grid-column:2;display:flex;gap:6px}
   .addrow .acts button{padding:7px 13px;font-size:.83rem}
   .list{max-height:62vh;overflow-y:auto}
@@ -261,6 +264,12 @@
   .pick b{display:block;font-size:.98rem;margin-bottom:4px}
   .pick span{color:var(--muted);font-size:.78rem}
   .vsx{align-self:center;color:var(--muted);font-weight:800;font-size:.85rem}
+  .joinrow{display:flex;gap:10px;align-items:center;justify-content:space-between;
+           border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+  .joinrow .who{min-width:0}
+  .joinrow .who b{display:block;font-size:.95rem}
+  .joinrow .who span{color:var(--muted);font-size:.78rem}
+  .joinrow .go{flex:none;padding:8px 14px;font-size:.85rem}
   .hhfoot{display:flex;gap:8px;align-items:center;margin-top:16px}
   .prog{flex:1;color:var(--muted);font-size:.8rem}
 
@@ -477,6 +486,22 @@
 </div></section>
 
 <!-- head-to-head overlay -->
+<!-- The one thing the ranking page should say without being asked: a ride you
+     have been on belongs to a category you have already ranked, so it has a
+     home waiting for it. Same overlay as the head-to-head below, because it is
+     the same kind of interruption and it leads straight into one. -->
+<div class="hh" id="join" style="display:none">
+  <div class="hhbox">
+    <h3 id="join_h"></h3>
+    <div class="sub" id="join_sub"></div>
+    <div id="join_list"></div>
+    <div class="hhfoot">
+      <span class="prog" id="join_prog"></span>
+      <button class="ghost" id="join_no">Not now</button>
+    </div>
+  </div>
+</div>
+
 <div class="hh" id="hh" style="display:none">
   <div class="hhbox">
     <h3>Which is better?</h3>
@@ -511,6 +536,7 @@ var fig=function(v,label){return '<div class="fig"><b>'+v+'</b><span>'+label+'</
 
 var slug=CoasterHub.currentUser();
 var BYID={}, MINE=[], ORDER=[], dirty=false, view='rank';
+var CANEDIT=false;
 
 // ---------------------------------------------------------------- load ------
 if(!slug){
@@ -672,6 +698,10 @@ if(!slug){
     // who predate accounts still manage their own lists.
     CoasterHub.me().then(function(acct){
       var mineToEdit = !rank.claimed || (acct && acct.slug === slug);
+      CANEDIT = !!mineToEdit;
+      // The offer waits for this: it is only worth making to the person who
+      // can place the ride, and who owns the list is not known until here.
+      maybeOfferJoins();
       // Everyone starts read-only (see #mine.readonly). The difference for
       // whoever owns the list is that they get an Edit button, which turns the
       // handles, the delete buttons, the Add coasters tab and Save back on.
@@ -709,6 +739,9 @@ if(!slug){
 
     $('loading').style.display='none'; $('mine').style.display='block';
     wire(); renderRank(); renderAdd();
+    // And again once everything is drawn: whichever of these two runs last is
+    // the one that finds both the categories and the ownership in place.
+    maybeOfferJoins();
   }).catch(function(e){ console.error(e); $('loading').textContent='Couldn’t load your coasters.'; });
 }
 
@@ -716,6 +749,7 @@ if(!slug){
 function wire(){
   $('v_rank').onclick=function(){setView('rank');};
   $('v_add').onclick=function(){setView('add');};
+  $('join_no').onclick=closeJoins;
   $('q').addEventListener('input',renderAdd);
   $('sort').addEventListener('change',renderAdd);
   $('f_addpark').addEventListener('change',renderAdd);
@@ -1455,13 +1489,29 @@ function renderAdd(){
   // it is a coaster, and it reads better as itself. The facets narrow the group
   // with everything else, so a Vekoma filter showing three of the five says
   // three.
+  //
+  // And an unranked ride whose category is ALREADY IN THE LIST is the easiest
+  // decision on the page: it folds into a row that exists, at a position that
+  // has already been argued about. It used to sit anonymously among three
+  // hundred others. (Carter, 2026-09-20: "shouldn't i get the prompt to put it
+  // in my count then because i have batman clones and ive been on chupacabra".
+  // The ride was in his count; what was missing was any sign that the list he
+  // had already built was one row short of finished.)
+  var rankedIn={};
+  ORDER.forEach(function(id){ var g=CLONE[id]; if(g) rankedIn[g.key]=(rankedIn[g.key]||0)+1; });
+
   var list=pool(), rows=[], seenG={};
   list.forEach(function(c){
     var g=CLONE[c.id];
     if(!g){ rows.push({c:c}); return; }
     if(seenG[g.key]) return;
     var mates=list.filter(function(x){ return CLONE[x.id]===g; });
-    if(mates.length<2){ rows.push({c:c}); return; }
+    // One left of a category you already rank is not a family row, but it is
+    // not an anonymous coaster either: it is the last of something.
+    if(mates.length<2){
+      rows.push({ c:c, joins: rankedIn[g.key] ? g : null, jn: rankedIn[g.key]||0 });
+      return;
+    }
     seenG[g.key]=1;
     rows.push({ g:g, c:c, ids:mates.map(function(x){ return x.id; }) });
   });
@@ -1471,8 +1521,9 @@ function renderAdd(){
   // that save the most work. Five Batmans added in one tap is the point of the
   // feature; it should not have to be hunted for.
   var cats=rows.filter(function(r){ return !!r.g; });
-  var solo=rows.filter(function(r){ return !r.g; });
-  rows=cats.concat(solo);
+  var joins=rows.filter(function(r){ return !r.g && r.joins; });
+  var solo=rows.filter(function(r){ return !r.g && !r.joins; });
+  rows=cats.concat(joins, solo);
   var shown=rows.slice(0,300);
   // Coasters, not rows: folding nine Batmans and Boomerangs into two rows does
   // not mean seven went missing. The cap is on ROWS, so that is what the
@@ -1492,7 +1543,10 @@ function renderAdd(){
     var head='';
     if(cats.length && ix===0) head='<div class="addsec">'+cats.length+' categor'
       +(cats.length===1?'y':'ies')+' \u2014 each one adds every ride in it at once</div>';
-    if(cats.length && solo.length && ix===cats.length)
+    if(joins.length && ix===cats.length)
+      head='<div class="addsec">'+(joins.length===1?'One ride':joins.length+' rides')
+        +' you have been on that finish a category you already rank</div>';
+    if(solo.length && (cats.length||joins.length) && ix===cats.length+joins.length)
       head='<div class="addsec">Everything else</div>';
     if(row.g){
       var g=row.g, n=row.ids.length, have=g.ids.length;
@@ -1514,9 +1568,12 @@ function renderAdd(){
       ? '<span class="st">'+(h?'<span class="h">'+h+'</span>':'')
         +(s?'<span class="s">'+(h?' · ':'')+s+'</span>':'')+'</span>'
       : '';
+    var joinbit = row.joins
+      ? '<span class="jn">joins '+esc(row.joins.name)+' \u00b7 '+row.jn+' ranked</span>'
+      : '';
     return pre+'<div class="addrow">'
       +'<span class="nm">'+esc(c.name)+'</span>'
-      +'<span class="meta"><span class="pk">'+esc(c.park||'—')+'</span>'+stat+'</span>'
+      +'<span class="meta"><span class="pk">'+esc(c.park||'—')+'</span>'+joinbit+stat+'</span>'
       +'<span class="acts"><button class="ghost" data-hh="'+c.id+'">Rank</button>'
       +'<button class="ghost" data-add="'+c.id+'">Add</button></span>'
       +'</div>';
@@ -1578,6 +1635,91 @@ function fitMeta(){
 // contradicts the inference, the range reopens and the search carries on, which
 // means the spot is always settled by comparisons the rider actually made.
 var hh=null;
+// ---- "you have been on this one too" ---------------------------------------
+// A ride in your count, not in your list, belonging to a category you HAVE
+// ranked. That is not a suggestion about taste — the position is already
+// decided, the row already exists, and the only reason it is missing is that
+// nobody told you. Carter lost a Goliath this way: a merge took it out of his
+// ranking, Chupacabra took its place in the database, and nothing on the page
+// ever mentioned that the Batman row was a ride short. (2026-09-20: "shouldn't
+// i get the 'categories change - include missing rides' note".)
+//
+// Shown once per page load, never for a ride already waved away, and never
+// while the list is read-only or another dialog is up. Placing one opens the
+// head-to-head, which is where it was always going to end.
+var JOIN_ASKED=false, JOIN_ROWS=[];
+function joinKey(){ return 'ch_join_'+(slug||''); }
+function joinSkipped(){
+  try { var v=JSON.parse(localStorage.getItem(joinKey())||'[]');
+        return Array.isArray(v)?v:[]; } catch(e){ return []; }
+}
+function skipJoins(ids){
+  try {
+    var seen={}, all=joinSkipped().concat(ids).filter(function(i){
+      if(seen[i]) return false; seen[i]=1; return true; });
+    localStorage.setItem(joinKey(), JSON.stringify(all.slice(-200)));
+  } catch(e){ /* the offer simply comes back next time */ }
+}
+// Every ride in the count, unranked, whose category already holds something you
+// ranked. Computed from the same three things the pool is: MINE, ORDER, CLONE.
+function joiners(){
+  if(!CATS.on) return [];
+  var ranked={}, out=[];
+  ORDER.forEach(function(id){ var g=CLONE[id]; if(g) ranked[g.key]=(ranked[g.key]||0)+1; });
+  var inList={}; ORDER.forEach(function(id){ inList[id]=1; });
+  MINE.forEach(function(id){
+    if(inList[id]) return;
+    var g=CLONE[id]; if(!g || !ranked[g.key]) return;
+    out.push({ id:id, g:g, n:ranked[g.key] });
+  });
+  return out;
+}
+function maybeOfferJoins(){
+  if(JOIN_ASKED) return;
+  if(!CANEDIT) return;                                   // not your list to fix
+  if($('hh').style.display==='flex') return;
+  var skip=joinSkipped();
+  var rows=joiners().filter(function(r){ return skip.indexOf(r.id)<0; });
+  if(!rows.length) return;
+  JOIN_ASKED=true; JOIN_ROWS=rows;
+  var one=rows.length===1, first=rows[0];
+  $('join_h').textContent = one
+    ? first.g.name+' is one ride short'
+    : rows.length+' rides you have been on belong in your list';
+  $('join_sub').innerHTML = one
+    ? 'You have been on <b>'+esc(BYID[first.id].name)+'</b> at '
+      + esc(BYID[first.id].park||'a park you have logged')+', and it is the same ride as the '
+      + first.n+' you have already ranked under <b>'+esc(first.g.name)+'</b>. '
+      + 'Place it and it folds into that row.'
+    : 'Each of these is the same ride as something already in your list, so it '
+      + 'folds into a row that is already there.';
+  $('join_list').innerHTML = rows.slice(0,6).map(function(r){
+    var c=BYID[r.id];
+    return '<div class="joinrow"><span class="who"><b>'+esc(c.name)+'</b>'
+      + '<span>'+esc(c.park||'\u2014')+' \u00b7 joins '+esc(r.g.name)
+      + ' \u00b7 '+r.n+' already ranked</span></span>'
+      + '<button class="ghost go" data-join="'+r.id+'">Place it</button></div>';
+  }).join('');
+  $('join_prog').textContent = rows.length>6 ? 'and '+(rows.length-6)+' more' : '';
+  $('join').style.display='flex';
+  $('join_list').querySelectorAll('[data-join]').forEach(function(b){
+    b.onclick=function(){
+      var id=+b.dataset.join;
+      skipJoins([id]);                 // asked and answered, either way
+      $('join').style.display='none';
+      // Straight into editing: the answer to this dialog is a change to the
+      // list, and stopping to press Edit first is a step with no question in it.
+      $('mine').classList.remove('readonly');
+      setView('rank');
+      openHH(id);
+    };
+  });
+}
+function closeJoins(){
+  $('join').style.display='none';
+  skipJoins(JOIN_ROWS.map(function(r){ return r.id; }));
+}
+
 function openHH(id, mates, g){
   mates=mates||[];
   if(!ORDER.length){ ORDER=ORDER.concat([id]).concat(mates);
