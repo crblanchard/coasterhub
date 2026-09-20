@@ -2353,6 +2353,40 @@ the model off these" — thirteen Arrow coasters lost their model while the toas
 successful split. An empty model now needs `clear:true`; without it, it is a 400. A field that
 is absent is not an instruction to erase.
 
+### /log filters parks by location (2026-09-20)
+
+Carter: *"on /log when you're adding new parks add a filter where you can check locations to
+view park list from only those locations. will make it easier for first time users to find
+parks and put their lists in"*.
+
+A **Locations** button beside the name filter opens a panel of tick boxes — one per location
+in `parks.json`, with how many parks are in each — and the picker narrows to what is ticked.
+The name filter was only ever useful to somebody who could already name the park; the
+locations you have been to, you know. 247 parks becomes 38 by ticking California and Ohio.
+
+Decisions worth keeping:
+
+- **Two sections, United States and Elsewhere.** The data says `"California, US"` for a state
+  and `"Japan"` for a country, so the suffix splits it (a bare `"US"` exists too, on the one
+  park nobody has put a state on, and it sorts with the states). 54 locations in one
+  alphabetical run mixes Canada between California and Colorado.
+- **Alphabetical, and it stays alphabetical.** Floating the ticked ones to the top would move
+  the next box out from under the finger that just tapped one — the same lesson the category
+  picker records.
+- **Remembered between visits** (`ch_log_regions`), because a first count is several sittings
+  and re-ticking your states each time is where people stop. Everything that makes it visible
+  is therefore load-bearing: the button reads `Locations · 2` and takes an accent border, and
+  the picker's placeholder reads `— 38 of 247 parks —`. A location stored for a place that no
+  longer exists is dropped on read rather than narrowing the list to nothing.
+- **The chosen park always survives the filter**, the same rule the name filter already had —
+  but if you tick a location the CHOSEN park is not in, it is deselected rather than left
+  sitting over a coaster list the picker no longer offers.
+- **Adding a park ticks its location** when a filter is on. You added it in order to log at
+  it; hiding it behind the filter you set five minutes ago is the page arguing with you.
+
+Driven in a browser at 1100px and at 390px: ticking, the counts, the name filter on top of it,
+the reload, Clear, and `scrollWidth - clientWidth` on the phone.
+
 ### A merge was a spec-shredder, and the repair missed (2026-09-20, same evening)
 
 Carter, after running 018: *"chupacabra lost all its stats and its not under batman"*. Two

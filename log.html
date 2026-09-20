@@ -35,6 +35,10 @@
   button.primary:disabled{opacity:.4;cursor:default}
   button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem}
   button.ghost:hover{color:var(--fg)}
+  /* A filter that is ON has to look it. This one is remembered between visits,
+     so "why can't I find Cedar Point" has to be answerable from the screen.
+     border-color, not the `border` shorthand — CLAUDE.md, five bugs' worth. */
+  button.ghost.on{border-color:var(--accent2);color:var(--fg)}
   /* Mode switch: the only real difference between the two ways of adding is
      whether a date is attached, but the controls differ enough (laps vs a
      tick) that a toggle reads better than an optional date field. */
@@ -141,6 +145,21 @@
   .miniform .grow{flex:1;min-width:170px}
   .miniform .note{flex-basis:100%;color:var(--muted);font-size:.78rem;margin:0}
   .miniform .err{flex-basis:100%;color:var(--accent);font-size:.82rem;margin:0}
+  /* The locations filter. 54 of them is a list rather than a row of pills, so
+     it scrolls inside the panel and columns up when there is width for it.
+     column-count, not the `columns` shorthand — see CLAUDE.md on shorthands
+     quietly resetting their longhands. */
+  .regs{flex-basis:100%;max-height:44vh;overflow:auto;column-count:3;column-gap:18px;
+        border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg)}
+  @media (max-width:820px){ .regs{column-count:2} }
+  @media (max-width:520px){ .regs{column-count:1} }
+  .regs label{display:flex;gap:8px;align-items:baseline;font-size:.88rem;
+              padding:3px 0;break-inside:avoid;cursor:pointer}
+  .regs .tick{width:auto;padding:0;margin:0;flex:none}
+  .regs .n{color:var(--muted);font-size:.78rem}
+  .regs .sec{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
+             color:var(--muted);margin:10px 0 2px;break-inside:avoid}
+  .regs .sec.first{margin-top:0}
   .addbar{display:flex;justify-content:flex-end;margin:0 0 10px}
   .addbar button{padding:7px 12px;font-size:.84rem}
   .tot{display:flex;justify-content:space-between;margin:12px 0;padding-top:12px;border-top:1px solid var(--line);font-weight:700}
@@ -231,12 +250,29 @@
       <!-- 247 parks is a long scroll to reach one you can already name. Types
            straight into the dropdown above rather than being a second list to
            choose from, so there is still only one place the park is chosen. -->
-      <input id="parkq" type="search" placeholder="Filter parks by name&hellip;"
-             autocomplete="off" style="width:100%;margin-top:8px">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="parkq" type="search" placeholder="Filter parks by name&hellip;"
+               autocomplete="off" style="flex:1;min-width:0">
+        <!-- Not everyone knows what a park is called; nearly everyone knows
+             where they have been. Ticking a few states cuts 247 parks to a
+             list you can read, which is most of the work of a first count. -->
+        <button class="ghost" id="regbtn" type="button"
+                style="flex:none;padding:10px 12px">Locations</button>
+      </div>
       <p class="geonote" id="geonote"></p>
     </div>
     <div class="fld" style="flex:1;min-width:200px"><label class="vh" for="search">Search all coasters</label>
       <input id="search" type="search" placeholder="Search every coaster&hellip;" style="width:100%"></div>
+  </div>
+
+  <!-- Built from the parks themselves, so a new location appears here the day a
+       park in it does. -->
+  <div class="miniform" id="regionpick">
+    <p class="note" id="reghead">Show only parks in…</p>
+    <div class="regs" id="reglist"></div>
+    <button class="ghost" id="reg_all" type="button">Select all</button>
+    <button class="ghost" id="reg_none" type="button">Clear</button>
+    <button class="ghost" id="reg_done" type="button">Done</button>
   </div>
 
   <div class="miniform" id="riderform">
@@ -313,6 +349,10 @@ CoasterHub.initNav('log');
 
 var TOKEN='', COASTERS=[], BYID={}, PARKS={}, basket={};   // basket: coasterId -> laps
 var PCOUNT={};   // park name -> how many coasters, for the dropdown labels
+// Which locations the park list is narrowed to. Empty means all of them, which
+// is not the same as none ticked-and-saved: see readRegions().
+var REGSEL={};
+var NOREGION='\u0000none';   // parks with no location recorded, as a bucket
 var MODE='day';  // 'day' = a dated visit with laps; 'list' = a backfill
 var TODAY='';    // today in LOCAL time, the default only day mode wants
 var OWNED={};    // coaster id -> true, what this rider already has in their count
@@ -384,6 +424,11 @@ function boot(){
     // Parks with no coasters yet still belong in the list — that is the whole
     // point of being able to add one before logging its first ride.
     Object.keys(PARKS).forEach(function(p){ if(PCOUNT[p]==null) PCOUNT[p]=0; });
+    // The locations ticked on an earlier visit are read HERE, not in the
+    // wiring: they are names of places that have to exist in the parks that
+    // just arrived, and one that no longer does is dropped rather than
+    // narrowing the list to nothing.
+    readRegions(); showRegionBtn();
     // A location from earlier today is applied here, once the parks it sorts
     // have actually arrived. wireNearMe() only reads it.
     if(HERE) setHere(HERE); else fillParks();
@@ -407,7 +452,8 @@ function boot(){
 
   $('save').onclick=save;
   $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
-  wireAdders(); wireRiderAdd(); wireRiderLine(); wireNearMe(); wireParkFilter(); wireMode();
+  wireAdders(); wireRiderAdd(); wireRiderLine(); wireNearMe(); wireParkFilter();
+  wireRegions(); wireMode();
   // ?mode=list opens straight on "Coaster credits". The two modes are different
   // jobs — tonight's laps versus filling in years of them — and the profile page
   // links at each one by name, so the link has to be able to say which.
@@ -577,6 +623,122 @@ function wireNearMe(){
   HERE=readHere();                  // a fix from earlier today needs no prompt
 }
 
+// ---- locations -------------------------------------------------------------
+// A first count is mostly "which of these 247 have I been to", and a name
+// filter only helps once you can name the park. The locations you have been to
+// you already know, so ticking three states is the fastest cut there is.
+// (Carter, 2026-09-20.)
+function regionOf(p){
+  var g=PARKS[p]; var r=g&&g.region ? String(g.region).trim() : '';
+  return r || NOREGION;
+}
+function regionLabel(r){ return r===NOREGION ? 'No location yet' : r; }
+// The data says "California, US" for a state and "Japan" for a country, so the
+// suffix is what splits the list in two. A bare "US" exists as well — one park
+// nobody has put a state on — and belongs with the states.
+function isUS(r){ return r===NOREGION ? false : (/,\s*US$/.test(r) || r==='US'); }
+function regionCounts(){
+  var by={};
+  Object.keys(PCOUNT).forEach(function(p){
+    var r=regionOf(p); by[r]=(by[r]||0)+1;
+  });
+  return by;
+}
+function regionsOn(){
+  var on=Object.keys(REGSEL).filter(function(r){ return REGSEL[r]; });
+  return on.length ? on : null;                 // null = no filter at all
+}
+// Remembered between visits: building a count is several sittings, and
+// re-ticking your states every time is the sort of thing that stops people.
+// Anything stored for a location that no longer exists is dropped on read.
+function readRegions(){
+  try {
+    var raw=localStorage.getItem('ch_log_regions');
+    if(!raw) return;
+    var by=regionCounts();
+    JSON.parse(raw).forEach(function(r){ if(by[r]) REGSEL[r]=1; });
+  } catch(e){ /* private mode, or something else wrote there: no filter */ }
+}
+function saveRegions(){
+  try {
+    var on=regionsOn();
+    if(on) localStorage.setItem('ch_log_regions', JSON.stringify(on));
+    else localStorage.removeItem('ch_log_regions');
+  } catch(e){ /* the filter still works for this visit */ }
+}
+function showRegionBtn(){
+  var on=regionsOn(), b=$('regbtn');
+  b.textContent = on ? 'Locations \u00b7 '+on.length : 'Locations';
+  b.classList.toggle('on', !!on);
+}
+function fillRegions(){
+  var by=regionCounts();
+  var names=Object.keys(by).sort(function(a,b){
+    return regionLabel(a).localeCompare(regionLabel(b), undefined, {sensitivity:'base'}); });
+  var us=names.filter(isUS), rest=names.filter(function(r){ return !isUS(r); });
+  var row=function(r){
+    return '<label><input type="checkbox" class="tick" data-reg="'+esc(r)+'"'
+      + (REGSEL[r]?' checked':'')+'><span>'+esc(regionLabel(r))
+      + ' <span class="n">'+by[r]+'</span></span></label>';
+  };
+  $('reglist').innerHTML =
+    (us.length ? '<div class="sec first">United States</div>'+us.map(row).join('') : '')
+    + (rest.length ? '<div class="sec'+(us.length?'':' first')+'">Elsewhere</div>'
+        +rest.map(row).join('') : '');
+  Array.prototype.forEach.call($('reglist').querySelectorAll('[data-reg]'), function(b){
+    b.onchange=function(){
+      var r=b.getAttribute('data-reg');
+      if(b.checked) REGSEL[r]=1; else delete REGSEL[r];
+      applyRegions();
+    };
+  });
+}
+// One place that reacts to the ticks: the dropdown, the button and the list
+// under it all have to move together, or the page says two different things
+// about which parks exist.
+function applyRegions(){
+  saveRegions(); showRegionBtn();
+  // A park that no longer passes the filter must not stay selected underneath
+  // it — the coaster list would be showing a park the picker no longer offers.
+  var cur=sel().value;
+  if(cur && !parkPasses(cur, true)) { sel().value=''; $('search').value=''; }
+  fillParks();
+  renderList();
+  var head=$('reghead'), on=regionsOn();
+  head.textContent = on
+    ? 'Showing '+parksShown()+' of '+Object.keys(PCOUNT).length+' parks.'
+    : 'Show only parks in\u2026 (nothing ticked means everywhere)';
+}
+function parksShown(){
+  return Object.keys(PCOUNT).filter(function(p){ return parkPasses(p, true); }).length;
+}
+// `strict` is for deciding whether the CHOSEN park survives; the list itself
+// always keeps the chosen one, so that typing or ticking cannot silently blank
+// what you are in the middle of logging.
+function parkPasses(p, strict){
+  var on=regionsOn();
+  if(!on) return true;
+  if(!strict && p===sel().value) return true;
+  return !!REGSEL[regionOf(p)];
+}
+function wireRegions(){
+  var rp=$('regionpick');
+  $('regbtn').onclick=function(){
+    var on=!rp.classList.contains('on');
+    rp.classList.toggle('on', on);
+    if(on){ fillRegions(); applyRegions(); }
+  };
+  $('reg_done').onclick=function(){ rp.classList.remove('on'); };
+  $('reg_all').onclick=function(){
+    Object.keys(regionCounts()).forEach(function(r){ REGSEL[r]=1; });
+    fillRegions(); applyRegions();
+  };
+  $('reg_none').onclick=function(){
+    REGSEL={}; fillRegions(); applyRegions();
+  };
+  showRegionBtn();
+}
+
 function fillParks(keep){
   var sel=$('park'), cur=keep!=null?keep:sel.value;
   var names=Object.keys(PCOUNT).sort(function(a,b){return a.localeCompare(b);});
@@ -586,6 +748,7 @@ function fillParks(keep){
   // your selection and empty the coaster list under it.
   var q=$('parkq') ? $('parkq').value.trim().toLowerCase() : '';
   var all=names.length;
+  names=names.filter(function(p){ return parkPasses(p) || p===cur; });
   if(q) names=names.filter(function(p){ return p.toLowerCase().indexOf(q)>=0 || p===cur; });
   var body;
   if(HERE){
@@ -615,9 +778,11 @@ function fillParks(keep){
   }
   // The placeholder carries the match count while filtering: it is the one bit
   // of chrome the select already has, so the filter needs no label of its own.
-  var head = q
-    ? ('— ' + names.length + ' of ' + all + ' parks —')
-    : '— pick a park —';
+  // The placeholder carries the count whenever anything is narrowing the list,
+  // so a filter left on from last visit says so where you are already looking.
+  var head = (q || regionsOn())
+    ? ('\u2014 ' + names.length + ' of ' + all + ' parks \u2014')
+    : '\u2014 pick a park \u2014';
   sel.innerHTML='<option value="">'+esc(head)+'</option>'+body;
   if(cur) sel.value=cur;
 }
@@ -630,7 +795,10 @@ function wireParkFilter(){
     fillParks();
     var t=q.value.trim().toLowerCase();
     if(t.length<2) return;
-    var hits=Object.keys(PCOUNT).filter(function(p){ return p.toLowerCase().indexOf(t)>=0; });
+    // Only among the parks on offer: with a location filter on, a name that
+    // matches one hidden park and one shown one is not "only one thing left".
+    var hits=Object.keys(PCOUNT).filter(function(p){
+      return parkPasses(p) && p.toLowerCase().indexOf(t)>=0; });
     if(hits.length===1 && sel().value!==hits[0]) choosePark(hits[0]);
     else renderList();
   });
@@ -749,6 +917,11 @@ function wireAdders(){
     api('PUT','/api/park',{name:name,region:region||null}).then(function(){
       PARKS[name]={lat:null,lon:null,region:region||null};
       PCOUNT[name]=0;
+      // Tick its location, if a filter is on and this is somewhere new: you
+      // added the park in order to log at it, and hiding it behind the filter
+      // you set five minutes ago is the page arguing with you.
+      if(regionsOn()){ REGSEL[regionOf(name)]=1; saveRegions(); showRegionBtn();
+                       if($('reglist').children.length) fillRegions(); }
       fillParks(name);
       $('search').value='';
       togglePark(false); renderList();
