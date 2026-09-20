@@ -71,6 +71,26 @@
   .cbrow { display:flex; align-items:center; gap:6px; font-size:.85rem; color:var(--muted); }
   .cbrow input { width:auto; }
   a.osm { color:#2a6db0; font-size:.85rem; }
+  /* A scrolling box inside the editor pane. The lists it holds are as long as
+     the database — 545 rides carry no model — and without it the pane's own
+     scrollbar carried everything, so the control that acts on a list sat
+     hundreds of rows below the list. */
+  .pane { max-height:42vh; overflow:auto; border:1px solid var(--line);
+          border-radius:10px; padding:6px 10px; background:#fff; margin-top:8px; }
+  /* These rows are inside <label>s so the checkbox is clickable, and `label`
+     in this page is a FIELD label: uppercase and letter-spaced. A ride's name
+     is not a field label. Same family as the CSS lessons in CLAUDE.md — the
+     rule named the element, so it caught everything shaped like one. */
+  .pane .tick, .cbrow.tick { padding:3px 0; font-size:.88rem;
+                             text-transform:none; letter-spacing:normal; }
+  .cbrow.tick { align-items:baseline; gap:8px; color:var(--ink); }
+  /* How much of a model has been filed into categories. Named for what it
+     means rather than where it is drawn, because the same three states are
+     read in the models list and in the triage headers. */
+  .badge.mixed { background:#fbe6de; color:var(--accent); }
+  .badge.partial { background:#f7ecd2; color:#8a6100; }
+  .badge.settled { background:#e0f0e4; color:var(--ok); }
+  .badge.gone { background:#efe9df; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -85,12 +105,20 @@
 
   <div id="app">
     <header class="bar">
-      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button><button id="mClones">Categories</button><button id="mModels">Models</button><button id="mTriage">Triage</button></div>
+      <!-- Three groups, not one row of five: each queue sits with the thing it
+           is a queue for, so "Triage" next to Categories and "Triage" next to
+           Models are obviously two different queues. (Carter, 2026-09-20.) -->
+      <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button></div>
+      <div class="seg"><button id="mClones">Categories</button><button id="mTriage">Triage</button></div>
+      <div class="seg"><button id="mModels">Models</button><button id="mMTriage">Triage</button></div>
       <input id="q" placeholder="Search…" style="max-width:220px">
       <button class="ghost" id="newcat">+ New category</button>
       <div class="seg" id="trseg"><button data-tf="todo" class="on">To look at</button><button data-tf="done">In a category</button><button data-tf="aside">Set aside</button></div>
+      <div class="seg" id="mtseg"><button data-mf="todo" class="on">To look at</button><button data-mf="done">Has a model</button><button data-mf="aside">Set aside</button></div>
       <label class="cbrow" id="fIncWrap"><input type="checkbox" id="incOnly"> Only incomplete</label>
       <label class="cbrow" id="fGeoWrap"><input type="checkbox" id="ungeoOnly"> Only un-geocoded</label>
+      <label class="cbrow" id="fOpenWrap"><input type="checkbox" id="openOnly"> Only models still operating</label>
+      <label class="cbrow" id="fGrpWrap"><input type="checkbox" id="byGroup"> <span id="grpLbl">By model</span></label>
       <span class="count" id="count"></span>
       <span class="grow"></span>
       <span class="count" id="geosum"></span>
@@ -109,8 +137,9 @@
   var state = { mode:"coasters", coasters: [], byId: {}, sel: null, opts: { manu:[], model:[] },
                 geo: {}, parks: [], selPark: null,
                 clones: [], suggest: [], riderCats: [], selClone: 0, cloneErr: "",
-                models: [], blankModels: 0, selModel: "",
-                skipped: {}, triageNeed: "", triageFilter: "todo" };
+                models: [], blankModels: 0, selModel: "", modelRows: [],
+                skipped: {}, triageNeed: "", triageFilter: "todo", triageLoaded: false,
+                mskipped: {}, mtriageNeed: "", mtriageFilter: "todo", mtriageLoaded: false };
 
   var FIELDS = [
     ["name","Name","text"], ["park","Park","text"], ["type","Type","type"],
@@ -225,12 +254,19 @@
     document.getElementById('q').addEventListener('input', render);
     document.getElementById('incOnly').addEventListener('change', render);
     document.getElementById('ungeoOnly').addEventListener('change', render);
+    document.getElementById('openOnly').addEventListener('change', render);
+    document.getElementById('byGroup').addEventListener('change', function(){
+      state.sel = null;
+      document.getElementById('editor').innerHTML = '<div class="empty">Select a coaster.</div>';
+      render();
+    });
     document.getElementById('geo').addEventListener('click', geocode);
     document.getElementById('mCoasters').addEventListener('click', function(){ setMode('coasters'); });
     document.getElementById('mParks').addEventListener('click', function(){ setMode('parks'); });
     document.getElementById('mClones').addEventListener('click', function(){ setMode('clones'); });
     document.getElementById('mModels').addEventListener('click', function(){ setMode('models'); });
     document.getElementById('mTriage').addEventListener('click', function(){ setMode('triage'); });
+    document.getElementById('mMTriage').addEventListener('click', function(){ setMode('mtriage'); });
     document.getElementById('trseg').querySelectorAll('[data-tf]').forEach(function(b){
       b.addEventListener('click', function(){
         state.triageFilter = b.getAttribute('data-tf');
@@ -240,6 +276,17 @@
         document.getElementById('editor').innerHTML =
           '<div class="empty">Select a coaster.</div>';
         renderTriage();
+      });
+    });
+    document.getElementById('mtseg').querySelectorAll('[data-mf]').forEach(function(b){
+      b.addEventListener('click', function(){
+        state.mtriageFilter = b.getAttribute('data-mf');
+        document.getElementById('mtseg').querySelectorAll('[data-mf]').forEach(function(x){
+          x.classList.toggle('on', x===b); });
+        state.sel = null;
+        document.getElementById('editor').innerHTML =
+          '<div class="empty">Select a coaster.</div>';
+        renderMTriage();
       });
     });
     document.getElementById('newcat').addEventListener('click', function(){ showGroup(0); });
@@ -259,16 +306,26 @@
     document.getElementById('mClones').classList.toggle('on', m==='clones');
     document.getElementById('mModels').classList.toggle('on', m==='models');
     document.getElementById('mTriage').classList.toggle('on', m==='triage');
+    document.getElementById('mMTriage').classList.toggle('on', m==='mtriage');
     document.getElementById('fIncWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('fGeoWrap').style.display = m==='coasters' ? '' : 'none';
+    document.getElementById('fOpenWrap').style.display = m==='models' ? '' : 'none';
+    // One checkbox, two queues. What it groups BY is different in each — the
+    // category queue reads best by model, the model queue by maker — so the
+    // label says which one you are about to get.
+    document.getElementById('fGrpWrap').style.display =
+      (m==='triage' || m==='mtriage') ? '' : 'none';
+    document.getElementById('grpLbl').textContent = m==='mtriage' ? 'By park' : 'By model';
     document.getElementById('newcat').style.display = m==='clones' ? '' : 'none';
     document.getElementById('trseg').style.display = m==='triage' ? '' : 'none';
+    document.getElementById('mtseg').style.display = m==='mtriage' ? '' : 'none';
     state.selClone = 0;
     document.getElementById('editor').innerHTML = '<div class="empty">Select an item to edit.</div>';
     if (m==='parks' && !state.parks.length) loadParks();
     else if (m==='clones') loadClones();
     else if (m==='models') loadModels();
     else if (m==='triage') loadTriage();
+    else if (m==='mtriage') loadMTriage();
     else render();
   }
 
@@ -277,6 +334,7 @@
     else if (state.mode==='parks') renderParks();
     else if (state.mode==='models') renderModels();
     else if (state.mode==='triage') renderTriage();
+    else if (state.mode==='mtriage') renderMTriage();
     else renderClones();
     updateGeoSummary();
   }
@@ -308,7 +366,7 @@
     try {
       var d = await api("GET","/api/admin/categories/skipped");
       state.skipped = {}; (d.ids||[]).forEach(function(i){ state.skipped[i]=1; });
-      state.triageNeed = d.need || "";
+      state.triageNeed = d.need || ""; state.triageLoaded = true;
     } catch(e){ state.skipped = {}; state.triageNeed = ""; state.cloneErr = e.message; }
     render();
   }
@@ -326,6 +384,73 @@
     });
     return { todo:todo, done:done, aside:aside, own:own };
   }
+  // How much of a model has already been decided. The sentence triage keeps
+  // wanting: twelve SLCs, nine of them in a category, is most of the answer for
+  // the other three — and "none of them yet" says the opposite just as clearly.
+  function coverText(e){
+    if (!e) return "";
+    var n = e.filed.length, t = e.rides.length;
+    return (n ? n + " of " + t : "none of " + t) + " in a category";
+  }
+  function coverBadge(e){
+    var n = e.filed.length, t = e.rides.length;
+    var k = n === t ? 'settled' : n ? 'partial' : 'gone';
+    return ' <span class="badge '+k+'">'+n+'/'+t+'</span>';
+  }
+  function triageRow(c, b){
+    var g = b.own[c.id];
+    return '<div class="row'+(state.sel===c.id?' sel':'')+'" data-tri="'+c.id+'">'
+      + '<div class="nm">'+esc(c.name)+'</div>'
+      + '<div class="pk">'+esc(c.park||'\u2014')
+      + (c.model?' \u00b7 '+esc(c.model):'')
+      + (g?' \u00b7 in '+esc(g.name):'')+'</div></div>';
+  }
+  // The queue, in model order, under a header saying how far that model has
+  // already got. Sorting by name walks the same twelve SLCs at twelve unrelated
+  // moments; this puts them together and says "nine of these are already in a
+  // category", which is the decision, not a step towards it.
+  //
+  // The fraction counts EVERY ride carrying the model, not the ones in this
+  // list: what is left in the queue is exactly what the fraction is about.
+  function triageGrouped(rows, b){
+    var split = modelSplit(), by = {};
+    rows.forEach(function(c){
+      var k = (c.model||'').trim() || NOMODEL;
+      (by[k] = by[k] || []).push(c);
+    });
+    var keys = Object.keys(by).sort(function(x, y){
+      // Nearly-finished models first: they are the ones where the rest of the
+      // database has already made the decision. Rides with no model at all sink
+      // to the bottom — nothing can be inferred about them here, and the Models
+      // tab is where they get answered.
+      if (x===NOMODEL) return 1;
+      if (y===NOMODEL) return -1;
+      var a = split[x], c = split[y];
+      return (c.filed.length / c.rides.length) - (a.filed.length / a.rides.length)
+        || by[y].length - by[x].length
+        || modelLabel(x).localeCompare(modelLabel(y));
+    });
+    var left = 400, out = [];
+    keys.forEach(function(k){
+      if (left <= 0) return;
+      var e = split[k], mine = by[k].slice(0, left);
+      left -= mine.length;
+      var where = k===NOMODEL ? 'nothing in the database says what these are'
+        : e.cat.length === 1 ? 'in ' + esc(e.cat[0])
+        : e.cat.length ? 'across ' + e.cat.length + ' different categories'
+        : 'no category holds one yet';
+      out.push('<div class="row sec"><div class="nm">'+esc(modelLabel(k))
+        + (k===NOMODEL ? '' : coverBadge(e))+'</div>'
+        + '<div class="pk">'+mine.length+' here \u00b7 '+where
+        + (k!==NOMODEL && e.aside.length ? ' \u00b7 '+e.aside.length+' set aside' : '')
+        + '</div></div>'
+        + mine.map(function(c){ return triageRow(c, b); }).join(''));
+    });
+    var shown = 400 - left;
+    if (shown < rows.length) out.push('<div class="row"><div class="pk">\u2026 and '
+      + (rows.length - shown) + ' more. Search to narrow it.</div></div>');
+    return out.join('');
+  }
   function renderTriage(){
     var q = document.getElementById('q').value.trim().toLowerCase();
     var b = triageBuckets();
@@ -333,6 +458,7 @@
     var rows = pick.filter(function(c){
       return !q || ((c.name||'')+' '+(c.park||'')+' '+(c.manu||'')+' '+(c.model||''))
         .toLowerCase().indexOf(q)>=0; });
+    var grouped = document.getElementById('byGroup').checked;
 
     document.getElementById('count').textContent =
       b.todo.length + " to look at \u00b7 " + b.done.length + " in a category \u00b7 "
@@ -346,24 +472,23 @@
         + (state.triageFilter==='done' ? 'In a category'
            : state.triageFilter==='aside' ? 'Set aside' : 'Still to look at')
         + '</div><div class="pk">'+rows.length+' of '+pick.length
-        + ' \u00b7 switch with the buttons on the right</div></div>'
-      + (rows.length ? rows.slice(0,400).map(function(c){
-          var g = b.own[c.id];
-          return '<div class="row'+(state.sel===c.id?' sel':'')+'" data-tri="'+c.id+'">'
-            + '<div class="nm">'+esc(c.name)+'</div>'
-            + '<div class="pk">'+esc(c.park||'\u2014')
-            + (c.model?' \u00b7 '+esc(c.model):'')
-            + (g?' \u00b7 in '+esc(g.name):'')+'</div></div>'; }).join('')
-          + (rows.length>400 ? '<div class="row"><div class="pk">\u2026 and '+(rows.length-400)
-              + ' more. Search to narrow it.</div></div>' : '')
-        : '<div class="row"><div class="pk">Nothing here.</div></div>');
+        + ' \u00b7 switch with the buttons on the right'
+        + (grouped ? ' \u00b7 grouped by model' : '')+'</div></div>'
+      + (rows.length
+          ? (grouped ? triageGrouped(rows, b)
+             : rows.slice(0,400).map(function(c){ return triageRow(c, b); }).join('')
+               + (rows.length>400 ? '<div class="row"><div class="pk">\u2026 and '+(rows.length-400)
+                   + ' more. Search to narrow it.</div></div>' : ''))
+          : '<div class="row"><div class="pk">Nothing here.</div></div>');
     document.getElementById('list').querySelectorAll('[data-tri]').forEach(function(r){
       r.onclick = function(){ showTriage(+r.getAttribute('data-tri')); }; });
   }
   function showTriage(id){
     var c = state.byId[id]; if(!c) return;
     state.sel = id; renderTriage();
+    document.getElementById('editor').scrollTop = 0;
     var b = triageBuckets(), g = b.own[id], aside = !!state.skipped[id];
+    var cover = c.model ? modelSplit()[(c.model||'').trim()] : null;
     document.getElementById('editor').innerHTML =
       '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(c.name)+'</h2>'
       + '<p class="hint">'+esc(c.park||'?')+(c.manu?' \u00b7 '+esc(c.manu):'')
@@ -382,10 +507,16 @@
       + '<button class="ghost" id="trnext">Next in the queue</button>'
       + '<span class="toast" id="trtoast"></span></div>'
       + '<div class="toolbar"><h3>Others with the same model</h3>'
-      + '<p class="hint">'+(c.model
-          ? 'Often the fastest way to see whether this one belongs with something.'
-          : 'This coaster has no model, so there is nothing to compare it to. '
-            + 'The Models tab is where that gets fixed.')+'</p>'
+      + '<p class="hint">'+(!c.model
+          ? 'This coaster has no model, so there is nothing to compare it to. '
+            + 'The Models tab is where that gets fixed.'
+          : esc(c.model)+' \u2014 '+coverText(cover)
+            + (cover.cat.length===1 ? ', all in ' + esc(cover.cat[0])
+               : cover.cat.length ? ', across ' + cover.cat.length + ' different categories' : '')
+            + (cover.aside.length ? ' \u00b7 '+cover.aside.length+' set aside' : '')
+            + '. ' + (cover.filed.length && cover.cat.length===1
+                ? 'The rest of the model has already answered this one.'
+                : 'Often the fastest way to see whether this one belongs with something.'))+'</p>'
       + '<div class="grid">' + (c.model ? state.coasters.filter(function(x){
           return x.id!==id && (x.model||'')===c.model; }).slice(0,20).map(function(x){
           var xg = b.own[x.id];
@@ -439,7 +570,35 @@
   // badly on the shared list and it makes a category far harder to assemble
   // than it should be, because the obvious filter does not gather the obvious
   // thing.
+  //
+  // There are two ways to fix that and the pane needs both. RENAMING takes
+  // every ride carrying a name at once, which is right when the name itself is
+  // the mistake. MOVING takes the ones you tick, which is right for everything
+  // else: the three Boomerangs somebody typed as "Vekoma Boomerang" while the
+  // other ten say "Boomerang", and the 545 rides carrying no model at all,
+  // which can only ever be sorted a handful at a time.
+
+  // The no-model bucket is a model row like any other. It is also the biggest
+  // group in the database, so leaving it as a footnote on the count line left
+  // the largest piece of this job invisible.
+  var NOMODEL = "\u0000nomodel";        // never rendered, never put in an attribute
+  function modelLabel(k){ return k===NOMODEL ? "No model yet" : k; }
+  function byRide(a, b){
+    return (a.name||"").localeCompare(b.name||"", undefined, { sensitivity:"base" })
+        || (a.park||"").localeCompare(b.park||"", undefined, { sensitivity:"base" });
+  }
+  function carriers(k){
+    return state.coasters.filter(function(c){
+      var m = (c.model||"").trim();
+      return k===NOMODEL ? !m : m===k;
+    }).sort(byRide);
+  }
   async function loadModels(){
+    // The categories and what triage has set aside come with it: every ride
+    // listed in this pane says where it already sits, and a model tidied blind
+    // to that is how a model ends up disagreeing with the categories built on
+    // top of it. loadTriage fetches both.
+    if (!state.triageLoaded) { try { await loadTriage(); } catch(e){} }
     try {
       var d = await api("GET","/api/admin/models");
       state.models = d.models || []; state.blankModels = d.blank || 0;
@@ -448,55 +607,207 @@
   }
   function renderModels(){
     var q = document.getElementById('q').value.trim().toLowerCase();
-    var rows = state.models.filter(function(m){ return !q || m.model.toLowerCase().indexOf(q)>=0; });
+    var openOnly = document.getElementById('openOnly').checked;
+    // Nothing has arrived yet. Saying "no model matches that" here is an
+    // answer, and the wrong one — the pane waits on the categories as well as
+    // the models now, so the gap is two round trips wide.
+    if (!state.models.length && !state.blankModels && !state.cloneErr){
+      document.getElementById('count').textContent = "";
+      document.getElementById('list').innerHTML =
+        '<div class="row"><div class="pk">Loading\u2026</div></div>';
+      return;
+    }
+    var rows = state.models.map(function(m){
+      return { model:m.model, n:m.n, gone:m.gone||0, makers:m.makers||1, manu:m.manu };
+    });
+    if (state.blankModels){
+      var blanks = carriers(NOMODEL);
+      rows.unshift({ model:NOMODEL, n:blanks.length, makers:0,
+                     gone:blanks.filter(function(c){ return !!c.closed; }).length });
+    }
+    // "Still operating" is the question this pane actually asks of a model: a
+    // name carried only by rides that have all been torn down is history, and
+    // not something to file the next new coaster under.
+    var shown = rows.filter(function(m){
+      if (openOnly && m.n - m.gone <= 0) return false;
+      return !q || modelLabel(m.model).toLowerCase().indexOf(q) >= 0;
+    }).sort(function(a, b){
+      // Alphabetical (Carter, 2026-09-20). Ordered by count, the twelve-strong
+      // families actually worth curating sat below forty kiddie coasters, and
+      // there is no looking a name up in a list ordered by size. The no-model
+      // bucket stays pinned at the top: it is not a model, it is the queue.
+      if (a.model===NOMODEL) return -1;
+      if (b.model===NOMODEL) return 1;
+      return modelLabel(a.model).localeCompare(modelLabel(b.model),
+        undefined, { sensitivity:"base" });
+    });
+    // The rows are addressed by INDEX, not by name: a model is free text and
+    // could be anything, including something that does not survive a round trip
+    // through an HTML attribute.
+    state.modelRows = shown;
+    var live = rows.filter(function(m){ return m.model!==NOMODEL && m.n - m.gone > 0; }).length;
     document.getElementById('count').textContent =
-      rows.length + " model" + (rows.length===1?"":"s")
-      + (state.blankModels ? " \u00b7 " + state.blankModels + " coasters with none" : "");
-    document.getElementById('list').innerHTML = rows.length
-      ? rows.map(function(m){
-          return '<div class="row'+(state.selModel===m.model?' sel':'')+'" data-mdl="'+esc(m.model)+'">'
-            + '<div class="nm">'+esc(m.model)+'</div>'
-            + '<div class="pk">'+m.n+' coaster'+(m.n===1?'':'s')
-            + (m.makers>1 ? ' \u00b7 '+m.makers+' makers' : (m.manu?' \u00b7 '+esc(m.manu):''))
-            + (m.gone ? ' \u00b7 '+m.gone+' defunct' : '')+'</div></div>'; }).join('')
+      shown.length + " model" + (shown.length===1?"":"s") + " shown · "
+      + live + " still operating"
+      + (state.blankModels ? " · " + state.blankModels + " rides with none" : "");
+    document.getElementById('list').innerHTML = shown.length
+      ? shown.map(function(m, i){
+          var open = m.n - m.gone;
+          return '<div class="row'+(state.selModel===m.model?' sel':'')+'" data-mi="'+i+'">'
+            + '<div class="nm">'+esc(modelLabel(m.model))
+            + (m.model===NOMODEL ? ' <span class="badge partial">nothing filed</span>'
+               : open ? '' : ' <span class="badge gone">all defunct</span>')
+            + '</div>'
+            + '<div class="pk">'+m.n+' ride'+(m.n===1?'':'s')
+            + (m.gone ? ' · '+open+' operating · '+m.gone+' defunct' : '')
+            + (m.makers>1 ? ' · '+m.makers+' makers' : (m.manu?' · '+esc(m.manu):''))
+            + '</div></div>'; }).join('')
       : '<div class="row"><div class="pk">No model matches that.</div></div>';
-    document.getElementById('list').querySelectorAll('[data-mdl]').forEach(function(r){
-      r.onclick = function(){ showModel(r.getAttribute('data-mdl')); }; });
+    document.getElementById('list').querySelectorAll('[data-mi]').forEach(function(r){
+      r.onclick = function(){ showModel(state.modelRows[+r.getAttribute('data-mi')].model); }; });
+  }
+  function modelDatalist(){
+    return '<datalist id="dl_models">'
+      + state.opts.model.map(function(x){ return '<option value="'+esc(x)+'">'; }).join('')
+      + '</datalist>';
   }
   function showModel(name){
-    var m = state.models.filter(function(x){ return x.model===name; })[0]; if(!m) return;
+    var list = carriers(name);
+    if (!list.length){                      // every ride moved off it a second ago
+      state.selModel = ""; renderModels();
+      document.getElementById('editor').innerHTML =
+        '<div class="empty">Nothing carries that model any more.</div>';
+      return;
+    }
+    var blank = name===NOMODEL;
     state.selModel = name; renderModels();
-    // Which coasters carry it, so a merge is never a guess about what moves.
-    var carry = state.coasters.filter(function(c){ return (c.model||'')===name; })
-      .sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+    var own = inCat();
+    var gone = list.filter(function(c){ return !!c.closed; }).length;
+    var makers = {}; list.forEach(function(c){ if(c.manu) makers[c.manu]=1; });
+    var nmakers = Object.keys(makers).length;
+    var picked = {};
+
     document.getElementById('editor').innerHTML =
-      '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(name)+'</h2>'
-      + '<p class="hint">'+m.n+' coaster'+(m.n===1?'':'s')
-        + (m.makers>1 ? ' from '+m.makers+' different makers' : '')
-        + '. Renaming rewrites every one of them.</p>'
-      + '<div class="grid"><div class="fld full"><label>Rename to \u2014 an existing '
-        + 'name merges the two</label><input id="mdlto" value="'+esc(name)+'" list="dl_models">'
-        + '<datalist id="dl_models">'
-        + state.models.map(function(x){ return '<option value="'+esc(x.model)+'">'; }).join('')
-        + '</datalist></div></div>'
-      + '<div class="actions"><button id="mdlsave">Save</button>'
-        + '<span class="toast" id="mdltoast"></span></div>'
-      + '<div class="toolbar"><h3>What carries it</h3>'
-        + '<div class="grid">' + carry.slice(0,60).map(function(c){
-            return '<div class="fld full"><label>'+esc(c.name)+' \u2014 '+esc(c.park||'?')
-              + (c.manu?' \u00b7 '+esc(c.manu):'')+'</label></div>'; }).join('')
-        + (carry.length>60 ? '<div class="fld full"><label>\u2026 and '+(carry.length-60)
-            + ' more</label></div>' : '')
-        + '</div></div>';
-    document.getElementById('mdlsave').onclick = async function(){
+      '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(modelLabel(name))+'</h2>'
+      + '<p class="hint">'+list.length+' ride'+(list.length===1?'':'s')
+        + ' · '+(list.length-gone)+' still operating'+(gone?' · '+gone+' defunct':'')
+        + (nmakers>1 ? ' · from '+nmakers+' different makers' : '')+'.</p>'
+      + (blank
+          ? '<p class="hint">These carry no model at all. Give a few of them one below and '
+            + 'they join the list on the left — this is where that list grows.</p>'
+          : '<div class="grid"><div class="fld full"><label>Rename all '+list.length
+            + ' — a name that already exists merges the two</label>'
+            + '<input id="mdlto" value="'+esc(name)+'" list="dl_models"></div></div>'
+            + '<div class="actions"><button id="mdlsave">Rename</button>'
+            + '<span class="toast" id="mdltoast"></span></div>')
+      + '<div class="toolbar"><h3>Rides carrying it</h3>'
+      + '<p class="hint">Tick the ones that belong under a different name and move them. '
+        + 'A rename above takes all '+list.length+'; this takes only what you tick.</p>'
+      + '<div class="inline"><input id="mdlq" placeholder="Filter these rides…" style="flex:1">'
+        + '<button class="ghost" id="mdlall">Tick these</button>'
+        + '<button class="ghost" id="mdlnone">Clear</button></div>'
+      + '<div class="pane" id="mdlrides"></div>'
+      + '<div class="inline" style="margin-top:10px">'
+        + '<input id="mdlmove" list="dl_models" placeholder="Move the ticked rides to…" style="flex:1">'
+        + '<button id="mdlmv">Move</button></div>'
+      + '<p class="hint" id="mvhint">Leaving the box empty takes the model off them entirely.</p>'
+      + '<span class="toast" id="mvtoast"></span></div>'
+      + splitBox(name, list)
+      + modelDatalist();
+
+    // One row per ride, and it says what a move would be walking past: the
+    // maker (two makers under one model is usually two models), whether it is
+    // still standing, and which category already holds it.
+    function rideRow(c){
+      var g = own[c.id];
+      var tail = (c.manu ? ' · ' + esc(c.manu) : '')
+        + (g ? ' · in ' + esc(g.name)
+             : state.skipped[c.id] ? ' · set aside' : '');
+      return '<label class="cbrow tick">'
+        + '<input type="checkbox" data-rd="'+c.id+'"'+(picked[c.id]?' checked':'')+'>'
+        + '<span>'+esc(c.name)+'<span class="sub"> — '+esc(c.park||'?')+tail+'</span>'
+        + (c.closed ? ' <span class="badge gone">defunct</span>' : '')+'</span></label>';
+    }
+    function shownRides(){
+      var f = (document.getElementById('mdlq').value||'').trim().toLowerCase();
+      return !f ? list : list.filter(function(c){
+        return ((c.name||'')+' '+(c.park||'')+' '+(c.manu||''))
+          .toLowerCase().indexOf(f) >= 0; });
+    }
+    function ticked(){
+      return Object.keys(picked).filter(function(k){ return picked[k]; }).map(Number);
+    }
+    // The button carries the count, so what is about to move is readable
+    // without scrolling back up through 545 rides to count ticks.
+    function countPicked(){
+      var n = ticked().length;
+      document.getElementById('mdlmv').textContent = n ? 'Move '+n : 'Move';
+    }
+    function redrawRides(){
+      var rs = shownRides(), el = document.getElementById('mdlrides');
+      el.innerHTML = (rs.length > 300
+          ? '<p class="hint">'+rs.length+' rides — the first 300 are listed. '
+            + 'Filter to narrow it.</p>' : '')
+        + (rs.length ? rs.slice(0,300).map(rideRow).join('')
+                     : '<p class="hint">Nothing here matches that filter.</p>');
+      el.querySelectorAll('[data-rd]').forEach(function(b){
+        // Redrawing on every tick would pull the next row out from under the
+        // tap; only the count moves. Same reason the category picker leaves a
+        // ticked row where it is.
+        b.onchange = function(){ picked[+b.getAttribute('data-rd')] = b.checked; countPicked(); };
+      });
+      countPicked();
+    }
+    redrawRides();
+    document.getElementById('mdlq').addEventListener('input', redrawRides);
+    // "Tick these" means what is on screen, filter and all — filter to Vekoma,
+    // tick them, move them is the whole workflow this pane exists for.
+    document.getElementById('mdlall').onclick = function(){
+      shownRides().slice(0,300).forEach(function(c){ picked[c.id]=1; }); redrawRides(); };
+    document.getElementById('mdlnone').onclick = function(){
+      picked = {}; redrawRides(); };
+
+    document.getElementById('mdlmv').onclick = async function(){
+      var ids = ticked(), to = document.getElementById('mdlmove').value.trim();
+      var t = document.getElementById('mvtoast');
+      t.className = 'toast';
+      if (!ids.length){ t.textContent = 'Tick the rides to move first.'; return; }
+      if (!to && !confirm(ids.length + (ids.length===1?' ride':' rides')
+            + ' will be left with no model at all. Sure?')) return;
+      t.textContent = 'Saving…';
+      try {
+        var out = await api("POST","/api/admin/models/assign",
+          { ids:ids, model:to, clear: !to });
+        // The page's own copy of the list is now wrong in `ids` places. Patch it
+        // rather than re-fetching 1,114 rows for a string swap — the same call
+        // the rename below makes.
+        ids.forEach(function(id){ var c = state.byId[id]; if(c) c.model = to || null; });
+        state.opts = { manu:distinct("manu"), model:distinct("model") };
+        await loadModels();
+        // Stay where you were if there is anything left to sort; follow the
+        // rides if the source model is now empty.
+        var stay = carriers(name).length ? name : (to || NOMODEL);
+        showModel(stay);
+        var t2 = document.getElementById('mvtoast');
+        if (t2){
+          t2.className = 'toast ' + (out.moved ? 'good' : '');
+          t2.textContent = !out.moved
+            ? 'Nothing to do — they already carry that model.'
+            : (out.model
+                ? 'Moved ' + out.moved + ' to ' + out.model
+                  + (out.created ? ' — a new model' : ' — ' + out.total + ' carry it now')
+                : 'Took the model off ' + out.moved + '.');
+        }
+      } catch(e){ t.className='toast bad'; t.textContent = e.message; }
+    };
+
+    if (!blank) document.getElementById('mdlsave').onclick = async function(){
       var to = document.getElementById('mdlto').value.trim();
       var t = document.getElementById('mdltoast');
       if(to===name){ t.textContent='That is the name it already has.'; return; }
-      t.textContent='Saving\u2026';
+      t.textContent='Saving…';
       try {
         var out = await api("POST","/api/admin/models/rename",{ from:name, to:to });
-        // The coaster list this page holds is now wrong in `moved` places, so
-        // fix it here rather than re-fetching 1,114 rows for a string swap.
         state.coasters.forEach(function(c){ if((c.model||'')===name) c.model = to; });
         state.opts = { manu:distinct("manu"), model:distinct("model") };
         state.selModel = to;
@@ -505,10 +816,420 @@
         var t2 = document.getElementById('mdltoast');
         if(t2){ t2.className='toast good';
           t2.textContent = out.merged
-            ? 'Merged \u2014 '+out.moved+' moved, '+out.total+' carry it now'
-            : 'Renamed \u2014 '+out.moved+' updated'; }
+            ? 'Merged — '+out.moved+' moved, '+out.total+' carry it now'
+            : 'Renamed — '+out.moved+' updated'; }
       } catch(e){ t.className='toast bad'; t.textContent = e.message; }
     };
+
+    if (document.getElementById('mdlsplit')) document.getElementById('mdlsplit').onclick = async function(){
+      var groups = makerGroups(list), t = document.getElementById('sptoast');
+      t.className = 'toast';
+      var moves = [];
+      document.getElementById('editor').querySelectorAll('[data-sg]').forEach(function(inp){
+        var g = groups[+inp.getAttribute('data-sg')], to = inp.value.trim();
+        // `model`, not `to` — the endpoint reads `model`, and an unrecognised
+        // field used to read as "take the model off these", which is a silent
+        // 13-ride wipe rather than a split. It refuses that now; this sends the
+        // name it means.
+        if (to && to !== name) moves.push({ model:to, ids:g.rides.map(function(c){ return c.id; }) });
+      });
+      if (!moves.length){
+        t.textContent = 'Every box still says '+name+' \u2014 nothing to split.'; return; }
+      t.textContent = 'Saving\u2026';
+      try {
+        var told = [];
+        // One call per maker: the endpoint moves a list of rides onto ONE
+        // model, and each group is going somewhere different.
+        for (var i=0;i<moves.length;i++){
+          var out = await api("POST","/api/admin/models/assign", moves[i]);
+          moves[i].ids.forEach(function(id){
+            var c2 = state.byId[id]; if(c2) c2.model = moves[i].model; });
+          told.push(out.moved + ' \u2192 ' + moves[i].model);
+        }
+        state.opts = { manu:distinct("manu"), model:distinct("model") };
+        await loadModels();
+        // Whatever stayed behind keeps the name; if every maker moved, follow
+        // the biggest group rather than landing on an empty pane.
+        var kept = carriers(name).length;
+        showModel(kept ? name : moves[0].model);
+        var t2 = document.getElementById('sptoast');
+        if (t2){ t2.className='toast good';
+          t2.textContent = 'Split \u2014 ' + told.join(', ')
+            + (kept ? ', '+kept+' left as '+name : ''); }
+      } catch(e){ t.className='toast bad'; t.textContent = e.message; }
+    };
+  }
+
+  // How a model sits against the categories, which is the question triage
+  // keeps asking one ride at a time: twelve SLCs, nine of them already in a
+  // category, is most of the answer for the other three. Computed from what
+  // the page already holds — the coaster list, the categories, and what triage
+  // has set aside — so it costs a pass over 1,114 rows and no request.
+  function modelSplit(){
+    var own = inCat(), by = {};
+    state.coasters.forEach(function(c){
+      var k = (c.model||'').trim() || NOMODEL;
+      var e = by[k] || (by[k] = { model:k, rides:[], cats:{}, filed:[], loose:[], aside:[] });
+      e.rides.push(c);
+      var g = own[c.id];
+      if (g){ e.filed.push(c); e.cats[g.id] = g.name; }
+      else if (state.skipped[c.id]) e.aside.push(c);
+      else e.loose.push(c);
+    });
+    Object.keys(by).forEach(function(k){
+      var e = by[k];
+      e.cat = Object.keys(e.cats).map(function(i){ return e.cats[i]; }).sort();
+    });
+    return by;
+  }
+
+
+  // The abbreviations the database's own model names already use \u2014 "B&M
+  // Invert", "PTC", "GCI", "RMC Hybrid" \u2014 so splitting Looper by maker
+  // offers "Arrow Looper" rather than "Arrow Dynamics Looper". Only the makers
+  // with a settled short form are in here; everybody else gets their name as
+  // typed, and either way the box is editable before anything moves.
+  var MAKER_SHORT = {
+    "Arrow Dynamics":"Arrow", "Bolliger & Mabillard":"B&M",
+    "Philadelphia Toboggan Coasters":"PTC", "Great Coasters International":"GCI",
+    "Custom Coasters International":"CCI", "Rocky Mountain Construction":"RMC",
+    "MACK Rides":"Mack", "Maurer Rides":"Maurer", "Premier Rides":"Premier",
+    "S&S Worldwide":"S&S", "Chance Rides":"Chance", "Wisdom Rides":"Wisdom",
+    "Dinn Corporation":"Dinn", "ART Engineering":"ART"
+  };
+  function shortMaker(m){ return MAKER_SHORT[m] || m; }
+  function makerGroups(list){
+    var by = {};
+    list.forEach(function(c){
+      var k = (c.manu||'').trim() || NOMAKER;
+      (by[k] = by[k] || []).push(c);
+    });
+    return Object.keys(by).map(function(k){ return { maker:k, rides:by[k] }; })
+      .sort(function(a, b){ return b.rides.length - a.rides.length
+        || makerLabel(a.maker).localeCompare(makerLabel(b.maker)); });
+  }
+  // One model built by several makers is usually several models. "Looper" is 21
+  // rides and six makers: Arrow built thirteen of them and Vekoma four, and
+  // those are not the same ride in any sense a category cares about. (Carter,
+  // 2026-09-20: "I have Looper and I want to break it into Arrow Looper Vekoma
+  // Looper maybe just a plain Looper based on manufacturer".)
+  //
+  // Prefilled, never applied on sight: one box per maker starting at "<Maker>
+  // <Model>", and a box left at the model\u2019s own name keeps that maker
+  // exactly where it is \u2014 which is how one group stays plain "Looper".
+  function splitBox(name, list){
+    if (name===NOMODEL) return '';
+    var groups = makerGroups(list);
+    if (groups.length < 2) return '';
+    return '<div class="toolbar"><h3>Split it by maker</h3>'
+      + '<p class="hint">'+list.length+' rides carry this model and '+groups.length
+        + ' different makers built them, which usually means it is more than one '
+        + 'model. Leave a box as it is to keep that maker on '+esc(name)+'.</p>'
+      + '<div class="grid">'
+      + groups.map(function(g, i){
+          // No stutter: a model that already opens with the maker\u2019s name is
+          // the name this would propose, so it proposes nothing.
+          var suggest = g.maker===NOMAKER ? name
+            : (name.toLowerCase().indexOf(shortMaker(g.maker).toLowerCase())===0
+                ? name : shortMaker(g.maker)+' '+name);
+          return '<div class="fld full"><label>'+esc(makerLabel(g.maker))+' \u2014 '
+            + g.rides.length+' ride'+(g.rides.length===1?'':'s')+'</label>'
+            + '<input data-sg="'+i+'" list="dl_models" value="'+esc(suggest)+'"></div>'; }).join('')
+      + '</div>'
+      + '<div class="actions"><button id="mdlsplit">Split</button>'
+      + '<span class="toast" id="sptoast"></span></div></div>';
+  }
+
+  // ---------- the models queue ----------
+  // The same pane as the category queue, asking the other question. A coaster
+  // is in exactly one of three states and only two of them are written down:
+  // `coasters.model` says which HAVE one, `model_skipped` says which were
+  // looked at and have none to give, and what is in neither is the queue. 545
+  // rides carry no model, so this is the longest queue in the editor — and the
+  // one everything else here depends on, because a model nobody typed cannot
+  // group anything.
+  //
+  // Grouped by PARK, which is what the data asked for. Grouping by maker was
+  // the obvious mirror of the category queue's group-by-model, and it groups
+  // nothing: 544 of the 545 rides carrying no model carry no MAKER either.
+  // They are the rows nobody has ever filled in, not rows missing one field.
+  // A park is the unit they get looked up in, and one lookup answers five of
+  // them, so the park with the most still to do is the best next half hour.
+  async function loadMTriage(){
+    if (!state.clones.length) { try { await loadClones(); } catch(e){} }
+    try {
+      var d = await api("GET","/api/admin/models/skipped");
+      state.mskipped = {}; (d.ids||[]).forEach(function(i){ state.mskipped[i]=1; });
+      state.mtriageNeed = d.need || ""; state.mtriageLoaded = true;
+    } catch(e){ state.mskipped = {}; state.mtriageNeed = ""; state.cloneErr = e.message; }
+    render();
+  }
+  function hasModel(c){ return !!(c.model||"").trim(); }
+  function mtriageBuckets(){
+    var todo = [], done = [], aside = [];
+    state.coasters.forEach(function(c){
+      if (hasModel(c)) done.push(c);
+      else if (state.mskipped[c.id]) aside.push(c);
+      else todo.push(c);
+    });
+    return { todo:todo, done:done, aside:aside };
+  }
+  var NOMAKER = "\u0000nomaker";
+  function makerLabel(k){ return k===NOMAKER ? "No maker either" : k; }
+  // How far a maker's catalogue has been filled in. The same fraction the
+  // category queue puts on a model, asked of the other column.
+  function makerSplit(){
+    var by = {};
+    state.coasters.forEach(function(c){
+      var k = (c.manu||'').trim() || NOMAKER;
+      var e = by[k] || (by[k] = { maker:k, rides:[], filed:[], loose:[], aside:[], models:{} });
+      e.rides.push(c);
+      if (hasModel(c)){ e.filed.push(c); e.models[c.model.trim()] = (e.models[c.model.trim()]||0)+1; }
+      else if (state.mskipped[c.id]) e.aside.push(c);
+      else e.loose.push(c);
+    });
+    Object.keys(by).forEach(function(k){
+      var e = by[k];
+      // Its models, commonest first: on the queue's own pane these are the
+      // buttons, and the one it builds most of is nearly always the answer.
+      e.model = Object.keys(e.models).map(function(m){ return { model:m, n:e.models[m] }; })
+        .sort(function(a,b){ return b.n - a.n || a.model.localeCompare(b.model); });
+    });
+    return by;
+  }
+  function mtriageRow(c){
+    return '<div class="row'+(state.sel===c.id?' sel':'')+'" data-mtri="'+c.id+'">'
+      + '<div class="nm">'+esc(c.name)+'</div>'
+      + '<div class="pk">'+esc(c.park||'—')
+      + (c.manu?' · '+esc(c.manu):'')
+      + (c.model?' · '+esc(c.model):'')+'</div></div>';
+  }
+  var NOPARK = "\u0000nopark";
+  function parkLabel(k){ return k===NOPARK ? "No park recorded" : k; }
+  // How much of a park is filled in \u2014 the same fraction the category queue
+  // puts on a model, asked of the unit you actually look rides up in.
+  function parkSplit(){
+    var by = {};
+    state.coasters.forEach(function(c){
+      var k = (c.park||'').trim() || NOPARK;
+      var e = by[k] || (by[k] = { park:k, rides:[], filed:[], loose:[], aside:[] });
+      e.rides.push(c);
+      if (hasModel(c)) e.filed.push(c);
+      else if (state.mskipped[c.id]) e.aside.push(c);
+      else e.loose.push(c);
+    });
+    return by;
+  }
+  function mtriageGrouped(rows){
+    var split = parkSplit(), by = {};
+    rows.forEach(function(c){
+      var k = (c.park||'').trim() || NOPARK;
+      (by[k] = by[k] || []).push(c);
+    });
+    var keys = Object.keys(by).sort(function(x, y){
+      // The park with the most still to do first: a park is looked up once and
+      // answers all of them, so the order is what one lookup is worth.
+      if (x===NOPARK) return 1;
+      if (y===NOPARK) return -1;
+      return by[y].length - by[x].length || parkLabel(x).localeCompare(parkLabel(y));
+    });
+    var left = 400, out = [];
+    keys.forEach(function(k){
+      if (left <= 0) return;
+      var e = split[k], mine = by[k].slice(0, left);
+      left -= mine.length;
+      out.push('<div class="row sec"><div class="nm">'+esc(parkLabel(k))
+        + ' <span class="badge '
+        + (e.filed.length===e.rides.length ? 'settled' : e.filed.length ? 'partial' : 'gone')
+        + '">'+e.filed.length+'/'+e.rides.length+'</span></div>'
+        + '<div class="pk">'+mine.length+' here \u00b7 '
+        + (e.filed.length ? e.filed.length+' of its '+e.rides.length+' rides already '
+             + (e.filed.length===1?'carries':'carry')+' one'
+           : 'none of its rides carry a model yet')
+        + (e.aside.length ? ' \u00b7 '+e.aside.length+' set aside' : '')
+        + '</div></div>'
+        + mine.map(mtriageRow).join(''));
+    });
+    var shown = 400 - left;
+    if (shown < rows.length) out.push('<div class="row"><div class="pk">… and '
+      + (rows.length - shown) + ' more. Search to narrow it.</div></div>');
+    return out.join('');
+  }
+  function renderMTriage(){
+    var q = document.getElementById('q').value.trim().toLowerCase();
+    var b = mtriageBuckets();
+    var pick = b[state.mtriageFilter==='done' ? 'done' : state.mtriageFilter==='aside' ? 'aside' : 'todo'];
+    var rows = pick.filter(function(c){
+      return !q || ((c.name||'')+' '+(c.park||'')+' '+(c.manu||'')+' '+(c.model||''))
+        .toLowerCase().indexOf(q)>=0; });
+    var grouped = document.getElementById('byGroup').checked;
+
+    document.getElementById('count').textContent =
+      b.todo.length + " to look at · " + b.done.length + " with a model · "
+      + b.aside.length + " set aside";
+
+    document.getElementById('list').innerHTML =
+      (state.mtriageNeed ? '<div class="row"><div class="nm">Set aside is not stored yet</div>'
+        + '<div class="pk">run migrations/'+esc(state.mtriageNeed)+' — until then every '
+        + 'coaster without a model shows as still to look at</div></div>' : '')
+      + '<div class="row live"><div class="nm">'
+        + (state.mtriageFilter==='done' ? 'Has a model'
+           : state.mtriageFilter==='aside' ? 'Set aside' : 'No model yet')
+        + '</div><div class="pk">'+rows.length+' of '+pick.length
+        + ' · switch with the buttons on the right'
+        + (grouped ? ' · grouped by park' : '')+'</div></div>'
+      + (rows.length
+          ? (grouped ? mtriageGrouped(rows)
+             : rows.slice(0,400).map(mtriageRow).join('')
+               + (rows.length>400 ? '<div class="row"><div class="pk">… and '+(rows.length-400)
+                   + ' more. Search to narrow it.</div></div>' : ''))
+          : '<div class="row"><div class="pk">Nothing here.</div></div>');
+    document.getElementById('list').querySelectorAll('[data-mtri]').forEach(function(r){
+      r.onclick = function(){ showMTriage(+r.getAttribute('data-mtri')); }; });
+  }
+  function showMTriage(id){
+    var c = state.byId[id]; if(!c) return;
+    state.sel = id; renderMTriage();
+    // Back to the top: walking a queue redraws this pane under the scroll
+    // position the last ride left, which put the name of the one you just
+    // opened off the top of the screen.
+    document.getElementById('editor').scrollTop = 0;
+    var aside = !!state.mskipped[id];
+    var maker = (c.manu||'').trim();
+    var mk = maker ? makerSplit()[maker] : null;
+    // A coaster of the same name somewhere else is the strongest hint there is:
+    // a clone carries the clone's model, and the name is how clones are spotted
+    // everywhere else in this editor.
+    var same = !c.name ? [] : state.coasters.filter(function(x){
+      return x.id!==id && hasModel(x)
+        && String(x.name||'').trim().toLowerCase() === String(c.name).trim().toLowerCase();
+    }).sort(byRide);
+
+    document.getElementById('editor').innerHTML =
+      '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(c.name)+'</h2>'
+      + '<p class="hint">'+esc(c.park||'?')+(maker?' · '+esc(maker):' · no maker recorded')
+        + (c.type?' · '+esc(c.type):'')+(c.yr?' · '+c.yr:'')+'</p>'
+      + '<p class="hint">'+(hasModel(c) ? 'Model: <b>'+esc(c.model)+'</b>.'
+          : aside ? 'Set aside — looked at, and there is no model to give it.'
+          : 'No model yet.')+'</p>'
+      // Maker and model together, because they are missing together: these are
+      // rows nobody has filled in yet, and Carter is filling both in this pass
+      // (2026-09-20), with the stats to follow later. One save writes both.
+      + '<div class="grid"><div class="fld"><label>Manufacturer</label>'
+        + '<input id="mtmanu" list="dl_manu" value="'+esc(c.manu||'')+'" '
+        + 'placeholder="who built it"></div>'
+        + '<div class="fld"><label>Model</label>'
+        + '<input id="mtset" list="dl_models" value="'+esc(c.model||'')+'" '
+        + 'placeholder="pick one that exists, or type a new one"></div></div>'
+      + '<div class="actions"><button id="mtsave">Save and go on</button>'
+        + '<button class="ghost" id="mtaside">'+(aside?'Back to the queue':'Set aside')+'</button>'
+        + '<button class="ghost" id="mtnext">Next in the queue</button>'
+        + '<span class="toast" id="mttoast"></span></div>'
+      // The park first, because it is the hint that is actually there. These
+      // rides are missing their maker as often as their model, so "what this
+      // maker builds" leads with a blank; a park is a single lookup that
+      // answers every ride standing in it.
+      + (function(){
+          var here = state.coasters.filter(function(x){
+            return x.id!==id && (c.park||'') && (x.park||'')===(c.park||''); }).sort(byRide);
+          if (!here.length) return '';
+          var done = here.filter(hasModel).length;
+          return '<div class="toolbar"><h3>The rest of '+esc(c.park||'this park')+'</h3>'
+            + '<p class="hint">'+done+' of its other '+here.length+' ride'
+              + (here.length===1?'':'s')+' carr'+(here.length===1?'ies':'y')+' a model. '
+              + 'Looking the park up once answers all of them.</p>'
+            + '<div class="pane">'+here.slice(0,20).map(function(x){
+                return '<div class="tick">'+esc(x.name)
+                  + '<span class="sub"> \u2014 '+(x.model ? esc(x.model) : 'no model yet')
+                  + (x.manu?' \u00b7 '+esc(x.manu):'')+'</span></div>'; }).join('')
+            + (here.length>20 ? '<p class="hint">\u2026 and '+(here.length-20)+' more.</p>' : '')
+            + '</div></div>';
+        })()
+      + (mk && mk.model.length
+          ? '<div class="toolbar"><h3>What '+esc(maker)+' builds</h3>'
+            + '<p class="hint">'+mk.filed.length+' of its '+mk.rides.length+' rides carry a model'
+            + (mk.loose.length ? ' · '+mk.loose.length+' still to do' : '')
+            + '. One click files this one and moves on.</p>'
+            + '<div class="inline" style="flex-wrap:wrap">'
+            + mk.model.slice(0,14).map(function(m, i){
+                return '<button class="ghost" data-mm="'+i+'">'+esc(m.model)
+                  + ' <span class="sub">'+m.n+'</span></button>'; }).join('')
+            + '</div></div>'
+          : '<div class="toolbar"><h3>What '+(maker?esc(maker):'this maker')+' builds</h3>'
+            + '<p class="hint">'+(maker
+                ? 'Nothing else by this maker carries a model yet, so there is nothing to copy.'
+                : 'No maker is recorded for this coaster yet. Type one into the box '
+                  + 'above and it is saved with the model.')+'</p></div>')
+      + (same.length
+          ? '<div class="toolbar"><h3>The same name elsewhere</h3>'
+            + '<p class="hint">Almost always the same ride, and the same ride is the same '
+              + 'model. Check the maker matches before taking it.</p>'
+            + '<div class="pane">'+same.slice(0,12).map(function(x, i){
+                return '<div class="tick"><button class="ghost" data-mn="'+i+'">Use '
+                  + esc(x.model)+'</button> <span class="sub">'+esc(x.name)+' — '
+                  + esc(x.park||'?')+(x.manu?' · '+esc(x.manu):'')+'</span></div>';
+              }).join('')+'</div></div>'
+          : '')
+      + modelDatalist()
+      + '<datalist id="dl_manu">'
+      + state.opts.manu.map(function(x){ return '<option value="'+esc(x)+'">'; }).join('')
+      + '</datalist>';
+
+    async function give(model, manu){
+      var t = document.getElementById('mttoast'); t.className='toast';
+      var to = String(model==null ? document.getElementById('mtset').value : model).trim();
+      // What is in the box wins: it is either what the ride already had or what
+      // was just typed. A maker offered by a clone only fills a box left empty.
+      var mn = document.getElementById('mtmanu').value.trim() || String(manu||'').trim();
+      if (!to){ t.textContent = 'Type a model, or set it aside.'; return; }
+      t.textContent = 'Saving…';
+      try {
+        // Both fields in one call, so a ride cannot end up half-saved.
+        await api("POST","/api/admin/models/assign",{ ids:[id], model:to, manu:mn });
+        c.model = to;
+        if (mn) c.manu = mn;
+        state.opts = { manu:distinct("manu"), model:distinct("model") };
+        // It has a model now, so a note saying it has none is stale.
+        if (state.mskipped[id]) {
+          try { await api("POST","/api/admin/models/skipped",{ ids:[id], on:false }); } catch(e){}
+          delete state.mskipped[id];
+        }
+        nextMTodo(id);
+      } catch(e){ t.className='toast bad'; t.textContent = e.message; }
+    }
+    document.getElementById('mtsave').onclick = function(){ give(null); };
+    document.getElementById('editor').querySelectorAll('[data-mm]').forEach(function(b){
+      b.onclick = function(){ give(mk.model[+b.getAttribute('data-mm')].model); }; });
+    document.getElementById('editor').querySelectorAll('[data-mn]').forEach(function(b){
+      b.onclick = function(){
+        var x = same[+b.getAttribute('data-mn')]; give(x.model, x.manu); }; });
+    document.getElementById('mtaside').onclick = async function(){
+      var t = document.getElementById('mttoast'); t.className='toast';
+      t.textContent='Saving…';
+      try {
+        await api("POST","/api/admin/models/skipped",{ ids:[id], on:!aside });
+        if (aside) delete state.mskipped[id]; else state.mskipped[id] = 1;
+        if (!aside) nextMTodo(id); else showMTriage(id);
+      } catch(e){ t.className='toast bad'; t.textContent = e.message; }
+    };
+    document.getElementById('mtnext').onclick = function(){ nextMTodo(id); };
+  }
+  // Straight on to the next one, the same way the category queue does it:
+  // stopping to find your place again after every decision is most of the work.
+  function nextMTodo(after){
+    var q = document.getElementById('q').value.trim().toLowerCase();
+    var list = mtriageBuckets().todo.filter(function(c){
+      return !q || ((c.name||'')+' '+(c.park||'')+' '+(c.manu||''))
+        .toLowerCase().indexOf(q)>=0; });
+    if(!list.length){
+      state.sel = null; renderMTriage();
+      document.getElementById('editor').innerHTML =
+        '<div class="empty">Nothing left without a model.</div>';
+      return;
+    }
+    var at = -1;
+    for(var i=0;i<list.length;i++) if(list[i].id===after){ at=i; break; }
+    showMTriage(list[Math.min(at+1, list.length-1)].id);
   }
 
   function cname(id){

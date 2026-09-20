@@ -45,6 +45,7 @@
           : kind === 'clone_set' ? 'stack'
           : kind === 'model_renamed' ? 'edited'
           : kind === 'model_merged' ? 'merged'
+          : kind === 'model_assigned' ? 'edited'
           : kind === 'park_renamed' ? 'edited'
           : kind === 'park_merged' ? 'merged'
           : kind === 'coaster_deleted' ? 'deleted'
@@ -131,6 +132,14 @@
       + (sub || 'another park') + (e.n ? ' — ' + e.n + ' coaster' + (e.n === 1 ? '' : 's') + ' moved' : '');
     if (e.kind === 'model_merged') return esc(d.from || 'A model') + ' was merged into '
       + (sub || 'another model') + ' \u2014 ' + plural(e.n || 0, 'coaster') + ' moved';
+    // Coasters moved onto a model one handful at a time, which is the half of
+    // the tidying a rename cannot do. `from` is only recorded when they all
+    // came off the same name, so the sentence loses it rather than guessing.
+    if (e.kind === 'model_assigned') return sub
+      ? plural(e.n || 0, 'coaster')
+        + (d.from ? ' moved from ' + esc(d.from) + ' to ' : ' given the model ') + sub
+      : plural(e.n || 0, 'coaster') + ' no longer '
+        + ((e.n || 0) === 1 ? 'carries' : 'carry') + ' a model';
     if (e.kind === 'user_added')      return (sub || 'A rider') + ' joined'
       + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
     if (e.kind === 'claimed')         return (sub || 'A rider') + ' created an account'

@@ -33,6 +33,7 @@ const MIGRATION_010 = readFileSync(join(ROOT, "migrations", "010-follows.sql"), 
 const MIGRATION_012 = readFileSync(join(ROOT, "migrations", "012-clone-groups.sql"), "utf8");
 const MIGRATION_013 = readFileSync(join(ROOT, "migrations", "013-rider-categories.sql"), "utf8");
 const MIGRATION_015 = readFileSync(join(ROOT, "migrations", "015-category-triage.sql"), "utf8");
+const MIGRATION_017 = readFileSync(join(ROOT, "migrations", "017-model-triage.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
 // D1 rejects a statement with more bound parameters than SQLite's compiled-in
@@ -2025,6 +2026,55 @@ async function main() {
       r.status + " " + JSON.stringify(r.data));
   }
 
+  // ---- a merge carries everything keyed by the coaster ----------------------
+  //
+  // It used to move the rides and the aliases and stop there, so the coaster
+  // that disappeared took its category membership and every ranking holding it
+  // into a row nothing could resolve. Carter merged Goliath into Chupacabra on
+  // 2026-09-20 and the Batman clones category was left showing "#137".
+  {
+    const db = freshDb();
+    db.exec(`
+      INSERT INTO clone_groups (id,name,created) VALUES (1,'Batman clones','x');
+      INSERT INTO clone_members (coaster,group_id) VALUES (2,1);
+      INSERT INTO rankings (user_slug,coaster_id,pos) VALUES ('carter',2,1),('cole',1,2),('cole',2,3);
+      INSERT INTO rider_categories (id,user_slug,name,created) VALUES (9,'cole','Mine','x');
+      INSERT INTO rider_category_members (user_slug,coaster,cat_id) VALUES ('cole',2,9);
+      INSERT INTO category_skipped (coaster,at) VALUES (2,'x');
+    `);
+    await call(db, "POST", "/api/merge", { token: PW, body: { from: 2, to: 1 } });
+
+    check("a merge hands the category membership to the survivor",
+      rows(db, "SELECT coaster FROM clone_members").map((r) => r.coaster).join() === "1",
+      JSON.stringify(rows(db, "SELECT * FROM clone_members")));
+    check("...and the ranking that held it, at the position it held",
+      rows(db, "SELECT pos FROM rankings WHERE user_slug='carter' AND coaster_id=1")
+        .map((r) => r.pos).join() === "1",
+      JSON.stringify(rows(db, "SELECT * FROM rankings")));
+    // Cole had ranked both. One row survives — his own, at his own position —
+    // rather than the merge failing on the primary key or ranking it twice.
+    check("...and a rider who ranked both keeps one row, not two",
+      rows(db, "SELECT pos FROM rankings WHERE user_slug='cole'").map((r) => r.pos).join() === "2",
+      JSON.stringify(rows(db, "SELECT * FROM rankings WHERE user_slug='cole'")));
+    check("nothing anywhere still names the merged-away id",
+      rows(db, "SELECT coaster_id AS c FROM rankings WHERE coaster_id=2 " +
+               "UNION ALL SELECT coaster FROM clone_members WHERE coaster=2 " +
+               "UNION ALL SELECT coaster FROM rider_category_members WHERE coaster=2 " +
+               "UNION ALL SELECT coaster FROM category_skipped WHERE coaster=2").length === 0);
+    check("...and the rider's own category came with it",
+      rows(db, "SELECT coaster FROM rider_category_members").map((r) => r.coaster).join() === "1");
+    check("...as did the set-aside decision",
+      rows(db, "SELECT coaster FROM category_skipped").map((r) => r.coaster).join() === "1");
+
+    // A database that has not run the category migrations still merges: the
+    // tables it carries are moved and the missing ones are simply not there.
+    const old = dbWithoutClones();
+    const r = await call(old, "POST", "/api/merge", { token: PW, body: { from: 2, to: 1 } });
+    check("a merge still works before the category migrations", r.status === 200,
+      r.status + " " + JSON.stringify(r.data));
+    check("...and still moved the rides", rows(old, "SELECT id FROM rides WHERE coaster_id=2").length === 0);
+  }
+
   // ---- models ---------------------------------------------------------------
   {
     const db = freshDb();
@@ -2070,6 +2120,139 @@ async function main() {
 
     r = await call(db, "GET", "/api/admin/models");
     check("the model list needs an admin", r.status === 401, r.status + "");
+  }
+
+  // ---- moving individual rides between models -------------------------------
+  //
+  // The other half of the tidying: a rename takes every carrier of a name, this
+  // takes the ones that were ticked. It is what /edit's model pane moves rides
+  // with, and what splitting a model by maker is built out of.
+  {
+    const db = freshDb();
+    db.exec(`
+      INSERT INTO coasters (id,name,park,manu,model) VALUES
+        (61,'Loop A','P','Arrow Dynamics','Looper'),
+        (62,'Loop B','P','Arrow Dynamics','Looper'),
+        (63,'Loop C','P','Vekoma','Looper'),
+        (64,'Bare','P','Vekoma',NULL);
+    `);
+    const cookie = await signedUp(db, "assign@example.com", "As");
+    db.prepare("UPDATE accounts SET is_admin = 1").run();
+
+    let r = await call(db, "POST", "/api/admin/models/assign",
+      { cookie, body: { ids: [61, 62], model: "Arrow Looper" } });
+    check("moving rides onto a new model says it is new",
+      r.status === 200 && r.data.moved === 2 && r.data.created === true, JSON.stringify(r.data));
+    check("...and only those rides moved",
+      rows(db, "SELECT id FROM coasters WHERE model = 'Looper'").map((x) => x.id).join() === "63");
+
+    r = await call(db, "POST", "/api/admin/models/assign",
+      { cookie, body: { ids: [64], model: "Arrow Looper" } });
+    check("moving onto a model that exists counts them all",
+      r.status === 200 && r.data.moved === 1 && r.data.created === false && r.data.total === 3,
+      JSON.stringify(r.data));
+
+    // Ticking a ride that already carries the model is the normal way to use a
+    // list of them, so it is not an error — and it is not a move either.
+    r = await call(db, "POST", "/api/admin/models/assign",
+      { cookie, body: { ids: [61], model: "Arrow Looper" } });
+    check("a ride that already carries it is not counted as moved",
+      r.status === 200 && r.data.moved === 0, JSON.stringify(r.data));
+    check("...and no feed row is written for a no-op",
+      rows(db, "SELECT id FROM activity WHERE kind = 'model_assigned'").length === 2,
+      JSON.stringify(rows(db, "SELECT kind, subject, n FROM activity WHERE kind = 'model_assigned'")));
+
+    // An empty model is a real answer, and it has to be asked for: /edit once
+    // posted the name under the wrong key and this took the model off thirteen
+    // coasters while reporting a successful split.
+    r = await call(db, "POST", "/api/admin/models/assign",
+      { cookie, body: { ids: [61], to: "Arrow Looper" } });
+    check("a model under the wrong key is refused, not read as a wipe", r.status === 400,
+      r.status + " " + JSON.stringify(r.data));
+    check("...and nothing moved",
+      rows(db, "SELECT id FROM coasters WHERE model = 'Arrow Looper'").length === 3);
+    r = await call(db, "POST", "/api/admin/models/assign",
+      { cookie, body: { ids: [61], model: "", clear: true } });
+    check("asking for it takes the model off, and stores NULL rather than ''",
+      r.status === 200 && r.data.moved === 1
+      && rows(db, "SELECT id FROM coasters WHERE model IS NULL").some((x) => x.id === 61),
+      JSON.stringify(r.data));
+
+    // The maker rides in on the same call: these rows are missing both, and
+    // Carter fills both in one pass.
+    r = await call(db, "POST", "/api/admin/models/assign",
+      { cookie, body: { ids: [63], model: "Vekoma Looper", manu: "Vekoma Rides" } });
+    check("a maker can be written with the model",
+      r.status === 200 && r.data.manu === "Vekoma Rides"
+      && rows(db, "SELECT manu, model FROM coasters WHERE id = 63")[0].manu === "Vekoma Rides",
+      JSON.stringify(rows(db, "SELECT manu, model FROM coasters WHERE id = 63")));
+    // An empty maker box says nothing about the maker; it does not erase one.
+    r = await call(db, "POST", "/api/admin/models/assign",
+      { cookie, body: { ids: [63], model: "Vekoma Looper", manu: "" } });
+    check("...and an empty maker leaves the one it had",
+      rows(db, "SELECT manu FROM coasters WHERE id = 63")[0].manu === "Vekoma Rides");
+
+    r = await call(db, "POST", "/api/admin/models/assign", { cookie, body: { ids: [], model: "X" } });
+    check("no coasters is a 400", r.status === 400);
+    r = await call(db, "POST", "/api/admin/models/assign", { body: { ids: [61], model: "X" } });
+    check("moving rides between models needs an admin", r.status === 401);
+  }
+
+  // ---- the models queue's set-aside ----------------------------------------
+  {
+    const db = freshDb();
+    db.exec(MIGRATION_017);
+    db.exec(MIGRATION_017);
+    const cookie = await signedUp(db, "mtriage@example.com", "Mt");
+    db.prepare("UPDATE accounts SET is_admin = 1").run();
+
+    let r = await call(db, "POST", "/api/admin/models/skipped", { cookie, body: { ids: [1, 2] } });
+    check("setting rides aside", r.status === 200 && r.data.on === true);
+    r = await call(db, "GET", "/api/admin/models/skipped", { cookie });
+    check("...and reading them back", r.data.ids.sort().join() === "1,2", JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/admin/models/skipped", { cookie, body: { ids: [1], on: false } });
+    r = await call(db, "GET", "/api/admin/models/skipped", { cookie });
+    check("...putting one back leaves the other", r.data.ids.join() === "2", JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/admin/models/skipped");
+    check("the models queue needs an admin", r.status === 401);
+
+    // Before the migration: the read answers, the write names the file.
+    const old = freshDb();
+    const c2 = await signedUp(old, "pre17@example.com", "Pre");
+    old.prepare("UPDATE accounts SET is_admin = 1").run();
+    r = await call(old, "GET", "/api/admin/models/skipped", { cookie: c2 });
+    check("no migration yet: the read is empty, not an error",
+      r.status === 200 && r.data.ids.length === 0 && /017/.test(r.data.need || ""),
+      JSON.stringify(r.data));
+    r = await call(old, "POST", "/api/admin/models/skipped", { cookie: c2, body: { ids: [1] } });
+    check("no migration yet: the write is a 503 naming the file",
+      r.status === 503 && /017-model-triage\.sql/.test(r.data.error || ""),
+      r.status + " " + JSON.stringify(r.data));
+  }
+
+  // ---- curation stays out of the feed ---------------------------------------
+  //
+  // Renaming a model, moving rides between models, building or deleting a
+  // category: recorded, and not published. A tidying session is dozens of them
+  // and they buried what /changes is for. (Carter, 2026-09-20.)
+  {
+    const db = freshDb();
+    const cookie = await signedUp(db, "feed@example.com", "Fe");
+    db.prepare("UPDATE accounts SET is_admin = 1").run();
+    await call(db, "POST", "/api/admin/models/assign", { cookie, body: { ids: [1], model: "Hyper" } });
+    await call(db, "POST", "/api/admin/models/rename", { cookie, body: { from: "Hyper", to: "Giga" } });
+    await call(db, "POST", "/api/clones", { cookie, body: { name: "Twins", ids: [1, 2] } });
+
+    check("all of it is recorded",
+      rows(db, "SELECT kind FROM activity WHERE kind IN ('model_assigned','model_renamed','clone_set')")
+        .length === 3);
+    const r = await call(db, "GET", "/api/activity");
+    check("...and none of it reaches the feed",
+      !r.data.events.some((e) => /^clone_|^model_/.test(e.kind)),
+      JSON.stringify(r.data.events.map((e) => e.kind)));
+    check("...while what the feed is for still does",
+      r.data.events.length > 0 && r.data.events.every((e) => e.kind === "user_added"),
+      JSON.stringify(r.data.events.map((e) => e.kind)));
   }
 
   // The window where the code is live and 013 is not.

@@ -989,10 +989,27 @@ async function recordCredits(env, slug, { rides, coasters, newCredits }) {
   });
 }
 
+// Curation is recorded and not published. Renaming a model, merging two
+// spellings of one, moving a handful of rides between them, building or
+// deleting a category: every one of those is Carter tidying the shared list,
+// and a tidying session is dozens of them. They buried what /changes is for —
+// somebody logged rides, a coaster was added, a rider joined — under a column
+// of housekeeping nobody reads. (Carter, 2026-09-20: "remove all the category
+// changes from /changes it's a lot of clutter", "and all the model name
+// changes".)
+//
+// Excluded in the QUERY, not in the page: filtering after the LIMIT would let
+// a curation session eat all 300 rows and leave the feed looking empty. The
+// rows stay in `activity` — they are the record of what changed and when, and
+// the /qc and admin panes can still read them.
+const FEED_HIDDEN = ["clone_set", "clone_removed",
+                     "model_renamed", "model_merged", "model_assigned"];
 async function getActivity(env, limit) {
   const { results } = await env.DB.prepare(
-    "SELECT id, at, actor, kind, subject, n, detail FROM activity ORDER BY at DESC, id DESC LIMIT ?"
-  ).bind(limit).all();
+    "SELECT id, at, actor, kind, subject, n, detail FROM activity " +
+    "WHERE kind NOT IN (" + FEED_HIDDEN.map(() => "?").join(",") + ") " +
+    "ORDER BY at DESC, id DESC LIMIT ?"
+  ).bind(...FEED_HIDDEN, limit).all();
   const names = await env.DB.prepare("SELECT slug, name FROM users").all();
   const by = {};
   for (const u of names.results) by[u.slug] = u.name;
@@ -2302,6 +2319,41 @@ export default {
         const rec = src && recordAlias(env, to, src.name, "merge");
         if (rec) batch.unshift(rec);
         await env.DB.batch(batch);
+
+        // Everything else keyed by the coaster that just disappeared.
+        //
+        // The merge moved the rides and the aliases and nothing else, so a
+        // merged coaster silently fell out of its category and out of every
+        // ranking holding it. Carter merged Goliath (Fiesta Texas) into
+        // Chupacabra and the Batman clones category was left showing "#137" —
+        // an id with no coaster behind it — while Chupacabra inherited
+        // nothing. (2026-09-20.) Rankings were worse and quieter: the row
+        // survives pointing at an id nothing can resolve, so the ride just
+        // stops appearing in the list.
+        //
+        // UPDATE OR IGNORE, then DELETE, one table at a time. OR IGNORE is
+        // what decides a collision: the survivor may already be in a category
+        // or already ranked by that rider, and then ITS row wins and the dead
+        // one is dropped rather than the update failing. Each table gets its
+        // own try because several of them belong to migrations a database may
+        // not have run yet, and a merge must not fail over a table that is not
+        // there.
+        const MERGE_CARRIES = [
+          ["rankings", "coaster_id"],
+          ["clone_members", "coaster"],
+          ["rider_category_members", "coaster"],
+          ["category_skipped", "coaster"],
+          ["model_skipped", "coaster"],
+        ];
+        for (const [table, col] of MERGE_CARRIES) {
+          try {
+            await env.DB.batch([
+              env.DB.prepare("UPDATE OR IGNORE " + table + " SET " + col + " = ? WHERE " + col + " = ?")
+                .bind(to, from),
+              env.DB.prepare("DELETE FROM " + table + " WHERE " + col + " = ?").bind(from),
+            ]);
+          } catch (e) { /* that table is not in this database yet */ }
+        }
         const dst = await env.DB.prepare("SELECT name, park FROM coasters WHERE id = ?").bind(to).first();
         await recordActivity(env, "coaster_merged", {
           subject: dst ? dst.name : null,
@@ -2375,6 +2427,44 @@ export default {
         return json({ models: results, blank: (blank && blank.n) || 0 });
       }
 
+      // The models queue's other answer: "I looked at this one and there is no
+      // model to give it". Same shape and the same reasoning as
+      // category_skipped above — a table of decisions, so a coaster added
+      // tomorrow is in the queue by doing nothing, and one that is given a
+      // model later leaves it without anything having to tidy up.
+      if (request.method === "GET" && path === "/api/admin/models/skipped") {
+        try {
+          const { results } = await env.DB.prepare(
+            "SELECT coaster FROM model_skipped").all();
+          return json({ ids: results.map((r) => r.coaster) });
+        } catch (e) {
+          // Before the migration: nothing is set aside, which is true, and the
+          // pane still works — the queue is just longer than it needs to be.
+          return json({ ids: [], need: "017-model-triage.sql" });
+        }
+      }
+
+      if (request.method === "POST" && path === "/api/admin/models/skipped") {
+        const b = await request.json();
+        const ids = Array.from(new Set((Array.isArray(b && b.ids) ? b.ids : [])
+          .map((x) => Number(x)).filter((x) => Number.isInteger(x) && x > 0))).slice(0, 500);
+        if (!ids.length) return err(400, "which coasters?");
+        const marks = ids.map(() => "?").join(",");
+        try {
+          if (b && b.on === false) {
+            await env.DB.prepare(
+              "DELETE FROM model_skipped WHERE coaster IN (" + marks + ")").bind(...ids).run();
+          } else {
+            await env.DB.batch(ids.map((id) => env.DB.prepare(
+              "INSERT OR REPLACE INTO model_skipped (coaster,at) VALUES (?,datetime('now'))")
+              .bind(id)));
+          }
+        } catch (e) {
+          return err(503, "run migrations/017-model-triage.sql first");
+        }
+        return json({ ok: true, n: ids.length, on: !(b && b.on === false) });
+      }
+
       // Rename one model, or merge it into another by renaming it to a name
       // that already exists. One statement either way — the only difference is
       // whether the target was already there, which is what the answer says.
@@ -2396,6 +2486,92 @@ export default {
           { subject: to, n: had.n, detail: { from: from } });
         return afterWrite(ctx, env, json({ ok: true, from, to, moved: had.n, merged,
                                            total: had.n + ((into && into.n) || 0) }));
+      }
+
+      // Move a handful of coasters onto a model, rather than the whole string
+      // at once.
+      //
+      // Rename above answers "every carrier of this name is the same thing and
+      // should move together". This is the other half, and it is the bigger
+      // half: the three Boomerangs somebody typed as "Vekoma Boomerang" while
+      // the other ten say "Boomerang", and the 545 coasters carrying no model
+      // at all, which can only ever be sorted a handful at a time. Same UPDATE,
+      // a different WHERE.
+      if (request.method === "POST" && path === "/api/admin/models/assign") {
+        const b = await request.json();
+        const ids = Array.from(new Set((Array.isArray(b && b.ids) ? b.ids : [])
+          .map((x) => Number(x)).filter((x) => Number.isInteger(x) && x > 0))).slice(0, 500);
+        if (!ids.length) return err(400, "which coasters?");
+        // An empty model is a real answer — "that is not a model, take it off"
+        // — and it is stored as NULL rather than as a blank string: every read
+        // tests `IS NULL OR TRIM(model) = ''` and there is no reason to keep
+        // both shapes in the column.
+        //
+        // But it has to be ASKED for. A caller that sends the name under the
+        // wrong key, or forgets the field, is not saying "erase it", and this
+        // read that as a wipe: /edit's split-by-maker posted `to` instead of
+        // `model` and took the model off thirteen Arrow coasters while
+        // reporting a successful split. An empty model without `clear` is a
+        // 400 now, so that mistake cannot be silent.
+        const to = String((b && b.model) || "").trim().replace(/\s+/g, " ").slice(0, 60);
+        if (!to && !(b && b.clear === true)) {
+          return err(400, "no model given — pass clear:true to take the model off instead");
+        }
+        // The maker, optionally, in the same write. 544 of the 545 rides
+        // carrying no model carry no manufacturer either — they are rows
+        // nobody has filled in yet rather than rows missing one field — and
+        // Carter is filling both in one pass (2026-09-20: "prob will do
+        // manufacturer & model then maybe second pass at a later date to do
+        // actual stats"). Two calls per ride would mean two feed rows and two
+        // chances to half-save a ride.
+        //
+        // Only ever SET, never cleared: an empty box is "I am not saying
+        // anything about the maker", not "delete what is there". Taking a
+        // maker off is the Coasters tab's job, where it is the thing you are
+        // looking at.
+        const manu = String((b && b.manu) || "").trim().replace(/\s+/g, " ").slice(0, 60);
+        const marks = ids.map(() => "?").join(",");
+        const had = await env.DB.prepare(
+          "SELECT COUNT(*) AS n FROM coasters WHERE id IN (" + marks + ")").bind(...ids).first();
+        if (!had || !had.n) return err(404, "no such coaster");
+        // What is about to CHANGE, not what was asked for: ticking a row that
+        // already carries the model is the normal way to use a list like this,
+        // and counting it as moved would make the answer a lie.
+        const diff = await env.DB.prepare(
+          "SELECT COUNT(*) AS n FROM coasters WHERE id IN (" + marks + ") " +
+          "AND COALESCE(model,'') <> ?").bind(...ids, to).first();
+        const into = to ? await env.DB.prepare(
+          "SELECT COUNT(*) AS n FROM coasters WHERE model = ?").bind(to).first() : null;
+        // The name they came off, for the feed — but only when they all came
+        // off the SAME one. Half a dozen models collapsing into one has no
+        // "from" to name, and inventing one would be wrong.
+        const { results: were } = await env.DB.prepare(
+          "SELECT DISTINCT COALESCE(model,'') AS m FROM coasters WHERE id IN (" + marks + ")")
+          .bind(...ids).all();
+        const from = were.length === 1 ? (were[0].m || null) : null;
+        await env.DB.prepare(
+          "UPDATE coasters SET model = ?" + (manu ? ", manu = ?" : "") +
+          " WHERE id IN (" + marks + ")")
+          .bind(...(manu ? [to || null, manu] : [to || null]), ...ids).run();
+        const moved = (diff && diff.n) || 0;
+        const already = (into && into.n) || 0;
+        // Nothing changed — every row already carried it. No feed line for a
+        // no-op, and no repo-dispatch either; the answer still says what it
+        // found.
+        if (moved || manu) {
+          await recordActivity(env, "model_assigned", {
+            subject: to || null, n: moved,
+            detail: { from: from, to: to || null, ids: ids, manu: manu || null,
+                    created: !!to && !already },
+          });
+        }
+        // A maker written on its own is still a change worth flushing, even
+        // when every ride already carried the model.
+        const touched = moved || (manu ? had.n : 0);
+        const out = json({ ok: true, model: to || null, manu: manu || null, picked: had.n,
+                           moved: moved, created: !!to && !already,
+                           total: to ? already + moved : 0 });
+        return touched ? afterWrite(ctx, env, out) : out;
       }
 
       // Rename a park, and every coaster standing in it, in one move.

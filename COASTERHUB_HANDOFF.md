@@ -2255,6 +2255,113 @@ on its own arrow each time; a member row holds at 341px and walks 3→2→1→0,
 
 ---
 
+### Two queues in /edit, and the models pane that feeds them (2026-09-20)
+
+Carter, mid-session: *"update /edit so I can view a list of active models for each ride and
+sort rides between models — I want them to be more consistent"*, then *"I don't think we need
+new panes there are a bunch already… just within models I want to see a list of coasters not
+yet assigned models then in triage we can sort by model"*, then *"I like the triage pane how
+it's specific to categories but we need the same for models"*.
+
+**The tab bar is three groups now**, not one row of five: `Coasters Parks` · `Categories
+Triage` · `Models Triage`. Two panes are called Triage on purpose; each sits beside the thing
+it is a queue for, which is what tells them apart.
+
+**Models.** The list is **alphabetical** (it was by count, which buried the twelve-strong
+families worth curating under forty kiddie coasters and made a name impossible to look up),
+with **No model yet** pinned to the top as a row of its own — it is the biggest group in the
+database, and everything this pane is for comes out of it. Open a model and you get:
+
+- what it is — *14 rides · 11 still operating · 3 defunct · from 2 makers*, because a name
+  carried only by rides that have all been torn down is history, not somewhere to file the
+  next new coaster;
+- **rename**, which takes every carrier at once and merges when the name exists (unchanged);
+- **the rides carrying it, with tick boxes and a filter**, each saying its maker, whether it
+  is still standing, and which category already holds it. Tick some, type a name, **Move**.
+  That is the half of the tidying a rename cannot do: the three Boomerangs somebody typed as
+  "Vekoma Boomerang", and the 545 rides carrying nothing, which can only be sorted a handful
+  at a time;
+- **Split it by maker**, when more than one maker built it. Carter: *"I have Looper and I want
+  to break it into Arrow Looper Vekoma Looper maybe just a plain Looper based on
+  manufacturer"*. One box per maker, prefilled `<Maker> <Model>` through a short-name table
+  (`MAKER_SHORT`: Arrow Dynamics → Arrow, Bolliger & Mabillard → B&M — the abbreviations the
+  database's own model names already use), and **a box left at the model's own name keeps
+  that maker where it is**, which is how one group stays plain "Looper". Looper is 21 rides
+  and six makers; it splits 13 Arrow / 4 Vekoma / 4 left alone.
+
+`POST /api/admin/models/assign` is what moves them — `{ids, model, manu?, clear?}`, one
+`UPDATE`, capped at 500 ids. It reports what actually CHANGED rather than what was asked for,
+because ticking a ride that already carries the model is the normal way to use a list of them.
+
+**Categories → Triage** gained **By model**: the queue grouped under a sticky header per
+model carrying the fraction Carter asked for — *Suspended Looping Coaster 9/14 · 4 here · in
+Suspended Looping Coaster · 1 set aside*. The fraction counts every ride carrying the model,
+not the ones in this list, because what is left in the queue is exactly what the fraction is
+about, and the models nearest to done sort first: nine of twelve already filed is most of the
+answer for the other three. The coaster pane says the same sentence for the one ride you are
+on.
+
+**Models → Triage** is the same pane asking the other question, and `migrations/017-model-triage.sql`
+(`model_skipped`) gives it the third state, exactly as 015 did for categories: has a model /
+set aside / not looked at, and the last one is the queue. Before the migration the read
+answers empty and the write 503s naming the file.
+
+It groups **by park**, not by maker — the obvious mirror of the category queue, and it groups
+nothing: **544 of the 545 rides with no model carry no maker either.** They are rows nobody
+has filled in yet rather than rows missing one field, which is Carter's own description of
+them: *"I just haven't assigned stats yet so prob will do manufacturer & model then maybe
+second pass at a later date to do actual stats"*. So the pane takes **manufacturer and model
+together, in one save** (the same assign endpoint, so a ride cannot end up half-written), and
+leads with **the rest of the park** — one lookup answers fifteen rides at Carowinds — then
+what the maker builds, as one-click buttons, then the same name elsewhere, which carries its
+maker across too. Save, set aside and every suggestion button all move straight on to the
+next, the way the category queue does.
+
+### /changes is for what riders did, not for curation (2026-09-20)
+
+Carter: *"remove all the category changes from /changes it's a lot of clutter"*, and *"and all
+the model name changes"*. `FEED_HIDDEN` in `getActivity` drops `clone_set`, `clone_removed`,
+`model_renamed`, `model_merged` and `model_assigned` **in the query, not in the page** —
+filtering after the `LIMIT` would let one tidying session eat all 300 rows and leave the feed
+looking empty. The rows are still written: they are the record of what changed and when.
+
+### A merge dropped everything except rides and aliases (2026-09-20)
+
+Carter: *"I just merged goliath at six flags fiesta texas into chupacabra but chupacabra
+didn't inherit the batman clones category"*. `/api/merge` moved `rides` and `coaster_aliases`
+and stopped, so every other table keyed by the dead id was left pointing at a row the same
+merge had deleted — the category editor showed a member called **#137**, and, quieter and
+worse, **rankings**: the row survives naming an id nothing resolves, so the ride simply stops
+appearing in that rider's list.
+
+It now carries `rankings`, `clone_members`, `rider_category_members`, `category_skipped` and
+`model_skipped`, each as `UPDATE OR IGNORE` then `DELETE`, each in its own try so a merge
+never fails over a table a database has not migrated yet. OR IGNORE is what decides a
+collision: if the survivor is already in a category, or already ranked by that rider, **its own
+row wins** and the dead one is dropped.
+
+`migrations/018-merge-orphans.sql` repairs what earlier merges already broke, and the answer
+is already written down — every merge records `{"from":<id>,"to":<id>}` in `activity`, so the
+id a dead reference should have become is recoverable. Run over three times for A→B→C chains;
+anything still dangling afterwards is deleted, because a membership or a ranking naming a
+coaster that does not exist can never be rendered. Dry-run against `node:sqlite`: #137 becomes
+#200 in both tables, and a second run changes nothing.
+
+**One guard came out of this session's own mistake.** `/edit`'s split-by-maker posted the
+model under the key `to` instead of `model`, and the endpoint read the missing field as "take
+the model off these" — thirteen Arrow coasters lost their model while the toast reported a
+successful split. An empty model now needs `clear:true`; without it, it is a 400. A field that
+is absent is not an instruction to erase.
+
+### Two smaller things Carter asked for the same afternoon
+
+- **The green "Coaster Hub" pill is off the homepage hero.** It said the site's name directly
+  under a header that says it and directly above a headline and a paragraph that both say it
+  again. `.hero .badge` stays — it is the rider switcher on the per-rider pages.
+- **The footer says Edit where it said QC**, on all fourteen pages. `/qc` still exists.
+
+---
+
 ## Open tasks
 
 ### 1. Full editing of past days in `/log` — **requested, not built**

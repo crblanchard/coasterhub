@@ -39,14 +39,18 @@ one, a scratch copy starts writing to the real site.
 
 ### 3. Build the schema
 
-Five files, in this order. A brand new D1 has nothing in it, so this is what
-makes the tables:
+In this order. A brand new D1 has nothing in it, so this is what makes the
+tables:
 
 ```sh
-for f in 000-base-schema 003-accounts 007-password-resets 010-follows 012-clone-groups; do
+for f in 000-base-schema 003-accounts 007-password-resets 010-follows 012-clone-groups \
+         013-rider-categories 014-claimed-accounts 015-category-triage 017-model-triage; do
   npx wrangler d1 execute coasterhub-staging --remote --file=migrations/$f.sql
 done
 ```
+
+`018-merge-orphans` is a repair, not a shape: it has nothing to fix in a fresh
+database, and running it there is a no-op rather than an error.
 
 **Do not run `002` or `008`** against a fresh database. `000` already makes the
 `activity` table and the profile columns, and the rest of those two files is a
