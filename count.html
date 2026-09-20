@@ -305,8 +305,8 @@ var LOG=[];          // [{i?, c, d, num?, n?, name, park, loc}]
 var MODE='rides';    // 'rides' = dated ride log, 'credits' = credit log
 var DATED=false;     // any dates at all?
 var view='day', page=0;
-// Cards per page: days newest-first, parks A-Z.
-var DAYS=30, PARKS=40;
+// Day cards per page, newest first.
+var DAYS=30;   // day cards per page; the park list is not paged at all
 var COMBINED=false;  // true on /count with no rider selected = everyone
 // Every coaster the shared list has, grouped by park, and which of them are
 // yours. The park view needs both: a tick means nothing on a list where
@@ -497,6 +497,18 @@ function wire(){
   document.getElementById('v_day').onclick=function(){setView('day');};
   document.getElementById('v_list').onclick=function(){setView('list');};
   document.getElementById('v_parks').onclick=function(){setView('parks');};
+  // `toggle` does not bubble, so this listens in the CAPTURE phase — a
+  // capturing listener on an ancestor still sees an event that never bubbles.
+  // That catches a mouse click, Enter on a focused summary and a programmatic
+  // open alike, which a click handler on the summary would not.
+  document.getElementById('parkview').addEventListener('toggle', function(e){
+    var d=e.target;
+    if(!d || d.tagName!=='DETAILS' || !d.open) return;
+    var inner=d.querySelector('.inner');
+    if(!inner || inner.dataset.filled) return;
+    inner.dataset.filled='1';
+    inner.innerHTML=parkBody(d.getAttribute('data-park'));
+  }, true);
 }
 function setView(v){
   view=v; page=0;
@@ -638,18 +650,25 @@ function life(r){
     + '<span class="yrs">'+years+'</span></span>';
 }
 
+// What each park card needs to build its body, kept aside so the bodies can be
+// built later — see the toggle handler in wire().
+var PARKCARD={};
+
 function renderParks(rows){
   var byPark={};
   rows.forEach(function(r){
-    var k=r.park||'—';
+    var k=r.park||'\u2014';
     (byPark[k]=byPark[k]||[]).push(r);
   });
   var keys=Object.keys(byPark).sort(function(a,b){ return a.localeCompare(b); });
-  var total=keys.length, start=page*PARKS, slice=keys.slice(start,start+PARKS);
-  document.getElementById('count').innerHTML='Showing <b>'+slice.length+'</b> of '
-    +total.toLocaleString()+' park'+(total===1?'':'s');
+  var total=keys.length;
+  // Every park in one scroll (Carter, 2026-09-20). 247 of them was seven pages
+  // of forty, and paging through an alphabetical list to reach the S's is worse
+  // than scrolling to them. There is no pager on this view at all now.
+  document.getElementById('count').innerHTML='<b>'+total.toLocaleString()+'</b> park'+(total===1?'':'s');
 
-  document.getElementById('parkview').innerHTML=slice.map(function(park){
+  PARKCARD={};
+  document.getElementById('parkview').innerHTML=keys.map(function(park){
     var list=byPark[park];
     // Laps per coaster. There used to be a first-ridden date on each row too,
     // and nobody could tell what it meant: on a park card the obvious reading
@@ -665,7 +684,7 @@ function renderParks(rows){
     var days=[...new Set(list.map(function(r){return r.d;}).filter(Boolean))];
 
     // EVERY coaster the park has, not only the ones somebody has ridden. That
-    // is what makes a tick mean something and what puts the 13 in "11/13".
+    // is what makes a tick mean something and what the two numbers count.
     // Defunct ones are in the total too, for now (Carter, 2026-09-20) — they
     // are credits you either have or will never get.
     //
@@ -673,11 +692,8 @@ function renderParks(rows){
     // up, so that card falls back to what the log itself remembers.
     var all = BYPARK[park] || uniq;
     var mine = MINE ? all.filter(function(r){ return MINE[r.c]; }).length : null;
+    PARKCARD[park]={ all:all, laps:laps };
 
-    // Everyone's parks at once: visits, rides and laps are sums across six
-    // people and mean nothing as a number — "3 visits" is not a trip anybody
-    // took and "×3" is not a re-ride. So the global view says what the park
-    // has, and — once it knows who you are — how much of it is yours.
     // What is still standing, and how many of the park you have. Two lines
     // rather than a fraction (Carter, 2026-09-20), which means the lower number
     // is sometimes the bigger one: at Knott's it reads 11 operating, 13 ridden,
@@ -689,33 +705,43 @@ function renderParks(rows){
     var opN = all.filter(function(r){ return !r.cl; }).length;
     var what = '<span class="nl nop">'+opN+' operating</span>'
       + (mine!=null ? '<span class="nl nrid'+(mine?'':' none')+'">'+mine+' ridden</span>' : '');
-    return '<details class="day"><summary>'
+    // The body is deliberately EMPTY here. Every park at once means 247 cards,
+    // and filling each one costs its whole coaster list — about 1,360 rows of
+    // DOM on the page whose entire point is being quick to scroll, nearly all
+    // of which nobody will ever open. parkBody() fills one when it is opened.
+    return '<details class="day" data-park="'+esc(park)+'"><summary>'
       +'<span class="pmain">'
         +'<span class="dt">'+esc(park)+'</span>'
         +'<span class="pk">'+esc((all[0]&&all[0].loc)||list[0].loc||'')
-          +((days.length && !COMBINED)?' <span style="opacity:.75">· '+days.length+' visit'+(days.length===1?'':'s')+'</span>':'')
+          +((days.length && !COMBINED)?' <span style="opacity:.75">\u00b7 '+days.length+' visit'+(days.length===1?'':'s')+'</span>':'')
         +'</span>'
       +'</span>'
       +'<span class="n">'+what+'</span>'
-      +'</summary><div class="inner">'
-      + (known(park)
-          ? '<div class="parklink"><a href="'+esc(CoasterHub.parkHref(park))+'">'
-            +'Everything at '+esc(park)+' &rarr;</a></div>'
-          : '')
-      + all.map(function(r){
-          var mk=CoasterHub.maker(r);
-          var got = MINE ? !!MINE[r.c] : !!laps[r.c];
-          return '<div class="row'+(MINE?(got?' got':' miss'):'')+'">'
-            +(MINE?'<span class="tick">'+(got?'✓':'')+'</span>':'')
-            +'<span class="cn">'+clink(r)+'</span>'
-            +((laps[r.c]>1 && !COMBINED)?'<span class="lap">×'+laps[r.c]+'</span>':'')
-            +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
-            +life(r)
-            +'</div>';
-        }).join('')
-      +'</div></details>';
+      +'</summary><div class="inner"></div></details>';
   }).join('') || '<p class="lead">No parks match those filters.</p>';
-  pager(total,PARKS);
+  document.getElementById('pager').innerHTML='';
+}
+
+// One park's coasters, built the first time that park is opened.
+function parkBody(park){
+  var card=PARKCARD[park];
+  if(!card) return '';
+  var laps=card.laps;
+  return (known(park)
+      ? '<div class="parklink"><a href="'+esc(CoasterHub.parkHref(park))+'">'
+        +'Everything at '+esc(park)+' &rarr;</a></div>'
+      : '')
+    + card.all.map(function(r){
+        var mk=CoasterHub.maker(r);
+        var got = MINE ? !!MINE[r.c] : !!laps[r.c];
+        return '<div class="row'+(MINE?(got?' got':' miss'):'')+'">'
+          +(MINE?'<span class="tick">'+(got?'\u2713':'')+'</span>':'')
+          +'<span class="cn">'+clink(r)+'</span>'
+          +((laps[r.c]>1 && !COMBINED)?'<span class="lap">\u00d7'+laps[r.c]+'</span>':'')
+          +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
+          +life(r)
+          +'</div>';
+      }).join('');
 }
 function pager(total,per){
   var pages=Math.ceil(total/per)||1;
