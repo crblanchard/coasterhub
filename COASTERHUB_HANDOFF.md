@@ -440,6 +440,28 @@ run a no-op.
 rename path above was untestable locally and *looked* fine, because every current name still
 matched. That is exactly the class of thing this harness exists to catch.
 
+### A coaster's year is its opening date, and is not typed (2026-09-20)
+
+**`/edit` has no Year box.** `yr` is the opening year and nothing else: across the 572 rows
+carrying both, it has never once disagreed with the year in `opened`. A second box for the same
+fact is a second place to get it wrong, and it had already gone wrong — a coaster could sit
+flagged "incomplete" for a missing year while showing a full opening date right beside it.
+`readForm()` derives `yr` from Opened now, the way `/add` has always done, and sends it on
+every save, so clearing the date clears the year with it rather than leaving one behind that
+belongs to nothing. `STAT_FIELDS` asks for `opened` rather than `yr` for the same reason: the QC
+flag should point at a field you can actually fill in.
+
+**The column is labelled Opened**, on `/count`'s full list and on `/qc`. "Year" said nothing
+about which year.
+
+### Tried and taken out: tick boxes on a park page (2026-09-20)
+
+`/park/<park>` briefly carried a checkbox per coaster that wrote an undated credit. Built,
+shipped, and reverted the same day — Carter's call, he did not like it. The mechanics all
+worked (`POST /api/rides` with `d:null`, a plain tick rather than a disabled box for coasters
+with dated rides, counts patched instead of re-fetched); it was the idea he did not want, so
+don't rebuild it as a bug fix. The commit is in the history if any of it is ever wanted.
+
 ### The QC table is `/qc`, and the count's everyone view is "Database" (2026-09-20)
 
 `database.html` is `qc.html`, and `/database` 301s to `/qc` — after the global count's

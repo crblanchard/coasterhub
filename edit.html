@@ -117,14 +117,18 @@
     ["manu","Manufacturer","list"], ["model","Model","list"],
     ["h","Height (ft)","num"], ["s","Speed (mph)","num"], ["l","Length (ft)","num"],
     ["inv","Inversions","int"], ["dur","Duration (sec)","int"], ["laps","Laps","int"],
-    ["yr","Year","int"], ["opened","Opened (YYYY-MM-DD)","text"], ["closed","Closed (YYYY-MM-DD)","text"]
+    // No Year box. `yr` is the opening year and nothing else — across the 572
+    // rows that carry both it has never once disagreed with `opened`, so it is
+    // a second place to type the same fact and a second place to get it wrong.
+    // readForm() derives it from Opened, the way /add already does.
+    ["opened","Opened (YYYY-MM-DD)","text"], ["closed","Closed (YYYY-MM-DD)","text"]
   ];
   function fieldKind(k){ for (var i=0;i<FIELDS.length;i++) if (FIELDS[i][0]===k) return FIELDS[i][2]; return "text"; }
   // The specs a coaster row is expected to carry. Everything else (model, maker,
   // duration) is genuinely optional or not published for a lot of rides, so it
   // stays out of the count rather than marking half the database as unfinished.
   var STAT_FIELDS = [["type","type"],["h","height"],["s","speed"],["l","length"],
-                     ["inv","inversions"],["yr","year"]];
+                     ["inv","inversions"],["opened","opened"]];
   function statsHave(c){
     return STAT_FIELDS.filter(function(f){ return c[f[0]]!=null && c[f[0]]!==""; });
   }
@@ -892,6 +896,11 @@
       var k=inp.getAttribute('data-k'), v=(inp.value||"").trim(), kind=fieldKind(k);
       if (v==="") body[k]=null; else if (kind==="int") body[k]=parseInt(v,10); else if (kind==="num") body[k]=Number(v); else body[k]=v;
     });
+    // The opening YEAR is not typed, it is read off the opening DATE — the same
+    // rule /add uses. Sent on every save so a row that had one and lost its
+    // date does not keep a year that now belongs to nothing.
+    var opened = body.opened;
+    body.yr = (opened && /^\d{4}/.test(opened)) ? Number(String(opened).slice(0,4)) : null;
     return body;
   }
   async function saveCoaster(){
