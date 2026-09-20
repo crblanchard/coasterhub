@@ -277,6 +277,14 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
 .ev .tx .sub{color:var(--accent2);font-weight:600}
 /* Which park the coaster is at — context, not the subject, so it stays quiet. */
 .ev .tx .at{color:var(--muted)}
+/* Every name in a sentence is a way in to what it names — a rider, a park, a
+   coaster. The link takes the colour of whatever it sits in rather than turning
+   the feed blue: the name is already styled by what it IS (a subject is teal, an
+   actor is bold), and the same rule keeps the day cards on /count readable.
+   Scoped to the anchor inside the sentence, not to .sub or b, which have rules
+   of their own above and would lose properties this one repeated. */
+.ev .tx a{color:inherit;text-decoration:none}
+.ev .tx a:hover{color:var(--accent2);text-decoration:underline}
 .ev .when{flex:none;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;
   white-space:nowrap;margin-top:2px}
 .feed .empty{color:var(--muted);padding:26px 0}

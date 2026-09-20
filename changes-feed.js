@@ -69,20 +69,65 @@
   // it ended up as, so the park is looked up from the coaster list instead. A
   // merge writes that id as `to`; the backfill wrote it as `id`.
   var PARK_BY_ID = null;   // filled in once the coaster list arrives, see load()
-  function parkOf(e){
+  // Which park names are real ones, and which coaster names name exactly one
+  // coaster. Both only so a name can be turned into a link it will not 404 on
+  // — see the linking block below. Filled in the same place as PARK_BY_ID.
+  var PARKS = {}, COASTER_PARK = {};
+  function parkName(e){
     var d = e.detail || {};
-    var park = d.park || (PARK_BY_ID && PARK_BY_ID[d.to != null ? d.to : d.id]);
-    return park ? ' <span class="at">(' + esc(park) + ')</span>' : '';
+    return d.park || (PARK_BY_ID && PARK_BY_ID[d.to != null ? d.to : d.id]) || null;
+  }
+  function parkOf(e){
+    var park = parkName(e);
+    return park ? ' <span class="at">(' + parkLink(park, esc(park)) + ')</span>' : '';
+  }
+
+  // ---- Every name in a sentence is a way in --------------------------------
+  // A rider goes to their page, a park to the park, a coaster to the coaster
+  // (Carter, 2026-09-20). The hrefs come out of CoasterHub rather than being
+  // spelled here, the same rule every other page follows — see the note on
+  // userPageHref in app.js.
+  //
+  // Anything the feed cannot place keeps saying its name plainly rather than
+  // linking somewhere that 404s. That is not a rare case: an admin write records
+  // no rider, a day out across two parks records "3 parks" where a park name
+  // would go, a deleted coaster no longer has a page, and a coaster cannot be
+  // addressed at all without its park, because the park leads in the URL. None
+  // of them links until the coaster list has landed either — PARKS and
+  // COASTER_PARK are empty before that, and the feed is drawn again when it
+  // arrives.
+  function anchor(u, html){ return u ? '<a href="' + esc(u) + '">' + html + '</a>' : html; }
+  function CH(){ return global.CoasterHub || null; }
+  function riderLink(slug, html){
+    var ch = CH();
+    return (slug && ch && ch.userPageHref) ? anchor(ch.userPageHref(slug, 'profile'), html) : html;
+  }
+  function parkLink(park, html){
+    var ch = CH();
+    return (park && PARKS[park] && ch && ch.parkHref) ? anchor(ch.parkHref(park), html) : html;
+  }
+  // A coaster needs its park, which the events carry in three different places:
+  // `detail.park` on the ones written since the park was thought worth recording,
+  // the coaster list by id for the rest, and — for a removed ride, which records
+  // neither — the name itself, but ONLY when it names one coaster. 93 names in
+  // the database are used at more than one park, and a link to the wrong Wacky
+  // Worm is worse than no link at all.
+  function rideLink(name, park, html){
+    var ch = CH();
+    if (!park && name) park = COASTER_PARK[name] || null;
+    return (name && park && ch && ch.coasterHref) ? anchor(ch.coasterHref(name, park), html) : html;
   }
   
   function sentence(e){
-    var who = e.actorName ? '<b>' + esc(e.actorName) + '</b>' : null;
+    var who = e.actorName ? riderLink(e.actor, '<b>' + esc(e.actorName) + '</b>') : null;
     var d = e.detail || {};
     var sub = e.subject ? '<span class="sub">' + esc(e.subject) + '</span>' : null;
+    // Where the subject of this event IS a coaster, the park it stands at.
+    var park = parkName(e);
   
     if (e.kind === 'rides') {
       var s = (who || 'Someone') + ' logged ' + plural(d.rides || e.n || 0, 'ride');
-      if (sub) s += ' at ' + sub;
+      if (sub) s += ' at ' + parkLink(e.subject, sub);
       if (d.date) s += ' on ' + niceDate(d.date);
       if (d.newCredits) s += ' &mdash; ' + plural(d.newCredits, 'new credit');
       return s;
@@ -102,7 +147,8 @@
       return (who || 'Someone') + ' added ' + plural(n, 'coaster') + ' to their count';
     }
     if (e.kind === 'ride_removed') {
-      return (who || 'Someone') + ' removed a ride' + (sub ? ' of ' + sub : '');
+      return (who || 'Someone') + ' removed a ride'
+        + (sub ? ' of ' + rideLink(e.subject, null, sub) : '');
     }
     if (e.kind === 'ranking') {
       var bits = [];
@@ -115,17 +161,17 @@
       return (who || 'Someone') + ' ' + bits.join(' and ')
         + (d.total ? ' <span class="sub">(' + d.total + ' ranked)</span>' : '');
     }
-    if (e.kind === 'coaster_added')   return (sub || 'A coaster') + ' was added'
-      + (d.park ? ' at ' + esc(d.park) : '');
+    if (e.kind === 'coaster_added')   return (sub ? rideLink(e.subject, park, sub) : 'A coaster')
+      + ' was added' + (d.park ? ' at ' + parkLink(d.park, esc(d.park)) : '');
     if (e.kind === 'coaster_renamed') return (d.from ? esc(d.from) : 'A coaster')
-      + ' was renamed to ' + (sub || 'something else') + parkOf(e);
+      + ' was renamed to ' + (sub ? rideLink(e.subject, park, sub) : 'something else') + parkOf(e);
     if (e.kind === 'coaster_merged'){
       // The live path records the name it merged away as `fromName` and keeps `from`
       // for the id; the backfill put the NAME in `from`. Read both, or 44 rows of
       // history say "A duplicate" when they know exactly what it was called.
       var gone = d.fromName || (typeof d.from === 'string' ? d.from : null);
       return (gone ? esc(gone) : 'A duplicate')
-        + ' was merged into ' + (sub || 'another coaster') + parkOf(e);
+        + ' was merged into ' + (sub ? rideLink(e.subject, park, sub) : 'another coaster') + parkOf(e);
     }
     if (e.kind === 'coaster_deleted') return (sub || 'A coaster') + ' was deleted';
     if (e.kind === 'clone_set'){
@@ -139,9 +185,9 @@
     // A park rename moves every coaster standing in it, so the count is the
     // part worth saying — unlike a coaster rename, where the ride is the story.
     if (e.kind === 'park_renamed') return esc(d.from || 'A park') + ' is now '
-      + (sub || 'something else') + (e.n ? ' — ' + e.n + ' coaster' + (e.n === 1 ? '' : 's') + ' moved' : '');
+      + (sub ? parkLink(e.subject, sub) : 'something else') + (e.n ? ' — ' + e.n + ' coaster' + (e.n === 1 ? '' : 's') + ' moved' : '');
     if (e.kind === 'park_merged') return esc(d.from || 'A park') + ' was merged into '
-      + (sub || 'another park') + (e.n ? ' — ' + e.n + ' coaster' + (e.n === 1 ? '' : 's') + ' moved' : '');
+      + (sub ? parkLink(e.subject, sub) : 'another park') + (e.n ? ' — ' + e.n + ' coaster' + (e.n === 1 ? '' : 's') + ' moved' : '');
     if (e.kind === 'model_merged') return esc(d.from || 'A model') + ' was merged into '
       + (sub || 'another model') + ' \u2014 ' + plural(e.n || 0, 'coaster') + ' moved';
     // Coasters moved onto a model one handful at a time, which is the half of
@@ -152,14 +198,16 @@
         + (d.from ? ' moved from ' + esc(d.from) + ' to ' : ' given the model ') + sub
       : plural(e.n || 0, 'coaster') + ' no longer '
         + ((e.n || 0) === 1 ? 'carries' : 'carry') + ' a model';
-    if (e.kind === 'user_added')      return (sub || 'A rider') + ' joined'
-      + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
-    if (e.kind === 'claimed')         return (sub || 'A rider') + ' created an account'
-      + (e.actor ? ' <span class="sub">/user/' + esc(e.actor) + '</span>' : '');
+    // The rider's name and the address of their page both go to it. Two links
+    // to one place in a sentence of six words, and that is right: whichever of
+    // the two somebody reads as the name of the person, it is the way there.
+    var at = e.actor ? ' ' + riderLink(e.actor, '<span class="sub">/user/' + esc(e.actor) + '</span>') : '';
+    if (e.kind === 'user_added')      return (sub ? riderLink(e.actor, sub) : 'A rider') + ' joined' + at;
+    if (e.kind === 'claimed')         return (sub ? riderLink(e.actor, sub) : 'A rider')
+      + ' created an account' + at;
     if (e.kind === 'user_renamed')    return (sub || 'A rider') + ' is now '
-      + (e.actor ? '<b>' + esc(e.actor) + '</b> <span class="sub">/user/' + esc(e.actor) + '</span>'
-                 : 'somebody else');
-    if (e.kind === 'coaster_edited')  return (sub || 'A coaster') + ' had '
+      + (e.actor ? riderLink(e.actor, '<b>' + esc(e.actor) + '</b>') + at : 'somebody else');
+    if (e.kind === 'coaster_edited')  return (sub ? rideLink(e.subject, park, sub) : 'A coaster') + ' had '
       + plural(e.n || (d.fields || []).length || 1, 'detail') + ' updated';
     return esc(e.kind);
   }
@@ -331,8 +379,16 @@
     // sentences simply stay as they were.
     if (global.CoasterHub && global.CoasterHub.fetchCoasters) {
       global.CoasterHub.fetchCoasters().then(function(res){
-        PARK_BY_ID = {};
-        (res.coasters || []).forEach(function(c){ if (c.park) PARK_BY_ID[c.id] = c.park; });
+        PARK_BY_ID = {}; PARKS = {}; COASTER_PARK = {};
+        (res.coasters || []).forEach(function(c){
+          if (c.park){ PARK_BY_ID[c.id] = c.park; PARKS[c.park] = 1; }
+          if (!c.name) return;
+          // Second sighting of a name means it names two coasters, and a link
+          // built from the name alone would be a coin toss. Null it rather than
+          // letting the last one win.
+          COASTER_PARK[c.name] = Object.prototype.hasOwnProperty.call(COASTER_PARK, c.name)
+            ? null : (c.park || null);
+        });
         if (EVENTS.length) render();
       }).catch(function(){});
     }

@@ -605,12 +605,15 @@ if(!slug){
         // "Anyone can build a list — nothing is locked" dates from before
         // accounts. A claimed rider's list is theirs alone now, so inviting a
         // stranger to start it was a promise the API would refuse to keep.
-        // Each card says what the person reading it can actually do.
+        // Each card says what the person reading it can actually do — and says
+        // nothing at all when the answer is "open it and look", which is what
+        // somebody else's empty list is. "Only Sean can build this one" named a
+        // person to tell a visitor about a rule they were not up against;
+        // an empty card reads the same for everyone now (Carter, 2026-09-20).
         var yours = ME && ME.slug === l.user.slug;
         var seedable = !yours && ME && ME.admin && !l.claimed;
         var why = yours     ? 'Judgment-free zone'
                 : seedable  ? 'Not claimed yet — you can start it for them.'
-                : l.claimed ? 'Only ' + esc(l.user.name) + ' can build this one.'
                 :             '';
         return '<a class="card" href="'+href+'"><div class="hd"><b>'+esc(l.user.name)+'</b><em>not started</em></div>'
           +'<div class="none">No favorites ranked yet.'+(why?'<em>'+why+'</em>':'')+'</div>'
