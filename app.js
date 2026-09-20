@@ -1131,7 +1131,9 @@
     "Counting rides",
     "Tracking stats",
     "Loop-de-looping",
-    "Hitting -2",
+    // A true minus (U+2212), not a hyphen: at hero size a hyphen sits low and
+    // short beside a numeral and reads as a dash rather than a sign.
+    "Hitting \u22122",
     // The ellipses inside this one are Carter's; the mapper below only strips a
     // trailing one, so the internal beats survive and it still ends "1\u2026".
     "3\u2026 2\u2026 1"
