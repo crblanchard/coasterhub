@@ -179,12 +179,54 @@
   .pager button:disabled{opacity:.35;cursor:default}
   #loading{color:var(--muted);padding:40px 0}
   #err{display:none;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:20px}
-  .sortpick{display:none}
   td.cmodel{display:none}
+  /* A row's detail line: the columns the table no longer spends width on.
+     A real <tr> with a colspan rather than a CSS trick, because anything that
+     re-flows one row of a table takes its column alignment with it. */
+  tr.det{display:none}
+  tr.det.on{display:table-row}
+  tr.det td{padding:0 12px 14px;border-bottom:1px solid var(--soft);white-space:normal}
+  tr.det .dl{display:flex;flex-wrap:wrap;gap:8px 28px}
+  tr.det .dl div{font-size:.82rem;color:var(--fg)}
+  tr.det .dl b{color:var(--muted);font-weight:600;margin-right:7px}
+  @media (min-width:681px){
+    /* Fourteen columns of nowrap measured 2,315px inside a 1,030px page, so
+       Height, Speed and Rides sat off the right-hand edge and reading one
+       meant scrolling the coaster's name out of view. (Carter, 2026-09-20:
+       "for caosters the table is tough to use ... phone is good".)
+       What is left is what identifies a ride — what, where, what kind, when,
+       how often. The measurements are a click away on the row itself, which
+       is the same bargain the phone has always made, and they stay sortable
+       through the Sort control beside the search box.
+       Keep this list and DESK_HIDE in CreditList in step. */
+    #c_wrap th[data-k=type],  #c_wrap td[data-k=type],
+    #c_wrap th[data-k=manu],  #c_wrap td[data-k=manu],
+    #c_wrap th[data-k=h],     #c_wrap td[data-k=h],
+    #c_wrap th[data-k=s],     #c_wrap td[data-k=s],
+    #c_wrap th[data-k=l],     #c_wrap td[data-k=l],
+    #c_wrap th[data-k=inv],   #c_wrap td[data-k=inv]{display:none}
+    /* Let the words wrap instead of setting the column's width. A park called
+       "St. Louis's Incredible Pizza Company" was holding 300px open on every
+       other row. */
+    #c_body td[data-k=name],#c_body td[data-k=park],
+    #c_body td[data-k=loc],#c_body td[data-k=model]{white-space:normal}
+    #c_body tr:not(.det){cursor:pointer}
+    /* The chevron rides on the last column, the way it rides on the name on a
+       phone: one affordance per row, at the end of it. */
+    #c_body td[data-k=status]{position:relative;padding-right:28px}
+    #c_body td[data-k=status]::after{content:'';position:absolute;right:12px;top:15px;
+      width:6px;height:6px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
+      transform:rotate(45deg);transition:transform .15s}
+    #c_body tr.open td[data-k=status]::after{transform:rotate(-135deg);top:18px}
+  }
+  @media (max-width:680px){
+    /* The card layout already shows everything; the detail row would be a
+       second copy of it. */
+    #c_body tr.det{display:none}
+  }
   @media (max-width:680px){
     .day summary{gap:8px}
     .day .dt{min-width:100%}
-    .sortpick{display:block}
     #c_more{display:inline-block}
     #c_filters.closed{display:none}
     #c_filters select{flex:1;max-width:none;min-width:44%}
@@ -292,7 +334,10 @@
   <div id="ui" style="display:none">
     <div class="controls">
       <div class="seg" id="seg">
-        <button id="v_day" class="on">Rides</button><button id="v_parks">Parks</button><button id="v_list">Coasters</button>
+        <!-- Parks, then coasters, then rides: widest thing first, narrowest
+             last (Carter, 2026-09-20). Which one OPENS is unchanged — `on`
+             still starts on the view the page lands in. -->
+        <button id="v_parks">Parks</button><button id="v_list">Coasters</button><button id="v_day" class="on">Rides</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
       <select id="f_rider" style="display:none"><option value="">All riders</option></select>
@@ -320,8 +365,10 @@
              page" meant. They live behind this on a phone and stay laid out
              on a desktop, where there is width for them. -->
         <button id="c_more" type="button">Filters</button>
-        <!-- Phone-only: the card layout has no column headers to tap, so
-             sorting needs its own control. Hidden above 680px. -->
+        <!-- The card layout has no column headers to tap, so sorting needs its
+             own control — and on a desktop it is how you sort by the columns
+             that now live behind a row's detail line (height, speed, length).
+             Shown at every width. -->
         <select id="c_sort" class="sortpick">
           <option value="park|1">Sort: Park A&ndash;Z</option>
           <option value="name|1">Sort: Name A&ndash;Z</option>
@@ -850,6 +897,9 @@ function pager(total,per){
 // ---------------------------------------------------------------------------
 var CreditList=(function(){
   var DATA=[], COLS=[], sortKey='park', sortDir=1, ready=false, loading=false;
+  // The columns a desktop row keeps behind its chevron. The stylesheet hides
+  // the same six by name — keep the two in step.
+  var DESK_HIDE=['type','manu','h','s','l','inv'];
   var FILTS=['c_q','c_f_status','c_f_type','c_f_manu','c_f_model','c_f_park','c_f_loc'];
   var $=function(id){return document.getElementById(id);};
   var ALLCOLS=[
@@ -927,12 +977,21 @@ var CreditList=(function(){
       var open=$('c_filters').classList.toggle('closed')===false;
       $('c_more').classList.toggle('on',open);
     };
-    // Phone only: tapping a card reveals the columns the table shows on desktop.
-    // Delegated, because draw() replaces every row on each filter or sort.
+    // Opening a row: on a phone the card unfolds its hidden cells, on a desktop
+    // the detail row under it appears. Delegated, because draw() replaces every
+    // row on each filter or sort.
     $('c_body').addEventListener('click',function(e){
-      if(!window.matchMedia('(max-width:680px)').matches) return;
       var tr=e.target.closest('tr');
-      if(tr) tr.classList.toggle('open');
+      if(!tr || tr.classList.contains('det')) return;
+      if(window.matchMedia('(max-width:680px)').matches){ tr.classList.toggle('open'); return; }
+      // A name and a park are links to pages of their own. Following one beats
+      // unfolding the row it sits in.
+      if(e.target.closest('a')) return;
+      var det=tr.nextElementSibling;
+      if(det && det.classList.contains('det')){
+        tr.classList.toggle('open');
+        det.classList.toggle('on');
+      }
     });
     $('c_sort').addEventListener('change',function(){
       var p=$('c_sort').value.split('|'); sortKey=p[0]; sortDir=+p[1]; draw();
@@ -1007,8 +1066,24 @@ var CreditList=(function(){
       // 2026-09-20 is that under a name and a park the useful third line is
       // what the thing IS. maker() is the model, falling back to the
       // manufacturer for a row that has no model on file.
+      // And the line behind the chevron: the measurements the desktop table
+      // stopped spending width on. Empty values are left out rather than
+      // printed as em-dashes — a detail line of dashes is worse than a short
+      // one. A row with nothing to add gets no detail row at all, and its
+      // chevron does nothing, which is why `det` is checked before it is
+      // written.
+      var det = COLS.filter(function(col){ return DESK_HIDE.indexOf(col.k) >= 0; })
+        .map(function(col){
+          var v = c[col.k];
+          if (v == null || v === '') return '';
+          if (col.k === 'type') return '<div><b>'+esc(col.t)+'</b><span class="pill '
+            + (v === 'Wood' ? 'wood' : 'steel') + '">' + esc(v) + '</span></div>';
+          return '<div><b>'+esc(col.t)+'</b>'+esc(v)+'</div>';
+        }).join('');
       return '<tr>'+cells
-        +'<td class="cmodel" data-k="_model">'+esc(CoasterHub.maker(c))+'</td></tr>';
+        +'<td class="cmodel" data-k="_model">'+esc(CoasterHub.maker(c))+'</td></tr>'
+        + (det ? '<tr class="det"><td colspan="'+(COLS.length+1)+'">'
+                 + '<div class="dl">'+det+'</div></td></tr>' : '');
     }).join('');
   }
   return {open:open};
