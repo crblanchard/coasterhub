@@ -32,6 +32,20 @@
 -- Everything below matches on NAME AND PARK rather than an id read off a
 -- snapshot, per CLAUDE.md, and every statement is guarded so a second run is a
 -- no-op.
+--
+-- IT DID NOT TAKE (Carter, 2026-09-20): pasted, and Chupacabra was still bare.
+-- Which statement missed is not knowable from here — a repair matched on
+-- name + park is only as good as the names, and nothing in this sandbox can
+-- read the live row to check them. The fix went in through the API instead,
+-- which is the path CLAUDE.md names for exactly this case and is strictly
+-- better here: it goes through the Worker, so it records activity and fires the
+-- static sync, and it finds the coaster by asking rather than by guessing what
+-- it is called. See "Repairing one row" in the handoff for the snippet, which
+-- is driven against the real worker in a browser rather than hoped at.
+--
+-- This file stays as the record of what the values were and where they came
+-- from. After the API fix every statement below is a no-op, which is what a
+-- COALESCE repair is for.
 
 -- 1. The specs, filling gaps only.
 UPDATE coasters SET

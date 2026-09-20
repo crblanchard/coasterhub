@@ -2442,6 +2442,52 @@ homepage changes"* — filling in the specs of rows nobody had got to yet is a t
 lines, and it is not what anybody opens /changes for. A coaster being **added**, renamed or
 merged still shows: those change what the list IS, not what it says about itself.
 
+### Repairing one row: the API beats a migration (2026-09-20)
+
+019 was pasted and Chupacabra was still bare. *"Didn't work the chupacabra sql. can't you make
+these changes yourself?"* — no: nothing in the sandbox can reach Cloudflare, so a repair
+written here is matched on names it cannot verify, and `WHERE name = 'Chupacabra' AND park =
+'Six Flags Fiesta Texas'` is a guess about two strings.
+
+**For one row, use the API.** It is the second path in CLAUDE.md and it is the better one
+here: it finds the coaster by asking rather than by guessing, it goes through the Worker so
+the edit is recorded and the static JSON re-syncs, and it can be DRIVEN AND PROVEN from here
+before Carter runs it — stand the dev server up, rebuild the broken state (the merge, with the
+ids as strings, which is how it broke), paste the snippet into the page with Playwright, and
+read the row back. That is what was done; it restored the specs and the category and was
+idempotent on a second run.
+
+```js
+(async () => {
+  const j = async (m, p, b) => {
+    const r = await fetch(p, { method: m, credentials: 'same-origin',
+      headers: { 'content-type': 'application/json' },
+      body: b ? JSON.stringify(b) : undefined });
+    const d = await r.json().catch(() => null);
+    if (!r.ok) throw new Error(m + ' ' + p + ' → ' + r.status + ' ' + JSON.stringify(d));
+    return d;
+  };
+  const { coasters } = await j('GET', '/api/coasters');
+  const c = coasters.find(x => /chupacabra/i.test(x.name || ''));
+  if (!c) throw new Error('No Chupacabra in the coaster list — what is it called?');
+  console.log('found', c.id, c.name, '—', c.park, '| model:', c.model, '| height:', c.h);
+  await j('PUT', '/api/coaster/' + c.id, {
+    type: 'Steel', manu: 'Bolliger & Mabillard', model: 'B&M Invert',
+    h: 105, s: 50, l: 2693, inv: 5, dur: 120, laps: 1, opened: '2008-04-18' });
+  const { groups } = await j('GET', '/api/clones');
+  const g = groups.find(x => /batman/i.test(x.name || ''));
+  if (g && !g.ids.includes(c.id))
+    await j('PUT', '/api/clones/' + g.id, { name: g.name, note: g.note, ids: g.ids.concat([c.id]) });
+  console.log('done');
+})();
+```
+
+The rule this leaves: **a migration is for a shape, or for a change across many rows that no
+endpoint makes. One row that an endpoint already updates goes through the endpoint.** And when
+a repair has to be written blind, it should print what it found rather than assume — the
+snippet's first line logs the row's real name, park and model, which is also the diagnosis if
+it turns out the names were never what the SQL expected.
+
 ### Pasting a migration into the D1 console strips the newlines (2026-09-20)
 
 017 came back from the console as *"The request is malformed: Requests without any query are
