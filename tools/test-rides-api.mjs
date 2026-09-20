@@ -2026,6 +2026,50 @@ async function main() {
       r.status + " " + JSON.stringify(r.data));
   }
 
+  // ---- a whole count arriving at once is one line ---------------------------
+  //
+  // An import keeps its dates by posting one call per day ridden, so a count
+  // the size of Nick's wrote twenty feed rows. `bulk` says the calls are one
+  // act; they merge into a single "imported N credits".
+  {
+    const db = freshDb();
+    db.exec("INSERT INTO coasters (id,name,park) VALUES (71,'A','P'),(72,'B','P'),(73,'C','Q')");
+    db.prepare("INSERT INTO users (slug,name,mode) VALUES ('nick','Nick','rides')").run();
+
+    let r = await call(db, "POST", "/api/rides",
+      { token: PW, body: { user: "nick", d: "2021-06-03", bulk: true, entries: [{ c: 71, n: 1 }] } });
+    check("a bulk call writes rides as usual", r.status === 200 && r.data.added === 1);
+    await call(db, "POST", "/api/rides",
+      { token: PW, body: { user: "nick", d: "2021-06-04", bulk: true, entries: [{ c: 72, n: 1 }] } });
+    await call(db, "POST", "/api/rides",
+      { token: PW, body: { user: "nick", d: null, bulk: true, entries: [{ c: 73, n: 1 }] } });
+
+    const feed = rows(db, "SELECT kind, n, detail FROM activity WHERE actor = 'nick'");
+    check("...three calls, one feed row", feed.length === 1 && feed[0].kind === "import",
+      JSON.stringify(feed));
+    check("...carrying every credit", feed[0].n === 3, JSON.stringify(feed[0]));
+    const det = JSON.parse(feed[0].detail);
+    check("...and the dated days, counted once each",
+      det.rides === 3 && det.days.length === 2 && det.calls === 3, feed[0].detail);
+
+    // An ordinary log is untouched: two park days in one evening are two things
+    // that happened, and merging them would say otherwise.
+    await call(db, "POST", "/api/rides",
+      { token: PW, body: { user: "carter", d: "2024-07-01", entries: [{ c: 71, n: 1 }] } });
+    await call(db, "POST", "/api/rides",
+      { token: PW, body: { user: "carter", d: "2024-07-02", entries: [{ c: 72, n: 1 }] } });
+    check("a normal log still writes a row per day",
+      rows(db, "SELECT id FROM activity WHERE actor = 'carter' AND kind = 'rides'").length === 2);
+
+    // And an import an hour later is a second import, not more of the first.
+    db.prepare("UPDATE activity SET at = ? WHERE actor = 'nick'")
+      .run(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
+    await call(db, "POST", "/api/rides",
+      { token: PW, body: { user: "nick", d: "2022-01-01", bulk: true, entries: [{ c: 72, n: 1 }] } });
+    check("...an import an hour later is its own line",
+      rows(db, "SELECT id FROM activity WHERE actor = 'nick' AND kind = 'import'").length === 2);
+  }
+
   // ---- a merge carries everything keyed by the coaster ----------------------
   //
   // It used to move the rides and the aliases and stop there, so the coaster

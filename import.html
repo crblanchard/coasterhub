@@ -862,7 +862,10 @@ function save(){
       (left?('\n\n'+left+' line'+(left===1?'':'s')+' still have no ride picked and will NOT go in. '
              +'They stay on screen — nothing is lost if you cancel and finish them first.'):''))) return;
   $('save').disabled=true; $('msg').className='msg'; $('msg').textContent='Adding…';
-  api('POST','/api/rides',{user:rider,d:null,entries:ids.map(function(c){return {c:c,n:1};})})
+  // bulk: this is one import however many coasters it carries, so the feed
+  // records it as one line rather than a row per call (worker.js, recordImport).
+  api('POST','/api/rides',{user:rider,d:null,bulk:true,
+                           entries:ids.map(function(c){return {c:c,n:1};})})
     .then(function(r){
       ids.forEach(function(i){ OWNED[i]=true; });
       $('msg').className='msg ok';

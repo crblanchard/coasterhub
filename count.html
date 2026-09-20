@@ -622,7 +622,14 @@ function buildFilters(){
     document.getElementById('f_rider').dataset.hidden='1';
   }
   // Nobody to compare against: the toggle would be filtering on nothing.
-  if(!MINE) document.getElementById('f_mine_wrap').dataset.hidden='1';
+  //
+  // And on a rider's own page it filters on nothing either — that park list is
+  // built from their own log, so every row in it is a park they have visited
+  // and the box can only ever tick away nothing. It belongs to the everyone
+  // view, where the list spans all five riders and "mine" is a real subset.
+  // (Carter, 2026-09-20: "'only parks i've visited' on your own page doesnt
+  // make sense".)
+  if(!MINE || !COMBINED) document.getElementById('f_mine_wrap').dataset.hidden='1';
 }
 function wire(){
   ['q','f_rider','f_year','f_park'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){page=0;render();});});

@@ -34,7 +34,8 @@
   };
   // Which of the two feeds an event belongs to: something a rider did to their own
   // count, or something that changed the shared list everyone draws from.
-  var RIDER_KINDS = { rides:1, credits:1, ranking:1, ride_removed:1, user_added:1, claimed:1 };
+  var RIDER_KINDS = { rides:1, credits:1, ranking:1, ride_removed:1, user_added:1,
+                      claimed:1, import:1 };
   
   function icon(kind){
     var k = kind === 'ride_removed' ? 'removed'
@@ -46,6 +47,7 @@
           : kind === 'model_renamed' ? 'edited'
           : kind === 'model_merged' ? 'merged'
           : kind === 'model_assigned' ? 'edited'
+          : kind === 'import' ? 'stack'
           : kind === 'park_renamed' ? 'edited'
           : kind === 'park_merged' ? 'merged'
           : kind === 'coaster_deleted' ? 'deleted'
@@ -84,6 +86,16 @@
       if (d.date) s += ' on ' + niceDate(d.date);
       if (d.newCredits) s += ' &mdash; ' + plural(d.newCredits, 'new credit');
       return s;
+    }
+    // A whole count arriving at once. Twenty calls to keep the dates, one line
+    // to read. (Carter, 2026-09-20.)
+    if (e.kind === 'import') {
+      // A list of the days, or just how many there were — the repair that
+      // collapsed the twenty rows Nick's import wrote could not reasonably
+      // carry nineteen dates through a console paste.
+      var days = Array.isArray(d.days) ? d.days.length : (+d.days || 0);
+      return (who || 'Someone') + ' imported ' + plural(e.n || 0, 'credit')
+        + (days ? ' <span class="sub">across ' + plural(days, 'day') + '</span>' : '');
     }
     if (e.kind === 'credits') {
       var n = d.rides || e.n || 0;

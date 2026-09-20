@@ -873,7 +873,15 @@ async function addRides(env, b) {
 
   const total = await userTotal(env, slug);
   if (inserted) {
-    if (d === null) {
+    // `bulk` marks a call as part of one import. Somebody's whole count
+    // arrives as many calls — one per day they rode, which is what keeps the
+    // dates — and each one used to write its own feed line. Nick's 183 credits
+    // came in as twenty. (Carter, 2026-09-20: "can you compress it so he
+    // 'imported 183 credits' as one line item".)
+    if (b && b.bulk) {
+      await recordImport(env, slug, { rides: inserted,
+                                      credits: total.credits - wasCredits, day: d });
+    } else if (d === null) {
       await recordCredits(env, slug, { rides: inserted, coasters: norm.length,
                                        newCredits: total.credits - wasCredits });
     } else {
@@ -963,6 +971,40 @@ async function recordRanking(env, slug, { added, removed, reordered, credited, t
 // Merges into this rider's last credits row while that one is under an hour old,
 // exactly like recordRanking. DATED rides are deliberately NOT merged: each one
 // is a day out at a named park and reads as a fact on its own.
+// One import, one line, however many calls it took. Merges into this rider's
+// last import for an hour — the same window a ranking or a burst of credits
+// already merges over, and for the same reason: the feed is a record of what
+// somebody DID, and importing a count is one thing they did.
+//
+// The days are kept as a list rather than a count so a second call for a date
+// already seen does not inflate it; nothing else needs them.
+async function recordImport(env, slug, { rides, credits, day }) {
+  const now = new Date().toISOString();
+  try {
+    const prev = await env.DB.prepare(
+      "SELECT id, at, n, detail FROM activity WHERE kind = 'import' AND actor = ? ORDER BY at DESC, id DESC LIMIT 1"
+    ).bind(slug).first();
+    if (prev && Date.parse(now) - Date.parse(prev.at) < RANKING_MERGE_MS) {
+      const d = JSON.parse(prev.detail || "{}");
+      const days = new Set(Array.isArray(d.days) ? d.days : []);
+      if (day) days.add(day);
+      const merged = {
+        rides: (d.rides || 0) + rides,
+        credits: (d.credits || prev.n || 0) + credits,
+        days: [...days],
+        calls: (d.calls || 1) + 1,
+      };
+      await env.DB.prepare("UPDATE activity SET at = ?, n = ?, detail = ? WHERE id = ?")
+        .bind(now, merged.credits, JSON.stringify(merged), prev.id).run();
+      return;
+    }
+  } catch (e) { /* fall through and record it as its own row */ }
+  await recordActivity(env, "import", {
+    actor: slug, n: credits,
+    detail: { rides: rides, credits: credits, days: day ? [day] : [], calls: 1 },
+  });
+}
+
 async function recordCredits(env, slug, { rides, coasters, newCredits }) {
   const now = new Date().toISOString();
   try {
