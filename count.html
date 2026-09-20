@@ -41,6 +41,13 @@
   .controls .onlymine input{accent-color:var(--accent2);width:17px;height:17px;
     min-width:0;flex:none;margin:0;cursor:pointer}
   .controls .onlymine.on{color:var(--fg);border-color:var(--accent2)}
+  /* The six coaster filters, and the button that reveals them. Both are
+     phone-only: above 680px the selects simply sit in their row, because there
+     the width exists and hiding a filter behind a click would be a loss. The
+     `closed` class is therefore honoured ONLY inside the media query. */
+  #c_more{display:none}
+  #c_filters{margin-top:-6px}
+  #c_more.on{color:var(--fg);border-color:var(--accent2)}
   .count{color:var(--muted);font-size:.85rem;margin-bottom:12px}
   .count b{color:var(--accent2)}
   .day{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--panel);overflow:hidden}
@@ -123,9 +130,12 @@
   #parkview.flat .pmain{flex:1;min-width:0;display:flex;flex-direction:column}
   /* Both of these carry sizes meant for the day cards' one-line summary. */
   #parkview.flat .day .dt{min-width:0;line-height:1.3}
-  #parkview.flat .day .pk{flex:none;min-width:0;line-height:1.3}
+  /* The park's name carries the row; where it is and what it holds are the
+     supporting facts, so they sit a step down from it rather than level with
+     it. Also buys back a few pixels of height across 247 rows. */
+  #parkview.flat .day .pk{flex:none;min-width:0;line-height:1.3;font-size:.8rem}
   #parkview.flat .day .n{flex:none;display:flex;flex-direction:column;
-    align-items:flex-end;text-align:right;line-height:1.3}
+    align-items:flex-end;text-align:right;line-height:1.3;font-size:.78rem}
   /* Named for what they mean, not which line they landed on — the rule that
      said .herocount h1 span broke the day the numbers became links. */
   #parkview.flat .day .n .nop{color:var(--muted);font-weight:400;white-space:nowrap}
@@ -171,6 +181,9 @@
     .day summary{gap:8px}
     .day .dt{min-width:100%}
     .sortpick{display:block}
+    #c_more{display:inline-block}
+    #c_filters.closed{display:none}
+    #c_filters select{flex:1;max-width:none;min-width:44%}
 
     /* The full list stops being a table on a phone. At 390px the Name column
        alone measured 419px, so Park began 100px past the right edge and you
@@ -180,46 +193,62 @@
     #c_wrap{overflow-x:visible;border:0;border-radius:0;background:none}
     #c_wrap table{white-space:normal;font-size:1rem}
     #c_head{display:none}
-    #c_body tr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;
-               background:var(--panel);border:1px solid var(--line);border-radius:12px;
-               padding:11px 13px;margin-bottom:8px}
-    #c_body tr:hover{background:var(--panel)}
+    /* Flat rows, the same as the park list (Carter, 2026-09-20): no card, no
+       gap between them, a hairline instead. The card's border, radius, panel
+       and 8px margin were costing more height than two of its four lines. */
+    #c_body tr{display:grid;grid-template-columns:1fr auto;gap:1px 10px;
+               border-bottom:1px solid var(--line);padding:8px 2px;margin:0}
+    #c_body tr:hover{background:transparent}
     #c_body td{display:none;border:0;padding:0;white-space:normal}
     /* Explicit rows, because the status cell comes before the meta cell in the
        source and sparse auto-placement would push meta onto a fourth row,
        leaving a hole next to the pill. */
-    #c_body td[data-k=name]{display:block;grid-column:1/-1;grid-row:1;font-weight:600;
-                            font-size:.94rem;line-height:1.3;color:var(--fg)}
+    /* Three lines, not four: the status moves up beside the name, and the
+       riders line shares row 3 with the numbers instead of taking a row of its
+       own. The old row 3 held the status pill alone whenever a coaster had no
+       year or height on file, which is a whole line of nothing. */
+    #c_body td[data-k=name]{display:block;grid-column:1;grid-row:1;font-weight:600;
+                            font-size:.9rem;line-height:1.3;color:var(--fg)}
     #c_body td[data-k=park]{display:block;grid-column:1;grid-row:2;color:var(--muted);
-                            font-size:.79rem;min-width:0;
+                            font-size:.76rem;min-width:0;
                             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #c_body td[data-k=loc]{display:block;grid-column:2;grid-row:2;color:var(--muted);
-                           font-size:.79rem;text-align:right;white-space:nowrap}
+                           font-size:.76rem;text-align:right;white-space:nowrap}
     #c_body td.cmeta{display:block;grid-column:1;grid-row:3;color:var(--accent2);
-                     font-size:.77rem;font-variant-numeric:tabular-nums;min-width:0;
+                     font-size:.74rem;font-variant-numeric:tabular-nums;min-width:0;
                      overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    #c_body td[data-k=status]{display:block;grid-column:2;grid-row:3;text-align:right}
-    #c_body td.criders{display:block;grid-column:1/-1;grid-row:4;color:var(--muted);
-                       font-size:.75rem;margin-top:4px}
+    #c_body td.cmeta:empty{display:none}
+    /* Top right, clear of the chevron, and always there — open or closed. */
+    #c_body td[data-k=status]{display:block;grid-column:2;grid-row:1;text-align:right;
+                              padding-right:17px}
+    /* The status reads like the park rows' do on a phone: coloured word, no
+       border. A bordered pill beside the name made the name the second-loudest
+       thing on its own row. */
+    #c_body td[data-k=status] .pill{border:0;padding:0;font-size:.68rem;font-weight:700;
+                                    text-transform:uppercase;letter-spacing:.06em}
+    #c_body td[data-k=status] .cyear{font-size:.74rem;margin-left:4px}
+    #c_body td.criders{display:block;grid-column:2;grid-row:3;color:var(--muted);
+                       font-size:.73rem;text-align:right;white-space:nowrap}
     #c_body td.criders:empty{display:none}
 
     /* Tap a card to see the columns the phone layout hides. The chevron is the
        affordance; :not() keeps the four summary cells out of the generic rule
        so they stay in their explicit grid slots. */
     #c_body tr{cursor:pointer;position:relative}
-    #c_body td[data-k=name]{padding-right:20px}
-    #c_body td[data-k=name]::after{content:'';position:absolute;right:14px;top:15px;
+    #c_body td[data-k=name]::after{content:'';position:absolute;right:2px;top:12px;
       width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
       transform:rotate(45deg);transition:transform .15s}
-    #c_body tr.open td[data-k=name]::after{transform:rotate(-135deg);top:18px}
+    #c_body tr.open td[data-k=name]::after{transform:rotate(-135deg);top:15px}
     #c_body tr.open td.cmeta{display:none}
-    #c_body tr.open td.criders{grid-row:auto;order:99}
-    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not(.cmeta):not(.criders){
+    #c_body tr.open td.criders{grid-row:auto;grid-column:1/-1;text-align:left;order:99}
+    /* Status is excluded too now: it is pinned top right whether the row is
+       open or shut, so repeating it as a labelled line below would be saying
+       the same thing twice. */
+    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmeta):not(.criders){
       display:flex;grid-column:1/-1;justify-content:space-between;align-items:baseline;gap:14px;
-      text-align:left;font-size:.79rem;color:var(--fg);padding:5px 0 0;white-space:normal}
-    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not(.cmeta):not(.criders)::before{
+      text-align:left;font-size:.78rem;color:var(--fg);padding:4px 0 0;white-space:normal}
+    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmeta):not(.criders)::before{
       content:attr(data-label);color:var(--muted);flex:none}
-    #c_body tr.open td[data-k=status]{grid-row:auto}
     #c_body td.muted[data-k=park],#c_body td.muted[data-k=loc]{color:var(--muted)}
   }
 </style>
@@ -268,7 +297,7 @@
       <select id="f_year"><option value="">All years</option></select>
       <select id="f_park"><option value="">All parks</option></select>
       <label class="onlymine" id="f_mine_wrap" style="display:none">
-        <input type="checkbox" id="f_mine"> Only parks I&rsquo;ve ridden
+        <input type="checkbox" id="f_mine"> Only parks I&rsquo;ve visited
       </label>
       <button id="reset">Reset</button>
     </div>
@@ -284,12 +313,11 @@
     <div id="listview" style="display:none">
       <div class="controls">
         <input id="c_q" type="search" placeholder="Search name, park, manufacturer, model&hellip;">
-        <select id="c_f_status"><option value="">All statuses</option><option value="Operating">Operating</option><option value="Defunct">Defunct</option></select>
-        <select id="c_f_type"><option value="">All types</option></select>
-        <select id="c_f_manu"><option value="">All manufacturers</option></select>
-        <select id="c_f_model"><option value="">All models</option></select>
-        <select id="c_f_park"><option value="">All parks</option></select>
-        <select id="c_f_loc"><option value="">All locations</option></select>
+        <!-- Phone-only: six stacked selects filled the whole screen before a
+             single coaster, which is most of what "there is nothing on this
+             page" meant. They live behind this on a phone and stay laid out
+             on a desktop, where there is width for them. -->
+        <button id="c_more" type="button">Filters</button>
         <!-- Phone-only: the card layout has no column headers to tap, so
              sorting needs its own control. Hidden above 680px. -->
         <select id="c_sort" class="sortpick">
@@ -302,6 +330,14 @@
           <option value="yr|1">Sort: Oldest first</option>
         </select>
         <button id="c_reset">Reset</button>
+      </div>
+      <div class="controls" id="c_filters">
+        <select id="c_f_status"><option value="">All statuses</option><option value="Operating">Operating</option><option value="Defunct">Defunct</option></select>
+        <select id="c_f_type"><option value="">All types</option></select>
+        <select id="c_f_manu"><option value="">All manufacturers</option></select>
+        <select id="c_f_model"><option value="">All models</option></select>
+        <select id="c_f_park"><option value="">All parks</option></select>
+        <select id="c_f_loc"><option value="">All locations</option></select>
       </div>
       <div class="count" id="c_count"></div>
       <div id="c_loading" style="color:var(--muted);padding:30px 0">Loading the full list&hellip;</div>
@@ -692,6 +728,7 @@ function renderParks(rows){
   // Filtered on the keys rather than inside the card, so the count line and the
   // length of the scroll both mean what they say.
   var mineOnly = MINE && document.getElementById('f_mine').checked;
+  var everything = keys.length;
   if(mineOnly) keys=keys.filter(function(park){
     return (BYPARK[park] || byPark[park]).some(function(r){ return MINE[r.c]; });
   });
@@ -699,7 +736,11 @@ function renderParks(rows){
   // Every park in one scroll (Carter, 2026-09-20). 247 of them was seven pages
   // of forty, and paging through an alphabetical list to reach the S's is worse
   // than scrolling to them. There is no pager on this view at all now.
-  document.getElementById('count').innerHTML='<b>'+total.toLocaleString()+'</b> park'+(total===1?'':'s');
+  // Filtered, the number is only worth reading against what it came from:
+  // "113/247" says both how many you have been to and how much is out there.
+  document.getElementById('count').innerHTML = mineOnly
+    ? '<b>'+total.toLocaleString()+'</b>/'+everything.toLocaleString()+' parks'
+    : '<b>'+total.toLocaleString()+'</b> park'+(total===1?'':'s');
 
   PARKCARD={};
   document.getElementById('parkview').innerHTML=keys.map(function(park){
@@ -889,7 +930,12 @@ var CreditList=(function(){
       th.onclick=function(){ if(sortKey===c.k)sortDir*=-1; else {sortKey=c.k;sortDir=c.num?-1:1;} draw(); };
       head.appendChild(th);
     });
-    FILTS.forEach(function(id){$(id).addEventListener('input',draw);});
+    FILTS.forEach(function(id){$(id).addEventListener('input',function(){ draw(); more(); });});
+    $('c_filters').classList.add('closed');
+    $('c_more').onclick=function(){
+      var open=$('c_filters').classList.toggle('closed')===false;
+      $('c_more').classList.toggle('on',open);
+    };
     // Phone only: tapping a card reveals the columns the table shows on desktop.
     // Delegated, because draw() replaces every row on each filter or sort.
     $('c_body').addEventListener('click',function(e){
@@ -902,12 +948,21 @@ var CreditList=(function(){
     });
     $('c_reset').onclick=function(){
       FILTS.forEach(function(id){$(id).value='';});
-      sortKey='park'; sortDir=1; $('c_sort').value='park|1'; draw();
+      sortKey='park'; sortDir=1; $('c_sort').value='park|1'; draw(); more();
     };
     $('c_loading').style.display='none';
     $('c_wrap').style.display='block';
     ready=true; loading=false;
     draw();
+  }
+  // How many of the hidden selects are actually doing something, said on the
+  // button — otherwise a filter you set and collapsed is a page that silently
+  // shows you a third of the list. c_q is not counted: the search box is on
+  // screen and says so itself.
+  function more(){
+    var n=FILTS.filter(function(id){ return id!=='c_q' && $(id).value; }).length;
+    $('c_more').textContent = n ? 'Filters · '+n : 'Filters';
+    $('c_more').classList.toggle('on', n>0 || !$('c_filters').classList.contains('closed'));
   }
   function rows(){
     var q=$('c_q').value.trim().toLowerCase();
@@ -968,9 +1023,10 @@ var CreditList=(function(){
       // Phone-only line: how many of the riders have this one. No good place
       // for it in the desktop table, so it is display:none there.
       var rn=RIDERN[c.id]||0;
-      var who=NRIDERS
-        ? (rn+' of '+NRIDERS+' rider'+(NRIDERS===1?'':'s')+' have ridden this')
-        : '';
+      // Short, because it shares row 3 with the specs and is the wider of the
+      // two: "3 of 5 riders have ridden this" crowded a coaster carrying a
+      // year, a height and a speed.
+      var who=NRIDERS ? (rn+' of '+NRIDERS+' rider'+(NRIDERS===1?'':'s')) : '';
       return '<tr>'+cells
         +'<td class="cmeta" data-k="_meta">'+esc(bits.join(' · '))+'</td>'
         +'<td class="criders" data-k="_riders">'+esc(who)+'</td></tr>';
