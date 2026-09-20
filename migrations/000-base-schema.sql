@@ -105,8 +105,31 @@ CREATE INDEX IF NOT EXISTS activity_at ON activity(at DESC, id DESC);
 
 -- Renames keep the old name working. /api/coasters reads both of these on every
 -- request, so a database without them 500s on the shared list.
-CREATE TABLE IF NOT EXISTS coaster_aliases (coaster_id INTEGER, former_name TEXT);
-CREATE TABLE IF NOT EXISTS park_aliases   (park TEXT,          former_name TEXT);
+--
+-- These two used to be declared here as (coaster_id, former_name) and
+-- (park, former_name) and nothing else, which did NOT describe the table
+-- production actually has: recordAlias() in worker.js writes `note` and `added`,
+-- and 002's backfill reads both. A database built from this file therefore had a
+-- coaster_aliases that every rename threw on — and because the UPDATE runs
+-- first, the rename SAVED the new name and then 500'd, losing the former name it
+-- was supposed to record. The test harness declared the right shape all along,
+-- so only a fresh build (the dev server) ever hit it. Fixed 2026-09-20; this is
+-- a no-op against production, where the columns are already there.
+--
+-- UNIQUE is what makes recordAlias()'s INSERT OR IGNORE mean anything; an
+-- existing database gets it from migrations/016-alias-unique.sql.
+CREATE TABLE IF NOT EXISTS coaster_aliases (
+  coaster_id  INTEGER NOT NULL,
+  former_name TEXT    NOT NULL,
+  note        TEXT,                -- 'rename', 'merge <id>' — what put it here
+  added       TEXT,                -- date(); 002's backfill reads it
+  UNIQUE(coaster_id, former_name)
+);
+CREATE TABLE IF NOT EXISTS park_aliases (
+  park        TEXT NOT NULL,
+  former_name TEXT NOT NULL,
+  UNIQUE(park, former_name)
+);
 
 CREATE INDEX IF NOT EXISTS rides_user    ON rides(user_slug);
 CREATE INDEX IF NOT EXISTS rides_coaster ON rides(coaster_id);

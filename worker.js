@@ -532,6 +532,9 @@ async function getUsers(env) {
 // matters more since the profile lost its /stats suffix: the rider segment now
 // sits one level from the site root.
 const RESERVED_SLUGS = new Set(["api","user","users","admin","new","all","everyone",
+  // "park" and "coaster" joined the list when /park/<park>/<coaster> landed:
+  // a rider called Park would shadow every one of those pages.
+  "park", "coaster", "ride",
   "home","stats","rides","count","rankings","coasters","parks","log","add","edit","import",
   "changes","database","sitemap","index","account","accounts","login","logout",
   "signup","signin","profile","riders","me","auth","session","settings"]);
@@ -2393,6 +2396,84 @@ export default {
           { subject: to, n: had.n, detail: { from: from } });
         return afterWrite(ctx, env, json({ ok: true, from, to, moved: had.n, merged,
                                            total: had.n + ((into && into.n) || 0) }));
+      }
+
+      // Rename a park, and every coaster standing in it, in one move.
+      //
+      // Before this there was no such thing as renaming a park: you edited each
+      // of its coasters by hand, and nothing recorded that the two names were
+      // the same place. So /add would offer to create the park again under its
+      // old name, and any URL carrying that name became a dead end. This writes
+      // the former name into park_aliases the same way a coaster rename writes
+      // one into coaster_aliases, which is what keeps /park/<park> and
+      // /park/<park>/<coaster> resolving for both spellings — see findPark and
+      // findCoaster in app.js.
+      //
+      // Modelled on /api/admin/models/rename above, including that renaming
+      // ONTO a name that already exists is a merge and is allowed: two
+      // spellings of one park is exactly the mess this is for. It says so in
+      // the answer, because a merge does not come back by renaming in reverse.
+      if (request.method === "POST" && path === "/api/admin/parks/rename") {
+        const b = await request.json();
+        const from = String(b && b.from || "").trim();
+        const to = String(b && b.to || "").trim().replace(/\s+/g, " ").slice(0, 120);
+        if (!from) return err(400, "which park?");
+        if (!to) return err(400, "a park needs a name");
+        if (from === to) return err(400, "that is the name it already has");
+
+        // A park can exist as a row in `parks` with nothing standing in it yet,
+        // or as a name on coasters with no row of its own. Either is renameable;
+        // neither is a 404 on its own.
+        const had = await env.DB.prepare(
+          "SELECT COUNT(*) AS n FROM coasters WHERE park = ?").bind(from).first();
+        const row = await env.DB.prepare("SELECT name FROM parks WHERE name = ?").bind(from).first();
+        if ((!had || !had.n) && !row) return err(404, "no such park");
+
+        const into = await env.DB.prepare(
+          "SELECT COUNT(*) AS n FROM coasters WHERE park = ?").bind(to).first();
+        const target = await env.DB.prepare("SELECT name FROM parks WHERE name = ?").bind(to).first();
+        const merged = !!(into && into.n) || !!target;
+
+        // The parks row first. Merging keeps the surviving row but fills any gap
+        // in it from the one going away — a park being merged INTO may be the
+        // one that never got geocoded, and dropping the other's coordinates
+        // would quietly lose them.
+        if (target && row) {
+          await env.DB.prepare(
+            "UPDATE parks SET lat = COALESCE(lat, (SELECT lat FROM parks WHERE name = ?1)), " +
+            "lon = COALESCE(lon, (SELECT lon FROM parks WHERE name = ?1)), " +
+            "region = COALESCE(region, (SELECT region FROM parks WHERE name = ?1)) " +
+            "WHERE name = ?2").bind(from, to).run();
+          await env.DB.prepare("DELETE FROM parks WHERE name = ?").bind(from).run();
+        } else if (row) {
+          await env.DB.prepare("UPDATE parks SET name = ? WHERE name = ?").bind(to, from).run();
+        }
+        await env.DB.prepare("UPDATE coasters SET park = ? WHERE park = ?").bind(to, from).run();
+
+        // Then the aliases, in one batch:
+        //  - every former name the old park answered to now points at the new
+        //    one, because an alias aimed at a park that no longer exists is a
+        //    dead end;
+        //  - the old name itself becomes a former name, guarded rather than
+        //    INSERT OR IGNOREd because these tables carry no unique constraint
+        //    before migrations/016;
+        //  - and a name that has become current again stops being a former one,
+        //    the same undo a coaster rename does for an A->B->A round trip.
+        await env.DB.batch([
+          env.DB.prepare("UPDATE park_aliases SET park = ? WHERE park = ?").bind(to, from),
+          env.DB.prepare(
+            "INSERT INTO park_aliases (park, former_name) SELECT ?1, ?2 WHERE NOT EXISTS " +
+            "(SELECT 1 FROM park_aliases WHERE park = ?1 AND former_name = ?2)").bind(to, from),
+          env.DB.prepare("DELETE FROM park_aliases WHERE park = ?1 AND former_name = ?1").bind(to),
+          env.DB.prepare(
+            "DELETE FROM park_aliases WHERE rowid NOT IN " +
+            "(SELECT MIN(rowid) FROM park_aliases GROUP BY park, former_name)"),
+        ]);
+
+        await recordActivity(env, merged ? "park_merged" : "park_renamed",
+          { subject: to, n: (had && had.n) || 0, detail: { from: from } });
+        return afterWrite(ctx, env, json({ ok: true, from, to, moved: (had && had.n) || 0, merged,
+                                           total: ((had && had.n) || 0) + ((into && into.n) || 0) }));
       }
 
       if (request.method === "GET" && path === "/api/parks-all") {

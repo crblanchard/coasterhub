@@ -45,6 +45,8 @@
           : kind === 'clone_set' ? 'stack'
           : kind === 'model_renamed' ? 'edited'
           : kind === 'model_merged' ? 'merged'
+          : kind === 'park_renamed' ? 'edited'
+          : kind === 'park_merged' ? 'merged'
           : kind === 'coaster_deleted' ? 'deleted'
           : kind;
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
@@ -121,6 +123,12 @@
     if (e.kind === 'clone_removed') return (sub || 'A category') + ' category deleted';
     if (e.kind === 'model_renamed') return esc(d.from || 'A model') + ' is now '
       + (sub || 'something else') + ' \u2014 ' + plural(e.n || 0, 'coaster');
+    // A park rename moves every coaster standing in it, so the count is the
+    // part worth saying — unlike a coaster rename, where the ride is the story.
+    if (e.kind === 'park_renamed') return esc(d.from || 'A park') + ' is now '
+      + (sub || 'something else') + (e.n ? ' — ' + e.n + ' coaster' + (e.n === 1 ? '' : 's') + ' moved' : '');
+    if (e.kind === 'park_merged') return esc(d.from || 'A park') + ' was merged into '
+      + (sub || 'another park') + (e.n ? ' — ' + e.n + ' coaster' + (e.n === 1 ? '' : 's') + ' moved' : '');
     if (e.kind === 'model_merged') return esc(d.from || 'A model') + ' was merged into '
       + (sub || 'another model') + ' \u2014 ' + plural(e.n || 0, 'coaster') + ' moved';
     if (e.kind === 'user_added')      return (sub || 'A rider') + ' joined'

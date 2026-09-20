@@ -2087,6 +2087,96 @@ async function main() {
       r.status + " " + JSON.stringify(r.data));
   }
 
+  // ---- renaming a park, and the former name that keeps its URL alive --------
+  //
+  // The point of these is not the UPDATE, it is park_aliases: /park/<park> and
+  // /park/<park>/<coaster> resolve through that table (findPark/findCoaster in
+  // app.js), so a rename that forgets to write it silently breaks every link
+  // anyone has ever shared to that park.
+  {
+    const db = freshDb();
+    db.exec(`
+      INSERT INTO parks (name,lat,lon,region) VALUES
+        ('Old Name', 1.5, 2.5, 'Ohio, US'),
+        ('Has Gaps', NULL, NULL, NULL);
+      INSERT INTO coasters (id,name,park,type) VALUES
+        (51,'Racer','Old Name','Wood'),
+        (52,'Blue Streak','Old Name','Wood'),
+        (53,'Orphan','Nowhere In Parks','Steel'),
+        (54,'Gapper','Has Gaps','Steel');
+      INSERT INTO park_aliases (park, former_name) VALUES ('Old Name','Older Name');
+    `);
+    const cookie = await signedUp(db, "parks@example.com", "Parker");
+    db.prepare("UPDATE accounts SET is_admin = 1").run();
+
+    let r = await call(db, "POST", "/api/admin/parks/rename",
+      { cookie, body: { from: "Old Name", to: "New Name" } });
+    check("a park rename moves every coaster standing in it",
+      r.status === 200 && r.data.merged === false && r.data.moved === 2, JSON.stringify(r.data));
+    check("...and the coasters carry the new name",
+      rows(db, "SELECT id FROM coasters WHERE park = 'New Name'").length === 2);
+    check("...and the parks row moved with its coordinates",
+      rows(db, "SELECT lat FROM parks WHERE name = 'New Name'")[0]?.lat === 1.5
+      && rows(db, "SELECT name FROM parks WHERE name = 'Old Name'").length === 0);
+    check("...and the old name is recorded as a former name",
+      rows(db, "SELECT 1 FROM park_aliases WHERE park = 'New Name' AND former_name = 'Old Name'").length === 1);
+    // An alias pointing at a park that no longer exists is a dead end, so the
+    // ones the old name answered to have to come along.
+    check("...and the aliases it already had came with it",
+      rows(db, "SELECT 1 FROM park_aliases WHERE park = 'New Name' AND former_name = 'Older Name'").length === 1
+      && rows(db, "SELECT 1 FROM park_aliases WHERE park = 'Old Name'").length === 0);
+
+    // A -> B -> A: "New Name" must stop being a former name of itself, or /add
+    // answers "that is the old name" about the name it currently has.
+    r = await call(db, "POST", "/api/admin/parks/rename",
+      { cookie, body: { from: "New Name", to: "Old Name" } });
+    check("renaming back does not leave a park aliased to itself",
+      r.status === 200
+      && rows(db, "SELECT 1 FROM park_aliases WHERE park = former_name").length === 0,
+      JSON.stringify(rows(db, "SELECT * FROM park_aliases")));
+    check("...and renaming back is not a merge", r.data.merged === false, JSON.stringify(r.data));
+
+    // A park that is only a name on coasters, with no row in `parks`.
+    r = await call(db, "POST", "/api/admin/parks/rename",
+      { cookie, body: { from: "Nowhere In Parks", to: "Somewhere Real" } });
+    check("a park with no parks row is still renameable",
+      r.status === 200 && r.data.moved === 1
+      && rows(db, "SELECT 1 FROM coasters WHERE park = 'Somewhere Real'").length === 1,
+      JSON.stringify(r.data));
+
+    // Merging: two spellings of one place, which is what this is mostly for.
+    r = await call(db, "POST", "/api/admin/parks/rename",
+      { cookie, body: { from: "Somewhere Real", to: "Old Name" } });
+    check("renaming onto a park that exists is a merge, and says so",
+      r.status === 200 && r.data.merged === true && r.data.total === 3, JSON.stringify(r.data));
+    check("...and only one parks row survives",
+      rows(db, "SELECT name FROM parks WHERE name IN ('Old Name','Somewhere Real')").length === 1);
+
+    // The surviving row may be the one that never got geocoded.
+    r = await call(db, "POST", "/api/admin/parks/rename",
+      { cookie, body: { from: "Old Name", to: "Has Gaps" } });
+    check("a merge fills the survivor's gaps from the row going away",
+      r.status === 200 && rows(db, "SELECT lat, region FROM parks WHERE name = 'Has Gaps'")[0]?.lat === 1.5
+      && rows(db, "SELECT region FROM parks WHERE name = 'Has Gaps'")[0]?.region === "Ohio, US",
+      JSON.stringify(rows(db, "SELECT * FROM parks")));
+
+    r = await call(db, "POST", "/api/admin/parks/rename", { cookie, body: { from: "Ghost Park", to: "X" } });
+    check("a park nobody has heard of is a 404", r.status === 404);
+    r = await call(db, "POST", "/api/admin/parks/rename", { cookie, body: { from: "Has Gaps", to: "" } });
+    check("a park still needs a name", r.status === 400);
+    r = await call(db, "POST", "/api/admin/parks/rename",
+      { cookie, body: { from: "Has Gaps", to: "Has Gaps" } });
+    check("renaming a park to itself is refused", r.status === 400);
+    r = await call(db, "POST", "/api/admin/parks/rename", { body: { from: "Has Gaps", to: "Y" } });
+    check("renaming a park needs an admin", r.status === 401, r.status + "");
+
+    // No duplicate rows, whatever route the renames above took.
+    check("no duplicate aliases anywhere",
+      rows(db, "SELECT park, former_name, COUNT(*) AS n FROM park_aliases " +
+               "GROUP BY park, former_name HAVING n > 1").length === 0,
+      JSON.stringify(rows(db, "SELECT * FROM park_aliases")));
+  }
+
   console.log("\n" + pass + " passed, " + fail + " failed\n");
   process.exit(fail ? 1 : 0);
 }

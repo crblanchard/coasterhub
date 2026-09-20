@@ -70,6 +70,19 @@
     .day .row .life .stat{font-size:0;line-height:0}
     .day .row .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
   }
+  /* Every coaster and park named on this page is a way in to its own page.
+     The link inherits the row's colour rather than turning the list into a wall
+     of blue, and only says so on hover. Scoped to the anchor, not to the cell:
+     .cn and the park cell already have rules of their own further up. */
+  .day .row .cn a,.day .pgrp a{color:inherit;text-decoration:none}
+  .day .row .cn a:hover,.day .pgrp a:hover{color:var(--accent2);text-decoration:underline}
+  /* The park's own page, at the top of a park card. Teal, because unlike the
+     rows around it this one is not a coaster. */
+  .day .inner .parklink{margin:4px 0 9px}
+  .day .inner .parklink a{color:var(--accent2);font-size:.82rem;text-decoration:none}
+  .day .inner .parklink a:hover{text-decoration:underline}
+  #c_body td a{color:inherit;text-decoration:none}
+  #c_body td a:hover{color:var(--accent2);text-decoration:underline}
   .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
   /* Full-list table (came over with the old /coasters page) */
   .pill{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
@@ -254,6 +267,25 @@ var DAYS=30, PARKS=40;
 var COMBINED=false;  // true on /count with no rider selected = everyone
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+// Every coaster and park named on this page is a way in to /park/<park> and
+// /park/<park>/<coaster>. The hrefs come out of CoasterHub so this page never
+// spells one itself — see the note on userPageHref in app.js, which is the same
+// rule for the same reason.
+//
+// A ride whose coaster is no longer in the shared list arrives here with its
+// park set to the em-dash placeholder, and "/park//<name>" is not an address.
+// Those say the name plainly rather than linking somewhere that 404s.
+function known(p){ return !!p && p!=='\u2014'; }
+function clink(r){
+  return known(r.park)
+    ? '<a href="'+esc(CoasterHub.coasterHref(r))+'">'+esc(r.name)+'</a>'
+    : esc(r.name);
+}
+function plink(p){
+  return known(p) ? '<a href="'+esc(CoasterHub.parkHref(p))+'">'+esc(p)+'</a>' : esc(p||'\u2014');
+}
+
 function fail(e){console.error(e);document.getElementById('loading').style.display='none';document.getElementById('err').style.display='block';}
 
 // No rider in the URL means "Everyone", exactly like /riders —
@@ -460,7 +492,7 @@ function renderDays(rows){
     // saying the same thing twice — these are 8 credits picked up that day.
     var isRides=list[0].rep;
     var dayRow=function(r){
-      return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
+      return '<div class="row"><span class="cn">'+clink(r)+'</span>'
         +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')+'</div>';
     };
     var what=isRides
@@ -480,7 +512,7 @@ function renderDays(rows){
       // parks were first ridden, so the blocks match the summary line.
       + (pk.length>1
           ? pk.map(function(park){
-              return '<div class="pgrp">'+esc(park)+'</div>'
+              return '<div class="pgrp">'+plink(park)+'</div>'
                 + uniqRows.filter(function(r){ return r.park===park; }).map(dayRow).join('');
             }).join('')
           : uniqRows.map(dayRow).join(''))
@@ -559,9 +591,13 @@ function renderParks(rows){
       +'</span>'
       +'<span class="n">'+what+'</span>'
       +'</summary><div class="inner">'
+      + (known(park)
+          ? '<div class="parklink"><a href="'+esc(CoasterHub.parkHref(park))+'">'
+            +'Everything at '+esc(park)+' &rarr;</a></div>'
+          : '')
       + uniq.map(function(r){
           var mk=CoasterHub.maker(r);
-          return '<div class="row"><span class="cn">'+esc(r.name)+'</span>'
+          return '<div class="row"><span class="cn">'+clink(r)+'</span>'
             +((laps[r.c]>1 && !COMBINED)?'<span class="lap">×'+laps[r.c]+'</span>':'')
             +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
             +life(r)
@@ -742,6 +778,11 @@ var CreditList=(function(){
           ? '<td'+k+'><span class="pill def">Defunct</span><span class="cyear">'+String(c.closed).slice(0,4)+'</span></td>'
           : '<td'+k+'><span class="pill op">Operating</span></td>';
         if(v==null||v==='')return '<td class="muted"'+k+'>—</td>';
+        // The two columns that are also pages of their own. Checked after the
+        // empty test above, so a row with no park still gets its em-dash rather
+        // than a link to /park/.
+        if(col.k==='name')return '<td class="'+(col.cls||'')+'"'+k+'>'+clink(c)+'</td>';
+        if(col.k==='park')return '<td'+k+'>'+plink(v)+'</td>';
         return '<td class="'+(col.num?'num':'')+' '+(col.cls||'')+'"'+k+'>'+esc(v)+'</td>';
       }).join('');
       // One extra cell holding the numbers as a single line. display:none on

@@ -526,6 +526,121 @@
     return page === "profile" ? "/user/" + slug : "/user/" + slug + "/" + page;
   }
 
+  // ---- Parks and coasters have URLs too ------------------------------------
+  // /park/<park> and /park/<park>/<coaster>.
+  //
+  // The park leads because a coaster cannot exist without one: chop the last
+  // segment off a coaster's URL and you land on its park, which is a page that
+  // exists. A flat /coaster/<name> was never on the table — 93 names in the
+  // database are used at more than one park ("Wacky Worm" at ten of them) —
+  // while the park+coaster pair is unique across all 1,114.
+  //
+  // This is the only place that knows the shape, for the same reason
+  // userPageHref is: build one by hand and it will be the one that rots.
+
+  // Deliberately NOT the same function as slugify() in worker.js, in one
+  // respect: an apostrophe is DROPPED here rather than becoming a separator, so
+  // Knott's Berry Farm is knotts-berry-farm and not knott-s-berry-farm. That is
+  // 27 parks and 51 coasters spelled the way somebody would read them out, and
+  // it introduces no collision — the park slugs stay unique, and so do all
+  // 1,114 park+coaster pairs.
+  //
+  // The two can diverge because they are not the same kind of thing. A rider's
+  // slug is STORED: it is their identity, a column in five tables and the URL
+  // they hand people, so changing the rule that made it would rename existing
+  // riders. A park's is DERIVED fresh from its name on every render and owned by
+  // nothing, so the rule that makes it can be the better one. Don't "fix" this
+  // by making them match again without moving the riders too.
+  function slugify(s) {
+    return String(s == null ? "" : s).toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/['\u2019]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  function parkHref(park) { return "/park/" + slugify(park); }
+  // Takes a coaster row, or a name and a park.
+  function coasterHref(c, park) {
+    var obj = c && typeof c === "object";
+    return "/park/" + slugify(obj ? c.park : park) + "/" + slugify(obj ? c.name : c);
+  }
+
+  // ---- ...and a URL resolves back through every rename ----------------------
+  // A rename is not an edge case here, it is how this hobby works: a retheme
+  // renames the ride, a buyout renames the park, and a relocation moves one to
+  // the other. So the database records every former name — coaster_aliases and
+  // park_aliases, which ride along with /api/coasters and therefore with the
+  // static coasters.json too — and these two functions spend them.
+  //
+  // The pages do not redirect on what these return. They look up the thing,
+  // then compare parkHref/coasterHref of what they found against the URL that
+  // was asked for, and replace the address only when the two differ. That way
+  // there is one rule — the canonical URL is whatever the current names make —
+  // and no path through here can invent a redirect loop.
+  function parkWas(list, slug) {
+    var pa = (list && list.parkAliases) || [];
+    for (var i = 0; i < pa.length; i++) if (slugify(pa[i].n) === slug) return pa[i].p;
+    return null;
+  }
+  // `list` is what fetchCoasters() resolves to: { coasters, aliases, parkAliases }.
+  // `parks` is the fetchParks() map, so a park with no coasters on it yet still
+  // has a page.
+  function findPark(list, parks, slug) {
+    var names = Object.create(null), cs = (list && list.coasters) || [], k, i;
+    for (k in (parks || {})) names[k] = 1;
+    for (i = 0; i < cs.length; i++) if (cs[i].park) names[cs[i].park] = 1;
+    for (k in names) if (slugify(k) === slug) return k;
+    var was = parkWas(list, slug);
+    return (was && names[was]) ? was : null;
+  }
+  // Four attempts, in the order they are most likely, and each one narrower
+  // than a plain name search would be. Returns the coaster row or null.
+  function findCoaster(list, parkSlug, nameSlug) {
+    var cs = (list && list.coasters) || [], i, c;
+    // 1. Both segments as they stand. The overwhelmingly common case.
+    for (i = 0; i < cs.length; i++)
+      if (slugify(cs[i].park) === parkSlug && slugify(cs[i].name) === nameSlug) return cs[i];
+    // 2. The park was renamed and the ride was not — a buyout, a sponsor.
+    var pk = parkWas(list, parkSlug);
+    if (pk) for (i = 0; i < cs.length; i++)
+      if (cs[i].park === pk && slugify(cs[i].name) === nameSlug) return cs[i];
+    // 3. The ride was renamed at a park that still has its name — a retheme.
+    //    Intimidator at Carowinds is Thunder Striker now, and the old link
+    //    should land on it rather than read as a missing coaster.
+    var byId = Object.create(null);
+    for (i = 0; i < cs.length; i++) byId[cs[i].id] = cs[i];
+    var al = (list && list.aliases) || [], elsewhere = [];
+    for (i = 0; i < al.length; i++) {
+      if (slugify(al[i].n) !== nameSlug) continue;
+      c = byId[al[i].c];
+      if (!c) continue;
+      if (slugify(c.park) === parkSlug || (pk && c.park === pk)) return c;
+      if (elsewhere.indexOf(c) < 0) elsewhere.push(c);
+    }
+    // 4. Nothing in the URL's park matched. A ride that moved — a relocation,
+    //    or a park rename nobody recorded — is still findable by name alone,
+    //    but ONLY where the name picks out exactly one ride: "wacky-worm" is
+    //    ten different coasters and guessing between them is worse than a 404.
+    var byName = cs.filter(function (x) { return slugify(x.name) === nameSlug; });
+    if (byName.length === 1) return byName[0];
+    if (!byName.length && elsewhere.length === 1) return elsewhere[0];
+    return null;
+  }
+  // Every former name this coaster has worn, for the line that says so.
+  //
+  // Minus the ones that are the current name in different punctuation. Seventeen
+  // of the table's aliases are exactly that — "Flash: Vertical Velocity*" under
+  // Flash: Vertical Velocity, "Rollies Coaster" under Rollie's Coaster — because
+  // they came in from imports that spelled it differently, not from a rename.
+  // They are real and they still resolve; they are just not news, and printing
+  // "Formerly Flash: Vertical Velocity" on Flash: Vertical Velocity reads as a
+  // bug. Same slug, same name as far as a URL is concerned.
+  function formerNames(list, id, current) {
+    var now = slugify(current);
+    return ((list && list.aliases) || [])
+      .filter(function (a) { return a.c === id && slugify(a.n) !== now; })
+      .map(function (a) { return a.n; });
+  }
+
   // The pages that exist per rider, i.e. everything but Home. Used for both
   // the header links and the rider picker so the two can't disagree.
   // Pages that belong to one rider and take a /user/<slug>/ prefix. Add new is
@@ -1041,6 +1156,8 @@
 
   var api = { computeStats: computeStats, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
+              slugify: slugify, parkHref: parkHref, coasterHref: coasterHref,
+              findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner };

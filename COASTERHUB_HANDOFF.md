@@ -367,13 +367,87 @@ is the only place that knows the shape of these URLs — header links, the rider
 bar, the hub cards, the home page and `/account`'s redirects all call it. Build one by hand and
 it will be the one that rots.
 
-### Wanted, not built yet: pages for a park and for a coaster (2026-09-17)
+### A park and a coaster are pages now: `/park/<park>/<coaster>` (2026-09-20)
 
-Carter's, for later: open a park or a coaster as its own page — the global ranking it sits at,
-how many riders here have it, who has ridden it and where they put it, the specs. The data is
-already there (`/api/coasters`, `/api/parks`, every rider's rides and rankings); what is missing
-is the URL scheme (`/park/<slug>`, `/coaster/<id>`?) and a decision about what leads each page.
-Nothing on the site links to such a page yet, so it can be built whole rather than in pieces.
+Wanted since 2026-09-17, built here. `park.html` and `coaster.html`, both reached by 200
+rewrites in `_redirects` (and mirrored in `tools/dev-server.mjs`, which hand-rolls the same
+rules).
+
+**Why the park leads, and why there is no `/coaster/<name>`.** The park is the parent: a
+coaster cannot exist without one, so chopping the last segment off a coaster's URL lands you on
+its park, which is a page that exists. A flat coaster URL was never on the table — **93 names in
+the database are used at more than one park** (`wacky-worm` at ten of them, `batman-the-ride` at
+nine), while the **park+coaster pair is unique across all 1,114**. `/ride/<park>/<coaster>` was
+the other candidate and lost on a word collision: in this codebase a *ride* is a logged ride by
+a person (`/api/rides`, `DELETE /api/ride`), so `/ride/...` would read as somebody's log entry.
+Singular `/park/` matches the `/user/<slug>` precedent, with the plural kept for an index.
+
+**`CoasterHub.parkHref` / `coasterHref` are the only places that know the shape**, for the same
+reason `userPageHref` is. Build one by hand and it will be the one that rots.
+
+**The slug rule deliberately differs from `slugify()` in worker.js in one respect**: an
+apostrophe is dropped rather than turned into a separator, so Knott's Berry Farm is
+`knotts-berry-farm` and not `knott-s-berry-farm`. That is 27 parks and 51 coasters spelled the
+way you would read them out, and it collides with nothing — the park slugs stay unique and so do
+all 1,114 pairs. The two functions may diverge because they are not the same kind of thing: a
+rider's slug is **stored** (their identity, a column in five tables, the URL they hand people),
+so changing the rule that made it would rename existing riders; a park's is **derived** fresh on
+every render and owned by nothing. Don't make them match again without moving the riders too.
+
+**`park`, `coaster` and `ride` are reserved usernames now** (`RESERVED_SLUGS` in worker.js).
+
+### A renamed park or ride keeps its URL (2026-09-20)
+
+The database has recorded former names since the beginning — `coaster_aliases`, `park_aliases`,
+both riding along inside `/api/coasters` and therefore inside the static `coasters.json` too —
+and this is what finally spends them. `findPark` and `findCoaster` in app.js try four things, in
+the order they are most likely: both segments as they stand; the park renamed and the ride not;
+the ride rethemed at a park that kept its name; and finally the name alone, **but only where it
+picks out exactly one ride**, since `wacky-worm` is ten different coasters and guessing between
+them is worse than a 404. Measured against the real snapshot: 1,114/1,114 coasters and 247/247
+parks round-trip, and 99/99 coaster aliases resolve.
+
+**The pages do not redirect from inside the lookup.** They resolve the thing, then compare
+`parkHref`/`coasterHref` of what they found against the URL asked for, and `replaceState` only
+when the two differ. One rule — the canonical URL is whatever the current names spell — and no
+path through the resolver can invent a loop. `replaceState` rather than `location.replace`
+because the page is already drawn from the right row.
+
+**`POST /api/admin/parks/rename` is new**, and is what makes this true for parks. Renaming a
+park used to mean editing each of its coasters by hand, which recorded nothing — so `/add` would
+offer to create the park again under its old name. This moves the coasters, moves or merges the
+`parks` row (filling the survivor's gaps from the row going away, because the one being merged
+*into* may be the one that never got geocoded), and writes the former name. **There is no `/edit`
+UI for it yet** — call it from the browser console the way any admin write can be, which also
+gets you the activity row and the static re-sync that raw D1 SQL does not.
+
+**Two known limits, neither a bug.** `Boomers` and `Boomers!` are former names of two *different*
+parks and slugify identically, so that one old address lands on one of them; there is no right
+answer in the data. And `park_aliases` is only written by the endpoint above — a park renamed by
+editing coasters one at a time still records nothing.
+
+**`migrations/016-alias-unique.sql`** dedupes both alias tables and puts a unique index on each.
+That also makes an old line honest: `recordAlias()` has always said `INSERT OR IGNORE`, which had
+nothing to ignore without a constraint. Dry-run against the snapshot: 101 → 99 and 9 → 7, second
+run a no-op.
+
+**The dev server now seeds the alias tables** (106 former names). It did not, which meant every
+rename path above was untestable locally and *looked* fine, because every current name still
+matched. That is exactly the class of thing this harness exists to catch.
+
+### Everything on the global count links out (2026-09-20)
+
+Park cards carry an "Everything at &lt;park&gt; →" line and linked coaster rows; day cards link
+their coasters and their per-park headings; the full list links its Name and Park columns. All of
+it goes through `clink`/`plink`, which fall back to plain text when a row has no park — a ride
+whose coaster has left the shared list would otherwise point at `/park//<name>`.
+
+The links are **not** in the `<summary>` of a card: an `<a>` there both navigates and toggles the
+`<details>`, which is why the park's own link sits at the top of the opened body instead.
+
+**Categories on the global count: asked for, deferred by Carter on 2026-09-20** ("nothing for now
+we'll do this later"). The three shapes put to him were a fourth view beside Tracked days /
+Parks / Coaster list, a Category column and filter in the full list, or a badge on every row.
 
 ### Asset paths must stay absolute
 

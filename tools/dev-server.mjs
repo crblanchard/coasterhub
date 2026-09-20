@@ -114,6 +114,16 @@ function seed() {
       c.yr ?? null, c.opened ?? null, c.openedPrec ?? null, c.closed ?? null, c.closedPrec ?? null);
   }
 
+  // Former names, which coasters.json carries alongside the list. Without these
+  // the two alias tables are empty locally, and everything that depends on a
+  // rename still resolving — /add refusing to re-create a rethemed ride, and
+  // /park/<park>/<coaster> healing an old URL — silently has nothing to work
+  // with and looks like it works because every current name still matches.
+  const ica = db.prepare("INSERT OR IGNORE INTO coaster_aliases (coaster_id,former_name) VALUES (?,?)");
+  for (const a of (coasters.aliases || [])) ica.run(a.c, a.n);
+  const ipa = db.prepare("INSERT OR IGNORE INTO park_aliases (park,former_name) VALUES (?,?)");
+  for (const a of (coasters.parkAliases || [])) ipa.run(a.p, a.n);
+
   // Every rider whose export is in the repo. The file is named for the slug,
   // except Carter's, which is still under the name the site launched with.
   const RIDERS = [["crblanchard.json", "carter", "Carter"], ["cole.json", "cole", "Cole"],
@@ -169,7 +179,9 @@ function seed() {
          J({ park:"Thorpe Park", backfilled:true }));
 
   console.log("seeded " + list.length + " coasters, " + Object.keys(parks).length +
-              " parks, " + rides.toLocaleString() + " rides, 10 feed events");
+              " parks, " + rides.toLocaleString() + " rides, " +
+              ((coasters.aliases || []).length + (coasters.parkAliases || []).length) +
+              " former names, 10 feed events");
 }
 
 // ---- the real Worker -------------------------------------------------------
@@ -247,6 +259,11 @@ createServer(async (req, res) => {
   if (p === "/stats") { res.writeHead(301, { location: "/" }); res.end(); return; }
   if (p === "/home" || p === "/riders") { res.writeHead(301, { location: "/" }); res.end(); return; }
   if (p === "/rankings/all") p = "/rankings-all.html";
+  // A park page, and a coaster at it. Two placeholders where the rider rules
+  // have one, and the longer match has to be tested first for the same reason
+  // it is listed first in _redirects.
+  const pk = p.match(/^\/park\/([^/]+)(?:\/([^/]+))?\/?$/);
+  if (pk) p = pk[2] ? "/coaster.html" : "/park.html";
   const m = p.match(/^\/user\/[^/]+(\/.*)?$/);
   if (m) p = m[1] && m[1] !== "/" ? m[1] : "/profile";
   if (p === "/") p = "/index.html";

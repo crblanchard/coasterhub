@@ -75,6 +75,11 @@ var GROUPS = [
       { t: 'Count',       p: '/count',     d: 'The log, by park day or as one flat list.', rider: 'count' },
       { t: 'All coasters', p: '/count?view=list', d: 'Every coaster ridden, sortable and filterable.' },
       { t: 'All parks',    p: '/count?view=parks', d: 'Every park visited, A\u2013Z \u2014 open one for what you have ridden there.' },
+      // Linked to a real park and a real ride rather than a /park/<park> shape,
+      // because every entry on this page is a link somebody can follow. The
+      // examples are Knott's because its slug shows the apostrophe rule.
+      { t: 'One park',    p: '/park/knotts-berry-farm', d: 'Every coaster at one park, who has ridden them, and how much of it each rider has.' },
+      { t: 'One coaster', p: '/park/knotts-berry-farm/ghostrider', d: 'One ride: its specs, its former names, and who has been on it. The address is /park/<park>/<coaster>.' },
       { t: 'Rankings',    p: '/rankings',  d: 'Favourites in order — drag to reorder, or compare two at a time.', rider: 'rankings' },
       { t: 'Categories',  p: '/categories', d: 'The same ride at five parks, ranked once. Pick the ones you use, or write your own.' }
     ] },

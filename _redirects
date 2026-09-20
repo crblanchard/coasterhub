@@ -11,6 +11,24 @@
 # own URL rather than a query string because it is a page you send someone.
 /rankings/all         /rankings-all 200
 
+# A park, and a coaster at it. The park leads because a coaster cannot exist
+# without one: chop the last segment off a coaster's URL and you land on its
+# park, which is a page that exists. A flat /coaster/<name> was never possible —
+# 93 names in the database are used at more than one park ("Wacky Worm" at ten
+# of them) — while the park+coaster pair is unique across all 1,114.
+#
+# 200 = rewrite, so the browser keeps the pretty URL, and the destinations are
+# the CLEAN paths (/coaster, not /coaster.html) for the same reason the rider
+# ones are. The two-segment rule MUST come first: the first matching rule wins,
+# and /park/:park would otherwise swallow the coaster segment.
+#
+# A rename does not need a rule here. Both pages resolve their slug through the
+# former-name tables that ride along with /api/coasters, then correct the
+# address bar to whatever the current names spell — see findPark/findCoaster in
+# app.js. Adding a redirect per rename would be a second, staler source of truth.
+/park/:park/:coaster  /coaster  200
+/park/:park           /park     200
+
 /user/:name/count     /count      200
 /user/:name/rankings  /rankings   200
 /user/:name/add       /add        200
