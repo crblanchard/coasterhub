@@ -536,7 +536,7 @@ const RESERVED_SLUGS = new Set(["api","user","users","admin","new","all","everyo
   // a rider called Park would shadow every one of those pages.
   "park", "coaster", "ride",
   "home","stats","rides","count","rankings","coasters","parks","log","add","edit","import",
-  "changes","database","sitemap","index","account","accounts","login","logout",
+  "changes","database","qc","sitemap","index","account","accounts","login","logout",
   "signup","signin","profile","riders","me","auth","session","settings"]);
 function slugify(s) {
   return String(s == null ? "" : s).toLowerCase()

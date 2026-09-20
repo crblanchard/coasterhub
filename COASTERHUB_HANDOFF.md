@@ -440,6 +440,14 @@ run a no-op.
 rename path above was untestable locally and *looked* fine, because every current name still
 matched. That is exactly the class of thing this harness exists to catch.
 
+### The QC table is `/qc`, and the count's everyone view is "Database" (2026-09-20)
+
+`database.html` is `qc.html`, and `/database` 301s to `/qc` — after the global count's
+headline became **Database**, two pages answered to that word, one of them unlisted and
+admin-shaped. Every footer, the sitemap and `RESERVED_SLUGS` moved with it. Carter does his
+fixing in `/edit` now and barely opens this page; it is kept because it is the only view that
+shows the whole list with its gaps flagged.
+
 ### Everything on the global count links out (2026-09-20)
 
 Park cards carry an "Everything at &lt;park&gt; →" line and linked coaster rows; day cards link

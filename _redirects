@@ -11,6 +11,13 @@
 # own URL rather than a query string because it is a page you send someone.
 /rankings/all         /rankings-all 200
 
+# The QC table was /database until the everyone view of the count took that
+# word for its headline. Two pages called Database, one of them unlisted and
+# admin-shaped, was a question nobody should have to ask. 301, not a rewrite:
+# the old address should settle on the new one, the same treatment /coasters
+# and /stats got.
+/database             /qc           301
+
 # A park, and a coaster at it. The park leads because a coaster cannot exist
 # without one: chop the last segment off a coaster's URL and you land on its
 # park, which is a page that exists. A flat /coaster/<name> was never possible —

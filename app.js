@@ -1024,7 +1024,7 @@
 
   // The two controls every header carries on its right: the theme toggle and
   // whoever is signed in. Split out of initNav so a page with its own header
-  // and no site nav — /database — can wear the same corner without inheriting
+  // and no site nav — /qc — can wear the same corner without inheriting
   // the rest of it (Carter, 2026-09-18).
   function accountCorner(host) {
     if (!host) return;
