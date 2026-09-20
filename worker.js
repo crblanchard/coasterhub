@@ -1003,7 +1003,14 @@ async function recordCredits(env, slug, { rides, coasters, newCredits }) {
 // rows stay in `activity` — they are the record of what changed and when, and
 // the /qc and admin panes can still read them.
 const FEED_HIDDEN = ["clone_set", "clone_removed",
-                     "model_renamed", "model_merged", "model_assigned"];
+                     "model_renamed", "model_merged", "model_assigned",
+                     // "Kumba had 6 details updated" is the same housekeeping
+                     // wearing a coaster's name: filling in the specs of rows
+                     // nobody had got to yet is a thousand of these, and it is
+                     // not what anybody opens /changes to read. A coaster being
+                     // ADDED, renamed or merged still shows — those change what
+                     // the list IS, not what it says about itself.
+                     "coaster_edited"];
 async function getActivity(env, limit) {
   const { results } = await env.DB.prepare(
     "SELECT id, at, actor, kind, subject, n, detail FROM activity " +
@@ -2300,13 +2307,46 @@ export default {
       // Two undated rows for the same rider would collapse into one credit
       // anyway, so the dedupe keeps the table honest rather than changing counts.
       if (request.method === "POST" && path === "/api/merge") {
-        const { from, to } = await request.json();
-        if (!from || !to || from === to) return err(400, "need distinct from/to");
+        const body = await request.json();
+        // Numbers, always. SQLite compares a text '137' against an INTEGER
+        // column happily enough, so a caller passing ids as strings merged
+        // correctly — and then the activity row recorded them as strings,
+        // where json_extract hands back text that does not compare equal to an
+        // integer id. That is what made the merge unrecoverable for
+        // migrations/018, which had to find the survivor by reading that row
+        // back. The record is the only trace a merge leaves; it gets one shape.
+        const from = Number(body && body.from), to = Number(body && body.to);
+        if (!Number.isInteger(from) || !Number.isInteger(to) || !from || !to || from === to) {
+          return err(400, "need distinct from/to");
+        }
         // The disappearing row's name is a former name of the survivor, and any
         // alias it already carried has to come with it — otherwise merging a
         // coaster silently throws away everything it was ever called.
         const src = await env.DB.prepare("SELECT name, park FROM coasters WHERE id = ?").bind(from).first();
+
+        // Fill the survivor's GAPS from the row that is about to go, the way a
+        // park merge already fills its survivor's coordinates.
+        //
+        // Without this a merge is a spec-shredder, and it does its worst in the
+        // case people actually merge: a ride that was rethemed exists twice,
+        // once as the old row with every number filled in and once as a stub
+        // somebody typed the new name into. Merging the old into the new — the
+        // right way round, because the new name is the one that stays — deleted
+        // all of it. Carter merged Goliath (Six Flags Fiesta Texas, a B&M
+        // Invert with its full specs) into Chupacabra and Chupacabra was left
+        // with nothing but "Steel". (2026-09-20.)
+        //
+        // COALESCE only ever fills a NULL, so nothing the survivor already says
+        // about itself is touched, and `name` and `park` are not in the list:
+        // the survivor's identity is the whole point of choosing it.
+        const MERGE_FILLS = ["type", "manu", "model", "h", "s", "l", "inv", "dur",
+                             "laps", "yr", "opened", "openedPrec", "closed", "closedPrec"];
+        const fills = MERGE_FILLS.map(
+          (c) => c + " = COALESCE(" + c + ", (SELECT " + c + " FROM coasters WHERE id = ?1))"
+        ).join(", ");
+
         const batch = [
+          env.DB.prepare("UPDATE coasters SET " + fills + " WHERE id = ?2").bind(from, to),
           env.DB.prepare("UPDATE rides SET coaster_id = ? WHERE coaster_id = ?").bind(to, from),
           env.DB.prepare(
             "DELETE FROM rides WHERE d IS NULL AND id NOT IN " +

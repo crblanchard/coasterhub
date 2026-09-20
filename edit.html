@@ -1090,122 +1090,67 @@
   function showMTriage(id){
     var c = state.byId[id]; if(!c) return;
     state.sel = id; renderMTriage();
-    // Back to the top: walking a queue redraws this pane under the scroll
-    // position the last ride left, which put the name of the one you just
-    // opened off the top of the screen.
-    document.getElementById('editor').scrollTop = 0;
     var aside = !!state.mskipped[id];
-    var maker = (c.manu||'').trim();
-    var mk = maker ? makerSplit()[maker] : null;
-    // A coaster of the same name somewhere else is the strongest hint there is:
-    // a clone carries the clone's model, and the name is how clones are spotted
-    // everywhere else in this editor.
+
+    // The real editor, with the queue's two buttons above it. There is no
+    // second form here any more: these rides are missing their maker and their
+    // numbers as often as their model, and a pane that only took a model was a
+    // worse version of the page next door.
+    coasterEditor(id,
+      '<div class="actions" style="margin:0 0 14px">'
+      + '<button class="ghost" id="mtaside">'+(aside?'Back to the queue':'Set aside')+'</button>'
+      + '<button class="ghost" id="mtnext">Next in the queue</button>'
+      + '<span class="toast" id="mttoast">'
+        + (aside ? 'Set aside \u2014 looked at, and there is no model to give it.'
+           : hasModel(c) ? 'Has a model. Saving takes it out of the queue.'
+           : 'No model yet.')
+      + '</span></div>');
+
+    // What this ride can be answered from, under the editor and read-only: the
+    // rest of its park, which is one lookup for all of them, and anything of
+    // the same name elsewhere, which is usually the same ride and therefore the
+    // same model.
+    var here = state.coasters.filter(function(x){
+      return x.id!==id && (c.park||'') && (x.park||'')===(c.park||''); }).sort(byRide);
     var same = !c.name ? [] : state.coasters.filter(function(x){
       return x.id!==id && hasModel(x)
         && String(x.name||'').trim().toLowerCase() === String(c.name).trim().toLowerCase();
     }).sort(byRide);
-
-    document.getElementById('editor').innerHTML =
-      '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(c.name)+'</h2>'
-      + '<p class="hint">'+esc(c.park||'?')+(maker?' · '+esc(maker):' · no maker recorded')
-        + (c.type?' · '+esc(c.type):'')+(c.yr?' · '+c.yr:'')+'</p>'
-      + '<p class="hint">'+(hasModel(c) ? 'Model: <b>'+esc(c.model)+'</b>.'
-          : aside ? 'Set aside — looked at, and there is no model to give it.'
-          : 'No model yet.')+'</p>'
-      // Maker and model together, because they are missing together: these are
-      // rows nobody has filled in yet, and Carter is filling both in this pass
-      // (2026-09-20), with the stats to follow later. One save writes both.
-      + '<div class="grid"><div class="fld"><label>Manufacturer</label>'
-        + '<input id="mtmanu" list="dl_manu" value="'+esc(c.manu||'')+'" '
-        + 'placeholder="who built it"></div>'
-        + '<div class="fld"><label>Model</label>'
-        + '<input id="mtset" list="dl_models" value="'+esc(c.model||'')+'" '
-        + 'placeholder="pick one that exists, or type a new one"></div></div>'
-      + '<div class="actions"><button id="mtsave">Save and go on</button>'
-        + '<button class="ghost" id="mtaside">'+(aside?'Back to the queue':'Set aside')+'</button>'
-        + '<button class="ghost" id="mtnext">Next in the queue</button>'
-        + '<span class="toast" id="mttoast"></span></div>'
-      // The park first, because it is the hint that is actually there. These
-      // rides are missing their maker as often as their model, so "what this
-      // maker builds" leads with a blank; a park is a single lookup that
-      // answers every ride standing in it.
-      + (function(){
-          var here = state.coasters.filter(function(x){
-            return x.id!==id && (c.park||'') && (x.park||'')===(c.park||''); }).sort(byRide);
-          if (!here.length) return '';
-          var done = here.filter(hasModel).length;
-          return '<div class="toolbar"><h3>The rest of '+esc(c.park||'this park')+'</h3>'
-            + '<p class="hint">'+done+' of its other '+here.length+' ride'
-              + (here.length===1?'':'s')+' carr'+(here.length===1?'ies':'y')+' a model. '
-              + 'Looking the park up once answers all of them.</p>'
-            + '<div class="pane">'+here.slice(0,20).map(function(x){
-                return '<div class="tick">'+esc(x.name)
-                  + '<span class="sub"> \u2014 '+(x.model ? esc(x.model) : 'no model yet')
-                  + (x.manu?' \u00b7 '+esc(x.manu):'')+'</span></div>'; }).join('')
-            + (here.length>20 ? '<p class="hint">\u2026 and '+(here.length-20)+' more.</p>' : '')
-            + '</div></div>';
-        })()
-      + (mk && mk.model.length
-          ? '<div class="toolbar"><h3>What '+esc(maker)+' builds</h3>'
-            + '<p class="hint">'+mk.filed.length+' of its '+mk.rides.length+' rides carry a model'
-            + (mk.loose.length ? ' · '+mk.loose.length+' still to do' : '')
-            + '. One click files this one and moves on.</p>'
-            + '<div class="inline" style="flex-wrap:wrap">'
-            + mk.model.slice(0,14).map(function(m, i){
-                return '<button class="ghost" data-mm="'+i+'">'+esc(m.model)
-                  + ' <span class="sub">'+m.n+'</span></button>'; }).join('')
-            + '</div></div>'
-          : '<div class="toolbar"><h3>What '+(maker?esc(maker):'this maker')+' builds</h3>'
-            + '<p class="hint">'+(maker
-                ? 'Nothing else by this maker carries a model yet, so there is nothing to copy.'
-                : 'No maker is recorded for this coaster yet. Type one into the box '
-                  + 'above and it is saved with the model.')+'</p></div>')
-      + (same.length
-          ? '<div class="toolbar"><h3>The same name elsewhere</h3>'
-            + '<p class="hint">Almost always the same ride, and the same ride is the same '
-              + 'model. Check the maker matches before taking it.</p>'
-            + '<div class="pane">'+same.slice(0,12).map(function(x, i){
-                return '<div class="tick"><button class="ghost" data-mn="'+i+'">Use '
-                  + esc(x.model)+'</button> <span class="sub">'+esc(x.name)+' — '
-                  + esc(x.park||'?')+(x.manu?' · '+esc(x.manu):'')+'</span></div>';
-              }).join('')+'</div></div>'
-          : '')
-      + modelDatalist()
-      + '<datalist id="dl_manu">'
-      + state.opts.manu.map(function(x){ return '<option value="'+esc(x)+'">'; }).join('')
-      + '</datalist>';
-
-    async function give(model, manu){
-      var t = document.getElementById('mttoast'); t.className='toast';
-      var to = String(model==null ? document.getElementById('mtset').value : model).trim();
-      // What is in the box wins: it is either what the ride already had or what
-      // was just typed. A maker offered by a clone only fills a box left empty.
-      var mn = document.getElementById('mtmanu').value.trim() || String(manu||'').trim();
-      if (!to){ t.textContent = 'Type a model, or set it aside.'; return; }
-      t.textContent = 'Saving…';
-      try {
-        // Both fields in one call, so a ride cannot end up half-saved.
-        await api("POST","/api/admin/models/assign",{ ids:[id], model:to, manu:mn });
-        c.model = to;
-        if (mn) c.manu = mn;
-        state.opts = { manu:distinct("manu"), model:distinct("model") };
-        // It has a model now, so a note saying it has none is stale.
-        if (state.mskipped[id]) {
-          try { await api("POST","/api/admin/models/skipped",{ ids:[id], on:false }); } catch(e){}
-          delete state.mskipped[id];
-        }
-        nextMTodo(id);
-      } catch(e){ t.className='toast bad'; t.textContent = e.message; }
+    function listOf(rides){
+      return '<div class="pane">' + rides.slice(0,20).map(function(x){
+          return '<div class="tick">'+esc(x.name)
+            + '<span class="sub"> \u2014 '+(x.model ? esc(x.model) : 'no model yet')
+            + (x.manu?' \u00b7 '+esc(x.manu):'')
+            + (x.park!==c.park?' \u00b7 '+esc(x.park||'?'):'')+'</span></div>'; }).join('')
+        + (rides.length>20 ? '<p class="hint">\u2026 and '+(rides.length-20)+' more.</p>' : '')
+        + '</div>';
     }
-    document.getElementById('mtsave').onclick = function(){ give(null); };
-    document.getElementById('editor').querySelectorAll('[data-mm]').forEach(function(b){
-      b.onclick = function(){ give(mk.model[+b.getAttribute('data-mm')].model); }; });
-    document.getElementById('editor').querySelectorAll('[data-mn]').forEach(function(b){
-      b.onclick = function(){
-        var x = same[+b.getAttribute('data-mn')]; give(x.model, x.manu); }; });
+    var hints = '';
+    if (here.length){
+      hints += '<div class="toolbar"><h3>The rest of '+esc(c.park||'this park')+'</h3>'
+        + '<p class="hint">'+here.filter(hasModel).length+' of its other '+here.length
+          + ' ride'+(here.length===1?'':'s')+' carr'+(here.length===1?'ies':'y')+' a model. '
+          + 'Looking the park up once answers all of them.</p>'
+        + listOf(here) + '</div>';
+    }
+    if (same.length){
+      hints += '<div class="toolbar"><h3>The same name elsewhere</h3>'
+        + '<p class="hint">Almost always the same ride, and the same ride is the same '
+          + 'model. Check the maker matches before copying it.</p>'
+        + listOf(same) + '</div>';
+    }
+    // Above Merge and Delete, not below them: this is what you read while
+    // filling the fields in, and those two are the rarest things on the page.
+    if (hints) {
+      var ed = document.getElementById('editor'), first = ed.querySelector('.toolbar');
+      if (first) first.insertAdjacentHTML('beforebegin', hints);
+      else ed.insertAdjacentHTML('beforeend', hints);
+      ed.scrollTop = 0;
+    }
+
     document.getElementById('mtaside').onclick = async function(){
       var t = document.getElementById('mttoast'); t.className='toast';
-      t.textContent='Saving…';
+      t.textContent='Saving\u2026';
       try {
         await api("POST","/api/admin/models/skipped",{ ids:[id], on:!aside });
         if (aside) delete state.mskipped[id]; else state.mskipped[id] = 1;
@@ -1550,6 +1495,14 @@
   }
   function selectCoaster(id){
     state.sel = id; renderCoasters();
+    coasterEditor(id);
+  }
+  // The editor itself, so the models queue can open the REAL one rather than a
+  // second, smaller form beside it. (Carter, 2026-09-20: "on models triage give
+  // me regular editor just show me rides without a model assigned".) `extra` is
+  // whatever the pane that opened it wants above the fields — the queue puts
+  // its Set aside and Next there.
+  function coasterEditor(id, extra){
     var c = state.byId[id];
     var fields = FIELDS.map(function(f){
       var cls = (f[0]==="name"||f[0]==="park") ? "fld full" : "fld";
@@ -1557,6 +1510,7 @@
     }).join("");
     var geoNote = geocoded(c.park) ? '<span class="badge onmap">park on map</span>' : '<span class="badge nomap">park not geocoded — add it in the Parks tab</span>';
     document.getElementById('editor').innerHTML =
+      (extra || '') +
       '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:1.15rem">'+esc(c.name)+'</h2>'+
         '<span style="color:var(--muted)">#'+c.id+'</span>'+geoNote+'</div>'+
       '<p class="hint">Edits update this coaster everywhere — every rider’s page reflects it automatically (they reference it by id).</p>'+
@@ -1571,6 +1525,16 @@
     document.getElementById('revert').addEventListener('click', function(){ selectCoaster(id); });
     document.getElementById('mergeBtn').addEventListener('click', mergeCoaster);
     document.getElementById('delBtn').addEventListener('click', deleteCoaster);
+    // AFTER the content is in: setting it first leaves the browser holding the
+    // old offset, which is how the top of a queued ride ended up off-screen.
+    //
+    // The WINDOW too, and it is the one that was actually wrong: the header
+    // wraps to two rows at this width, so the page is a header's-worth taller
+    // than `.wrap`'s `100vh - 54px` believes, and whatever the page is scrolled
+    // by hides that much of the pane behind the sticky bar. Opening a ride put
+    // its name under the header.
+    document.getElementById('editor').scrollTop = 0;
+    window.scrollTo(0, 0);
     loadUsage(id);
   }
 
@@ -1629,7 +1593,7 @@
     try {
       var body = readForm(); await api("PUT","/api/coaster/"+id, body); Object.assign(state.byId[id], body);
       state.opts = { manu:distinct("manu"), model:distinct("model") };
-      toast.textContent="Saved ✓"; toast.className="toast good"; renderCoasters();
+      toast.textContent="Saved ✓"; toast.className="toast good"; render();
     } catch(e){ toast.textContent="Error: "+e.message; toast.className="toast bad"; }
   }
   async function mergeCoaster(){

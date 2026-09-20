@@ -2353,6 +2353,61 @@ the model off these" — thirteen Arrow coasters lost their model while the toas
 successful split. An empty model now needs `clear:true`; without it, it is a 400. A field that
 is absent is not an instruction to erase.
 
+### A merge was a spec-shredder, and the repair missed (2026-09-20, same evening)
+
+Carter, after running 018: *"chupacabra lost all its stats and its not under batman"*. Two
+separate faults on one ride, and the first one is much older than this session.
+
+**The specs.** `/api/merge` moved the rides and the former names and took no interest in the
+columns, so merging #137 (Goliath, Six Flags Fiesta Texas — a B&M Invert with every number
+filled in) into #1199 (Chupacabra, the stub the new name had been typed into) kept the stub
+and deleted the filled row. That is the case people actually merge — a retheme exists twice,
+once complete and once as a name — and the right way round loses everything. The merge now
+**fills the survivor's gaps** with `COALESCE` over every spec column, the way a park merge has
+always filled its survivor's coordinates. `name` and `park` are deliberately not in the list:
+the survivor's identity is why it was chosen.
+
+**The category.** 018's `clone_members` block did not match, and its `DELETE` then removed the
+row — too eager. An unresolved membership is a question, not rubbish, and nothing in
+`activity` can reconstruct one (`clone_set` records a count, not ids). The likeliest reason it
+missed: a merge recorded with **string** ids. `json_extract` hands back the type the JSON
+held, and SQLite does not compare text `'137'` equal to integer `137` — while the merge itself
+worked fine, because an INTEGER column coerces the text on the way in. `/api/merge` coerces
+both ids with `Number()` before anything is recorded now: the activity row is the only trace a
+merge leaves, so it gets one shape.
+
+`migrations/019-chupacabra.sql` restores the specs from the repo's `coasters.json` export
+(which still carries id 137, the static sync not having run), puts Chupacabra back into Batman
+clones, and re-runs the resolution with `CAST` on **both** sides — and does not delete what it
+cannot resolve. Everything in it matches on name + park and is guarded, so a second run is a
+no-op. Dry-run against `node:sqlite` including the string-id case.
+
+### The models queue opens the real editor (2026-09-20)
+
+Carter: *"on models triage give me regular editor just show me rides without a model
+assigned"*. `selectCoaster` is split into `coasterEditor(id, extra)` and both panes call it, so
+the queue gets the whole field form — maker, the numbers, merge, delete — with **Set aside**
+and **Next in the queue** above it and the park's other rides below. The bespoke two-field
+form is gone; it was a worse version of the page next door, and these rides are missing their
+numbers as often as their model. Saving redraws whichever list is open, so a ride that just
+got a model visibly leaves the queue.
+
+`POST /api/admin/models/assign` still takes an optional `manu` — nothing in the UI sends it
+now, and it stays because the pane that moves rides in bulk is the obvious next caller.
+
+**A layout bug fell out of it.** `.wrap` is `height:calc(100vh - 54px)`, but the editor's
+header wraps to two rows at most widths, so the page is a header's-worth taller than that and
+whatever the page is scrolled by hides the top of the pane behind the sticky bar — opening a
+ride put its name under the header. `coasterEditor` scrolls the window as well as the pane.
+The `54px` is still a guess; a flex column would end the class.
+
+### "Had 6 details updated" is housekeeping too (2026-09-20)
+
+`coaster_edited` joins `FEED_HIDDEN`. Carter: *"make it so details updated also dont show on
+homepage changes"* — filling in the specs of rows nobody had got to yet is a thousand of those
+lines, and it is not what anybody opens /changes for. A coaster being **added**, renamed or
+merged still shows: those change what the list IS, not what it says about itself.
+
 ### Pasting a migration into the D1 console strips the newlines (2026-09-20)
 
 017 came back from the console as *"The request is malformed: Requests without any query are

@@ -2035,6 +2035,11 @@ async function main() {
   {
     const db = freshDb();
     db.exec(`
+      -- #1 is the survivor and carries almost nothing; #2 is the row with the
+      -- specs on it, which is the shape a retheme leaves behind.
+      UPDATE coasters SET manu = NULL, model = NULL WHERE id = 1;
+      UPDATE coasters SET manu = 'B&M', model = 'Invert', h = 105, s = 50, l = 2693,
+        inv = 5, dur = 120, yr = 2008, opened = '2008-04-18' WHERE id = 2;
       INSERT INTO clone_groups (id,name,created) VALUES (1,'Batman clones','x');
       INSERT INTO clone_members (coaster,group_id) VALUES (2,1);
       INSERT INTO rankings (user_slug,coaster_id,pos) VALUES ('carter',2,1),('cole',1,2),('cole',2,3);
@@ -2043,6 +2048,17 @@ async function main() {
       INSERT INTO category_skipped (coaster,at) VALUES (2,'x');
     `);
     await call(db, "POST", "/api/merge", { token: PW, body: { from: 2, to: 1 } });
+
+    check("a merge fills the survivor's gaps from the row going away",
+      (function(){
+        const r2 = rows(db, "SELECT type, manu, model, h, inv, opened FROM coasters WHERE id = 1")[0];
+        return r2.manu === "B&M" && r2.model === "Invert" && r2.h === 105 && r2.inv === 5
+            && r2.opened === "2008-04-18";
+      })(), JSON.stringify(rows(db, "SELECT * FROM coasters WHERE id = 1")[0]));
+    check("...without touching anything it already said about itself",
+      rows(db, "SELECT name, park, type FROM coasters WHERE id = 1")[0].name === "Steel Vengeance"
+      && rows(db, "SELECT type FROM coasters WHERE id = 1")[0].type === "Steel",
+      JSON.stringify(rows(db, "SELECT name, park, type FROM coasters WHERE id = 1")[0]));
 
     check("a merge hands the category membership to the survivor",
       rows(db, "SELECT coaster FROM clone_members").map((r) => r.coaster).join() === "1",
@@ -2065,6 +2081,22 @@ async function main() {
       rows(db, "SELECT coaster FROM rider_category_members").map((r) => r.coaster).join() === "1");
     check("...as did the set-aside decision",
       rows(db, "SELECT coaster FROM category_skipped").map((r) => r.coaster).join() === "1");
+
+    // The ids reach `activity` as numbers whatever the caller sent, because a
+    // repair has to find the survivor by reading that row back, and
+    // json_extract returns text for a string — which SQLite will not compare
+    // equal to an integer id. This is what made an earlier merge
+    // unrecoverable.
+    {
+      const db2 = freshDb();
+      await call(db2, "POST", "/api/merge", { token: PW, body: { from: "3", to: "1" } });
+      const e = rows(db2, "SELECT detail FROM activity WHERE kind='coaster_merged' ORDER BY id DESC")[0];
+      const d = JSON.parse(e.detail);
+      check("a merge records its ids as numbers, whatever it was sent",
+        d.from === 3 && d.to === 1, e.detail);
+      const r2 = await call(db2, "POST", "/api/merge", { token: PW, body: { from: "x", to: 1 } });
+      check("...and a non-numeric id is a 400", r2.status === 400, r2.status + "");
+    }
 
     // A database that has not run the category migrations still merges: the
     // tables it carries are moved and the missing ones are simply not there.
