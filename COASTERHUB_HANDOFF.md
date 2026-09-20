@@ -2626,6 +2626,61 @@ The dot is `.day .row .nw`, named for what it is rather than where it landed. Th
 a card keeps its hairline when the grey line is there: it then reads as the rule between the
 rides and a line that counts them.
 
+### Names in the changes feed are links (2026-09-20)
+
+Riders, parks and coasters in a feed sentence go to their pages, on `/changes` and the
+homepage both — one component, `changes-feed.js`, so both got it at once. The hrefs come out
+of `CoasterHub` (`userPageHref`, `parkHref`, `coasterHref`), never spelled in the feed.
+
+What does not link is the interesting half:
+
+- **A coaster with no park.** The park leads in the URL, so without one there is no address.
+  Most events carry it (`detail.park`, or the coaster list by id); `ride_removed` records only
+  the name, so those are looked up by name and linked **only when the name belongs to exactly
+  one coaster**. 93 names are used at more than one park and the wrong Wacky Worm is worse
+  than no link.
+- **"3 parks"**, which is what `parkLabel` writes for a day across several. A subject only
+  links when it is a name in the real park list, which rules that out for free.
+- **A deleted coaster.** Nothing to open.
+- **Anything, before the coaster list lands.** `PARKS` and `COASTER_PARK` are empty until
+  then; the feed already redrew itself when it arrives, for the `(park)` suffix.
+
+Categories and models are still plain text. They were not asked for, and neither has a page
+that shows one.
+
+The links take the colour of what they sit in — a subject is already teal, an actor already
+bold — rather than turning the feed blue, the same rule as the day cards on `/count`. The
+cost is that a linked name and an unlinked one look identical until you hover; the pointer
+cursor is the only tell. That is the accepted trade, not an oversight.
+
+### The share card's tagline, and the scanline under it (2026-09-20)
+
+`og-image.png` said "A ROLLER COASTER COUNT, VISUALIZED". It now says **TRACK YOUR COASTER
+COUNT.** with **RANK YOUR CREDITS. LOG YOUR RIDES.** under it in muted grey — Carter's copy,
+his line break.
+
+`tools/render-icons.mjs` draws the tagline now, so it has a source rather than existing only
+as pixels. The **wordmark still doesn't**: it was set in a font this container hasn't got, so
+the card is redrawn ON TOP OF ITSELF — the tile and the tagline painted over the existing
+PNG, everything else left as the pixels it already is. Re-running the script is idempotent.
+
+**The trap, if you ever patch that image again: the backdrop is not flat.** Every odd row is
+`#01030c` against `#04091a` — a scanline across the whole card, *under* the type (the
+wordmark's pixels are 255,255,255 on both parities). A flat rectangle over the old tagline
+leaves a visible band where the stripes stop. The patch repeats the pattern
+(`repeating-linear-gradient`, 1px/1px) and starts on an **even** row so it lands in phase;
+verified row by row across the patch and out to both edges before it shipped.
+
+Geometry, measured off the card as it was, in case the next line needs to match: the wordmark
+is caps 320–379; the old tagline was caps 414–429, 1,022px across 34 characters — 30px per
+character, which is why any grotesque can stand in for it at that size.
+
+Note that `og:description` and `<title>` still say "A roller coaster count, visualized". A
+link preview shows that text directly above the card, so the two now disagree; Carter asked
+about the card only. And every page points at the same `/og-image.png`, so Slack, iMessage and
+the rest will keep showing the OLD card from their caches until they refetch — nothing is
+wrong when that happens. A `?v=2` on the twelve `og:image` tags is the lever if it matters.
+
 ---
 
 ## Open tasks
