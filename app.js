@@ -1129,7 +1129,12 @@
     "Getting in line",
     "Ropedropping",
     "Counting rides",
-    "Tracking stats"
+    "Tracking stats",
+    "Loop-de-looping",
+    "Hitting -2",
+    // The ellipses inside this one are Carter's; the mapper below only strips a
+    // trailing one, so the internal beats survive and it still ends "1\u2026".
+    "3\u2026 2\u2026 1"
   ].map(function (t) { return t.replace(/[.\u2026]+$/, "") + "\u2026"; });
   function loadingLine() { return LOADING[Math.floor(Math.random() * LOADING.length)]; }
 
