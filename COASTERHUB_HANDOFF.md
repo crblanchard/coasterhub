@@ -2353,6 +2353,38 @@ the model off these" — thirteen Arrow coasters lost their model while the toas
 successful split. An empty model now needs `clear:true`; without it, it is a 400. A field that
 is absent is not an instruction to erase.
 
+### The ranking page says when a category is one ride short (2026-09-20)
+
+Carter lost a ranking to the merge bug — 221 down to 220 — and asked the question that
+matters more than the row: *"because i've been on it shouldn't i get the 'categories change -
+include missing rides' note"*, then *"I'd like a popup in this instance or if you newly add a
+ride to your count thats in a category you already have ranked"*.
+
+A ride **in your count, not in your list, in a category you have already ranked** is not a
+suggestion about taste. The position is decided, the row exists, and the only reason it is
+missing is that nobody said so. `/rankings` now says so twice:
+
+- **A dialog on load**, the same overlay as the head-to-head because it leads straight into
+  one: *"Batman clones is one ride short — you have been on Chupacabra at Six Flags Fiesta
+  Texas, and it is the same ride as the 7 you have already ranked."* **Place it** opens the
+  comparison (and turns editing on, because the answer to the dialog is a change to the list);
+  **Not now** remembers, per rider, in `ch_join_<slug>`.
+- **A section in the Add list** — *"one ride you have been on that finishes a category you
+  already rank"* — above Everything else, so it is still there after the dialog is dismissed.
+
+Shown once per load, never for a ride already waved away, never while the head-to-head is up,
+and never to somebody looking at a list they cannot edit (which is why it waits for
+`CoasterHub.me()` rather than firing on render). A rider who has ranked nothing has no
+joiners by definition, so a first-timer is not greeted by it.
+
+Where it is NOT shown: `/log`, at the moment a ride is added. That page holds neither the
+ranking nor the categories, and the offer is only actionable on `/rankings` anyway — so the
+next visit there is where it appears.
+
+Driven against the real worker: the offer's wording, placing it through the head-to-head into
+the list, that it does not ask twice, that "Not now" survives, that a visitor is never asked,
+and no sideways scroll at 390px.
+
 ### /log filters parks by location (2026-09-20)
 
 Carter: *"on /log when you're adding new parks add a filter where you can check locations to
