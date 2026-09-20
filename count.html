@@ -24,6 +24,23 @@
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .seg button{background:transparent;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;font-size:.9rem}
   .seg button.on{background:var(--tint2);color:var(--fg)}
+  /* Cuts the park list down to the ones you have actually been to — 247 to
+     113, for Carter. Shown only on the park list and only when the page knows
+     who you are; display is inline-flex here rather than none, because setView
+     shows a control by clearing its inline style and would otherwise reveal
+     nothing. Staying hidden for a signed-out visitor is dataset.hidden's job,
+     the same mechanism the year and rider pickers use. */
+  .controls .onlymine{display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:10px 14px;font-size:.9rem;color:var(--muted);white-space:nowrap;user-select:none}
+  /* min-width and flex are undone deliberately: `.controls input` sets
+     min-width:220px and flex:1 for the SEARCH box, and a checkbox is an input
+     too — it inherited both and shoved the label off the side of a phone.
+     Ninth instance of the same family; check what already matches the element,
+     not only the rule you are writing. */
+  .controls .onlymine input{accent-color:var(--accent2);width:17px;height:17px;
+    min-width:0;flex:none;margin:0;cursor:pointer}
+  .controls .onlymine.on{color:var(--fg);border-color:var(--accent2)}
   .count{color:var(--muted);font-size:.85rem;margin-bottom:12px}
   .count b{color:var(--accent2)}
   .day{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--panel);overflow:hidden}
@@ -250,6 +267,9 @@
       <select id="f_rider" style="display:none"><option value="">All riders</option></select>
       <select id="f_year"><option value="">All years</option></select>
       <select id="f_park"><option value="">All parks</option></select>
+      <label class="onlymine" id="f_mine_wrap" style="display:none">
+        <input type="checkbox" id="f_mine"> Only parks I&rsquo;ve ridden
+      </label>
       <button id="reset">Reset</button>
     </div>
     <div class="count" id="count"></div>
@@ -488,6 +508,8 @@ function buildFilters(){
   } else {
     document.getElementById('f_rider').dataset.hidden='1';
   }
+  // Nobody to compare against: the toggle would be filtering on nothing.
+  if(!MINE) document.getElementById('f_mine_wrap').dataset.hidden='1';
 }
 function wire(){
   ['q','f_rider','f_year','f_park'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){page=0;render();});});
@@ -497,6 +519,10 @@ function wire(){
   document.getElementById('v_day').onclick=function(){setView('day');};
   document.getElementById('v_list').onclick=function(){setView('list');};
   document.getElementById('v_parks').onclick=function(){setView('parks');};
+  document.getElementById('f_mine').addEventListener('change',function(){
+    document.getElementById('f_mine_wrap').classList.toggle('on',this.checked);
+    page=0; render();
+  });
   // `toggle` does not bubble, so this listens in the CAPTURE phase — a
   // capturing listener on an ancestor still sees an event that never bubbles.
   // That catches a mouse click, Enter on a focused summary and a programmatic
@@ -522,8 +548,8 @@ function setView(v){
   // on this view as well, so nothing goes on narrowing from a hidden control.
   var listing = v==='list';
   var keep = v==='day' ? ['q','f_rider','f_year','f_park','reset']
-           : v==='parks' ? ['q'] : [];
-  ['q','f_rider','f_year','f_park','reset'].forEach(function(id){
+           : v==='parks' ? ['q','f_mine_wrap'] : [];
+  ['q','f_rider','f_year','f_park','reset','f_mine_wrap'].forEach(function(id){
     var el=document.getElementById(id);
     if(el && !el.dataset.hidden) el.style.display = keep.indexOf(id)>=0 ? '' : 'none';
   });
@@ -661,6 +687,14 @@ function renderParks(rows){
     (byPark[k]=byPark[k]||[]).push(r);
   });
   var keys=Object.keys(byPark).sort(function(a,b){ return a.localeCompare(b); });
+  // "Only parks I've ridden" — the everyone view lists every park anybody has
+  // been to, which for one person is mostly a list of places they have not.
+  // Filtered on the keys rather than inside the card, so the count line and the
+  // length of the scroll both mean what they say.
+  var mineOnly = MINE && document.getElementById('f_mine').checked;
+  if(mineOnly) keys=keys.filter(function(park){
+    return (BYPARK[park] || byPark[park]).some(function(r){ return MINE[r.c]; });
+  });
   var total=keys.length;
   // Every park in one scroll (Carter, 2026-09-20). 247 of them was seven pages
   // of forty, and paging through an alphabetical list to reach the S's is worse
