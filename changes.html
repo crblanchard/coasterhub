@@ -49,9 +49,13 @@
 
 <section class="block" style="padding-top:20px"><div class="container">
   <div class="seg" id="filter">
+    <!-- Carter's words, 2026-09-20: everything / users / database. The values
+         behind them are unchanged — `riders` is what changes-feed.js matches
+         against RIDER_KINDS, and renaming a label is not a reason to rename a
+         thing that works. -->
     <button data-f="all" class="on">Everything</button>
-    <button data-f="riders">Riders</button>
-    <button data-f="database">The list</button>
+    <button data-f="riders">Users</button>
+    <button data-f="database">Database</button>
   </div>
   <p class="note" id="note"></p>
   <div class="feed" id="feed"><div class="empty" data-loading>Loading&hellip;</div></div>
