@@ -2497,6 +2497,34 @@ homepage changes"* — filling in the specs of rows nobody had got to yet is a t
 lines, and it is not what anybody opens /changes for. A coaster being **added**, renamed or
 merged still shows: those change what the list IS, not what it says about itself.
 
+### The static sync has never run by itself (2026-09-20)
+
+Every run of **Sync static JSON from D1** in this repo's history was started by hand
+— three of them, two of them from this session. Nothing has ever arrived as a
+`repository_dispatch`, although today alone put six coasters, a park rename and
+twenty ride calls through the API.
+
+`dispatchSync` in `worker.js` opens with `if (!env.GITHUB_TOKEN) return;`, and the
+secret is not set on the Worker. No token, no ping, no error — the edit succeeds and
+the snapshot quietly stays where it was. The `catch` around the fetch swallows an
+expired token exactly the same way, so a dead one would look identical.
+
+**Nothing is broken for a reader**: D1 is the truth and the site reads it. What goes
+stale is the fallback the site uses when D1 is unreachable, and every local tool
+here that matches against `coasters.json` — which is how Nick's list needed
+`--db=` to see six coasters that were minutes old.
+
+Carter's fix, when he gets to it: `npx wrangler secret put GITHUB_TOKEN` with a
+fine-grained token for this repo, Contents: read and write. Worth doing alongside
+it: log the response status instead of returning silently, so a dead token shows in
+the Worker log rather than looking like success.
+
+**Until then, pull it yourself.** Carter, 2026-09-20: *"make a note in your handoff
+or wherever to pull it every now and then"*. Run the action (the GitHub connector
+can), wait out its two-minute debounce, `git pull`. It commits only what changed, so
+a run that commits nothing tells you the snapshot was already current. CLAUDE.md
+carries the short version.
+
 ### Repairing one row: the API beats a migration (2026-09-20)
 
 019 was pasted and Chupacabra was still bare. *"Didn't work the chupacabra sql. can't you make

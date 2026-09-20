@@ -12,15 +12,22 @@ Live at coasterhub.org. **Push to `main` and it deploys** — no PRs, Carter's c
 
 Reachable: GitHub, npm, usually the CDNs.
 
-**Not reachable: coasterhub.org, Cloudflare (D1, R2, wrangler), Resend, map tile
-servers.** The egress proxy denies CONNECT to all of them, and there are no
-Cloudflare credentials in the environment. This has been re-tested several times
-across sessions; it is the environment, not a transient failure.
+**Not reachable over the network: coasterhub.org, Cloudflare's own endpoints,
+Resend, map tile servers, coaster-count.com.** The egress proxy denies CONNECT to
+all of them, and so does the server-side fetcher WebFetch. Re-tested many times
+across sessions; it is the environment, not a transient failure. So you cannot
+call the site's API, deploy, send a real email or load a basemap tile — the API
+path runs in Carter's browser, not here.
 
-So you cannot read or write the live database, deploy, send a real email, or load a
-basemap tile. Don't offer to, and don't burn turns retrying. What you *can* do is
-write the change, prove it locally, and hand Carter the one step that needs his
-console.
+**But D1 is READABLE from 2026-09-20**, through the Cloudflare connector Carter
+added (`mcp__Cloudflare_Developer_Platform__d1_database_query`, database
+`coasterhub`, id `d4742d82-f606-498a-8520-bcbfec7dcf91`). Use it: checking the
+live row beats guessing from a snapshot, and it is how the Chupacabra mess was
+finally diagnosed. **Writes through it are refused by the harness**, so a change
+still goes to Carter as a paste — which is the better path anyway, because SQL
+skips the Worker (no activity row, no sync).
+
+The GitHub connector can also start Actions, which matters for the next section.
 
 ## How a data change actually ships
 
@@ -42,6 +49,33 @@ console.
    activity and fires the repo-dispatch that re-syncs the static JSON. Raw SQL in
    the D1 console does neither — after SQL, the `<rider>.json` files sit stale until
    the Sync static JSON action is run by hand.
+
+### Pull the static JSON every now and then — it does not update itself
+
+`coasters.json`, `parks.json` and each `<rider>.json` are the fallback the site
+uses when D1 is unreachable, and they are what every local tool here matches
+against. They are refreshed by the **Sync static JSON from D1** action, which is
+supposed to run on its own: the Worker pings GitHub after each write
+(`dispatchSync`). It never has. `dispatchSync` opens with
+`if (!env.GITHUB_TOKEN) return;`, the secret is not set on the Worker, and every
+run in the repo's history was started by hand. (Found 2026-09-20. The fix is one
+command of Carter's: `npx wrangler secret put GITHUB_TOKEN` with a fine-grained
+token for this repo, Contents: read and write.)
+
+**So refresh them yourself when the answer depends on them** — before matching
+somebody's list, before quoting a count, and at the start of a session that will
+touch data. Carter's standing ask (2026-09-20: *"make a note ... to pull it every
+now and then"*):
+
+```
+Actions -> "Sync static JSON from D1" -> Run workflow   (or the GitHub connector's
+                                                         run_workflow)
+git fetch origin main && git pull --ff-only origin main
+```
+
+It debounces two minutes, then commits only what actually changed. A sync run
+that commits nothing means the snapshot was already current, which is also an
+answer.
 
 Write migrations so a second run is a no-op (`NOT EXISTS`, `IF NOT EXISTS`), and
 match rows on something visible (name + park) rather than an id you read off a
