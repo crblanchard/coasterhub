@@ -337,7 +337,7 @@
         <!-- Parks, then coasters, then rides: widest thing first, narrowest
              last (Carter, 2026-09-20). Which one OPENS is unchanged — `on`
              still starts on the view the page lands in. -->
-        <button id="v_parks">Parks</button><button id="v_list">Coasters</button><button id="v_day" class="on">Rides</button>
+        <button id="v_parks" class="on">Parks</button><button id="v_list">Coasters</button><button id="v_day">Rides</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
       <select id="f_rider" style="display:none"><option value="">All riders</option></select>
@@ -409,7 +409,10 @@ CoasterHub.riderBadge(document.getElementById('hero_badge'),'count',CoasterHub.c
 var LOG=[];          // [{i?, c, d, num?, n?, name, park, loc}]
 var MODE='rides';    // 'rides' = dated ride log, 'credits' = credit log
 var DATED=false;     // any dates at all?
-var view='day', page=0;
+// Parks is where the page opens (Carter, 2026-09-20). It is the shortest of
+// the three — a few dozen rows rather than hundreds — and it is the one you can
+// read without filtering first.
+var view='parks', page=0;
 // Day cards per page, newest first.
 var DAYS=30;   // day cards per page; the park list is not paged at all
 var COMBINED=false;  // true on /count with no rider selected = everyone
@@ -532,9 +535,10 @@ return Promise.all([
     // read "N new credits" rather than "N rides" because no re-ride is implied.
     // Hide just that button, not the whole switch — the other two are always
     // there, and Coaster list is the one that reads as a credit list.
-    if(!DATED){
-      view='list'; document.getElementById('v_day').style.display='none';
-    }
+    // Nothing to put on a calendar: the Rides button goes. The view does not
+    // need forcing any more — Parks is the default and it reads the same
+    // whether or not a single ride carries a date.
+    if(!DATED) document.getElementById('v_day').style.display='none';
 
     // The badge is the rider switcher now (app.js builds it over #hero_badge),
     // so nothing here writes to it — setting its textContent would take the
@@ -568,11 +572,13 @@ return Promise.all([
     // setView('list') doesn't call it — landing straight on ?view=list used to
     // leave the tiles showing em-dashes.
     render();
-    // ?view=list opens straight on the coaster list — that's where /coasters and
-    // the profile's "View your count" point. ?view=parks does the same for parks.
+    // ?view= overrides where it opens: /coaster's "full list", the sitemap and
+    // /park's crumb all point at a particular one. `day` is in the list now
+    // that it is no longer the default — without it, a link to the rides view
+    // could not be written.
     var want=new URLSearchParams(location.search).get('view');
-    if(want==='list' || want==='parks') setView(want);
-    else if(!DATED) setView('list');
+    if(want==='list' || want==='parks' || (want==='day' && DATED)) setView(want);
+    else setView(view);
   });
 }).catch(fail);
 
