@@ -149,26 +149,36 @@
      it scrolls inside the panel and columns up when there is width for it.
      column-count, not the `columns` shorthand — see CLAUDE.md on shorthands
      quietly resetting their longhands. */
-  /* Five columns, and as tall as the list needs to be. It was three columns
-     inside a 44vh scroll box, which is exactly how a multi-column list grows a
-     HORIZONTAL scrollbar — capped height makes the columns flow sideways
-     instead of down. (Carter, 2026-09-20: "they're way too far apart make it
-     4-5 columns maybe and as tall as they need to be to fit everything".) */
-  .regs{flex-basis:100%;column-count:5;column-gap:16px;
+  /* The locations dropdown. Positioned in script under its button. */
+  .drop{position:fixed;z-index:60;display:none;background:var(--panel);
+        border:1px solid var(--line);border-radius:14px;padding:12px 14px;
+        box-shadow:0 18px 40px rgba(0,0,0,.28)}
+  .drop.on{display:block}
+  .drop .note{margin:0 0 8px;color:var(--muted);font-size:.8rem}
+  .drop .foot{display:flex;gap:8px;margin-top:10px}
+  .drop .foot button{padding:8px 12px;font-size:.85rem}
+  /* A GRID, not column-count. A grid fills left to right and wraps DOWNWARD, so
+     capping its height scrolls vertically. Multi-column does the opposite: cap
+     the height and the columns run off the side, which is how this panel grew a
+     horizontal scrollbar the first time round. The auto-fill also means the
+     column count follows the width without four media queries, and a section
+     heading can span the row, which in columns it could not. */
+  .regs{display:grid;grid-template-columns:repeat(auto-fill,minmax(164px,1fr));
+        gap:1px 14px;max-height:56vh;overflow-y:auto;overflow-x:hidden;
         border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg)}
-  @media (max-width:1100px){ .regs{column-count:4} }
-  @media (max-width:860px){ .regs{column-count:3} }
-  @media (max-width:620px){ .regs{column-count:2} }
-  @media (max-width:430px){ .regs{column-count:1} }
   /* align-items:CENTER. A checkbox's baseline is its bottom edge, so baseline
      alignment hung every box above the words it belongs to. */
   .regs label{display:flex;gap:7px;align-items:center;font-size:.85rem;line-height:1.3;
-              padding:2px 0;break-inside:avoid;cursor:pointer}
-  /* The panel styles every input like a text field; a tick box is not one. */
+              padding:2px 0;cursor:pointer;min-width:0}
+  /* Let a long one wrap rather than truncate. "United Arab Emirates" is the
+     only name that does not fit a column, and an ellipsis is a worse answer
+     than a second line in a list you are reading to find your own states. */
+  .regs label span{min-width:0}
+  /* The page styles every input like a text field; a tick box is not one. */
   .regs .tick{width:auto;height:auto;min-height:0;padding:0;margin:0;flex:none}
   .regs .n{color:var(--muted);font-size:.76rem}
-  .regs .sec{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
-             color:var(--muted);margin:10px 0 3px;break-inside:avoid}
+  .regs .sec{grid-column:1/-1;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
+             color:var(--muted);margin:10px 0 3px}
   .regs .sec.first{margin-top:0}
   .addbar{display:flex;justify-content:flex-end;margin:0 0 10px}
   .addbar button{padding:7px 12px;font-size:.84rem}
@@ -275,16 +285,6 @@
       <input id="search" type="search" placeholder="Search every coaster&hellip;" style="width:100%"></div>
   </div>
 
-  <!-- Built from the parks themselves, so a new location appears here the day a
-       park in it does. -->
-  <div class="miniform" id="regionpick">
-    <p class="note" id="reghead">Show only parks in…</p>
-    <div class="regs" id="reglist"></div>
-    <button class="ghost" id="reg_all" type="button">Select all</button>
-    <button class="ghost" id="reg_none" type="button">Clear</button>
-    <button class="ghost" id="reg_done" type="button">Done</button>
-  </div>
-
   <div class="miniform" id="riderform">
     <div class="fld grow"><label for="nr_name">Their name</label>
       <input id="nr_name" type="text" placeholder="Jamie" autocomplete="off"></div>
@@ -345,6 +345,22 @@
     </div>
   </div>
 </div></section>
+
+<!-- The locations filter, built from the parks themselves so a new location
+     appears the day a park in it does. It lives at the end of <body> and is
+     positioned in script under the button that opens it — the same shape the
+     rider menu uses, and for the same reason: a panel that sits inside the
+     layout is clipped by whatever is above it, and this one is wider than the
+     field it belongs to. -->
+<div class="drop" id="regionpick">
+  <p class="note" id="reghead">Show only parks in&hellip;</p>
+  <div class="regs" id="reglist"></div>
+  <div class="foot">
+    <button class="ghost" id="reg_all" type="button">Select all</button>
+    <button class="ghost" id="reg_none" type="button">Clear</button>
+    <button class="ghost" id="reg_done" type="button">Done</button>
+  </div>
+</div>
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
@@ -731,21 +747,48 @@ function parkPasses(p, strict){
   if(!strict && p===sel().value) return true;
   return !!REGSEL[regionOf(p)];
 }
-function wireRegions(){
+// Where the dropdown sits: under its button, pulled back inside the window if
+// the button is near the right edge, and as wide as the list can use without
+// leaving the screen. Recomputed every time it opens rather than remembered —
+// the header above it wraps at some widths, so the button moves.
+function placeRegions(){
+  var rp=$('regionpick'), b=$('regbtn').getBoundingClientRect();
+  // Wide enough that "Massachusetts, US" is not an ellipsis, and never wider
+  // than the window.
+  var pad=8, want=Math.min(780, window.innerWidth - pad*2);
+  rp.style.width=want+'px';
+  var left=Math.max(pad, Math.min(b.left, window.innerWidth - want - pad));
+  rp.style.left=left+'px';
+  rp.style.top=(b.bottom + 6)+'px';
+  // Never taller than what is left below the button.
+  var room=window.innerHeight - b.bottom - 16;
+  rp.querySelector('.regs').style.maxHeight=Math.max(160, room - 90)+'px';
+}
+function regionsOpen(){ return $('regionpick').classList.contains('on'); }
+function openRegions(on){
   var rp=$('regionpick');
-  $('regbtn').onclick=function(){
-    var on=!rp.classList.contains('on');
-    rp.classList.toggle('on', on);
-    if(on){ fillRegions(); applyRegions(); }
-  };
-  $('reg_done').onclick=function(){ rp.classList.remove('on'); };
+  rp.classList.toggle('on', on);
+  $('regbtn').setAttribute('aria-expanded', on?'true':'false');
+  if(on){ fillRegions(); applyRegions(); placeRegions(); }
+}
+function wireRegions(){
+  $('regbtn').setAttribute('aria-expanded','false');
+  $('regbtn').onclick=function(e){ e.stopPropagation(); openRegions(!regionsOpen()); };
+  $('reg_done').onclick=function(){ openRegions(false); };
   $('reg_all').onclick=function(){
     Object.keys(regionCounts()).forEach(function(r){ REGSEL[r]=1; });
     fillRegions(); applyRegions();
   };
-  $('reg_none').onclick=function(){
-    REGSEL={}; fillRegions(); applyRegions();
-  };
+  $('reg_none').onclick=function(){ REGSEL={}; fillRegions(); applyRegions(); };
+  // Anywhere else closes it, the way a dropdown should. Ticking inside must
+  // not, so the panel's own clicks stop here.
+  $('regionpick').addEventListener('click', function(e){ e.stopPropagation(); });
+  document.addEventListener('click', function(){ if(regionsOpen()) openRegions(false); });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape' && regionsOpen()) openRegions(false); });
+  // It is positioned against the window, so the window moving invalidates it.
+  window.addEventListener('resize', function(){ if(regionsOpen()) placeRegions(); });
+  window.addEventListener('scroll', function(){ if(regionsOpen()) placeRegions(); }, {passive:true});
   showRegionBtn();
 }
 

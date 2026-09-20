@@ -498,6 +498,7 @@
     <div class="hhfoot">
       <span class="prog" id="join_prog"></span>
       <button class="ghost" id="join_no">Not now</button>
+      <button class="primary" id="join_ok">OK</button>
     </div>
   </div>
 </div>
@@ -1582,7 +1583,14 @@ function renderAdd(){
         ? 'Nothing unranked matches those filters.'
         : 'Nothing left to add.')+'</div>');
   $('addlist').querySelectorAll('[data-add]').forEach(function(b){
-    b.onclick=function(){ ORDER.push(+b.dataset.add); markDirty(); renderRank(); renderAdd(); };
+    b.onclick=function(){
+      var id=+b.dataset.add, fam=CLONE[id];
+      // Beside its family if the family is already ranked; otherwise on the end
+      // as before. A clone dropped at the bottom is a second row for a ride
+      // that already has one.
+      if(fam && ORDER.some(function(x){ return CLONE[x]===fam; })) return foldInto(id, fam);
+      ORDER.push(id); markDirty(); renderRank(); renderAdd();
+    };
   });
   $('addlist').querySelectorAll('[data-hh]').forEach(function(b){
     b.onclick=function(){ openHH(+b.dataset.hh); };
@@ -1684,44 +1692,64 @@ function maybeOfferJoins(){
   JOIN_ASKED=true; JOIN_ROWS=rows;
   var one=rows.length===1, first=rows[0];
   $('join_h').textContent = one
-    ? first.g.name+' is one ride short'
-    : rows.length+' rides you have been on belong in your list';
+    ? esc(BYID[first.id].name)+' belongs in '+first.g.name
+    : rows.length+' rides you have been on belong in categories you rank';
+  // Nothing to decide. A clone's position is the position of the row it is a
+  // clone OF, so this is a statement with an OK on it, not a question.
   $('join_sub').innerHTML = one
-    ? 'You have been on <b>'+esc(BYID[first.id].name)+'</b> at '
-      + esc(BYID[first.id].park||'a park you have logged')+', and it is the same ride as the '
-      + first.n+' you have already ranked under <b>'+esc(first.g.name)+'</b>. '
-      + 'Place it and it folds into that row.'
-    : 'Each of these is the same ride as something already in your list, so it '
-      + 'folds into a row that is already there.';
+    ? 'You have been on it at <b>'+esc(BYID[first.id].park||'a park you have logged')
+      + '</b>, and it is the same ride as the '+first.n+' already in your '
+      + '<b>'+esc(first.g.name)+'</b> row. It folds straight in \u2014 nothing to '
+      + 'compare, nothing to reorder.'
+    : 'Each one is the same ride as something already in your list, so each folds '
+      + 'into the row that is already there \u2014 nothing to compare, nothing to reorder.';
   $('join_list').innerHTML = rows.slice(0,6).map(function(r){
     var c=BYID[r.id];
     return '<div class="joinrow"><span class="who"><b>'+esc(c.name)+'</b>'
       + '<span>'+esc(c.park||'\u2014')+' \u00b7 joins '+esc(r.g.name)
-      + ' \u00b7 '+r.n+' already ranked</span></span>'
-      + '<button class="ghost go" data-join="'+r.id+'">Place it</button></div>';
+      + ' \u00b7 '+r.n+' already ranked</span></span></div>';
   }).join('');
   $('join_prog').textContent = rows.length>6 ? 'and '+(rows.length-6)+' more' : '';
+  $('join_ok').textContent = one ? 'OK, fold it in' : 'OK, fold them in';
   $('join').style.display='flex';
-  $('join_list').querySelectorAll('[data-join]').forEach(function(b){
-    b.onclick=function(){
-      var id=+b.dataset.join;
-      skipJoins([id]);                 // asked and answered, either way
-      $('join').style.display='none';
-      // Straight into editing: the answer to this dialog is a change to the
-      // list, and stopping to press Edit first is a step with no question in it.
-      $('mine').classList.remove('readonly');
-      setView('rank');
-      openHH(id);
-    };
-  });
+  $('join_ok').onclick=function(){
+    var ids=rows.map(function(r){ return r.id; });
+    skipJoins(ids);                    // asked and answered, either way
+    $('join').style.display='none';
+    // Straight into editing: the answer to this dialog is a change to the list,
+    // and stopping to press Edit first is a step with no question in it.
+    $('mine').classList.remove('readonly');
+    rows.forEach(function(r){ foldInto(r.id, r.g); });
+    setView('rank');
+    // And saved, because "OK" is the whole interaction: a fold left sitting
+    // unsaved is the same silence that lost the ride in the first place.
+    save();
+  };
 }
 function closeJoins(){
   $('join').style.display='none';
   skipJoins(JOIN_ROWS.map(function(r){ return r.id; }));
 }
 
+// A ride whose category is ALREADY in the list has nowhere to be compared to:
+// its spot is the row its siblings are in. The head-to-head duly offered
+// "Chupacabra vs Batman clones", which is asking whether a ride beats itself.
+// (Carter, 2026-09-20: "I just want it to be a batman clone want it to fold
+// into that category".) So it folds, in from wherever it came — this dialog's
+// OK, the Add list's Rank button, anything else that calls openHH.
+function foldInto(id, g){
+  if(ORDER.indexOf(id)<0) ORDER.push(id);
+  snug(id, g);                      // in beside the rest of its family
+  markDirty(); renderRank(); renderAdd();
+}
 function openHH(id, mates, g){
   mates=mates||[];
+  var fam=CLONE[id];
+  // `g` means a whole family is being placed at once, none of it ranked yet —
+  // that one really is a comparison.
+  if(fam && !g && ORDER.some(function(x){ return CLONE[x]===fam; })){
+    foldInto(id, fam); setView('rank'); return;
+  }
   if(!ORDER.length){ ORDER=ORDER.concat([id]).concat(mates);
     markDirty(); renderRank(); renderAdd(); setView('rank'); return; }
   hh={id:id, mates:mates, g:g||null, lo:0, hi:ORDER.length, asked:0, cmp:{},

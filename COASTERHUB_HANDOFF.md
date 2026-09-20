@@ -2381,9 +2381,22 @@ Where it is NOT shown: `/log`, at the moment a ride is added. That page holds ne
 ranking nor the categories, and the offer is only actionable on `/rankings` anyway — so the
 next visit there is where it appears.
 
-Driven against the real worker: the offer's wording, placing it through the head-to-head into
-the list, that it does not ask twice, that "Not now" survives, that a visitor is never asked,
-and no sideways scroll at 390px.
+**A clone is never compared against its own family.** The first version sent OK into the
+head-to-head, which duly asked *"Chupacabra or Batman clones — which is better?"*: a ride
+against itself. Carter: *"I just want it to be a batman clone want it to fold into that
+category. maybe a popup but you just click okay don't choose anything"*. So the dialog is a
+statement with one **OK**, and OK folds the ride in beside its siblings (`foldInto` — push,
+then `snug` against the family) and saves, because a fold left sitting unsaved is the same
+silence that lost the ride to begin with.
+
+The rule lives in `openHH`, not in the dialog, so every path obeys it: the Add list's **Rank**
+button folds too, and so does **Add**, which used to drop a clone on the end of the list — a
+second row for a ride that already had one. Placing a whole family at once is still a
+comparison, because none of it is ranked yet.
+
+Driven against the real worker: the wording, that there is nothing to choose, that OK lands
+the ride beside its own category and saves, that it does not ask twice, that "Not now"
+survives, that a visitor is never asked, and no sideways scroll at 390px.
 
 ### /log filters parks by location (2026-09-20)
 
@@ -2405,6 +2418,16 @@ Decisions worth keeping:
 - **Alphabetical, and it stays alphabetical.** Floating the ticked ones to the top would move
   the next box out from under the finger that just tapped one — the same lesson the category
   picker records.
+- **A dropdown, not a panel in the page** (Carter, 2026-09-20). It lives at the end of
+  `<body>` and is positioned under its button in script — the rider-menu shape, for the
+  rider-menu reason: a panel inside the layout is clipped by whatever is above it, and this
+  one is wider than the field it belongs to. Closes on Done, on Escape, on a click anywhere
+  else; ticking inside it does not close it.
+- **A grid, not columns.** Multi-column plus a height cap makes the columns run off the SIDE
+  — which is how the first version grew a horizontal scrollbar and 66px row pitch. A grid
+  fills left-to-right and wraps downward, so capping the height scrolls vertically like
+  anything else, `auto-fill` picks the column count from the width without four media
+  queries, and a section heading can span the row.
 - **Remembered between visits** (`ch_log_regions`), because a first count is several sittings
   and re-ticking your states each time is where people stop. Everything that makes it visible
   is therefore load-bearing: the button reads `Locations · 2` and takes an accent border, and
