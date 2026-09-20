@@ -225,8 +225,27 @@
     #c_body tr.det{display:none}
   }
   @media (max-width:680px){
-    .day summary{gap:8px}
-    .day .dt{min-width:100%}
+    /* Denser day cards. Three stacked lines at 14px of padding measured 110px
+       a card, so three of them filled a phone screen below the controls.
+       Date and counts share the top line, the park sits under them, and the
+       padding comes in — about 60px a card, which is six or seven.
+       (Carter, 2026-09-20: "make rides cards smaller so you can fit more per
+       screen".)
+
+       Scoped to #dayview: the park list is built from the same .day markup,
+       and it has its own phone layout a few rules up. A bare `.day summary`
+       here would turn those rows into grids too. */
+    #dayview .day{margin-bottom:6px;border-radius:12px}
+    #dayview .day summary{display:grid;grid-template-columns:1fr auto;
+                          gap:1px 10px;padding:8px 12px}
+    #dayview .day .dt{grid-column:1;grid-row:1;min-width:0;font-size:.92rem}
+    #dayview .day .n{grid-column:2;grid-row:1;text-align:right;font-size:.76rem}
+    /* One line, clipped: a day at three parks used to wrap into a third and a
+       fourth line, which is the whole saving gone on the one card that has the
+       most to say. */
+    #dayview .day .pk{grid-column:1/-1;grid-row:2;min-width:0;font-size:.78rem;
+                      overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #dayview .day .rd{grid-column:2;grid-row:2;text-align:right;font-size:.76rem}
     #c_more{display:inline-block}
     #c_filters.closed{display:none}
     #c_filters select{flex:1;max-width:none;min-width:44%}
