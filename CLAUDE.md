@@ -29,6 +29,14 @@ console.
    `<rider>.json` snapshots — they are real exports, so "670 → 672" is checkable
    before Carter touches anything. Then he pastes it into the D1 console. Every
    database change since 001 has gone this way.
+
+   **The console's query box is one line, and a paste loses the newlines** — at
+   which point the first `--` comment swallows the whole file and D1 answers
+   *"The request is malformed: Requests without any query are not supported."*
+   The file is fine; the paste is not. Hand him
+   `node tools/paste-sql.mjs migrations/NNN-name.sql` output (comments stripped,
+   one statement per line; `--one-line` joins them) rather than the file, and
+   keep writing the reasoning into the file, where it belongs.
 2. **Or a browser-console `fetch`**, when the API already does what you want and
    Carter is signed in as admin. That path goes through the Worker, so it records
    activity and fires the repo-dispatch that re-syncs the static JSON. Raw SQL in

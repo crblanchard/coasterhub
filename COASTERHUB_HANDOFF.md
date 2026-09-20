@@ -2353,6 +2353,19 @@ the model off these" — thirteen Arrow coasters lost their model while the toas
 successful split. An empty model now needs `clear:true`; without it, it is a 400. A field that
 is absent is not an instruction to erase.
 
+### Pasting a migration into the D1 console strips the newlines (2026-09-20)
+
+017 came back from the console as *"The request is malformed: Requests without any query are
+supported."* — with the whole file visible in the box, on one line. That is the answer: the
+query box is a single line, a paste loses every newline, and the file's first `--` comment
+then runs to the end of the input and swallows the `CREATE TABLE` with it.
+
+`node tools/paste-sql.mjs migrations/NNN-name.sql` prints the statements with the comments
+stripped, one per line, and `--one-line` joins them for a console that takes several at once.
+The migration files keep their comments: they are the explanation of why a change was made,
+and they are worth more than the convenience of a paste. Both forms of 018 were dry-run
+against `node:sqlite` exactly as they will be pasted.
+
 ### Two smaller things Carter asked for the same afternoon
 
 - **The green "Coaster Hub" pill is off the homepage hero.** It said the site's name directly
