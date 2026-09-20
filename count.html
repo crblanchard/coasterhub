@@ -72,6 +72,15 @@
   .day .row .cp{color:var(--muted);font-size:.82rem;margin-left:auto;flex:none;
                 white-space:nowrap;padding-left:10px}
   .lap{color:var(--accent);font-variant-numeric:tabular-nums;font-size:.82rem}
+  /* A new credit, marked on the row where it was picked up. A dot rather than a
+     word because the coaster's name wants that width on a phone, and the grey
+     line at the foot of the card says what the dots mean. Named for what it is
+     rather than where it sits — see the note on .herocount h1 span. */
+  .day .row .nw{color:var(--accent2);font-size:.55rem;line-height:1;flex:none;
+    position:relative;top:1px}
+  /* What the dots add up to. Grey, and set apart from the rows above it,
+     because it counts the card rather than being one of its rides. */
+  .day .inner .newsum{color:var(--muted);font-size:.78rem;padding:9px 0 1px}
   /* Who built it, beside the name. Shrinks before anything else does and
      ellipsizes rather than pushing the status off the row. */
   .day .row .mk{color:var(--muted);font-size:.8rem;flex:0 1 auto;min-width:0;
@@ -337,7 +346,7 @@
        way to somebody else's. The headline under it already says "the log". -->
   <span class="badge" id="hero_badge">The log</span>
   <h1 style="max-width:20ch" data-loading>Loading&hellip;</h1>
-  <p>Every ride, day by day.</p>
+  <p>Rides, day by day.</p>
   <!-- The way in, on the page the count lives on. Shown only to whoever may
        write to this one, and never on the everyone view — there is no single
        count to add to there. -->
@@ -353,10 +362,11 @@
   <div id="ui" style="display:none">
     <div class="controls">
       <div class="seg" id="seg">
-        <!-- Parks, then coasters, then rides: widest thing first, narrowest
-             last (Carter, 2026-09-20). Which one OPENS is unchanged — `on`
-             still starts on the view the page lands in. -->
-        <button id="v_parks" class="on">Parks</button><button id="v_list">Coasters</button><button id="v_day">Rides</button>
+        <!-- Rides, parks, coasters — Carter's order, 2026-09-20, back from the
+             widest-first pass earlier the same day. WHICH ONE OPENS is a
+             separate question and is unchanged: `view` still starts on parks,
+             so `on` is still on the parks button. -->
+        <button id="v_day">Rides</button><button id="v_parks" class="on">Parks</button><button id="v_list">Coasters</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
       <select id="f_rider" style="display:none"><option value="">All riders</option></select>
@@ -440,6 +450,11 @@ var COMBINED=false;  // true on /count with no rider selected = everyone
 // everything is ticked, and the total behind "11/13" has to be the whole park
 // rather than the part of it somebody has already ridden.
 var BYPARK={}, MINE=null;
+// Which ride in the log was a rider's FIRST on its coaster — the ones a day
+// card marks as new credits. Keyed rider|coaster, value the date of that first
+// ride. Built from the whole log rather than the filtered rows, so a year or a
+// park filter can never promote a re-ride into a first.
+var FIRST={};
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
@@ -530,6 +545,19 @@ return Promise.all([
         LOG.push(row);
       });
     });
+    // A rider's first ride on each coaster, for the new-credit marks in the day
+    // cards. A coaster with an UNDATED ride in the log is deliberately left out
+    // of the map: the undated one may well have come first, and a mark that
+    // might be wrong is worse than no mark.
+    FIRST={};
+    var murky={};
+    LOG.forEach(function(r){
+      var k=(r.rider||'')+'|'+r.c;
+      if(!r.d){ murky[k]=1; return; }
+      if(!FIRST[k] || r.d<FIRST[k]) FIRST[k]=r.d;
+    });
+    Object.keys(murky).forEach(function(k){ delete FIRST[k]; });
+
     // Whose progress the park list marks: the rider being looked at, or — on
     // the everyone view, where there is no one rider — whoever is signed in.
     // Neither means the park list still says what a park HAS, just not what
@@ -578,8 +606,12 @@ return Promise.all([
       document.title='Count — Coaster Hub';
     } else {
       var nm=esc(logs[0].user||'Carter');
+      // The number rather than the word: "All 2,394 rides" says everything
+      // "Every ride" said and also says how many (Carter, 2026-09-20). LOG is
+      // this one rider's log here — COMBINED took the branch above.
       document.querySelector('.hero h1').textContent =
-        MODE==='rides' ? ('Every ride in '+nm+'’s count.') : (nm+'’s full credit list.');
+        MODE==='rides' ? ('All '+LOG.length.toLocaleString()+' rides in '+nm+'’s count.')
+                       : (nm+'’s full credit list.');
       heroSub(MODE==='rides' ? ('Full list of '+nm+'’s logged rides on the site.') : '');
       document.title=nm+'’s Count — Coaster Hub';
     }
@@ -701,6 +733,10 @@ function filtered(){
     return true;
   });
 }
+// Was this ride the rider's first on this coaster? See FIRST, built alongside
+// the log. An undated ride is never a new credit: it is not in a day card at
+// all, and a coaster carrying one is kept out of FIRST entirely.
+function isNew(r){ return !!r.d && FIRST[(r.rider||'')+'|'+r.c]===r.d; }
 function fmtDate(d){
   if(!d)return '—';
   var p=d.split('-'); if(p.length!==3)return d;
@@ -740,10 +776,17 @@ function renderDays(rows){
     // Without a re-ride anywhere in their log, "8 rides · 8 coasters" would be
     // saying the same thing twice — these are 8 credits picked up that day.
     var isRides=list[0].rep;
+    // Which rows were credits picked up THAT DAY, as opposed to re-rides. Only
+    // worth saying on a log that has re-rides in it: on a credit log every row
+    // is a new credit and the summary line already says so, so a dot on every
+    // row would be noise.
     var dayRow=function(r){
+      var nw=isRides && isNew(r);
       return '<div class="row"><span class="cn">'+clink(r)+'</span>'
+        +(nw?'<span class="nw" title="New credit — first time on this one">●</span>':'')
         +(laps[r.c]>1?'<span class="lap">×'+laps[r.c]+'</span>':'')+'</div>';
     };
+    var nNew=isRides ? uniqRows.filter(isNew).length : 0;
     var what=isRides
       ? (list.length+' ride'+(list.length===1?'':'s')+' · '+uniqRows.length+' coaster'+(uniqRows.length===1?'':'s'))
       : (uniqRows.length+' new credit'+(uniqRows.length===1?'':'s'));
@@ -765,6 +808,10 @@ function renderDays(rows){
                 + uniqRows.filter(function(r){ return r.park===park; }).map(dayRow).join('');
             }).join('')
           : uniqRows.map(dayRow).join(''))
+      // What the dots add up to, at the foot of the card in grey. The last row
+      // keeps its hairline here — it separates the rides from a line that
+      // counts them rather than being one of them.
+      + (nNew ? '<div class="newsum">'+nNew+' new credit'+(nNew===1?'':'s')+'</div>' : '')
       +'</div></details>';
   }).join('') || '<p class="lead">No rides match those filters.</p>';
   pager(total,DAYS);
