@@ -440,6 +440,34 @@ run a no-op.
 rename path above was untestable locally and *looked* fine, because every current name still
 matched. That is exactly the class of thing this harness exists to catch.
 
+### Ticking a coaster off on its park page (2026-09-20)
+
+`/park/<park>` carries a checkbox per coaster when you are signed in. Ticking writes one
+**undated** credit — `POST /api/rides` with `d:null`, the same row ticking a coaster off a list
+leaves — and unticking deletes that row and only that row.
+
+**A coaster you have DATED rides on is not a checkbox at all.** It renders as a plain tick and
+cannot be toggled from here: unticking would have to delete logged history from a page that is
+not the log, and it is not obvious which of several rides would go. Three states, and they look
+different: empty box, filled box (an undated credit, yours to take back), plain tick (logged on
+a day).
+
+**Every box starts disabled** and is armed only once the rider logs have landed, so a tap on a
+half-drawn row cannot write against state the page has not read yet.
+
+**The counts are patched, not re-fetched.** A tick updates the row's rider count and your own
+pill from module state — re-reading six rider files per checkbox would be an absurd price for a
+number you can add one to. Only the new row's id is read back, because the write's answer does
+not carry it and unticking immediately afterwards needs it.
+
+**A checkbox inside the row's `<a>` is a coin flip** between ticking and navigating, so the row
+is a `div` holding the box and a sibling link that covers everything else.
+
+- **`accent-color` does not apply to a DISABLED checkbox.** The first cut disabled the ones you
+  had dated rides on, and the browser drew them in its own grey — so the strongest yes on the
+  page, a ride logged on a day you remember, read as off. That is why those are a glyph now.
+  Tenth instance of the CSS family below: what you wrote was not what already applied.
+
 ### The QC table is `/qc`, and the count's everyone view is "Database" (2026-09-20)
 
 `database.html` is `qc.html`, and `/database` 301s to `/qc` — after the global count's
