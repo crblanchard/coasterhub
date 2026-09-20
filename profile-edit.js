@@ -70,8 +70,6 @@
       +       '<button class="ghost" type="button" data-el="clear" style="width:100%">Remove</button>'
       +     '</div>'
       +   '</div>'
-      +   '<p class="hint" style="margin-top:12px">Cropped square and shrunk in your browser before'
-      +     ' it is sent, so a photo straight off a phone is fine.</p>'
       +   '<div class="msg" data-msg="pic"></div>'
       + '</div>'
 
