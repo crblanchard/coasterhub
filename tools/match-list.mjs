@@ -45,7 +45,10 @@ if (!file) {
 }
 
 // ---- the database ----------------------------------------------------------
-const db = JSON.parse(readFileSync(join(ROOT, "coasters.json"), "utf8"));
+// --db lets it run against a newer snapshot than the repo's own, for the gap
+// between somebody adding coasters and the sync workflow committing them.
+const dbArg = (process.argv.find((a) => a.startsWith("--db=")) || "").slice(5);
+const db = JSON.parse(readFileSync(dbArg || join(ROOT, "coasters.json"), "utf8"));
 const COASTERS = db.coasters || [];
 const ALIASES = db.aliases || [];          // {c: coasterId, n: formerName}
 const PARK_ALIASES = db.parkAliases || []; // {p: park, n: formerName}
@@ -90,8 +93,14 @@ function parse(text) {
     if (!line.trim()) continue;
     if (/^\s*coaster\t/i.test(line)) continue;              // the table header
     if (line.includes("\t")) {
-      const name = stripMarks(line.split("\t")[0]);
-      if (name) out.push({ name, park, raw: line.split("\t")[0].trim() });
+      const cells = line.split("\t");
+      const name = stripMarks(cells[0]);
+      // The last cell is the date the credit was taken, "No date", or a bare
+      // year. A bare year is not a day, and a made-up day is worse than none:
+      // it would put the ride on a calendar on a date nobody rode it.
+      const when = (cells[cells.length - 1] || "").trim();
+      const d = /^\d{4}-\d{2}-\d{2}$/.test(when) ? when : null;
+      if (name) out.push({ name, park, d, raw: cells[0].trim() });
       continue;
     }
     const head = stripMarks(line.replace(/\s*\*\s*/g, " "));
@@ -223,6 +232,23 @@ for (const r of rows) {
 }
 
 const pad = (s, n) => String(s).padEnd(n);
+
+// --rides: the payload /api/rides takes, one call per date. Dated credits stay
+// dated — the site's timelines, day views and on-this-day all read `d`, and
+// flattening a list that HAS dates into undated rows throws that away for good.
+if (process.argv.includes("--rides")) {
+  const byDate = new Map();
+  for (const h of have) {
+    const k = h.d || "";
+    if (!byDate.has(k)) byDate.set(k, new Set());
+    byDate.get(k).add(h.c.id);            // a Set: two tracks of one coaster on
+  }                                       // one day is one ride of one coaster
+  const outRows = [...byDate.entries()]
+    .sort((a, b) => (a[0] ? 1 : -1) - (b[0] ? 1 : -1) || String(a[0]).localeCompare(b[0]))
+    .map(([d, ids]) => ({ d: d || null, ids: [...ids].sort((x, y) => x - y) }));
+  console.log(JSON.stringify(outRows));
+  process.exit(0);
+}
 if (wantImport) {
   // Ready to paste into /import: park heading, then its coasters, our spelling.
   let park = null;
