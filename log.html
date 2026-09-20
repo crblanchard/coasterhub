@@ -17,6 +17,13 @@
   .gate h2{font-size:1.1rem;margin-bottom:6px}
   .gate p{color:var(--muted);font-size:.88rem;margin-bottom:14px}
   input,select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem;font-family:inherit}
+  /* iOS renders a date input's value CENTRED, and ignores text-align until the
+     native appearance is turned off — so this one field sat centred while every
+     other input on the page was flush left. appearance:none also stops iOS
+     sizing the control to its content rather than to the width it was given.
+     Not in style.css: a bare input[] rule there reaches into /log, /add and
+     /edit, which all style their own forms (see the note by .profedit). */
+  input[type=date]{-webkit-appearance:none;appearance:none;text-align:left}
   .gate input{width:100%;margin-bottom:10px}
   button.primary{background:var(--accent2);border:0;color:var(--well);font-weight:700;border-radius:10px;padding:11px 18px;cursor:pointer;font-size:.92rem}
   button.primary:disabled{opacity:.4;cursor:default}

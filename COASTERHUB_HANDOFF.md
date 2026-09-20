@@ -440,6 +440,20 @@ run a no-op.
 rename path above was untestable locally and *looked* fine, because every current name still
 matched. That is exactly the class of thing this harness exists to catch.
 
+### A date input needs `appearance:none` to line up on iOS (2026-09-20)
+
+Safari on iOS renders `input[type=date]`'s value **centred**, and ignores `text-align` until the
+native appearance is off. So /log's Date sat centred under a left-aligned DATE label while every
+other field on the page was flush left — and nothing showed in Chromium, which left-aligns it
+already. The rule is `-webkit-appearance:none;appearance:none;text-align:left`, on /log and
+/add, the two pages with a date field.
+
+**Not in `style.css`**: a bare `input[...]` rule there reaches into /log, /add and /edit, which
+all style their own forms — the same reason everything under `.profedit` is scoped.
+
+Worth knowing this class of bug is invisible to the local harness: Chromium is not Safari, and
+the only proof is Carter's phone.
+
 ### A coaster's year is its opening date, and is not typed (2026-09-20)
 
 **`/edit` has no Year box.** `yr` is the opening year and nothing else: across the 572 rows
