@@ -2591,6 +2591,41 @@ against `node:sqlite` exactly as they will be pasted.
   again. `.hero .badge` stays — it is the rider switcher on the per-rider pages.
 - **The footer says Edit where it said QC**, on all fourteen pages. `/qc` still exists.
 
+### The count page: order, headline, and the new credits (2026-09-20)
+
+Three passes over `count.html` in one afternoon, and the third undid part of the first, so
+the order of them matters:
+
+1. The switch went **Parks, Coasters, Rides** — widest thing first.
+2. **Parks became the view the page opens in.** That one still stands.
+3. The switch went back to **Rides, Parks, Coasters**. Only the order: `view` still starts
+   on `'parks'` and the `on` class is still on the Parks button. The two questions — what
+   order the buttons sit in, and which view opens — are separate, and only the first was
+   asked about the second time. That is written into the comment above the buttons so the
+   next pass does not helpfully "fix" the mismatch.
+
+The headline on a rider's page was *"Every ride in Carter's count."* and is now
+**"All 2,394 rides in Carter's count."** — `LOG.length.toLocaleString()`, which in the
+non-combined branch is that one rider's log. A credit log (no re-rides anywhere) keeps
+*"<Name>'s full credit list."*
+
+**New credits are marked in the day cards.** A teal dot after the coaster's name, and a grey
+`N new credits` line under the last row of the card. What counts as new is `FIRST`, built
+next to `LOG`: rider|coaster to the date of the earliest ride, from the **whole** log rather
+than the filtered rows — otherwise picking a year in the filter would promote that year's
+first re-ride into a first. Two deliberate abstentions:
+
+- **A coaster with an undated ride anywhere in the log is dropped from `FIRST` entirely.**
+  The undated one may well have come first; a mark that might be wrong is worse than no mark.
+  This is most of Sean's log and half of Nick's.
+- **Nothing is marked on a credit log.** `isRides` (`list[0].rep`, true when that rider has a
+  re-ride anywhere) gates both the dots and the grey line. On a credit log every row is a new
+  credit and the card's summary already says *"7 new credits"* — a dot on every row is noise.
+
+The dot is `.day .row .nw`, named for what it is rather than where it landed. The last row of
+a card keeps its hairline when the grey line is there: it then reads as the rule between the
+rides and a line that counts them.
+
 ---
 
 ## Open tasks
