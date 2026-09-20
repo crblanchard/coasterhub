@@ -69,6 +69,12 @@
     .day .row .life{gap:7px}
     .day .row .life .stat{font-size:0;line-height:0}
     .day .row .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
+    /* Who built it goes, so the name can be read. Only the park rows carry a
+       maker at all, and on a 390px screen it was taking enough width to clip
+       half of them — "Boomerang: Coast t\2026", "Road Runn\2026". The name is the
+       thing you are looking for in the list; the maker is a detail you can get
+       from the coaster's own page. */
+    .day .row .mk{display:none}
   }
   /* Every coaster and park named on this page is a way in to its own page.
      The link inherits the row's colour rather than turning the list into a wall
@@ -83,6 +89,26 @@
   .day .inner .parklink a:hover{text-decoration:underline}
   #c_body td a{color:inherit;text-decoration:none}
   #c_body td a:hover{color:var(--accent2);text-decoration:underline}
+  /* The park list is a LIST, not a stack of cards. 247 of them is a long scroll
+     on a phone, and the card chrome — a border, a panel, a gap — was costing
+     about half the rows that fit on a screen. Off it comes: one continuous
+     list with a hairline between rows. Only here; the day cards keep theirs,
+     because a day is a thing that happened and a park is an index entry.
+     (Carter, 2026-09-20.) */
+  #parkview.flat .day{border:0;border-bottom:1px solid var(--line);border-radius:0;
+    margin:0;background-color:transparent}
+  #parkview.flat .day summary{padding:10px 2px}
+  #parkview.flat .day .inner{border-top:0;padding:0 2px 12px}
+  /* A tick per coaster: what you have of this park. Fixed width so the names
+     below it still line up on the ones you have not ridden. */
+  .day .row .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
+  /* Dimmed rather than hidden, the same way an unridden row reads on
+     /categories: the ones you are missing are the point of the list. */
+  .day .row.miss .cn{color:var(--muted)}
+  .day .row.miss .cn a{color:inherit}
+  /* "11/13" — yours in the accent, the park's total muted behind it. */
+  .day .n .mine{color:var(--accent2);font-weight:700}
+  .day .n .of{color:var(--muted);font-weight:400}
   .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
   /* Full-list table (came over with the old /coasters page) */
   .pill{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
@@ -201,7 +227,7 @@
   <div id="ui" style="display:none">
     <div class="controls">
       <div class="seg" id="seg">
-        <button id="v_day" class="on">Rides</button><button id="v_list">Coaster list</button><button id="v_parks">Park list</button>
+        <button id="v_day" class="on">Rides</button><button id="v_list">Coasters</button><button id="v_parks">Parks</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
       <select id="f_rider" style="display:none"><option value="">All riders</option></select>
@@ -212,7 +238,7 @@
     <div class="count" id="count"></div>
     <div id="dayview"></div>
     <!-- Every park in the count, A-Z, each one opening the way a day does. -->
-    <div id="parkview" style="display:none"></div>
+    <div id="parkview" class="flat" style="display:none"></div>
     <div class="pager" id="pager"></div>
 
     <!-- Full list: every coaster in the count, once. Was its own /coasters
@@ -265,6 +291,11 @@ var view='day', page=0;
 // Cards per page: days newest-first, parks A-Z.
 var DAYS=30, PARKS=40;
 var COMBINED=false;  // true on /count with no rider selected = everyone
+// Every coaster the shared list has, grouped by park, and which of them are
+// yours. The park view needs both: a tick means nothing on a list where
+// everything is ticked, and the total behind "11/13" has to be the whole park
+// rather than the part of it somebody has already ridden.
+var BYPARK={}, MINE=null;
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
@@ -311,33 +342,65 @@ return Promise.all([
     return CoasterHub.fetchRides(u.slug).catch(function(){ return {user:u.name||u.slug,rides:[]}; });
   })),
   CoasterHub.fetchCoasters(),
-  CoasterHub.fetchParks()
+  CoasterHub.fetchParks(),
+  // Signed out is not a failure here, it is an answer: no ticks, no fraction.
+  CoasterHub.me().catch(function(){ return null; })
 ]).then(function(res){
-    var logs=res[0], coasters=res[1].coasters, parks=res[2];
+    var logs=res[0], coasters=res[1].coasters, parks=res[2], acct=res[3];
     var byId={}; coasters.forEach(function(c){byId[c.id]=c;});
 
     // Everyone is one row per ride now, so there is no stored mode to read.
     // What actually differs between a logged park day and a list someone
     // ticked off is whether any coaster appears twice — that is the only
     // evidence we have that ride counts mean anything. Derive it per rider.
+    // The log and the park list describe a coaster the same way, so they build
+    // it the same way — this used to be spelled out once and was about to be
+    // spelled out twice.
+    function shape(c, id){
+      var pk=parks[c.park];
+      return { c:id, name:c.name||('#'+id), park:c.park||'—',
+               op:c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):''),
+               cl:c.closed?String(c.closed).slice(0,4):'',
+               manu:c.manu||'', model:c.model||'',
+               loc:(pk&&pk.region)?pk.region:'' };
+    }
+    BYPARK={};
+    coasters.forEach(function(c){
+      var r=shape(c,c.id);
+      (BYPARK[r.park]=BYPARK[r.park]||[]).push(r);
+    });
+    Object.keys(BYPARK).forEach(function(k){
+      BYPARK[k].sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
+    });
+
     LOG=[];
     logs.forEach(function(log){
       var seen={}, repeats=false;
       log.rides.forEach(function(r){ if(seen[r.c]) repeats=true; seen[r.c]=1; });
       log.rides.forEach(function(r){
-        var c=byId[r.c]||{}, pk=parks[c.park];
         // The coaster's OWN dates, not the rider's: when it opened and, if it
         // is gone, when it closed. `yr` is the opening year where the full
         // date is not known, so fall back to it rather than showing nothing.
-        var op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):'');
-        LOG.push({i:r.i, c:r.c, d:r.d||null,
-                  rider:log.user, rep:repeats,
-                  name:c.name||('#'+r.c), park:c.park||'—',
-                  op:op, cl:c.closed?String(c.closed).slice(0,4):'',
-                  manu:c.manu||'', model:c.model||'',
-                  loc:(pk&&pk.region)?pk.region:''});
+        var row=shape(byId[r.c]||{}, r.c);
+        row.i=r.i; row.d=r.d||null; row.rider=log.user; row.rep=repeats;
+        LOG.push(row);
       });
     });
+    // Whose progress the park list marks: the rider being looked at, or — on
+    // the everyone view, where there is no one rider — whoever is signed in.
+    // Neither means the park list still says what a park HAS, just not what
+    // anybody has of it.
+    var meSlug = slug || (acct && acct.slug) || null;
+    MINE = null;
+    if(meSlug){
+      var mi=-1;
+      WHO.forEach(function(u,i){ if(u.slug===meSlug) mi=i; });
+      if(mi>=0 && logs[mi]){
+        MINE={};
+        logs[mi].rides.forEach(function(r){ MINE[r.c]=1; });
+      }
+    }
+
     MODE = COMBINED ? 'mixed' : (LOG.length && LOG[0].rep ? 'rides' : 'credits');
     DATED = LOG.some(function(r){return r.d;});
 
@@ -423,12 +486,17 @@ function setView(v){
   document.getElementById('v_day').classList.toggle('on',v==='day');
   document.getElementById('v_list').classList.toggle('on',v==='list');
   document.getElementById('v_parks').classList.toggle('on',v==='parks');
-  // The full list brings its own filters, so the log's are put away rather
-  // than left sitting there doing nothing.
+  // Which controls belong to which view. The full list brings its own, and the
+  // park list keeps only the search box (Carter, 2026-09-20) — a rider or a
+  // year narrows the rides BEHIND a park rather than the list of parks, which
+  // is a filter you cannot see the effect of. filtered() ignores those three
+  // on this view as well, so nothing goes on narrowing from a hidden control.
   var listing = v==='list';
+  var keep = v==='day' ? ['q','f_rider','f_year','f_park','reset']
+           : v==='parks' ? ['q'] : [];
   ['q','f_rider','f_year','f_park','reset'].forEach(function(id){
     var el=document.getElementById(id);
-    if(el && !el.dataset.hidden) el.style.display = listing ? 'none' : '';
+    if(el && !el.dataset.hidden) el.style.display = keep.indexOf(id)>=0 ? '' : 'none';
   });
   document.getElementById('count').style.display = listing ? 'none' : '';
   document.getElementById('pager').style.display = listing ? 'none' : '';
@@ -442,8 +510,14 @@ function setView(v){
 }
 function filtered(){
   var q=document.getElementById('q').value.trim().toLowerCase();
-  var fy=document.getElementById('f_year').value, fp=document.getElementById('f_park').value;
-  var fr=document.getElementById('f_rider').value;
+  // The park view shows only the search box, so the other three must not keep
+  // narrowing it from behind a control that is no longer on screen. Their
+  // values are left alone rather than cleared, so switching back to Rides
+  // finds them where you put them.
+  var onlyQ = view==='parks';
+  var fy=onlyQ?'':document.getElementById('f_year').value;
+  var fp=onlyQ?'':document.getElementById('f_park').value;
+  var fr=onlyQ?'':document.getElementById('f_rider').value;
   return LOG.filter(function(r){
     if(fr&&r.rider!==fr)return false;
     if(fy&&(!r.d||r.d.slice(0,4)!==fy))return false;
@@ -573,20 +647,32 @@ function renderParks(rows){
     uniq.sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
     var days=[...new Set(list.map(function(r){return r.d;}).filter(Boolean))];
     var isRides=list[0].rep;
+
+    // EVERY coaster the park has, not only the ones somebody has ridden. That
+    // is what makes a tick mean something and what puts the 13 in "11/13".
+    // Defunct ones are in the total too, for now (Carter, 2026-09-20) — they
+    // are credits you either have or will never get.
+    //
+    // A ride whose coaster has since left the shared list has no park to look
+    // up, so that card falls back to what the log itself remembers.
+    var all = BYPARK[park] || uniq;
+    var mine = MINE ? all.filter(function(r){ return MINE[r.c]; }).length : null;
+
     // Everyone's parks at once: visits, rides and laps are sums across six
     // people and mean nothing as a number — "3 visits" is not a trip anybody
-    // took and "×3" is not a re-ride. How many coasters the park has between
-    // you is the one figure that survives being added up, so on the global view
-    // it is the only one shown.
-    var what = COMBINED
-      ? (uniq.length.toLocaleString()+' coaster'+(uniq.length===1?'':'s'))
-      : isRides
-        ? (list.length.toLocaleString()+' ride'+(list.length===1?'':'s')
-           +' · '+uniq.length.toLocaleString()+' coaster'+(uniq.length===1?'':'s'))
-        : (uniq.length.toLocaleString()+' credit'+(uniq.length===1?'':'s'));
+    // took and "×3" is not a re-ride. So the global view says what the park
+    // has, and — once it knows who you are — how much of it is yours.
+    var what = mine!=null
+      ? '<b class="mine">'+mine+'</b><span class="of">/'+all.length+'</span>'
+      : COMBINED
+        ? (all.length.toLocaleString()+' coaster'+(all.length===1?'':'s'))
+        : isRides
+          ? (list.length.toLocaleString()+' ride'+(list.length===1?'':'s')
+             +' · '+uniq.length.toLocaleString()+' coaster'+(uniq.length===1?'':'s'))
+          : (uniq.length.toLocaleString()+' credit'+(uniq.length===1?'':'s'));
     return '<details class="day"><summary>'
       +'<span class="dt">'+esc(park)+'</span>'
-      +'<span class="pk">'+esc(list[0].loc||'')
+      +'<span class="pk">'+esc((all[0]&&all[0].loc)||list[0].loc||'')
         +((days.length && !COMBINED)?' <span style="opacity:.75">· '+days.length+' visit'+(days.length===1?'':'s')+'</span>':'')
       +'</span>'
       +'<span class="n">'+what+'</span>'
@@ -595,9 +681,12 @@ function renderParks(rows){
           ? '<div class="parklink"><a href="'+esc(CoasterHub.parkHref(park))+'">'
             +'Everything at '+esc(park)+' &rarr;</a></div>'
           : '')
-      + uniq.map(function(r){
+      + all.map(function(r){
           var mk=CoasterHub.maker(r);
-          return '<div class="row"><span class="cn">'+clink(r)+'</span>'
+          var got = MINE ? !!MINE[r.c] : !!laps[r.c];
+          return '<div class="row'+(MINE?(got?' got':' miss'):'')+'">'
+            +(MINE?'<span class="tick">'+(got?'✓':'')+'</span>':'')
+            +'<span class="cn">'+clink(r)+'</span>'
             +((laps[r.c]>1 && !COMBINED)?'<span class="lap">×'+laps[r.c]+'</span>':'')
             +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
             +life(r)
