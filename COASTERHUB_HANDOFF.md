@@ -440,19 +440,29 @@ run a no-op.
 rename path above was untestable locally and *looked* fine, because every current name still
 matched. That is exactly the class of thing this harness exists to catch.
 
-### A date input needs `appearance:none` to line up on iOS (2026-09-20)
+### `min-width:0`, or a field grows out through its card (2026-09-20)
 
-Safari on iOS renders `input[type=date]`'s value **centred**, and ignores `text-align` until the
-native appearance is off. So /log's Date sat centred under a left-aligned DATE label while every
-other field on the page was flush left — and nothing showed in Chromium, which left-aligns it
-already. The rule is `-webkit-appearance:none;appearance:none;text-align:left`, on /log and
-/add, the two pages with a date field.
+/log's date field pushed out past the right edge of its panel on a phone. The input was not the
+problem and `max-width:100%` on it did not help, because **`.fld` is a GRID ITEM and a grid
+item's min-width is `auto`** — it refuses to shrink below its content. An input wanting to be
+wider than the card stretched `.fld`, and `max-width:100%` then resolved against the stretched
+parent and capped nothing. Measured before the fix: a date field asked for 900px got all 900.
 
-**Not in `style.css`**: a bare `input[...]` rule there reaches into /log, /add and /edit, which
-all style their own forms — the same reason everything under `.profedit` is scoped.
+Three levels, all of them needed:
+- `.fld{min-width:0}` — the grid item may shrink. **`/add` already had this**; /log did not,
+  which is the whole difference between the two pages.
+- `.grid{grid-template-columns:minmax(0,1fr) …}` — a bare `1fr` is `minmax(auto,1fr)` and the
+  track will not go below its content either, the same trap one level up.
+- `input[type=date]{min-width:0;max-width:100%}` — and `-webkit-appearance:none`, because iOS
+  sizes the native control to its own content and will not shrink it.
 
-Worth knowing this class of bug is invisible to the local harness: Chromium is not Safari, and
-the only proof is Carter's phone.
+Chromium cannot show this one: the same input measures 308px inside a 308px content box, an
+exact fit with no slack, so it looks perfect right up until iOS's wider control meets it. Test
+it by forcing the width (`el.style.width='900px'`) and checking it still renders at the card's
+inner width — that reproduces what iOS does without needing iOS.
+
+Not in `style.css`: a bare `input[...]` rule there reaches into /log, /add and /edit, which all
+style their own forms — the same reason everything under `.profedit` is scoped.
 
 ### A coaster's year is its opening date, and is not typed (2026-09-20)
 

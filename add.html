@@ -49,10 +49,12 @@
                color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem;
                font-family:inherit;min-width:0;width:100%}
   .panel input:focus,.panel select:focus,.gate input:focus{outline:0;border-color:var(--accent2)}
-  /* iOS renders a date input's value CENTRED, and ignores text-align until the
-     native appearance is turned off — so Opened sat centred while every other
-     field on this form was flush left. Same rule as /log's date. */
-  .panel input[type=date]{-webkit-appearance:none;appearance:none;text-align:left}
+  /* Same as /log's date: iOS sizes the native control to its own content and
+     will not shrink it, so it grows out through the edge of the panel.
+     appearance:none makes the box ours, min-width:0 lets it shrink, and
+     max-width:100% is the backstop. */
+  .panel input[type=date]{-webkit-appearance:none;appearance:none;text-align:left;
+    max-width:100%;min-width:0}
   button.primary{background:var(--accent2);border:0;color:#06121a;font-weight:700;border-radius:10px;
                  padding:11px 18px;cursor:pointer;font-size:.92rem}
   button.primary:disabled{opacity:.4;cursor:default}
