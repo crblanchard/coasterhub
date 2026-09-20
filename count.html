@@ -97,7 +97,27 @@
      (Carter, 2026-09-20.) */
   #parkview.flat .day{border:0;border-bottom:1px solid var(--line);border-radius:0;
     margin:0;background-color:transparent}
-  #parkview.flat .day summary{padding:10px 2px}
+  /* Two columns, each of two lines: the park and where it is on the left, what
+     it has and what you have of it on the right. LAID OUT rather than left to
+     wrap — the summary is a wrapping flexbox with a 14px gap, so on a phone the
+     region and the count wrapped onto a second flex line and that gap became
+     14px of dead space in the middle of every single row. */
+  #parkview.flat .day summary{padding:9px 2px;flex-wrap:nowrap;align-items:flex-start;gap:14px}
+  #parkview.flat .pmain{flex:1;min-width:0;display:flex;flex-direction:column}
+  /* Both of these carry sizes meant for the day cards' one-line summary. */
+  #parkview.flat .day .dt{min-width:0;line-height:1.3}
+  #parkview.flat .day .pk{flex:none;min-width:0;line-height:1.3}
+  #parkview.flat .day .n{flex:none;display:flex;flex-direction:column;
+    align-items:flex-end;text-align:right;line-height:1.3}
+  /* Named for what they mean, not which line they landed on — the rule that
+     said .herocount h1 span broke the day the numbers became links. */
+  #parkview.flat .day .n .nop{color:var(--muted);font-weight:400;white-space:nowrap}
+  #parkview.flat .day .n .nrid{color:var(--accent2);font-weight:700;white-space:nowrap}
+  /* A zero is not an achievement. Left muted so the accent down the list means
+     "you have some of this one" — on the everyone view most parks are ones you
+     have never been to, and highlighting all of those zeros made the column
+     loudest exactly where there was nothing to say. */
+  #parkview.flat .day .n .nrid.none{color:var(--muted);font-weight:400}
   #parkview.flat .day .inner{border-top:0;padding:0 2px 12px}
   /* A tick per coaster: what you have of this park. Fixed width so the names
      below it still line up on the ones you have not ridden. */
@@ -106,9 +126,6 @@
      /categories: the ones you are missing are the point of the list. */
   .day .row.miss .cn{color:var(--muted)}
   .day .row.miss .cn a{color:inherit}
-  /* "11/13" — yours in the accent, the park's total muted behind it. */
-  .day .n .mine{color:var(--accent2);font-weight:700}
-  .day .n .of{color:var(--muted);font-weight:400}
   .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
   /* Full-list table (came over with the old /coasters page) */
   .pill{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
@@ -646,7 +663,6 @@ function renderParks(rows){
     });
     uniq.sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
     var days=[...new Set(list.map(function(r){return r.d;}).filter(Boolean))];
-    var isRides=list[0].rep;
 
     // EVERY coaster the park has, not only the ones somebody has ridden. That
     // is what makes a tick mean something and what puts the 13 in "11/13".
@@ -662,18 +678,23 @@ function renderParks(rows){
     // people and mean nothing as a number — "3 visits" is not a trip anybody
     // took and "×3" is not a re-ride. So the global view says what the park
     // has, and — once it knows who you are — how much of it is yours.
-    var what = mine!=null
-      ? '<b class="mine">'+mine+'</b><span class="of">/'+all.length+'</span>'
-      : COMBINED
-        ? (all.length.toLocaleString()+' coaster'+(all.length===1?'':'s'))
-        : isRides
-          ? (list.length.toLocaleString()+' ride'+(list.length===1?'':'s')
-             +' · '+uniq.length.toLocaleString()+' coaster'+(uniq.length===1?'':'s'))
-          : (uniq.length.toLocaleString()+' credit'+(uniq.length===1?'':'s'));
+    // What is still standing, and how many of the park you have. Two lines
+    // rather than a fraction (Carter, 2026-09-20), which means the lower number
+    // is sometimes the bigger one: at Knott's it reads 11 operating, 13 ridden,
+    // because two of the thirteen are gone. That is the true statement about a
+    // count — a credit you hold on a ride that has since been torn down is
+    // still a credit — and it is why the pair is two facts rather than a
+    // fraction. Eighteen of Carter's parks read this way and three read
+    // "0 operating", which is a closed park he has been to.
+    var opN = all.filter(function(r){ return !r.cl; }).length;
+    var what = '<span class="nl nop">'+opN+' operating</span>'
+      + (mine!=null ? '<span class="nl nrid'+(mine?'':' none')+'">'+mine+' ridden</span>' : '');
     return '<details class="day"><summary>'
-      +'<span class="dt">'+esc(park)+'</span>'
-      +'<span class="pk">'+esc((all[0]&&all[0].loc)||list[0].loc||'')
-        +((days.length && !COMBINED)?' <span style="opacity:.75">· '+days.length+' visit'+(days.length===1?'':'s')+'</span>':'')
+      +'<span class="pmain">'
+        +'<span class="dt">'+esc(park)+'</span>'
+        +'<span class="pk">'+esc((all[0]&&all[0].loc)||list[0].loc||'')
+          +((days.length && !COMBINED)?' <span style="opacity:.75">· '+days.length+' visit'+(days.length===1?'':'s')+'</span>':'')
+        +'</span>'
       +'</span>'
       +'<span class="n">'+what+'</span>'
       +'</summary><div class="inner">'
