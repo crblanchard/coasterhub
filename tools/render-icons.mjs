@@ -48,10 +48,35 @@ await shot(icon({ size: 16, w: 7, ground: false, car: '<rect x="11" y="7.4" widt
 await shot(icon({ size: 180, rx: 0 }), 180, 180, "apple-touch-icon.png");
 
 // --- og-image: composite ---------------------------------------------------
-// Only the tile is redrawn. The wordmark and tagline in this file were set in a
-// font this container doesn't have, so re-rendering the whole card would change
-// the type. Tile measured off the existing PNG: 201x201 at (500,92), fill
-// #061121, corner radius 45 (= 14.3/64, the same proportion as the favicon).
+// The card is redrawn ON TOP OF ITSELF: the tile, and the tagline under the
+// wordmark. Everything else is left as the pixels it already is, because the
+// WORDMARK was set in a font this container doesn't have and re-rendering it
+// would change the type. The tagline can be redrawn — it is small, uppercase
+// and spaced out to 30px per character, which is a rhythm any grotesque hits.
+//
+// Measured off the card as it was:
+//   tile      201x201 at (500,92), fill #061121, radius 45 (= 14.3/64, the
+//             same proportion as the favicon)
+//   tagline   caps 414-429, 1,022px wide across 34 characters
+//   backdrop  #04091a, with every ODD row #01030c — a scanline, over the whole
+//             card and UNDER the type (the wordmark's pixels are 255,255,255
+//             on both parities). Paint the patch flat and a band appears where
+//             the stripes stop, so the patch repeats them, and starts on an
+//             even row so they land in phase.
+//
+// Carter's copy, 2026-09-20. It was "A ROLLER COASTER COUNT, VISUALIZED", which
+// described the site rather than saying what you do with it. Two lines now: what
+// it is for, and then the three things it does.
+const TAG1 = "TRACK YOUR COASTER COUNT.";
+const TAG2 = "RANK YOUR CREDITS. LOG YOUR RIDES.";
+// letter-spacing adds its gap AFTER the last letter too, which pushes a centred
+// line half a gap to the right. The negative margin takes that back.
+const tagLine = (text, top, size, ls, color) =>
+  `<div style="position:absolute;left:0;top:${top}px;width:1200px;text-align:center;
+               line-height:1;white-space:nowrap;font-family:Arial,Helvetica,sans-serif;
+               font-weight:700;font-size:${size}px;letter-spacing:${ls}px;color:${color}">
+     <span style="display:inline-block;margin-right:-${ls}px">${text}</span>
+   </div>`;
 const og = "data:image/png;base64," + readFileSync(ROOT + "og-image.png").toString("base64");
 await shot(
   `<div style="position:relative;width:1200px;height:630px">
@@ -59,6 +84,10 @@ await shot(
      <div style="position:absolute;left:500px;top:92px;width:201px;height:201px">
        ${icon({ size: 201, tile: "#061121", rx: 14.3, w: 5.5 })}
      </div>
+     <div style="position:absolute;left:0;top:396px;width:1200px;height:104px;
+                 background-image:repeating-linear-gradient(to bottom,#04091a 0,#04091a 1px,#01030c 1px,#01030c 2px)"></div>
+     ${tagLine(TAG1, 412, 23, 16, "#34d1c9")}
+     ${tagLine(TAG2, 455, 18, 8, "#9fb0d6")}
    </div>`,
   1200, 630, "og-image.png");
 
