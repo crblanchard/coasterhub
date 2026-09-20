@@ -943,8 +943,27 @@
       '<div class="grid"><div class="fld"><label>Latitude</label><input id="plat" type="number" step="any" value="'+(p.lat==null?"":p.lat)+'"></div>'+
         '<div class="fld"><label>Longitude</label><input id="plon" type="number" step="any" value="'+(p.lon==null?"":p.lon)+'"></div>'+
         '<div class="fld full"><label>Region (grouping label, e.g. "Ohio, US" or "Japan")</label><input id="preg" value="'+esc(p.region==null?"":p.region)+'"></div></div>'+
-      '<div class="actions"><button id="psave">Save park</button><span class="toast" id="ptoast"></span></div>';
+      '<div class="actions"><button id="psave">Save park</button><span class="toast" id="ptoast"></span></div>'+
+      // Renaming is its own control, deliberately not folded into Save park.
+      // Coordinates are a correction; a name change rewrites every coaster
+      // standing in the park and is how somebody's shared link stays alive, so
+      // it should not ride along on the button you press to nudge a latitude.
+      '<div class="toolbar"><h3>Rename</h3>'+
+        // No CoasterHub.slugify() here: this page does not load app.js, on
+        // purpose (see the note by api() above), so the path is described
+        // rather than spelled out.
+        '<p class="hint">Moves all '+p.coasters+' coaster'+(p.coasters==1?'':'s')+' with it, keeps the '+
+          'coordinates, and records the old name so links to this park\u2019s page keep working. '+
+          'Retyping the park on each coaster instead does none of that.</p>'+
+        '<div class="grid"><div class="fld full"><label>Rename to \u2014 an existing name merges the two</label>'+
+          '<input id="pname" value="'+esc(p.name)+'" list="dl_parks">'+
+          '<datalist id="dl_parks">'+
+          state.parks.map(function(x){ return '<option value="'+esc(x.name)+'">'; }).join('')+
+          '</datalist></div></div>'+
+        '<div class="actions"><button id="prename">Rename park</button>'+
+          '<span class="toast" id="pntoast"></span></div></div>';
     document.getElementById('psave').addEventListener('click', function(){ savePark(name); });
+    document.getElementById('prename').addEventListener('click', function(){ renamePark(name); });
   }
   async function savePark(name){
     var toast=document.getElementById('ptoast'); toast.textContent="Saving…"; toast.className="toast";
@@ -956,6 +975,38 @@
       if(p && p.lat!=null) state.geo[name]=p; else delete state.geo[name];
       toast.textContent="Saved ✓"; toast.className="toast good"; renderParks(); updateGeoSummary();
     } catch(e){ toast.textContent="Error: "+e.message; toast.className="toast bad"; }
+  }
+
+  // The park name is a URL (/park/<slug>) and a string repeated on every coaster
+  // standing in it, so this is one call rather than an edit per coaster: the
+  // Worker moves the coasters, moves or merges the parks row, and writes the old
+  // name into park_aliases so existing links keep resolving.
+  async function renamePark(name){
+    var toast=document.getElementById('pntoast'); toast.className="toast";
+    var to=document.getElementById('pname').value.trim();
+    if(!to){ toast.textContent="Give it a name."; toast.className="toast bad"; return; }
+    if(to===name){ toast.textContent="That is the name it already has."; return; }
+    var hit=state.parks.filter(function(x){ return x.name===to; })[0];
+    if(hit && !confirm('"'+to+'" already exists with '+hit.coasters+' coaster'+(hit.coasters==1?'':'s')+'.\n\n'+
+                       'Renaming merges the two into one park. That does not come back by renaming in reverse.'))
+      return;
+    toast.textContent="Renaming\u2026";
+    try {
+      var out = await api("POST","/api/admin/parks/rename",{ from:name, to:to });
+      // The coaster list this page is holding now names a park that is gone.
+      // Patched in place rather than re-fetching 1,114 rows for a string swap —
+      // the same shortcut the model rename takes.
+      state.coasters.forEach(function(c){ if((c.park||'')===name) c.park = to; });
+      if(state.geo[name]){ state.geo[to]=state.geo[name]; delete state.geo[name]; }
+      state.selPark = to;
+      await loadParks();
+      selectPark(to);
+      var t2=document.getElementById('pntoast');
+      if(t2){ t2.className="toast good";
+        t2.textContent = out.merged
+          ? 'Merged \u2014 '+out.moved+' moved, '+out.total+' here now'
+          : 'Renamed \u2014 '+out.moved+' coaster'+(out.moved===1?'':'s')+' moved'; }
+    } catch(e){ toast.className="toast bad"; toast.textContent=e.message; }
   }
 
   // ---------- geocoding ----------

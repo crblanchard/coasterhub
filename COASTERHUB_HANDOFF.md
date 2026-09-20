@@ -417,9 +417,14 @@ because the page is already drawn from the right row.
 park used to mean editing each of its coasters by hand, which recorded nothing — so `/add` would
 offer to create the park again under its old name. This moves the coasters, moves or merges the
 `parks` row (filling the survivor's gaps from the row going away, because the one being merged
-*into* may be the one that never got geocoded), and writes the former name. **There is no `/edit`
-UI for it yet** — call it from the browser console the way any admin write can be, which also
-gets you the activity row and the static re-sync that raw D1 SQL does not.
+*into* may be the one that never got geocoded), and writes the former name.
+
+**`/edit` → Parks drives it**, under the coordinates that tab already edited — a Rename section
+with its own button, deliberately not folded into Save park: coordinates are a correction, a name
+rewrites every coaster in the park. Renaming onto a park that exists asks first, because a merge
+does not come back by renaming in reverse. Note that **`/edit` does not load `app.js`** (it is
+standalone on purpose, see the note by its `api()`), so nothing in there may reach for
+`CoasterHub.*` — `check-inline-js` parses but does not run, so that mistake reaches the browser.
 
 **Two known limits, neither a bug.** `Boomers` and `Boomers!` are former names of two *different*
 parks and slugify identically, so that one old address lands on one of them; there is no right
