@@ -36,65 +36,42 @@
         letter-spacing:.06em;margin:26px 0 8px}
   .panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
 
-  /* A row is a checkbox and a link. The link is everything but the box, so the
-     whole strip is still one thumb-sized target for opening the coaster, and
-     the box is its own — a checkbox INSIDE an anchor is a coin flip between
-     ticking and navigating. */
-  .crow{display:flex;align-items:center;gap:11px;padding:0 16px;
-        border-bottom:1px solid var(--soft)}
-  .crow:last-child{border-bottom:0}
-  .crow:hover{background:var(--soft)}
-  .crow .cgo{flex:1;display:flex;align-items:center;gap:10px;min-width:0;
-             padding:11px 0;font-size:.9rem;color:var(--fg);text-decoration:none}
-  .crow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .crow:hover .cn{color:var(--accent2)}
-  /* Ticking one adds an undated credit. Disabled until the page knows what you
-     already have, so a tap on a half-loaded row cannot write the wrong thing. */
-  .crow .got{flex:none;width:19px;height:19px;margin:0;accent-color:var(--accent2);cursor:pointer}
-  .crow .got:disabled{cursor:default;opacity:.5}
-  /* A coaster you have DATED rides on is not a checkbox at all — unticking it
-     would mean deleting logged history from a page that is not the log. It is
-     a plain tick, and it has to be a GLYPH rather than a disabled box:
-     accent-color does not apply to a disabled checkbox, so the browser drew
-     the strongest yes on the page — a ride you logged on a day you remember —
-     in grey, which reads as off. */
-  .crow .lock{flex:none;width:19px;text-align:center;color:var(--accent2);
-              font-size:.95rem;line-height:19px;cursor:default}
-  .crow.busy{opacity:.55}
+  /* A coaster on the list is a link, not a row with a link in it — the whole
+     strip is the target, which is the only version that works with a thumb. */
+  a.crow{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:.9rem;
+         color:var(--fg);text-decoration:none;border-bottom:1px solid var(--soft)}
+  a.crow:last-child{border-bottom:0}
+  a.crow:hover{background:var(--soft)}
+  a.crow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  a.crow:hover .cn{color:var(--accent2)}
   /* Who built it. Shrinks before anything else and ellipsizes rather than
      pushing the status off the row — the same rule the count page's rows use. */
-  .crow .mk{color:var(--muted);font-size:.8rem;flex:0 1 auto;min-width:0;
+  a.crow .mk{color:var(--muted);font-size:.8rem;flex:0 1 auto;min-width:0;
              overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* The far edge of a row, as ONE box. Both things inside it are optional — a
      coaster with no year known has no status, one nobody has ridden has no
      count — and hanging the margin-left:auto off either of them meant the other
      slid back down the row whenever the first was missing. The wrapper is
      always there, so the right edge always holds. */
-  .crow .end{margin-left:auto;flex:none;display:flex;align-items:baseline;gap:12px;
+  a.crow .end{margin-left:auto;flex:none;display:flex;align-items:baseline;gap:12px;
               padding-left:10px;white-space:nowrap}
   /* Status and years. The status carries the colour — teal for running, red for
      gone — and the years stay body-coloured, because the years are the fact and
      the status is only the flag on it. */
-  .crow .life{flex:none;display:flex;align-items:baseline;gap:9px;white-space:nowrap}
-  .crow .life .stat{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-  .crow .life .stat.on{color:var(--accent2)}
-  .crow .life .stat.off{color:var(--accent)}
-  .crow .life .yrs{color:var(--fg);font-size:.8rem;font-variant-numeric:tabular-nums}
+  a.crow .life{flex:none;display:flex;align-items:baseline;gap:9px;white-space:nowrap}
+  a.crow .life .stat{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  a.crow .life .stat.on{color:var(--accent2)}
+  a.crow .life .stat.off{color:var(--accent)}
+  a.crow .life .yrs{color:var(--fg);font-size:.8rem;font-variant-numeric:tabular-nums}
   /* How many riders have this one. Filled in after the rider logs land, so it
      reserves no space and nothing reflows into it. */
-  .crow .rid{flex:none;color:var(--accent);font-size:.78rem;font-variant-numeric:tabular-nums}
-  /* "4 riders" becomes "4" on a phone. The checkbox took the width the word
-     used to sit in, and the names were what gave way — "Boomerang: Coas…",
-     "Flash: Vertical Vel…". The number is the fact; the word is grammar. */
+  a.crow .rid{flex:none;color:var(--accent);font-size:.78rem;font-variant-numeric:tabular-nums}
   @media (max-width:560px){
-    .crow .rid{font-size:0}
-    .crow .rid::before{content:attr(data-n);font-size:.78rem}
-    .crow{gap:9px;padding:0 13px}
-    .crow .cgo{gap:7px;padding:10px 0}
-    .crow .mk{display:none}
-    .crow .life{gap:7px}
-    .crow .life .stat{font-size:0;line-height:0}
-    .crow .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
+    a.crow{gap:7px;padding:10px 13px}
+    a.crow .mk{display:none}
+    a.crow .life{gap:7px}
+    a.crow .life .stat{font-size:0;line-height:0}
+    a.crow .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
   }
 
   /* Riders down the side of the park: how much of it each of them has. */
@@ -174,14 +151,7 @@ function $(id){return document.getElementById(id);}
 // The park's slug is the one path segment after /park/. Everything else on this
 // page is derived from it.
 var SLUG=decodeURIComponent((location.pathname.match(/^\/park\/([^\/]+)/)||[])[1]||'').toLowerCase();
-var PARK=null, LIST=null, MINE=[];
-// Who you are, and what you already have of this park. MYROWS is keyed by
-// coaster id: `un` is the row id of an UNDATED credit (the kind the tick box
-// writes, and the only kind it may take back), `dated` counts rides that carry
-// a date. Both stay null/0 until the rider logs have landed, and every box is
-// disabled until then — a tick acting on state this page has not read yet
-// would write the wrong thing.
-var ME=null, MYROWS={}, PERCOASTER={}, PERRIDER=[];
+var PARK=null, LIST=null;
 
 function notFound(){
   $('loading').style.display='none';
@@ -195,15 +165,9 @@ function fail(e){
   $('err').style.display='block';
 }
 
-Promise.all([
-  CoasterHub.fetchCoasters(),
-  CoasterHub.fetchParks(),
-  // Signed out is an answer, not a failure: no tick boxes at all.
-  CoasterHub.me().catch(function(){ return null; })
-]).then(function(res){
+Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function(res){
   LIST=res[0];
   var parks=res[1];
-  ME=(res[2] && res[2].slug) || null;
   PARK=CoasterHub.findPark(LIST, parks, SLUG);
   if(!PARK) return notFound();
 
@@ -224,7 +188,6 @@ Promise.all([
   var meta=parks[PARK]||{};
   var mine=LIST.coasters.filter(function(c){return c.park===PARK;});
   mine.sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
-  MINE=mine;
 
   document.querySelector('.hero h1').textContent=PARK;
   document.title=PARK+' — Coaster Hub';
@@ -250,12 +213,6 @@ Promise.all([
 
   $('loading').style.display='none';
   $('ui').style.display='block';
-  // Delegated, because paintCounts() never rebuilds the rows but arm() does
-  // touch every box — one listener outlives all of it.
-  $('list').addEventListener('change', function(e){
-    var box=e.target;
-    if(box && box.classList && box.classList.contains('got')) toggle(box);
-  });
 
   // Who has ridden here, filled in afterwards. A rider list that cannot be read
   // leaves the park page complete rather than taking it down — the coasters are
@@ -275,15 +232,11 @@ function life(c){
 }
 function row(c){
   var mk=CoasterHub.maker(c);
-  return '<div class="crow" data-row="'+c.id+'">'
-    +(ME?'<input type="checkbox" class="got" data-c="'+c.id+'" disabled'
-        +' title="Loading your count\u2026" aria-label="I have ridden '+esc(c.name)+'">':'')
-    +'<a class="cgo" href="'+esc(CoasterHub.coasterHref(c))+'">'
-      +'<span class="cn">'+esc(c.name)+'</span>'
-      +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
-      +'<span class="end">'+life(c)+'<span class="rid" data-rid="'+c.id+'"></span></span>'
-    +'</a>'
-    +'</div>';
+  return '<a class="crow" href="'+esc(CoasterHub.coasterHref(c))+'" data-c="'+c.id+'">'
+    +'<span class="cn">'+esc(c.name)+'</span>'
+    +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
+    +'<span class="end">'+life(c)+'<span class="rid" data-rid="'+c.id+'"></span></span>'
+    +'</a>';
 }
 
 // Every rider's log, the same way the everyone view of /count reads them: a
@@ -296,141 +249,31 @@ function riders(mine){
                        .catch(function(){ return null; });
     }));
   }).then(function(all){
-    PERCOASTER={}; PERRIDER=[]; MYROWS={};
+    var perCoaster={}, perRider=[];
     all.forEach(function(x){
       if(!x) return;
       var seen={}, n=0;
       x.log.rides.forEach(function(r){
-        if(!here[r.c]) return;
-        // Your own rows in detail, because the tick box has to know whether a
-        // credit is an undated one it may take back or a dated ride it must not.
-        if(x.u.slug===ME){
-          var m=MYROWS[r.c]||(MYROWS[r.c]={un:null,dated:0});
-          if(r.d) m.dated++; else if(m.un==null) m.un=r.i;
-        }
-        if(seen[r.c]) return;
+        if(!here[r.c] || seen[r.c]) return;
         seen[r.c]=1; n++;
-        PERCOASTER[r.c]=(PERCOASTER[r.c]||0)+1;
+        perCoaster[r.c]=(perCoaster[r.c]||0)+1;
       });
-      if(n) PERRIDER.push({slug:x.u.slug, name:x.u.name||x.u.slug, n:n});
+      if(n) perRider.push({slug:x.u.slug, name:x.u.name||x.u.slug, n:n});
     });
-    paintCounts();
-    arm();
-  });
-}
-
-// The rider count on each row, and the pills underneath. Both are redrawn from
-// module state after a tick rather than re-read from the network — six rider
-// files per checkbox would be an absurd price for a number we can add one to.
-function paintCounts(){
-  MINE.forEach(function(c){
-    var el=document.querySelector('[data-rid="'+c.id+'"]');
-    if(!el) return;
-    var n=PERCOASTER[c.id]||0;
-    el.textContent = n ? (n+(n===1?' rider':' riders')) : '';
-    // The bare number for the phone rule below, which drops the word so the
-    // coaster's name keeps its width.
-    el.setAttribute('data-n', n||'');
-  });
-  if(!PERRIDER.length){ $('who_wrap').style.display='none'; return; }
-  var rows=PERRIDER.slice().sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); });
-  $('who').innerHTML=rows.map(function(p){
-    return '<a href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'">'+esc(p.name)
-      +'<i>'+p.n+' of '+MINE.length+'</i></a>';
-  }).join('');
-  $('who_wrap').style.display='block';
-}
-
-// Arm the tick boxes once the logs are in: checked for what you have, and left
-// disabled on anything carrying a dated ride.
-function arm(){
-  if(!ME) return;
-  MINE.forEach(function(c){
-    var box=document.querySelector('.got[data-c="'+c.id+'"]');
-    if(!box) return;
-    var m=MYROWS[c.id];
-    if(m && m.dated){
-      // Swapped for a plain tick, not merely disabled — see the .lock note in
-      // the stylesheet. The delegated handler never sees it, because it is no
-      // longer a .got.
-      var lock=document.createElement('span');
-      lock.className='lock';
-      lock.textContent='\u2713';
-      lock.title='Ridden on a logged day \u2014 change it from that day.';
-      box.parentNode.replaceChild(lock, box);
-      return;
-    }
-    box.checked=!!m;
-    box.disabled=false;
-    box.title=box.checked ? 'In your count. Untick to take it back out.'
-                          : 'Tick to add it to your count, undated.';
-  });
-}
-
-function api(method, path, body){
-  return fetch(path,{ method:method, headers:{'content-type':'application/json'},
-                      body:JSON.stringify(body), cache:'no-store' })
-    .then(function(r){
-      return r.json().catch(function(){ return {}; }).then(function(j){
-        if(!r.ok) throw new Error(j.error || ('HTTP '+r.status));
-        return j;
-      });
+    // Counts on the rows. The number is riders, not rides: this is a park page,
+    // and "3" here means three people have been on it.
+    Object.keys(perCoaster).forEach(function(id){
+      var el=document.querySelector('[data-rid="'+id+'"]');
+      if(el) el.textContent=perCoaster[id]+(perCoaster[id]===1?' rider':' riders');
     });
-}
-
-// Ticking writes an UNDATED credit — the same row ticking a coaster off a list
-// leaves, which is what this is. Unticking deletes that row and only that row;
-// a coaster with dated rides never gets here, because arm() disabled its box.
-function toggle(box){
-  var id=Number(box.getAttribute('data-c'));
-  var want=box.checked;
-  var rowEl=box.closest('.crow');
-  var m=MYROWS[id];
-  if(!want && (!m || m.un==null)){ box.checked=true; return; }   // nothing to take back
-  box.disabled=true; rowEl.classList.add('busy');
-  var call = want
-    ? api('POST','/api/rides',{ user:ME, d:null, entries:[{ c:id, n:1 }] })
-    : api('DELETE','/api/ride',{ i:m.un });
-  call.then(function(){
-    if(want){
-      MYROWS[id]={ un:null, dated:0 };
-      PERCOASTER[id]=(PERCOASTER[id]||0)+1;
-      bumpMe(+1);
-      // The row id of what was just written is not in the answer, so read it
-      // back — without it, unticking straight away has nothing to delete.
-      return CoasterHub.fetchRides(ME).then(function(log){
-        log.rides.forEach(function(r){
-          if(r.c===id && !r.d && MYROWS[id] && MYROWS[id].un==null) MYROWS[id].un=r.i;
-        });
-      }).catch(function(){ /* it is in; the box is right either way */ });
-    }
-    delete MYROWS[id];
-    PERCOASTER[id]=Math.max(0,(PERCOASTER[id]||1)-1);
-    bumpMe(-1);
-  }).then(function(){
-    paintCounts(); arm();
-  }).catch(function(e){
-    console.error(e);
-    box.checked=!want;                       // put it back the way it was
-    box.disabled=false;
-    alert('Couldn\u2019t save that: '+e.message);
-  }).then(function(){
-    rowEl.classList.remove('busy');
+    if(!perRider.length) return;
+    perRider.sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); });
+    $('who').innerHTML=perRider.map(function(p){
+      return '<a href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'">'+esc(p.name)
+        +'<i>'+p.n+' of '+mine.length+'</i></a>';
+    }).join('');
+    $('who_wrap').style.display='block';
   });
-}
-
-// Your own pill under the list, so the count you just changed agrees with it.
-function bumpMe(d){
-  var meRow=null;
-  PERRIDER.forEach(function(p){ if(p.slug===ME) meRow=p; });
-  if(!meRow){
-    if(d<0) return;
-    var nm=(CoasterHub.USERS.filter(function(u){return u.slug===ME;})[0]||{}).name || ME;
-    PERRIDER.push({ slug:ME, name:nm, n:1 });
-    return;
-  }
-  meRow.n+=d;
-  if(meRow.n<=0) PERRIDER=PERRIDER.filter(function(p){ return p!==meRow; });
 }
 </script>
 </body>
