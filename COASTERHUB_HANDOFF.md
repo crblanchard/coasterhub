@@ -2763,6 +2763,58 @@ asserts both orientations now, which is the check that would have caught the hal
 `background-size:cover` on a square source in a square box crops nothing further. An avatar
 that looks wrong has to be re-cropped to change.
 
+### The nine-argument drawImage is gone from the crop (2026-09-21)
+
+Carter, after the framing fix landed and he re-cropped again: **the dialog is right, the saved
+avatar is not.** Which is the one answer that rules out everything the framing work addressed
+and points at the save.
+
+Ruled out along the way, so nobody re-walks it:
+
+- **Not a stale key.** `users.avatar` changed on every attempt — `6288bf17…`, `3f174306…` — so
+  the uploads were landing. And a stale key cannot explain a WRONG picture: the upload path
+  deletes the previous R2 object, so an old key renders nothing at all.
+- **Not the display.** Every element that paints an avatar (`.riderrow .av`, `.profedit .av`,
+  `.followlist .fav`, the header link, the phone tab) is a square box with `background-size:
+  cover` and a circular clip. A square source in a square box is cropped by exactly nothing,
+  and the circle on the page is the same inscribed circle the dialog shows.
+- **Not the framing.** `tools/test-crop.mjs` drives the real dialog with a real EXIF-rotated
+  JPEG and reads the saved 256x256 back out of its own pixels: on Chromium the saved file IS
+  the previewed region, in both orientations, to within JPEG noise.
+
+So the save now avoids the nine-argument `drawImage(img, sx, sy, sw, sh, 0, 0, 256, 256)`
+altogether — the source-rectangle form this file has warned about since September, which
+WebKit has read in a space of its own more than once. Baking to a canvas first was supposed
+to settle that (a canvas carries no orientation metadata) and on Chromium it does. On an
+iPhone it evidently still didn't.
+
+The same crop is a transform plus the plain three-argument draw now:
+
+```js
+var k = PIC_PX / (V / s);
+g.setTransform(k, 0, 0, k, (CROP.x / s) * k, (CROP.y / s) * k);
+g.drawImage(CROP.img, 0, 0);
+```
+
+A source pixel at `sx` lands at `k * (sx + CROP.x/s)`, which is 0 at the crop's left edge and
+256 at its right — identical arithmetic, and the test reports byte-identical framing numbers
+before and after, so this is a swap of construct rather than of behaviour.
+
+**Not yet confirmed on the device that has the bug.** If it persists, the DIRECTION of the
+error names the mechanism, so get a screenshot of the result and compare: the whole photo
+means `V`/zoom was lost, a rotated region means the two halves still disagree about the space,
+a shift at the same scale means the offsets. Guessing a fourth time is worse than asking.
+
+### Latent: a `<rider>.json` avatar key is a broken image, not an old picture
+
+Noticed while chasing the above, unfixed. The snapshot carries `avatar` — `crblanchard.json`
+still says `233359ce…` — but the upload path **deletes the previous R2 object**, so every
+avatar key in every snapshot older than the rider's last upload points at nothing. A page that
+falls back to the snapshot therefore draws a broken image rather than a slightly old face, and
+it cannot fall back to the initial-in-a-circle either, because as far as it knows there IS a
+picture. Either leave `avatar` out of the static snapshot or keep the old object around; the
+snapshot is a safety net and this is the one field in it that rots into a visible fault.
+
 ---
 
 ## Open tasks

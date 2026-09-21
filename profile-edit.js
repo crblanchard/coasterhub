@@ -554,8 +554,29 @@
       var s = CROP.base * CROP.zoom, V = CROP.vw;
       var canvas = document.createElement("canvas");
       canvas.width = canvas.height = PIC_PX;
-      canvas.getContext("2d").drawImage(CROP.img, -CROP.x / s, -CROP.y / s, V / s, V / s,
-        0, 0, PIC_PX, PIC_PX);
+      // NO NINE-ARGUMENT drawImage. This used to pass the crop as a source
+      // rectangle — drawImage(img, sx, sy, sw, sh, 0, 0, 256, 256) — which is
+      // the one form of the call this file's history warns about: WebKit has
+      // read those coordinates in a space of its own more than once, and the
+      // preview then frames one region while the canvas saves another. Baking
+      // to a canvas first was supposed to settle that, because a canvas carries
+      // no orientation metadata, and on Chromium it does: tools/test-crop.mjs
+      // proves the saved file is the previewed region, on a real EXIF-rotated
+      // JPEG, in both orientations. On Carter's iPhone it still came out
+      // different from the circle he framed (2026-09-21).
+      //
+      // So the source rectangle is gone. The same crop is expressed as a
+      // transform and the PLAIN THREE-ARGUMENT draw, which every engine agrees
+      // on: scale by the destination-per-source ratio, translate so the top-left
+      // of the crop lands at the canvas origin, and let the canvas bounds
+      // discard the rest. Identical arithmetic — a source pixel at sx lands at
+      // k*(sx + CROP.x/s), which is 0 at the crop's left edge and PIC_PX at its
+      // right — with one fewer thing for a browser to have an opinion about.
+      var k = PIC_PX / (V / s);              // destination pixels per source pixel
+      var g = canvas.getContext("2d");
+      g.setTransform(k, 0, 0, k, (CROP.x / s) * k, (CROP.y / s) * k);
+      g.drawImage(CROP.img, 0, 0);
+      g.setTransform(1, 0, 0, 1, 0, 0);
       new Promise(function (resolve, reject) {
         canvas.toBlob(function (b) { b ? resolve(b) : reject(new Error("could not read that image")); },
           "image/jpeg", 0.88);
