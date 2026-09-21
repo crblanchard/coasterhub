@@ -371,6 +371,81 @@ async function main() {
     check("unknown ride id -> 404", r.status === 404);
   }
 
+  // Changing a day after the fact. The fixture gives carter two laps on coaster
+  // 1 on 2024-06-01 and one on coaster 2 on 2024-06-02.
+  console.log("\nPUT /api/day");
+  {
+    const db = freshDb();
+    const before = rows(db, "SELECT id FROM rides WHERE user_slug='carter' AND d='2024-06-01' ORDER BY id").map(r => r.id);
+    let r = await call(db, "PUT", "/api/day", { body: { user: "carter", d: "2024-06-01", entries: [{ c: 1, n: 1 }] } });
+    check("no token -> 401", r.status === 401);
+    check("...and nothing changed", rows(db, "SELECT * FROM rides WHERE user_slug='carter'").length === 3);
+
+    // Laps down: 2 -> 1. The row that goes is the NEWER one; the older keeps its id.
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "carter", d: "2024-06-01", entries: [{ c: 1, n: 1 }] } });
+    let left = rows(db, "SELECT id FROM rides WHERE user_slug='carter' AND d='2024-06-01' ORDER BY id").map(x => x.id);
+    check("laps down deletes the newer row and keeps the older one",
+      r.status === 200 && r.data.removed === 1 && r.data.added === 0 && left.length === 1 && left[0] === before[0],
+      JSON.stringify({ data: r.data, before, left }));
+    check("...and reports the new totals", r.data.rides === 2 && r.data.credits === 2, JSON.stringify(r.data));
+
+    // Laps up: 1 -> 3, plus a coaster the day did not have. The surviving row keeps its id.
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "carter", d: "2024-06-01", entries: [{ c: 1, n: 3 }, { c: 3, n: 1 }] } });
+    const day = rows(db, "SELECT id, coaster_id FROM rides WHERE user_slug='carter' AND d='2024-06-01' ORDER BY id");
+    check("laps up inserts the difference and a new coaster comes onto the day",
+      r.status === 200 && r.data.added === 3 && r.data.removed === 0
+      && day.filter(x => x.coaster_id === 1).length === 3 && day.filter(x => x.coaster_id === 3).length === 1,
+      JSON.stringify({ data: r.data, day }));
+    check("...the row that was there is still the same row", day[0].id === before[0], JSON.stringify(day));
+
+    // A coaster left out of `entries` comes off the day entirely.
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "carter", d: "2024-06-01", entries: [{ c: 1, n: 3 }] } });
+    check("a coaster left out is removed from the day",
+      r.status === 200 && r.data.removed === 1
+      && rows(db, "SELECT * FROM rides WHERE user_slug='carter' AND d='2024-06-01' AND coaster_id=3").length === 0,
+      JSON.stringify(r.data));
+
+    // Moving the day: same rows, new date, ids untouched.
+    const ids = rows(db, "SELECT id FROM rides WHERE user_slug='carter' AND d='2024-06-01' ORDER BY id").map(x => x.id);
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "carter", d: "2024-06-01", to: "2024-06-05", entries: [{ c: 1, n: 3 }] } });
+    const movedIds = rows(db, "SELECT id FROM rides WHERE user_slug='carter' AND d='2024-06-05' ORDER BY id").map(x => x.id);
+    check("moving the day is an UPDATE: the same rows, on the new date",
+      r.status === 200 && r.data.moved === true && movedIds.length === 3 && movedIds.join() === ids.join()
+      && rows(db, "SELECT * FROM rides WHERE user_slug='carter' AND d='2024-06-01'").length === 0,
+      JSON.stringify({ data: r.data, ids, movedIds }));
+    // Moving onto a date that already has rides merges the two days.
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "carter", d: "2024-06-05", to: "2024-06-02", entries: [{ c: 1, n: 3 }] } });
+    check("moving onto an existing day merges into it",
+      r.status === 200 && rows(db, "SELECT * FROM rides WHERE user_slug='carter' AND d='2024-06-02'").length === 4,
+      JSON.stringify(r.data));
+
+    // An empty day, with nowhere to move to, is a removed day.
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "carter", d: "2024-06-02", entries: [] } });
+    check("empty entries removes the day",
+      r.status === 200 && r.data.removed === 4 && rows(db, "SELECT * FROM rides WHERE user_slug='carter'").length === 0,
+      JSON.stringify(r.data));
+
+    // The feed knows.
+    const acts = rows(db, "SELECT kind, actor, n, detail FROM activity WHERE kind='day_edited' ORDER BY id");
+    check("every change wrote a day_edited row", acts.length === 6 && acts.every(a => a.actor === "carter"),
+      JSON.stringify(acts));
+    check("...carrying what moved", JSON.parse(acts[4].detail).to === "2024-06-02" && JSON.parse(acts[0].detail).removed === 1,
+      JSON.stringify(acts.map(a => a.detail)));
+
+    // Refusals.
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "carter", d: "2024-06-01", entries: [{ c: 1, n: 1 }] } });
+    check("a day with no rides -> 404", r.status === 404);
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "cole", d: "05/05/2023", entries: [{ c: 1, n: 1 }] } });
+    check("a malformed date -> 400", r.status === 400);
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "cole", d: "2023-05-05", to: "next tuesday", entries: [{ c: 1, n: 1 }] } });
+    check("a malformed target date -> 400", r.status === 400);
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "cole", d: "2023-05-05", entries: [{ c: 999, n: 1 }] } });
+    check("an unknown coaster -> 400", r.status === 400);
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "cole", d: "2023-05-05" } });
+    check("missing entries -> 400, and does not empty the day", r.status === 400
+      && rows(db, "SELECT * FROM rides WHERE user_slug='cole'").length === 1);
+  }
+
   console.log("\nDELETE /api/coaster/:id + usage");
   {
     const db = freshDb();

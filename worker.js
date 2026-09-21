@@ -872,6 +872,89 @@ async function userTotal(env, slug) {
 //
 // EVERY coaster id is validated up front and the whole batch is rejected if any
 // is unknown — a typo must never half-log a day. Returns {added, total, date}.
+// Change a day that is already logged: laps up or down, a coaster off the day,
+// a coaster onto it, or the whole day onto another date. Carter's follow-up
+// from the day /log shipped, built 2026-09-21.
+//
+// Rides are one row per lap, so a lap count is a number of rows and editing
+// it means making the rows match: fewer wanted than held deletes the newest
+// extras, more inserts the difference, a coaster left out of `entries` loses
+// every row it had that day. Rows that stay are the SAME rows — nothing is
+// deleted and re-inserted — which is what keeps ride ids stable for anything
+// holding one, and it is why moving the day is an UPDATE of `d` on the rows
+// rather than a copy: the handoff's note on this was right. A move onto a date
+// that already has rides merges the two days, which is what "put this on the
+// 14th" means when the 14th exists.
+//
+// `entries` is the whole day as it should be afterwards, not a diff. An empty
+// list is allowed and empties the day — with no `to`, that removes it.
+async function editDay(env, b) {
+  const slug = String(b && b.user || "").toLowerCase();
+  const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
+  if (!u) return { bad: [400, "no such user"] };
+  const DAY = /^\d{4}-\d{2}-\d{2}$/;
+  const d = String(b && b.d || "");
+  if (!DAY.test(d)) return { bad: [400, "need d as YYYY-MM-DD"] };
+  const to = (b && b.to != null && b.to !== "") ? String(b.to) : null;
+  if (to !== null && !DAY.test(to)) return { bad: [400, "need to as YYYY-MM-DD or null"] };
+  if (!Array.isArray(b && b.entries)) return { bad: [400, "need entries"] };
+
+  const want = new Map();                        // coaster -> laps wanted
+  for (const e of b.entries) {
+    const c = Number(e && e.c);
+    if (!Number.isInteger(c) || c <= 0) return { bad: [400, "bad coaster id"] };
+    let n = Math.round(Number(e && e.n));
+    if (!Number.isFinite(n) || n < 1) n = 1;
+    if (n > 50) n = 50;                          // the same laps clamp as addRides
+    want.set(c, (want.get(c) || 0) + n);
+  }
+  const ids = [...want.keys()];
+  if (ids.length) {
+    const known = await knownCoasterIds(env, ids);
+    const unknown = ids.filter(i => !known.has(i));
+    if (unknown.length) return { bad: [400, "unknown coaster id(s): " + unknown.join(", ")] };
+  }
+
+  const { results: have } = await env.DB.prepare(
+    "SELECT id, coaster_id FROM rides WHERE user_slug = ? AND d = ? ORDER BY id"
+  ).bind(slug, d).all();
+  if (!have.length) return { bad: [404, "no rides on that day"] };
+  const held = new Map();                        // coaster -> [row ids], oldest first
+  for (const r of have) { if (!held.has(r.coaster_id)) held.set(r.coaster_id, []); held.get(r.coaster_id).push(r.id); }
+
+  const batch = [];
+  let added = 0, removed = 0;
+  for (const [c, rows] of held) {
+    const n = want.get(c) || 0;
+    // Newest first off the end: the lap you added by mistake is the one you
+    // just added, and the oldest row is the one most likely to be referenced.
+    for (const id of rows.slice(n)) { batch.push(env.DB.prepare("DELETE FROM rides WHERE id = ?").bind(id)); removed++; }
+  }
+  for (const [c, n] of want) {
+    const has = (held.get(c) || []).length;
+    for (let k = has; k < n; k++) {
+      batch.push(env.DB.prepare("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,?)").bind(slug, c, d));
+      added++;
+    }
+  }
+  const moved = to !== null && to !== d;
+  // After the reconcile, so the new rows move with the day too.
+  if (moved) batch.push(env.DB.prepare("UPDATE rides SET d = ? WHERE user_slug = ? AND d = ?").bind(to, slug, d));
+  if (batch.length) await env.DB.batch(batch);
+
+  const after = [...want.values()].reduce((a, n) => a + n, 0);
+  await recordActivity(env, "day_edited", {
+    actor: slug,
+    subject: await parkLabel(env, ids.length ? ids : [...held.keys()]),
+    n: after,
+    detail: { date: d, to: moved ? to : null, added, removed, rides: after, coasters: ids.length },
+  });
+  // `rides` and `credits` are the rider's TOTALS, from userTotal, the same two
+  // numbers every other write reports; the day's own count is `onDay`. Not
+  // `rides: after` — that name is taken by the total and the spread would win.
+  return { added, removed, moved, onDay: after, coasters: ids.length, ...(await userTotal(env, slug)) };
+}
+
 async function addRides(env, b) {
   const slug = String(b && b.user || "").toLowerCase();
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
@@ -2109,6 +2192,15 @@ export default {
         const b = await request.json();
         if (!mayWriteRider(request, env, b && b.user, acct)) return err(401, "unauthorized");
         const out = await addRides(env, b);
+        if (out.bad) return err(out.bad[0], out.bad[1]);
+        return afterWrite(ctx, env, request, json({ ok: true, ...out }));
+      }
+      // Change a day that is already logged — see editDay. The body names the
+      // rider, so it authorizes the same way adding a day does.
+      if (request.method === "PUT" && path === "/api/day") {
+        const b = await request.json();
+        if (!mayWriteRider(request, env, b && b.user, acct)) return err(401, "unauthorized");
+        const out = await editDay(env, b);
         if (out.bad) return err(out.bad[0], out.bad[1]);
         return afterWrite(ctx, env, request, json({ ok: true, ...out }));
       }

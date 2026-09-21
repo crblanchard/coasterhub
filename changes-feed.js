@@ -35,7 +35,7 @@
   // Which of the two feeds an event belongs to: something a rider did to their own
   // count, or something that changed the shared list everyone draws from.
   var RIDER_KINDS = { rides:1, credits:1, ranking:1, ride_removed:1, user_added:1,
-                      claimed:1, import:1 };
+                      claimed:1, import:1, day_edited:1 };
   
   function icon(kind){
     var k = kind === 'ride_removed' ? 'removed'
@@ -48,6 +48,7 @@
           : kind === 'model_merged' ? 'merged'
           : kind === 'model_assigned' ? 'edited'
           : kind === 'import' ? 'stack'
+          : kind === 'day_edited' ? 'edited'
           : kind === 'park_renamed' ? 'edited'
           : kind === 'park_merged' ? 'merged'
           : kind === 'coaster_deleted' ? 'deleted'
@@ -141,6 +142,18 @@
       var days = Array.isArray(d.days) ? d.days.length : (+d.days || 0);
       return (who || 'Someone') + ' imported ' + plural(e.n || 0, 'credit')
         + (days ? ' <span class="sub">across ' + plural(days, 'day') + '</span>' : '');
+    }
+    // A logged day changed after the fact: laps, a coaster on or off it, or the
+    // date itself. Says what moved and where it ended up; the row count after
+    // is in `n` for anyone who wants it, but "changed" is the news.
+    if (e.kind === 'day_edited') {
+      var moves = [];
+      if (d.added) moves.push('added ' + plural(d.added, 'ride'));
+      if (d.removed) moves.push('removed ' + plural(d.removed, 'ride'));
+      if (d.to) moves.push('moved it to ' + niceDate(d.to));
+      return (who || 'Someone') + ' changed ' + (d.date ? niceDate(d.date) : 'a day')
+        + (sub ? ' at ' + parkLink(e.subject, sub) : '')
+        + (moves.length ? ' \u2014 ' + moves.join(', ') : '');
     }
     if (e.kind === 'credits') {
       var n = d.rides || e.n || 0;

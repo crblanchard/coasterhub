@@ -2897,7 +2897,37 @@ snapshot is a safety net and this is the one field in it that rots into a visibl
 
 ## Open tasks
 
-### 1. Full editing of past days in `/log` — **requested, not built**
+### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**
+
+Pick a date on /log that already has rides and a line under the field offers to load it.
+Loading puts that day's laps in the basket exactly as logged; from there the stepper, the
+remove crosses and the park list work as they always have, the date field becomes "move it
+to", and Save sends the whole day as it should be afterwards to **`PUT /api/day`**
+`{user, d, to?, entries:[{c,n}]}`. An empty basket saves as "Remove this day" behind a
+`confirm()`. Clear, the mode switch and a rider change all abandon an edit.
+
+Server side, `editDay()` reconciles rows rather than replacing them, because a ride is one
+row per lap: fewer wanted than held deletes the NEWEST extras, more inserts the difference,
+a coaster left out loses its rows, and moving the day is an `UPDATE` of `d` on the rows that
+remain — so ride ids never churn for anything holding one, which is what the note below asked
+for. Moving onto a date that already has rides merges the two days. The feed gets a
+`day_edited` row (`Carter changed Sep 12, 2026 at Six Flags Magic Mountain — removed 1 ride`),
+counted as a rider event.
+
+Things learned building it, so they are not re-learned:
+
+- The response spreads `userTotal` last, and that carries `rides` (the rider's total). The
+  day's count is `onDay`; naming it `rides` lost it to the spread, silently.
+- The page's message builder used `r.total`, copied from add-a-day. `userTotal` has no
+  `total`; it is `rides`. The TypeError fired AFTER the write, inside `.then`, so the save
+  succeeded and the page showed an error — and because it fired before the page refreshed its
+  idea of the day, the next attempt worked from stale laps and doubled them. A message that
+  throws after a write is worse than no message.
+- `tools/test-rides-api.mjs` covers the endpoint (17 checks); the UI was driven end to end
+  in the harness: offer, load, laps down, coaster off, move, remove, mode switch, feed.
+
+The original note, kept for the record:
+
 
 `/log` currently supports **add a day** + **undo an individual ride** (`DELETE /api/ride`).
 Carter asked for full editing as a follow-up: pick any past date, load that day, adjust or

@@ -338,6 +338,10 @@
         <input id="date" type="date" style="width:100%">
         <p class="note" id="datehint" style="display:none;margin:2px 0 0">Optional — leave it
           blank if you don&rsquo;t remember.</p>
+        <!-- The way into changing a day you have already logged. Picking a date
+             that has rides on it is how you say which day; this line notices
+             and offers to load it. See beginEdit(). -->
+        <p class="note" id="dayhint" style="display:none;margin:2px 0 0"></p>
       </div>
       <button class="primary" id="save" disabled>Save day</button>
       <button class="ghost" id="clear" style="margin-left:8px">Clear</button>
@@ -382,6 +386,15 @@ var NOREGION='\u0000none';   // parks with no location recorded, as a bucket
 var MODE='day';  // 'day' = a dated visit with laps; 'list' = a backfill
 var TODAY='';    // today in LOCAL time, the default only day mode wants
 var OWNED={};    // coaster id -> true, what this rider already has in their count
+// ---- Changing a day already logged ------------------------------------------
+// DAYS is every dated day this rider has, date -> {coasterId: laps}, filled by
+// the same fetch that fills OWNED. EDITING is the date whose rides are in the
+// basket right now, or null. While it is set the basket IS that day — what you
+// save replaces the day rather than adding to it (PUT /api/day), the date field
+// becomes "move it to", and an empty basket means "remove the day". Carter's
+// follow-up from the day /log shipped; built 2026-09-21.
+var DAYS={};
+var EDITING=null;
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function $(id){return document.getElementById(id);}
@@ -477,7 +490,9 @@ function boot(){
   });
 
   $('save').onclick=save;
-  $('clear').onclick=function(){ basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
+  $('clear').onclick=function(){ if(EDITING){ cancelEdit(); return; } basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
+  $('date').addEventListener('change',offerDay);
+  $('date').addEventListener('input',offerDay);
   wireAdders(); wireRiderAdd(); wireRiderLine(); wireNearMe(); wireParkFilter();
   wireRegions(); wireMode();
   // ?mode=list opens straight on "Coaster credits". The two modes are different
@@ -487,7 +502,7 @@ function boot(){
   $('rider').addEventListener('change',function(){
     try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
     showRider();
-    basket={}; renderBasket(); loadOwned();
+    EDITING=null; basket={}; renderBasket(); loadOwned();
   });
   loadOwned();
 }
@@ -498,12 +513,49 @@ function boot(){
 // the server's guard still refuses to double-count.
 function loadOwned(){
   var slug=$('rider').value;
-  OWNED={};
+  OWNED={}; DAYS={};
   return CoasterHub.fetchRides(slug).then(function(log){
     if($('rider').value!==slug) return;            // rider changed mid-flight
-    (log.rides||[]).forEach(function(r){ OWNED[r.c]=true; });
-    renderList();
+    (log.rides||[]).forEach(function(r){
+      OWNED[r.c]=true;
+      if(r.d){ var day=DAYS[r.d]||(DAYS[r.d]={}); day[r.c]=(day[r.c]||0)+1; }
+    });
+    renderList(); offerDay();
   }).catch(function(){ renderList(); });
+}
+
+function niceDay(d){
+  var p=d.split('-'); if(p.length!==3) return d;
+  return new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).toLocaleDateString(undefined,{timeZone:'UTC',year:'numeric',month:'short',day:'numeric'});
+}
+// Under the date field: what picking this date means right now.
+function offerDay(){
+  var h=$('dayhint'), d=$('date').value, day=DAYS[d];
+  if(MODE!=='day'){ h.style.display='none'; return; }
+  if(EDITING){
+    h.style.display='';
+    h.innerHTML = d===EDITING ? 'Changing this day. <a href="#" id="dayback">Cancel</a>'
+      : (d ? 'Moving it to '+esc(niceDay(d))+(DAYS[d]?' — which already has rides; they will merge':'')+'. <a href="#" id="dayback">Cancel</a>'
+           : 'Pick the date to move it to, or <a href="#" id="dayback">cancel</a>.');
+  } else if(day){
+    var n=Object.keys(day).reduce(function(a,k){return a+day[k];},0), c=Object.keys(day).length;
+    h.style.display='';
+    h.innerHTML='You logged '+n+' ride'+(n===1?'':'s')+' on '+c+' coaster'+(c===1?'':'s')+' this day. '
+      +'<a href="#" id="dayload">Change that day</a>';
+  } else { h.style.display='none'; h.innerHTML=''; return; }
+  var a=$('dayload'); if(a) a.onclick=function(e){ e.preventDefault(); beginEdit(d); };
+  var b=$('dayback'); if(b) b.onclick=function(e){ e.preventDefault(); cancelEdit(); };
+}
+function beginEdit(d){
+  EDITING=d;
+  basket={}; Object.keys(DAYS[d]||{}).forEach(function(k){ basket[k]=DAYS[d][k]; });
+  $('date').value=d; $('msg').textContent='';
+  renderList(); renderBasket(); offerDay();
+  $('basket').scrollIntoView({behavior:'instant',block:'nearest'});
+}
+function cancelEdit(){
+  EDITING=null; basket={}; $('date').value=TODAY; $('msg').textContent='';
+  renderList(); renderBasket(); offerDay();
 }
 
 function wireMode(){
@@ -537,8 +589,8 @@ function setMode(m){
   $('save').textContent = m==='day' ? 'Save day' : 'Add to my count';
   $('baskethead').textContent = m==='day' ? 'This day' : 'Staged';
   // Laps mean nothing in list mode and a tick means nothing in day mode, so
-  // the basket does not survive the switch.
-  basket={}; renderList(); renderBasket(); $('msg').textContent='';
+  // the basket does not survive the switch — and neither does a day being changed.
+  EDITING=null; basket={}; renderList(); renderBasket(); $('msg').textContent=''; offerDay();
 }
 
 // ---- "Near me" -------------------------------------------------------------
@@ -1165,7 +1217,14 @@ function renderBasket(){
     ? (rides+' ride'+(rides===1?'':'s'))
     : (order.length+' park'+(order.length===1?'':'s'));
   $('save').disabled=!ids.length;
-  if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">Nothing staged yet.</div>'; return; }
+  // While changing a day the basket IS the day: an empty one is a day to
+  // remove, which is a real thing to save, so the button stays live and says so.
+  if(EDITING){
+    $('baskethead').textContent='Changing '+niceDay(EDITING);
+    $('save').textContent = ids.length ? 'Save changes' : 'Remove this day';
+    $('save').disabled=false;
+  } else if(MODE==='day'){ $('baskethead').textContent='This day'; $('save').textContent='Save day'; }
+  if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">'+(EDITING?'Every ride taken off — saving removes the day.':'Nothing staged yet.')+'</div>'; return; }
 
   // One park needs no heading — the picker above already says which it is.
   var multi=order.length>1;
@@ -1184,9 +1243,41 @@ function renderBasket(){
 }
 
 // ---- save ------------------------------------------------------------------
+// The day being changed, as it should be afterwards. The date field is where
+// it is going; the same date means it stays put. Same rider rule as adding a
+// day: the server checks the body's rider against the account.
+function saveEdit(entries){
+  var rider=$('rider').value, to=$('date').value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(to||'')){
+    $('msg').className='msg bad'; $('msg').textContent='Pick a valid date.'; return; }
+  if(!entries.length && !confirm('Remove every ride from '+niceDay(EDITING)+'?')) return;
+  var was=EDITING;
+  $('save').disabled=true; $('msg').className='msg'; $('msg').textContent='Saving…';
+  api('PUT','/api/day',{user:rider,d:was,to:to,entries:entries})
+    .then(function(r){
+      var bits=[];
+      if(r.added) bits.push('added '+r.added+' ride'+(r.added===1?'':'s'));
+      if(r.removed) bits.push('removed '+r.removed+' ride'+(r.removed===1?'':'s'));
+      if(r.moved) bits.push('moved it to '+niceDay(to));
+      EDITING=null; basket={}; $('date').value=TODAY;
+      $('msg').className='msg ok';
+      $('msg').innerHTML=(entries.length ? 'Changed '+esc(niceDay(was))+(bits.length?' — '+bits.join(', '):'')+'.'
+                                        : 'Removed '+esc(niceDay(was))+'.')
+        +' Now on <b>'+r.credits.toLocaleString()+'</b> coaster'+(r.credits===1?'':'s')
+        +' over '+r.rides.toLocaleString()+' ride'+(r.rides===1?'':'s')+'. '
+        +'<a href="/user/'+encodeURIComponent(rider)+'/count">View the log →</a>';
+      renderBasket();
+      return loadOwned();          // DAYS and OWNED both changed
+    })
+    .catch(function(e){
+      $('save').disabled=false;
+      $('msg').className='msg bad'; $('msg').textContent=String(e.message||e);
+    });
+}
 function save(){
   var ids=Object.keys(basket);
   var entries=ids.map(function(k){return {c:+k,n:basket[k]};});
+  if(EDITING) return saveEdit(entries);
   if(!entries.length)return;
   var rider=$('rider').value, date=$('date').value;
   // Undated is a deliberate null, not an omitted field — the server tells the
