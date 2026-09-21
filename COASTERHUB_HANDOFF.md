@@ -2893,6 +2893,47 @@ it cannot fall back to the initial-in-a-circle either, because as far as it know
 picture. Either leave `avatar` out of the static snapshot or keep the old object around; the
 snapshot is a safety net and this is the one field in it that rots into a visible fault.
 
+### Captain Coaster: no key needed, the pages carry everything (2026-09-21)
+
+Carter asked how to get Captain Coaster's API "for rides". Read from their source
+(`github.com/captain-coaster/captain-coaster`, reachable from here even though the site is not):
+
+- **The public API** exposes `Coaster` (`/api/coasters`, `/api/coasters/{id}`), `Park`, `Model`,
+  `Launch`, `Restraint`, `Status`, `Image`. JSON-LD only, Hydra paging. A coaster carries
+  `name materialType seatingType model manufacturer height speed length inversionsNumber
+  restraint launchs park status openingDate closingDate` — metric.
+- **Ride history is not on it.** `RiddenCoaster` has no `ApiResource`. Carter does not want it.
+- **Every `/api/` route needs a key** (`Authorization: <key>`, `ApiKeyAuthenticator`, `ROLE_USER`),
+  and **nothing in the code generates one** — the settings field only shows a key that an admin
+  has already set. Carter asked months ago and never heard back. The `/api` docs page is
+  `ROLE_ADMIN`, so it 403s ordinary users; that is not the key failing.
+- **The coaster PAGES are public** and print the same stats: `coaster-stats__label/__value`
+  spans for height/length/speed/inversions, `cc-field__label` + `.pull-right` items for
+  Manufacturer, Type (Steel/Wood), Train, Model, Launch, Restraint, Opening date, Closing
+  date. `?setUnits=metric` on any request pins the units regardless of cookie or locale
+  guess. `/sitemap.xml` lists every coaster URL. `/search/api?q=` is open (no role) and returns
+  `{id,name,slug,subtitle:<park>}` per coaster — unlike the autocomplete route their own pages
+  use, which is `ROLE_USER`. Dates print as a bare year when stored as Jan 1 (their "year only"),
+  else `M/d/yy` under `/en/`.
+
+So **`tools/cc-stats.mjs`**, which Carter runs on his machine (the sandbox cannot reach the
+site): sitemap once, then for every row in `coasters.json` missing any of `type h s l inv yr
+manu model` (101 with nothing, 529 partial, 543 with no maker as of the 2026-09-20 snapshot)
+it matches by normalised name, confirms the **park on the page** before trusting a hit (ten
+Wacky Worms), falls back to `/search/api` for names the sitemap does not know, fetches one
+page a second with a User-Agent that names the project, caches pages in `tools/.cc-cache/`,
+converts to ft/mph, and writes `migrations/020-cc-stats.sql` — `COALESCE` on every column so
+it fills blanks and never overwrites a typed number, matched on name + park, idempotent —
+plus `tools/cc-stats-report.json` (matched / unmatched / ambiguous, and every distinct
+manufacturer and model spelling, to reconcile with ours in /edit before the paste). The
+parser has a `--selftest` against a page built from their templates; the migration shape
+was proved on the snapshot in `node:sqlite` (fills the blank, keeps the typed height,
+second run identical).
+
+The old `tools/import-captaincoaster.js` is from the static-file era: it REBUILDS
+`coasters.json` on Captain Coaster's ids and rewrites every rider file. Do not run it against
+today's D1-backed site. It also needs the key nobody has.
+
 ---
 
 ## Open tasks
