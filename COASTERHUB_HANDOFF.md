@@ -3171,6 +3171,18 @@ null`). `scratchpad/editdel.mjs` drives the real page: Blue Streak, the panel sa
 tick arms the button, the confirm names the riders, the list and the usage route agree it is
 gone, and /changes shows the sentence with a park link and one rider link per rider.
 
+### Profile hero: "View your map"; the map's "not placed" list is gone (2026-09-21)
+
+Carter, with the account hero: *"log a day - view your map - view your count - update your
+rankings"* — so `profile.html`'s `.heroacts` has a `#hero_map` button between Log a day and
+the count, `data-nav="map"` so `initNav` points it at the rider whose page it is, and worded
+like the count button: "View your map" on your own page, "View Sean's map" on Sean's.
+
+And on the map: *"hide the not placed button, these are all traveling coasters & companies."*
+The bottom-left note's "8 not placed" button and its folded list are removed — Butler
+Amusements, Ray Cammack Shows and the rest are fairs and companies, not parks missing a pin.
+The note is the counts and the legend now. /edit still shows which parks are un-geocoded.
+
 ### /categories: a category's rows read alphabetically by park (2026-09-21)
 
 Carter, with a screenshot of Vekoma SLCs open — Kong, Batman, Professor Screamore's, Queen

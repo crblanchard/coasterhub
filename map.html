@@ -92,9 +92,6 @@
   .ctl.filt label{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--fg);padding:3px 0;font-size:.85rem;user-select:none;white-space:nowrap}
   .ctl.filt input{accent-color:var(--accent2);width:16px;height:16px;margin:0;flex:none;cursor:pointer}
   .ctl.filt small{color:var(--muted);font-variant-numeric:tabular-nums}
-  .ctl .list{display:none;margin-top:6px;max-width:260px;line-height:1.5}
-  .ctl.open .list{display:block}
-  .ctl button{background:none;border:0;padding:0;font:inherit;color:var(--accent2);cursor:pointer}
   #err{position:absolute;z-index:2;left:16px;right:16px;top:16px;background:var(--tint2);border:1px solid var(--accent2);border-radius:12px;padding:14px 16px;display:none}
 </style>
 </head>
@@ -214,7 +211,6 @@ Promise.all([
     p.been = !!log && p.open.concat(p.closed).some(function(c){ return MINE[c.id]; });
   });
   var placed=all.filter(function(p){ return p.lat!=null && p.lon!=null; });
-  var unplaced=all.filter(function(p){ return p.lat==null || p.lon==null; });
 
   // One row per coaster, operating or defunct: a tick when there is somebody
   // to tick for, the name as a link, and for a defunct one its years.
@@ -310,23 +306,21 @@ Promise.all([
     document.getElementById('f_not').onchange=function(){ SHOW.not=this.checked; refresh(); };
   }
 
-  // What is not on the map, and why. Bottom-left, folded, because a park
-  // with no coordinates is invisible here and nowhere else says so.
+  // The counts and the legend, bottom-left. This used to also fold out the
+  // parks with no coordinates; Carter, 2026-09-21: "hide the not placed
+  // button, these are all traveling coasters & companies" — a fair with no
+  // fixed place is not a park missing a pin, so the note no longer says so.
+  // (/edit still lists un-geocoded parks for the day one of them is real.)
   var note=L.control({position:'bottomleft'});
   note.onAdd=function(){
     var d=L.DomUtil.create('div','ctl');
     var tot=placed.reduce(function(a,p){ return a+p.open.length; },0);
     d.innerHTML='<b id="np">'+placed.length+'</b> parks · <b id="nc">'+tot.toLocaleString()+'</b> operating coasters'
-      +' · 1 <span class="ramp" title="Operating coasters, fewest to most" style="background-image:linear-gradient(to right,'+rampT(0)+','+rampT(.5)+','+rampT(1)+')"></span> '+MAX
-      +(unplaced.length ? ' · <button type="button" id="unp">'+unplaced.length+' not placed</button>'
-        +'<div class="list">No coordinates yet — give them a location in /edit: '
-        +unplaced.map(function(p){ return '<b>'+esc(p.name)+'</b> ('+p.open.length+')'; }).join(', ')+'</div>' : '');
+      +' · 1 <span class="ramp" title="Operating coasters, fewest to most" style="background-image:linear-gradient(to right,'+rampT(0)+','+rampT(.5)+','+rampT(1)+')"></span> '+MAX;
     L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
     return d;
   };
   note.addTo(map);
-  var unp=document.getElementById('unp');
-  if(unp) unp.onclick=function(){ unp.parentNode.classList.toggle('open'); };
   document.title=(slug && log && log.user ? log.user+'’s Map' : 'Map')+' — Coaster Hub';
   document.body.setAttribute('data-ready','1');
 }).catch(fail);

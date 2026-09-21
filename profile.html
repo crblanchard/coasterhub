@@ -200,6 +200,10 @@
         <!-- Always here, for whoever is reading: the numbers above are the
              summary and this is the page behind them. data-nav, so initNav
              points it at the rider whose page this is. -->
+        <!-- The map before the count (Carter, 2026-09-21: "log a day - view your
+             map - view your count - update your rankings"). Same rule as the
+             count button: the rider whose page this is, worded for whose it is. -->
+        <a class="btn alt" data-nav="map" id="hero_map" href="/map">View your map</a>
         <a class="btn alt" data-nav="count" id="hero_view" href="/count">View your count</a>
         <a class="btn alt own" data-nav="rankings" href="/rankings" hidden>Update your rankings</a>
       </div>
@@ -529,6 +533,8 @@ function render(s){
     // copy: this is textContent, and an escaped one would print the entities.
     document.getElementById('hero_view').textContent =
       mine ? 'View your count' : ('View ' + (s.userName || 'this') + '’s count');
+    document.getElementById('hero_map').textContent =
+      mine ? 'View your map' : ('View ' + (s.userName || 'this') + '’s map');
     CoasterHubProfile.mount(host,
       mine ? acct : { name:s.userName, slug:CoasterHub.currentUser(), bio:s.bio, avatar:s.avatar },
       { editable: !!mine,
