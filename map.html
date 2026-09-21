@@ -222,7 +222,7 @@ Promise.all([
       +(cl ? '<span class="yrs">'+(c.yr ? esc(c.yr)+'–'+cl : 'closed '+cl)+'</span>' : '')
       +'</li>';
   }
-  // The headline is "11 coasters · 13 ridden": the first number is what is
+  // The headline is "11 operating · 13 ridden" (his wording, third try): the first number is what is
   // operating (the number on the disc), the second is everything the rider
   // has ridden here, defunct ones included — so it can be the bigger of the
   // two, and the defunct list underneath is where the difference lives.
@@ -233,7 +233,7 @@ Promise.all([
     var ridden=p.open.concat(p.closed).filter(function(c){ return MINE[c.id]; }).length;
     var h='<div class="pp"><h3><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+' →</a></h3>'
       +'<small>'+esc(p.region)+'</small>'
-      +'<div class="n">'+(p.open.length ? p.open.length+' coaster'+(p.open.length===1?'':'s') : 'No operating coasters')
+      +'<div class="n">'+(p.open.length ? p.open.length+' operating' : 'No operating coasters')
       +(log ? ' · '+ridden+' ridden' : '')+'</div>';
     if(p.open.length) h+='<ul>'+p.open.map(row).join('')+'</ul>';
     if(p.closed.length) h+='<div class="n dead">'+p.closed.length+' defunct</div><ul class="dead">'+p.closed.map(row).join('')+'</ul>';

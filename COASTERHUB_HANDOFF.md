@@ -3116,7 +3116,7 @@ the bottom show all defunct coasters too with closing years and checkboxes as re
   gone from `setBase()` (the comment there says why, so the next session does not put it
   back); the harness now asserts ONE tile layer and no `_Reference` requests. The county-border
   answer above still stands.
-- **The headline is "11 coasters · 13 ridden".** The first number is what is operating — the
+- **The headline is "11 operating · 13 ridden"** (was "11 coasters" for an hour; Carter: *"x operating - x ridden"*). The first number is what is operating — the
   number on the disc — and the second is everything the rider has ridden at the park, defunct
   included, so it can be the larger of the two. His example was Knott's, and the data says
   exactly that: 10 operating + 3 defunct ridden = 13. Signed out it is just "11 coasters".
