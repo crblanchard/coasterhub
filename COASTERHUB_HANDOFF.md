@@ -3107,6 +3107,20 @@ page requests `World_Dark_Gray_Reference` tiles as a second tile layer, a theme 
 requests the light ones with still exactly two layers, and `setBase(FALLBACK)` leaves one.
 
 
+### /categories: a category's rows read alphabetically by park (2026-09-21)
+
+Carter, with a screenshot of Vekoma SLCs open — Kong, Batman, Professor Screamore's, Queen
+Cobra, T3 … in whatever order they were added: *"sort these alphabetically by park."* The
+expanded card in `categories.html` (`catCard`) now sorts a copy of `g.ids` by park, then
+name, for display; `g.ids` itself keeps the stored order and nothing about what is saved or
+sent changes. Harness (`scratchpad/cats.mjs`): the dev seed has no site categories — they are
+rows Carter writes through `POST /api/clones` — so the test makes one from six of carter's
+ridden coasters at six parks stored in REVERSE park order (a ride row carries only `c`, the
+park comes from the coaster list), reloads, expands it, and reads the rows back in A–Z park
+order.
+
+### /edit has a dark mode, and the footer is six links (2026-09-21)
+
 Carter: *"dark mode for /edit please? let me choose."* `edit.html` is standalone on purpose —
 no `style.css`, no `app.js` — and was light-only, with twenty hard-coded light colours in its
 rules (`#fff` nine times, the warm tints, the badge tints). Every one is a role now: two
