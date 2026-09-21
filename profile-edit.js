@@ -16,20 +16,31 @@
 
   var BIO_MAX = 280;
   var PIC_PX = 256;                       // what gets uploaded, after cropping
-  // Where a TALL photo's crop window starts. `base` in openCrop is COVER, so on
-  // a portrait photo the square it frames is the photo's ENTIRE width — 600px of
-  // a 600x800 — and a person standing in a phone photo is a small part of that.
-  // The default therefore framed the scene rather than the person, every time,
-  // and the only cure was knowing to zoom before pressing OK. A tall photo now
-  // opens at the tighter end instead: a square this fraction of the width,
-  // centred this far down, which is roughly where a face is. The slider still
-  // goes back to 100% for the whole frame — nothing is out of reach, the
-  // starting point is just the useful one. (Carter, 2026-09-21: "my photo is
-  // still cropped weird". The crop MATHS was right — tools/test-crop.mjs proves
-  // the saved file is the previewed region, on a real EXIF-rotated JPEG — it was
-  // the frame it handed you to start from that was wrong.)
-  var TALL_FRAME = 0.70;                  // crop side, as a fraction of the width
-  var TALL_EYELINE = 0.32;                // ...centred this far down the photo
+  // Where the crop window starts. `base` in openCrop is COVER, which sounds
+  // like a sensible default and is the widest possible crop: on a 600x800 the
+  // square it frames is the photo's entire 600px width, and on an 800x600 it is
+  // the entire 600px height. Either way a person in a phone photo is a small
+  // part of it, so the default framed the scene rather than the person and the
+  // only cure was knowing to zoom before pressing OK.
+  //
+  // So the window opens at FRAME of the photo's SHORTER edge — zoom 1.43 of
+  // cover — whichever way round the photo is. The first pass at this only did
+  // it for tall photos, on the reasoning that a wide one is already tight at
+  // cover; it isn't, it is merely less loose, and Carter's own photo is the
+  // proof: he re-cropped, the branch never fired, and it came out the same.
+  // (2026-09-21, "no way it still didn't work it looks the same".)
+  //
+  // The slider still goes back to 100% for the whole frame, so nothing is out
+  // of reach — the starting point is just the useful one.
+  //
+  // The crop MATHS was never the problem here: tools/test-crop.mjs drives the
+  // real dialog with a real EXIF-rotated JPEG and proves the saved file is the
+  // region the preview showed.
+  var FRAME = 0.70;                       // crop side, as a fraction of the short edge
+  // Vertically, a tall photo is anchored on where a face is rather than on the
+  // middle of the frame; a wide or square one is not, because a face in a wide
+  // photo is already near its middle.
+  var TALL_EYELINE = 0.32;
 
   function esc(t) {
     return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) {
@@ -462,12 +473,11 @@
       // comes out as Infinity.
       CROP.vw = c.view.clientWidth;
       CROP.base = Math.max(CROP.vw / img.width, CROP.vw / img.height);
-      // A tall photo opens FRAMED rather than at the widest square it can make
-      // — see TALL_FRAME above for why. A wide or square one is already tight
-      // at cover (a 4:3 landscape's square is 75% of its width) and opens
-      // centred, as it always did.
+      // Framed rather than at the widest square it can make — see FRAME above
+      // for why, and why this is not conditional on which way round the photo
+      // is. Only the VERTICAL anchor below is.
       var tall = img.height > img.width;
-      CROP.zoom = tall ? Math.min(3, 1 / TALL_FRAME) : 1;
+      CROP.zoom = Math.min(3, 1 / FRAME);
       c.zoom.value = Math.round(CROP.zoom * 100);
       var s = CROP.base * CROP.zoom, sh = img.height * s;
       CROP.x = (CROP.vw - img.width * s) / 2;

@@ -24,7 +24,9 @@
  *   1. the browser applies the EXIF rotation (600x800 out of an 800x600 bitmap)
  *   2. the saved file IS the previewed region, within JPEG noise
  *   3. a tall photo opens framed on the upper middle, not at its full width
- *   4. a wide photo still opens centred
+ *   4. a WIDE photo is framed too, and centred. It used to be left at cover on
+ *      the reasoning that a landscape square is already tight; it isn't, it is
+ *      merely less loose, and that is the bug this test was extended to catch.
  *
  * JPEG is lossy, so the read-back is compared to within TOL. At 800px tall, 0.02
  * is about 16 rows — far tighter than any framing bug worth catching.
@@ -171,10 +173,10 @@ try {
   // centre it 32% down, which on a 600x800 is 5.8% to 58.3%.
   await run(page, "A portrait photo with EXIF Orientation=6", 600, 800, 6,
     { top: 0.058, left: 0.15 });
-  // A wide photo is already tight at cover — its square is 75% of the width —
-  // so it opens centred, horizontally and vertically.
+  // A wide photo: FRAME 0.70 of the short edge (the height) is a 420px square on
+  // an 800x600, centred both ways — 15%-85% down, 23.75%-76.25% across.
   await run(page, "A landscape photo, no rotation", 800, 600, 1,
-    { top: 0, left: 0.125 });
+    { top: 0.15, left: 0.2375 });
 } finally {
   await browser.close();
 }

@@ -2742,11 +2742,22 @@ knowing to zoom before pressing OK. An earlier pass had already noticed the vert
 this (a tall photo opened 10% down from the top rather than centred) without noticing that
 the window was still the full width.
 
-A tall photo now opens at `TALL_FRAME` 0.70 of the width — zoom 1.43 — with the crop centred
+A tall photo now opens at `FRAME` 0.70 of the short edge — zoom 1.43 — with the crop centred
 `TALL_EYELINE` 0.32 down, which on a 600x800 is the window 5.8%–58.3% down and 15%–85% across:
-head and shoulders. A wide or square photo is already tight at cover (a 4:3 landscape's square
-is 75% of its width) and still opens centred. The slider still goes back to 100% for the whole
-frame, so nothing is out of reach — the starting point is just the useful one.
+head and shoulders. The slider still goes back to 100% for the whole frame, so nothing is out
+of reach — the starting point is just the useful one.
+
+**The first pass at that only did it for TALL photos** — the reasoning being that a wide one is
+already tight at cover, since a 4:3 landscape's square is 75% of its width. That reasoning was
+wrong: 75% is not tight, it is merely less loose. Carter re-cropped, the branch never fired,
+and the avatar came out the same (*"no way it still didn't work it looks the same"*). The
+`users.avatar` key had changed — `6288bf17…` to `3f174306…` — which is how we knew he really
+had re-uploaded and the theory had to be wrong rather than the user.
+
+So `FRAME` applies whichever way round the photo is; only the VERTICAL anchor is conditional,
+because a face in a wide photo is already near its middle. A landscape 800x600 opens 15%–85%
+down and 23.75%–76.25% across, where it used to open at the full height. `tools/test-crop.mjs`
+asserts both orientations now, which is the check that would have caught the half-fix.
 
 **This only affects the next upload.** A picture already in R2 is a finished 256x256 file;
 `background-size:cover` on a square source in a square box crops nothing further. An avatar
