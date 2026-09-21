@@ -186,7 +186,15 @@
       return (gone ? esc(gone) : 'A duplicate')
         + ' was merged into ' + (sub ? rideLink(e.subject, park, sub) : 'another coaster') + parkOf(e);
     }
-    if (e.kind === 'coaster_deleted') return (sub || 'A coaster') + ' was deleted';
+    if (e.kind === 'coaster_deleted'){
+      // Deleted with riders' rides on it (?dropRides=1 — not a roller coaster):
+      // the row names them, and so does the sentence, since their counts moved.
+      var lost = d.riders || [], nr = d.rides || lost.length;
+      return (sub || 'A coaster') + ' was deleted' + parkOf(e)
+        + (lost.length ? ' — the ' + nr + ' ride' + (nr === 1 ? '' : 's') + ' on it by '
+            + lost.map(function(r){ return riderLink(r.slug, esc(r.name || r.slug)); }).join(', ')
+            + ' went with it' : '');
+    }
     if (e.kind === 'clone_set'){
       var made = !!d.made, again = (d.saves || 1) > 1;
       return (sub || 'A category') + ' category '

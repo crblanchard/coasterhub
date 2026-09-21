@@ -126,6 +126,10 @@
   .themetoggle { width:32px; height:32px; padding:0; border-radius:999px; background:var(--panel); border:1px solid var(--line2); color:var(--muted); display:inline-flex; align-items:center; justify-content:center; }
   .themetoggle:hover { background:var(--soft); color:var(--ink); }
   .themetoggle svg { width:16px; height:16px; }
+  /* The "not a roller coaster" tick under a held coaster's Delete. */
+  /* A bare `label` rule above upper-cases every label as a field caption; this one is a sentence, so it reads like the hint beside it. */
+  .toolbar .dropRides{display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;color:var(--ink);text-transform:none;letter-spacing:0;font-size:.85rem;font-weight:400}
+  .toolbar .dropRides input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--btn-bg)}
 </style>
 </head>
 <body>
@@ -1619,11 +1623,20 @@
         return;
       }
       var names=u.riders.map(function(r){ return esc(r.name||r.slug)+' ('+r.rides+')'; }).join(', ');
+      // Held by somebody: a duplicate is merged, never deleted. The tick is
+      // for the other case — something on the list that is not a roller
+      // coaster, where the credit was never a credit and the rides should go
+      // with it (Carter, 2026-09-21: Berserker and Tiki Twirl at Great
+      // America). It arms the button; the confirm names who loses what.
       who.innerHTML='<b>'+u.riders.length+' rider'+(u.riders.length===1?'':'s')+' still have this</b> — '
         +names+', '+u.rides+' ride'+(u.rides===1?'':'s')+' in total. '
-        +'Deleting would take it off their count, so this is blocked. '
-        +'Use <b>Merge</b> above to move them onto the surviving coaster instead.';
+        +'A duplicate should be <b>merged</b> above, so their credits move rather than vanish. '
+        +'<label class="dropRides"><input type="checkbox" id="dropRides"> '
+        +'Not a roller coaster — delete it anyway and take the '+u.rides+' ride'+(u.rides===1?'':'s')
+        +' off their counts</label>';
       btn.disabled=true;
+      btn.dataset.riders=JSON.stringify(u.riders.map(function(r){ return (r.name||r.slug)+' ('+r.rides+')'; }));
+      document.getElementById('dropRides').addEventListener('change', function(){ btn.disabled=!this.checked; });
     } catch(e){
       if(state.sel!==id) return;
       who.textContent="Couldn't check who has this: "+e.message+" — delete stays disabled.";
@@ -1633,10 +1646,13 @@
 
   async function deleteCoaster(){
     var id=state.sel, c=state.byId[id];
+    var box=document.getElementById('dropRides'), drop=!!(box && box.checked);
+    var who=drop ? JSON.parse(document.getElementById('delBtn').dataset.riders||'[]') : [];
     if(!confirm('Delete #'+id+' "'+c.name+'" at '+c.park+'?\n\n'
+      +(drop ? 'This also removes it from '+who.length+' rider'+(who.length===1?'':'s')+'\u2019 counts: '+who.join(', ')+'.\n\n' : '')
       +'This removes it from the shared list for everyone. It cannot be undone from this page.')) return;
     try {
-      await api("DELETE","/api/coaster/"+id);
+      await api("DELETE","/api/coaster/"+id+(drop?'?dropRides=1':''));
       state.coasters = state.coasters.filter(function(x){ return x.id!==id; });
       delete state.byId[id]; state.sel=null;
       document.getElementById('editor').innerHTML='<div class="empty">Deleted #'+id+'.</div>';

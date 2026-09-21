@@ -482,6 +482,36 @@ async function main() {
     check("an unheld coaster deletes", r.status === 200 && r.data.deleted === 3, JSON.stringify(r.data));
     check("...and is gone", rows(db, "SELECT * FROM coasters WHERE id=3").length === 0);
     check("...while every ride row is untouched", rows(db, "SELECT * FROM rides").length === 5);
+
+    // ?dropRides=1 — the one exception to the guard: something on the list that
+    // is not a roller coaster (Berserker, Tiki Twirl — Carter, 2026-09-21).
+    // The rides go with it, so does everything keyed by it, and the activity
+    // row names whose count changed and by how much.
+    const db2 = freshDb();
+    db2.prepare("INSERT INTO rankings (user_slug, coaster_id, pos) VALUES ('carter', 1, 1)").run();
+    r = await call(db2, "DELETE", "/api/coaster/1?dropRides=1");
+    check("dropRides without a token -> 401, and nothing moved", r.status === 401
+      && rows(db2, "SELECT * FROM rides WHERE coaster_id=1").length === 4);
+    r = await call(db2, "DELETE", "/api/coaster/1?dropRides=1", { token: PW });
+    check("dropRides deletes a held coaster and says what went with it",
+      r.status === 200 && r.data.deleted === 1 && r.data.dropped
+      && r.data.dropped.riders === 3 && r.data.dropped.rides === 4, JSON.stringify(r.data));
+    check("...the coaster, its rides and its ranking row are gone; the other ride is not",
+      rows(db2, "SELECT * FROM coasters WHERE id=1").length === 0
+      && rows(db2, "SELECT * FROM rides WHERE coaster_id=1").length === 0
+      && rows(db2, "SELECT * FROM rides").length === 1
+      && rows(db2, "SELECT * FROM rankings WHERE coaster_id=1").length === 0);
+    const act = rows(db2, "SELECT * FROM activity WHERE kind='coaster_deleted' ORDER BY id DESC LIMIT 1")[0];
+    const det = act ? JSON.parse(act.detail || "{}") : {};
+    check("...and the activity row names every rider and their rides",
+      !!act && det.rides === 4 && Array.isArray(det.riders) && det.riders.length === 3
+      && det.riders.find((x) => x.slug === "carter").rides === 2
+      && det.riders.find((x) => x.slug === "max").rides === 1, JSON.stringify(det));
+    r = await call(db2, "DELETE", "/api/coaster/3?dropRides=1", { token: PW });
+    check("dropRides on a coaster nobody holds is a plain delete: dropped is null, no riders in the row",
+      r.status === 200 && r.data.dropped === null
+      && !JSON.parse(rows(db2, "SELECT detail FROM activity WHERE kind='coaster_deleted' ORDER BY id DESC LIMIT 1")[0].detail).riders,
+      JSON.stringify(r.data));
   }
 
   console.log("\nAliases — former names");

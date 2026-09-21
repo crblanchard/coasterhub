@@ -83,6 +83,19 @@ const LIST_CACHE = { "cache-control": "public, max-age=300" };
 // and inert on a workers.dev hostname, so every call is guarded: a cache that
 // is not there must cost correctness nothing.
 const EDGE_CACHED = { "/api/coasters": 1, "/api/parks": 1, "/api/clones": 1 };
+
+// Every table keyed by a coaster id besides rides and aliases. A merge repoints
+// them to the survivor and a delete sweeps them, because a row left pointing at
+// an id with no coaster behind it is the "#137" bug (see the merge route).
+// Several belong to migrations a database may not have run yet, so each one is
+// touched in its own try.
+const KEYED_BY_COASTER = [
+  ["rankings", "coaster_id"],
+  ["clone_members", "coaster"],
+  ["rider_category_members", "coaster"],
+  ["category_skipped", "coaster"],
+  ["model_skipped", "coaster"],
+];
 function edgeKey(url, path) {
   const u = new URL(url);
   return new Request(u.origin + (path || u.pathname), { method: "GET" });
@@ -2490,13 +2503,25 @@ export default {
           "FROM rides r LEFT JOIN users u ON u.slug = r.user_slug " +
           "WHERE r.coaster_id = ? GROUP BY r.user_slug, u.name ORDER BY u.name"
         ).bind(id).all();
-        if (results.length) {
+        const rides = results.reduce((a, r) => a + r.rides, 0);
+        // The rule: a coaster riders hold is merged, not deleted — deleting
+        // would take a credit off somebody. The one exception, ?dropRides=1: a
+        // thing on the list that is not a roller coaster at all (Berserker and
+        // Tiki Twirl at Great America — Carter, 2026-09-21), where the credit
+        // was never a credit. Then the rides go with it, and the activity row
+        // names every rider whose count just changed and by how much, because
+        // that row is the only trace the rides leave.
+        const drop = new URL(request.url).searchParams.get("dropRides") === "1";
+        if (results.length && !drop) {
           return json({
             error: results.length + " rider" + (results.length === 1 ? "" : "s") +
                    " still have this coaster — merge it instead of deleting it",
             riders: results,
-            rides: results.reduce((a, r) => a + r.rides, 0),
+            rides: rides,
           }, 409);
+        }
+        if (drop && results.length) {
+          await env.DB.prepare("DELETE FROM rides WHERE coaster_id = ?").bind(id).run();
         }
         // Belt and braces: the guard above is a separate read, so re-assert it in
         // the statement itself rather than trusting nothing landed in between.
@@ -2505,11 +2530,24 @@ export default {
         ).bind(id).run();
         if (!res.meta || res.meta.changes === 0) return err(409, "coaster is still in use");
         // Its former names go with it — an alias pointing at a deleted id would
-        // resolve to nothing and quietly suppress the "not listed" warning.
+        // resolve to nothing and quietly suppress the "not listed" warning. So
+        // does every other row keyed by the id: a ranking of it, its place in a
+        // category, a clone-group membership.
         await env.DB.prepare("DELETE FROM coaster_aliases WHERE coaster_id = ?").bind(id).run();
-        await recordActivity(env, "coaster_deleted",
-          { subject: row.name, detail: { id: id, park: row.park } });
-        return afterWrite(ctx, env, request, json({ ok: true, deleted: id, name: row.name, park: row.park }));
+        for (const [table, col] of KEYED_BY_COASTER) {
+          try { await env.DB.prepare("DELETE FROM " + table + " WHERE " + col + " = ?").bind(id).run(); }
+          catch (e) { /* that table is not in this database yet */ }
+        }
+        const detail = { id: id, park: row.park };
+        if (drop && results.length) {
+          detail.riders = results.map((r) => ({ slug: r.slug, name: r.name, rides: r.rides }));
+          detail.rides = rides;
+        }
+        await recordActivity(env, "coaster_deleted", { subject: row.name, detail: detail });
+        return afterWrite(ctx, env, request, json({
+          ok: true, deleted: id, name: row.name, park: row.park,
+          dropped: drop && results.length ? { riders: results.length, rides: rides } : null,
+        }));
       }
 
       // merge coaster `from` into `to` (repoints every ride, deletes `from`)
@@ -2587,14 +2625,7 @@ export default {
         // own try because several of them belong to migrations a database may
         // not have run yet, and a merge must not fail over a table that is not
         // there.
-        const MERGE_CARRIES = [
-          ["rankings", "coaster_id"],
-          ["clone_members", "coaster"],
-          ["rider_category_members", "coaster"],
-          ["category_skipped", "coaster"],
-          ["model_skipped", "coaster"],
-        ];
-        for (const [table, col] of MERGE_CARRIES) {
+        for (const [table, col] of KEYED_BY_COASTER) {
           try {
             await env.DB.batch([
               env.DB.prepare("UPDATE OR IGNORE " + table + " SET " + col + " = ? WHERE " + col + " = ?")

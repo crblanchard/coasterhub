@@ -3133,6 +3133,44 @@ Harness: 21 checks — the Cedar Point ones count `ul:not(.dead) li`, and a Knot
 years and a `/park/…` link, and the three he rode ticked.
 
 
+### Deleting a coaster riders hold: `?dropRides=1` (2026-09-21)
+
+Carter: *"gonna delete rides from the list even though people have it as a credit tell me how
+to do that. just ones that aren't technically rollercoasters (eg berserker & tiki twirl at
+cga)."* Until now the answer was "you can't": `DELETE /api/coaster/:id` answers 409 for any
+coaster somebody holds — deleting would take a credit off them, merge it instead — and /edit's
+Delete button stayed disabled with that explanation. That rule is right for a duplicate and
+wrong for a thing that is not a roller coaster, where the credit was never a credit.
+
+**How he does it:** /edit → pick the ride → the Delete panel says who has it and how many rides
+→ tick **"Not a roller coaster — delete it anyway and take the N rides off their counts"** →
+the button arms → the confirm lists every rider and their ride count → Delete. That is
+`DELETE /api/coaster/:id?dropRides=1`. Without the flag the 409 stands exactly as before,
+so nothing that used to be safe got less safe. The plain `?dropRides=1` on a coaster nobody
+holds is an ordinary delete (`dropped: null`).
+
+**What goes:** its rides (every rider's, dated or not), its aliases, and every other row keyed
+by the id — `rankings`, `clone_members`, `rider_category_members`, `category_skipped`,
+`model_skipped`. That table list is `KEYED_BY_COASTER` at the top of `worker.js` now,
+hoisted out of the merge route (which repoints them) so the delete (which sweeps them) uses the
+same list; each table is its own try, since a database may not have run their migrations. The
+sweep happens on EVERY delete now, held or not — a row pointing at an id with no coaster
+behind it is the "#137" bug the merge fix was about. The `coaster_deleted` activity row
+carries `riders: [{slug, name, rides}]` and `rides` when rides went with it, because that
+row is the only trace they leave; the /changes sentence reads *"Berserker was deleted
+(California's Great America) — the 5 rides on it by Carter, Sean, Cole went with it"*, each
+name a link. The response is `{ok, deleted, name, park, dropped: {riders, rides} | null}`.
+Counts follow on their own: a rider's total is computed from `rides`, the edge cache is
+purged by `afterWrite`, and the static JSON is stale until the sync runs (as after every
+write — see CLAUDE.md).
+
+Tests: `tools/test-rides-api.mjs` has five more (401 without a token and nothing moved; 200
+with `dropped {riders:3, rides:4}`; coaster, rides and its ranking row gone with the other
+ride untouched; the activity row naming carter 2 / max 1; an unheld coaster → `dropped:
+null`). `scratchpad/editdel.mjs` drives the real page: Blue Streak, the panel says held, the
+tick arms the button, the confirm names the riders, the list and the usage route agree it is
+gone, and /changes shows the sentence with a park link and one rider link per rider.
+
 ### /categories: a category's rows read alphabetically by park (2026-09-21)
 
 Carter, with a screenshot of Vekoma SLCs open — Kong, Batman, Professor Screamore's, Queen
