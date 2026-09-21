@@ -3203,7 +3203,11 @@ Done on all fifteen pages. That removes Rankings, Categories, Profile, Log and *
 footer; the first four are in the nav and the tab bar, and `/map` was reachable only by its
 URL for an hour — then, with the map's third pass done: *"and put it in the footer home map
 count add new edit site map."* So the footer is SIX links, on all fifteen pages, in that
-order: **Home · Map · Count · Add new · Edit · Site map**. The map's only way in.
+order: **Home · Map · Count · Add new · Edit · Site map**. Then, later that day: *"add map to the
+header between count and log"* — so the header on all fifteen pages reads Home · Rankings ·
+Profile · Count · **Map** · Log (`data-nav="map"`, which `applyRiderLinks` already knew, since
+`map` was in `PER_RIDER`: on Sean's page it points at Sean's map). Checked on one line at
+1200 and 900; the phone header hides the links and the tab bar is unchanged.
 
 ---
 
