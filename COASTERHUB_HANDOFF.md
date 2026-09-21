@@ -2956,6 +2956,29 @@ The old `tools/import-captaincoaster.js` is from the static-file era: it REBUILD
 `coasters.json` on Captain Coaster's ids and rewrites every rider file. Do not run it against
 today's D1-backed site. It also needs the key nobody has.
 
+### Wikidata as a stats source: thin, but honest (2026-09-21)
+
+After Captain Coaster, Carter pulled every roller coaster Wikidata knows through the public
+query service (`query.wikidata.org`, no key, run in his browser; the export is
+`tools/wikidata-coasters.csv`). 1,363 distinct coasters — but only 488 with a height and 398
+with a speed; Tatsu is in there with nothing on it. Two query lessons: a property looked up
+by label inside the main pattern is evaluated per row and 502s the service, and `psn:`
+normalised values are the way to get one unit (metres, m/s) regardless of what was typed.
+
+Matched by name + park against our rows (91 same-name coasters with no park on Wikidata were
+skipped rather than guessed), it yields **`migrations/020-wikidata-stats.sql`** in two sections
+that can be pasted independently: **A** — 92 rows of numbers (height 43, speed 32, length 41,
+opening year 78, steel/wood 3), metres and m/s converted to ft and mph; **B** — 170
+manufacturers, mapped from Wikidata's legal names to the spellings /edit already uses (Vekoma
+Rides Manufacturing B.V. → Vekoma, and thirteen more), with Herschend, Hensel Phelps and one
+unlabelled item dropped as not manufacturers. `COALESCE` on every column, matched on name +
+park, dry-run on the snapshot: blanks 576→533 (h), 616→584 (s), 569→528 (l), 538→460 (yr),
+543→373 (manu).
+
+**Pending Carter's call — A, B, both or neither.** Committed so the file exists; nothing is
+applied until he pastes it. The fairground and pizza-parlour spinners are not on Wikidata and
+stay for /edit whatever he decides.
+
 ---
 
 ## Open tasks
