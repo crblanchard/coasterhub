@@ -3088,7 +3088,24 @@ and the filled one teal, `/user/sean/map` counts Sean's parks, and signed out (t
 answers `/api/auth/me` with `{account:null}`) there are no checkboxes and no boxes. Phone:
 the checkboxes and the switcher do not collide.
 
-### /edit has a dark mode, and the footer is six links (2026-09-21)
+**Fourth pass: city names, and the county borders that cannot go (2026-09-21).** Carter:
+*"can we make cities pop up on the map. maybe hide county borders if you have control over
+that."* Esri's Canvas basemaps come as a pair by design: the `_Base` tiles are the unlabelled
+picture, and the matching `_Reference` tiles (`Canvas/World_Dark_Gray_Reference` /
+`World_Light_Gray_Reference`, same host, same `{z}/{y}/{x}` order, no key) are "labels for
+selected cities, towns, and neighborhoods" — big cities at world zoom, towns as you get closer.
+`setBase()` now adds the reference layer over the base (`zIndex:2` in the tile pane, so it is
+above the base and below every disc and popup), swaps it with the theme, and drops it when the
+base falls back to OpenStreetMap, whose tiles label themselves. **County borders: no.** They are
+drawn INTO the base tiles — a raster tile is a picture, there is no boundaries layer to switch
+off — and every keyless basemap draws them (OSM's are the dashed ones). Carto's
+`dark_nolabels` + `dark_only_labels` would have been the clean way to compose a borderless
+base, but their raster basemaps now require an API key and are being retired. Not done, and
+told him why. (Esri has also announced it is sunsetting its legacy raster basemaps; the OSM
+fallback already covers the day `server.arcgisonline.com` stops answering.) Harness: the
+page requests `World_Dark_Gray_Reference` tiles as a second tile layer, a theme change
+requests the light ones with still exactly two layers, and `setBase(FALLBACK)` leaves one.
+
 
 Carter: *"dark mode for /edit please? let me choose."* `edit.html` is standalone on purpose —
 no `style.css`, no `app.js` — and was light-only, with twenty hard-coded light colours in its

@@ -138,19 +138,34 @@ var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true}).setView([30,-40],
 // The basemap, exactly as the profile page picks it: Esri's canvas tiles, no
 // key, dark or light to match the theme, OpenStreetMap if Esri stops
 // answering. See profile.html for the history behind each choice.
+//
+// Plus, here only, Esri's matching REFERENCE layer over the base. The canvas
+// base is unlabelled on purpose, and the reference tiles are its place names —
+// a few big cities at world zoom, towns as you get closer (Carter, 2026-09-21:
+// "can we make cities pop up on the map"). It sits in the tile pane, so the
+// discs and popups stay above it. He also asked to lose the county borders:
+// those are drawn INTO the base tiles, and a raster tile is a picture — there
+// is no layer to switch off. Every keyless basemap draws them too (OSM's are
+// the dashed ones), and Carto's label-only tiles, the one clean way to compose
+// a borderless base, now need an API key and are being retired. So: labels
+// yes, borders no, and this is where the reason lives.
+var ESRI='https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
 var TILES={
-  dark: {url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'},
-  light:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'}
+  dark: {url:ESRI+'World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',  labels:ESRI+'World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',  attribution:'Tiles &copy; Esri'},
+  light:{url:ESRI+'World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', labels:ESRI+'World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'}
 };
 var FALLBACK={url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution:'&copy; OpenStreetMap contributors', native:19};
-var base=null, fellBack=false;
+var base=null, labels=null, fellBack=false;
 function setBase(spec){
   var layer=L.tileLayer(spec.url,{attribution:spec.attribution, maxNativeZoom:spec.native||16, maxZoom:19});
   var ok=false, bad=0;
   layer.on('tileload',function(){ ok=true; });
   layer.on('tileerror',function(){ if(!ok && !fellBack && ++bad>=8){ fellBack=true; setBase(FALLBACK); } });
   if(base) map.removeLayer(base);
+  if(labels) map.removeLayer(labels);
   base=layer.addTo(map);
+  // OpenStreetMap's tiles carry their own names: no reference layer over those.
+  labels=spec.labels ? L.tileLayer(spec.labels,{maxNativeZoom:16, maxZoom:19, zIndex:2}).addTo(map) : null;
 }
 function mapTheme(){ return document.documentElement.getAttribute('data-theme')==='light' ? 'light' : 'dark'; }
 setBase(TILES[mapTheme()]);
