@@ -19,12 +19,6 @@
 <!-- The same Leaflet the profile page uses, from the same place. -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<!-- Clustering, because 231 numbered discs at world zoom are a pile: Ohio alone
-     has a dozen on top of each other. A cluster shows the SUM of operating
-     coasters underneath it, so zoomed out the map still answers "how many
-     here", and it splits as you zoom in. Only the base CSS: the icon is ours. -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <style>
   /* A full-screen map with just the header and footer (Carter, 2026-09-21).
      The page is a column: sticky header, the map taking every pixel left,
@@ -35,22 +29,29 @@
   body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
   #map{flex:1 1 auto;min-height:60vh;z-index:1;background-color:var(--panel)}
   footer.site{margin-top:0;padding-top:18px;padding-bottom:18px}
-  /* The number on each park: operating coasters. A small disc that grows a
-     little with the digits, the site's accent for the ring so it reads as
-     ours over any basemap. A park with nothing operating is a muted ring. */
+  /* The number on each park: operating coasters. Every park is its own disc
+     at every zoom — they do not combine into clusters (Carter, 2026-09-21:
+     "make it so the dots don't combine") — so the disc is small on purpose,
+     small enough that where parks overlap at a wide zoom you can see that
+     they do, and it sits centred on the park rather than hanging off its
+     corner. The fill is a red ramp by the count, pale for one coaster and
+     deep for the busiest park; JS sets it per marker so the legend and the
+     discs come from the same function. The ring is a thin white line so the
+     fill reads over any basemap. A park with nothing operating is a muted
+     ring; one the rider has ridden out is ringed in the site's teal. */
   .leaflet-div-icon.pk{background:none;border:0}
   .pk span{display:flex;align-items:center;justify-content:center;
-    min-width:26px;height:26px;padding:0 6px;border-radius:999px;box-sizing:border-box;
-    background-color:var(--accent);color:#fff;border:2px solid var(--accent2);
-    font-weight:800;font-size:.8rem;line-height:1;font-variant-numeric:tabular-nums;
-    box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer}
+    min-width:20px;height:20px;padding:0 4px;border-radius:999px;box-sizing:border-box;
+    transform:translate(-50%,-50%);
+    background-color:var(--accent);color:#fff;
+    border-width:1.5px;border-style:solid;border-color:rgba(255,255,255,.85);
+    font-weight:800;font-size:.68rem;line-height:1;font-variant-numeric:tabular-nums;
+    box-shadow:0 1px 3px rgba(0,0,0,.4);cursor:pointer}
   .pk.none span{background-color:var(--panel);color:var(--muted);border-color:var(--muted);font-weight:700}
-  .pk.mine span{border-color:#fff}
-  /* A cluster: several parks, one number — the sum of their operating
-     coasters. Bigger and rounder than a park so the two read differently,
-     and a faint halo so it is clearly a group. */
-  .pkc span{min-width:36px;height:36px;font-size:.9rem;background-color:var(--accent2);color:var(--well);border-color:var(--accent2);
-    box-shadow:0 0 0 6px rgba(55,208,200,.18),0 1px 4px rgba(0,0,0,.35)}
+  .pk.mine span{border-color:var(--accent2);border-width:2px}
+  /* The ramp's legend, in the note bottom-left: a short bar from the palest
+     fill to the deepest, with the count at each end. */
+  .ctl .ramp{display:inline-block;vertical-align:middle;width:54px;height:8px;border-radius:4px;margin:0 3px 2px}
   /* The popup: the park as a link, then its operating coasters as links. A big
      park is a long list, so it scrolls inside the popup rather than off the map. */
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
@@ -60,10 +61,15 @@
   .pp small{color:var(--muted)}
   .pp .n{color:var(--accent2);font-weight:700;font-size:.82rem;margin:6px 0 4px}
   .pp ul{list-style:none;margin:0;padding:0}
-  .pp li{padding:3px 0;border-top:1px solid var(--soft);font-size:.9rem;display:flex;gap:8px;align-items:baseline}
+  .pp li{padding:3px 0;border-top:1px solid var(--soft);font-size:.9rem;display:flex;gap:8px;align-items:center}
   .pp li a{color:inherit;text-decoration:none;min-width:0}.pp li a:hover{color:var(--accent2);text-decoration:underline}
-  .pp li .tick{color:var(--accent2);font-weight:700;flex:none}
-  .pp li .notyet{color:var(--muted);flex:none;font-size:.78rem}
+  /* The box beside each coaster when there is somebody to mark: the log page's
+     tick, smaller. An empty box until you have the credit, then a filled one —
+     the same picture /log draws (Carter, 2026-09-21: "the checkboxes when you
+     have a credit like we've seen in other places"). */
+  .pp li .tick{flex:none;width:18px;height:18px;border-radius:5px;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:transparent}
+  .pp li .tick.on{background-color:var(--accent2);border-color:var(--accent2);color:var(--well)}
   .pp .closed{color:var(--muted);font-size:.8rem;margin-top:6px}
   /* Two small panels on the map itself, since there is no page around it:
      the rider switcher top-right (app.js builds the badge into it, exactly as
@@ -73,6 +79,13 @@
     color:var(--muted);font-size:.8rem;box-shadow:0 2px 10px rgba(0,0,0,.25)}
   .ctl b{color:var(--fg)}
   .ctl.who{padding:4px 6px}
+  /* Top-left, under the zoom buttons: which parks are on the map — the ones
+     you have a credit at, the ones you do not. Only when there is somebody to
+     ask that about; "ridden" means nothing on the everyone view. */
+  .ctl.filt{padding:6px 11px 6px 9px}
+  .ctl.filt label{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--fg);padding:3px 0;font-size:.85rem;user-select:none;white-space:nowrap}
+  .ctl.filt input{accent-color:var(--accent2);width:16px;height:16px;margin:0;flex:none;cursor:pointer}
+  .ctl.filt small{color:var(--muted);font-variant-numeric:tabular-nums}
   .ctl .list{display:none;margin-top:6px;max-width:260px;line-height:1.5}
   .ctl.open .list{display:block}
   .ctl button{background:none;border:0;padding:0;font:inherit;color:var(--accent2);cursor:pointer}
@@ -112,9 +125,12 @@ function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return
 function fail(e){console.error(e);document.getElementById('err').style.display='block';}
 
 // Whose map. The parks and the numbers on them are the same for everybody —
-// operating coasters is a fact about the park. A rider in the URL adds what
-// is theirs: a tick on each coaster they have ridden, and "12 of 15" in the
-// popup. No rider means no ticks, nothing more.
+// operating coasters is a fact about the park. A rider adds what is theirs:
+// the rider in the URL, or, with nobody in the URL, whoever is signed in — the
+// same rule /count uses. That gives every coaster in a popup a box, ticked when
+// they have the credit, "12 of 15" under the park's name, and the two
+// checkboxes top-left that keep or drop the parks they have been to. Nobody
+// means none of that: a map of what each park has.
 var slug=CoasterHub.currentUser();
 
 var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true}).setView([30,-40],2);
@@ -154,15 +170,21 @@ who.onAdd=function(){
 who.addTo(map);
 CoasterHub.riderBadge(document.getElementById('hero_badge'),'map',slug);
 
+// A rider whose log cannot be read gets the everyone map rather than a map
+// that ticks nothing and says "0 of 15" at every park.
+var whose = slug ? Promise.resolve(slug)
+  : CoasterHub.me().then(function(a){ return (a && a.slug) || null; }).catch(function(){ return null; });
 Promise.all([
-  slug ? CoasterHub.fetchRides(slug).catch(function(){ return {rides:[]}; }) : Promise.resolve(null),
+  whose.then(function(s){ return s ? CoasterHub.fetchRides(s).catch(function(){ return null; }) : null; }),
   CoasterHub.fetchCoasters(),
   CoasterHub.fetchParks()
 ]).then(function(res){
   var log=res[0], coasters=res[1].coasters, parks=res[2];
   var MINE={}; if(log) (log.rides||[]).forEach(function(r){ MINE[r.c]=1; });
+  var TICK='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
-  // Per park: its coasters, operating and closed, A-Z within each.
+  // Per park: its coasters, operating and closed, A-Z within each, and whether
+  // the rider has any credit there. A closed one counts: it was still a visit.
   var P={};
   Object.keys(parks).forEach(function(name){
     P[name]={ name:name, lat:parks[name].lat, lon:parks[name].lon, region:parks[name].region||'', open:[], closed:[] };
@@ -172,7 +194,10 @@ Promise.all([
     (c.closed ? P[c.park].closed : P[c.park].open).push(c);
   });
   var all=Object.keys(P).map(function(k){ return P[k]; });
-  all.forEach(function(p){ p.open.sort(function(a,b){ return a.name.localeCompare(b.name); }); p.closed.sort(function(a,b){ return a.name.localeCompare(b.name); }); });
+  all.forEach(function(p){
+    p.open.sort(function(a,b){ return a.name.localeCompare(b.name); }); p.closed.sort(function(a,b){ return a.name.localeCompare(b.name); });
+    p.been = !!log && p.open.concat(p.closed).some(function(c){ return MINE[c.id]; });
+  });
   var placed=all.filter(function(p){ return p.lat!=null && p.lon!=null; });
   var unplaced=all.filter(function(p){ return p.lat==null || p.lon==null; });
 
@@ -184,30 +209,77 @@ Promise.all([
       +(log && p.open.length ? ' · '+ridden+' of '+p.open.length+' ridden' : '')+'</div>';
     if(p.open.length){
       h+='<ul>'+p.open.map(function(c){
-        return '<li>'+(log ? (MINE[c.id] ? '<span class="tick" title="Ridden">✓</span>' : '<span class="notyet">–</span>') : '')
+        return '<li>'+(log ? '<span class="tick'+(MINE[c.id]?' on':'')+'" role="img" aria-label="'+(MINE[c.id]?'Ridden':'Not ridden')+'">'+TICK+'</span>' : '')
           +'<a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></li>';
       }).join('')+'</ul>';
     }
     if(p.closed.length) h+='<div class="closed">'+p.closed.length+' closed: '+p.closed.map(function(c){ return esc(c.name); }).join(', ')+'</div>';
     return h+'</div>';
   }
+  // The colour ramp: pale at one coaster, the site's red in the middle, deep
+  // crimson at the busiest park. Square-root, not linear, because the median
+  // park has three and a linear ramp would leave two-thirds of the map the
+  // same pale pink. Dark digits on the pale end, white once the fill is dark
+  // enough to carry them.
+  var MAX=placed.reduce(function(m,p){ return Math.max(m,p.open.length); },1);
+  var STOPS=[[255,190,178],[255,90,95],[140,10,30]];
+  function rampT(t){
+    var i=t<.5?0:1, f=(t-i*.5)*2, a=STOPS[i], b=STOPS[i+1];
+    return 'rgb('+[0,1,2].map(function(k){ return Math.round(a[k]+(b[k]-a[k])*f); }).join(',')+')';
+  }
+  function ramp(n){
+    var t=Math.sqrt(Math.max(0,n-1)/Math.max(1,MAX-1));
+    return { bg:rampT(t), fg: t<.3 ? '#3a0810' : '#fff' };
+  }
   var pts=[];
-  var group=L.markerClusterGroup({
-    maxClusterRadius:44, showCoverageOnHover:false, spiderfyOnMaxZoom:true, zoomToBoundsOnClick:true,
-    iconCreateFunction:function(cl){
-      var sum=0; cl.getAllChildMarkers().forEach(function(m){ sum+=m.options.n||0; });
-      return L.divIcon({className:'pk pkc', html:'<span>'+sum+'</span>', iconSize:null});
-    }
-  });
+  var group=L.layerGroup();
   placed.forEach(function(p){
     var n=p.open.length;
     var full = log && n && p.open.every(function(c){ return MINE[c.id]; });
-    var icon=L.divIcon({className:'pk'+(n?'':' none')+(full?' mine':''), html:'<span>'+n+'</span>', iconSize:null});
-    group.addLayer(L.marker([p.lat,p.lon],{icon:icon, title:p.name, n:n}).bindPopup(popup(p),{maxWidth:320}));
+    var col = n ? ramp(n) : null;
+    var icon=L.divIcon({className:'pk'+(n?'':' none')+(full?' mine':''),
+      html:'<span'+(col ? ' style="background-color:'+col.bg+';color:'+col.fg+'"' : '')+'>'+n+'</span>',
+      iconSize:null, popupAnchor:[0,-10]});
+    // Where discs overlap, the bigger park is on top: the one worth clicking
+    // is the one you can see.
+    p.marker=L.marker([p.lat,p.lon],{icon:icon, title:p.name, zIndexOffset:n*10}).bindPopup(popup(p),{maxWidth:320});
     pts.push([p.lat,p.lon]);
   });
   map.addLayer(group);
+
+  // Which parks are on the map. The note's two numbers follow along.
+  var SHOW={been:true, not:true};
+  function shown(p){ return p.been ? SHOW.been : SHOW.not; }
+  function refresh(){
+    var vis=placed.filter(shown);
+    group.clearLayers(); vis.forEach(function(p){ group.addLayer(p.marker); });
+    var np=document.getElementById('np'), nc=document.getElementById('nc');
+    if(np) np.textContent=vis.length;
+    if(nc) nc.textContent=vis.reduce(function(a,p){ return a+p.open.length; },0).toLocaleString();
+  }
+  refresh();
   if(pts.length) map.fitBounds(pts,{padding:[30,30]});
+
+  // The two boxes, top-left under the zoom buttons (Carter, 2026-09-21:
+  // "checkboxes in the top left that show ridden and not ridden while you're
+  // logged in"). Both on to start, so the map opens complete; untick one and
+  // that half of the parks goes. A park is "ridden" when the rider has any
+  // credit there. The counts are of parks that are on the map — the unplaced
+  // ones are the note's business.
+  if(log){
+    var been=placed.filter(function(p){ return p.been; }).length;
+    var filt=L.control({position:'topleft'});
+    filt.onAdd=function(){
+      var d=L.DomUtil.create('div','ctl filt');
+      d.innerHTML='<label><input type="checkbox" id="f_been" checked> Ridden <small>'+been+'</small></label>'
+        +'<label><input type="checkbox" id="f_not" checked> Not ridden <small>'+(placed.length-been)+'</small></label>';
+      L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
+      return d;
+    };
+    filt.addTo(map);
+    document.getElementById('f_been').onchange=function(){ SHOW.been=this.checked; refresh(); };
+    document.getElementById('f_not').onchange=function(){ SHOW.not=this.checked; refresh(); };
+  }
 
   // What is not on the map, and why. Bottom-left, folded, because a park
   // with no coordinates is invisible here and nowhere else says so.
@@ -215,7 +287,8 @@ Promise.all([
   note.onAdd=function(){
     var d=L.DomUtil.create('div','ctl');
     var tot=placed.reduce(function(a,p){ return a+p.open.length; },0);
-    d.innerHTML='<b>'+placed.length+'</b> parks · <b>'+tot.toLocaleString()+'</b> operating coasters'
+    d.innerHTML='<b id="np">'+placed.length+'</b> parks · <b id="nc">'+tot.toLocaleString()+'</b> operating coasters'
+      +' · 1 <span class="ramp" title="Operating coasters, fewest to most" style="background-image:linear-gradient(to right,'+rampT(0)+','+rampT(.5)+','+rampT(1)+')"></span> '+MAX
       +(unplaced.length ? ' · <button type="button" id="unp">'+unplaced.length+' not placed</button>'
         +'<div class="list">No coordinates yet — give them a location in /edit: '
         +unplaced.map(function(p){ return '<b>'+esc(p.name)+'</b> ('+p.open.length+')'; }).join(', ')+'</div>' : '');

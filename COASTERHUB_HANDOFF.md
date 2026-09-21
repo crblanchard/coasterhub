@@ -2996,7 +2996,7 @@ coasters they have ridden and "16 of 21 ridden"; the switcher lives in a Leaflet
 top-right, since there is no hero to hold it, and its menu is `fixed` at the end of `<body>`
 so the map cannot clip it.
 
-**Clustering was not optional.** 231 numbered discs at world zoom are a pile — the first test
+**Clustering was not optional** — until the third pass below took it out again. 231 numbered discs at world zoom are a pile — the first test
 click on Cedar Point landed on Kentucky Kingdom. Leaflet.markercluster 1.5.3 (cdnjs, base CSS
 only) groups them, and the cluster icon shows the **sum** of operating coasters under it, so
 zoomed out the map still answers "how many here" (Ohio reads as one number) and splits as you
@@ -3032,6 +3032,58 @@ Two things this page taught, both cheap to re-learn the hard way: the header blo
 copied from a page that works (`header.nav` / `.nav-inner` / `nav.links` / `.brand-mark`) —
 one written from memory put the nav on a second line; and `riderBadge()` REPLACES the host
 with a wrapper div holding the button, so a test must look for `#hero_badge button`.
+
+**Third pass, later the same day — three asks in two messages.** Carter: *"I want checkboxes
+in the top left that show ridden and not ridden while you're logged in. then when you click
+on parks you see the checkboxes when you have a credit like we've seen in other places."* And
+then: *"Make it so the dots don't combine - but numbers are smaller so it's easier to see
+overlap. want the colors of the red dots to be a gradient so you can see which locations
+have more rides."* What that became:
+
+- **Whose ticks.** The rider in the URL, or, with nobody in the URL, whoever is signed in —
+  the same rule `/count` uses for its park list (`meSlug = slug || acct.slug`). `map.html`
+  resolves `CoasterHub.me()` only when the URL names nobody, so the per-rider page costs no
+  extra round trip. A rider whose log cannot be read gets the everyone map, not a map that
+  ticks nothing and says "0 of 15" at every park (it used to fall back to `{rides:[]}`).
+- **Two checkboxes top-left, under the zoom buttons** (a Leaflet control in `topleft`; Leaflet
+  stacks a corner's controls in the order they were added, so the zoom stays first). "Ridden
+  112 · Not ridden 119": a park is ridden when the rider has ANY credit there, closed
+  coasters included — it was still a visit. Both on to start; untick one and that half goes.
+  The markers are built once and kept on the park object (`p.marker`); `refresh()` empties
+  the layer group and re-adds the ones that pass, and the note's two numbers follow. The
+  control only exists when there is somebody to ask about — signed out, nobody in the URL,
+  the map has no checkboxes and the popup rows have no boxes.
+- **The popup rows are the log page's tick box**, 18px: an empty bordered square for a coaster
+  you have not ridden, teal-filled with the check for one you have, `aria-label` Ridden /
+  Not ridden. The old ✓ / – glyphs are gone. "16 of 21 ridden" stays under the park name.
+- **No clustering.** Leaflet.markercluster is out (link, script, the `.pkc` rule, the cluster
+  icon). Every park is its own disc at every zoom, and the disc is small on purpose — 20px,
+  `.68rem` digits — so where parks overlap at a wide zoom you can see that they do. Two
+  things make the pile workable: the disc is now CENTRED on the park (`transform:
+  translate(-50%,-50%)` on the span; with `iconSize:null` Leaflet anchors the icon's top-left
+  corner at the point, which had every disc hanging 13px off to the south-east) and
+  `zIndexOffset: n*10`, so where discs overlap the bigger park is on top — the one worth
+  clicking is the one you can see. `popupAnchor:[0,-10]` lifts the popup clear of the disc.
+- **The red ramp.** Pale `rgb(255,190,178)` at one coaster, the site's red at the middle,
+  deep crimson `rgb(140,10,30)` at the busiest park (`MAX`, computed from the placed parks —
+  21 on the dev seed, 20 live). **Square-root, not linear:** the median park has three
+  operating coasters and a linear ramp left two-thirds of the map the same pale pink.
+  `rampT(t)` is a two-segment lerp over three stops; `ramp(n)` maps the count to `t` and also
+  picks the digit colour — dark `#3a0810` on the pale end (white on salmon is 2:1), white
+  from `t≥.3`. JS sets `background-color`/`color` inline per marker, and the legend bar in the
+  bottom-left note (`1 ▬▬▬ 21`) is a `linear-gradient` of the same three stops, so the two
+  cannot drift apart. The ring is a thin white line now, not teal, so the fill is what you
+  read; teal is kept for the "ridden every one of them" ring (`.pk.mine`).
+
+Harness (`scratchpad/map3.mjs`, 16 checks): 231 discs and no `.pkc` at world zoom, disc
+height 20, Cedar Point is `rgb(140, 10, 30)` and a one-coaster park is `rgb(255, 190, 178)`
+with dark digits, the busier park's z-index is higher, the legend and the two checkboxes are
+there with the right counts (ridden = parks where carter has any credit, computed from
+`fetchRides` in the page), unticking Not ridden leaves exactly those parks and the note says
+so, both off is an empty map, the popup has a box per operating coaster with 16 of 21 filled
+and the filled one teal, `/user/sean/map` counts Sean's parks, and signed out (the driver
+answers `/api/auth/me` with `{account:null}`) there are no checkboxes and no boxes. Phone:
+the checkboxes and the switcher do not collide.
 
 ### /edit has a dark mode, and the footer is five links (2026-09-21)
 
