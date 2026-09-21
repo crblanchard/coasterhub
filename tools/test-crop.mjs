@@ -180,6 +180,44 @@ async function run(page, label, w, h, rot, expect, drag) {
   });
   if (saved.error) { check("the file saved", false, saved.error); return; }
   check("saved 256x256", saved.size === "256x256", saved.size);
+
+  // The file is one thing; what the page DRAWS from it is another, and the
+  // latter is what anybody actually compares to the dialog. Screenshot the
+  // avatar element as rendered — border, background-size, border-radius and
+  // all — and read its pixels at the same insets. The circle clip makes the
+  // corners transparent, so sample just inside the circle on the vertical and
+  // horizontal centre lines instead of at the corners.
+  const avPng = await (await page.$(".profedit .av")).screenshot({ omitBackground: true });
+  const drawn = await page.evaluate(async b64 => {
+    const img = new Image(); img.src = "data:image/png;base64," + b64; await img.decode();
+    const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    c.getContext("2d").drawImage(img, 0, 0);
+    const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+    const at = (fx, fy) => {
+      const i = (Math.round((c.height - 1) * fy) * c.width + Math.round((c.width - 1) * fx)) * 4;
+      return { row: d[i] / 255, col: d[i + 1] / 255, a: d[i + 3] };
+    };
+    // 4% in, not 2%: the element has a 1px border and the circle's edge is
+    // anti-aliased, so the outermost ring is not the image.
+    return { size: c.width + "x" + c.height,
+             top: at(0.5, 0.04), bottom: at(0.5, 0.96), left: at(0.04, 0.5), right: at(0.96, 0.5) };
+  }, avPng.toString("base64"));
+  console.log("       drawn:   " + JSON.stringify({ top: r3(drawn.top.row), bottom: r3(drawn.bottom.row),
+                                                    left: r3(drawn.left.col), right: r3(drawn.right.col),
+                                                    el: drawn.size }));
+  // Expected: the preview's window, 4% in along the centre lines.
+  const pv = { v: shown.bottom - shown.top, h: shown.right - shown.left };
+  // shown.* were sampled 2% in, so the true window edges are those pulled back out.
+  const winTop = shown.top - 0.02 / 0.96 * pv.v, winLeft = shown.left - 0.02 / 0.96 * pv.h;
+  const winV = pv.v / 0.96, winH = pv.h / 0.96;
+  check("the page draws the avatar as the preview showed it",
+    drawn.top.a > 200 && drawn.bottom.a > 200
+    && near(drawn.top.row, winTop + 0.04 * winV) && near(drawn.bottom.row, winTop + 0.96 * winV)
+    && near(drawn.left.col, winLeft + 0.04 * winH) && near(drawn.right.col, winLeft + 0.96 * winH),
+    JSON.stringify({ drawn: { top: r3(drawn.top.row), bottom: r3(drawn.bottom.row),
+                              left: r3(drawn.left.col), right: r3(drawn.right.col) },
+                     wanted: { top: r3(winTop + 0.04 * winV), bottom: r3(winTop + 0.96 * winV),
+                               left: r3(winLeft + 0.04 * winH), right: r3(winLeft + 0.96 * winH) } }));
   console.log("       saved:   " + JSON.stringify({ top: r3(saved.top), bottom: r3(saved.bottom),
                                                     left: r3(saved.left), right: r3(saved.right) }));
   // Both were sampled at the same insets of their own square, so the SAME
@@ -211,6 +249,16 @@ try {
   // an 800x600, centred both ways — 15%-85% down, 23.75%-76.25% across.
   await run(page, "A landscape photo, no rotation", 800, 600, 1,
     { top: 0.164, left: 0.248 });   // window 15%-85% and 23.75%-76.25%, sampled 2% in
+  // The size a phone actually hands over: 12 megapixels, stored 4032x3024 and
+  // tagged to display 3024x4032. The small fixtures above never make bake()
+  // scale anything (BAKE_MAX is 1800); this one makes it scale by 0.446, which
+  // is the path a real upload takes and the small ones do not.
+  await run(page, "A 12-megapixel phone photo, EXIF Orientation=6", 3024, 4032, 6,
+    { top: 0.069, left: 0.164 });
+  // Square, as a photo already cropped in the Photos app arrives. Not tall, so
+  // it opens centred both ways: 15%-85% each way.
+  await run(page, "A square photo", 1200, 1200, 1,
+    { top: 0.164, left: 0.164 });
 } finally {
   await browser.close();
 }
