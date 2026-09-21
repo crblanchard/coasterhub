@@ -55,7 +55,12 @@
   /* The popup: the park as a link, then its operating coasters as links. A big
      park is a long list, so it scrolls inside the popup rather than off the map. */
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
-  .leaflet-popup-content{margin:12px 14px;line-height:1.45;max-height:min(46vh,380px);overflow-y:auto;scrollbar-width:thin}
+  /* The height cap is Leaflet's own maxHeight option (set per popup below),
+     not a CSS max-height: that is the path Leaflet built for a scrolling
+     popup — it sets the height and adds .leaflet-popup-scrolled, which is
+     what a finger can scroll on a phone. overscroll-behavior keeps the end of
+     the list from handing the drag to the map. */
+  .leaflet-popup-content{margin:12px 14px;line-height:1.45;scrollbar-width:thin;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .pp h3{font-size:1rem;margin:0 0 1px;font-weight:800}
   .pp h3 a{color:var(--fg);text-decoration:none}.pp h3 a:hover{color:var(--accent2);text-decoration:underline}
   .pp small{color:var(--muted)}
@@ -93,6 +98,17 @@
   .ctl.filt input{accent-color:var(--accent2);width:16px;height:16px;margin:0;flex:none;cursor:pointer}
   .ctl.filt small{color:var(--muted);font-variant-numeric:tabular-nums}
   #err{position:absolute;z-index:2;left:16px;right:16px;top:16px;background:var(--tint2);border:1px solid var(--accent2);border-radius:12px;padding:14px 16px;display:none}
+  /* Smaller on a phone: it was most of the screen (Carter, 2026-09-21: "make
+     a little smaller on mobile? and so i can scroll within card"). LAST in
+     the sheet on purpose: same specificity as the .pp rules above, so order
+     decides, and placed above them it lost every property (the trap list in
+     CLAUDE.md, again). */
+  @media (max-width:640px){
+    .leaflet-popup-content{margin:10px 12px;line-height:1.35}
+    .pp h3{font-size:.92rem}
+    .pp .n{font-size:.76rem;margin:4px 0 2px}
+    .pp li{font-size:.82rem;padding:2px 0;gap:6px}
+  }
 </style>
 </head>
 <body>
@@ -265,7 +281,14 @@ Promise.all([
       iconSize:null, popupAnchor:[0,-10]});
     // Where discs overlap, the bigger park is on top: the one worth clicking
     // is the one you can see.
-    p.marker=L.marker([p.lat,p.lon],{icon:icon, title:p.name, zIndexOffset:n*10}).bindPopup(popup(p),{maxWidth:320});
+    // Sized to the screen: a phone gets a narrower, shorter card that scrolls
+    // inside itself rather than one that is most of the screen.
+    p.marker=L.marker([p.lat,p.lon],{icon:icon, title:p.name, zIndexOffset:n*10})
+      .bindPopup(popup(p),{maxWidth:Math.min(320, window.innerWidth-72), maxHeight:Math.min(380, Math.round(window.innerHeight*0.42)),
+        // Auto-pan clear of the zoom buttons and the Visited boxes top-left,
+        // and of the switcher top-right: on a phone a popup opened up there
+        // sat under both.
+        autoPanPaddingTopLeft:[160,16], autoPanPaddingBottomRight:[110,16]});
     pts.push([p.lat,p.lon]);
   });
   map.addLayer(group);

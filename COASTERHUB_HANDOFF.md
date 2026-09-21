@@ -3183,6 +3183,20 @@ The bottom-left note's "8 not placed" button and its folded list are removed —
 Amusements, Ray Cammack Shows and the rest are fairs and companies, not parks missing a pin.
 The note is the counts and the legend now. /edit still shows which parks are un-geocoded.
 
+### /map popup on a phone: smaller, and it scrolls inside itself (2026-09-21)
+
+Carter, from his phone with a Discovery Kingdom popup filling the screen: *"make a little
+smaller on mobile? and so i can scroll within card."* Two changes. The height cap is now
+Leaflet's own `maxHeight` popup option (`min(380, 42% of the viewport)`) instead of a CSS
+`max-height` on the content: that is the path Leaflet built for a scrolling popup — it sets
+the height and adds `.leaflet-popup-scrolled`, whose `overflow:auto` is what a finger can
+scroll — plus `overscroll-behavior:contain` so the end of the list does not hand the drag to
+the map. `maxWidth` is `min(320, viewport − 72)`. And a `@media (max-width:640px)` block
+shrinks the type and padding. **That block is last in the sheet on purpose:** placed above the
+`.pp` rules it lost every property to them (equal specificity, later wins) — the harness
+caught it at 14.4px instead of 13. Checked at 390×844: the card is 300 wide, 354 tall, has
+the scrolled class, and `scrollTop` moves. Popups also auto-pan clear of the zoom buttons, the Visited boxes and the switcher (`autoPanPaddingTopLeft:[160,16]`, `BottomRight:[110,16]`) — on the phone one opened under the boxes.
+
 ### /categories: a category's rows read alphabetically by park (2026-09-21)
 
 Carter, with a screenshot of Vekoma SLCs open — Kong, Batman, Professor Screamore's, Queen
