@@ -16,6 +16,20 @@
 
   var BIO_MAX = 280;
   var PIC_PX = 256;                       // what gets uploaded, after cropping
+  // Where a TALL photo's crop window starts. `base` in openCrop is COVER, so on
+  // a portrait photo the square it frames is the photo's ENTIRE width — 600px of
+  // a 600x800 — and a person standing in a phone photo is a small part of that.
+  // The default therefore framed the scene rather than the person, every time,
+  // and the only cure was knowing to zoom before pressing OK. A tall photo now
+  // opens at the tighter end instead: a square this fraction of the width,
+  // centred this far down, which is roughly where a face is. The slider still
+  // goes back to 100% for the whole frame — nothing is out of reach, the
+  // starting point is just the useful one. (Carter, 2026-09-21: "my photo is
+  // still cropped weird". The crop MATHS was right — tools/test-crop.mjs proves
+  // the saved file is the previewed region, on a real EXIF-rotated JPEG — it was
+  // the frame it handed you to start from that was wrong.)
+  var TALL_FRAME = 0.70;                  // crop side, as a fraction of the width
+  var TALL_EYELINE = 0.32;                // ...centred this far down the photo
 
   function esc(t) {
     return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) {
@@ -441,26 +455,29 @@
       c.img.style.backgroundPosition = CROP.x + "px " + CROP.y + "px";
     }
     function openCrop(img) {
-      CROP.img = img; CROP.zoom = 1;
+      CROP.img = img;
       wrap.hidden = false;
       say(cropMsg, "");
-      c.zoom.value = 100;
       // Measured once visible, or the viewport is 0 wide and every number below
       // comes out as Infinity.
       CROP.vw = c.view.clientWidth;
       CROP.base = Math.max(CROP.vw / img.width, CROP.vw / img.height);
-      CROP.x = (CROP.vw - img.width * CROP.base) / 2;
-      // Vertically, centred is the wrong default for a PORTRAIT photo. Faces
-      // live in the upper third of one; centring the window reliably framed
-      // somebody's chest, and the crop then looked wrong for a reason nobody
-      // could name — the saved file is a faithful copy of the frame, the frame
-      // was just started in the wrong place. So a tall image opens with the
-      // window near the top, where the face is, and a wide or square one still
-      // opens centred. Drag from there as before; nothing else changes.
-      var sh = img.height * CROP.base;
-      CROP.y = img.height > img.width
-        ? Math.max(CROP.vw - sh, -sh * 0.10)
-        : (CROP.vw - sh) / 2;
+      // A tall photo opens FRAMED rather than at the widest square it can make
+      // — see TALL_FRAME above for why. A wide or square one is already tight
+      // at cover (a 4:3 landscape's square is 75% of its width) and opens
+      // centred, as it always did.
+      var tall = img.height > img.width;
+      CROP.zoom = tall ? Math.min(3, 1 / TALL_FRAME) : 1;
+      c.zoom.value = Math.round(CROP.zoom * 100);
+      var s = CROP.base * CROP.zoom, sh = img.height * s;
+      CROP.x = (CROP.vw - img.width * s) / 2;
+      // The eyeline goes to the MIDDLE of the window, not the top of the photo
+      // to the top of it: what matters is where a face lands. This replaces an
+      // earlier rule that opened a tall photo 10% down from its top — right
+      // idea, but at cover the window was the photo's whole width, so it framed
+      // the scene rather than the person in it. clamp() inside paint() pulls
+      // the offset back if the photo is not tall enough to allow this.
+      CROP.y = tall ? (CROP.vw / 2 - sh * TALL_EYELINE) : (CROP.vw - sh) / 2;
       paint();
       // Once more after the browser has laid the dialog out, in case the width
       // this was all measured against was not final yet.

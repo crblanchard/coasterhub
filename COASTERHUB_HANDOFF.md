@@ -2681,6 +2681,77 @@ about the card only. And every page points at the same `/og-image.png`, so Slack
 the rest will keep showing the OLD card from their caches until they refetch — nothing is
 wrong when that happens. A `?v=2` on the twelve `og:image` tags is the lever if it matters.
 
+### /api/coasters was costing 1,239 rows a page view (2026-09-21)
+
+Cloudflare mailed to say the account was at **95% of D1's free 5,000,000 rows read a day**.
+Against a database holding 1,129 coasters, 249 parks and 5,694 rides. That is not demand,
+it is waste, and this is where it was going.
+
+`LIST_CACHE` put `public, max-age=300` on `/api/coasters` and `/api/parks`. **A Worker's own
+response is not stored by Cloudflare unless the Worker stores it.** That header was a promise
+to the browser and nothing else: it saved a RETURNING visitor a fetch and saved the database
+nothing. Every first-time visitor, and every crawler, still paid for `SELECT * FROM coasters`
+plus both alias tables — 1,239 rows — and every page on the site fetches that list as it
+renders. 1,129 coaster pages plus 249 park pages, and a crawler that runs JavaScript pays it
+per page: one sweep is ~1.7M rows.
+
+Now the three slow-moving lists (`/api/coasters`, `/api/parks`, `/api/clones`) go through
+`caches.default`. Two rules are the whole of its safety, and both are tested:
+
+- **A request with ANY cookie is served fresh and never stored.** Every signed-in reader and
+  every admin, which is what `/edit` needs — it acts on what the list says, and a
+  five-minute-old list is how a console script once tried to rename a park that had already
+  been renamed. None of these three answers has ever depended on who was asking, so nothing
+  per-user can end up in a shared entry.
+- **The key is origin + path, never the query string**, so `/api/coasters?utm=anything` cannot
+  fill the cache with copies of one answer or push the real entry out of it.
+
+`afterWrite` purges all three — it takes `request` now, which is why 26 call sites changed in
+one sed. **The Cache API deletes in ONE colo**, the one that served the write, so the person
+editing sees their change at once and everybody else waits out the 300s TTL. That is the
+trade; the TTL is the max-age these answers already declared, so nobody sees anything staler
+than they did before.
+
+`caches` is absent in the node:sqlite harness and inert on a workers.dev hostname, so every
+call is guarded and a missing cache costs correctness nothing. Nine tests install it as a Map
+and take it away again; the other 490 run with it absent, which is the other half of that
+contract.
+
+`robots.txt` is new and is the belt to those braces: the API, the avatars and the write-side
+pages (`/log`, `/import`, `/add`, `/edit`, `/qc`, `/account`) are all things a crawler pays a
+database read to render and nobody should reach from a search result. Coaster, park and rider
+pages are deliberately left crawlable — they are the site.
+
+**Still on the table:** the Workers Paid plan is $5/month for 25 billion rows read, against
+150M/month on free. Not needed now, but it is what removes the cliff.
+
+### The avatar crop was right; the frame it offered you was not (2026-09-21)
+
+Carter: *"my photo is still cropped weird."* The suspicion was the EXIF trap above. It was not.
+
+`tools/test-crop.mjs` now builds a real EXIF-rotated JPEG — stored 800x600, tagged
+Orientation=6, displayed 600x800, every pixel encoding its own position in red and green —
+drives the actual dialog on `/account`, and reads the saved 256x256 back out of its own
+pixels. **The saved file is the previewed region, to within JPEG noise.** The maths was fine.
+
+What was wrong was where the dialog STARTED. `CROP.base` is cover, so on a portrait photo the
+square it frames is the photo's **entire width** — 600px of a 600x800 — and a person standing
+in a phone photo is a small part of that. Zoom opens at 1.00, the widest end of a 1–3 range.
+So every default avatar framed the scene rather than the person, and the only cure was
+knowing to zoom before pressing OK. An earlier pass had already noticed the vertical half of
+this (a tall photo opened 10% down from the top rather than centred) without noticing that
+the window was still the full width.
+
+A tall photo now opens at `TALL_FRAME` 0.70 of the width — zoom 1.43 — with the crop centred
+`TALL_EYELINE` 0.32 down, which on a 600x800 is the window 5.8%–58.3% down and 15%–85% across:
+head and shoulders. A wide or square photo is already tight at cover (a 4:3 landscape's square
+is 75% of its width) and still opens centred. The slider still goes back to 100% for the whole
+frame, so nothing is out of reach — the starting point is just the useful one.
+
+**This only affects the next upload.** A picture already in R2 is a finished 256x256 file;
+`background-size:cover` on a square source in a square box crops nothing further. An avatar
+that looks wrong has to be re-cropped to change.
+
 ---
 
 ## Open tasks

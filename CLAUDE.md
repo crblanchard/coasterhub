@@ -107,9 +107,13 @@ those files are the fallback, and the sync overwrites them.
   reading those coordinates in the RAW unrotated space, which crops a
   different region than the preview showed. `profile-edit.js` bakes every
   upload onto a canvas first (orientation applied once, in the plain
-  three-argument draw) and measures that. **A synthetic PNG has no EXIF, so no
-  test here can see this class of bug** — if you touch the crop, test with
-  `rotated.jpg` in the scratchpad, not a generated image.
+  three-argument draw) and measures that. This used to say no test here could
+  see the bug, because a synthetic PNG carries no EXIF. **It can now:**
+  `node tools/test-crop.mjs` (dev server + `playwright-core`) builds its own
+  EXIF-tagged JPEG — an Orientation tag is 36 bytes in front of an ordinary
+  file — whose every pixel encodes its own position, drives the real dialog,
+  and reads the saved 256x256 back to prove it IS the region the preview
+  showed. Run it if you touch the crop.
 - **Workers cap PBKDF2 at 100,000 iterations.** Node's WebCrypto does not, so a
   higher number passes every local test and 500s in production.
 - **CSS shorthands reset their longhands** (`background` kills `background-image`
