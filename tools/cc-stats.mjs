@@ -14,15 +14,21 @@
  * but every coaster PAGE is public and prints the same stats. This reads those.
  *
  * WHAT IT DOES
- *   1. Fetches https://captaincoaster.com/sitemap.xml once — every coaster URL
- *      on the site, id and slug.
- *   2. Takes every row in coasters.json that is missing any of
- *      type h s l inv yr manu model, matches it to a sitemap entry by name
- *      (normalised), then confirms the PARK on the page before trusting it —
- *      "Wacky Worm" is at ten parks and the slug alone cannot tell them apart.
- *   3. Fetches each matched page, one a second, with ?setUnits=metric so the
- *      numbers are the integers Captain Coaster stores rather than a rounded
- *      conversion, and converts to the site's ft / mph itself.
+ *   1. Takes every row in coasters.json that is missing any of
+ *      type h s l inv yr manu model, grouped by park.
+ *   2. For each park, asks their public search for the park, fetches the PARK
+ *      page once — it lists every coaster at the park with id, slug and the
+ *      real name — and matches our rows by normalised name within that park.
+ *      Park first, then name: "Wacky Worm" is at ten parks and a name alone
+ *      cannot tell them apart, but a name within a park can. A row the park
+ *      page does not know is tried once more through the coaster search,
+ *      filtered to the same park, which also knows former names.
+ *      (The first version matched sitemap SLUGS. Their slugs are uniquified —
+ *      cyclone, cyclone-1, cyclone-2 — so that found one Cyclone in the whole
+ *      site and 5 of 631 rows overall. Never match on a slug.)
+ *   3. Fetches each matched coaster page, one a second, with ?setUnits=metric
+ *      so the numbers are the integers Captain Coaster stores rather than a
+ *      rounded conversion, and converts to the site's ft / mph itself.
  *   4. Writes migrations/020-cc-stats.sql: one UPDATE per row, COALESCE on every
  *      column so it fills blanks and never overwrites a number somebody typed,
  *      matched on name + park as CLAUDE.md asks, safe to run twice. Plus
@@ -97,6 +103,14 @@ export function parsePage(html) {
   if (name) out.name = text(name[1]);
   return out;
 }
+// A park page: every coaster at the park, name inside the heading link, id and
+// slug in its href. Unpaginated, unfiltered (ParkController passes them all).
+export function parsePark(html) {
+  const out = [];
+  const row = /cc-media__heading[^>]*>\s*<a[^>]*href="[^"]*\/coasters\/(\d+)\/([^"?]+)"[^>]*>([\s\S]*?)<\/a>/g;
+  for (let m; (m = row.exec(html));) out.push({ id: +m[1], slug: decodeURIComponent(m[2]), name: text(m[3]) });
+  return out;
+}
 // Their displayDate: a bare year when the stored date is Jan 1 (their way of
 // saying "year only"), otherwise a short localised date — under /en/ that is
 // M/d/yy. Kept as the site keeps it: a full date with precision 'd', or a year
@@ -152,7 +166,17 @@ const SAMPLE = `
   :</label><div class="pull-right"><a href="/x">5/13/06</a></div></div>
 <div class="cc-list-group__item"><label class="cc-field__label m-0 text-semibold">Closing date
   :</label><div class="pull-right">2031</div></div>`;
+const PARK_SAMPLE = `
+<li class="cc-media"><div class="cc-media__start"><a href="/en/coasters/86/tatsu"><img></a></div>
+<div class="cc-media__body"><h2 class="cc-media__heading mb-2 center" style="margin-bottom: -4px;">
+  <a style="color:#333;" href="/en/coasters/86/tatsu">
+      Tatsu
+  </a></h2></div></li>
+<li class="cc-media"><h2 class="cc-media__heading"><a href="/en/coasters/4091/x2-1">X2</a></h2></li>`;
 if (args.selftest) {
+  const rows = parsePark(PARK_SAMPLE);
+  const okPark = rows.length === 2 && rows[0].id === 86 && rows[0].name === "Tatsu" && rows[1].slug === "x2-1" && rows[1].name === "X2";
+  if (!okPark) { console.log("  FAIL park page: " + JSON.stringify(rows)); process.exit(1); }
   const p = parsePage(SAMPLE);
   const want = { name: "Tatsu", park: "Six Flags Magic Mountain", h_m: 52, l_m: 1097, s_kph: 100, inv: 4,
     manu: "Bolliger & Mabillard", type: "Steel", model: "Flying Coaster",
@@ -165,10 +189,25 @@ if (args.selftest) {
 
 // ---- fetching --------------------------------------------------------------
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const FAILS = [];                          // every request that did not come back 200
 async function get(url) {
   const res = await fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "en" } });
-  if (!res.ok) throw new Error("HTTP " + res.status + " for " + url);
+  if (!res.ok) { FAILS.push({ url, status: res.status }); throw new Error("HTTP " + res.status + " for " + url); }
   return res.text();
+}
+async function search(q) {
+  const j = JSON.parse(await get(SITE + "/search/api?q=" + encodeURIComponent(q.slice(0, 100)) + "&limit=5"));
+  await sleep(1000);
+  return (j && j.results) || { coasters: [], parks: [] };
+}
+async function parkPage(id, slug) {
+  mkdirSync(CACHE, { recursive: true });
+  const f = join(CACHE, "park-" + id + ".html");
+  if (existsSync(f)) return readFileSync(f, "utf8");
+  const html = await get(SITE + "/en/parks/" + id + "/" + slug);
+  writeFileSync(f, html);
+  await sleep(1000);
+  return html;
 }
 async function page(id, slug) {
   mkdirSync(CACHE, { recursive: true });
@@ -187,68 +226,84 @@ const todo = coasters.filter(c => NEED.some(k => c[k] == null || c[k] === ""))
   .slice(0, args.limit ? +args.limit : Infinity);
 console.log(todo.length + " of " + coasters.length + " coasters are missing something in " + NEED.join(" "));
 
-process.stdout.write("sitemap… ");
-const sitemap = await get(SITE + "/sitemap.xml");
-const entries = new Map();               // norm(slug) -> [{id, slug}]
-for (const m of sitemap.matchAll(/\/en\/coasters\/(\d+)\/([^<"?]+)/g)) {
-  const id = +m[1], slug = decodeURIComponent(m[2]);
-  const k = norm(slug.replace(/-/g, " "));
-  if (!entries.has(k)) entries.set(k, []);
-  if (!entries.get(k).some(e => e.id === id)) entries.get(k).push({ id, slug });
-}
-console.log(entries.size + " distinct names on Captain Coaster");
+// ---- discovery: park first, then name within the park -----------------------
+const byPark = new Map();
+for (const c of todo) { if (!byPark.has(c.park)) byPark.set(c.park, []); byPark.get(c.park).push(c); }
+console.log(byPark.size + " parks to look up");
 
-const rows = [], report = { matched: [], unmatched: [], ambiguous: [], manufacturers: {}, models: {} };
-let n = 0;
-for (const c of todo) {
-  n++;
-  let cands = entries.get(norm(c.name)) || [];
-  // Not in the sitemap under that name: ask their public search, which also
-  // knows former names and returns the park with each hit, so a rename on
-  // either side is not a dead end. /search/api is open (no role on it), unlike
-  // the autocomplete route their pages use.
-  if (!cands.length) {
-    try {
-      const j = JSON.parse(await get(SITE + "/search/api?q=" + encodeURIComponent(c.name)));
-      await sleep(1000);
-      cands = ((j.results && j.results.coasters) || [])
-        .filter(r => r.subtitle && parkKey(r.subtitle) === parkKey(c.park))
-        .map(r => ({ id: r.id, slug: r.slug }));
-    } catch (err) { /* the sitemap miss stands */ }
+const rows = [], report = { parks: {}, matched: [], unmatched: [], manufacturers: {}, models: {}, failures: FAILS };
+// Their search is LIKE %q% on the name, five results, so ask with the name and
+// then with the name stripped of the generic words if that finds nothing.
+async function findPark(name) {
+  const tries = [name, name.replace(/\s*\(.*\)\s*/g, " ").trim(), parkKey(name)].filter((t, i, a) => t.length >= 2 && a.indexOf(t) === i);
+  for (const t of tries) {
+    let res; try { res = await search(t); } catch (e) { continue; }
+    const hit = (res.parks || []).find(p => parkKey(p.name) === parkKey(name))
+             || ((res.parks || []).length === 1 && t === name ? res.parks[0] : null);
+    if (hit) return hit;
   }
-  if (!cands.length) { report.unmatched.push({ name: c.name, park: c.park, why: "no coaster of that name on the site" }); continue; }
-  // Confirm the park on the page — the only way to tell ten Wacky Worms apart.
-  let hit = null, seen = [];
-  for (const e of cands) {
-    let p;
-    try { p = parsePage(await page(e.id, e.slug)); } catch (err) { seen.push(e.id + ": " + err.message); continue; }
-    seen.push(e.id + " @ " + p.park);
-    if (p.park && parkKey(p.park) === parkKey(c.park)) { hit = { e, p }; break; }
-  }
-  process.stdout.write("\r  " + n + "/" + todo.length + "  " + (hit ? "ok  " : "--  ") + c.name.padEnd(40).slice(0, 40));
-  if (!hit) { report[cands.length > 1 ? "ambiguous" : "unmatched"].push({ name: c.name, park: c.park, why: "park did not match", candidates: seen }); continue; }
-  const p = hit.p;
-  const fill = {
-    type: c.type ? null : (TYPE[p.type] || null),
-    h: c.h != null && c.h !== "" ? null : ft(p.h_m),
-    s: c.s != null && c.s !== "" ? null : mph(p.s_kph),
-    l: c.l != null && c.l !== "" ? null : ft(p.l_m),
-    inv: c.inv != null && c.inv !== "" ? null : (p.inv ?? null),
-    yr: c.yr ? null : (p.openedYear ?? null),
-    opened: c.opened ? null : (p.opened ?? null),
-    openedPrec: c.opened ? null : (p.openedPrec ?? null),
-    closed: c.closed ? null : (p.closed ?? null),
-    closedPrec: c.closed ? null : (p.closedPrec ?? null),
-    manu: c.manu ? null : (p.manu ?? null),
-    model: c.model ? null : (p.model ?? null),
-  };
-  if (p.manu) report.manufacturers[p.manu] = (report.manufacturers[p.manu] || 0) + 1;
-  if (p.model) report.models[p.model] = (report.models[p.model] || 0) + 1;
-  const sets = Object.entries(fill).filter(([, v]) => v != null);
-  report.matched.push({ name: c.name, park: c.park, cc: hit.e.id, fills: Object.fromEntries(sets) });
-  if (sets.length) rows.push({ c, sets });
+  return null;
 }
-console.log("\n" + report.matched.length + " matched, " + report.unmatched.length + " unmatched, " + report.ambiguous.length + " ambiguous; " + rows.length + " rows get something");
+
+let pn = 0;
+for (const [park, ours] of byPark) {
+  pn++;
+  process.stdout.write("\r  park " + pn + "/" + byPark.size + "  " + park.padEnd(44).slice(0, 44));
+  const hit = await findPark(park);
+  if (!hit) {
+    report.parks[park] = { found: false };
+    ours.forEach(c => report.unmatched.push({ name: c.name, park: c.park, why: "park not found on the site" }));
+    continue;
+  }
+  let listed;
+  try { listed = parsePark(await parkPage(hit.id, hit.slug)); }
+  catch (e) { report.parks[park] = { found: true, cc: hit.id, error: e.message }; ours.forEach(c => report.unmatched.push({ name: c.name, park: c.park, why: "park page failed: " + e.message })); continue; }
+  report.parks[park] = { found: true, cc: hit.id, ccName: hit.name, coasters: listed.length };
+  const byName = new Map(listed.map(r => [norm(r.name), r]));
+
+  for (const c of ours) {
+    let e = byName.get(norm(c.name)) || null;
+    if (!e) {
+      // Not under that name at the park: the coaster search knows former
+      // names and returns the park with each hit, so a rename on either side
+      // is not a dead end.
+      try {
+        const res = await search(c.name);
+        const r = (res.coasters || []).find(r => r.subtitle && parkKey(r.subtitle) === parkKey(c.park));
+        if (r) e = { id: r.id, slug: r.slug, name: r.name };
+      } catch (err) { /* logged in FAILS */ }
+    }
+    if (!e) {
+      report.unmatched.push({ name: c.name, park: c.park, why: "not at that park under that name",
+        parkHas: listed.map(r => r.name).sort() });
+      continue;
+    }
+    let p;
+    try { p = parsePage(await page(e.id, e.slug)); }
+    catch (err) { report.unmatched.push({ name: c.name, park: c.park, why: "coaster page failed: " + err.message, cc: e.id }); continue; }
+    const fill = {
+      type: c.type ? null : (TYPE[p.type] || null),
+      h: c.h != null && c.h !== "" ? null : ft(p.h_m),
+      s: c.s != null && c.s !== "" ? null : mph(p.s_kph),
+      l: c.l != null && c.l !== "" ? null : ft(p.l_m),
+      inv: c.inv != null && c.inv !== "" ? null : (p.inv ?? null),
+      yr: c.yr ? null : (p.openedYear ?? null),
+      opened: c.opened ? null : (p.opened ?? null),
+      openedPrec: c.opened ? null : (p.openedPrec ?? null),
+      closed: c.closed ? null : (p.closed ?? null),
+      closedPrec: c.closed ? null : (p.closedPrec ?? null),
+      manu: c.manu ? null : (p.manu ?? null),
+      model: c.model ? null : (p.model ?? null),
+    };
+    if (p.manu) report.manufacturers[p.manu] = (report.manufacturers[p.manu] || 0) + 1;
+    if (p.model) report.models[p.model] = (report.models[p.model] || 0) + 1;
+    const sets = Object.entries(fill).filter(([, v]) => v != null);
+    report.matched.push({ name: c.name, park: c.park, cc: e.id, ccName: e.name, fills: Object.fromEntries(sets) });
+    if (sets.length) rows.push({ c, sets });
+  }
+}
+const parksFound = Object.values(report.parks).filter(p => p.found).length;
+console.log("\n" + parksFound + "/" + byPark.size + " parks found; " + report.matched.length + " coasters matched, " + report.unmatched.length + " not; " + rows.length + " rows get something; " + FAILS.length + " requests failed");
 
 // ---- the migration ---------------------------------------------------------
 const q = v => typeof v === "number" ? String(v) : "'" + String(v).replace(/'/g, "''") + "'";

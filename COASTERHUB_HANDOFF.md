@@ -2917,18 +2917,25 @@ Carter asked how to get Captain Coaster's API "for rides". Read from their sourc
   else `M/d/yy` under `/en/`.
 
 So **`tools/cc-stats.mjs`**, which Carter runs on his machine (the sandbox cannot reach the
-site): sitemap once, then for every row in `coasters.json` missing any of `type h s l inv yr
-manu model` (101 with nothing, 529 partial, 543 with no maker as of the 2026-09-20 snapshot)
-it matches by normalised name, confirms the **park on the page** before trusting a hit (ten
-Wacky Worms), falls back to `/search/api` for names the sitemap does not know, fetches one
-page a second with a User-Agent that names the project, caches pages in `tools/.cc-cache/`,
-converts to ft/mph, and writes `migrations/020-cc-stats.sql` — `COALESCE` on every column so
+site). For every row in `coasters.json` missing any of `type h s l inv yr manu model` (101 with
+nothing, 529 partial, 543 with no maker as of the 2026-09-20 snapshot), grouped by park: find
+the park through `/search/api`, fetch the **park page** once — it lists every coaster there with
+id, slug and real name — and match by normalised name *within the park*; a miss is retried
+through the coaster search filtered to the same park, which knows former names. Then one
+coaster page a second with a User-Agent that names the project, cached in `tools/.cc-cache/`,
+converted to ft/mph, written to `migrations/020-cc-stats.sql` — `COALESCE` on every column so
 it fills blanks and never overwrites a typed number, matched on name + park, idempotent —
 plus `tools/cc-stats-report.json` (matched / unmatched / ambiguous, and every distinct
 manufacturer and model spelling, to reconcile with ours in /edit before the paste). The
 parser has a `--selftest` against a page built from their templates; the migration shape
 was proved on the snapshot in `node:sqlite` (fills the blank, keeps the typed height,
 second run identical).
+
+**The first version matched sitemap slugs and found 5 rows of 631.** Their slugs are
+uniquified by Gedmo — `cyclone`, `cyclone-1`, `cyclone-2` — so a slug equals a name for exactly
+one coaster of that name on the whole site. Carter ran it, pushed the report, and the report's
+`candidates` (one Cyclone, at Expo '58) is what gave it away. Never match on a slug; the park
+page is the thing that carries names.
 
 The old `tools/import-captaincoaster.js` is from the static-file era: it REBUILDS
 `coasters.json` on Captain Coaster's ids and rewrites every rider file. Do not run it against
