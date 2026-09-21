@@ -3210,7 +3210,15 @@ It was about **write authorization**, and it bought three things:
 A link is a **bearer credential** — anyone holding the URL is that person. Still true of the
 invite links in §3, which is why they are single-use.
 
-### 5. Sean's remaining 63 rows — **needs Carter**
+### 5. ~~Sean's remaining 63 rows~~ — **resolved by 2026-09-21**
+
+Checked against the 2026-09-20 snapshot: all 36 "coasters at parks we already have" exist
+now (ids 1179–1199 were added this week) and Sean has a ride on every one, including the
+four sheet typos — Millennium Force, Colorado Adventure, Surf Coaster Leviathan, Grand
+Canyon Blaster — all matched. 721 rides over 670 coasters against 668 sheet rows. Carter:
+*"Sean's is all set."* The notes below stay for the record; the naming-conflict, missing-park
+and retrack questions are policy, not backlog.
+
 
 604 of Sean's 668 sheet rows imported. The rest need decisions, not code.
 
