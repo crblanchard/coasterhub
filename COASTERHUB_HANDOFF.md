@@ -2893,7 +2893,23 @@ it cannot fall back to the initial-in-a-circle either, because as far as it know
 picture. Either leave `avatar` out of the static snapshot or keep the old object around; the
 snapshot is a safety net and this is the one field in it that rots into a visible fault.
 
-### Captain Coaster: no key needed, the pages carry everything (2026-09-21)
+### Captain Coaster: DO NOT SCRAPE IT. Carter's IP got blocked (2026-09-21)
+
+**The outcome first.** `tools/cc-stats.mjs` is deleted. Two runs against captaincoaster.com from
+Carter's machine ended with his IP returning 403 on everything. Carter: *"lesson learned, stop
+trying to use it."* Nothing here fetches from that site again unless they grant an API key,
+and then only through the API.
+
+What went wrong, so the shape is recognised next time: the search route was requested without
+its `/en/` locale prefix, so every call was a 404 — and the one-second delay sat *after* a
+successful response, so 237 failures went out as fast as `fetch` could send them. That burst
+is what a bot filter looks for, and the 238th request onward was a 403. Two bugs, one
+consequence. A polite fetcher sleeps in `finally`, not after success, and stops on the first
+403 rather than sending 211 more.
+
+The investigation below stands — it is accurate about what their API and pages carry — but it
+is background now, not a plan.
+
 
 Carter asked how to get Captain Coaster's API "for rides". Read from their source
 (`github.com/captain-coaster/captain-coaster`, reachable from here even though the site is not):
@@ -2916,8 +2932,7 @@ Carter asked how to get Captain Coaster's API "for rides". Read from their sourc
   use, which is `ROLE_USER`. Dates print as a bare year when stored as Jan 1 (their "year only"),
   else `M/d/yy` under `/en/`.
 
-So **`tools/cc-stats.mjs`**, which Carter runs on his machine (the sandbox cannot reach the
-site). For every row in `coasters.json` missing any of `type h s l inv yr manu model` (101 with
+So **`tools/cc-stats.mjs`** — since deleted, see above — which ran on Carter's machine. For every row in `coasters.json` missing any of `type h s l inv yr manu model` (101 with
 nothing, 529 partial, 543 with no maker as of the 2026-09-20 snapshot), grouped by park: find
 the park through `/search/api`, fetch the **park page** once — it lists every coaster there with
 id, slug and real name — and match by normalised name *within the park*; a miss is retried
