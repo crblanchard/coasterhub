@@ -220,8 +220,13 @@ function catCard(g){
       +'<span>'+n+' of '+g.ids.length+' ridden'
       +(g.note?' · '+esc(g.note):'')+'</span></span>';
   if(open){
+    /* Alphabetical by park, then name — the reading order, not the stored one:
+       g.ids keeps whatever order the server holds (Carter, 2026-09-21: "sort
+       these alphabetically by park"). */
+    var rows=g.ids.slice().sort(function(a,b){ var x=BY[a]||{}, y=BY[b]||{};
+      return (x.park||'').localeCompare(y.park||'') || (x.name||'').localeCompare(y.name||''); });
     h+='<div class="body">'
-      +g.ids.map(function(id){ var c=BY[id]||{};
+      +rows.map(function(id){ var c=BY[id]||{};
         return '<div class="mrow'+(RIDDEN[id]?'':' unridden')+'">'
           +'<span class="mp">'+esc(c.name||('#'+id))
           +'<i>'+esc(c.park||'')+'</i>'
