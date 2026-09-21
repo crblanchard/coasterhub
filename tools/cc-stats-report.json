@@ -1,0 +1,3258 @@
+{
+ "matched": [
+  {
+   "name": "Thunder Striker",
+   "park": "Carowinds",
+   "cc": 1782,
+   "fills": {
+    "type": "Steel",
+    "h": 233,
+    "s": 75,
+    "l": 5315,
+    "inv": 0,
+    "yr": 2010,
+    "opened": "2010-03-27",
+    "openedPrec": "d",
+    "manu": "Bolliger & Mabillard",
+    "model": "B&M Hyper Coaster"
+   }
+  },
+  {
+   "name": "Trolls Trollercoaster",
+   "park": "Universal Studios Florida",
+   "cc": 1142,
+   "fills": {
+    "type": "Steel",
+    "h": 30,
+    "s": 22,
+    "l": 679,
+    "inv": 0,
+    "yr": 1999,
+    "opened": "1999-03-13",
+    "openedPrec": "d",
+    "manu": "Vekoma",
+    "model": "Vekoma Junior Coaster"
+   }
+  },
+  {
+   "name": "Paw Patrol: Patrulla Canina",
+   "park": "Parque de Atracciones de Madrid",
+   "cc": 3078,
+   "fills": {
+    "h": 13,
+    "l": 262,
+    "inv": 0,
+    "yr": 2007,
+    "opened": "2007-06-02",
+    "openedPrec": "d",
+    "manu": "Zamperla",
+    "model": "Zamperla Family Coaster"
+   }
+  },
+  {
+   "name": "Nemesis Reborn",
+   "park": "Alton Towers",
+   "cc": 59,
+   "fills": {
+    "h": 43,
+    "s": 50,
+    "l": 2349,
+    "inv": 4,
+    "yr": 1994,
+    "opened": "1994-03-19",
+    "openedPrec": "d",
+    "manu": "Bolliger & Mabillard",
+    "model": "B&M Inverted Coaster"
+   }
+  },
+  {
+   "name": "Cootie Coaster",
+   "park": "Galaxyland",
+   "cc": 747,
+   "fills": {
+    "h": 36,
+    "s": 30,
+    "l": 1099,
+    "inv": 0,
+    "yr": 1985,
+    "opened": "1985-01-01",
+    "openedPrec": "y",
+    "manu": "Zierer",
+    "model": "Zierer Tivoli"
+   }
+  }
+ ],
+ "unmatched": [
+  {
+   "name": "Tiger Trek",
+   "park": "Oakland Zoo",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Timberline Twister",
+   "park": "Knott's Berry Farm",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Alpine Coaster",
+   "park": "Glenwood Caverns",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Demon Drop",
+   "park": "Dorney Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Coaster",
+   "park": "Las Vegas Mini Gran Prix",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Incredible Express",
+   "park": "John's Incredible Pizza Company Roseville",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Sandy Lake Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fiesta Express",
+   "park": "Austin's Park and Pizza",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pacific Fruit Express",
+   "park": "Happy Hollow Park and Zoo",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mine Train",
+   "park": "Sonoma TrainTown Railroad",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy Dane Coaster",
+   "park": "Scandia Family Fun Center",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Ex-Scream Machine Coaster",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pole Position",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Zillerator",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kozmo's Kurves",
+   "park": "Knoebels",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Black Diamond",
+   "park": "Knoebels",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Twist-n-Shout",
+   "park": "Fun Land of Fredericksburg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Grover's Alpine Express",
+   "park": "Busch Gardens Williamsburg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Port of Sky Treasure",
+   "park": "Sun World Danang Wonders",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Garuda Valley",
+   "park": "Sun World Danang Wonders",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Castle Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tiger Mike",
+   "park": "Boomers! (Fountain Valley)",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Freeway Coaster",
+   "park": "Adventure City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "The Branson Coaster",
+   "park": "Branson Sawmill",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fiorano GT Challenge (Left)",
+   "park": "Ferrari World",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dubai Drone",
+   "park": "VR Park Dubai",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy 8's",
+   "park": "John's Incredible Pizza Company Carson",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Orange County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Six Flags Great America",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Swiss Toboggan",
+   "park": "Little Amerricka",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Little Amerricka",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mad Mouse",
+   "park": "Little Amerricka",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sky Rangers",
+   "park": "Tom Foolerys Adventure Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Miner Mike",
+   "park": "Knucklehead's Bowling & Family Entertainment",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Avatar Airbender",
+   "park": "Nickelodeon Universe",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Underground",
+   "park": "Adventureland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Screamin Demon",
+   "park": "Castle Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Timmy's Half-Pipe Havoc",
+   "park": "Nickelodeon Universe Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Skyflyer",
+   "park": "Deno's Wonder Wheel",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mini Mouse",
+   "park": "Luna Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rocky Mountain Coaster",
+   "park": "Copper Mountain",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flight of the Hippogriff",
+   "park": "Universal Studios Hollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "CJ Barrymore's",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Loop Roller Coaster",
+   "park": "CJ Barrymore's",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wonder Mountain's Guardian",
+   "park": "Canada's Wonderland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Whirlwind",
+   "park": "Waldameer",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Ravine Flyer 3",
+   "park": "Waldameer",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Skyliner",
+   "park": "Lakemont Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "DelGrosso's Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wild Whizzer",
+   "park": "Morey's Piers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Gusano Loco",
+   "park": "Mundo Divertido",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mineshaft Coaster",
+   "park": "Alpine Slide at Magic Mountain",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Great Chase",
+   "park": "Six Flags New England",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pandemonium",
+   "park": "Six Flags New England",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Snoopy's Tenderpaw Twister Coaster",
+   "park": "Knott's Berry Farm",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "F.L.Y.",
+   "park": "Phantasialand",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Calamity Mine",
+   "park": "Walibi Belgium",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dreamcatcher",
+   "park": "Bobbejaanland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Supersplash",
+   "park": "Plopsaland Belgium",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Family Banana Coaster",
+   "park": "Yokohama Cosmoworld",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "DinoRunner",
+   "park": "Yomiuriland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Roller Coaster",
+   "park": "Hanayashiki",
+   "why": "park did not match",
+   "candidates": [
+    "6113 @ World Play"
+   ]
+  },
+  {
+   "name": "Flounder's Flying Fish Coaster",
+   "park": "Tokyo DisneySea",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Big Thunder Mountain Railroad",
+   "park": "Tokyo Disneyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Nia and Animal Coaster",
+   "park": "Fuji-Q Highland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Zokkon",
+   "park": "Fuji-Q Highland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Free Fall",
+   "park": "Nagashima Spaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Jet Coaster",
+   "park": "Nagashima Spaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hurricane",
+   "park": "Himeji Central Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Space Fantasy - The Ride",
+   "park": "Universal Studios Japan",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Snoopy's Flying Ace Adventure",
+   "park": "Universal Studios Japan",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mine Cart Madness",
+   "park": "Universal Studios Japan",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Arctic Rescue",
+   "park": "SeaWorld San Diego",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Miner Mike",
+   "park": "Adventuredome",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Cascabel 2.0",
+   "park": "Aztlán Parque Urbano",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Montana Rusa (Left)",
+   "park": "Aztlán Parque Urbano",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Quimera",
+   "park": "Aztlán Parque Urbano",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Raton Loco",
+   "park": "Aztlán Parque Urbano",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Air Grover",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Cheetah Hunt",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Cobra's Curse",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Iron Gwazi",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kumba",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Montu",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Phoenix Rising",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sand Serpent",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Scorpion",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "SheiKra",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tigris",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pantheon",
+   "park": "Busch Gardens Williamsburg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon (Blue)",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon (Red)",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Orient Express (1)",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Orient Express (2)",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Berserker",
+   "park": "California's Great America",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tiki Twirl",
+   "park": "California's Great America",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Afterburn",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Carolina Cyclone",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Carolina Goldrusher",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Copperhead Strike",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flying Cobras",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fury 325",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Nighthawk",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hurler",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kiddy Hawk",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Ricochet",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Vortex",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wilderness Run",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Woodstock Express",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pipe Scream",
+   "park": "Cedar Point",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wilderness Run",
+   "park": "Cedar Point",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Blazing Fury",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragonflier",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "FireChaser Express",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Lightning Rod",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mystery Mine",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tennessee Tornado",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Thunderhead",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wild Eagle",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hiccup's Wing Gliders",
+   "park": "Universal Epic Universe",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Swamp Fox",
+   "park": "Family Kingdom Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Twist 'n' Shout",
+   "park": "Family Kingdom Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Galaxy Spin",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mine Blower",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sea Serpent",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Freedom Flyer",
+   "park": "Fun Spot America - Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sea Serpent",
+   "park": "Fun Spot America - Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "White Lightning",
+   "park": "Fun Spot America - Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Iron Shark",
+   "park": "Galveston Island Historic Pleasure Pier",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Cornball Express",
+   "park": "Indiana Beach",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hoosier Hurricane",
+   "park": "Indiana Beach",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Lost Coaster of Superstition Mountain",
+   "park": "Indiana Beach",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Steel Hawg",
+   "park": "Indiana Beach",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tig'rr",
+   "park": "Indiana Beach",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flight of the Hippogriff",
+   "park": "Islands of Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hagrid's Magical Creatures Motorbike Adventure",
+   "park": "Islands of Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "The High in the Sky Seuss Trolley Train Ride (Left)",
+   "park": "Islands of Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "The High in the Sky Seuss Trolley Train Ride (Right)",
+   "park": "Islands of Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "VelociCoaster",
+   "park": "Islands of Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Boardwalk Bullet",
+   "park": "Kemah Boardwalk",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Bayern Kurve",
+   "park": "Kennywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tumbili",
+   "park": "Kings Dominion",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "The Racer (Red)",
+   "park": "Kings Island",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Woodstock's Air Rail",
+   "park": "Kings Island",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Primordial",
+   "park": "Lagoon",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Coastersaurus",
+   "park": "Legoland California",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon",
+   "park": "Legoland California",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Technic Coaster",
+   "park": "Legoland California",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sandy's Blasting Bronco",
+   "park": "Nickelodeon Universe Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Olympic Bobsleds",
+   "park": "Olympic Bobsled",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mountain Coaster",
+   "park": "Park City Mountain Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Journey to Atlantis",
+   "park": "SeaWorld Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kraken",
+   "park": "SeaWorld Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mako",
+   "park": "SeaWorld Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Manta",
+   "park": "SeaWorld Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Stunt Pilot",
+   "park": "Silverwood Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Timber Terror",
+   "park": "Silverwood Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tremors",
+   "park": "Silverwood Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Harley Quinn Crazy Coaster",
+   "park": "Six Flags Discovery Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pandemonium",
+   "park": "Six Flags Discovery Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Jersey Devil Coaster",
+   "park": "Six Flags Great Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Joker",
+   "park": "Six Flags Great Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Deja Vu",
+   "park": "Six Flags Magic Mountain",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Magic Flyer",
+   "park": "Six Flags Magic Mountain",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dark Knight",
+   "park": "Six Flags Mexico",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Joker",
+   "park": "Six Flags Mexico",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wonder Woman",
+   "park": "Six Flags Mexico",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Blue Hawk",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dare Devil Dive",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Goliath",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Riddler Mindbender",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Batman: The Ride",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Twisted Cyclone",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Train",
+   "park": "Sonoma TrainTown Railroad",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "St. Louis's Incredible Pizza Company",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Harry Potter and the Escape from Gringotts",
+   "park": "Universal Studios Florida",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hollywood Rip Ride Rockit",
+   "park": "Universal Studios Florida",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Revenge of the Mummy",
+   "park": "Universal Studios Florida",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Primeval Whirl (Left)",
+   "park": "Disney's Animal Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Primeval Whirl (Right)",
+   "park": "Disney's Animal Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rock 'n' Roller Coaster",
+   "park": "Disney's Hollywood Studios",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Slinky Dog Dash",
+   "park": "Disney's Hollywood Studios",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Space Mountain (Alpha)",
+   "park": "Magic Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rockin Roller",
+   "park": "Six Flags St. Louis",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Jack Rabbit",
+   "park": "Celebration City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Ozark Wildcat",
+   "park": "Celebration City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Thunderbolt",
+   "park": "Celebration City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Cosmic Coaster",
+   "park": "Worlds of Fun",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Runaway Mine Train",
+   "park": "Miner Mike's Adventure Town",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy Cobra",
+   "park": "Washington Town & Country Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Twist 'n' Shout",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Gauntlet",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "X Coaster",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Diamond Mine Run",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Big Bad John",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Arkansas Twister",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Blue Tornado",
+   "park": "Gardaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kung Fu Panda Master",
+   "park": "Gardaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mammut",
+   "park": "Gardaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Oblivion the Black Hole",
+   "park": "Gardaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fuga Da Atlantide",
+   "park": "Gardaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Ortobruco Tour",
+   "park": "Gardaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Raptor",
+   "park": "Gardaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Shaman",
+   "park": "Gardaland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Beast",
+   "park": "Kings Island",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Great Pumpkin Coaster",
+   "park": "Kings Island",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Vortex",
+   "park": "Kings Island",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Taxi Jam",
+   "park": "Kings Dominion",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Seven Dwarfs Mine Train",
+   "park": "Magic Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pteranadon Flyers",
+   "park": "Islands of Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hungarian Horntail",
+   "park": "Islands of Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Chinese Fireball",
+   "park": "Islands of Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rockstar",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wile E Coyote's Grand Canyon Blaster",
+   "park": "Six Flags Over Texas",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Whistle Punk Chaser",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Gatlinburg Mountain Coaster",
+   "park": "Gatlinburg Mountain Coaster",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rowdy Bear Mountain Coaster",
+   "park": "Rowdy Bear's Smoky Mountain Snowpark",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Blazin' Buckaroo",
+   "park": "Elitch Gardens",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Twister II",
+   "park": "Elitch Gardens",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kiddie Coaster",
+   "park": "Lakeside Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Diamond Back",
+   "park": "Frontier City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Silver Bullet",
+   "park": "Frontier City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Steel Lasso",
+   "park": "Frontier City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wildcat",
+   "park": "Frontier City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wild Kitty",
+   "park": "Frontier City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Windstorm",
+   "park": "America's Fun Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "America's Fun Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Groovy Train",
+   "park": "America's Fun Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Washington Town & Country Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Mascoutah Homecoming Festival",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fun Spot Kissimmee Kiddie Coaster",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Avalanche Hellcat",
+   "park": "Timber Falls Adventure Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hades",
+   "park": "Mt. Olympus",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Little Titans",
+   "park": "Mt. Olympus",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Opa",
+   "park": "Mt. Olympus",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Adventuredome",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Olympic Bobsleds",
+   "park": "San Diego County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy Mouse 1",
+   "park": "San Diego County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "San Diego County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "San Diego County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tidal Twister",
+   "park": "SeaWorld San Diego",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Calico Mine Ride",
+   "park": "Knott's Berry Farm",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flying School",
+   "park": "Legoland Florida",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Great Lego Race",
+   "park": "Legoland Florida",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Bug Whirled",
+   "park": "Playland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kettle Creek Mine",
+   "park": "Playland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Coaster",
+   "park": "Playland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Washington Town & Country Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rollin' Thunder",
+   "park": "Tropic Falls Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Southern Express",
+   "park": "Tropic Falls Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy Mouse",
+   "park": "Tropic Falls Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hurricane (Windstorm)",
+   "park": "Race City PCB",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Loop Coaster (Swampy Jack's Wongo)",
+   "park": "Swampy Jack's Wongo Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "Swampy Jack's Wongo Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Steel Curtain",
+   "park": "Kennywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Firehawk",
+   "park": "Kings Island",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Texas Stingray",
+   "park": "SeaWorld San Antonio",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Lokolo",
+   "park": "Lost Island Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Nopuku",
+   "park": "Lost Island Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "Track Family Fun Parks",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Woodstock Express",
+   "park": "Michigan's Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Zach's Zoomer",
+   "park": "Michigan's Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wolverine Wildcat",
+   "park": "Michigan's Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Corkscrew",
+   "park": "Michigan's Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Thunderhawk",
+   "park": "Michigan's Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Shivering Timbers",
+   "park": "Michigan's Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Copperhead Mountain Coaster",
+   "park": "Shepherd's Adventure Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Aquaman Powerwave",
+   "park": "Six Flags Over Texas",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Prairie Screamer",
+   "park": "Prairie Playland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Big Bear Mountain",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dahlonega Mine Train",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Georgia Scorcher",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Great American Scream Machine",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Joker Funhouse Coaster",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Superman: Ultimate Flight",
+   "park": "Six Flags Over Georgia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sand Blaster",
+   "park": "Boardwalk Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hurricane Coaster",
+   "park": "Fun Spot America - Atlanta",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kiddie Coaster",
+   "park": "Fun Spot America - Atlanta",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "ArieForce One",
+   "park": "Fun Spot America - Atlanta",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Centi-SPEED",
+   "park": "Alabama Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Cheddar Chase",
+   "park": "Alabama Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rampage",
+   "park": "Alabama Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Matugani",
+   "park": "Lost Island Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flying Viking",
+   "park": "Adventureland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Aftershock",
+   "park": "Silverwood Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Corkscrew",
+   "park": "Silverwood Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fire Runner",
+   "park": "Lost Island Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "Tulsa's Incredible Pizza Company",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Catapult Falls",
+   "park": "SeaWorld San Antonio",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Beach Rescue Racer",
+   "park": "SeaWorld San Antonio",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dinoconda",
+   "park": "China Dinosaurs Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dinosaur Mountain",
+   "park": "China Dinosaurs Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Diving Coaster",
+   "park": "Happy Valley",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Family Inverted Coaster",
+   "park": "Happy Valley",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mega-Lite",
+   "park": "Happy Valley",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mine Train Coaster",
+   "park": "Happy Valley",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Clouds of Fairyland",
+   "park": "Joyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Roaring Heaven",
+   "park": "Joyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Starry Sky Ripper",
+   "park": "Joyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Coaster Through the Clouds",
+   "park": "Nanchang Sunac Land",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Creep Caterpillar",
+   "park": "Nanchang Sunac Land",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Seven Dwarfs Mine Train",
+   "park": "Shanghai Disneyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "TRON Lightcycle Power Run",
+   "park": "Shanghai Disneyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Broken Rail Roller Coaster",
+   "park": "Suzhou Amusement Land Forest World",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Roller Coaster",
+   "park": "Suzhou Amusement Land Forest World",
+   "why": "park did not match",
+   "candidates": [
+    "6113 @ World Play"
+   ]
+  },
+  {
+   "name": "Dream Factory",
+   "park": "Wuxi Sunac Land",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Falcon",
+   "park": "Wuxi Sunac Land",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Steam Racers",
+   "park": "Wuxi Sunac Land",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fridolin's verrückter Zauberexpress",
+   "park": "Fantasiana",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wild Train",
+   "park": "Fantasiana",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Keltenblitz",
+   "park": "Zinkenlifte Bad Dürrnberg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Chinois",
+   "park": "Jardin d'Acclimatation",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Défi du Dragon",
+   "park": "Jardin d'Acclimatation",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fort des Pirates",
+   "park": "Jardin d'Acclimatation",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Machine à Vapeur",
+   "park": "Jardin d'Acclimatation",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Souris Mécaniques",
+   "park": "Jardin d'Acclimatation",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Speed Rockets",
+   "park": "Jardin d'Acclimatation",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Azteka (2021-)",
+   "park": "Le Pal",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fjord Explorer",
+   "park": "Le Pal",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tigre de Sibérie",
+   "park": "Le Pal",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Twist",
+   "park": "Le Pal",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Yukon Quad",
+   "park": "Le Pal",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tonnerre de Zeus",
+   "park": "Parc Astérix",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Aérotrain",
+   "park": "Parc Saint Paul",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Formule 1",
+   "park": "Parc Saint Paul",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mini Mouse Cartoon",
+   "park": "Parc Saint Paul",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pomme",
+   "park": "Parc Saint Paul",
+   "why": "park did not match",
+   "candidates": [
+    "3612 @ Fééryland"
+   ]
+  },
+  {
+   "name": "Souris Verte",
+   "park": "Parc Saint Paul",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wood Express",
+   "park": "Parc Saint Paul",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Namazu",
+   "park": "Vulcania",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Coccinelle",
+   "park": "Walibi Rhône-Alpes",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Generator",
+   "park": "Walibi Rhône-Alpes",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mahuka",
+   "park": "Walibi Rhône-Alpes",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mystic",
+   "park": "Walibi Rhône-Alpes",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Timber",
+   "park": "Walibi Rhône-Alpes",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Woodstock Express",
+   "park": "Walibi Rhône-Alpes",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Anaconda",
+   "park": "Walygator Grand Est",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Comet",
+   "park": "Walygator Grand Est",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Family Coaster",
+   "park": "Walygator Grand Est",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Monster",
+   "park": "Walygator Grand Est",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "La Pomme (chain lift) / Le Train Du Pere Noel",
+   "park": "Pouzet Group",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "G'sengte Sau",
+   "park": "Erlebnispark Tripsdrill",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Karacho",
+   "park": "Erlebnispark Tripsdrill",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mammut",
+   "park": "Erlebnispark Tripsdrill",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rasender Tausendfüßler",
+   "park": "Erlebnispark Tripsdrill",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Alpenexpress Enzian",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Arthur",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Atlantica SuperSplash",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Ba-a-a-Express",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "blue fire Megacoaster",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Euro Mir",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Eurosat - CanCan Coaster",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Matterhorn Blitz",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pegasus",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Poseidon",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Schweizer Bobbahn",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Silver Star",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Voltron",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wodan Timbur Coaster",
+   "park": "Europa Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flucht von Novgorod",
+   "park": "Hansa-Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Schwur des Kärnan",
+   "park": "Hansa-Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Big Loop",
+   "park": "Heide Park Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Bobbahn",
+   "park": "Heide Park Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Desert Race",
+   "park": "Heide Park Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flug der Dämonen",
+   "park": "Heide Park Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Grottenblitz",
+   "park": "Heide Park Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Indy-Blitz",
+   "park": "Heide Park Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Krake",
+   "park": "Heide Park Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Toxic Garden",
+   "park": "Heide Park Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Expedition GeForce",
+   "park": "Plopsaland Deutschland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sky Scream",
+   "park": "Plopsaland Deutschland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tabalugas Achterbahn",
+   "park": "Plopsaland Deutschland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Brucomela",
+   "park": "Nettuno Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Boomerang",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Roller Coaster",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Energuś",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Formuła",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Frutti Loop Coaster",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Happy Loops",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hyperion",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mars",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Roller Coaster Mayan",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Speed",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Viking Roller Coaster",
+   "park": "Energylandia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Diabelska Pętla / Devil's Loop",
+   "park": "Legendia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dream Hunters Society",
+   "park": "Legendia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Lech Coaster",
+   "park": "Legendia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Scary Toys Factory",
+   "park": "Legendia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Junior Red Force",
+   "park": "Ferrari Land",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Red Force",
+   "park": "Ferrari Land",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Abismo",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Padrinos Voladores",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tarántula",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "TNT Tren de la Mina",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tornado",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Vértigo",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Montaña Suiza",
+   "park": "Parque de Atracciones Monte Igueldo",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Batman Gotham City Escape",
+   "park": "Parque Warner Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Coaster Express",
+   "park": "Parque Warner Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Correcaminos Bip Bip",
+   "park": "Parque Warner Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Shadows of Arkham",
+   "park": "Parque Warner Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Stunt Fall",
+   "park": "Parque Warner Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Superman / la Atracción de Acero",
+   "park": "Parque Warner Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tom y Jerry",
+   "park": "Parque Warner Madrid",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Diablo - Tren de la Mina",
+   "park": "PortAventura Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Furius Baco",
+   "park": "PortAventura Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Shambhala",
+   "park": "PortAventura Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Stampida (Blue)",
+   "park": "PortAventura Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tami-Tami",
+   "park": "PortAventura Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Uncharted: The Enigma of Penitence",
+   "park": "PortAventura Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Muntanya Russa",
+   "park": "Tibidabo",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tibidabo Express",
+   "park": "Tibidabo",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Insane",
+   "park": "Gröna Lund",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Jetline",
+   "park": "Gröna Lund",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kvasten",
+   "park": "Gröna Lund",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Nyckelpigan",
+   "park": "Gröna Lund",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tuff-Tuff Tåget",
+   "park": "Gröna Lund",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Twister",
+   "park": "Gröna Lund",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Vilda Musen",
+   "park": "Gröna Lund",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Delfinexpressen",
+   "park": "Kolmården",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Godiståget",
+   "park": "Kolmården",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wildfire",
+   "park": "Kolmården",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Balder",
+   "park": "Liseberg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Helix",
+   "park": "Liseberg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Lisebergbanan",
+   "park": "Liseberg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rabalder",
+   "park": "Liseberg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Stampbanan",
+   "park": "Liseberg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Gruvbanan",
+   "park": "Skara Sommarland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinner",
+   "park": "Skara Sommarland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tranan",
+   "park": "Skara Sommarland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Galactica",
+   "park": "Alton Towers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Oblivion",
+   "park": "Alton Towers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Octonauts Rollercoaster Adventure",
+   "park": "Alton Towers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rita",
+   "park": "Alton Towers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Runaway Mine Train",
+   "park": "Alton Towers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Smiler",
+   "park": "Alton Towers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinball Whizzer",
+   "park": "Alton Towers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Th13teen",
+   "park": "Alton Towers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wicker Man",
+   "park": "Alton Towers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon's Fury",
+   "park": "Chessington World of Adventures",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mandrill Mayhem",
+   "park": "Chessington World of Adventures",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rattlesnake",
+   "park": "Chessington World of Adventures",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Vampire",
+   "park": "Chessington World of Adventures",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Accelerator",
+   "park": "Drayton Manor",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Jormungandr",
+   "park": "Drayton Manor",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Troublesome Trucks Runaway Coaster",
+   "park": "Drayton Manor",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Avalanche",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Big Dipper",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Big One",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Blue Flyer",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Grand National (Left)",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Icon",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Infusion",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Nickelodeon Streak",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Revolution",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Steeplechase (Green)",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Steeplechase (Red)",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Steeplechase (Yellow)",
+   "park": "Pleasure Beach Resort",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Vortex",
+   "park": "Calaway Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Galaxyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Galaxy Orbiter",
+   "park": "Galaxyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mindbender",
+   "park": "Galaxyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Mountain",
+   "park": "Marineland Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Lady Bug Coaster",
+   "park": "Marineland Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Carros Locos",
+   "park": "Kataplum",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Chu-Chu",
+   "park": "Kataplum",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Insomnio",
+   "park": "Kataplum",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Batgirl Batarang",
+   "park": "Six Flags Mexico",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tree Top Racers",
+   "park": "Adventure City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Kentucky Rumbler",
+   "park": "Beech Bend",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinning Out",
+   "park": "Beech Bend",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wild Mouse",
+   "park": "Beech Bend",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Miners Mike",
+   "park": "Boomers! (El Cajon)",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "The Branson Coaster",
+   "park": "Branson Coaster",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Runaway",
+   "park": "Branson Mountain Adventure Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Canobie Corkscrew",
+   "park": "Canobie Lake Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon",
+   "park": "Canobie Lake Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Untamed",
+   "park": "Canobie Lake Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Yankee Cannonball",
+   "park": "Canobie Lake Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Siren's Curse",
+   "park": "Cedar Point",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Top Thrill 2",
+   "park": "Cedar Point",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hell Cat",
+   "park": "Clementon Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sea Dragon",
+   "park": "Columbus Zoo and Aquarium",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Blue Streak",
+   "park": "Conneaut Lake Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Devil's Den",
+   "park": "Conneaut Lake Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Lightning Rod (-2020)",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mystery Mine (-2020)",
+   "park": "Dollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Iron Menace",
+   "park": "Dorney Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hurricane",
+   "park": "Fun Spot America - Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Fun World",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Excalibur",
+   "park": "Funtown Splashtown U.S.A.",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wild Mouse",
+   "park": "Funtown Splashtown U.S.A.",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Python Pit",
+   "park": "Go-Karts Plus",
+   "why": "park did not match",
+   "candidates": [
+    "6184 @ Jeepers West Nyack"
+   ]
+  },
+  {
+   "name": "Goat Coaster",
+   "park": "Goats on the Roof of the Smokies",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Good Gravy!",
+   "park": "Holiday World",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Cyclone",
+   "park": "Indiana Beach",
+   "why": "park did not match",
+   "candidates": [
+    "6105 @ Expo '58"
+   ]
+  },
+  {
+   "name": "Spinning Parrot",
+   "park": "Island in Pigeon Forge",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flying Fox",
+   "park": "Kentucky Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wind Chaser",
+   "park": "Kentucky Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Woodland Run",
+   "park": "Kentucky Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Volcano - The Blast Coaster",
+   "park": "Kings Dominion",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Snoopy's Soap Box Racers",
+   "park": "Kings Island",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Zoomerang",
+   "park": "Lake Compounce",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Piff the Magic Dragon",
+   "park": "Las Vegas Mini Gran Prix",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mad Mouse",
+   "park": "Michigan's Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Moonshine Mountain Coaster",
+   "park": "Moonshine Mountain Coaster",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flitzer",
+   "park": "Morey's Piers",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Speed - The Ride",
+   "park": "Nascar Café",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Speedway Coaster",
+   "park": "NASCAR SpeedPark",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy Mouse",
+   "park": "Niagara Amusement Park & Splash World",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Max's Doggy Dog Coaster",
+   "park": "Niagara Amusement Park & Splash World",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Silver Comet",
+   "park": "Niagara Amusement Park & Splash World",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tennessee Flyer Mountain Coaster",
+   "park": "Ober Mountain",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Palace Playland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sea Viper",
+   "park": "Palace Playland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon",
+   "park": "Peter Piper Pizza",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Miner Mike",
+   "park": "Peter Piper Pizza",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Coaster",
+   "park": "Playland Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "GaleForce",
+   "park": "Playland's Castaway Cove",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pirates Gold Rush",
+   "park": "Playland's Castaway Cove",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Whirlwind",
+   "park": "Playland's Castaway Cove",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wild Waves",
+   "park": "Playland's Castaway Cove",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Python Pit",
+   "park": "PowerPlay Family Entertainment Center",
+   "why": "park did not match",
+   "candidates": [
+    "6184 @ Jeepers West Nyack"
+   ]
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Quassy Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wooden Warrior",
+   "park": "Quassy Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mountain Glider (left)",
+   "park": "Ripley's Mountain Coaster",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Ripley's Mountain Coaster",
+   "park": "Ripley's Mountain Coaster",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rocky Top Mountain Coaster",
+   "park": "Rocky Top Mountain Coaster",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Ski Lift Shootout Coaster",
+   "park": "Rowdy Bear's Smoky Mountain Snowpark",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Super Cyclone",
+   "park": "Santa's Village Amusement and Water Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Santa's Village Amusement and Water Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Little Dipper Coaster",
+   "park": "Scandia Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Screamer",
+   "park": "Scandia Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Ice Breaker",
+   "park": "SeaWorld Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pipeline: The Surf Coaster",
+   "park": "SeaWorld Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Super Grover's Box Car Derby",
+   "park": "SeaWorld Orlando",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Krazy Koaster",
+   "park": "Silverwood Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tiny Toot",
+   "park": "Silverwood Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dr. Diabolical's Cliffhanger",
+   "park": "Six Flags Fiesta Texas",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wonder Woman Golden Lasso Coaster",
+   "park": "Six Flags Fiesta Texas",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Flash: Vertical Velocity",
+   "park": "Six Flags Great Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Medusa",
+   "park": "Six Flags Great Adventure",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wrath of Rakshasa",
+   "park": "Six Flags Great America",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Goliath",
+   "park": "Six Flags New England",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Alpine Coaster",
+   "park": "Smoky Mountain Alpine Coaster",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Polar Coaster",
+   "park": "Story Land",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Roar-O-Saurus",
+   "park": "Story Land",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Curse of the Werewolf",
+   "park": "Universal Epic Universe",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mine-Cart Madness",
+   "park": "Universal Epic Universe",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Stardust Racers (Photon/Yellow)",
+   "park": "Universal Epic Universe",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Stardust Racers (Pulsar/Green)",
+   "park": "Universal Epic Universe",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Guardians of the Galaxy: Cosmic Rewind",
+   "park": "EPCOT",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "TRON Lightcycle Run",
+   "park": "Magic Kingdom",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Boomerang",
+   "park": "Worlds of Fun",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon (blue track)",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon (red track)",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Go Gator",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Spinning Family Coaster",
+   "park": "Butler Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Davis Amusement Cascadia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Sooper Jets",
+   "park": "Davis Amusement Cascadia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm (Speedy Gonzales)",
+   "park": "Davis Amusement Cascadia",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Olympic Bobsled",
+   "park": "Helm & Sons Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Helm & Sons Amusements",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy Coaster",
+   "park": "Ray Cammack Shows",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Galaxy Coaster",
+   "park": "Ray Cammack Shows",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Little Dipper Roller Coaster",
+   "park": "Ray Cammack Shows",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Raptor",
+   "park": "Ray Cammack Shows",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy Mouse",
+   "park": "S.J. Entertainment (Vander Vorste, Steve)",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Todd Armstrong Shows",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Cyclone",
+   "park": "Lakeside Amusement Park",
+   "why": "park did not match",
+   "candidates": [
+    "6105 @ Expo '58"
+   ]
+  },
+  {
+   "name": "Dragon",
+   "park": "Lakeside Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fire In The Hole",
+   "park": "Silver Dollar City",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Big Bad Wolf: The Wolf's Revenge",
+   "park": "Busch Gardens Williamsburg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "DarKoaster",
+   "park": "Busch Gardens Williamsburg",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Snoopy's Racing Railway",
+   "park": "Carowinds",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Helios",
+   "park": "Fantasiana",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Great Pumpkin Coaster",
+   "park": "Kings Dominion",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hurler",
+   "park": "Kings Dominion",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rapterra",
+   "park": "Kings Dominion",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Shockwave",
+   "park": "Kings Dominion",
+   "why": "park did not match",
+   "candidates": [
+    "102 @ Drayton Manor"
+   ]
+  },
+  {
+   "name": "Kiddie Coaster",
+   "park": "Orange County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pinfari Galaxy",
+   "park": "Orange County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Reverchon Spinner",
+   "park": "Orange County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Khan",
+   "park": "PortAventura Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Stampida (Red)",
+   "park": "PortAventura Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Tomahawk",
+   "park": "PortAventura Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "San Diego County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pinfari Galaxy",
+   "park": "San Diego County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Puppy Express",
+   "park": "San Diego County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Raptor Coaster",
+   "park": "San Diego County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Firebird",
+   "park": "Six Flags America",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Woody Woodpecker's Nuthouse Coaster",
+   "park": "Universal Studios Florida",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon's Tail Coaster",
+   "park": "Adventure Ocean Oasis (Labadee)",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fabbri Spinner",
+   "park": "Alameda County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pinfari Galaxy",
+   "park": "Alameda County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "SBF Spinner",
+   "park": "Alameda County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Alameda County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Beyond Wonderland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hot Tamales",
+   "park": "Casino Pier",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Hydrus",
+   "park": "Casino Pier",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Pirate's Hideaway",
+   "park": "Casino Pier",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Xolo Loca",
+   "park": "Casino Pier",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Christmas in the Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Big Thunder Mountain",
+   "park": "Disneyland Park (Paris)",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Casey Jr., Le Petit Train du Cirque",
+   "park": "Disneyland Park (Paris)",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Indiana Jones et le Temple du Peril",
+   "park": "Disneyland Park (Paris)",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Star Wars Hyperspace Mountain: Rebel Mission",
+   "park": "Disneyland Park (Paris)",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Rolling Thunder",
+   "park": "Tahoe Amusement Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Scenic Railway",
+   "park": "Luna Park (Melbourne)",
+   "why": "park did not match",
+   "candidates": [
+    "6104 @ Expo '58"
+   ]
+  },
+  {
+   "name": "Mini Mouse",
+   "park": "Victorian Gardens",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Avengers Assemble: Flight Force",
+   "park": "Walt Disney Studios Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crush's Coaster",
+   "park": "Walt Disney Studios Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "RC Racer",
+   "park": "Walt Disney Studios Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Big Thunder Mountain Railroad (Old)",
+   "park": "Disneyland",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy Mouse 2",
+   "park": "San Diego County Fair",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Fast & Furious: Hollywood Drift",
+   "park": "Universal Studios Hollywood",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Mini Express",
+   "park": "Calaway Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Bumble Blast",
+   "park": "Calaway Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Scooby's Ghoster Coaster",
+   "park": "Kings Island",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Son Of Beast",
+   "park": "Kings Island",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Shaman's Curse",
+   "park": "Lost Island Theme Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Crazy Mouse",
+   "park": "Playland Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Family Flyer",
+   "park": "Playland Park",
+   "why": "no coaster of that name on the site"
+  },
+  {
+   "name": "Super Flight",
+   "park": "Playland Park",
+   "why": "no coaster of that name on the site"
+  }
+ ],
+ "ambiguous": [],
+ "manufacturers": {
+  "Bolliger & Mabillard": 2,
+  "Vekoma": 1,
+  "Zamperla": 1,
+  "Zierer": 1
+ },
+ "models": {
+  "B&M Hyper Coaster": 1,
+  "Vekoma Junior Coaster": 1,
+  "Zamperla Family Coaster": 1,
+  "B&M Inverted Coaster": 1,
+  "Zierer Tivoli": 1
+ }
+}
