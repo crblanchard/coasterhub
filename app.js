@@ -646,7 +646,7 @@
   // Pages that belong to one rider and take a /user/<slug>/ prefix. Add new is
   // deliberately absent: it edits the shared database, so it reads the same
   // whoever is looking at it.
-  var PER_RIDER = ["count", "profile", "rankings"];
+  var PER_RIDER = ["count", "profile", "rankings", "map"];
 
   // Wire the header for a page ("home" | "profile" | "riders" | "count" |
   // "rankings"): point the per-rider links at the current person, mark the

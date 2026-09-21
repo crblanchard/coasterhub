@@ -2979,6 +2979,37 @@ park, dry-run on the snapshot: blanks 576→533 (h), 616→584 (s), 569→528 (l
 applied until he pastes it. The fairground and pizza-parlour spinners are not on Wikidata and
 stay for /edit whatever he decides.
 
+### /map — every park, sized by rides (2026-09-21)
+
+Carter: *"make /map where I can zoom, click on parks and they show number of rides at each."*
+Then: *"make it unlisted or just in the footer."* So it is in every footer and nowhere else.
+
+`map.html` is the profile page's map grown into a page: the same Leaflet 1.9.4 from cdnjs,
+the same Esri canvas basemap (dark or light with the theme, OpenStreetMap if Esri stops
+answering — the fallback guard on the theme toggle is copied too), the same dark popup CSS.
+`/map` is everyone: every park in `parks.json`, one circle each, area following everyone's
+rides put together (radius `4 + √rides × 1.1`, because the eye reads area and a linear
+radius let the big parks swallow the map), a small hollow ring for a park nobody has ridden at.
+`/user/<slug>/map` is that rider's parks only, sized by theirs, with the rider switcher in the
+hero badge. A click gives the park, its region, coasters, rides on how many of them, riders on
+the everyone view, and links to the park page and the count's park view.
+
+Plumbing: `map` joined `PER_RIDER` in app.js and `_redirects` gained `/user/:name/map /map
+200`, which is all a per-rider page needs. **The 16 parks with no coordinates are listed under
+the map as "not on the map yet"** with their ride counts — that is the to-do for /edit, said
+where the gap is visible. Nothing else on the site says a park has no location.
+
+Testing: cdnjs and the tile servers are unreachable from the sandbox, so the harness driver
+intercepts the two Leaflet URLs and serves them from `node_modules/leaflet/dist` in the
+scratchpad, and aborts tile requests — the ocean stays grey in a screenshot and that is not a
+fault. Seven checks: 231 markers for 231 placed parks, the count line, the badge, a Cedar
+Point popup, the rider view (112 parks, none hollow), no sideways scroll at 390px.
+
+Two things this page taught, both cheap to re-learn the hard way: the header block must be
+copied from a page that works (`header.nav` / `.nav-inner` / `nav.links` / `.brand-mark`) —
+one written from memory put the nav on a second line; and `riderBadge()` REPLACES the host
+with a wrapper div holding the button, so a test must look for `#hero_badge button`.
+
 ---
 
 ## Open tasks

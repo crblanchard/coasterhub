@@ -38,6 +38,7 @@
 
 /user/:name/count     /count      200
 /user/:name/rankings  /rankings   200
+/user/:name/map       /map        200
 /user/:name/add       /add        200
 /user/:name           /profile    200
 
