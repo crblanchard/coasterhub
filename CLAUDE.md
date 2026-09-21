@@ -139,6 +139,12 @@ those files are the fallback, and the sync overwrites them.
   same button, a few lines down — it rendered as a raw browser `<button>`, serif
   face and all. The rule is `.rrow .tiny` now. Scope to the thing, not the
   place it first appeared.
+- **A bordered circle with `background-size:cover` has a rim, and the rim reads as
+  a shift.** `cover` fills the padding box, so a 1px border ring sits OUTSIDE the
+  picture showing the background-colour; against a light edge it is a dark line,
+  against a dark edge it vanishes, and the eye reads that as the picture sitting
+  low. Cost an evening of re-cropping a crop that was right (2026-09-21).
+  `background-origin:border-box` on every avatar circle; keep it there.
 - **An inline `padding` beats every stylesheet rule, media query included.** The
   heroes set `--hero-t`/`--hero-b` and let `style.css` do the padding, which is
   the only reason the phone layout can tighten it. Give a new page those, not a

@@ -2848,6 +2848,41 @@ the one that matters most: it is where two code paths would drift furthest apart
 **Still unconfirmed on the iPhone**, because Chromium was never wrong here. But there is no
 longer a second implementation for it to be wrong about.
 
+### It was the rim (2026-09-21, and the end of it)
+
+Carter, after one more re-crop on Chrome as well as Safari, fetched the saved 256x256 out of
+R2 himself and it was **exactly the dialog** — headroom, hands at the bottom. Then, looking at
+his card next to Cole's: *"WAIT ITS JUST THE RIM."*
+
+Every avatar circle wears `border:1px solid var(--line)` — a translucent white line — and
+paints the picture with `background-size:cover`. `cover` fills the **padding box**, so the 1px
+border ring sits *outside* the picture and shows the element's `background-color` (`--soft`,
+dark) under that translucent line. Against the bright sky along the top of Carter's photo the
+ring reads as a dark line; against his dark shirt along the bottom it disappears. The eye
+reads a dark line at the top and none at the bottom as *the picture sitting low in the
+circle* — "the top and bottom flipped". Cole's photo is dark all the way round, so his ring is
+invisible everywhere and his looked fine.
+
+**The crop was right every single time.** The six re-crops, the framing change, the transform
+rewrite and the unified draw were all aimed at a bug that was never in the crop. Of those,
+the framing default and the single `drawCrop()` were worth doing on their own merits and
+stay; the rest is history. The fix for the thing Carter actually saw is one longhand,
+`background-origin:border-box`, on the four bordered circles (`.riderrow .av`,
+`.profedit .av`, `.acctlink`, `.tabbar .tabav`): the picture now fills to the outer edge and
+the border is a faint hairline over it, uniform all the way round. `.followlist .fav` has no
+border and needed nothing.
+
+Lessons, since this cost an evening:
+
+- **When a user says "the saved one differs", get the saved file** — not a screenshot of it
+  inside the element that might be the problem. The first thing that broke the loop was the
+  256x256 itself, looked at outside any circle.
+- **A 1px asymmetry reads as a shift.** The eye does not see "a ring that is visible on one
+  side"; it sees "the picture is low". Anything that draws an edge over an image has to be
+  checked against a light edge and a dark edge.
+- `.acctlink` used the `background` shorthand this file already forbids. It is `background-
+  color` now. Ninth instance of that family.
+
 ### Latent: a `<rider>.json` avatar key is a broken image, not an old picture
 
 Noticed while chasing the above, unfixed. The snapshot carries `avatar` — `crblanchard.json`

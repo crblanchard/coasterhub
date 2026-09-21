@@ -232,11 +232,20 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
   color:var(--fg);text-decoration:none;transition:border-color .12s,transform .12s}
 .riderrow:hover{border-color:var(--accent2);transform:translateY(-1px)}
 /* background-COLOR, not the shorthand: the avatar rides on background-image and
-   the shorthand would wipe it — same trap as .profedit .av. */
+   the shorthand would wipe it — same trap as .profedit .av.
+
+   background-origin:border-box, on every circle that wears a picture AND a
+   border. Without it `cover` fills the padding box, so the 1px border ring
+   sits OUTSIDE the picture and shows the background-colour under a
+   translucent line. Against a light top edge (sky) that ring reads as a dark
+   line; against a dark bottom edge (a shirt) it vanishes — and the picture
+   looks pushed down inside its circle. Carter re-cropped his avatar six
+   times chasing "the top and bottom flipped" before spotting it was the rim
+   (2026-09-21). The crop was right every time. */
 .riderrow .av{width:54px;height:54px;border-radius:999px;background-color:var(--soft);
   border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
   font-weight:800;font-size:1.4rem;color:var(--accent2);flex:none;
-  background-size:cover;background-position:center}
+  background-size:cover;background-position:center;background-origin:border-box}
 .riderrow .who{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
 .riderrow .nm{font-weight:800;font-size:1.15rem;letter-spacing:-.01em;line-height:1.2}
 .riderrow .un{color:var(--accent2);font-size:.82rem;font-weight:600;line-height:1.35;
@@ -355,7 +364,8 @@ footer.site a:hover{color:var(--fg)}
    initial; signed out, a person outline. */
 .acctlink{flex:none;display:flex;align-items:center;justify-content:center;
   width:34px;height:34px;padding:0;border-radius:999px;cursor:pointer;
-  background:var(--soft);border:1px solid var(--line);color:var(--muted);
+  background-color:var(--soft);background-origin:border-box;
+  border:1px solid var(--line);color:var(--muted);
   font-weight:800;font-size:.86rem;line-height:1;text-decoration:none;
   transition:color .15s,border-color .15s}
 .acctlink:hover{color:var(--fg);border-color:var(--ring)}
@@ -418,7 +428,8 @@ footer.site a:hover{color:var(--fg)}
   /* The Profile tab wears the signed-in rider's picture (see buildTabBar). Same
      21px box as the icons it replaces, so the row does not shift. */
   .tabbar .tabav{width:21px;height:21px;border-radius:999px;background-size:cover;
-    background-position:center;background-color:var(--soft);border:1px solid var(--line)}
+    background-position:center;background-origin:border-box;background-color:var(--soft);
+    border:1px solid var(--line)}
   .tabbar a.on .tabav{border-color:var(--accent2)}
   .tabbar a:active{background:var(--soft)}
 }
@@ -463,7 +474,7 @@ footer.site a:hover{color:var(--fg)}
 .profedit .av{width:74px;height:74px;border-radius:999px;background-color:var(--soft);
   border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
   font-weight:800;font-size:1.9rem;color:var(--accent2);background-size:cover;
-  background-position:center;flex:none}
+  background-position:center;background-origin:border-box;flex:none}
 /* The one inside the picture editor stays smaller: it is a preview beside a
    pair of buttons, not the heading of the page. */
 .profedit .av.big{width:56px;height:56px;font-size:1.4rem}
