@@ -3053,9 +3053,12 @@ have more rides."* What that became:
   the layer group and re-adds the ones that pass, and the note's two numbers follow. The
   control only exists when there is somebody to ask about — signed out, nobody in the URL,
   the map has no checkboxes and the popup rows have no boxes.
-- **The popup rows are the log page's tick box**, 18px: an empty bordered square for a coaster
-  you have not ridden, teal-filled with the check for one you have, `aria-label` Ridden /
-  Not ridden. The old ✓ / – glyphs are gone. "16 of 21 ridden" stays under the park name.
+- **The popup rows carry /count's park-view tick**: a teal ✓ (`\u2713`, `.82rem`, a fixed
+  `1.05em` slot) on a coaster you have ridden, an empty slot of the same width on one you have
+  not, with the name muted (`li.miss a`), `aria-label` Ridden / Not ridden. For about an hour
+  it was the log page's bordered checkbox, filled teal when you had the credit — Carter, with
+  a screenshot of /count's park view: *"the checks like these, something less clickable."* A
+  box invites a click; the popup is a list, not a form. "16 of 21 ridden" stays under the name.
 - **No clustering.** Leaflet.markercluster is out (link, script, the `.pkc` rule, the cluster
   icon). Every park is its own disc at every zoom, and the disc is small on purpose — 20px,
   `.68rem` digits — so where parks overlap at a wide zoom you can see that they do. Two
@@ -3085,7 +3088,7 @@ and the filled one teal, `/user/sean/map` counts Sean's parks, and signed out (t
 answers `/api/auth/me` with `{account:null}`) there are no checkboxes and no boxes. Phone:
 the checkboxes and the switcher do not collide.
 
-### /edit has a dark mode, and the footer is five links (2026-09-21)
+### /edit has a dark mode, and the footer is six links (2026-09-21)
 
 Carter: *"dark mode for /edit please? let me choose."* `edit.html` is standalone on purpose —
 no `style.css`, no `app.js` — and was light-only, with twenty hard-coded light colours in its
@@ -3102,8 +3105,10 @@ opens dark, inputs dark with light text (the classic failure), the click flips a
 
 Carter, minutes later: *"make the footer only home - count - add new - edit - site map."*
 Done on all fifteen pages. That removes Rankings, Categories, Profile, Log and **Map** from the
-footer; the first four are in the nav and the tab bar, and `/map` is now reachable only by its
-URL — which is inside his "unlisted or just in the footer".
+footer; the first four are in the nav and the tab bar, and `/map` was reachable only by its
+URL for an hour — then, with the map's third pass done: *"and put it in the footer home map
+count add new edit site map."* So the footer is SIX links, on all fifteen pages, in that
+order: **Home · Map · Count · Add new · Edit · Site map**. The map's only way in.
 
 ---
 

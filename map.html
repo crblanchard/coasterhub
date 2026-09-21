@@ -63,13 +63,14 @@
   .pp ul{list-style:none;margin:0;padding:0}
   .pp li{padding:3px 0;border-top:1px solid var(--soft);font-size:.9rem;display:flex;gap:8px;align-items:center}
   .pp li a{color:inherit;text-decoration:none;min-width:0}.pp li a:hover{color:var(--accent2);text-decoration:underline}
-  /* The box beside each coaster when there is somebody to mark: the log page's
-     tick, smaller. An empty box until you have the credit, then a filled one —
-     the same picture /log draws (Carter, 2026-09-21: "the checkboxes when you
-     have a credit like we've seen in other places"). */
-  .pp li .tick{flex:none;width:18px;height:18px;border-radius:5px;border:1px solid var(--line);
-    display:flex;align-items:center;justify-content:center;color:transparent}
-  .pp li .tick.on{background-color:var(--accent2);border-color:var(--accent2);color:var(--well)}
+  /* The mark beside each coaster when there is somebody to mark: /count's
+     park-view tick, exactly — a teal ✓ on the ones you have, an empty slot of
+     the same width on the ones you do not, so the names line up, and the
+     name muted on those. Not a box: it was the log page's checkbox for an
+     hour and read as something to click (Carter, 2026-09-21: "the checks like
+     these, something less clickable"). */
+  .pp li .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
+  .pp li.miss a{color:var(--muted)}
   .pp .closed{color:var(--muted);font-size:.8rem;margin-top:6px}
   /* Two small panels on the map itself, since there is no page around it:
      the rider switcher top-right (app.js builds the badge into it, exactly as
@@ -113,7 +114,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/edit">Edit</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/edit">Edit</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -127,8 +128,8 @@ function fail(e){console.error(e);document.getElementById('err').style.display='
 // Whose map. The parks and the numbers on them are the same for everybody —
 // operating coasters is a fact about the park. A rider adds what is theirs:
 // the rider in the URL, or, with nobody in the URL, whoever is signed in — the
-// same rule /count uses. That gives every coaster in a popup a box, ticked when
-// they have the credit, "12 of 15" under the park's name, and the two
+// same rule /count uses. That gives every coaster in a popup a tick when they
+// have the credit, "12 of 15" under the park's name, and the two
 // checkboxes top-left that keep or drop the parks they have been to. Nobody
 // means none of that: a map of what each park has.
 var slug=CoasterHub.currentUser();
@@ -181,7 +182,6 @@ Promise.all([
 ]).then(function(res){
   var log=res[0], coasters=res[1].coasters, parks=res[2];
   var MINE={}; if(log) (log.rides||[]).forEach(function(r){ MINE[r.c]=1; });
-  var TICK='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
   // Per park: its coasters, operating and closed, A-Z within each, and whether
   // the rider has any credit there. A closed one counts: it was still a visit.
@@ -209,7 +209,9 @@ Promise.all([
       +(log && p.open.length ? ' · '+ridden+' of '+p.open.length+' ridden' : '')+'</div>';
     if(p.open.length){
       h+='<ul>'+p.open.map(function(c){
-        return '<li>'+(log ? '<span class="tick'+(MINE[c.id]?' on':'')+'" role="img" aria-label="'+(MINE[c.id]?'Ridden':'Not ridden')+'">'+TICK+'</span>' : '')
+        var got=!!MINE[c.id];
+        return '<li'+(log?(got?' class="got"':' class="miss"'):'')+'>'
+          +(log ? '<span class="tick" aria-label="'+(got?'Ridden':'Not ridden')+'">'+(got?'\u2713':'')+'</span>' : '')
           +'<a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></li>';
       }).join('')+'</ul>';
     }
@@ -265,7 +267,7 @@ Promise.all([
   // logged in"). Both on to start, so the map opens complete; untick one and
   // that half of the parks goes. A park is visited when the rider has any
   // credit there. Carter, on seeing it: "call it visited and not visited" —
-  // the coaster boxes in the popup stay Ridden, since those are about rides.
+  // the coaster ticks in the popup stay Ridden, since those are about rides.
   // The counts are of parks that are on the map — the unplaced
   // ones are the note's business.
   if(log){
