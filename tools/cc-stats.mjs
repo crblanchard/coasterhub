@@ -196,7 +196,9 @@ async function get(url) {
   return res.text();
 }
 async function search(q) {
-  const j = JSON.parse(await get(SITE + "/search/api?q=" + encodeURIComponent(q.slice(0, 100)) + "&limit=5"));
+  // Under /en/ like every page: their attribute routes are all mounted at
+  // /{_locale}, and without it this is a 404 — 448 of them, on the first run.
+  const j = JSON.parse(await get(SITE + "/en/search/api?q=" + encodeURIComponent(q.slice(0, 100)) + "&limit=5"));
   await sleep(1000);
   return (j && j.results) || { coasters: [], parks: [] };
 }
