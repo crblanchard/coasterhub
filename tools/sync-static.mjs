@@ -57,6 +57,14 @@ async function main() {
 
   for (const slug of slugs) {
     const user = await getJSON("/api/user/" + slug); // { user, rides|credits }
+    // NOT the avatar. The key names an R2 object, and the upload path deletes
+    // the previous object every time a rider replaces their picture — so a key
+    // in a snapshot is a broken image from the rider's next upload onward, and
+    // a page falling back to the snapshot would draw a broken picture rather
+    // than the initial-in-a-circle it draws when there is no picture at all.
+    // The snapshot is a safety net; this was the one field in it that rotted
+    // into a visible fault (found 2026-09-21).
+    delete user.avatar;
     const n = (user.rides || user.credits || []).length;
     await writeFile(join(ROOT, slug + ".json"), compact(user));
     console.log(`  ${slug}.json`.padEnd(17) + `<- ${n} ${user.rides ? "rides" : "credits"}`);
