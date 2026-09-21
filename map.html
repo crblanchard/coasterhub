@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <title>Map — Coaster Hub</title>
-<meta name="description" content="Every park on the map, sized by rides — Coaster Hub.">
+<meta name="description" content="Every park on the map with its operating coasters — Coaster Hub.">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:title" content="Map — Coaster Hub">
-<meta property="og:description" content="Every park on the map, sized by rides.">
+<meta property="og:description" content="Every park on the map with its operating coasters.">
 <meta property="og:image" content="https://coasterhub.org/og-image.png?v=2">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -19,28 +19,64 @@
 <!-- The same Leaflet the profile page uses, from the same place. -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Clustering, because 231 numbered discs at world zoom are a pile: Ohio alone
+     has a dozen on top of each other. A cluster shows the SUM of operating
+     coasters underneath it, so zoomed out the map still answers "how many
+     here", and it splits as you zoom in. Only the base CSS: the icon is ours. -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <style>
-  /* Every park, as a map. Unlisted — footer only, Carter's call (2026-09-21):
-     it is a way of looking at the count, not a place to go. */
-  #map{height:min(72vh,760px);min-height:380px;border-radius:14px;z-index:1;
-    border:1px solid var(--line);background-color:var(--panel)}
+  /* A full-screen map with just the header and footer (Carter, 2026-09-21).
+     The page is a column: sticky header, the map taking every pixel left,
+     the footer. dvh where the browser has it, because 100vh on iOS is the
+     toolbars-hidden height and leaves the page scrollable past the footer;
+     vh as the fallback for the browsers that do not. */
+  html,body{height:100%}
+  body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+  #map{flex:1 1 auto;min-height:60vh;z-index:1;background-color:var(--panel)}
+  footer.site{margin-top:0;padding-top:18px;padding-bottom:18px}
+  /* The number on each park: operating coasters. A small disc that grows a
+     little with the digits, the site's accent for the ring so it reads as
+     ours over any basemap. A park with nothing operating is a muted ring. */
+  .leaflet-div-icon.pk{background:none;border:0}
+  .pk span{display:flex;align-items:center;justify-content:center;
+    min-width:26px;height:26px;padding:0 6px;border-radius:999px;box-sizing:border-box;
+    background-color:var(--accent);color:#fff;border:2px solid var(--accent2);
+    font-weight:800;font-size:.8rem;line-height:1;font-variant-numeric:tabular-nums;
+    box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer}
+  .pk.none span{background-color:var(--panel);color:var(--muted);border-color:var(--muted);font-weight:700}
+  .pk.mine span{border-color:#fff}
+  /* A cluster: several parks, one number — the sum of their operating
+     coasters. Bigger and rounder than a park so the two read differently,
+     and a faint halo so it is clearly a group. */
+  .pkc span{min-width:36px;height:36px;font-size:.9rem;background-color:var(--accent2);color:var(--well);border-color:var(--accent2);
+    box-shadow:0 0 0 6px rgba(55,208,200,.18),0 1px 4px rgba(0,0,0,.35)}
+  /* The popup: the park as a link, then its operating coasters as links. A big
+     park is a long list, so it scrolls inside the popup rather than off the map. */
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
-  .leaflet-popup-content{margin:12px 14px;line-height:1.45}
-  .pp b{font-size:1rem}.pp small{color:var(--muted)}
-  .pp .n{color:var(--accent2);font-weight:700}
-  .pp a{color:var(--accent2);text-decoration:none}.pp a:hover{text-decoration:underline}
-  /* Under the map: what is on it and what is not. The count is the summary
-     line every other page has; the unplaced list is a to-do for /edit, in the
-     open, because a park with no coordinates is invisible here and nowhere
-     else says so. */
-  .count{color:var(--muted);font-size:.85rem;margin:14px 0 6px}
-  .count b{color:var(--accent2)}
-  .unplaced{color:var(--muted);font-size:.85rem;line-height:1.6}
-  .unplaced b{color:var(--fg);font-weight:600}
-  .legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:.8rem;margin-top:8px}
-  .legend i{display:inline-block;border-radius:999px;border:1px solid var(--accent2);background-color:var(--accent);opacity:.65;vertical-align:middle;margin-right:6px}
-  .legend .none i{border-color:var(--muted);background-color:transparent;opacity:.8}
-  #err{display:none;background:var(--tint2);border:1px solid var(--accent2);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  .leaflet-popup-content{margin:12px 14px;line-height:1.45;max-height:min(46vh,380px);overflow-y:auto}
+  .pp h3{font-size:1rem;margin:0 0 1px;font-weight:800}
+  .pp h3 a{color:var(--fg);text-decoration:none}.pp h3 a:hover{color:var(--accent2);text-decoration:underline}
+  .pp small{color:var(--muted)}
+  .pp .n{color:var(--accent2);font-weight:700;font-size:.82rem;margin:6px 0 4px}
+  .pp ul{list-style:none;margin:0;padding:0}
+  .pp li{padding:3px 0;border-top:1px solid var(--soft);font-size:.9rem;display:flex;gap:8px;align-items:baseline}
+  .pp li a{color:inherit;text-decoration:none;min-width:0}.pp li a:hover{color:var(--accent2);text-decoration:underline}
+  .pp li .tick{color:var(--accent2);font-weight:700;flex:none}
+  .pp li .notyet{color:var(--muted);flex:none;font-size:.78rem}
+  .pp .closed{color:var(--muted);font-size:.8rem;margin-top:6px}
+  /* Two small panels on the map itself, since there is no page around it:
+     the rider switcher top-right (app.js builds the badge into it, exactly as
+     it does into a hero), and a note bottom-left about the parks that have no
+     coordinates and so cannot be on the map at all. */
+  .ctl{background-color:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;
+    color:var(--muted);font-size:.8rem;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+  .ctl b{color:var(--fg)}
+  .ctl.who{padding:4px 6px}
+  .ctl .list{display:none;margin-top:6px;max-width:260px;line-height:1.5}
+  .ctl.open .list{display:block}
+  .ctl button{background:none;border:0;padding:0;font:inherit;color:var(--accent2);cursor:pointer}
+  #err{position:absolute;z-index:2;left:16px;right:16px;top:16px;background:var(--tint2);border:1px solid var(--accent2);border-radius:12px;padding:14px 16px;display:none}
 </style>
 </head>
 <body>
@@ -59,24 +95,8 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero" style="--hero-t:56px;--hero-b:26px"><div class="container">
-  <!-- app.js replaces this with the rider switcher, the same as /count. -->
-  <span class="badge" id="hero_badge">The map</span>
-  <h1 style="max-width:20ch" data-loading>Loading&hellip;</h1>
-  <p id="sub">Every park, sized by rides. Click one.</p>
-</div></section>
-
-<section class="block" style="padding-top:20px"><div class="container">
-  <div id="err"><strong>Couldn&rsquo;t load the data.</strong> This page reads the park and ride data, so it needs to be served over the web.</div>
-  <div id="map"></div>
-  <div class="legend">
-    <span><i style="width:10px;height:10px"></i>a few rides</span>
-    <span><i style="width:22px;height:22px"></i>a lot of rides</span>
-    <span class="none"><i style="width:8px;height:8px"></i>no rides here yet</span>
-  </div>
-  <div class="count" id="count"></div>
-  <div class="unplaced" id="unplaced"></div>
-</div></section>
+<div id="err"><strong>Couldn&rsquo;t load the data.</strong> This page reads the park and ride data, so it needs to be served over the web.</div>
+<div id="map" role="application" aria-label="Map of every park"></div>
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
@@ -87,126 +107,126 @@
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('map');
-CoasterHub.riderBadge(document.getElementById('hero_badge'),'map',CoasterHub.currentUser());
 
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function fail(e){console.error(e);document.getElementById('err').style.display='block';}
-function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
 
-// Whose map. No rider in the URL means everyone, exactly like /count: every
-// park the site has, sized by everybody's rides together. A rider's map is
-// the same parks, sized by theirs — and only the ones they have been to.
+// Whose map. The parks and the numbers on them are the same for everybody —
+// operating coasters is a fact about the park. A rider in the URL adds what
+// is theirs: a tick on each coaster they have ridden, and "12 of 15" in the
+// popup. No rider means no ticks, nothing more.
 var slug=CoasterHub.currentUser();
-var COMBINED=!slug;
 
-(slug ? Promise.resolve([{slug:slug}]) : CoasterHub.fetchUsers().then(function(){return CoasterHub.USERS;}))
-.then(function(WHO){
-  return Promise.all([
-    Promise.all(WHO.map(function(u){
-      return CoasterHub.fetchRides(u.slug).catch(function(){ return {user:u.name||u.slug,rides:[]}; });
-    })),
-    CoasterHub.fetchCoasters(),
-    CoasterHub.fetchParks()
-  ]);
-}).then(function(res){
-  var logs=res[0], coasters=res[1].coasters, parks=res[2];
-  var byId={}; coasters.forEach(function(c){ byId[c.id]=c; });
+var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true}).setView([30,-40],2);
+// The basemap, exactly as the profile page picks it: Esri's canvas tiles, no
+// key, dark or light to match the theme, OpenStreetMap if Esri stops
+// answering. See profile.html for the history behind each choice.
+var TILES={
+  dark: {url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'},
+  light:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'}
+};
+var FALLBACK={url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution:'&copy; OpenStreetMap contributors', native:19};
+var base=null, fellBack=false;
+function setBase(spec){
+  var layer=L.tileLayer(spec.url,{attribution:spec.attribution, maxNativeZoom:spec.native||16, maxZoom:19});
+  var ok=false, bad=0;
+  layer.on('tileload',function(){ ok=true; });
+  layer.on('tileerror',function(){ if(!ok && !fellBack && ++bad>=8){ fellBack=true; setBase(FALLBACK); } });
+  if(base) map.removeLayer(base);
+  base=layer.addTo(map);
+}
+function mapTheme(){ return document.documentElement.getAttribute('data-theme')==='light' ? 'light' : 'dark'; }
+setBase(TILES[mapTheme()]);
+// Not if the tiles fell back to OpenStreetMap: a theme toggle must not put
+// the dead server back. Same guard as the profile page.
+document.documentElement.addEventListener('ch:themechange',function(){ if(!fellBack) setBase(TILES[mapTheme()]); });
 
-  // Per park: how many coasters it has, how many rides were logged there, how
-  // many distinct coasters those rides covered (credits), and how many riders.
+// The rider switcher, on the map's top-right corner since there is no hero to
+// hold it. app.js builds the badge into the host exactly as it does on /count;
+// its menu is positioned fixed at the end of <body>, so the map cannot clip it.
+var who=L.control({position:'topright'});
+who.onAdd=function(){
+  var d=L.DomUtil.create('div','ctl who');
+  d.innerHTML='<span class="badge" id="hero_badge">Global</span>';
+  L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
+  return d;
+};
+who.addTo(map);
+CoasterHub.riderBadge(document.getElementById('hero_badge'),'map',slug);
+
+Promise.all([
+  slug ? CoasterHub.fetchRides(slug).catch(function(){ return {rides:[]}; }) : Promise.resolve(null),
+  CoasterHub.fetchCoasters(),
+  CoasterHub.fetchParks()
+]).then(function(res){
+  var log=res[0], coasters=res[1].coasters, parks=res[2];
+  var MINE={}; if(log) (log.rides||[]).forEach(function(r){ MINE[r.c]=1; });
+
+  // Per park: its coasters, operating and closed, A-Z within each.
   var P={};
   Object.keys(parks).forEach(function(name){
-    P[name]={ name:name, lat:parks[name].lat, lon:parks[name].lon, region:parks[name].region||'',
-              coasters:0, rides:0, credits:0, riders:0, cset:{}, rset:{} };
+    P[name]={ name:name, lat:parks[name].lat, lon:parks[name].lon, region:parks[name].region||'', open:[], closed:[] };
   });
-  coasters.forEach(function(c){ if(c.park && P[c.park]) P[c.park].coasters++; });
-  logs.forEach(function(log){
-    var seen={};
-    (log.rides||[]).forEach(function(r){
-      var c=byId[r.c]; if(!c || !c.park || !P[c.park]) return;
-      var p=P[c.park]; p.rides++; p.cset[r.c]=1; if(!seen[c.park]){ seen[c.park]=1; p.riders++; }
-    });
+  coasters.forEach(function(c){
+    if(!c.park || !P[c.park]) return;
+    (c.closed ? P[c.park].closed : P[c.park].open).push(c);
   });
-  Object.keys(P).forEach(function(k){ P[k].credits=Object.keys(P[k].cset).length; });
+  var all=Object.keys(P).map(function(k){ return P[k]; });
+  all.forEach(function(p){ p.open.sort(function(a,b){ return a.name.localeCompare(b.name); }); p.closed.sort(function(a,b){ return a.name.localeCompare(b.name); }); });
+  var placed=all.filter(function(p){ return p.lat!=null && p.lon!=null; });
+  var unplaced=all.filter(function(p){ return p.lat==null || p.lon==null; });
 
-  var nm = COMBINED ? null : esc(logs[0].user||slug);
-  document.querySelector('.hero h1').textContent = COMBINED ? 'Every park on the map.' : (nm+'’s parks on the map.');
-  document.getElementById('sub').textContent = COMBINED
-    ? 'Every park on the site, sized by how many rides everyone has logged there. Click one.'
-    : 'The parks '+nm+' has been to, sized by rides. Click one.';
-  document.title = (COMBINED ? 'Map' : nm+'’s Map')+' — Coaster Hub';
-
-  // A rider's map shows only where they have been. Everyone's shows every
-  // park, including the ones nobody has ridden at, in a quieter mark: an
-  // empty park is still a park, and on the everyone view the map IS the list.
-  var all=Object.keys(P).map(function(k){return P[k];});
-  var shown = COMBINED ? all : all.filter(function(p){ return p.rides>0; });
-  var placed = shown.filter(function(p){ return p.lat!=null && p.lon!=null; });
-  var unplaced = shown.filter(function(p){ return p.lat==null || p.lon==null; });
-
-  var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true}).setView([30,-40],2);
-  // The basemap, exactly as the profile page picks it: Esri's canvas tiles,
-  // no key, dark or light to match the theme, OpenStreetMap if Esri stops
-  // answering. See profile.html for the history behind each choice.
-  var TILES={
-    dark: {url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'},
-    light:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'}
-  };
-  var FALLBACK={url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution:'&copy; OpenStreetMap contributors', native:19};
-  var base=null, fellBack=false;
-  function setBase(spec){
-    var layer=L.tileLayer(spec.url,{attribution:spec.attribution, maxNativeZoom:spec.native||16, maxZoom:19});
-    var ok=false, bad=0;
-    layer.on('tileload',function(){ ok=true; });
-    layer.on('tileerror',function(){ if(!ok && !fellBack && ++bad>=8){ fellBack=true; setBase(FALLBACK); } });
-    if(base) map.removeLayer(base);
-    base=layer.addTo(map);
-  }
-  function mapTheme(){ return document.documentElement.getAttribute('data-theme')==='light' ? 'light' : 'dark'; }
-  setBase(TILES[mapTheme()]);
-
-  // One mark per park. Area follows rides, so a park with four times the rides
-  // is twice the width — the eye reads area, and linear radius made the big
-  // parks swallow the map. A park with no rides is a small hollow ring.
-  var MARKERS=[], pts=[];
   function popup(p){
-    var lines=[];
-    lines.push('<span class="n">'+p.coasters+' coaster'+(p.coasters===1?'':'s')+'</span>');
-    if(p.rides){
-      lines.push('<span class="n">'+p.rides.toLocaleString()+' ride'+(p.rides===1?'':'s')+'</span> on '+p.credits+' of them'
-        +(COMBINED && p.riders>1 ? ', by '+p.riders+' riders' : ''));
-    } else lines.push('no rides logged here'+(COMBINED?'':' by '+nm));
-    var links='<a href="'+esc(CoasterHub.parkHref(p.name))+'">Park page →</a>';
-    if(p.rides) links+=' &nbsp; <a href="'+esc(COMBINED ? '/count?view=parks' : CoasterHub.userPageHref(slug,'count')+'?view=parks')+'">In the count →</a>';
-    return '<div class="pp"><b>'+esc(p.name)+'</b><br><small>'+esc(p.region)+'</small><br>'+lines.join('<br>')+'<br>'+links+'</div>';
+    var ridden=p.open.filter(function(c){ return MINE[c.id]; }).length;
+    var h='<div class="pp"><h3><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+' →</a></h3>'
+      +'<small>'+esc(p.region)+'</small>'
+      +'<div class="n">'+(p.open.length ? p.open.length+' operating coaster'+(p.open.length===1?'':'s') : 'No operating coasters')
+      +(log && p.open.length ? ' · '+ridden+' of '+p.open.length+' ridden' : '')+'</div>';
+    if(p.open.length){
+      h+='<ul>'+p.open.map(function(c){
+        return '<li>'+(log ? (MINE[c.id] ? '<span class="tick" title="Ridden">✓</span>' : '<span class="notyet">–</span>') : '')
+          +'<a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></li>';
+      }).join('')+'</ul>';
+    }
+    if(p.closed.length) h+='<div class="closed">'+p.closed.length+' closed: '+p.closed.map(function(c){ return esc(c.name); }).join(', ')+'</div>';
+    return h+'</div>';
   }
-  placed.forEach(function(p){
-    var r = p.rides ? 4+Math.sqrt(p.rides)*1.1 : 4;
-    var m=L.circleMarker([p.lat,p.lon],{radius:r, weight:1, fillOpacity:p.rides?.65:0, className:p.rides?'':'empty'})
-      .addTo(map).bindPopup(popup(p));
-    m._park=p; MARKERS.push(m); pts.push([p.lat,p.lon]);
+  var pts=[];
+  var group=L.markerClusterGroup({
+    maxClusterRadius:44, showCoverageOnHover:false, spiderfyOnMaxZoom:true, zoomToBoundsOnClick:true,
+    iconCreateFunction:function(cl){
+      var sum=0; cl.getAllChildMarkers().forEach(function(m){ sum+=m.options.n||0; });
+      return L.divIcon({className:'pk pkc', html:'<span>'+sum+'</span>', iconSize:null});
+    }
   });
-  function paintMarkers(){
-    var stroke=cssVar('--accent2'), fill=cssVar('--accent'), quiet=cssVar('--muted');
-    MARKERS.forEach(function(m){ m.setStyle(m._park.rides ? {color:stroke,fillColor:fill} : {color:quiet,fillColor:'transparent'}); });
-  }
-  paintMarkers();
+  placed.forEach(function(p){
+    var n=p.open.length;
+    var full = log && n && p.open.every(function(c){ return MINE[c.id]; });
+    var icon=L.divIcon({className:'pk'+(n?'':' none')+(full?' mine':''), html:'<span>'+n+'</span>', iconSize:null});
+    group.addLayer(L.marker([p.lat,p.lon],{icon:icon, title:p.name, n:n}).bindPopup(popup(p),{maxWidth:320}));
+    pts.push([p.lat,p.lon]);
+  });
+  map.addLayer(group);
   if(pts.length) map.fitBounds(pts,{padding:[30,30]});
-  // Not if the tiles fell back to OpenStreetMap: a theme toggle must not put
-  // the dead server back. Same guard as the profile page.
-  document.documentElement.addEventListener('ch:themechange',function(){ paintMarkers(); if(!fellBack) setBase(TILES[mapTheme()]); });
 
-  var totalRides=shown.reduce(function(a,p){return a+p.rides;},0);
-  document.getElementById('count').innerHTML =
-    '<b>'+placed.length+'</b> park'+(placed.length===1?'':'s')+' on the map'
-    +(COMBINED ? ' · <b>'+placed.filter(function(p){return p.rides;}).length+'</b> with rides' : '')
-    +' · <b>'+totalRides.toLocaleString()+'</b> ride'+(totalRides===1?'':'s')
-    +(unplaced.length ? ' · '+unplaced.length+' not placed yet' : '');
-  document.getElementById('unplaced').innerHTML = unplaced.length
-    ? '<b>Not on the map yet</b> — no coordinates recorded; give them a location in /edit: '
-      + unplaced.map(function(p){ return esc(p.name)+(p.rides?' ('+p.rides+')':''); }).join(', ')
-    : '';
-  document.querySelector('.hero h1').removeAttribute('data-loading');
+  // What is not on the map, and why. Bottom-left, folded, because a park
+  // with no coordinates is invisible here and nowhere else says so.
+  var note=L.control({position:'bottomleft'});
+  note.onAdd=function(){
+    var d=L.DomUtil.create('div','ctl');
+    var tot=placed.reduce(function(a,p){ return a+p.open.length; },0);
+    d.innerHTML='<b>'+placed.length+'</b> parks · <b>'+tot.toLocaleString()+'</b> operating coasters'
+      +(unplaced.length ? ' · <button type="button" id="unp">'+unplaced.length+' not placed</button>'
+        +'<div class="list">No coordinates yet — give them a location in /edit: '
+        +unplaced.map(function(p){ return '<b>'+esc(p.name)+'</b> ('+p.open.length+')'; }).join(', ')+'</div>' : '');
+    L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
+    return d;
+  };
+  note.addTo(map);
+  var unp=document.getElementById('unp');
+  if(unp) unp.onclick=function(){ unp.parentNode.classList.toggle('open'); };
+  document.title=(slug && log && log.user ? log.user+'’s Map' : 'Map')+' — Coaster Hub';
+  document.body.setAttribute('data-ready','1');
 }).catch(fail);
 </script>
 </body>

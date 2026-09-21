@@ -2979,12 +2979,35 @@ park, dry-run on the snapshot: blanks 576→533 (h), 616→584 (s), 569→528 (l
 applied until he pastes it. The fairground and pizza-parlour spinners are not on Wikidata and
 stay for /edit whatever he decides.
 
-### /map — every park, sized by rides (2026-09-21)
+### /map — every park, with its operating coasters (2026-09-21)
 
 Carter: *"make /map where I can zoom, click on parks and they show number of rides at each."*
 Then: *"make it unlisted or just in the footer."* So it is in every footer and nowhere else.
 
-`map.html` is the profile page's map grown into a page: the same Leaflet 1.9.4 from cdnjs,
+**Second pass the same evening, Carter's spec:** *"fullscreen map, just the header/footer;
+instead of bubble sizes, numbers with the number of operating coasters; click one and see the
+list of operating coasters with the park name visible as a link."* So the hero is gone — the
+page is a flex column, sticky header, `#map` taking every pixel to the footer (`100dvh` with a
+`vh` fallback) — and every park is a disc with a NUMBER: its operating coasters, the same for
+everybody, since that is a fact about the park. The popup is the park name as a link to its
+page, the region, "21 operating coasters", then every operating coaster as a link to its own
+page, and the closed ones named in a line underneath. A rider in the URL adds ticks on the
+coasters they have ridden and "16 of 21 ridden"; the switcher lives in a Leaflet control
+top-right, since there is no hero to hold it, and its menu is `fixed` at the end of `<body>`
+so the map cannot clip it.
+
+**Clustering was not optional.** 231 numbered discs at world zoom are a pile — the first test
+click on Cedar Point landed on Kentucky Kingdom. Leaflet.markercluster 1.5.3 (cdnjs, base CSS
+only) groups them, and the cluster icon shows the **sum** of operating coasters under it, so
+zoomed out the map still answers "how many here" (Ohio reads as one number) and splits as you
+zoom. `maxClusterRadius:44`. The "not placed" list moved into a folded control bottom-left.
+
+The harness serves the plugin from `node_modules/leaflet.markercluster/dist` the same way it
+serves Leaflet, and the dev seed adds a test coaster to Cedar Point, so a test that counts
+operating coasters must count them from `/api/coasters`, not from `coasters.json` — that
+mismatch (21 vs 20) cost a round.
+
+The first pass, for the record — `map.html` was the profile page's map grown into a page: the same Leaflet 1.9.4 from cdnjs,
 the same Esri canvas basemap (dark or light with the theme, OpenStreetMap if Esri stops
 answering — the fallback guard on the theme toggle is copied too), the same dark popup CSS.
 `/map` is everyone: every park in `parks.json`, one circle each, area following everyone's
