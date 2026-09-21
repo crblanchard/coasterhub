@@ -1,0 +1,36 @@
+# Crawl the site. Don't crawl its API, its photos, or its write-side pages.
+#
+# WHY THIS FILE EXISTS (2026-09-20). Every HTML page here fetches /api/coasters
+# as it renders, and that answer is a read of the whole coaster table — 1,129
+# rows plus their aliases. A crawler that executes JavaScript therefore pays
+# that once per page, and there are 1,129 coaster pages and 249 park pages to
+# walk. It carried D1's free tier — 5,000,000 rows read a day — to 95% against
+# a database holding 5,694 rides.
+#
+# The Worker edge-caches the three list endpoints now, which is the actual fix;
+# this file is the belt to that braces. Nothing below is a page anyone should
+# arrive at from a search result, and every one of them costs a database read
+# to render.
+#
+# Coaster, park and rider pages are deliberately NOT here: they are the site,
+# they are worth finding, and they are what a sitemap would list if we had one.
+
+User-agent: *
+
+# JSON endpoints. Not pages, not indexable, and a crawler asking for one
+# directly is pure cost.
+Disallow: /api/
+
+# Riders' own photographs. They agreed to be on a coaster site, not in an
+# image search.
+Disallow: /avatars/
+
+# The write side: logging a day, curating the shared list, the account pages.
+# All of it needs a sign-in, so a crawler gets a page that renders nothing.
+Disallow: /log
+Disallow: /import
+Disallow: /add
+Disallow: /edit
+Disallow: /qc
+Disallow: /account
+Disallow: /database

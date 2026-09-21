@@ -2436,6 +2436,83 @@ async function main() {
       JSON.stringify(rows(db, "SELECT * FROM park_aliases")));
   }
 
+  // The edge cache on the three slow-moving lists. Worth testing because it is
+  // the one thing in the Worker that can serve an ANSWER THAT IS NO LONGER TRUE,
+  // and the rules about when it may not — a cookie on the request, a write
+  // clearing it — are the whole of its safety. `caches` does not exist in this
+  // harness any more than it does in the node:sqlite shim, so it is installed
+  // here as a Map and taken away again; the other 490 tests run with it absent,
+  // which is the other half of the contract.
+  console.log("\nThe edge cache on /api/coasters");
+  {
+    const store = new Map();
+    let hits = 0;
+    globalThis.caches = { default: {
+      async match(req) {
+        const r = store.get(req.url);
+        if (!r) return undefined;
+        hits++; return r.clone();
+      },
+      async put(req, res) { store.set(req.url, res); },
+      async delete(req) { return store.delete(req.url); },
+    } };
+    // waitUntil is a no-op in this harness, so a put would never be awaited —
+    // collect the promises instead and settle them where a test needs the cache
+    // to have actually been written.
+    const waits = [];
+    const cctx = { waitUntil(p) { waits.push(p); } };
+    const settle = () => Promise.all(waits.splice(0));
+    const get = async (db, path, cookie) => {
+      const headers = cookie ? { cookie } : {};
+      const res = await worker.fetch(new Request("https://coasterhub.org" + path, { headers }),
+        { DB: new FakeD1(db), ADMIN_PASSWORD: PW }, cctx);
+      await settle();
+      return res.json();
+    };
+    try {
+      const db = freshDb();
+      const cookie = await signedUp(db, "cache@x.test", "Cacher");
+      db.prepare("UPDATE accounts SET is_admin = 1 WHERE email = ?").run("cache@x.test");
+
+      let r = await get(db, "/api/coasters");
+      const before = r.coasters.length;
+      check("an anonymous read is stored", store.size === 1 && hits === 0,
+        store.size + " entries, " + hits + " hits");
+
+      // Behind the Worker's back, so a fresh read and a cached one cannot agree.
+      db.prepare("INSERT INTO coasters (name, park, type) VALUES ('Ghost Train','Nowhere','Steel')").run();
+
+      r = await get(db, "/api/coasters");
+      check("a second anonymous read is served from the cache",
+        hits === 1 && r.coasters.length === before, hits + " hits, " + r.coasters.length + " coasters");
+
+      r = await get(db, "/api/coasters?utm_source=twitter", null);
+      check("a query string reads the same entry rather than making another",
+        store.size === 1 && r.coasters.length === before, store.size + " entries");
+
+      r = await get(db, "/api/coasters", cookie);
+      check("a signed-in read bypasses it and sees the new row",
+        r.coasters.length === before + 1, r.coasters.length + " coasters");
+      check("...and is not stored, so it cannot be served to anybody else",
+        store.size === 1, store.size + " entries");
+
+      // A write through the API, which is what afterWrite hangs off.
+      const res = await worker.fetch(new Request("https://coasterhub.org/api/coaster", {
+        method: "POST", headers: { cookie, "content-type": "application/json" },
+        body: JSON.stringify({ name: "Written Through", park: "Nowhere", type: "Steel" }),
+      }), { DB: new FakeD1(db), ADMIN_PASSWORD: PW }, cctx);
+      check("the write itself succeeded", res.status === 200, res.status + "");
+      await settle();
+      check("a write empties the cache", store.size === 0, store.size + " entries");
+
+      r = await get(db, "/api/coasters");
+      check("so the next anonymous read is the live list again",
+        r.coasters.length === before + 2, r.coasters.length + " coasters");
+    } finally {
+      delete globalThis.caches;
+    }
+  }
+
   console.log("\n" + pass + " passed, " + fail + " failed\n");
   process.exit(fail ? 1 : 0);
 }

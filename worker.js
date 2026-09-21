@@ -47,6 +47,72 @@ const JSON_HEADERS = { "content-type": "application/json; charset=utf-8",
 // page, and they change when somebody adds a coaster rather than continuously.
 const LIST_CACHE = { "cache-control": "public, max-age=300" };
 
+// ---- ...and the header alone was not enough ---------------------------------
+// A `cache-control` on a response the WORKER MAKES is a promise to the browser
+// and nothing more. Cloudflare does not store a Worker's own response unless
+// the Worker puts it there, so `public, max-age=300` above saved a RETURNING
+// visitor a fetch and saved the database nothing at all: the next visitor, and
+// every crawler, still paid for a full read of the coaster table.
+//
+// That read is 1,239 rows — 1,129 coasters plus their aliases — on every single
+// page view, and on 2026-09-20 it carried the D1 free tier's 5,000,000 rows a
+// day to 95% against a database holding 5,694 rides. Cloudflare's own count,
+// from the alert mail, not an estimate. Every page fetches this list when it
+// renders, so a crawler that executes JavaScript pays it per page, and there
+// are 1,129 coaster pages and 249 park pages to walk.
+//
+// So the three slow-moving lists go in the edge cache explicitly. Two rules
+// keep that honest:
+//
+//   * A request carrying ANY cookie is served fresh and never stored. That is
+//     every signed-in reader and every admin, which is what /edit needs: it
+//     acts on what the list says, and a five-minute-old list is how a console
+//     script once tried to rename a park that had already been renamed. The
+//     traffic the cache is for is the anonymous kind, and none of these three
+//     answers has ever depended on who was asking.
+//   * The key is the origin and the PATH, never the query string, so
+//     /api/coasters?utm=whatever cannot fill the cache with copies of one
+//     answer — or push the real entry out of it.
+//
+// The TTL is the max-age these responses already declared, so nothing is
+// staler for anybody than it was before. A write purges the entries, but the
+// Cache API deletes in ONE colo — the one that served the write — so the person
+// editing sees their own change at once and everybody else waits out the 300s.
+// That is the trade, written down here so the next person reads it as a choice
+// rather than a bug. `caches` is also absent in the node:sqlite test harness
+// and inert on a workers.dev hostname, so every call is guarded: a cache that
+// is not there must cost correctness nothing.
+const EDGE_CACHED = { "/api/coasters": 1, "/api/parks": 1, "/api/clones": 1 };
+function edgeKey(url, path) {
+  const u = new URL(url);
+  return new Request(u.origin + (path || u.pathname), { method: "GET" });
+}
+function edgeUsable(request) {
+  return typeof caches !== "undefined" && caches.default && !request.headers.get("cookie");
+}
+async function edgeGet(request) {
+  if (!edgeUsable(request)) return null;
+  try { return (await caches.default.match(edgeKey(request.url))) || null; }
+  catch (e) { return null; }
+}
+function edgePut(ctx, request, response) {
+  if (edgeUsable(request)) {
+    try { ctx.waitUntil(caches.default.put(edgeKey(request.url), response.clone())); }
+    catch (e) { /* not cacheable here; the answer is still correct */ }
+  }
+  return response;
+}
+// Every list, not only the one the write touched: a merge moves a coaster and a
+// park in the same breath, and working out which entries a given write could
+// have invalidated is a rule that would rot. Three deletes cost nothing.
+function edgeDrop(ctx, request) {
+  if (typeof caches === "undefined" || !caches.default) return;
+  for (const path of Object.keys(EDGE_CACHED)) {
+    try { ctx.waitUntil(caches.default.delete(edgeKey(request.url, path))); }
+    catch (e) {}
+  }
+}
+
 function json(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), { status, headers: { ...JSON_HEADERS, ...extra } });
 }
@@ -58,8 +124,11 @@ function err(status, message) { return json({ error: message }, status); }
 // it never slows down or blocks the edit. No-op until a GITHUB_TOKEN secret (a
 // fine-grained PAT with Contents: write on this repo) is configured; the Actions
 // side debounces a burst of edits into a single commit.
-function afterWrite(ctx, env, response) {
+// Also drops the edge-cached lists, so the person who just made the change is
+// not shown their own stale copy of it — see the note on edgeDrop.
+function afterWrite(ctx, env, request, response) {
   ctx.waitUntil(dispatchSync(env));
+  edgeDrop(ctx, request);
   return response;
 }
 async function dispatchSync(env) {
@@ -1360,12 +1429,18 @@ export default {
       // endpoint: every consumer that needs them already fetches this, and it
       // means the static coasters.json fallback carries them too (sync-static
       // writes this response verbatim).
+      // One lookup covering all three, before the handlers below read anything.
+      if (request.method === "GET" && EDGE_CACHED[path]) {
+        const hit = await edgeGet(request);
+        if (hit) return hit;
+      }
       if (request.method === "GET" && path === "/api/coasters") {
-        return json({ coasters: await getCoasters(env), ...(await getAliases(env)) },
-                    200, LIST_CACHE);
+        return edgePut(ctx, request,
+          json({ coasters: await getCoasters(env), ...(await getAliases(env)) },
+               200, LIST_CACHE));
       }
       if (request.method === "GET" && path === "/api/parks") {
-        return json(await getParks(env), 200, LIST_CACHE);
+        return edgePut(ctx, request, json(await getParks(env), 200, LIST_CACHE));
       }
       // Which coasters are the same ride. Public and cacheable for the same
       // reason the coaster list is: it changes when Carter curates it, not when
@@ -1374,7 +1449,7 @@ export default {
       // failing it would take the whole editor down for a nicety.
       if (request.method === "GET" && path === "/api/clones") {
         if (!await haveClones(env)) return json({ groups: [] }, 200, LIST_CACHE);
-        return json({ groups: await getClones(env) }, 200, LIST_CACHE);
+        return edgePut(ctx, request, json({ groups: await getClones(env) }, 200, LIST_CACHE));
       }
       // Who exists. Public: the rider pickers and every /user/<slug>/ page read it.
       if (request.method === "GET" && path === "/api/users") return json({ users: await getUsers(env) });
@@ -1422,7 +1497,7 @@ export default {
         if (RANKINGS_NEED_TOKEN && !tokenOk(request, env)) return err(401, "unauthorized");
         const out = await putRankings(env, km[1].toLowerCase(), await request.json());
         if (out.bad) return err(out.bad[0], out.bad[1]);
-        return afterWrite(ctx, env, json(out));
+        return afterWrite(ctx, env, request, json(out));
       }
 
       // ---- categories ----------------------------------------------------
@@ -1645,7 +1720,7 @@ export default {
       if (path === "/api/admin/geocode" && (request.method === "POST" || request.method === "GET")) {
         const miss = await env.DB.prepare(MISSING_PARKS_COUNT).first();
         if ((miss.n || 0) === 0 && !adminOk(request, env, acct)) return err(401, "unauthorized");
-        return afterWrite(ctx, env, json(await geocodeMissing(env, 10)));
+        return afterWrite(ctx, env, request, json(await geocodeMissing(env, 10)));
       }
 
       // ---- accounts ----
@@ -1701,7 +1776,7 @@ export default {
           "INSERT INTO accounts (email,pw,slug,is_admin,created) VALUES (?,?,?,0,datetime('now')) RETURNING id"
         ).bind(email, pwHash, made.slug).first()).id;
         const raw = await startSession(env, acctId);
-        return afterWrite(ctx, env, json({ ok: true, slug: made.slug, name: made.name },
+        return afterWrite(ctx, env, request, json({ ok: true, slug: made.slug, name: made.name },
           200, { "set-cookie": setCookie(raw) }));
       }
 
@@ -1804,7 +1879,7 @@ export default {
         const who = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(slug).first();
         await recordActivity(env, "claimed", { actor: slug, subject: who && who.name || slug });
         const raw = await startSession(env, acctId);
-        return afterWrite(ctx, env, json({ ok: true, slug }, 200, { "set-cookie": setCookie(raw) }));
+        return afterWrite(ctx, env, request, json({ ok: true, slug }, 200, { "set-cookie": setCookie(raw) }));
       }
 
       // Edit your profile: display name, username, bio — any combination, each
@@ -1839,7 +1914,7 @@ export default {
               .bind(bio || null, who.slug).run();
           } catch (e) { return err(503, "run migrations/008-profiles.sql before editing a profile"); }
           if (b.username === undefined && b.name === undefined) {
-            return afterWrite(ctx, env, json({ ok: true, slug: who.slug, name: who.name,
+            return afterWrite(ctx, env, request, json({ ok: true, slug: who.slug, name: who.name,
               bio: bio || null, renamed: false, was: who.slug }));
           }
         }
@@ -1854,7 +1929,7 @@ export default {
           await env.DB.prepare("UPDATE users SET name = ? WHERE slug = ?").bind(nm, who.slug).run();
           who.name = nm;
           if (b.username === undefined) {
-            return afterWrite(ctx, env, json({ ok: true, slug: who.slug, name: nm,
+            return afterWrite(ctx, env, request, json({ ok: true, slug: who.slug, name: nm,
               renamed: false, was: who.slug }));
           }
         }
@@ -1866,7 +1941,7 @@ export default {
         if (slugBad) return err(409, slugBad);
 
         if (wantSlug !== who.slug) await renameRider(env, who.slug, wantSlug);
-        return afterWrite(ctx, env, json({ ok: true, slug: wantSlug, name: who.name,
+        return afterWrite(ctx, env, request, json({ ok: true, slug: wantSlug, name: who.name,
           renamed: wantSlug !== who.slug, was: who.slug }));
       }
 
@@ -1989,7 +2064,7 @@ export default {
         // Best effort: a leftover object costs a fraction of a cent and a
         // failure here must not lose the upload that just succeeded.
         if (prev && prev.avatar) { try { await env.AVATARS.delete(prev.avatar); } catch (e) {} }
-        return afterWrite(ctx, env, json({ ok: true, avatar: key, url: "/avatars/" + key }));
+        return afterWrite(ctx, env, request, json({ ok: true, avatar: key, url: "/avatars/" + key }));
       }
 
       // Remove it again, back to the initial in a circle.
@@ -2000,7 +2075,7 @@ export default {
           await env.DB.prepare("UPDATE users SET avatar = NULL WHERE slug = ?").bind(acct.slug).run();
         } catch (e) { return err(503, "run migrations/008-profiles.sql first"); }
         if (env.AVATARS && prev && prev.avatar) { try { await env.AVATARS.delete(prev.avatar); } catch (e) {} }
-        return afterWrite(ctx, env, json({ ok: true, avatar: null }));
+        return afterWrite(ctx, env, request, json({ ok: true, avatar: null }));
       }
 
       // Change your own password. Requires the current one: a borrowed session
@@ -2035,7 +2110,7 @@ export default {
         if (!mayWriteRider(request, env, b && b.user, acct)) return err(401, "unauthorized");
         const out = await addRides(env, b);
         if (out.bad) return err(out.bad[0], out.bad[1]);
-        return afterWrite(ctx, env, json({ ok: true, ...out }));
+        return afterWrite(ctx, env, request, json({ ok: true, ...out }));
       }
       // Add a rider's credit — one undated ride, unless they already have the
       // coaster, in which case there is nothing to add.
@@ -2047,14 +2122,14 @@ export default {
           "INSERT INTO rides (user_slug,coaster_id,d) SELECT ?,?,? WHERE NOT EXISTS " +
           "(SELECT 1 FROM rides WHERE user_slug = ? AND coaster_id = ?)"
         ).bind(b.user, b.coaster_id, b.first??null, b.user, b.coaster_id).run();
-        return afterWrite(ctx, env, json({ ok: true }));
+        return afterWrite(ctx, env, request, json({ ok: true }));
       }
       // Remove a rider's credit — every ride of it, not just one lap.
       if (request.method === "DELETE" && path === "/api/credit") {
         const b = await request.json();
         if (!mayWriteRider(request, env, b && b.user, acct)) return err(401, "unauthorized");
         await env.DB.prepare("DELETE FROM rides WHERE user_slug = ? AND coaster_id = ?").bind(b.user, b.coaster_id).run();
-        return afterWrite(ctx, env, json({ ok: true }));
+        return afterWrite(ctx, env, request, json({ ok: true }));
       }
       // Undo a single mis-tapped ride (dated ride log only). The owner is on the
       // row, not in the body, so this reads first and authorizes second.
@@ -2070,7 +2145,7 @@ export default {
         if (!mayWriteRider(request, env, row.slug, acct)) return err(401, "unauthorized");
         await env.DB.prepare("DELETE FROM rides WHERE id = ?").bind(i).run();
         await recordActivity(env, "ride_removed", { actor: row.slug, subject: row.name });
-        return afterWrite(ctx, env, json({ ok: true, ...(await userTotal(env, row.slug)) }));
+        return afterWrite(ctx, env, request, json({ ok: true, ...(await userTotal(env, row.slug)) }));
       }
 
       // ---- writes (auth required) ----
@@ -2187,7 +2262,7 @@ export default {
           "INSERT INTO clone_members (coaster,group_id) VALUES (?,?)").bind(cid, id)));
         await recordActivity(env, "clone_set",
           { subject: g.name, n: g.ids.length, detail: { made: true } });
-        return afterWrite(ctx, env, json({ ok: true, id, name: g.name, note: g.note, ids: g.ids }));
+        return afterWrite(ctx, env, request, json({ ok: true, id, name: g.name, note: g.note, ids: g.ids }));
       }
 
       const cg = path.match(/^\/api\/clones\/(\d+)$/);
@@ -2205,7 +2280,7 @@ export default {
           await env.DB.prepare("DELETE FROM clone_members WHERE group_id = ?").bind(gid).run();
           await env.DB.prepare("DELETE FROM clone_groups WHERE id = ?").bind(gid).run();
           await recordActivity(env, "clone_removed", { subject: row.name });
-          return afterWrite(ctx, env, json({ ok: true }));
+          return afterWrite(ctx, env, request, json({ ok: true }));
         }
 
         const g = await readGroup(await request.json(), gid);
@@ -2216,7 +2291,7 @@ export default {
         await env.DB.batch(g.ids.map((cid) => env.DB.prepare(
           "INSERT INTO clone_members (coaster,group_id) VALUES (?,?)").bind(cid, gid)));
         await recordActivity(env, "clone_set", { subject: g.name, n: g.ids.length });
-        return afterWrite(ctx, env, json({ ok: true, id: gid, name: g.name, note: g.note, ids: g.ids }));
+        return afterWrite(ctx, env, request, json({ ok: true, id: gid, name: g.name, note: g.note, ids: g.ids }));
       }
 
       // login check (lets the /edit page validate the password)
@@ -2232,7 +2307,7 @@ export default {
       if (request.method === "POST" && path === "/api/user") {
         const out = await addUser(env, await request.json());
         if (out.bad) return err(out.bad[0], out.bad[1]);
-        return afterWrite(ctx, env, json(out));
+        return afterWrite(ctx, env, request, json(out));
       }
 
       // create coaster (id = max+1)
@@ -2247,7 +2322,7 @@ export default {
           b.opened??null, b.openedPrec??null, b.closed??null, b.closedPrec??null).run();
         await recordActivity(env, "coaster_added",
           { subject: b.name ?? null, detail: { id: id, park: b.park ?? null } });
-        return afterWrite(ctx, env, json({ ok: true, id }));
+        return afterWrite(ctx, env, request, json({ ok: true, id }));
       }
 
       // update coaster fields
@@ -2286,7 +2361,7 @@ export default {
             { subject: (prev && prev.name) || null, n: sets.length,
               detail: { id: id, fields: COASTER_FIELDS.filter(f => f in b) } });
         }
-        return afterWrite(ctx, env, json({ ok: true }));
+        return afterWrite(ctx, env, request, json({ ok: true }));
       }
 
       // who still has this coaster — drives the delete button's label in /edit,
@@ -2342,7 +2417,7 @@ export default {
         await env.DB.prepare("DELETE FROM coaster_aliases WHERE coaster_id = ?").bind(id).run();
         await recordActivity(env, "coaster_deleted",
           { subject: row.name, detail: { id: id, park: row.park } });
-        return afterWrite(ctx, env, json({ ok: true, deleted: id, name: row.name, park: row.park }));
+        return afterWrite(ctx, env, request, json({ ok: true, deleted: id, name: row.name, park: row.park }));
       }
 
       // merge coaster `from` into `to` (repoints every ride, deletes `from`)
@@ -2444,7 +2519,7 @@ export default {
           detail: { from: from, to: to, fromName: src ? src.name : null,
                     park: (dst && dst.park) || (src && src.park) || null },
         });
-        return afterWrite(ctx, env, json({ ok: true }));
+        return afterWrite(ctx, env, request, json({ ok: true }));
       }
 
       // every park referenced by a coaster, with coords (null = not on the map yet) + coaster count
@@ -2566,7 +2641,7 @@ export default {
         await env.DB.prepare("UPDATE coasters SET model = ? WHERE model = ?").bind(to, from).run();
         await recordActivity(env, merged ? "model_merged" : "model_renamed",
           { subject: to, n: had.n, detail: { from: from } });
-        return afterWrite(ctx, env, json({ ok: true, from, to, moved: had.n, merged,
+        return afterWrite(ctx, env, request, json({ ok: true, from, to, moved: had.n, merged,
                                            total: had.n + ((into && into.n) || 0) }));
       }
 
@@ -2653,7 +2728,7 @@ export default {
         const out = json({ ok: true, model: to || null, manu: manu || null, picked: had.n,
                            moved: moved, created: !!to && !already,
                            total: to ? already + moved : 0 });
-        return touched ? afterWrite(ctx, env, out) : out;
+        return touched ? afterWrite(ctx, env, request, out) : out;
       }
 
       // Rename a park, and every coaster standing in it, in one move.
@@ -2730,7 +2805,7 @@ export default {
 
         await recordActivity(env, merged ? "park_merged" : "park_renamed",
           { subject: to, n: (had && had.n) || 0, detail: { from: from } });
-        return afterWrite(ctx, env, json({ ok: true, from, to, moved: (had && had.n) || 0, merged,
+        return afterWrite(ctx, env, request, json({ ok: true, from, to, moved: (had && had.n) || 0, merged,
                                            total: ((had && had.n) || 0) + ((into && into.n) || 0) }));
       }
 
@@ -2763,7 +2838,7 @@ export default {
               "lon=COALESCE(excluded.lon,lon), region=COALESCE(excluded.region,region)"
             : "ON CONFLICT(name) DO NOTHING")
         ).bind(b.name, b.lat ?? null, b.lon ?? null, b.region ?? null).run();
-        return afterWrite(ctx, env, json({ ok: true }));
+        return afterWrite(ctx, env, request, json({ ok: true }));
       }
 
       return err(404, "no such endpoint");
