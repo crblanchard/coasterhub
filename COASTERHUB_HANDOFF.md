@@ -3033,6 +3033,26 @@ copied from a page that works (`header.nav` / `.nav-inner` / `nav.links` / `.bra
 one written from memory put the nav on a second line; and `riderBadge()` REPLACES the host
 with a wrapper div holding the button, so a test must look for `#hero_badge button`.
 
+### /edit has a dark mode, and the footer is five links (2026-09-21)
+
+Carter: *"dark mode for /edit please? let me choose."* `edit.html` is standalone on purpose —
+no `style.css`, no `app.js` — and was light-only, with twenty hard-coded light colours in its
+rules (`#fff` nine times, the warm tints, the badge tints). Every one is a role now: two
+palettes on `:root` (dark, the default, as everywhere else) and `:root[data-theme="light"]`
+(the warm palette the page always had, unchanged), plus `color-scheme` on each so native
+selects and checkboxes follow. It reads the **same choice** the rest of the site stores —
+`ch_theme` in localStorage, `data-theme="light"` on `<html>` — through the same pre-paint
+line every page carries and a small re-statement of `applyTheme()` (same key, same attribute,
+same `theme-color` meta), so the toggle here and the toggle on any other page are one
+decision. The toggle sits in the header bar and on the gate card. Checked in the harness:
+opens dark, inputs dark with light text (the classic failure), the click flips and stores
+`light`, a reload keeps it, and `dark` set elsewhere applies here.
+
+Carter, minutes later: *"make the footer only home - count - add new - edit - site map."*
+Done on all fifteen pages. That removes Rankings, Categories, Profile, Log and **Map** from the
+footer; the first four are in the nav and the tab bar, and `/map` is now reachable only by its
+URL — which is inside his "unlisted or just in the footer".
+
 ---
 
 ## Open tasks

@@ -5,44 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Editor — Coaster Hub</title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="dark light">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <style>
-  :root { --ink:#14110f; --muted:#6b6459; --line:#e5ddd0; --bg:#faf7f2; --accent:#b4471f; --ok:#0a7d2c; }
+  /* Two palettes, one set of roles (Carter, 2026-09-21: "dark mode for /edit,
+     let me choose"). This page does not load style.css or app.js — it is
+     standalone on purpose — so it carries its own tokens, but it reads the
+     SAME choice the rest of the site stores (`ch_theme` in localStorage,
+     `data-theme="light"` on <html>), so the toggle here and the toggle on any
+     other page are one decision. Dark is the default, as everywhere else. The
+     light set is the warm palette this page always had, unchanged.
+
+     Every colour below is a role, never a hex in a rule: the first pass at
+     dark mode found twenty hard-coded light colours in the rules, which is
+     how a page ends up with white inputs on a dark background. */
+  :root { color-scheme:dark;
+    --ink:#f4f7ff; --muted:#9fb0d6; --bg:#0b1020; --panel:#121a33;
+    --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.2);
+    --soft:#182240; --soft2:#1f2b4d;
+    --accent:#ff7b7f; --ok:#4ad07a; --link:#7cc7ff;
+    --btn-bg:#37d0c8; --btn-fg:#07111f; --btn-hover:#5ee0d8;
+    --bad-bg:rgba(255,90,95,.14); --bad-line:rgba(255,90,95,.45);
+    --warn-bg:rgba(255,196,64,.14); --warn-fg:#ffd166;
+    --ok-bg:rgba(74,208,122,.14); --shadow:rgba(0,0,0,.35); }
+  :root[data-theme="light"] { color-scheme:light;
+    --ink:#14110f; --muted:#6b6459; --bg:#faf7f2; --panel:#fff;
+    --line:#e5ddd0; --line2:#cfc7ba;
+    --soft:#f2ece2; --soft2:#efe7d9;
+    --accent:#b4471f; --ok:#0a7d2c; --link:#2a6db0;
+    --btn-bg:#14110f; --btn-fg:#fff; --btn-hover:#000;
+    --bad-bg:#fbe6de; --bad-line:#e3b3a6;
+    --warn-bg:#f7ecd2; --warn-fg:#8a6100;
+    --ok-bg:#e0f0e4; --shadow:rgba(0,0,0,.05); }
   * { box-sizing:border-box; }
   body { margin:0; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); }
 
-  .card { max-width:420px; margin:14vh auto; background:#fff; border:1px solid var(--line); border-radius:14px; padding:28px; box-shadow:0 6px 24px rgba(0,0,0,.05); }
+  .card { max-width:420px; margin:14vh auto; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:28px; box-shadow:0 6px 24px var(--shadow); }
   .card h1 { margin:0 0 4px; font-size:1.35rem; }
   .sub { color:var(--muted); font-size:.95rem; }
   label { display:block; font-size:.72rem; color:var(--muted); margin:0 0 5px; text-transform:uppercase; letter-spacing:.04em; }
-  input, select { width:100%; padding:9px 11px; font-size:.95rem; border:1px solid #cfc7ba; border-radius:8px; background:#fff; }
-  button { font-size:.9rem; font-weight:600; border:0; border-radius:8px; background:var(--ink); color:#fff; cursor:pointer; padding:9px 13px; }
-  button:hover { background:#000; }
-  button.ghost { background:#fff; color:var(--ink); border:1px solid #cfc7ba; }
-  button.ghost:hover { background:#f2ece2; }
-  button.ghost.on { background:#efe7d9; }
-  button.danger { background:#fff; color:var(--accent); border:1px solid #e3b3a6; }
+  input, select { width:100%; padding:9px 11px; font-size:.95rem; border:1px solid var(--line2); border-radius:8px; background:var(--panel); color:var(--ink); }
+  button { font-size:.9rem; font-weight:600; border:0; border-radius:8px; background:var(--btn-bg); color:var(--btn-fg); cursor:pointer; padding:9px 13px; }
+  button:hover { background:var(--btn-hover); }
+  button.ghost { background:var(--panel); color:var(--ink); border:1px solid var(--line2); }
+  button.ghost:hover { background:var(--soft); }
+  button.ghost.on { background:var(--soft2); }
+  button.danger { background:var(--panel); color:var(--accent); border:1px solid var(--bad-line); }
   .msg { margin-top:12px; font-size:.9rem; min-height:1.1em; }
   .bad { color:var(--accent); } .good { color:var(--ok); }
 
   #app { display:none; }
-  header.bar { position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--line); padding:10px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  header.bar { position:sticky; top:0; z-index:5; background:var(--panel); border-bottom:1px solid var(--line); padding:10px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   header.bar h1 { font-size:1.05rem; margin:0; }
   header.bar .grow { flex:1; }
   header.bar .count { color:var(--muted); font-size:.82rem; }
-  .seg { display:flex; border:1px solid #cfc7ba; border-radius:8px; overflow:hidden; }
-  .seg button { border:0; border-radius:0; background:#fff; color:var(--muted); padding:8px 12px; }
-  .seg button.on { background:var(--ink); color:#fff; }
+  .seg { display:flex; border:1px solid var(--line2); border-radius:8px; overflow:hidden; }
+  .seg button { border:0; border-radius:0; background:var(--panel); color:var(--muted); padding:8px 12px; }
+  .seg button:hover { background:var(--soft); }
+  .seg button.on { background:var(--btn-bg); color:var(--btn-fg); }
   .wrap { display:grid; grid-template-columns: 1fr 1fr; gap:0; height:calc(100vh - 54px); }
   @media (max-width:820px){ .wrap { grid-template-columns:1fr; height:auto; } }
   .list { overflow:auto; border-right:1px solid var(--line); }
-  .row { padding:9px 16px; border-bottom:1px solid #f0e9dd; cursor:pointer; font-size:.9rem; }
-  .row:hover { background:#f6f0e6; }
-  .row.sel { background:#efe7d9; }
-  .sec { padding:14px 16px 7px; cursor:default; border-top:2px solid #d9cdb8;
-         background:#f2ece1; position:sticky; top:0; }
-  .sec:hover { background:#f2ece1; }
+  .row { padding:9px 16px; border-bottom:1px solid var(--line); cursor:pointer; font-size:.9rem; }
+  .row:hover { background:var(--soft); }
+  .row.sel { background:var(--soft2); }
+  .sec { padding:14px 16px 7px; cursor:default; border-top:2px solid var(--line2);
+         background:var(--soft); position:sticky; top:0; }
+  .sec:hover { background:var(--soft); }
   .sec .nm { text-transform:uppercase; letter-spacing:.09em; font-size:.72rem;
-             font-weight:700; color:#6b6355; }
+             font-weight:700; color:var(--muted); }
   .sec .pk { font-size:.76rem; }
   .live { padding:14px 16px 7px; cursor:default; }
   .live .nm { text-transform:uppercase; letter-spacing:.09em; font-size:.72rem;
@@ -50,14 +81,14 @@
   .row .nm { font-weight:600; }
   .row .pk { color:var(--muted); font-size:.82rem; }
   .pin { font-size:.9rem; margin-right:5px; }
-  .pin.on { color:var(--ok); } .pin.off { color:#c9a99f; }
+  .pin.on { color:var(--ok); } .pin.off { color:var(--bad-line); }
   .badge { display:inline-block; font-size:.68rem; padding:1px 6px; border-radius:20px; margin-left:6px; vertical-align:middle; }
   /* Two states, not one: nothing filled in at all is a different job from a row
      that just needs its last couple of numbers, and they used to look identical. */
-  .badge.nostats { background:#fbe6de; color:var(--accent); }
-  .badge.somestats { background:#f7ecd2; color:#8a6100; }
-  .badge.nomap { background:#fbe6de; color:var(--accent); }
-  .badge.onmap { background:#e0f0e4; color:var(--ok); }
+  .badge.nostats { background:var(--bad-bg); color:var(--accent); }
+  .badge.somestats { background:var(--warn-bg); color:var(--warn-fg); }
+  .badge.nomap { background:var(--bad-bg); color:var(--accent); }
+  .badge.onmap { background:var(--ok-bg); color:var(--ok); }
   .editor { overflow:auto; padding:20px 22px; }
   .editor .empty { color:var(--muted); margin-top:40px; text-align:center; }
   .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
@@ -70,13 +101,13 @@
   .hint { color:var(--muted); font-size:.82rem; margin:4px 0 0; }
   .cbrow { display:flex; align-items:center; gap:6px; font-size:.85rem; color:var(--muted); }
   .cbrow input { width:auto; }
-  a.osm { color:#2a6db0; font-size:.85rem; }
+  a.osm { color:var(--link); font-size:.85rem; }
   /* A scrolling box inside the editor pane. The lists it holds are as long as
      the database — 545 rides carry no model — and without it the pane's own
      scrollbar carried everything, so the control that acts on a list sat
      hundreds of rows below the list. */
   .pane { max-height:42vh; overflow:auto; border:1px solid var(--line);
-          border-radius:10px; padding:6px 10px; background:#fff; margin-top:8px; }
+          border-radius:10px; padding:6px 10px; background:var(--panel); margin-top:8px; }
   /* These rows are inside <label>s so the checkbox is clickable, and `label`
      in this page is a FIELD label: uppercase and letter-spaced. A ride's name
      is not a field label. Same family as the CSS lessons in CLAUDE.md — the
@@ -87,10 +118,14 @@
   /* How much of a model has been filed into categories. Named for what it
      means rather than where it is drawn, because the same three states are
      read in the models list and in the triage headers. */
-  .badge.mixed { background:#fbe6de; color:var(--accent); }
-  .badge.partial { background:#f7ecd2; color:#8a6100; }
-  .badge.settled { background:#e0f0e4; color:var(--ok); }
-  .badge.gone { background:#efe9df; color:var(--muted); }
+  .badge.mixed { background:var(--bad-bg); color:var(--accent); }
+  .badge.partial { background:var(--warn-bg); color:var(--warn-fg); }
+  .badge.settled { background:var(--ok-bg); color:var(--ok); }
+  .badge.gone { background:var(--soft2); color:var(--muted); }
+  /* The theme toggle: the same sun-and-moon the site's header carries. */
+  .themetoggle { width:32px; height:32px; padding:0; border-radius:999px; background:var(--panel); border:1px solid var(--line2); color:var(--muted); display:inline-flex; align-items:center; justify-content:center; }
+  .themetoggle:hover { background:var(--soft); color:var(--ink); }
+  .themetoggle svg { width:16px; height:16px; }
 </style>
 </head>
 <body>
@@ -101,6 +136,7 @@
       <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••"></div>
     <div style="margin-top:14px"><button id="go" style="width:100%">Unlock</button></div>
     <div class="msg" id="msg"></div>
+    <div style="margin-top:14px;display:flex;justify-content:flex-end"><button class="themetoggle" type="button" data-el="theme" aria-label="Switch theme" title="Switch theme"></button></div>
   </div>
 
   <div id="app">
@@ -124,6 +160,7 @@
       <span class="count" id="geosum"></span>
       <button class="ghost" id="geo">Geocode missing parks</button>
       <span class="count" id="geostat"></span>
+      <button class="themetoggle" type="button" data-el="theme" aria-label="Switch theme" title="Switch theme"></button>
       <a href="/" style="color:var(--muted);font-size:.85rem;text-decoration:none">← Site</a>
     </header>
     <div class="wrap">
@@ -133,6 +170,37 @@
   </div>
 
   <script>
+// ---- the theme, chosen here or anywhere else on the site --------------------
+// The same key and the same attribute app.js uses (THEME_KEY / applyTheme),
+// re-stated because this page does not load app.js. Dark unless the choice
+// says light; the choice is one choice, site-wide.
+(function(){
+  var KEY='ch_theme';
+  var SUN='<path d="M12 4V2M12 22v-2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4M5.6 18.4l-1.4 1.4M19.8 4.2l-1.4 1.4"/><circle cx="12" cy="12" r="4"/>';
+  var MOON='<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>';
+  function current(){ try{ return localStorage.getItem(KEY)==='light' ? 'light' : 'dark'; }catch(e){ return 'dark'; } }
+  function apply(t){
+    if(t==='light') document.documentElement.setAttribute('data-theme','light');
+    else document.documentElement.removeAttribute('data-theme');
+    var m=document.querySelector('meta[name="theme-color"]');
+    if(!m){ m=document.createElement('meta'); m.setAttribute('name','theme-color'); document.head.appendChild(m); }
+    m.setAttribute('content', t==='light' ? '#faf7f2' : '#0b1020');
+    var btns=document.querySelectorAll('[data-el="theme"]');
+    for(var i=0;i<btns.length;i++){
+      // The icon shows where the click GOES, as app.js does: a sun on the dark page.
+      btns[i].innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(t==='light'?MOON:SUN)+'</svg>';
+      btns[i].setAttribute('aria-label', t==='light' ? 'Switch to dark mode' : 'Switch to light mode');
+    }
+  }
+  apply(current());
+  var btns=document.querySelectorAll('[data-el="theme"]');
+  for(var i=0;i<btns.length;i++) btns[i].addEventListener('click',function(){
+    var next = current()==='light' ? 'dark' : 'light';
+    try{ localStorage.setItem(KEY,next); }catch(e){}
+    apply(next);
+  });
+})();
+
   var TOKEN = "";
   var state = { mode:"coasters", coasters: [], byId: {}, sel: null, opts: { manu:[], model:[] },
                 geo: {}, parks: [], selPark: null,
