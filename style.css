@@ -578,7 +578,11 @@ footer.site a:hover{color:var(--fg)}
 .cropview{position:relative;width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;
   background:var(--well);border:1px solid var(--line);touch-action:none;cursor:grab}
 .cropview:active{cursor:grabbing}
-.cropimg{position:absolute;inset:0;background-repeat:no-repeat}
+/* A CANVAS, not a background image. The preview and the saved file are the
+   same drawCrop() call now — see profile-edit.js — so what you frame cannot
+   differ from what you get. It sizes itself in device pixels, hence the
+   100%/100% here: the attribute size is the bitmap, this is the box. */
+.cropimg{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* The dimming goes OUTSIDE the circle: the picture being chosen stays bright
    and what will be cropped away is knocked back. `inset` does the opposite. */
 .cropmask{position:absolute;inset:0;pointer-events:none;border-radius:50%;

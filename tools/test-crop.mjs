@@ -13,12 +13,13 @@
  * which is exactly what a phone hands over, and no binary is committed.
  *
  * Every pixel of the fixture says where it is — RED is the row as a fraction of
- * the displayed height, GREEN the column as a fraction of its width. So the
- * saved 256x256 can be read back as "you kept 6%-58% down and 15%-85% across"
- * and compared against what the dialog was showing. That comparison is the
- * whole point: the preview is CSS background sizing and the save is a canvas
- * source rectangle, two different engines for the same arithmetic, and when
- * they disagree the picture you get is not the one you framed.
+ * the displayed height, GREEN the column as a fraction of its width. So both the
+ * preview and the saved file can be read back as "this is 6%-58% down and
+ * 15%-85% across the photo" and compared to each other DIRECTLY, in the same
+ * units, sampled at the same points. That comparison is the whole point, and it
+ * is read off pixels rather than CSS on purpose: the two used to be a CSS
+ * background and a canvas draw, two engines for one piece of arithmetic, and
+ * when they disagreed the picture you got was not the one you framed.
  *
  * What it asserts:
  *   1. the browser applies the EXIF rotation (600x800 out of an 800x600 bitmap)
@@ -87,7 +88,7 @@ async function fixture(page, w, h, rot) {
 const u16 = n => { const b = Buffer.alloc(2); b.writeUInt16BE(n); return b; };
 const u32 = n => { const b = Buffer.alloc(4); b.writeUInt32BE(n); return b; };
 
-async function run(page, label, w, h, rot, expect) {
+async function run(page, label, w, h, rot, expect, drag) {
   console.log("\n" + label);
   const buf = await fixture(page, w, h, rot);
   await page.goto(BASE + "/account");
@@ -104,19 +105,48 @@ async function run(page, label, w, h, rot, expect) {
   await page.waitForSelector(".cropwrap:not([hidden])", { timeout: 20000 });
   await page.waitForTimeout(400);   // the second paint(), after layout settles
 
-  // What the dialog is SHOWING, as fractions of the photo.
+  // Dragging is where a preview and a save that were two code paths would drift
+  // apart the furthest, so one case does it: the default frame proves the
+  // opening arithmetic, this proves the arithmetic it is nudged to.
+  if (drag) {
+    const box = await (await page.$(".cropview")).boundingBox();
+    const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+    await page.mouse.move(cx, cy);
+    await page.mouse.down();
+    await page.mouse.move(cx + drag.dx, cy + drag.dy, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(200);
+  }
+
+  // What the dialog is SHOWING, read out of the preview canvas's own pixels.
+  // Sampled 2% inside the edges, the same insets the saved file is read at
+  // below, so the two sets of numbers are directly comparable.
   const shown = await page.evaluate(() => {
-    const view = document.querySelector(".cropview"), img = document.querySelector(".cropimg");
-    const V = view.clientWidth;
-    const bs = getComputedStyle(img).backgroundSize.split(" ").map(parseFloat);
-    const bp = getComputedStyle(img).backgroundPosition.split(" ").map(parseFloat);
-    return { top: -bp[1] / bs[1], bottom: (-bp[1] + V) / bs[1],
-             left: -bp[0] / bs[0], right: (-bp[0] + V) / bs[0] };
+    const cv = document.querySelector("canvas.cropimg");
+    if (!cv || !cv.width) return { error: "the preview is not a canvas with a bitmap" };
+    const d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data;
+    const at = (fx, fy) => {
+      const i = (Math.round((cv.height - 1) * fy) * cv.width + Math.round((cv.width - 1) * fx)) * 4;
+      return { row: d[i] / 255, col: d[i + 1] / 255 };
+    };
+    const a = at(0.02, 0.02), b = at(0.98, 0.98);
+    return { top: a.row, left: a.col, bottom: b.row, right: b.col };
   });
+  if (shown.error) { check("the preview drew", false, shown.error); return; }
   console.log("       preview: " + JSON.stringify({ top: r3(shown.top), bottom: r3(shown.bottom),
                                                     left: r3(shown.left), right: r3(shown.right) }));
-  check("opens where it should", near(shown.top, expect.top) && near(shown.left, expect.left),
-    "top " + r3(shown.top) + " want " + expect.top + ", left " + r3(shown.left) + " want " + expect.left);
+  if (expect) {
+    check("opens where it should", near(shown.top, expect.top) && near(shown.left, expect.left),
+      "top " + r3(shown.top) + " want " + expect.top + ", left " + r3(shown.left) + " want " + expect.left);
+  } else {
+    // A drag has to actually have moved the frame, or the next check passes for
+    // the wrong reason. Measured against where the same photo OPENS (0.069,
+    // 0.164), in either direction: dragging the picture down moves the window
+    // UP the photo, which is the sign this guard first got wrong.
+    check("the drag moved the frame",
+      Math.abs(shown.top - 0.069) > 0.03 || Math.abs(shown.left - 0.164) > 0.03,
+      "top " + r3(shown.top) + " and left " + r3(shown.left) + " are where it opens");
+  }
 
   await page.click(".cropbox button.primary");
   // A failure shows up in the dialog's own message line, so wait for EITHER
@@ -152,16 +182,15 @@ async function run(page, label, w, h, rot, expect) {
   check("saved 256x256", saved.size === "256x256", saved.size);
   console.log("       saved:   " + JSON.stringify({ top: r3(saved.top), bottom: r3(saved.bottom),
                                                     left: r3(saved.left), right: r3(saved.right) }));
-  // The sample points are 2% in, so the region they should report is the
-  // previewed window shrunk by 2% at each end.
-  const span = { v: shown.bottom - shown.top, h: shown.right - shown.left };
-  check("the saved file IS the previewed region",
-    near(saved.top, shown.top + 0.02 * span.v) && near(saved.bottom, shown.top + 0.98 * span.v)
-    && near(saved.left, shown.left + 0.02 * span.h) && near(saved.right, shown.left + 0.98 * span.h),
-    JSON.stringify({ saved, wanted: { top: r3(shown.top + 0.02 * span.v),
-                                      bottom: r3(shown.top + 0.98 * span.v),
-                                      left: r3(shown.left + 0.02 * span.h),
-                                      right: r3(shown.left + 0.98 * span.h) } }));
+  // Both were sampled at the same insets of their own square, so the SAME
+  // numbers have to come back. This is the assertion the whole file exists for.
+  check("the saved file shows exactly what the preview showed",
+    near(saved.top, shown.top) && near(saved.bottom, shown.bottom)
+    && near(saved.left, shown.left) && near(saved.right, shown.right),
+    JSON.stringify({ preview: { top: r3(shown.top), bottom: r3(shown.bottom),
+                                left: r3(shown.left), right: r3(shown.right) },
+                     saved: { top: r3(saved.top), bottom: r3(saved.bottom),
+                              left: r3(saved.left), right: r3(saved.right) } }));
 }
 
 const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox"] });
@@ -172,11 +201,16 @@ try {
   // TALL_FRAME 0.70 and TALL_EYELINE 0.32 put the window at 15%-85% across and
   // centre it 32% down, which on a 600x800 is 5.8% to 58.3%.
   await run(page, "A portrait photo with EXIF Orientation=6", 600, 800, 6,
-    { top: 0.058, left: 0.15 });
+    { top: 0.069, left: 0.164 });   // window 5.8%-58.3% and 15%-85%, sampled 2% in
+  // The same photo, dragged down and left before saving. `expect` is skipped
+  // here — where a drag lands depends on the viewport this runs at, and the
+  // assertion that matters is the next one: preview and file still agree.
+  await run(page, "A portrait photo, dragged before saving", 600, 800, 6,
+    null, { dx: -30, dy: 45 });
   // A wide photo: FRAME 0.70 of the short edge (the height) is a 420px square on
   // an 800x600, centred both ways — 15%-85% down, 23.75%-76.25% across.
   await run(page, "A landscape photo, no rotation", 800, 600, 1,
-    { top: 0.15, left: 0.2375 });
+    { top: 0.164, left: 0.248 });   // window 15%-85% and 23.75%-76.25%, sampled 2% in
 } finally {
   await browser.close();
 }

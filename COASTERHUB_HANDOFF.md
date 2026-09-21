@@ -2800,10 +2800,53 @@ A source pixel at `sx` lands at `k * (sx + CROP.x/s)`, which is 0 at the crop's 
 256 at its right — identical arithmetic, and the test reports byte-identical framing numbers
 before and after, so this is a swap of construct rather than of behaviour.
 
-**Not yet confirmed on the device that has the bug.** If it persists, the DIRECTION of the
-error names the mechanism, so get a screenshot of the result and compare: the whole photo
-means `V`/zoom was lost, a rotated region means the two halves still disagree about the space,
-a shift at the same scale means the offsets. Guessing a fourth time is worse than asking.
+That didn't fix it either. Carter sent the dialog and the result side by side: **the dialog
+framed sky above his head and cut his hands; the avatar came back cutting his hair with room
+at the bottom.** A shift at the same scale, with the margin moved from the top to the bottom —
+*"see how the top and bottom flipped"*.
+
+### So the preview and the save are one function now (2026-09-21)
+
+The bug survived three attempts because of its shape, not its difficulty. **The preview was
+CSS and the save was a canvas.** `background-size` plus `background-position` on one side,
+`drawImage` on the other, the same arithmetic expressed twice in two engines. Chromium made
+them agree, so nothing runnable here could reproduce a disagreement, and every fix was aimed
+at whichever half seemed likelier that hour.
+
+They are not two code paths any more:
+
+```js
+function drawCrop(g, dest) {
+  var s = CROP.base * CROP.zoom, k = dest / CROP.vw;
+  g.setTransform(k, 0, 0, k, 0, 0);
+  g.clearRect(0, 0, CROP.vw, CROP.vw);
+  g.drawImage(CROP.img, CROP.x, CROP.y, CROP.img.width * s, CROP.img.height * s);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+}
+```
+
+`dest` is the only difference between the two callers: the preview canvas in device pixels, or
+`PIC_PX` for the file. Everything else stays in the CSS pixels the crop state is already
+expressed in and is scaled once by the transform. **The preview cannot show a region the file
+does not have, because it is the same call.** No engine gets a second opinion.
+
+Three things fell out of that:
+
+- `.cropimg` is a `<canvas>` rather than a div with a background image.
+- `bake()` no longer makes a `toDataURL` copy of the photo for the preview to point at, which
+  also spares an iPhone a second full-size bitmap.
+- The draw is `drawImage`'s FOUR-argument form — whole image into a destination rect, which is
+  exactly what the CSS was doing — and deliberately not the nine-argument source-rectangle
+  form this file has always warned about.
+
+`tools/test-crop.mjs` asserts it the way it should always have been asserted: it reads the
+PREVIEW canvas's pixels and the SAVED file's pixels at the same insets and demands the same
+numbers, rather than comparing a computed CSS window against a file. Three cases — portrait
+with EXIF Orientation=6, the same photo dragged before saving, and landscape. The drag case is
+the one that matters most: it is where two code paths would drift furthest apart.
+
+**Still unconfirmed on the iPhone**, because Chromium was never wrong here. But there is no
+longer a second implementation for it to be wrong about.
 
 ### Latent: a `<rider>.json` avatar key is a broken image, not an old picture
 

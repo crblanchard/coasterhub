@@ -154,7 +154,7 @@
       + '<div class="cropbox">'
       +   '<h2>Crop your picture</h2>'
       +   '<p class="sub">Drag to move it. Scroll, pinch or use the slider to zoom.</p>'
-      +   '<div class="cropview" data-el="view"><div class="cropimg" data-el="img"></div>'
+      +   '<div class="cropview" data-el="view"><canvas class="cropimg" data-el="img"></canvas>'
       +     '<div class="cropmask" aria-hidden="true"></div></div>'
       +   '<label style="margin-top:14px">Zoom<input type="range" min="100" max="300" value="100"'
       +     ' step="1" data-el="zoom"></label>'
@@ -426,9 +426,11 @@
       c.height = Math.max(1, Math.round(h * k));
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
       try { URL.revokeObjectURL(img.src); } catch (e) {}
-      // The preview paints it as a CSS background, which needs a URL; a canvas
-      // has none, so one is made here and reused rather than per repaint.
-      c.previewUrl = c.toDataURL("image/jpeg", 0.85);
+      // No toDataURL any more. The preview used to be a JPEG copy of this canvas
+      // painted as a CSS background, which meant the thing you looked at and the
+      // thing that got saved were two different images produced by two different
+      // engines — see drawCrop. The preview draws from this canvas directly now,
+      // which also spares an iPhone a second full-size copy of the photo.
       return c;
     }
     // The crop viewport's width is measured once, on open, and EVERY number in
@@ -456,14 +458,42 @@
       CROP.x = Math.min(0, Math.max(V - CROP.img.width * s, CROP.x));
       CROP.y = Math.min(0, Math.max(V - CROP.img.height * s, CROP.y));
     }
+    // ---- ONE function draws the crop, and everything goes through it --------
+    // This is the fix for a bug that survived three attempts. The preview used
+    // to be CSS — a background image, sized and positioned — and the save was a
+    // canvas drawImage. Two engines, the same arithmetic, and on Carter's iPhone
+    // they disagreed: the dialog framed sky above his head and cut his hands,
+    // the avatar came back cutting his hair with room at the bottom. Chromium
+    // agreed with itself, so nothing here could reproduce it (2026-09-21).
+    //
+    // So they are not two code paths any more. `dest` is the size of the square
+    // being drawn into — the preview canvas in device pixels, or PIC_PX for the
+    // file — and everything else is expressed in the CSS pixels the crop state
+    // is already in, scaled once by the transform. The preview cannot show a
+    // region the file does not have, because it is the same call.
+    //
+    // drawImage's FOUR-argument form: the whole image into a destination rect.
+    // That is exactly what `background-size` + `background-position` did, and it
+    // is deliberately NOT the nine-argument source-rectangle form, which is the
+    // one WebKit has read in a space of its own more than once.
+    function drawCrop(g, dest) {
+      var s = CROP.base * CROP.zoom, k = dest / CROP.vw;
+      g.setTransform(k, 0, 0, k, 0, 0);
+      g.clearRect(0, 0, CROP.vw, CROP.vw);
+      g.drawImage(CROP.img, CROP.x, CROP.y, CROP.img.width * s, CROP.img.height * s);
+      g.setTransform(1, 0, 0, 1, 0, 0);
+    }
     function paint() {
       if (!CROP.img) return;
       syncView();
       clamp();
-      var s = CROP.base * CROP.zoom;
-      c.img.style.backgroundImage = 'url("' + CROP.img.previewUrl + '")';
-      c.img.style.backgroundSize = (CROP.img.width * s) + "px " + (CROP.img.height * s) + "px";
-      c.img.style.backgroundPosition = CROP.x + "px " + CROP.y + "px";
+      // Backed at device resolution so the preview is not soft on a phone, but
+      // capped: 3x of a 390px-wide viewport is already 1,170px square and an
+      // iPhone does not need more canvas than that lying around.
+      var dpr = Math.min(3, window.devicePixelRatio || 1);
+      var dest = Math.max(1, Math.round(CROP.vw * dpr));
+      if (c.img.width !== dest) { c.img.width = dest; c.img.height = dest; }
+      drawCrop(c.img.getContext("2d"), dest);
     }
     function openCrop(img) {
       CROP.img = img;
@@ -551,32 +581,9 @@
       // has to be the same square the preview is showing.
       syncView();
       clamp();
-      var s = CROP.base * CROP.zoom, V = CROP.vw;
       var canvas = document.createElement("canvas");
       canvas.width = canvas.height = PIC_PX;
-      // NO NINE-ARGUMENT drawImage. This used to pass the crop as a source
-      // rectangle — drawImage(img, sx, sy, sw, sh, 0, 0, 256, 256) — which is
-      // the one form of the call this file's history warns about: WebKit has
-      // read those coordinates in a space of its own more than once, and the
-      // preview then frames one region while the canvas saves another. Baking
-      // to a canvas first was supposed to settle that, because a canvas carries
-      // no orientation metadata, and on Chromium it does: tools/test-crop.mjs
-      // proves the saved file is the previewed region, on a real EXIF-rotated
-      // JPEG, in both orientations. On Carter's iPhone it still came out
-      // different from the circle he framed (2026-09-21).
-      //
-      // So the source rectangle is gone. The same crop is expressed as a
-      // transform and the PLAIN THREE-ARGUMENT draw, which every engine agrees
-      // on: scale by the destination-per-source ratio, translate so the top-left
-      // of the crop lands at the canvas origin, and let the canvas bounds
-      // discard the rest. Identical arithmetic — a source pixel at sx lands at
-      // k*(sx + CROP.x/s), which is 0 at the crop's left edge and PIC_PX at its
-      // right — with one fewer thing for a browser to have an opinion about.
-      var k = PIC_PX / (V / s);              // destination pixels per source pixel
-      var g = canvas.getContext("2d");
-      g.setTransform(k, 0, 0, k, (CROP.x / s) * k, (CROP.y / s) * k);
-      g.drawImage(CROP.img, 0, 0);
-      g.setTransform(1, 0, 0, 1, 0, 0);
+      drawCrop(canvas.getContext("2d"), PIC_PX);
       new Promise(function (resolve, reject) {
         canvas.toBlob(function (b) { b ? resolve(b) : reject(new Error("could not read that image")); },
           "image/jpeg", 0.88);
