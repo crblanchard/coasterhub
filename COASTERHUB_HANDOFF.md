@@ -3047,7 +3047,7 @@ have more rides."* What that became:
   ticks nothing and says "0 of 15" at every park (it used to fall back to `{rides:[]}`).
 - **Two checkboxes top-left, under the zoom buttons** (a Leaflet control in `topleft`; Leaflet
   stacks a corner's controls in the order they were added, so the zoom stays first). "Ridden
-  112 · Not ridden 119": a park is ridden when the rider has ANY credit there, closed
+  112 · Not visited 119" (Carter, on seeing it: *"call it visited and not visited"* — the popup boxes stay Ridden, they are about rides): a park is visited when the rider has ANY credit there, closed
   coasters included — it was still a visit. Both on to start; untick one and that half goes.
   The markers are built once and kept on the park object (`p.marker`); `refresh()` empties
   the layer group and re-adds the ones that pass, and the note's two numbers follow. The

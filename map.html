@@ -81,7 +81,7 @@
   .ctl.who{padding:4px 6px}
   /* Top-left, under the zoom buttons: which parks are on the map — the ones
      you have a credit at, the ones you do not. Only when there is somebody to
-     ask that about; "ridden" means nothing on the everyone view. */
+     ask that about; "visited" means nothing on the everyone view. */
   .ctl.filt{padding:6px 11px 6px 9px}
   .ctl.filt label{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--fg);padding:3px 0;font-size:.85rem;user-select:none;white-space:nowrap}
   .ctl.filt input{accent-color:var(--accent2);width:16px;height:16px;margin:0;flex:none;cursor:pointer}
@@ -263,16 +263,18 @@ Promise.all([
   // The two boxes, top-left under the zoom buttons (Carter, 2026-09-21:
   // "checkboxes in the top left that show ridden and not ridden while you're
   // logged in"). Both on to start, so the map opens complete; untick one and
-  // that half of the parks goes. A park is "ridden" when the rider has any
-  // credit there. The counts are of parks that are on the map — the unplaced
+  // that half of the parks goes. A park is visited when the rider has any
+  // credit there. Carter, on seeing it: "call it visited and not visited" —
+  // the coaster boxes in the popup stay Ridden, since those are about rides.
+  // The counts are of parks that are on the map — the unplaced
   // ones are the note's business.
   if(log){
     var been=placed.filter(function(p){ return p.been; }).length;
     var filt=L.control({position:'topleft'});
     filt.onAdd=function(){
       var d=L.DomUtil.create('div','ctl filt');
-      d.innerHTML='<label><input type="checkbox" id="f_been" checked> Ridden <small>'+been+'</small></label>'
-        +'<label><input type="checkbox" id="f_not" checked> Not ridden <small>'+(placed.length-been)+'</small></label>';
+      d.innerHTML='<label><input type="checkbox" id="f_been" checked> Visited <small>'+been+'</small></label>'
+        +'<label><input type="checkbox" id="f_not" checked> Not visited <small>'+(placed.length-been)+'</small></label>';
       L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
       return d;
     };
