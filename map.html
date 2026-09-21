@@ -55,7 +55,7 @@
   /* The popup: the park as a link, then its operating coasters as links. A big
      park is a long list, so it scrolls inside the popup rather than off the map. */
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
-  .leaflet-popup-content{margin:12px 14px;line-height:1.45;max-height:min(46vh,380px);overflow-y:auto}
+  .leaflet-popup-content{margin:12px 14px;line-height:1.45;max-height:min(46vh,380px);overflow-y:auto;scrollbar-width:thin}
   .pp h3{font-size:1rem;margin:0 0 1px;font-weight:800}
   .pp h3 a{color:var(--fg);text-decoration:none}.pp h3 a:hover{color:var(--accent2);text-decoration:underline}
   .pp small{color:var(--muted)}
@@ -71,7 +71,12 @@
      these, something less clickable"). */
   .pp li .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
   .pp li.miss a{color:var(--muted)}
-  .pp .closed{color:var(--muted);font-size:.8rem;margin-top:6px}
+  /* The defunct ones, under the operating list: their own small heading, the
+     years on the right the way /count writes them (1990–2017, or "closed 2017"
+     when the opening year is unknown), a tick where the rider has the credit —
+     a defunct coaster ridden is a credit like any other. */
+  .pp .n.dead{color:var(--muted);margin-top:10px}
+  .pp li .yrs{margin-left:auto;flex:none;color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums;padding-left:8px}
   /* Two small panels on the map itself, since there is no page around it:
      the rider switcher top-right (app.js builds the badge into it, exactly as
      it does into a hero), and a note bottom-left about the parks that have no
@@ -139,33 +144,27 @@ var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true}).setView([30,-40],
 // key, dark or light to match the theme, OpenStreetMap if Esri stops
 // answering. See profile.html for the history behind each choice.
 //
-// Plus, here only, Esri's matching REFERENCE layer over the base. The canvas
-// base is unlabelled on purpose, and the reference tiles are its place names —
-// a few big cities at world zoom, towns as you get closer (Carter, 2026-09-21:
-// "can we make cities pop up on the map"). It sits in the tile pane, so the
-// discs and popups stay above it. He also asked to lose the county borders:
-// those are drawn INTO the base tiles, and a raster tile is a picture — there
-// is no layer to switch off. Every keyless basemap draws them too (OSM's are
-// the dashed ones), and Carto's label-only tiles, the one clean way to compose
-// a borderless base, now need an API key and are being retired. So: labels
-// yes, borders no, and this is where the reason lives.
+// No place names, on purpose. Esri's matching Reference layer (the canvas
+// base's city labels: Canvas/World_Dark_Gray_Reference, same host, no key) was
+// on for an hour on 2026-09-21 and came straight off — the labels sit under
+// the discs and every park is at a city, so "San Jose" was a disc with a
+// word poking out of it (Carter: "maybe turn them off this isnt good"). The
+// county borders he asked to lose are drawn INTO the base tiles; a raster
+// tile is a picture, there is no layer to switch off.
 var ESRI='https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
 var TILES={
-  dark: {url:ESRI+'World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',  labels:ESRI+'World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',  attribution:'Tiles &copy; Esri'},
-  light:{url:ESRI+'World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', labels:ESRI+'World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'}
+  dark: {url:ESRI+'World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',  attribution:'Tiles &copy; Esri'},
+  light:{url:ESRI+'World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'}
 };
 var FALLBACK={url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution:'&copy; OpenStreetMap contributors', native:19};
-var base=null, labels=null, fellBack=false;
+var base=null, fellBack=false;
 function setBase(spec){
   var layer=L.tileLayer(spec.url,{attribution:spec.attribution, maxNativeZoom:spec.native||16, maxZoom:19});
   var ok=false, bad=0;
   layer.on('tileload',function(){ ok=true; });
   layer.on('tileerror',function(){ if(!ok && !fellBack && ++bad>=8){ fellBack=true; setBase(FALLBACK); } });
   if(base) map.removeLayer(base);
-  if(labels) map.removeLayer(labels);
   base=layer.addTo(map);
-  // OpenStreetMap's tiles carry their own names: no reference layer over those.
-  labels=spec.labels ? L.tileLayer(spec.labels,{maxNativeZoom:16, maxZoom:19, zIndex:2}).addTo(map) : null;
 }
 function mapTheme(){ return document.documentElement.getAttribute('data-theme')==='light' ? 'light' : 'dark'; }
 setBase(TILES[mapTheme()]);
@@ -216,21 +215,31 @@ Promise.all([
   var placed=all.filter(function(p){ return p.lat!=null && p.lon!=null; });
   var unplaced=all.filter(function(p){ return p.lat==null || p.lon==null; });
 
+  // One row per coaster, operating or defunct: a tick when there is somebody
+  // to tick for, the name as a link, and for a defunct one its years.
+  function row(c){
+    var got=!!MINE[c.id], cl=c.closed ? String(c.closed).slice(0,4) : '';
+    return '<li'+(log?(got?' class="got"':' class="miss"'):'')+'>'
+      +(log ? '<span class="tick" aria-label="'+(got?'Ridden':'Not ridden')+'">'+(got?'\u2713':'')+'</span>' : '')
+      +'<a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'
+      +(cl ? '<span class="yrs">'+(c.yr ? esc(c.yr)+'–'+cl : 'closed '+cl)+'</span>' : '')
+      +'</li>';
+  }
+  // The headline is "11 coasters · 13 ridden": the first number is what is
+  // operating (the number on the disc), the second is everything the rider
+  // has ridden here, defunct ones included — so it can be the bigger of the
+  // two, and the defunct list underneath is where the difference lives.
+  // (Carter, 2026-09-21: "write it as 11 coasters > 13 ridden or however
+  // many. then at the bottom show all defunct coasters too with closing years
+  // and checkboxes as relevant". At Knott's that is 10 operating + 3 defunct.)
   function popup(p){
-    var ridden=p.open.filter(function(c){ return MINE[c.id]; }).length;
+    var ridden=p.open.concat(p.closed).filter(function(c){ return MINE[c.id]; }).length;
     var h='<div class="pp"><h3><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+' →</a></h3>'
       +'<small>'+esc(p.region)+'</small>'
-      +'<div class="n">'+(p.open.length ? p.open.length+' operating coaster'+(p.open.length===1?'':'s') : 'No operating coasters')
-      +(log && p.open.length ? ' · '+ridden+' of '+p.open.length+' ridden' : '')+'</div>';
-    if(p.open.length){
-      h+='<ul>'+p.open.map(function(c){
-        var got=!!MINE[c.id];
-        return '<li'+(log?(got?' class="got"':' class="miss"'):'')+'>'
-          +(log ? '<span class="tick" aria-label="'+(got?'Ridden':'Not ridden')+'">'+(got?'\u2713':'')+'</span>' : '')
-          +'<a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></li>';
-      }).join('')+'</ul>';
-    }
-    if(p.closed.length) h+='<div class="closed">'+p.closed.length+' closed: '+p.closed.map(function(c){ return esc(c.name); }).join(', ')+'</div>';
+      +'<div class="n">'+(p.open.length ? p.open.length+' coaster'+(p.open.length===1?'':'s') : 'No operating coasters')
+      +(log ? ' · '+ridden+' ridden' : '')+'</div>';
+    if(p.open.length) h+='<ul>'+p.open.map(row).join('')+'</ul>';
+    if(p.closed.length) h+='<div class="n dead">'+p.closed.length+' defunct</div><ul class="dead">'+p.closed.map(row).join('')+'</ul>';
     return h+'</div>';
   }
   // The colour ramp: pale at one coaster, the site's red in the middle, deep

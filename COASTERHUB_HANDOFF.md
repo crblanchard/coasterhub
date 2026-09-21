@@ -3088,7 +3088,8 @@ and the filled one teal, `/user/sean/map` counts Sean's parks, and signed out (t
 answers `/api/auth/me` with `{account:null}`) there are no checkboxes and no boxes. Phone:
 the checkboxes and the switcher do not collide.
 
-**Fourth pass: city names, and the county borders that cannot go (2026-09-21).** Carter:
+**Fourth pass: city names, and the county borders that cannot go (2026-09-21) — and the
+names came straight off again, see the fifth pass.** Carter:
 *"can we make cities pop up on the map. maybe hide county borders if you have control over
 that."* Esri's Canvas basemaps come as a pair by design: the `_Base` tiles are the unlabelled
 picture, and the matching `_Reference` tiles (`Canvas/World_Dark_Gray_Reference` /
@@ -3105,6 +3106,31 @@ told him why. (Esri has also announced it is sunsetting its legacy raster basema
 fallback already covers the day `server.arcgisonline.com` stops answering.) Harness: the
 page requests `World_Dark_Gray_Reference` tiles as a second tile layer, a theme change
 requests the light ones with still exactly two layers, and `setBase(FALLBACK)` leaves one.
+
+**Fifth pass, an hour later (2026-09-21).** Carter, with a screenshot of the West Coast: *"maybe
+turn them off this isnt good. then write it as 11 coasters > 13 ridden or however many. then at
+the bottom show all defunct coasters too with closing years and checkboxes as relevant."*
+
+- **Labels off.** Every park is at a city, so every label was under a disc — "San Jose" was a
+  disc with a word poking out of it, "Sacramento" had two on top of it. The Reference layer is
+  gone from `setBase()` (the comment there says why, so the next session does not put it
+  back); the harness now asserts ONE tile layer and no `_Reference` requests. The county-border
+  answer above still stands.
+- **The headline is "11 coasters · 13 ridden".** The first number is what is operating — the
+  number on the disc — and the second is everything the rider has ridden at the park, defunct
+  included, so it can be the larger of the two. His example was Knott's, and the data says
+  exactly that: 10 operating + 3 defunct ridden = 13. Signed out it is just "11 coasters".
+- **The defunct list, at the bottom**, under its own muted heading ("3 defunct"): each one a
+  link, its years on the right the way /count writes them (`1990–2017`, or "closed 2017" when
+  the opening year is unknown — `c.closed` is a date string, the year is its first four
+  characters), and the same tick as the operating rows where the rider has the credit. The
+  old "3 closed: Boomerang, GhostRider (Old), Timberline Twister" line is gone. One `row(c)`
+  builds both lists. The popup's scrollbar is `scrollbar-width:thin`, since his Windows
+  screenshot showed the fat one.
+
+Harness: 21 checks — the Cedar Point ones count `ul:not(.dead) li`, and a Knott's popup reads
+"11 coasters · 13 ridden", "3 defunct" as the last list, every defunct row with `^\d{4}–\d{4}$`
+years and a `/park/…` link, and the three he rode ticked.
 
 
 ### /categories: a category's rows read alphabetically by park (2026-09-21)
