@@ -1,0 +1,5621 @@
+{
+ "parks": {
+  "Oakland Zoo": {
+   "found": false
+  },
+  "Knott's Berry Farm": {
+   "found": false
+  },
+  "Glenwood Caverns": {
+   "found": false
+  },
+  "Dorney Park": {
+   "found": false
+  },
+  "Las Vegas Mini Gran Prix": {
+   "found": false
+  },
+  "John's Incredible Pizza Company Roseville": {
+   "found": false
+  },
+  "Sandy Lake Amusement Park": {
+   "found": false
+  },
+  "Austin's Park and Pizza": {
+   "found": false
+  },
+  "Happy Hollow Park and Zoo": {
+   "found": false
+  },
+  "Sonoma TrainTown Railroad": {
+   "found": false
+  },
+  "Scandia Family Fun Center": {
+   "found": false
+  },
+  "Butler Amusements": {
+   "found": false
+  },
+  "Knoebels": {
+   "found": false
+  },
+  "Fun Land of Fredericksburg": {
+   "found": false
+  },
+  "Busch Gardens Williamsburg": {
+   "found": false
+  },
+  "Sun World Danang Wonders": {
+   "found": false
+  },
+  "Castle Park": {
+   "found": false
+  },
+  "Boomers! (Fountain Valley)": {
+   "found": false
+  },
+  "Adventure City": {
+   "found": false
+  },
+  "Branson Sawmill": {
+   "found": false
+  },
+  "Ferrari World": {
+   "found": false
+  },
+  "VR Park Dubai": {
+   "found": false
+  },
+  "John's Incredible Pizza Company Carson": {
+   "found": false
+  },
+  "Orange County Fair": {
+   "found": false
+  },
+  "Six Flags Great America": {
+   "found": false
+  },
+  "Little Amerricka": {
+   "found": false
+  },
+  "Tom Foolerys Adventure Park": {
+   "found": false
+  },
+  "Knucklehead's Bowling & Family Entertainment": {
+   "found": false
+  },
+  "Nickelodeon Universe": {
+   "found": false
+  },
+  "Adventureland": {
+   "found": false
+  },
+  "Nickelodeon Universe Theme Park": {
+   "found": false
+  },
+  "Deno's Wonder Wheel": {
+   "found": false
+  },
+  "Luna Park": {
+   "found": false
+  },
+  "Copper Mountain": {
+   "found": false
+  },
+  "Universal Studios Hollywood": {
+   "found": false
+  },
+  "CJ Barrymore's": {
+   "found": false
+  },
+  "Canada's Wonderland": {
+   "found": false
+  },
+  "Waldameer": {
+   "found": false
+  },
+  "Lakemont Park": {
+   "found": false
+  },
+  "DelGrosso's Amusement Park": {
+   "found": false
+  },
+  "Morey's Piers": {
+   "found": false
+  },
+  "Mundo Divertido": {
+   "found": false
+  },
+  "Alpine Slide at Magic Mountain": {
+   "found": false
+  },
+  "Six Flags New England": {
+   "found": false
+  },
+  "Phantasialand": {
+   "found": false
+  },
+  "Walibi Belgium": {
+   "found": false
+  },
+  "Bobbejaanland": {
+   "found": false
+  },
+  "Plopsaland Belgium": {
+   "found": false
+  },
+  "Yokohama Cosmoworld": {
+   "found": false
+  },
+  "Yomiuriland": {
+   "found": false
+  },
+  "Hanayashiki": {
+   "found": false
+  },
+  "Tokyo DisneySea": {
+   "found": false
+  },
+  "Tokyo Disneyland": {
+   "found": false
+  },
+  "Fuji-Q Highland": {
+   "found": false
+  },
+  "Nagashima Spaland": {
+   "found": false
+  },
+  "Himeji Central Park": {
+   "found": false
+  },
+  "Universal Studios Japan": {
+   "found": false
+  },
+  "SeaWorld San Diego": {
+   "found": false
+  },
+  "Adventuredome": {
+   "found": false
+  },
+  "Aztlán Parque Urbano": {
+   "found": false
+  },
+  "Busch Gardens Tampa Bay": {
+   "found": false
+  },
+  "California's Great America": {
+   "found": false
+  },
+  "Carowinds": {
+   "found": false
+  },
+  "Cedar Point": {
+   "found": false
+  },
+  "Dollywood": {
+   "found": false
+  },
+  "Universal Epic Universe": {
+   "found": false
+  },
+  "Family Kingdom Amusement Park": {
+   "found": false
+  },
+  "Fun Spot America - Kissimmee": {
+   "found": false
+  },
+  "Fun Spot America - Orlando": {
+   "found": false
+  },
+  "Galveston Island Historic Pleasure Pier": {
+   "found": false
+  },
+  "Indiana Beach": {
+   "found": false
+  },
+  "Islands of Adventure": {
+   "found": false
+  },
+  "Kemah Boardwalk": {
+   "found": false
+  },
+  "Kennywood": {
+   "found": false
+  },
+  "Kings Dominion": {
+   "found": false
+  },
+  "Kings Island": {
+   "found": false
+  },
+  "Lagoon": {
+   "found": false
+  },
+  "Legoland California": {
+   "found": false
+  },
+  "Olympic Bobsled": {
+   "found": false
+  },
+  "Park City Mountain Resort": {
+   "found": false
+  },
+  "SeaWorld Orlando": {
+   "found": false
+  },
+  "Silverwood Theme Park": {
+   "found": false
+  },
+  "Six Flags Discovery Kingdom": {
+   "found": false
+  },
+  "Six Flags Great Adventure": {
+   "found": false
+  },
+  "Six Flags Magic Mountain": {
+   "found": false
+  },
+  "Six Flags Mexico": {
+   "found": false
+  },
+  "Six Flags Over Georgia": {
+   "found": false
+  },
+  "St. Louis's Incredible Pizza Company": {
+   "found": false
+  },
+  "Universal Studios Florida": {
+   "found": false
+  },
+  "Disney's Animal Kingdom": {
+   "found": false
+  },
+  "Disney's Hollywood Studios": {
+   "found": false
+  },
+  "Magic Kingdom": {
+   "found": false
+  },
+  "Six Flags St. Louis": {
+   "found": false
+  },
+  "Celebration City": {
+   "found": false
+  },
+  "Worlds of Fun": {
+   "found": false
+  },
+  "Miner Mike's Adventure Town": {
+   "found": false
+  },
+  "Washington Town & Country Fair": {
+   "found": false
+  },
+  "Magic Springs Theme and Water Park": {
+   "found": false
+  },
+  "Gardaland": {
+   "found": false
+  },
+  "Six Flags Over Texas": {
+   "found": false
+  },
+  "Gatlinburg Mountain Coaster": {
+   "found": false
+  },
+  "Rowdy Bear's Smoky Mountain Snowpark": {
+   "found": false
+  },
+  "Elitch Gardens": {
+   "found": false
+  },
+  "Lakeside Amusement Park": {
+   "found": false
+  },
+  "Frontier City": {
+   "found": false
+  },
+  "America's Fun Park": {
+   "found": false
+  },
+  "Mascoutah Homecoming Festival": {
+   "found": false
+  },
+  "Timber Falls Adventure Park": {
+   "found": false
+  },
+  "Mt. Olympus": {
+   "found": false
+  },
+  "San Diego County Fair": {
+   "found": false
+  },
+  "Legoland Florida": {
+   "found": false
+  },
+  "Playland": {
+   "found": false
+  },
+  "Tropic Falls Theme Park": {
+   "found": false
+  },
+  "Race City PCB": {
+   "found": false
+  },
+  "Swampy Jack's Wongo Adventure": {
+   "found": false
+  },
+  "SeaWorld San Antonio": {
+   "found": false
+  },
+  "Lost Island Theme Park": {
+   "found": false
+  },
+  "Track Family Fun Parks": {
+   "found": false
+  },
+  "Michigan's Adventure": {
+   "found": false
+  },
+  "Shepherd's Adventure Park": {
+   "found": false
+  },
+  "Prairie Playland": {
+   "found": false
+  },
+  "Boardwalk Amusements": {
+   "found": false
+  },
+  "Fun Spot America - Atlanta": {
+   "found": false
+  },
+  "Alabama Adventure": {
+   "found": false
+  },
+  "Tulsa's Incredible Pizza Company": {
+   "found": false
+  },
+  "China Dinosaurs Park": {
+   "found": false
+  },
+  "Happy Valley": {
+   "found": false
+  },
+  "Joyland": {
+   "found": false
+  },
+  "Nanchang Sunac Land": {
+   "found": false
+  },
+  "Shanghai Disneyland": {
+   "found": false
+  },
+  "Suzhou Amusement Land Forest World": {
+   "found": false
+  },
+  "Wuxi Sunac Land": {
+   "found": false
+  },
+  "Fantasiana": {
+   "found": false
+  },
+  "Zinkenlifte Bad Dürrnberg": {
+   "found": false
+  },
+  "Jardin d'Acclimatation": {
+   "found": false
+  },
+  "Le Pal": {
+   "found": false
+  },
+  "Parc Astérix": {
+   "found": false
+  },
+  "Parc Saint Paul": {
+   "found": false
+  },
+  "Vulcania": {
+   "found": false
+  },
+  "Walibi Rhône-Alpes": {
+   "found": false
+  },
+  "Walygator Grand Est": {
+   "found": false
+  },
+  "Pouzet Group": {
+   "found": false
+  },
+  "Erlebnispark Tripsdrill": {
+   "found": false
+  },
+  "Europa Park": {
+   "found": false
+  },
+  "Hansa-Park": {
+   "found": false
+  },
+  "Heide Park Resort": {
+   "found": false
+  },
+  "Plopsaland Deutschland": {
+   "found": false
+  },
+  "Nettuno Park": {
+   "found": false
+  },
+  "Energylandia": {
+   "found": false
+  },
+  "Legendia": {
+   "found": false
+  },
+  "Ferrari Land": {
+   "found": false
+  },
+  "Parque de Atracciones de Madrid": {
+   "found": false
+  },
+  "Parque de Atracciones Monte Igueldo": {
+   "found": false
+  },
+  "Parque Warner Madrid": {
+   "found": false
+  },
+  "PortAventura Park": {
+   "found": false
+  },
+  "Tibidabo": {
+   "found": false
+  },
+  "Gröna Lund": {
+   "found": false
+  },
+  "Kolmården": {
+   "found": false
+  },
+  "Liseberg": {
+   "found": false
+  },
+  "Skara Sommarland": {
+   "found": false
+  },
+  "Alton Towers": {
+   "found": false
+  },
+  "Chessington World of Adventures": {
+   "found": false
+  },
+  "Drayton Manor": {
+   "found": false
+  },
+  "Pleasure Beach Resort": {
+   "found": false
+  },
+  "Calaway Park": {
+   "found": false
+  },
+  "Galaxyland": {
+   "found": false
+  },
+  "Marineland Theme Park": {
+   "found": false
+  },
+  "Kataplum": {
+   "found": false
+  },
+  "Beech Bend": {
+   "found": false
+  },
+  "Boomers! (El Cajon)": {
+   "found": false
+  },
+  "Branson Coaster": {
+   "found": false
+  },
+  "Branson Mountain Adventure Park": {
+   "found": false
+  },
+  "Canobie Lake Park": {
+   "found": false
+  },
+  "Clementon Park": {
+   "found": false
+  },
+  "Columbus Zoo and Aquarium": {
+   "found": false
+  },
+  "Conneaut Lake Park": {
+   "found": false
+  },
+  "Fun World": {
+   "found": false
+  },
+  "Funtown Splashtown U.S.A.": {
+   "found": false
+  },
+  "Go-Karts Plus": {
+   "found": false
+  },
+  "Goats on the Roof of the Smokies": {
+   "found": false
+  },
+  "Holiday World": {
+   "found": false
+  },
+  "Island in Pigeon Forge": {
+   "found": false
+  },
+  "Kentucky Kingdom": {
+   "found": false
+  },
+  "Lake Compounce": {
+   "found": false
+  },
+  "Moonshine Mountain Coaster": {
+   "found": false
+  },
+  "Nascar Café": {
+   "found": false
+  },
+  "NASCAR SpeedPark": {
+   "found": false
+  },
+  "Niagara Amusement Park & Splash World": {
+   "found": false
+  },
+  "Ober Mountain": {
+   "found": false
+  },
+  "Palace Playland": {
+   "found": false
+  },
+  "Peter Piper Pizza": {
+   "found": false
+  },
+  "Playland Park": {
+   "found": false
+  },
+  "Playland's Castaway Cove": {
+   "found": false
+  },
+  "PowerPlay Family Entertainment Center": {
+   "found": false
+  },
+  "Quassy Amusement Park": {
+   "found": false
+  },
+  "Ripley's Mountain Coaster": {
+   "found": false
+  },
+  "Rocky Top Mountain Coaster": {
+   "found": false
+  },
+  "Santa's Village Amusement and Water Park": {
+   "found": false
+  },
+  "Scandia Amusement Park": {
+   "found": false
+  },
+  "Six Flags Fiesta Texas": {
+   "found": false
+  },
+  "Smoky Mountain Alpine Coaster": {
+   "found": false
+  },
+  "Story Land": {
+   "found": false
+  },
+  "EPCOT": {
+   "found": false
+  },
+  "Davis Amusement Cascadia": {
+   "found": false
+  },
+  "Helm & Sons Amusements": {
+   "found": false
+  },
+  "Ray Cammack Shows": {
+   "found": false
+  },
+  "S.J. Entertainment (Vander Vorste, Steve)": {
+   "found": false
+  },
+  "Todd Armstrong Shows": {
+   "found": false
+  },
+  "Silver Dollar City": {
+   "found": false
+  },
+  "Six Flags America": {
+   "found": false
+  },
+  "Adventure Ocean Oasis (Labadee)": {
+   "found": false
+  },
+  "Alameda County Fair": {
+   "found": false
+  },
+  "Beyond Wonderland": {
+   "found": false
+  },
+  "Casino Pier": {
+   "found": false
+  },
+  "Christmas in the Park": {
+   "found": false
+  },
+  "Disneyland Park (Paris)": {
+   "found": false
+  },
+  "Tahoe Amusement Park": {
+   "found": false
+  },
+  "Luna Park (Melbourne)": {
+   "found": false
+  },
+  "Victorian Gardens": {
+   "found": false
+  },
+  "Walt Disney Studios Park": {
+   "found": false
+  },
+  "Disneyland": {
+   "found": false
+  }
+ },
+ "matched": [],
+ "unmatched": [
+  {
+   "name": "Tiger Trek",
+   "park": "Oakland Zoo",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Timberline Twister",
+   "park": "Knott's Berry Farm",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Snoopy's Tenderpaw Twister Coaster",
+   "park": "Knott's Berry Farm",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Calico Mine Ride",
+   "park": "Knott's Berry Farm",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Alpine Coaster",
+   "park": "Glenwood Caverns",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Demon Drop",
+   "park": "Dorney Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Iron Menace",
+   "park": "Dorney Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Coaster",
+   "park": "Las Vegas Mini Gran Prix",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Piff the Magic Dragon",
+   "park": "Las Vegas Mini Gran Prix",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Incredible Express",
+   "park": "John's Incredible Pizza Company Roseville",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Sandy Lake Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fiesta Express",
+   "park": "Austin's Park and Pizza",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pacific Fruit Express",
+   "park": "Happy Hollow Park and Zoo",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mine Train",
+   "park": "Sonoma TrainTown Railroad",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Train",
+   "park": "Sonoma TrainTown Railroad",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy Dane Coaster",
+   "park": "Scandia Family Fun Center",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Ex-Scream Machine Coaster",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pole Position",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Zillerator",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon (Blue)",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon (Red)",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Orient Express (1)",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Orient Express (2)",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon (blue track)",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon (red track)",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Go Gator",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinning Family Coaster",
+   "park": "Butler Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kozmo's Kurves",
+   "park": "Knoebels",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Black Diamond",
+   "park": "Knoebels",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Twist-n-Shout",
+   "park": "Fun Land of Fredericksburg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Grover's Alpine Express",
+   "park": "Busch Gardens Williamsburg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pantheon",
+   "park": "Busch Gardens Williamsburg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Big Bad Wolf: The Wolf's Revenge",
+   "park": "Busch Gardens Williamsburg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "DarKoaster",
+   "park": "Busch Gardens Williamsburg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Port of Sky Treasure",
+   "park": "Sun World Danang Wonders",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Garuda Valley",
+   "park": "Sun World Danang Wonders",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Castle Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Screamin Demon",
+   "park": "Castle Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tiger Mike",
+   "park": "Boomers! (Fountain Valley)",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Freeway Coaster",
+   "park": "Adventure City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tree Top Racers",
+   "park": "Adventure City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "The Branson Coaster",
+   "park": "Branson Sawmill",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fiorano GT Challenge (Left)",
+   "park": "Ferrari World",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dubai Drone",
+   "park": "VR Park Dubai",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy 8's",
+   "park": "John's Incredible Pizza Company Carson",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Orange County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kiddie Coaster",
+   "park": "Orange County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pinfari Galaxy",
+   "park": "Orange County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Reverchon Spinner",
+   "park": "Orange County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Six Flags Great America",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wrath of Rakshasa",
+   "park": "Six Flags Great America",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Swiss Toboggan",
+   "park": "Little Amerricka",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Little Amerricka",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mad Mouse",
+   "park": "Little Amerricka",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sky Rangers",
+   "park": "Tom Foolerys Adventure Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Miner Mike",
+   "park": "Knucklehead's Bowling & Family Entertainment",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Avatar Airbender",
+   "park": "Nickelodeon Universe",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Underground",
+   "park": "Adventureland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flying Viking",
+   "park": "Adventureland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Timmy's Half-Pipe Havoc",
+   "park": "Nickelodeon Universe Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sandy's Blasting Bronco",
+   "park": "Nickelodeon Universe Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Skyflyer",
+   "park": "Deno's Wonder Wheel",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mini Mouse",
+   "park": "Luna Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rocky Mountain Coaster",
+   "park": "Copper Mountain",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flight of the Hippogriff",
+   "park": "Universal Studios Hollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fast & Furious: Hollywood Drift",
+   "park": "Universal Studios Hollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "CJ Barrymore's",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Loop Roller Coaster",
+   "park": "CJ Barrymore's",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wonder Mountain's Guardian",
+   "park": "Canada's Wonderland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Whirlwind",
+   "park": "Waldameer",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Ravine Flyer 3",
+   "park": "Waldameer",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Skyliner",
+   "park": "Lakemont Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "DelGrosso's Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wild Whizzer",
+   "park": "Morey's Piers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flitzer",
+   "park": "Morey's Piers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Gusano Loco",
+   "park": "Mundo Divertido",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mineshaft Coaster",
+   "park": "Alpine Slide at Magic Mountain",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Great Chase",
+   "park": "Six Flags New England",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pandemonium",
+   "park": "Six Flags New England",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Goliath",
+   "park": "Six Flags New England",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "F.L.Y.",
+   "park": "Phantasialand",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Calamity Mine",
+   "park": "Walibi Belgium",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dreamcatcher",
+   "park": "Bobbejaanland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Supersplash",
+   "park": "Plopsaland Belgium",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Family Banana Coaster",
+   "park": "Yokohama Cosmoworld",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "DinoRunner",
+   "park": "Yomiuriland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Roller Coaster",
+   "park": "Hanayashiki",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flounder's Flying Fish Coaster",
+   "park": "Tokyo DisneySea",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Big Thunder Mountain Railroad",
+   "park": "Tokyo Disneyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Nia and Animal Coaster",
+   "park": "Fuji-Q Highland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Zokkon",
+   "park": "Fuji-Q Highland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Free Fall",
+   "park": "Nagashima Spaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Jet Coaster",
+   "park": "Nagashima Spaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hurricane",
+   "park": "Himeji Central Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Space Fantasy - The Ride",
+   "park": "Universal Studios Japan",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Snoopy's Flying Ace Adventure",
+   "park": "Universal Studios Japan",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mine Cart Madness",
+   "park": "Universal Studios Japan",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Arctic Rescue",
+   "park": "SeaWorld San Diego",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tidal Twister",
+   "park": "SeaWorld San Diego",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Miner Mike",
+   "park": "Adventuredome",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Adventuredome",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Cascabel 2.0",
+   "park": "Aztlán Parque Urbano",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Montana Rusa (Left)",
+   "park": "Aztlán Parque Urbano",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Quimera",
+   "park": "Aztlán Parque Urbano",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Raton Loco",
+   "park": "Aztlán Parque Urbano",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Air Grover",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Cheetah Hunt",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Cobra's Curse",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Iron Gwazi",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kumba",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Montu",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Phoenix Rising",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sand Serpent",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Scorpion",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "SheiKra",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tigris",
+   "park": "Busch Gardens Tampa Bay",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Berserker",
+   "park": "California's Great America",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tiki Twirl",
+   "park": "California's Great America",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Afterburn",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Carolina Cyclone",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Carolina Goldrusher",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Copperhead Strike",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flying Cobras",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fury 325",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Nighthawk",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hurler",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kiddy Hawk",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Ricochet",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Thunder Striker",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Vortex",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wilderness Run",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Woodstock Express",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Snoopy's Racing Railway",
+   "park": "Carowinds",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pipe Scream",
+   "park": "Cedar Point",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wilderness Run",
+   "park": "Cedar Point",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Siren's Curse",
+   "park": "Cedar Point",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Top Thrill 2",
+   "park": "Cedar Point",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Blazing Fury",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragonflier",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "FireChaser Express",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Lightning Rod",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mystery Mine",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tennessee Tornado",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Thunderhead",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wild Eagle",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Whistle Punk Chaser",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Big Bear Mountain",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Lightning Rod (-2020)",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mystery Mine (-2020)",
+   "park": "Dollywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hiccup's Wing Gliders",
+   "park": "Universal Epic Universe",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Curse of the Werewolf",
+   "park": "Universal Epic Universe",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mine-Cart Madness",
+   "park": "Universal Epic Universe",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Stardust Racers (Photon/Yellow)",
+   "park": "Universal Epic Universe",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Stardust Racers (Pulsar/Green)",
+   "park": "Universal Epic Universe",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Swamp Fox",
+   "park": "Family Kingdom Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Twist 'n' Shout",
+   "park": "Family Kingdom Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Galaxy Spin",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mine Blower",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sea Serpent",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rockstar",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fun Spot Kissimmee Kiddie Coaster",
+   "park": "Fun Spot America - Kissimmee",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Freedom Flyer",
+   "park": "Fun Spot America - Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sea Serpent",
+   "park": "Fun Spot America - Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "White Lightning",
+   "park": "Fun Spot America - Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hurricane",
+   "park": "Fun Spot America - Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Iron Shark",
+   "park": "Galveston Island Historic Pleasure Pier",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Cornball Express",
+   "park": "Indiana Beach",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hoosier Hurricane",
+   "park": "Indiana Beach",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Lost Coaster of Superstition Mountain",
+   "park": "Indiana Beach",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Steel Hawg",
+   "park": "Indiana Beach",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tig'rr",
+   "park": "Indiana Beach",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Cyclone",
+   "park": "Indiana Beach",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flight of the Hippogriff",
+   "park": "Islands of Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hagrid's Magical Creatures Motorbike Adventure",
+   "park": "Islands of Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "The High in the Sky Seuss Trolley Train Ride (Left)",
+   "park": "Islands of Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "The High in the Sky Seuss Trolley Train Ride (Right)",
+   "park": "Islands of Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "VelociCoaster",
+   "park": "Islands of Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pteranadon Flyers",
+   "park": "Islands of Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hungarian Horntail",
+   "park": "Islands of Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Chinese Fireball",
+   "park": "Islands of Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Boardwalk Bullet",
+   "park": "Kemah Boardwalk",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Bayern Kurve",
+   "park": "Kennywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Steel Curtain",
+   "park": "Kennywood",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tumbili",
+   "park": "Kings Dominion",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Taxi Jam",
+   "park": "Kings Dominion",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Volcano - The Blast Coaster",
+   "park": "Kings Dominion",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Great Pumpkin Coaster",
+   "park": "Kings Dominion",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hurler",
+   "park": "Kings Dominion",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rapterra",
+   "park": "Kings Dominion",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Shockwave",
+   "park": "Kings Dominion",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "The Racer (Red)",
+   "park": "Kings Island",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Woodstock's Air Rail",
+   "park": "Kings Island",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Beast",
+   "park": "Kings Island",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Great Pumpkin Coaster",
+   "park": "Kings Island",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Vortex",
+   "park": "Kings Island",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Firehawk",
+   "park": "Kings Island",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Snoopy's Soap Box Racers",
+   "park": "Kings Island",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Scooby's Ghoster Coaster",
+   "park": "Kings Island",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Son Of Beast",
+   "park": "Kings Island",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Primordial",
+   "park": "Lagoon",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Coastersaurus",
+   "park": "Legoland California",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon",
+   "park": "Legoland California",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Technic Coaster",
+   "park": "Legoland California",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Olympic Bobsleds",
+   "park": "Olympic Bobsled",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mountain Coaster",
+   "park": "Park City Mountain Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Journey to Atlantis",
+   "park": "SeaWorld Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kraken",
+   "park": "SeaWorld Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mako",
+   "park": "SeaWorld Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Manta",
+   "park": "SeaWorld Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Ice Breaker",
+   "park": "SeaWorld Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pipeline: The Surf Coaster",
+   "park": "SeaWorld Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Super Grover's Box Car Derby",
+   "park": "SeaWorld Orlando",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Stunt Pilot",
+   "park": "Silverwood Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Timber Terror",
+   "park": "Silverwood Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tremors",
+   "park": "Silverwood Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Aftershock",
+   "park": "Silverwood Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Corkscrew",
+   "park": "Silverwood Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Krazy Koaster",
+   "park": "Silverwood Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tiny Toot",
+   "park": "Silverwood Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Harley Quinn Crazy Coaster",
+   "park": "Six Flags Discovery Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pandemonium",
+   "park": "Six Flags Discovery Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Jersey Devil Coaster",
+   "park": "Six Flags Great Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Joker",
+   "park": "Six Flags Great Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flash: Vertical Velocity",
+   "park": "Six Flags Great Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Medusa",
+   "park": "Six Flags Great Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Deja Vu",
+   "park": "Six Flags Magic Mountain",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Magic Flyer",
+   "park": "Six Flags Magic Mountain",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dark Knight",
+   "park": "Six Flags Mexico",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Joker",
+   "park": "Six Flags Mexico",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wonder Woman",
+   "park": "Six Flags Mexico",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Batgirl Batarang",
+   "park": "Six Flags Mexico",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Blue Hawk",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dare Devil Dive",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Goliath",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Riddler Mindbender",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Batman: The Ride",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Twisted Cyclone",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dahlonega Mine Train",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Georgia Scorcher",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Great American Scream Machine",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Joker Funhouse Coaster",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Superman: Ultimate Flight",
+   "park": "Six Flags Over Georgia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "St. Louis's Incredible Pizza Company",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Harry Potter and the Escape from Gringotts",
+   "park": "Universal Studios Florida",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hollywood Rip Ride Rockit",
+   "park": "Universal Studios Florida",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Revenge of the Mummy",
+   "park": "Universal Studios Florida",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Trolls Trollercoaster",
+   "park": "Universal Studios Florida",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Woody Woodpecker's Nuthouse Coaster",
+   "park": "Universal Studios Florida",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Primeval Whirl (Left)",
+   "park": "Disney's Animal Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Primeval Whirl (Right)",
+   "park": "Disney's Animal Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rock 'n' Roller Coaster",
+   "park": "Disney's Hollywood Studios",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Slinky Dog Dash",
+   "park": "Disney's Hollywood Studios",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Space Mountain (Alpha)",
+   "park": "Magic Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Seven Dwarfs Mine Train",
+   "park": "Magic Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "TRON Lightcycle Run",
+   "park": "Magic Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rockin Roller",
+   "park": "Six Flags St. Louis",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Jack Rabbit",
+   "park": "Celebration City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Ozark Wildcat",
+   "park": "Celebration City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Thunderbolt",
+   "park": "Celebration City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Cosmic Coaster",
+   "park": "Worlds of Fun",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Boomerang",
+   "park": "Worlds of Fun",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Runaway Mine Train",
+   "park": "Miner Mike's Adventure Town",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy Cobra",
+   "park": "Washington Town & Country Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Washington Town & Country Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Washington Town & Country Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Twist 'n' Shout",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Gauntlet",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "X Coaster",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Diamond Mine Run",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Big Bad John",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Arkansas Twister",
+   "park": "Magic Springs Theme and Water Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Blue Tornado",
+   "park": "Gardaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kung Fu Panda Master",
+   "park": "Gardaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mammut",
+   "park": "Gardaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Oblivion the Black Hole",
+   "park": "Gardaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fuga Da Atlantide",
+   "park": "Gardaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Ortobruco Tour",
+   "park": "Gardaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Raptor",
+   "park": "Gardaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Shaman",
+   "park": "Gardaland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wile E Coyote's Grand Canyon Blaster",
+   "park": "Six Flags Over Texas",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Aquaman Powerwave",
+   "park": "Six Flags Over Texas",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Gatlinburg Mountain Coaster",
+   "park": "Gatlinburg Mountain Coaster",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rowdy Bear Mountain Coaster",
+   "park": "Rowdy Bear's Smoky Mountain Snowpark",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Ski Lift Shootout Coaster",
+   "park": "Rowdy Bear's Smoky Mountain Snowpark",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Blazin' Buckaroo",
+   "park": "Elitch Gardens",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Twister II",
+   "park": "Elitch Gardens",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kiddie Coaster",
+   "park": "Lakeside Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Cyclone",
+   "park": "Lakeside Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon",
+   "park": "Lakeside Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Diamond Back",
+   "park": "Frontier City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Silver Bullet",
+   "park": "Frontier City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Steel Lasso",
+   "park": "Frontier City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wildcat",
+   "park": "Frontier City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wild Kitty",
+   "park": "Frontier City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Windstorm",
+   "park": "America's Fun Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "America's Fun Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Groovy Train",
+   "park": "America's Fun Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Mascoutah Homecoming Festival",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Avalanche Hellcat",
+   "park": "Timber Falls Adventure Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hades",
+   "park": "Mt. Olympus",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Little Titans",
+   "park": "Mt. Olympus",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Opa",
+   "park": "Mt. Olympus",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Olympic Bobsleds",
+   "park": "San Diego County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy Mouse 1",
+   "park": "San Diego County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "San Diego County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "San Diego County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "San Diego County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pinfari Galaxy",
+   "park": "San Diego County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Puppy Express",
+   "park": "San Diego County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Raptor Coaster",
+   "park": "San Diego County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy Mouse 2",
+   "park": "San Diego County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flying School",
+   "park": "Legoland Florida",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Great Lego Race",
+   "park": "Legoland Florida",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Bug Whirled",
+   "park": "Playland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kettle Creek Mine",
+   "park": "Playland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Coaster",
+   "park": "Playland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rollin' Thunder",
+   "park": "Tropic Falls Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Southern Express",
+   "park": "Tropic Falls Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy Mouse",
+   "park": "Tropic Falls Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hurricane (Windstorm)",
+   "park": "Race City PCB",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Loop Coaster (Swampy Jack's Wongo)",
+   "park": "Swampy Jack's Wongo Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "Swampy Jack's Wongo Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Texas Stingray",
+   "park": "SeaWorld San Antonio",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Catapult Falls",
+   "park": "SeaWorld San Antonio",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Beach Rescue Racer",
+   "park": "SeaWorld San Antonio",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Lokolo",
+   "park": "Lost Island Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Nopuku",
+   "park": "Lost Island Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Matugani",
+   "park": "Lost Island Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fire Runner",
+   "park": "Lost Island Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Shaman's Curse",
+   "park": "Lost Island Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "Track Family Fun Parks",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Woodstock Express",
+   "park": "Michigan's Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Zach's Zoomer",
+   "park": "Michigan's Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wolverine Wildcat",
+   "park": "Michigan's Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Corkscrew",
+   "park": "Michigan's Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Thunderhawk",
+   "park": "Michigan's Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Shivering Timbers",
+   "park": "Michigan's Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mad Mouse",
+   "park": "Michigan's Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Copperhead Mountain Coaster",
+   "park": "Shepherd's Adventure Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Prairie Screamer",
+   "park": "Prairie Playland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sand Blaster",
+   "park": "Boardwalk Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hurricane Coaster",
+   "park": "Fun Spot America - Atlanta",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kiddie Coaster",
+   "park": "Fun Spot America - Atlanta",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "ArieForce One",
+   "park": "Fun Spot America - Atlanta",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Centi-SPEED",
+   "park": "Alabama Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Cheddar Chase",
+   "park": "Alabama Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rampage",
+   "park": "Alabama Adventure",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinning Coaster",
+   "park": "Tulsa's Incredible Pizza Company",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dinoconda",
+   "park": "China Dinosaurs Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dinosaur Mountain",
+   "park": "China Dinosaurs Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Diving Coaster",
+   "park": "Happy Valley",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Family Inverted Coaster",
+   "park": "Happy Valley",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mega-Lite",
+   "park": "Happy Valley",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mine Train Coaster",
+   "park": "Happy Valley",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Clouds of Fairyland",
+   "park": "Joyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Roaring Heaven",
+   "park": "Joyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Starry Sky Ripper",
+   "park": "Joyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Coaster Through the Clouds",
+   "park": "Nanchang Sunac Land",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Creep Caterpillar",
+   "park": "Nanchang Sunac Land",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Seven Dwarfs Mine Train",
+   "park": "Shanghai Disneyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "TRON Lightcycle Power Run",
+   "park": "Shanghai Disneyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Broken Rail Roller Coaster",
+   "park": "Suzhou Amusement Land Forest World",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Roller Coaster",
+   "park": "Suzhou Amusement Land Forest World",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dream Factory",
+   "park": "Wuxi Sunac Land",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Falcon",
+   "park": "Wuxi Sunac Land",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Steam Racers",
+   "park": "Wuxi Sunac Land",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fridolin's verrückter Zauberexpress",
+   "park": "Fantasiana",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wild Train",
+   "park": "Fantasiana",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Helios",
+   "park": "Fantasiana",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Keltenblitz",
+   "park": "Zinkenlifte Bad Dürrnberg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Chinois",
+   "park": "Jardin d'Acclimatation",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Défi du Dragon",
+   "park": "Jardin d'Acclimatation",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fort des Pirates",
+   "park": "Jardin d'Acclimatation",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Machine à Vapeur",
+   "park": "Jardin d'Acclimatation",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Souris Mécaniques",
+   "park": "Jardin d'Acclimatation",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Speed Rockets",
+   "park": "Jardin d'Acclimatation",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Azteka (2021-)",
+   "park": "Le Pal",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fjord Explorer",
+   "park": "Le Pal",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tigre de Sibérie",
+   "park": "Le Pal",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Twist",
+   "park": "Le Pal",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Yukon Quad",
+   "park": "Le Pal",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tonnerre de Zeus",
+   "park": "Parc Astérix",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Aérotrain",
+   "park": "Parc Saint Paul",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Formule 1",
+   "park": "Parc Saint Paul",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mini Mouse Cartoon",
+   "park": "Parc Saint Paul",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pomme",
+   "park": "Parc Saint Paul",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Souris Verte",
+   "park": "Parc Saint Paul",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wood Express",
+   "park": "Parc Saint Paul",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Namazu",
+   "park": "Vulcania",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Coccinelle",
+   "park": "Walibi Rhône-Alpes",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Generator",
+   "park": "Walibi Rhône-Alpes",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mahuka",
+   "park": "Walibi Rhône-Alpes",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mystic",
+   "park": "Walibi Rhône-Alpes",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Timber",
+   "park": "Walibi Rhône-Alpes",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Woodstock Express",
+   "park": "Walibi Rhône-Alpes",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Anaconda",
+   "park": "Walygator Grand Est",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Comet",
+   "park": "Walygator Grand Est",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Family Coaster",
+   "park": "Walygator Grand Est",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Monster",
+   "park": "Walygator Grand Est",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "La Pomme (chain lift) / Le Train Du Pere Noel",
+   "park": "Pouzet Group",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "G'sengte Sau",
+   "park": "Erlebnispark Tripsdrill",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Karacho",
+   "park": "Erlebnispark Tripsdrill",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mammut",
+   "park": "Erlebnispark Tripsdrill",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rasender Tausendfüßler",
+   "park": "Erlebnispark Tripsdrill",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Alpenexpress Enzian",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Arthur",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Atlantica SuperSplash",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Ba-a-a-Express",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "blue fire Megacoaster",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Euro Mir",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Eurosat - CanCan Coaster",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Matterhorn Blitz",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pegasus",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Poseidon",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Schweizer Bobbahn",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Silver Star",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Voltron",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wodan Timbur Coaster",
+   "park": "Europa Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flucht von Novgorod",
+   "park": "Hansa-Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Schwur des Kärnan",
+   "park": "Hansa-Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Big Loop",
+   "park": "Heide Park Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Bobbahn",
+   "park": "Heide Park Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Desert Race",
+   "park": "Heide Park Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flug der Dämonen",
+   "park": "Heide Park Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Grottenblitz",
+   "park": "Heide Park Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Indy-Blitz",
+   "park": "Heide Park Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Krake",
+   "park": "Heide Park Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Toxic Garden",
+   "park": "Heide Park Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Expedition GeForce",
+   "park": "Plopsaland Deutschland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sky Scream",
+   "park": "Plopsaland Deutschland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tabalugas Achterbahn",
+   "park": "Plopsaland Deutschland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Brucomela",
+   "park": "Nettuno Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Boomerang",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Roller Coaster",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Energuś",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Formuła",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Frutti Loop Coaster",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Happy Loops",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hyperion",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mars",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Roller Coaster Mayan",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Speed",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Viking Roller Coaster",
+   "park": "Energylandia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Diabelska Pętla / Devil's Loop",
+   "park": "Legendia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dream Hunters Society",
+   "park": "Legendia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Lech Coaster",
+   "park": "Legendia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Scary Toys Factory",
+   "park": "Legendia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Junior Red Force",
+   "park": "Ferrari Land",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Red Force",
+   "park": "Ferrari Land",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Abismo",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Padrinos Voladores",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Paw Patrol: Patrulla Canina",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tarántula",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "TNT Tren de la Mina",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tornado",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Vértigo",
+   "park": "Parque de Atracciones de Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Montaña Suiza",
+   "park": "Parque de Atracciones Monte Igueldo",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Batman Gotham City Escape",
+   "park": "Parque Warner Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Coaster Express",
+   "park": "Parque Warner Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Correcaminos Bip Bip",
+   "park": "Parque Warner Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Shadows of Arkham",
+   "park": "Parque Warner Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Stunt Fall",
+   "park": "Parque Warner Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Superman / la Atracción de Acero",
+   "park": "Parque Warner Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tom y Jerry",
+   "park": "Parque Warner Madrid",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Diablo - Tren de la Mina",
+   "park": "PortAventura Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Furius Baco",
+   "park": "PortAventura Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Shambhala",
+   "park": "PortAventura Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Stampida (Blue)",
+   "park": "PortAventura Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tami-Tami",
+   "park": "PortAventura Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Uncharted: The Enigma of Penitence",
+   "park": "PortAventura Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Khan",
+   "park": "PortAventura Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Stampida (Red)",
+   "park": "PortAventura Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tomahawk",
+   "park": "PortAventura Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Muntanya Russa",
+   "park": "Tibidabo",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tibidabo Express",
+   "park": "Tibidabo",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Insane",
+   "park": "Gröna Lund",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Jetline",
+   "park": "Gröna Lund",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kvasten",
+   "park": "Gröna Lund",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Nyckelpigan",
+   "park": "Gröna Lund",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tuff-Tuff Tåget",
+   "park": "Gröna Lund",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Twister",
+   "park": "Gröna Lund",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Vilda Musen",
+   "park": "Gröna Lund",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Delfinexpressen",
+   "park": "Kolmården",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Godiståget",
+   "park": "Kolmården",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wildfire",
+   "park": "Kolmården",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Balder",
+   "park": "Liseberg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Helix",
+   "park": "Liseberg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Lisebergbanan",
+   "park": "Liseberg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rabalder",
+   "park": "Liseberg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Stampbanan",
+   "park": "Liseberg",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Gruvbanan",
+   "park": "Skara Sommarland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinner",
+   "park": "Skara Sommarland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tranan",
+   "park": "Skara Sommarland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Galactica",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Nemesis Reborn",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Oblivion",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Octonauts Rollercoaster Adventure",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rita",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Runaway Mine Train",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Smiler",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinball Whizzer",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Th13teen",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wicker Man",
+   "park": "Alton Towers",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon's Fury",
+   "park": "Chessington World of Adventures",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mandrill Mayhem",
+   "park": "Chessington World of Adventures",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rattlesnake",
+   "park": "Chessington World of Adventures",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Vampire",
+   "park": "Chessington World of Adventures",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Accelerator",
+   "park": "Drayton Manor",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Jormungandr",
+   "park": "Drayton Manor",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Troublesome Trucks Runaway Coaster",
+   "park": "Drayton Manor",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Avalanche",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Big Dipper",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Big One",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Blue Flyer",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Grand National (Left)",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Icon",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Infusion",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Nickelodeon Streak",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Revolution",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Steeplechase (Green)",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Steeplechase (Red)",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Steeplechase (Yellow)",
+   "park": "Pleasure Beach Resort",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Vortex",
+   "park": "Calaway Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mini Express",
+   "park": "Calaway Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Bumble Blast",
+   "park": "Calaway Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Cootie Coaster",
+   "park": "Galaxyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Galaxyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Galaxy Orbiter",
+   "park": "Galaxyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mindbender",
+   "park": "Galaxyland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Mountain",
+   "park": "Marineland Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Lady Bug Coaster",
+   "park": "Marineland Theme Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Carros Locos",
+   "park": "Kataplum",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Chu-Chu",
+   "park": "Kataplum",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Insomnio",
+   "park": "Kataplum",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Kentucky Rumbler",
+   "park": "Beech Bend",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinning Out",
+   "park": "Beech Bend",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wild Mouse",
+   "park": "Beech Bend",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Miners Mike",
+   "park": "Boomers! (El Cajon)",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "The Branson Coaster",
+   "park": "Branson Coaster",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Runaway",
+   "park": "Branson Mountain Adventure Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Canobie Corkscrew",
+   "park": "Canobie Lake Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon",
+   "park": "Canobie Lake Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Untamed",
+   "park": "Canobie Lake Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Yankee Cannonball",
+   "park": "Canobie Lake Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hell Cat",
+   "park": "Clementon Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sea Dragon",
+   "park": "Columbus Zoo and Aquarium",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Blue Streak",
+   "park": "Conneaut Lake Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Devil's Den",
+   "park": "Conneaut Lake Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Fun World",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Excalibur",
+   "park": "Funtown Splashtown U.S.A.",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wild Mouse",
+   "park": "Funtown Splashtown U.S.A.",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Python Pit",
+   "park": "Go-Karts Plus",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Goat Coaster",
+   "park": "Goats on the Roof of the Smokies",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Good Gravy!",
+   "park": "Holiday World",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Spinning Parrot",
+   "park": "Island in Pigeon Forge",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Flying Fox",
+   "park": "Kentucky Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wind Chaser",
+   "park": "Kentucky Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Woodland Run",
+   "park": "Kentucky Kingdom",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Zoomerang",
+   "park": "Lake Compounce",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Moonshine Mountain Coaster",
+   "park": "Moonshine Mountain Coaster",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Speed - The Ride",
+   "park": "Nascar Café",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Speedway Coaster",
+   "park": "NASCAR SpeedPark",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy Mouse",
+   "park": "Niagara Amusement Park & Splash World",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Max's Doggy Dog Coaster",
+   "park": "Niagara Amusement Park & Splash World",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Silver Comet",
+   "park": "Niagara Amusement Park & Splash World",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Tennessee Flyer Mountain Coaster",
+   "park": "Ober Mountain",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Orient Express",
+   "park": "Palace Playland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sea Viper",
+   "park": "Palace Playland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon",
+   "park": "Peter Piper Pizza",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Miner Mike",
+   "park": "Peter Piper Pizza",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Coaster",
+   "park": "Playland Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy Mouse",
+   "park": "Playland Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Family Flyer",
+   "park": "Playland Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Super Flight",
+   "park": "Playland Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "GaleForce",
+   "park": "Playland's Castaway Cove",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pirates Gold Rush",
+   "park": "Playland's Castaway Cove",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Whirlwind",
+   "park": "Playland's Castaway Cove",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wild Waves",
+   "park": "Playland's Castaway Cove",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Python Pit",
+   "park": "PowerPlay Family Entertainment Center",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Little Dipper",
+   "park": "Quassy Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wooden Warrior",
+   "park": "Quassy Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mountain Glider (left)",
+   "park": "Ripley's Mountain Coaster",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Ripley's Mountain Coaster",
+   "park": "Ripley's Mountain Coaster",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rocky Top Mountain Coaster",
+   "park": "Rocky Top Mountain Coaster",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Super Cyclone",
+   "park": "Santa's Village Amusement and Water Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Santa's Village Amusement and Water Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Little Dipper Coaster",
+   "park": "Scandia Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Screamer",
+   "park": "Scandia Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dr. Diabolical's Cliffhanger",
+   "park": "Six Flags Fiesta Texas",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wonder Woman Golden Lasso Coaster",
+   "park": "Six Flags Fiesta Texas",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Alpine Coaster",
+   "park": "Smoky Mountain Alpine Coaster",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Polar Coaster",
+   "park": "Story Land",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Roar-O-Saurus",
+   "park": "Story Land",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Guardians of the Galaxy: Cosmic Rewind",
+   "park": "EPCOT",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Davis Amusement Cascadia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Sooper Jets",
+   "park": "Davis Amusement Cascadia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm (Speedy Gonzales)",
+   "park": "Davis Amusement Cascadia",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Olympic Bobsled",
+   "park": "Helm & Sons Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Helm & Sons Amusements",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy Coaster",
+   "park": "Ray Cammack Shows",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Galaxy Coaster",
+   "park": "Ray Cammack Shows",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Little Dipper Roller Coaster",
+   "park": "Ray Cammack Shows",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Raptor",
+   "park": "Ray Cammack Shows",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crazy Mouse",
+   "park": "S.J. Entertainment (Vander Vorste, Steve)",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Todd Armstrong Shows",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fire In The Hole",
+   "park": "Silver Dollar City",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Firebird",
+   "park": "Six Flags America",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon's Tail Coaster",
+   "park": "Adventure Ocean Oasis (Labadee)",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Fabbri Spinner",
+   "park": "Alameda County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pinfari Galaxy",
+   "park": "Alameda County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "SBF Spinner",
+   "park": "Alameda County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Alameda County Fair",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Wacky Worm",
+   "park": "Beyond Wonderland",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hot Tamales",
+   "park": "Casino Pier",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Hydrus",
+   "park": "Casino Pier",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Pirate's Hideaway",
+   "park": "Casino Pier",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Xolo Loca",
+   "park": "Casino Pier",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Dragon Wagon",
+   "park": "Christmas in the Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Big Thunder Mountain",
+   "park": "Disneyland Park (Paris)",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Casey Jr., Le Petit Train du Cirque",
+   "park": "Disneyland Park (Paris)",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Indiana Jones et le Temple du Peril",
+   "park": "Disneyland Park (Paris)",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Star Wars Hyperspace Mountain: Rebel Mission",
+   "park": "Disneyland Park (Paris)",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Rolling Thunder",
+   "park": "Tahoe Amusement Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Scenic Railway",
+   "park": "Luna Park (Melbourne)",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Mini Mouse",
+   "park": "Victorian Gardens",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Avengers Assemble: Flight Force",
+   "park": "Walt Disney Studios Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Crush's Coaster",
+   "park": "Walt Disney Studios Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "RC Racer",
+   "park": "Walt Disney Studios Park",
+   "why": "park not found on the site"
+  },
+  {
+   "name": "Big Thunder Mountain Railroad (Old)",
+   "park": "Disneyland",
+   "why": "park not found on the site"
+  }
+ ],
+ "manufacturers": {},
+ "models": {},
+ "failures": [
+  {
+   "url": "https://captaincoaster.com/search/api?q=Oakland%20Zoo&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=oakland%20zoo&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Knott's%20Berry%20Farm&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=knott%20s%20berry%20farm&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Glenwood%20Caverns&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=glenwood%20caverns&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Dorney%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=dorney&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Las%20Vegas%20Mini%20Gran%20Prix&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=las%20vegas%20mini%20gran%20prix&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=John's%20Incredible%20Pizza%20Company%20Roseville&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=john%20s%20incredible%20pizza%20company%20roseville&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Sandy%20Lake%20Amusement%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=sandy%20lake&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Austin's%20Park%20and%20Pizza&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=austin%20s%20and%20pizza&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Happy%20Hollow%20Park%20and%20Zoo&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=happy%20hollow%20and%20zoo&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Sonoma%20TrainTown%20Railroad&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=sonoma%20traintown%20railroad&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Scandia%20Family%20Fun%20Center&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=scandia%20family%20fun%20center&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Butler%20Amusements&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=butler%20amusements&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Knoebels&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=knoebels&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Fun%20Land%20of%20Fredericksburg&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=fun%20of%20fredericksburg&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Busch%20Gardens%20Williamsburg&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=busch%20gardens%20williamsburg&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Sun%20World%20Danang%20Wonders&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=sun%20danang%20wonders&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Castle%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=castle&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Boomers!%20(Fountain%20Valley)&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Boomers!&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=boomers&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Adventure%20City&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=adventure%20city&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Branson%20Sawmill&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=branson%20sawmill&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Ferrari%20World&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=ferrari&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=VR%20Park%20Dubai&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=vr%20dubai&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=John's%20Incredible%20Pizza%20Company%20Carson&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=john%20s%20incredible%20pizza%20company%20carson&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Orange%20County%20Fair&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=orange%20county%20fair&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20Great%20America&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20great%20america&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Little%20Amerricka&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=little%20amerricka&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Tom%20Foolerys%20Adventure%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=tom%20foolerys%20adventure&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Knucklehead's%20Bowling%20%26%20Family%20Entertainment&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=knucklehead%20s%20bowling%20and%20family%20entertainment&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Nickelodeon%20Universe&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=nickelodeon%20universe&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Adventureland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=adventureland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Nickelodeon%20Universe%20Theme%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=nickelodeon%20universe&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Deno's%20Wonder%20Wheel&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=deno%20s%20wonder%20wheel&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Luna%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=luna&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Copper%20Mountain&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=copper%20mountain&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Universal%20Studios%20Hollywood&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=universal%20studios%20hollywood&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=CJ%20Barrymore's&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=cj%20barrymore%20s&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Canada's%20Wonderland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=canada%20s%20wonderland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Waldameer&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=waldameer&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Lakemont%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=lakemont&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=DelGrosso's%20Amusement%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=delgrosso%20s&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Morey's%20Piers&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=morey%20s%20piers&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Mundo%20Divertido&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=mundo%20divertido&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Alpine%20Slide%20at%20Magic%20Mountain&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=alpine%20slide%20at%20magic%20mountain&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20New%20England&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20new%20england&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Phantasialand&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=phantasialand&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Walibi%20Belgium&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=walibi%20belgium&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Bobbejaanland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=bobbejaanland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Plopsaland%20Belgium&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=plopsaland%20belgium&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Yokohama%20Cosmoworld&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=yokohama%20cosmoworld&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Yomiuriland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=yomiuriland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Hanayashiki&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=hanayashiki&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Tokyo%20DisneySea&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=tokyo%20disneysea&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Tokyo%20Disneyland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=tokyo%20disneyland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Fuji-Q%20Highland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=fuji%20q%20highland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Nagashima%20Spaland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=nagashima%20spaland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Himeji%20Central%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=himeji%20central&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Universal%20Studios%20Japan&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=universal%20studios%20japan&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=SeaWorld%20San%20Diego&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=seaworld%20san%20diego&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Adventuredome&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=adventuredome&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Aztl%C3%A1n%20Parque%20Urbano&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=aztlan%20parque%20urbano&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Busch%20Gardens%20Tampa%20Bay&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=busch%20gardens%20tampa%20bay&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=California's%20Great%20America&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=california%20s%20great%20america&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Carowinds&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=carowinds&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Cedar%20Point&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=cedar%20point&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Dollywood&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=dollywood&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Universal%20Epic%20Universe&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=universal%20epic%20universe&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Family%20Kingdom%20Amusement%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=family%20kingdom&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Fun%20Spot%20America%20-%20Kissimmee&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=fun%20spot%20america%20kissimmee&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Fun%20Spot%20America%20-%20Orlando&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=fun%20spot%20america%20orlando&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Galveston%20Island%20Historic%20Pleasure%20Pier&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=galveston%20island%20historic%20pleasure%20pier&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Indiana%20Beach&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=indiana%20beach&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Islands%20of%20Adventure&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=islands%20of%20adventure&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Kemah%20Boardwalk&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=kemah%20boardwalk&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Kennywood&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=kennywood&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Kings%20Dominion&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=kings%20dominion&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Kings%20Island&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=kings%20island&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Lagoon&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=lagoon&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Legoland%20California&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=legoland%20california&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Olympic%20Bobsled&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=olympic%20bobsled&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Park%20City%20Mountain%20Resort&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=city%20mountain&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=SeaWorld%20Orlando&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=seaworld%20orlando&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Silverwood%20Theme%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=silverwood&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20Discovery%20Kingdom&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20discovery%20kingdom&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20Great%20Adventure&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20great%20adventure&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20Magic%20Mountain&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20magic%20mountain&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20Mexico&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20mexico&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20Over%20Georgia&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20over%20georgia&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=St.%20Louis's%20Incredible%20Pizza%20Company&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=st%20louis%20s%20incredible%20pizza%20company&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Universal%20Studios%20Florida&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=universal%20studios%20florida&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Disney's%20Animal%20Kingdom&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=disney%20s%20animal%20kingdom&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Disney's%20Hollywood%20Studios&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=disney%20s%20hollywood%20studios&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Magic%20Kingdom&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=magic%20kingdom&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20St.%20Louis&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20st%20louis&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Celebration%20City&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=celebration%20city&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Worlds%20of%20Fun&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=worlds%20of%20fun&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Miner%20Mike's%20Adventure%20Town&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=miner%20mike%20s%20adventure%20town&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Washington%20Town%20%26%20Country%20Fair&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=washington%20town%20and%20country%20fair&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Magic%20Springs%20Theme%20and%20Water%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=magic%20springs%20and%20water&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Gardaland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=gardaland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20Over%20Texas&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20over%20texas&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Gatlinburg%20Mountain%20Coaster&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=gatlinburg%20mountain%20coaster&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Rowdy%20Bear's%20Smoky%20Mountain%20Snowpark&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=rowdy%20bear%20s%20smoky%20mountain%20snowpark&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Elitch%20Gardens&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=elitch%20gardens&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Lakeside%20Amusement%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=lakeside&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Frontier%20City&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=frontier%20city&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=America's%20Fun%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=america%20s%20fun&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Mascoutah%20Homecoming%20Festival&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=mascoutah%20homecoming%20festival&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Timber%20Falls%20Adventure%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=timber%20falls%20adventure&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Mt.%20Olympus&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=mt%20olympus&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=San%20Diego%20County%20Fair&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=san%20diego%20county%20fair&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Legoland%20Florida&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=legoland%20florida&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Playland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=playland&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Tropic%20Falls%20Theme%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=tropic%20falls&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Race%20City%20PCB&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=race%20city%20pcb&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Swampy%20Jack's%20Wongo%20Adventure&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=swampy%20jack%20s%20wongo%20adventure&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=SeaWorld%20San%20Antonio&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=seaworld%20san%20antonio&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Lost%20Island%20Theme%20Park&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=lost%20island&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Track%20Family%20Fun%20Parks&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=track%20family%20fun%20parks&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Michigan's%20Adventure&limit=5",
+   "status": 404
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=michigan%20s%20adventure&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Shepherd's%20Adventure%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=shepherd%20s%20adventure&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Prairie%20Playland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=prairie%20playland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Boardwalk%20Amusements&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=boardwalk%20amusements&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Fun%20Spot%20America%20-%20Atlanta&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=fun%20spot%20america%20atlanta&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Alabama%20Adventure&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=alabama%20adventure&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Tulsa's%20Incredible%20Pizza%20Company&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=tulsa%20s%20incredible%20pizza%20company&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=China%20Dinosaurs%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=china%20dinosaurs&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Happy%20Valley&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=happy%20valley&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Joyland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=joyland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Nanchang%20Sunac%20Land&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=nanchang%20sunac&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Shanghai%20Disneyland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=shanghai%20disneyland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Suzhou%20Amusement%20Land%20Forest%20World&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=suzhou%20forest&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Wuxi%20Sunac%20Land&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=wuxi%20sunac&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Fantasiana&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=fantasiana&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Zinkenlifte%20Bad%20D%C3%BCrrnberg&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=zinkenlifte%20bad%20durrnberg&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Jardin%20d'Acclimatation&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=jardin%20d%20acclimatation&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Le%20Pal&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=le%20pal&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Parc%20Ast%C3%A9rix&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=parc%20asterix&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Parc%20Saint%20Paul&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=parc%20saint%20paul&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Vulcania&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=vulcania&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Walibi%20Rh%C3%B4ne-Alpes&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=walibi%20rhone%20alpes&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Walygator%20Grand%20Est&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=walygator%20grand%20est&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Pouzet%20Group&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=pouzet%20group&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Erlebnispark%20Tripsdrill&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=erlebnispark%20tripsdrill&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Europa%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=europa&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Hansa-Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=hansa&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Heide%20Park%20Resort&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=heide&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Plopsaland%20Deutschland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=plopsaland%20deutschland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Nettuno%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=nettuno&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Energylandia&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=energylandia&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Legendia&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=legendia&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Ferrari%20Land&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=ferrari&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Parque%20de%20Atracciones%20de%20Madrid&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=parque%20de%20atracciones%20de%20madrid&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Parque%20de%20Atracciones%20Monte%20Igueldo&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=parque%20de%20atracciones%20monte%20igueldo&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Parque%20Warner%20Madrid&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=parque%20warner%20madrid&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=PortAventura%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=portaventura&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Tibidabo&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=tibidabo&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Gr%C3%B6na%20Lund&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=grona%20lund&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Kolm%C3%A5rden&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=kolmarden&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Liseberg&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=liseberg&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Skara%20Sommarland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=skara%20sommarland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Alton%20Towers&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=alton%20towers&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Chessington%20World%20of%20Adventures&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=chessington%20of%20adventures&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Drayton%20Manor&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=drayton%20manor&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Pleasure%20Beach%20Resort&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=pleasure%20beach&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Calaway%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=calaway&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Galaxyland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=galaxyland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Marineland%20Theme%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=marineland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Kataplum&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=kataplum&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Beech%20Bend&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=beech%20bend&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Boomers!%20(El%20Cajon)&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Boomers!&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=boomers&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Branson%20Coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=branson%20coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Branson%20Mountain%20Adventure%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=branson%20mountain%20adventure&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Canobie%20Lake%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=canobie%20lake&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Clementon%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=clementon&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Columbus%20Zoo%20and%20Aquarium&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=columbus%20zoo%20and%20aquarium&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Conneaut%20Lake%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=conneaut%20lake&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Fun%20World&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=fun&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Funtown%20Splashtown%20U.S.A.&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=funtown%20splashtown%20u%20s%20a&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Go-Karts%20Plus&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=go%20karts%20plus&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Goats%20on%20the%20Roof%20of%20the%20Smokies&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=goats%20on%20the%20roof%20of%20the%20smokies&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Holiday%20World&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=holiday&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Island%20in%20Pigeon%20Forge&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=island%20in%20pigeon%20forge&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Kentucky%20Kingdom&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=kentucky%20kingdom&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Lake%20Compounce&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=lake%20compounce&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Moonshine%20Mountain%20Coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=moonshine%20mountain%20coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Nascar%20Caf%C3%A9&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=nascar%20cafe&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=NASCAR%20SpeedPark&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=nascar%20speedpark&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Niagara%20Amusement%20Park%20%26%20Splash%20World&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=niagara%20and%20splash&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Ober%20Mountain&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=ober%20mountain&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Palace%20Playland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=palace%20playland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Peter%20Piper%20Pizza&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=peter%20piper%20pizza&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Playland%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=playland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Playland's%20Castaway%20Cove&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=playland%20s%20castaway%20cove&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=PowerPlay%20Family%20Entertainment%20Center&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=powerplay%20family%20entertainment%20center&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Quassy%20Amusement%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=quassy&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Ripley's%20Mountain%20Coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=ripley%20s%20mountain%20coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Rocky%20Top%20Mountain%20Coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=rocky%20top%20mountain%20coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Santa's%20Village%20Amusement%20and%20Water%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=santa%20s%20village%20and%20water&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Scandia%20Amusement%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=scandia&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20Fiesta%20Texas&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20fiesta%20texas&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Smoky%20Mountain%20Alpine%20Coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=smoky%20mountain%20alpine%20coaster&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Story%20Land&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=story&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=EPCOT&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=epcot&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Davis%20Amusement%20Cascadia&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=davis%20cascadia&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Helm%20%26%20Sons%20Amusements&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=helm%20and%20sons%20amusements&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Ray%20Cammack%20Shows&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=ray%20cammack%20shows&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=S.J.%20Entertainment%20(Vander%20Vorste%2C%20Steve)&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=S.J.%20Entertainment&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=s%20j%20entertainment&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Todd%20Armstrong%20Shows&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=todd%20armstrong%20shows&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Silver%20Dollar%20City&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=silver%20dollar%20city&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Six%20Flags%20America&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=six%20flags%20america&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Adventure%20Ocean%20Oasis%20(Labadee)&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Adventure%20Ocean%20Oasis&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=adventure%20ocean%20oasis&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Alameda%20County%20Fair&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=alameda%20county%20fair&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Beyond%20Wonderland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=beyond%20wonderland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Casino%20Pier&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=casino%20pier&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Christmas%20in%20the%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=christmas%20in%20the&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Disneyland%20Park%20(Paris)&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Disneyland%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=disneyland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Tahoe%20Amusement%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=tahoe&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Luna%20Park%20(Melbourne)&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Luna%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=luna&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Victorian%20Gardens&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=victorian%20gardens&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Walt%20Disney%20Studios%20Park&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=walt%20disney%20studios&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=Disneyland&limit=5",
+   "status": 403
+  },
+  {
+   "url": "https://captaincoaster.com/search/api?q=disneyland&limit=5",
+   "status": 403
+  }
+ ]
+}
