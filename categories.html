@@ -39,7 +39,12 @@
   .cat .nm{flex:1;min-width:0;cursor:pointer}
   .cat .nm b{display:flex;align-items:center;font-weight:600;font-size:.92rem;line-height:1.3;min-width:0}
   .cat .nm b .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-  .cat .nm span{display:block;color:var(--muted);font-size:.77rem;line-height:1.35;
+  /* The "14 of 14 ridden · model" line, and ONLY that: a direct child. As
+     `.cat .nm span` it also matched the name's own span inside the <b>, so
+     every category name came out grey and at the sub line's size (Carter,
+     2026-09-24: "make names black instead of grey, count/model can be grey").
+     The CLAUDE.md trap again: check what else a selector matches. */
+  .cat .nm > span{display:block;color:var(--muted);font-size:.77rem;line-height:1.35;
                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* A Coaster Hub category is the same on everybody's list. That is the fact
      worth marking; one you wrote yourself is just your list. */
