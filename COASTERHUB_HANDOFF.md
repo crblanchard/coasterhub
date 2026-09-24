@@ -3259,8 +3259,9 @@ the way.
   `tools/build-cities.mjs`) is placed greedily, biggest first: right of its dot, else left,
   above, below, else not at all, never over a disc or another name. The population needed
   falls with zoom (`minPop`). 2M+ cities ignore the discs (only names block them), because
-  New York has parks on every side and otherwise never got a name. A **Cities** box turns
-  them off (`ch_map_cities`). GeoNames is CC BY; the attribution names it.
+  New York has parks on every side and otherwise never got a name. They are always on: a
+  Cities box to turn them off lasted a day (Carter: *"remove cities checkbox from map"*).
+  GeoNames is CC BY; the attribution names it.
 - **Somebody else's map opens on Visited only** (`SHOW.not = !others`, where others = a
   rider in the URL who is not the one signed in). Your own opens complete.
 - **Desktop popup** is 340–440 wide and up to 62% of the height; operating rows carry their

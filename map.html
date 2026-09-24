@@ -105,7 +105,6 @@
   .ctl.filt .sw{flex:none;width:22px;height:8px;border-radius:4px}
   .ctl.filt select{display:block;width:100%;margin:5px 0 3px;background-color:var(--well);color:var(--fg);
     border:1px solid var(--line);border-radius:8px;padding:5px 6px;font-size:.8rem;cursor:pointer}
-  .ctl.filt label.cities{color:var(--muted);font-size:.8rem}
   /* City names, drawn by the page (see drawCities). A dot and a name beside
      it, haloed in the page colour so it reads over any tile, and the million-
      plus cities a little heavier. The name sits right of the dot, or left
@@ -410,14 +409,15 @@ Promise.all([
   // County. They sit in their own pane below the discs and take no clicks.
   var CITIES=null, cityLayer=L.layerGroup().addTo(map);
   map.createPane('cities'); map.getPane('cities').style.zIndex=450; map.getPane('cities').style.pointerEvents='none';
-  var SHOWCITIES=true;
-  try{ SHOWCITIES = localStorage.getItem('ch_map_cities')!=='0'; }catch(e){}
+  // Always on. There was a Cities box for a day; Carter, 2026-09-24: "remove
+  // cities checkbox from map". The old ch_map_cities key is no longer read, so
+  // somebody who had ticked it off gets the names back.
   // Thousands of people a city needs to be named at each zoom.
   function minPop(z){ return z<=2 ? 6000 : z<=3 ? 3000 : z<=4 ? 1200 : z<=5 ? 600 : z<=6 ? 300 : z<=7 ? 180 : 100; }
   var measure=document.createElement('canvas').getContext('2d');
   function drawCities(){
     cityLayer.clearLayers();
-    if(!CITIES || !SHOWCITIES) return;
+    if(!CITIES) return;
     var z=map.getZoom(), min=minPop(z), size=map.getSize(), taken=[], discs=[];
     function over(list,b){ return list.some(function(t){ return b[0]<t[2] && b[2]>t[0] && b[1]<t[3] && b[3]>t[1]; }); }
     group.eachLayer(function(m){
@@ -467,7 +467,8 @@ Promise.all([
   // carries a swatch of its ramp, so the boxes are the legend too.
   //
   // Comparing turns the two into four — both of you, only you, only them,
-  // neither of you — and "Cities" is always there.
+  // neither of you. Nobody to ask about (signed out, nobody in the URL): no
+  // control at all.
   function box(k, label, count, R){
     return '<label><input type="checkbox" data-k="'+k+'"'+(SHOW[k]?' checked':'')+'>'
       +(R ? '<span class="sw" style="background-image:'+grad(R)+'"></span>' : '')
@@ -479,8 +480,9 @@ Promise.all([
     L.DomEvent.disableClickPropagation(fbox); L.DomEvent.disableScrollPropagation(fbox);
     return fbox;
   };
-  filt.addTo(map);
+  if(log) filt.addTo(map);
   function drawFilt(){
+    if(!fbox) return;
     var h='';
     if(log){
       var cnt={}; placed.forEach(function(p){ var k=kind(p); cnt[k]=(cnt[k]||0)+1; });
@@ -494,16 +496,10 @@ Promise.all([
       }
       h+='<select id="cmp" aria-label="Compare with"><option value="">Compare with…</option>'+cmpOptions()+'</select>';
     }
-    h+='<label class="cities"><input type="checkbox" id="f_cities"'+(SHOWCITIES?' checked':'')+'> Cities</label>';
     fbox.innerHTML=h;
     Array.prototype.forEach.call(fbox.querySelectorAll('input[data-k]'),function(el){
       el.onchange=function(){ SHOW[this.getAttribute('data-k')]=this.checked; refresh(); };
     });
-    fbox.querySelector('#f_cities').onchange=function(){
-      SHOWCITIES=this.checked;
-      try{ localStorage.setItem('ch_map_cities', SHOWCITIES?'1':'0'); }catch(e){}
-      drawCities();
-    };
     var sel=fbox.querySelector('#cmp');
     if(sel){ sel.value=CMP?CMP.slug:''; sel.onchange=function(){ compare(this.value); }; }
   }
