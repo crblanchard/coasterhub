@@ -3256,7 +3256,7 @@ the way.
   each ramp carries its own dark digit colour for the pale end.
 - **Compare.** A "Compare with…" select in the top-left control (friends first — the
   signed-in rider's follows, plus you on somebody else's map — then everyone). Picking one
-  swaps the two boxes for four: both of you (purple), only you (blue), only them (amber),
+  swaps the two boxes for four: both of you (green, purple until later that day — too close to blue), only you (blue), only them (amber),
   neither (red). Each box carries a swatch of its ramp, so the boxes are the legend. The
   popup gains a second tick column in amber and "you 19 · Sean 18" in the headline. The
   popup is now built when it opens (`bindPopup(fn)`), and markers get `setIcon` on a

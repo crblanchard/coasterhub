@@ -338,7 +338,7 @@ Promise.all([
   // kind and the depth still says how big (Carter, 2026-09-24: "make 'visited'
   // blue to separate with the same color gradient"). Yellow is a park the
   // map's rider has not been to (and every park on the everyone view), blue
-  // one they have. Comparing adds red, only the other rider, and purple, both
+  // one they have. Comparing adds red, only the other rider, and green, both
   // of you. (Until Launch Yellow, the same day, not-visited was red and "only
   // them" amber; amber sat too close to the new yellow.)
   var MAX=placed.reduce(function(m,p){ return Math.max(m,p.open.length); },1);
@@ -349,7 +349,10 @@ Promise.all([
     yellow:{stops:[[255,238,168],[255,204,31],[168,112,0]],  ink:'#2e2200', dark:.8},
     blue:  {stops:[[196,222,255],[74,144,255],[14,46,140]], ink:'#0a1f4a'},
     amber: {stops:[[255,228,170],[240,160,30],[140,78,0]],  ink:'#3a2400'},
-    purple:{stops:[[228,206,255],[160,104,240],[72,24,140]],ink:'#2a0a4a'}
+    // "Both of you" was purple until Carter, 2026-09-24: "the purple feels
+    // similar to blue". Green is the one hue left that none of the other three
+    // ramps is near. White digits only once it is deep.
+    green: {stops:[[204,242,210],[52,196,108],[8,100,48]],   ink:'#08301a', dark:.6}
   };
   function rampT(t, R){
     var S=(R||RAMPS.red).stops, i=t<.5?0:1, f=(t-i*.5)*2, a=S[i], b=S[i+1];
@@ -369,7 +372,7 @@ Promise.all([
   }
   var KIND={
     all:{R:RAMPS.yellow}, been:{R:RAMPS.blue}, not:{R:RAMPS.yellow},
-    both:{R:RAMPS.purple}, me:{R:RAMPS.blue}, them:{R:RAMPS.red}, neither:{R:RAMPS.yellow}
+    both:{R:RAMPS.green}, me:{R:RAMPS.blue}, them:{R:RAMPS.red}, neither:{R:RAMPS.yellow}
   };
   function iconFor(p){
     var n=p.open.length;
@@ -539,7 +542,7 @@ Promise.all([
       if(!CMP){
         h+=box('been','Visited',cnt.been||0,RAMPS.blue)+box('not','Not visited',cnt.not||0,RAMPS.yellow);
       } else {
-        h+=box('both','Both of you',cnt.both||0,RAMPS.purple)
+        h+=box('both','Both of you',cnt.both||0,RAMPS.green)
           +box('me','Only '+(others?YOU:'you'),cnt.me||0,RAMPS.blue)
           +box('them','Only '+CMP.name,cnt.them||0,RAMPS.red)
           +box('neither','Neither of you',cnt.neither||0,RAMPS.yellow);
