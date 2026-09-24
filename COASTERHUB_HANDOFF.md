@@ -3282,9 +3282,9 @@ stamp changes — never /log, /add, /import, /rankings, /account or a profile, w
 would eat what you were typing. Other visitors still see a change within the five minutes.
 
 **Home.** Signed in: **You & your friends** (you, then the riders you follow) above **Top
-users**, everyone sorted by credits, most first. Carter wrote "most rides"; credits is what
-was used because the ride total is unknown or an import artifact for half the riders (the
-home page already hides it for unclaimed riders). The hero says "N coasters in the database"
+users**, sorted by **coasters ranked** (the number on the right of each row), then credits,
+then name — Carter's second pass the same day: *"sort top users by number of rides ranked"*.
+The first pass sorted by credits. The hero says "N coasters in the database"
 above "Pick a rider".
 
 **/count.** A location select on the Parks and Rides views (states under United States with

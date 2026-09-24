@@ -219,15 +219,15 @@ CoasterHub.fetchUsers().then(function(){
       var st = CoasterHub.computeStats(coasters, parks, datas[i]);
       return { u: u, st: st, ranked: (ranks[i].order || []).length, credits: st.kpi.credits || 0 };
     });
-    // Most credits first (Carter, 2026-09-24: "'top users' below whoever has
-    // the most rides"). Credits, not the ride total: rides are unknown or an
-    // import artifact for half the riders (see row() above), and the credit
-    // count is the number the whole site ranks people by. Name breaks a tie.
-    rows.sort(function(a, b){ return b.credits - a.credits || a.u.name.localeCompare(b.u.name); });
+    // Most coasters RANKED first — the number on the right of each row
+    // (Carter, 2026-09-24, second pass: "sort top users by number of rides
+    // ranked"; the first pass sorted by credits). Credits break a tie, which
+    // matters while most riders have ranked nothing, then the name.
+    rows.sort(function(a, b){ return b.ranked - a.ranked || b.credits - a.credits || a.u.name.localeCompare(b.u.name); });
     function html(list){ return list.map(function(x){ return row(x.u, x.st, x.ranked); }).join(''); }
     document.getElementById('loading').style.display = 'none';
     if (fol) {
-      // You first, then the people you follow, each list in count order.
+      // You first, then the people you follow, in the same order as below.
       var inF = {}; fol.slugs.forEach(function(s){ inF[s] = 1; });
       var mine = rows.filter(function(x){ return x.u.slug === fol.me; })
         .concat(rows.filter(function(x){ return inF[x.u.slug] && x.u.slug !== fol.me; }));
