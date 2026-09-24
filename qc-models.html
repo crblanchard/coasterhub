@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/">
+<title>QC: models — Coaster Hub</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/style.css?v=20260805b">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<link rel="icon" href="/favicon.svg?v=20260805b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260805b" sizes="32x32" type="image/png">
+<style>
+  .qcbar{display:flex;align-items:center;gap:12px;height:66px}
+  /* The way on from reading to fixing: QC finds the gap, /edit fills it. */
+  .qcbar .go{margin-left:auto;color:var(--accent2);font-weight:600;font-size:.9rem;
+             text-decoration:none;border:1px solid var(--line);border-radius:10px;
+             padding:7px 13px;white-space:nowrap}
+  .qcbar .go:hover{border-color:var(--accent2)}
+  @media (max-width:560px){
+    .qcbar{height:60px;gap:9px}
+    .qcbar .brand-text{font-size:1.05rem}
+    .qcbar .go{padding:6px 11px}
+  }
+  /* The site's own brand, not a one-off wordmark: this page looked like a
+     different website (Carter, 2026-09-18). The lead paragraph under it says
+     what the page is, so nothing here has to. */
+  .qcbar .brand{flex:0 0 auto}
+  /* The same corner every other header wears. app.js fills it. */
+  .qcbar .people{flex:none;display:flex;align-items:center;gap:9px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0}
+  .controls input[type=search],.controls select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem}
+  .controls input[type=search]{min-width:240px;flex:1}
+  .controls label{color:var(--muted);font-size:.9rem;display:flex;align-items:center;gap:6px;cursor:pointer}
+  .controls button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem}
+  .controls button:hover{color:var(--fg)}
+  .count{color:var(--muted);font-size:.85rem;margin-bottom:12px}
+  .count b{color:var(--accent2)}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  table{border-collapse:collapse;width:100%;font-size:.82rem;white-space:nowrap}
+  thead th{position:sticky;top:0;background:var(--well);color:var(--muted);text-align:left;padding:10px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.7rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
+  thead th:hover{color:var(--fg)}
+  thead th.num{text-align:right}
+  thead th .ar{color:var(--accent);margin-left:4px}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--soft)}
+  tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+  tbody td.name{font-weight:600;color:var(--fg)}
+  tbody tr:hover{background:var(--tint)}
+  tbody tr.incomplete td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+  td.muted{color:var(--muted)}
+  .pill{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+  .pill.steel{color:var(--accent2)}.pill.wood{color:var(--accent)}
+  .pill.def{color:var(--accent)}.pill.op{color:var(--accent2)}
+  #loading{color:var(--muted);padding:40px 0}
+  /* A model that looks like another one: same letters once case, spacing and
+     punctuation are gone — or a model with no maker. */
+  tbody tr.dupe td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+  td .why{color:var(--accent);font-size:.75rem;margin-left:6px}
+  td a{color:inherit;text-decoration:none} td a:hover{color:var(--accent2);text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="qcbar">
+    <a class="brand" href="/">
+      <img src="/mark.svg?v=20260805b" alt="" class="brand-mark" width="40" height="40">
+      <span class="brand-text">Coaster <b>Hub</b></span>
+    </a>
+    <a class="go" href="/qc">All coasters</a>
+    <a class="go" style="margin-left:0" href="/edit">Edit</a>
+    <div class="people" id="people"></div>
+  </div>
+</div>
+
+<section class="block" style="padding:8px 0 48px"><div class="container">
+  <p class="lead" style="margin-bottom:8px">Every model on the site, one row per maker and model, with how many coasters carry it. Unlisted, for internal use (Carter, 2026-09-24). The <b style="color:var(--accent)">red bar</b> flags a model that is probably another one spelled differently, or one with no maker. The model and the maker link to the maker&rsquo;s page; fixing a row happens in <a href="/edit" style="color:var(--accent2)">/edit</a>&rsquo;s Models pane.</p>
+  <div id="loading">Loading the list…</div>
+  <div id="ui" style="display:none">
+    <div class="controls">
+      <input id="q" type="search" placeholder="Search manufacturer or model…">
+      <label><input type="checkbox" id="f_dupe"> Only flagged</label>
+      <label><input type="checkbox" id="f_nomodel"> Include &ldquo;no model&rdquo; rows</label>
+      <button id="reset">Reset</button>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="tbl-wrap"><table><thead><tr id="head"></tr></thead><tbody id="body"></tbody></table></div>
+  </div>
+</div></section>
+
+<script src="/app.js?v=20260805b"></script>
+<script>
+CoasterHub.accountCorner(document.getElementById('people'));
+
+const COLS=[
+ {k:'manu',t:'Manufacturer'},
+ {k:'model',t:'Model',cls:'name'},
+ {k:'n',t:'Coasters',num:true},
+ {k:'open',t:'Operating',num:true},
+ {k:'gone',t:'Defunct',num:true},
+ {k:'parks',t:'Parks',num:true},
+ {k:'types',t:'Type'},
+ {k:'first',t:'First',num:true},
+ {k:'last',t:'Latest',num:true},
+];
+let DATA=[], sortKey='n', sortDir=-1;
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// The same squash /add uses to catch "SandSerpent" vs "Sand Serpent": case,
+// accents, punctuation and spaces gone.
+const squash=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+
+// The live list, not coasters.json: the models pane in /edit changes these,
+// and the snapshot only catches up when the sync runs.
+CoasterHub.fetchCoasters().then(j=>{
+  const G={};
+  j.coasters.forEach(c=>{
+    const manu=String(c.manu||'').trim(), model=String(c.model||'').trim();
+    if(!manu&&!model) return;
+    const k=manu+'\u0000'+model;
+    const g=G[k]||(G[k]={manu,model,n:0,open:0,gone:0,parks:{},types:{},first:null,last:null});
+    g.n++; c.closed?g.gone++:g.open++; if(c.park) g.parks[c.park]=1; if(c.type) g.types[c.type]=1;
+    const y=c.yr!=null?+c.yr:(c.opened?+String(c.opened).slice(0,4):null);
+    if(y){ if(g.first==null||y<g.first) g.first=y; if(g.last==null||y>g.last) g.last=y; }
+  });
+  DATA=Object.values(G).map(g=>Object.assign(g,{parks:Object.keys(g.parks).length,types:Object.keys(g.types).sort().join(', ')}));
+  // Flags: two spellings of one model under one maker, and a model with no
+  // maker. The same model NAME under several makers is not flagged — "Kiddie"
+  // and "Looper" are generic, and flagging them buried the real ones.
+  const bySq={};
+  DATA.forEach(g=>{ if(!g.model) return;
+    const k=squash(g.manu)+'|'+squash(g.model); (bySq[k]=bySq[k]||[]).push(g); });
+  DATA.forEach(g=>{ g.why=[]; if(!g.model) return;
+    const sp=bySq[squash(g.manu)+'|'+squash(g.model)];
+    if(sp.length>1) g.why.push('spelled '+sp.length+' ways');
+    if(!g.manu) g.why.push('no maker');
+  });
+  document.getElementById('loading').style.display='none';
+  document.getElementById('ui').style.display='block';
+  const head=document.getElementById('head');
+  COLS.forEach(c=>{const th=document.createElement('th');th.textContent=c.t;th.dataset.k=c.k;if(c.num)th.className='num';
+    th.onclick=()=>{if(sortKey===c.k)sortDir*=-1;else{sortKey=c.k;sortDir=c.num?-1:1;}render();};head.appendChild(th);});
+  document.getElementById('q').addEventListener('input',render);
+  ['f_dupe','f_nomodel'].forEach(id=>document.getElementById(id).addEventListener('change',render));
+  document.getElementById('reset').onclick=()=>{document.getElementById('q').value='';['f_dupe','f_nomodel'].forEach(id=>document.getElementById(id).checked=false);sortKey='n';sortDir=-1;render();};
+  render();
+}).catch(e=>{console.error(e);document.getElementById('loading').textContent='Could not load the coaster list.';});
+
+function rows(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  const fd=document.getElementById('f_dupe').checked, fn=document.getElementById('f_nomodel').checked;
+  let r=DATA.filter(g=>{
+    if(!fn&&!g.model) return false;
+    if(fd&&!g.why.length) return false;
+    if(q&&(g.manu+' '+g.model).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+  r.sort((a,b)=>{let x=a[sortKey],y=b[sortKey];
+    if(x==null&&y==null) return 0; if(x==null) return 1; if(y==null) return -1;
+    let c=(typeof x==='string')?x.localeCompare(y)*sortDir:(x-y)*sortDir;
+    return c||a.manu.localeCompare(b.manu)||a.model.localeCompare(b.model);});
+  return r;
+}
+function render(){
+  const r=rows(), models=DATA.filter(g=>g.model);
+  document.getElementById('count').innerHTML='Showing <b>'+r.length+'</b> of '+models.length+' models · <b>'
+    +models.filter(g=>g.why.length).length+'</b> flagged · '+new Set(DATA.map(g=>g.manu).filter(Boolean)).size+' makers';
+  document.querySelectorAll('#head th').forEach(th=>{const a=th.querySelector('.ar');if(a)a.remove();
+    if(th.dataset.k===sortKey){const sp=document.createElement('span');sp.className='ar';sp.textContent=sortDir<0?'▼':'▲';th.appendChild(sp);}});
+  document.getElementById('body').innerHTML=r.map(g=>'<tr class="'+(g.why.length?'dupe':'')+'">'+COLS.map(col=>{
+    const v=g[col.k];
+    if(col.k==='manu') return v?'<td><a href="'+esc(CoasterHub.makerHref(v))+'">'+esc(v)+'</a></td>':'<td class="muted">—</td>';
+    if(col.k==='model') return '<td class="name">'+(v?(g.manu?'<a href="'+esc(CoasterHub.makerHref(g.manu,v))+'">'+esc(v)+'</a>':esc(v)):'<span class="muted">no model</span>')
+      +(g.why.length?'<span class="why">'+esc(g.why.join(' · '))+'</span>':'')+'</td>';
+    if(v==null||v==='') return '<td class="muted">—</td>';
+    return '<td class="'+(col.num?'num':'')+'">'+esc(v)+'</td>';
+  }).join('')+'</tr>').join('');
+}
+</script>
+</body>
+</html>

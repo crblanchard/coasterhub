@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- /manufacturer/<slug> is a 200 rewrite, so the browser keeps the pretty path and a
+     relative asset href would resolve under it and 404 into an unstyled page.
+     Every asset below is root-absolute, and this <base> covers the rest. -->
+<base href="/">
+<title>Manufacturers — Coaster Hub</title>
+<meta name="description" content="Every coaster maker on the site, their models, and how many of each — Coaster Hub.">
+<link rel="stylesheet" href="/style.css?v=20260805b">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<link rel="icon" href="/favicon.svg?v=20260805b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260805b" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png?v=20260805b" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260805b">
+<meta property="og:title" content="Coaster Hub — Manufacturers">
+<meta property="og:image" content="https://coasterhub.org/og-image.png?v=2">
+<style>
+  /* One maker: its models, biggest first, each opening to its coasters. The
+     index (/manufacturers) is every maker as one list. Carter, 2026-09-24:
+     "make the manufacturers clickable so you can see models / total rides from
+     each manufacturer". Tiles and rows are park.html's shapes, so the two
+     pages read as one family. */
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 20px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+  .tile b{display:block;font-size:1.5rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.15}
+  .tile span{display:block;color:var(--muted);font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+  @media (max-width:680px){ .tiles{grid-template-columns:repeat(2,1fr)} .tile b{font-size:1.25rem} }
+  .sect{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:26px 0 8px}
+  .crumb{margin:0 0 14px;font-size:.86rem}
+  .crumb a{color:var(--muted);text-decoration:none}
+  .crumb a:hover{color:var(--accent2)}
+  .find{width:100%;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);color:var(--fg);
+        padding:10px 12px;border-radius:10px;font-size:.9rem;margin:0 0 12px}
+
+  /* A model is a <details>: the summary is its name and how many, the body
+     its coasters. */
+  details.mdl{border:1px solid var(--line);border-radius:14px;background:var(--panel);margin:0 0 8px;overflow:hidden}
+  details.mdl summary{display:flex;align-items:baseline;gap:10px;padding:12px 16px;cursor:pointer;list-style:none}
+  details.mdl summary::-webkit-details-marker{display:none}
+  details.mdl summary .nm{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  details.mdl summary .ct{margin-left:auto;flex:none;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+  details.mdl summary .ct b{color:var(--accent2)}
+  details.mdl[open] summary{border-bottom:1px solid var(--soft)}
+  details.mdl:target{border-color:var(--accent2)}
+  /* Opened from a #model link: clear of the sticky header. */
+  details.mdl{scroll-margin-top:84px}
+
+  /* A coaster row inside a model, and a maker row on the index: the whole
+     strip is the link. */
+  a.crow{display:flex;align-items:baseline;gap:10px;padding:9px 16px;font-size:.9rem;color:var(--fg);
+         text-decoration:none;border-bottom:1px solid var(--soft)}
+  a.crow:last-child{border-bottom:0}
+  a.crow:hover{background:var(--soft)}
+  a.crow .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
+  a.crow.miss .cn{color:var(--muted)}
+  a.crow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  a.crow:hover .cn{color:var(--accent2)}
+  a.crow .pk{color:var(--muted);font-size:.8rem;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  a.crow .yrs{margin-left:auto;flex:none;padding-left:10px;font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+  a.crow .yrs.off{color:var(--accent)}
+  .panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  @media (max-width:560px){ a.crow .pk{display:none} details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
+  .missing{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
+  .missing p{color:var(--muted);margin:8px 0 0}
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260805b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="riders">Home</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/account" data-nav="profile">Profile</a>
+    <a href="/count" data-nav="count">Count</a>
+    <a href="/map" data-nav="map">Map</a>
+    <a href="/log" data-nav="log">Log</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero" style="--hero-t:56px;--hero-b:26px"><div class="container">
+  <span class="badge" id="hero_badge">Manufacturer</span>
+  <h1 class="wide" data-loading>Loading&hellip;</h1>
+  <p class="wide" id="hero_sub"></p>
+</div></section>
+
+<section class="block" style="padding-top:20px"><div class="container">
+  <div id="err" style="display:none"><strong>Couldn&rsquo;t load the data.</strong> This page reads external data files, so it needs to be served over the web.</div>
+  <div id="loading">Loading&hellip;</div>
+  <div id="ui" style="display:none">
+    <p class="crumb" id="crumb"></p>
+    <div class="tiles" id="tiles"></div>
+    <div id="body"></div>
+  </div>
+  <div id="none" style="display:none">
+    <div class="missing">
+      <strong>No manufacturer at that address.</strong>
+      <p>The <a href="/manufacturers">list of manufacturers</a> has every one on the site.</p>
+    </div>
+  </div>
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/edit">Edit</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+</div></footer>
+
+<script src="/app.js?v=20260805b"></script>
+<script>
+document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('manufacturer');
+
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function $(id){return document.getElementById(id);}
+function tile(n,label){ return '<div class="tile"><b>'+esc(n)+'</b><span>'+esc(label)+'</span></div>'; }
+function fail(e){ console.error(e); $('loading').style.display='none'; $('err').style.display='block'; }
+
+// /manufacturer/<slug> is one maker; /manufacturers (or a bare /manufacturer)
+// is the index. The slug is CoasterHub.slugify of the name, the same rule a
+// park's URL uses.
+var SLUG=decodeURIComponent((location.pathname.match(/^\/manufacturer\/([^\/]+)/)||[])[1]||'').toLowerCase();
+
+// Whose ticks: the signed-in rider, as on /count's park view. Signed out, no
+// ticks and no "you have ridden".
+var mine=CoasterHub.me().then(function(a){
+  return (a && a.slug) ? CoasterHub.fetchRides(a.slug).then(function(l){
+    var m={}; (l.rides||[]).forEach(function(r){ m[r.c]=1; }); return m;
+  }).catch(function(){ return null; }) : null;
+}).catch(function(){ return null; });
+
+Promise.all([CoasterHub.fetchCoasters(), mine]).then(function(res){
+  var coasters=res[0].coasters, MINE=res[1];
+  var BY={};
+  coasters.forEach(function(c){
+    var m=String(c.manu||'').trim(); if(!m) return;
+    (BY[m]=BY[m]||[]).push(c);
+  });
+  $('loading').style.display='none';
+  $('ui').style.display='block';
+  if(!SLUG) return index(BY, MINE);
+  var name=Object.keys(BY).filter(function(m){ return CoasterHub.slugify(m)===SLUG; })[0];
+  if(!name){
+    $('ui').style.display='none'; $('none').style.display='block';
+    document.querySelector('.hero h1').textContent='Not found';
+    document.title='Not found — Coaster Hub';
+    return;
+  }
+  one(name, BY[name], MINE);
+}).catch(fail);
+
+// Every maker, most coasters first, with how many models and how many are
+// still running. A search box, because there are a hundred-odd of them.
+function index(BY, MINE){
+  var list=Object.keys(BY).map(function(m){
+    var cs=BY[m], models={};
+    cs.forEach(function(c){ if(c.model) models[c.model]=1; });
+    return { name:m, n:cs.length, open:cs.filter(function(c){ return !c.closed; }).length,
+             models:Object.keys(models).length, got:MINE ? cs.filter(function(c){ return MINE[c.id]; }).length : null };
+  }).sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); });
+  document.querySelector('.hero h1').textContent='Manufacturers';
+  $('hero_sub').textContent=list.length+' manufacturers built the coasters on the site.';
+  document.title='Manufacturers — Coaster Hub';
+  $('tiles').style.display='none';
+  $('body').innerHTML='<input class="find" id="find" type="search" placeholder="Find a manufacturer&hellip;">'
+    +'<div class="panel" id="mlist"></div>';
+  function draw(){
+    var q=$('find').value.trim().toLowerCase();
+    $('mlist').innerHTML=list.filter(function(m){ return !q || m.name.toLowerCase().indexOf(q)>=0; }).map(function(m){
+      return '<a class="crow" href="'+esc(CoasterHub.makerHref(m.name))+'"><span class="cn">'+esc(m.name)+'</span>'
+        +'<span class="pk">'+m.models+' model'+(m.models===1?'':'s')+' · '+m.open+' operating</span>'
+        +'<span class="yrs">'+(m.got!=null ? m.got+' of ' : '')+m.n+' coaster'+(m.n===1?'':'s')+'</span></a>';
+    }).join('') || '<div style="padding:16px;color:var(--muted)">No manufacturer by that name.</div>';
+  }
+  $('find').addEventListener('input', draw);
+  draw();
+}
+
+// One maker. Tiles for the whole of it, then a card per model, most coasters
+// first; the ones with no model on file last, under their own heading.
+function one(name, cs, MINE){
+  var canon=CoasterHub.makerHref(name);
+  if(canon!==location.pathname) history.replaceState(null,'',canon+location.search+location.hash);
+  document.querySelector('.hero h1').textContent=name;
+  document.title=name+' — Coaster Hub';
+  $('crumb').innerHTML='<a href="/manufacturers">&larr; All manufacturers</a>';
+  var open=cs.filter(function(c){ return !c.closed; }).length;
+  var byModel={};
+  cs.forEach(function(c){ var k=String(c.model||'').trim(); (byModel[k]=byModel[k]||[]).push(c); });
+  var models=Object.keys(byModel).filter(Boolean).sort(function(a,b){ return byModel[b].length-byModel[a].length || a.localeCompare(b); });
+  if(byModel['']) models.push('');
+  var got=MINE ? cs.filter(function(c){ return MINE[c.id]; }).length : null;
+  $('hero_sub').textContent=cs.length+' coaster'+(cs.length===1?'':'s')+' on the site'
+    +(got!=null ? ' — you have ridden '+got+'.' : '.');
+  $('tiles').innerHTML=tile(cs.length,'Coasters')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
+    +tile(models.filter(Boolean).length,'Models');
+  $('body').innerHTML='<div class="sect">Models</div>'+models.map(function(mo){
+    var list=byModel[mo].slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
+    var g=MINE ? list.filter(function(c){ return MINE[c.id]; }).length : null;
+    return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
+      +'<span class="nm">'+esc(mo || 'No model on file')+'</span>'
+      +'<span class="ct">'+(g!=null ? '<b>'+g+'</b> of ' : '')+list.length+'</span></summary>'
+      +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
+  }).join('');
+  // A link to one model (/manufacturer/intamin#accelerator-coaster) opens it.
+  if(location.hash){
+    var d=document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if(d && d.tagName==='DETAILS'){ d.open=true; d.scrollIntoView({behavior:'instant',block:'start'}); }
+  }
+}
+function crow(c, MINE){
+  var got=MINE && MINE[c.id];
+  var op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):'');
+  var cl=c.closed?String(c.closed).slice(0,4):'';
+  var yrs=cl ? (op?op+'–'+cl:'closed '+cl) : op;
+  return '<a class="crow'+(MINE?(got?' got':' miss'):'')+'" href="'+esc(CoasterHub.coasterHref(c))+'">'
+    +(MINE ? '<span class="tick">'+(got?'✓':'')+'</span>' : '')
+    +'<span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(c.park||'')+'</span>'
+    +(yrs ? '<span class="yrs'+(cl?' off':'')+'">'+esc(yrs)+'</span>' : '')+'</a>';
+}
+</script>
+</body>
+</html>

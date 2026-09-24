@@ -18,6 +18,9 @@
 # and /stats got.
 /database             /qc           301
 
+# The model table (2026-09-24): /qc's sibling, one row per maker and model.
+/qc/models            /qc-models    200
+
 # A park, and a coaster at it. The park leads because a coaster cannot exist
 # without one: chop the last segment off a coaster's URL and you land on its
 # park, which is a page that exists. A flat /coaster/<name> was never possible —
@@ -35,6 +38,11 @@
 # app.js. Adding a redirect per rename would be a second, staler source of truth.
 /park/:park/:coaster  /coaster  200
 /park/:park           /park     200
+
+# A coaster maker, and the list of them (2026-09-24). Same shape as a park:
+# the slug is derived from the name, and the page resolves it.
+/manufacturers        /manufacturer 200
+/manufacturer/:m      /manufacturer 200
 
 /user/:name/count     /count      200
 /user/:name/rankings  /rankings   200

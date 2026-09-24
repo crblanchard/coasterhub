@@ -261,11 +261,14 @@ createServer(async (req, res) => {
   if (p === "/home" || p === "/riders") { res.writeHead(301, { location: "/" }); res.end(); return; }
   if (p === "/database") { res.writeHead(301, { location: "/qc" }); res.end(); return; }
   if (p === "/rankings/all") p = "/rankings-all.html";
+  if (p === "/qc/models") p = "/qc-models.html";
   // A park page, and a coaster at it. Two placeholders where the rider rules
   // have one, and the longer match has to be tested first for the same reason
   // it is listed first in _redirects.
   const pk = p.match(/^\/park\/([^/]+)(?:\/([^/]+))?\/?$/);
   if (pk) p = pk[2] ? "/coaster.html" : "/park.html";
+  // A maker, and the list of them.
+  if (p === "/manufacturers" || /^\/manufacturer\/[^/]+\/?$/.test(p)) p = "/manufacturer.html";
   const m = p.match(/^\/user\/[^/]+(\/.*)?$/);
   if (m) p = m[1] && m[1] !== "/" ? m[1] : "/profile";
   if (p === "/") p = "/index.html";

@@ -40,6 +40,8 @@
   /* A maker's name is prose, not a number, so it is sized like prose and
      allowed to wrap rather than being clipped at one line. */
   .spec.text b{font-size:.95rem;font-weight:700;color:var(--fg);white-space:normal;line-height:1.3}
+  .spec.text b a{color:inherit;text-decoration:none}
+  .spec.text b a:hover{color:var(--accent2);text-decoration:underline}
   .spec span{display:block;color:var(--muted);font-size:.74rem;text-transform:uppercase;
              letter-spacing:.06em;margin-top:4px}
   @media (max-width:680px){ .specs{grid-template-columns:repeat(2,1fr)} }
@@ -201,8 +203,11 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   // says nothing and reads as a broken page rather than a thin record.
   var specs=[];
   if(C.type) specs.push(txt(C.type,'Type'));
-  if(C.manu) specs.push(txt(C.manu,'Manufacturer'));
-  if(C.model) specs.push(txt(C.model,'Model'));
+  // The maker and the model are pages (Carter, 2026-09-24: "make the
+  // manufacturers clickable"): the maker's page, and that page opened at the
+  // model's card. A model with no maker on file has nowhere to go.
+  if(C.manu) specs.push(lnk(C.manu,'Manufacturer',CoasterHub.makerHref(C.manu)));
+  if(C.model) specs.push(C.manu ? lnk(C.model,'Model',CoasterHub.makerHref(C.manu,C.model)) : txt(C.model,'Model'));
   if(C.h!=null) specs.push(num(Math.round(C.h)+' ft','Height'));
   if(C.s!=null) specs.push(num(Math.round(C.s)+' mph','Top speed'));
   if(C.l!=null) specs.push(num(Math.round(C.l).toLocaleString()+' ft','Length'));
@@ -233,6 +238,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 
 function num(v,label){ return '<div class="spec"><b>'+esc(v)+'</b><span>'+esc(label)+'</span></div>'; }
 function txt(v,label){ return '<div class="spec text"><b>'+esc(v)+'</b><span>'+esc(label)+'</span></div>'; }
+function lnk(v,label,href){ return '<div class="spec text"><b><a href="'+esc(href)+'">'+esc(v)+'</a></b><span>'+esc(label)+'</span></div>'; }
 function dur(s){
   s=Math.round(s);
   var m=Math.floor(s/60), r=s%60;

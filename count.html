@@ -1177,6 +1177,9 @@ var CreditList=(function(){
         // than a link to /park/.
         if(col.k==='name')return '<td class="'+(col.cls||'')+'"'+k+'>'+clink(c)+'</td>';
         if(col.k==='park')return '<td'+k+'>'+plink(v)+'</td>';
+        // The maker and the model link to the maker's page (2026-09-24).
+        if(col.k==='manu')return '<td'+k+'><a href="'+esc(CoasterHub.makerHref(v))+'">'+esc(v)+'</a></td>';
+        if(col.k==='model'&&c.manu)return '<td'+k+'><a href="'+esc(CoasterHub.makerHref(c.manu,v))+'">'+esc(v)+'</a></td>';
         return '<td class="'+(col.num?'num':'')+' '+(col.cls||'')+'"'+k+'>'+esc(v)+'</td>';
       }).join('');
       // One extra cell, phone-only (display:none on desktop, where the real

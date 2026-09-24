@@ -573,6 +573,12 @@
       .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   }
   function parkHref(park) { return "/park/" + slugify(park); }
+  // A manufacturer's page, /manufacturer/<maker> — derived the same way a
+  // park's is, and owned by nothing. A model is a card on that page, so a link
+  // to one is the maker's URL plus #<model>.
+  function makerHref(manu, model) {
+    return "/manufacturer/" + slugify(manu) + (model ? "#" + slugify(model) : "");
+  }
   // Takes a coaster row, or a name and a park.
   function coasterHref(c, park) {
     var obj = c && typeof c === "object";
@@ -1196,7 +1202,7 @@
 
   var api = { computeStats: computeStats, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
-              slugify: slugify, parkHref: parkHref, coasterHref: coasterHref,
+              slugify: slugify, parkHref: parkHref, makerHref: makerHref, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers, noteWrite: noteWrite,
