@@ -11,13 +11,13 @@
            is the thing that says "track" — take it away and this is a balloon.
        Move any of those numbers and you have to move all of them. -->
   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <g stroke="#37d0c8" stroke-width="2" opacity="0.4">
+    <g stroke="#4cc3ff" stroke-width="2" opacity="0.4">
       <line x1="6" y1="54" x2="58" y2="54"/>
       <line x1="17" y1="54" x2="17" y2="17"/>
       <line x1="43.5" y1="54" x2="43.5" y2="36"/>
     </g>
-    <path d="M7,54 C7,30 10,14.5 17,14.5 C24,14.5 27,47 34,47 C41,47 43.86,39.08 50.22,32.72 A9.5,9.5 0 1 0 36.78,32.72 C43.85,39.79 52,54 58,54" stroke="#37d0c8" stroke-width="5"/>
-    <rect x="11.5" y="8" width="12" height="6.4" rx="2.6" fill="#ff5a5f"/>
+    <path d="M7,54 C7,30 10,14.5 17,14.5 C24,14.5 27,47 34,47 C41,47 43.86,39.08 50.22,32.72 A9.5,9.5 0 1 0 36.78,32.72 C43.85,39.79 52,54 58,54" stroke="#4cc3ff" stroke-width="5"/>
+    <rect x="11.5" y="8" width="12" height="6.4" rx="2.6" fill="#ffcc1f"/>
     <circle cx="14.7" cy="6.7" r="1.35" fill="#eaf7ff"/>
     <circle cx="20.3" cy="6.7" r="1.35" fill="#eaf7ff"/>
   </g>

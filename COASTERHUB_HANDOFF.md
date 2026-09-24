@@ -529,7 +529,8 @@ Two things carry the fix, and neither is decoration:
 - **The legs cross below the loop**, at about `(43.6,40.7)`. That crossing is what says
   "track". Remove it and the shape is a balloon.
 
-Change one of those and you have to change all of them. The coral is now only the car — a
+Change one of those and you have to change all of them. (Colours since 2026-09-24: sky-blue
+track `#4cc3ff`, yellow car `#ffcc1f` — the Launch Yellow palette.) The coral is now only the car — a
 colour break mid-track was half of why the loop looked detached.
 
 Four SVGs carry the same path and must stay in step: `mark.svg` (header), `favicon.svg` (tile,
@@ -3335,8 +3336,12 @@ replaced Midnight (navy, coral `#ff5a5f`, teal `#37d0c8`). Three new tokens in `
 
 The map's not-visited ramp is yellow now (visited stays blue), "only them" in compare is red
 (amber sat too close to yellow), and the yellow ramp keeps dark digits until t≥.8. `/edit`'s dark
-palette moved to graphite with yellow buttons. **Not changed:** the logo mark and favicons still
-carry the old teal and coral.
+palette moved to graphite with yellow buttons. **The logo followed the same day** (Carter: *"change
+the logo too"*): track `#37d0c8` → `#4cc3ff`, car `#ff5a5f` → `#ffcc1f`, favicon tiles `#0e1730` →
+`#1b1e22`, in all four SVGs and `tools/render-icons.mjs`, which re-rendered the PNGs and the OG
+card's tile and tagline (the card's navy backdrop and wordmark are pixels and stayed). Images are
+cached a week (`_headers`), so every page's icon links carry `?v=20260924` and the OG image
+`?v=3` — bump them again on the next logo change.
 
 ---
 

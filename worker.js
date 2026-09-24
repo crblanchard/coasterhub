@@ -429,7 +429,7 @@ function mailConfigured(env) { return !!env.RESEND_API_KEY; }
 // The mark, as a PNG. NOT mark.svg: most mail clients will not render SVG, and
 // a broken image in a password-reset email is the last thing that should look
 // wrong. 180px served at 48, so it stays sharp on a retina screen.
-const MAIL_LOGO = "https://coasterhub.org/apple-touch-icon.png";
+const MAIL_LOGO = "https://coasterhub.org/apple-touch-icon.png?v=20260924";
 
 // Both parts, every time. Plain text is what a screen reader, a terminal client
 // and a spam filter all prefer; the HTML is for everyone else. Sending only
