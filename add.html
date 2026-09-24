@@ -172,8 +172,12 @@
            everywhere on the site (Carter, 2026-09-24: "add new needs a spot
            for closing date"). -->
       <div class="row" style="margin-top:12px;align-items:flex-start">
-        <div class="fld date"><label for="c_opened">Opened</label><input id="c_opened" type="date"></div>
-        <div class="fld date"><label for="c_closed">Closed</label><input id="c_closed" type="date"><small class="opt">Blank if still operating</small></div>
+        <!-- Text, not type="date": a date picker cannot hold a year on its own,
+             so "1999" was silently dropped and nothing saved (Carter,
+             2026-09-24). A year or a full date, stored the way /edit and
+             migration 021 store them: '1999' with Prec 'year', or the day. -->
+        <div class="fld date"><label for="c_opened">Opened</label><input id="c_opened" type="text" inputmode="numeric" placeholder="1999 or 1999-06-01" autocomplete="off"></div>
+        <div class="fld date"><label for="c_closed">Closed</label><input id="c_closed" type="text" inputmode="numeric" placeholder="year or date" autocomplete="off"><small class="opt">Blank if still operating</small></div>
       </div>
       <div class="dupe" id="c_dupe"></div>
       <div class="row" style="margin-top:16px">
@@ -485,15 +489,29 @@ function saveCoaster(){
   if(checkCoaster()) return void($('c_msg').className='msg bad',
     $('c_msg').textContent='That looks like a duplicate — see above.');
 
-  var opened=$('c_opened').value||null, closed=$('c_closed').value||null;
-  if(opened && closed && closed<opened) return void($('c_msg').className='msg bad',
+  // A year (1999) or a full date (1999-06-01); anything else is refused with
+  // a message rather than dropped.
+  function when(id){
+    var v=$(id).value.trim();
+    if(!v) return {v:null, prec:null};
+    if(/^\d{4}$/.test(v)) return {v:v, prec:'year'};
+    if(/^\d{4}-\d{2}-\d{2}$/.test(v)) return {v:v, prec:'day'};
+    return {bad:true};
+  }
+  var o=when('c_opened'), cz=when('c_closed');
+  if(o.bad||cz.bad) return void($('c_msg').className='msg bad',
+    $('c_msg').textContent='Dates are a year (1999) or a full date (1999-06-01).');
+  var opened=o.v, closed=cz.v;
+  // Compared by what both sides know: the year if either is only a year.
+  var byYear = o.prec==='year' || cz.prec==='year';
+  if(opened && closed && (byYear ? closed.slice(0,4)<opened.slice(0,4) : closed<opened)) return void($('c_msg').className='msg bad',
     $('c_msg').textContent='It closed before it opened — check the two dates.');
   var body={name:name,park:park,type:type,
             manu:$('c_manu').value.trim()||null, model:$('c_model').value.trim()||null,
             h:num('c_h'), s:num('c_s'), l:num('c_l'), inv:num('c_inv'),
-            opened:opened, openedPrec:opened?'day':null,
+            opened:opened, openedPrec:o.prec,
             yr:opened?Number(opened.slice(0,4)):null,
-            closed:closed, closedPrec:closed?'day':null};
+            closed:closed, closedPrec:cz.prec};
 
   // Everyone sees this and there is no undo from this page, so it is worth one
   // deliberate click.
