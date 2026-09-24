@@ -42,6 +42,8 @@
   .fld label{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}
   .fld.grow{flex:1;min-width:190px}
   .fld.small{width:104px}
+  .fld.date{width:190px}
+  .fld .opt{color:var(--muted);font-size:.74rem}
   /* Scoped to the forms on purpose. A bare `input,select` here also matched the
      rider picker in the header — it sets no width of its own, so width:100%
      leaked straight through and stretched it. */
@@ -85,7 +87,7 @@
   .step span{color:var(--muted);font-size:.85rem}
   .after{color:var(--muted);font-size:.9rem;margin-top:22px}
   .after a{color:var(--accent2)}
-  @media (max-width:560px){ .fld.small{width:calc(50% - 6px)} }
+  @media (max-width:560px){ .fld.small,.fld.date{width:calc(50% - 6px)} }
 </style>
 </head>
 <body>
@@ -163,7 +165,15 @@
         <div class="fld small"><label for="c_s">Speed (mph)</label><input id="c_s" type="number" step="0.1" min="0"></div>
         <div class="fld small"><label for="c_l">Length (ft)</label><input id="c_l" type="number" step="1" min="0"></div>
         <div class="fld small"><label for="c_inv">Inversions</label><input id="c_inv" type="number" step="1" min="0"></div>
-        <div class="fld small"><label for="c_opened">Opened</label><input id="c_opened" type="date"></div>
+      </div>
+      <!-- The two dates on their own row, wide enough for a date picker: at
+           the 104px of the number boxes the date was clipped to "/dd/yyy".
+           Closed blank = still operating; a date is what makes it defunct
+           everywhere on the site (Carter, 2026-09-24: "add new needs a spot
+           for closing date"). -->
+      <div class="row" style="margin-top:12px;align-items:flex-start">
+        <div class="fld date"><label for="c_opened">Opened</label><input id="c_opened" type="date"></div>
+        <div class="fld date"><label for="c_closed">Closed</label><input id="c_closed" type="date"><small class="opt">Blank if still operating</small></div>
       </div>
       <div class="dupe" id="c_dupe"></div>
       <div class="row" style="margin-top:16px">
@@ -388,7 +398,7 @@ function boot(){
   $('c_save').onclick=saveCoaster;
   $('p_save').onclick=savePark;
   $('c_clear').onclick=function(){
-    ['c_name','c_manu','c_model','c_h','c_s','c_l','c_inv','c_opened'].forEach(function(k){ $(k).value=''; });
+    ['c_name','c_manu','c_model','c_h','c_s','c_l','c_inv','c_opened','c_closed'].forEach(function(k){ $(k).value=''; });
     checkCoaster(); $('c_msg').textContent='';
   };
   $('p_clear').onclick=function(){ $('p_name').value=''; $('p_region').value=''; checkPark(); $('p_msg').textContent=''; };
@@ -475,12 +485,15 @@ function saveCoaster(){
   if(checkCoaster()) return void($('c_msg').className='msg bad',
     $('c_msg').textContent='That looks like a duplicate — see above.');
 
-  var opened=$('c_opened').value||null;
+  var opened=$('c_opened').value||null, closed=$('c_closed').value||null;
+  if(opened && closed && closed<opened) return void($('c_msg').className='msg bad',
+    $('c_msg').textContent='It closed before it opened — check the two dates.');
   var body={name:name,park:park,type:type,
             manu:$('c_manu').value.trim()||null, model:$('c_model').value.trim()||null,
             h:num('c_h'), s:num('c_s'), l:num('c_l'), inv:num('c_inv'),
             opened:opened, openedPrec:opened?'day':null,
-            yr:opened?Number(opened.slice(0,4)):null};
+            yr:opened?Number(opened.slice(0,4)):null,
+            closed:closed, closedPrec:closed?'day':null};
 
   // Everyone sees this and there is no undo from this page, so it is worth one
   // deliberate click.
@@ -495,7 +508,7 @@ function saveCoaster(){
   api('POST','/api/coaster',body).then(function(r){
     COASTERS.push({id:r.id,name:name,park:park,type:type});
     PCOUNT[park]=(PCOUNT[park]||0)+1; fillParks(park);
-    $('c_name').value=''; ['c_manu','c_model','c_h','c_s','c_l','c_inv','c_opened'].forEach(function(k){ $(k).value=''; });
+    $('c_name').value=''; ['c_manu','c_model','c_h','c_s','c_l','c_inv','c_opened','c_closed'].forEach(function(k){ $(k).value=''; });
     checkCoaster();
     $('c_msg').className='msg ok';
     $('c_msg').innerHTML='Added <b>'+esc(name)+'</b> to '+esc(park)+'. '
