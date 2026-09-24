@@ -3384,7 +3384,7 @@ into those and look like rcdb or something."*
   and an **Installations** table — name, park, location, opened, status, operating first.
   `CoasterHub.makerHref(manu, model)` returns this path now (it was `#model` on the maker page;
   that page still opens the card for an old link, and each card links to its model page).
-- **Location:** `/location/<slug>` (location.html): a US state (`ohio-us`), a country (`japan`),
+- **Location:** `/location/<slug>` (location.html; "you" is ridden of OPERATING, Carter the same day): a US state (`ohio-us`), a country (`japan`),
   or `/location/us` for the whole US (states table + parks, no coaster table — it would be ~800
   rows). `/locations` is the index. The slug is `slugify(region)`; `CoasterHub.locationHref`.
 - **Reached from:** the region under a park's name and on a coaster page links to its location;

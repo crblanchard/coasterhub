@@ -128,8 +128,11 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), mine]).then(fu
 function counts(ps, MINE){
   var cs=[]; ps.forEach(function(p){ cs=cs.concat(p.cs); });
   var open=cs.filter(function(c){ return !c.closed; }).length;
+  // "You" is measured against what is still OPERATING (Carter, 2026-09-24:
+  // "you have ridden x of x operating, not total"): the defunct ones are a
+  // count you can no longer add to.
   return { parks:ps.length, all:cs.length, open:open, gone:cs.length-open, cs:cs,
-           got: MINE ? cs.filter(function(c){ return MINE[c.id]; }).length : null };
+           got: MINE ? cs.filter(function(c){ return !c.closed && MINE[c.id]; }).length : null };
 }
 function table(head, rows){
   return '<div class="dtable-wrap"><table class="dtable"><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
@@ -150,26 +153,26 @@ function place(reg, ps, MINE, R){
   $('crumb').innerHTML='<a href="/locations">&larr; All locations</a>';
   var k=counts(ps, MINE);
   $('tiles').innerHTML=tile(k.parks,k.parks===1?'Park':'Parks')+tile(k.open,'Operating coasters')+tile(k.gone,'Defunct coasters')
-    +(k.got!=null ? tile(k.got+' of '+k.all,'You have ridden') : tile(k.all,'Coasters, all time'));
+    +(k.got!=null ? tile(k.got+' of '+k.open,'Operating you have ridden') : tile(k.all,'Coasters, all time'));
   var h='';
   if(us){
     // The states, most operating coasters first.
     var st=Object.keys(R).filter(isUS).map(function(r){ var c=counts(R[r], MINE); c.r=r; return c; })
       .sort(function(a,b){ return b.open-a.open || a.r.localeCompare(b.r); });
     h+='<div class="sect">States</div>'+table(
-      '<th>State</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You</th>':''),
+      '<th>State</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You, operating</th>':''),
       st.map(function(c){ return '<tr><td class="nm"><a href="'+esc(CoasterHub.locationHref(c.r))+'">'+esc(shortName(c.r))+'</a></td>'
         +'<td class="num">'+c.parks+'</td><td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'
-        +(MINE?'<td class="num">'+c.got+' of '+c.all+'</td>':'')+'</tr>'; }).join(''));
+        +(MINE?'<td class="num">'+c.got+' of '+c.open+'</td>':'')+'</tr>'; }).join(''));
   }
   var pk=ps.map(function(p){ var c=counts([p], MINE); c.p=p; return c; })
     .sort(function(a,b){ return b.open-a.open || b.all-a.all || a.p.name.localeCompare(b.p.name); });
   h+='<div class="sect">Parks</div>'+table(
-    '<th>Park</th>'+(us?'<th class="opt">State</th>':'')+'<th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You</th>':''),
+    '<th>Park</th>'+(us?'<th class="opt">State</th>':'')+'<th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You, operating</th>':''),
     pk.map(function(c){ return '<tr><td class="nm"><a href="'+esc(CoasterHub.parkHref(c.p.name))+'">'+esc(c.p.name)+'</a></td>'
       +(us?'<td class="sub opt"><a href="'+esc(CoasterHub.locationHref(c.p.region))+'">'+esc(shortName(c.p.region))+'</a></td>':'')
       +'<td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'
-      +(MINE?'<td class="num">'+c.got+' of '+c.all+'</td>':'')+'</tr>'; }).join(''));
+      +(MINE?'<td class="num">'+c.got+' of '+c.open+'</td>':'')+'</tr>'; }).join(''));
   if(!us){
     var rows=k.cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
     h+='<div class="sect">Coasters</div>'+table(
@@ -198,10 +201,10 @@ function index(R, MINE){
   var by=function(a,b){ return b.open-a.open || a.r.localeCompare(b.r); };
   var us=regs.filter(function(c){ return isUS(c.r); }).sort(by), rest=regs.filter(function(c){ return !isUS(c.r); }).sort(by);
   $('hero_sub').textContent=us.length+' states and '+rest.length+' other countries on the site.';
-  var head='<th>Location</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You</th>':'');
+  var head='<th>Location</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You, operating</th>':'');
   function row(c){ return '<tr><td class="nm"><a href="'+esc(CoasterHub.locationHref(c.r))+'">'+esc(shortName(c.r))+'</a></td>'
     +'<td class="num">'+c.parks+'</td><td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'
-    +(MINE?'<td class="num">'+c.got+' of '+c.all+'</td>':'')+'</tr>'; }
+    +(MINE?'<td class="num">'+c.got+' of '+c.open+'</td>':'')+'</tr>'; }
   $('body').innerHTML='<div class="sect"><a href="/location/us" style="color:inherit">United States &rarr;</a></div>'+table(head, us.map(row).join(''))
     +'<div class="sect">Elsewhere</div>'+table(head, rest.map(row).join(''));
 }
