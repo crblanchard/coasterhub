@@ -332,9 +332,24 @@
   // /import both do exactly that, and a longer-lived cache would quietly show
   // them the list from before their own edit.
   var inFlight = {};
+  // ...and after a write, not even the HTTP cache. The lists carry max-age=300,
+  // so a coaster fixed on /edit went on reading the old way on every other page
+  // for five minutes (Carter, 2026-09-24: "changes not yet applied to website?
+  // please update so things refresh once changes are pushed"). Every page that
+  // writes calls noteWrite(), and for ten minutes after one THIS browser reads
+  // the lists with no-store. Only the browser that wrote: going no-store for
+  // everybody would put the 1,239-row read back on every page view, which is
+  // the D1 bill the cache exists to avoid (see EDGE_CACHED in worker.js).
+  // Other readers get the change within the five minutes, as before.
+  var WROTE_KEY = "ch_wrote", WROTE_FOR = 10 * 60 * 1000;
+  function noteWrite() { try { window.localStorage.setItem(WROTE_KEY, String(Date.now())); } catch (e) {} }
+  function wroteLately() {
+    try { return Date.now() - (+window.localStorage.getItem(WROTE_KEY) || 0) < WROTE_FOR; }
+    catch (e) { return false; }
+  }
   function shared(key, apiPath, staticPath) {
     if (inFlight[key]) return inFlight[key];
-    var p = fetchJSON(apiPath, staticPath);
+    var p = fetchJSON(apiPath, staticPath, wroteLately() ? LIVE : undefined);
     inFlight[key] = p;
     var done = function () { delete inFlight[key]; };
     p.then(done, done);
@@ -920,9 +935,27 @@
     window.addEventListener("resize", function () { if (!menu.hidden) place(); });
   }
 
+  var RELOADS_ON_WRITE = { riders: 1, count: 1, map: 1, park: 1, coaster: 1, changes: 1, qc: 1, sitemap: 1 };
   function initNav(page) {
     if (typeof document === "undefined") return;
     applyTheme(readTheme());
+
+    // A write in another tab (noteWrite, or /edit's copy of it) reloads a page
+    // that only SHOWS data, so the map or the count you left open beside /edit
+    // is showing the change when you look back at it. At once if it is the tab
+    // you are looking at, otherwise the moment it is shown again. Never a page
+    // you type into — /log, /add, /import, /rankings, /account and the profile
+    // (its edit dialog) — where a reload would throw away what you were doing.
+    if (RELOADS_ON_WRITE[page]) {
+      var stale = false;
+      window.addEventListener("storage", function (e) {
+        if (e.key !== WROTE_KEY) return;
+        if (document.visibilityState === "visible") location.reload(); else stale = true;
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (stale && document.visibilityState === "visible") location.reload();
+      });
+    }
 
     // Active rider persists between pages: the URL wins (/user/<slug>/...),
     // otherwise fall back to the last rider we remembered.
@@ -1166,7 +1199,7 @@
               slugify: slugify, parkHref: parkHref, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
-              fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers,
+              fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
