@@ -1,0 +1,19 @@
+-- 022: take every Thursday, July 30 row out of /changes (Carter, 2026-09-24:
+-- "remove all Thursday, July 30 items from 'changes'").
+--
+-- What they are: the feed did not exist until 2026-08-06, so nothing on July 30
+-- was recorded live. Those rows are the day-one reconstruction in
+-- 002-activity.sql — every rename and merge in the alias table stamped with the
+-- alias's `added` date, and tools/build-aliases.mjs rebuilt most of that table
+-- from git history on July 30, so the whole pile landed on one day as a wall of
+-- "X was renamed to Y" that says when the table was rebuilt, not when anything
+-- happened. The aliases themselves stay: they are what makes an old URL
+-- resolve. Only the feed rows go.
+--
+-- Two shapes of `at` live in this table (see the /changes note in the
+-- handoff): a full ISO instant and a bare YYYY-MM-DD. The LIKE takes both. A
+-- second run deletes nothing.
+--
+-- Check first, then delete:
+--   SELECT kind, COUNT(*) FROM activity WHERE at LIKE '2026-07-30%' GROUP BY kind;
+DELETE FROM activity WHERE at LIKE '2026-07-30%';
