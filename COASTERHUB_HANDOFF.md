@@ -3288,6 +3288,16 @@ the way.
   opening year on the right like the defunct ones. The phone keeps the small card and
   hides the operating year (`.yrs.op`).
 
+**/edit, second pass (same day):** *"button for new ride on /edit; change/view what category
+rides are on on the ride page"*. **+ New coaster** (Coasters mode) asks name, park (a select of
+parks that exist, so a typo cannot invent one) and type, refuses a name already at that park
+with a link to it, posts `/api/coaster` and opens the new ride in the full editor. The editor's
+**Category** block is a select of every site category (A–Z, with sizes) and a Move button. A
+ride can be in one category only and the API refuses a ride that is already in another, so a
+move takes it out of the old one first (`PUT /api/clones/:id` without it) and then adds it
+(`PUT` with it). A category needs two rides: if leaving would strand one, it asks and then
+`DELETE`s the old category rather than leaving an invalid one.
+
 **/edit.** The coaster header carries **category: <name>** or **not in a category** (from
 `/api/clones`, loaded once without `loadClones()`'s re-render). **Add a credit** posts
 `/api/rides` with `d:null` or a date — /log's list mode for one coaster, so it records

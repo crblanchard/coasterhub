@@ -159,6 +159,10 @@
       <div class="seg"><button id="mModels">Models</button><button id="mMTriage">Triage</button></div>
       <input id="q" placeholder="Search…" style="max-width:220px">
       <button class="ghost" id="newcat">+ New category</button>
+      <!-- A new ride without leaving the editor (Carter, 2026-09-24). /add is
+           still the page for anyone else; this one opens the ride here so its
+           stats can be filled in straight away. -->
+      <button class="ghost" id="newride">+ New coaster</button>
       <div class="seg" id="trseg"><button data-tf="todo" class="on">To look at</button><button data-tf="done">In a category</button><button data-tf="aside">Set aside</button></div>
       <div class="seg" id="mtseg"><button data-mf="todo" class="on">To look at</button><button data-mf="done">Has a model</button><button data-mf="aside">Set aside</button></div>
       <label class="cbrow" id="fIncWrap"><input type="checkbox" id="incOnly"> Only incomplete</label>
@@ -375,6 +379,7 @@
       });
     });
     document.getElementById('newcat').addEventListener('click', function(){ showGroup(0); });
+    document.getElementById('newride').addEventListener('click', newCoasterForm);
     document.getElementById('list').addEventListener('click', function(e){
       var row = e.target.closest ? e.target.closest('.row[data-id]') : null;
       if (!row) return;
@@ -402,6 +407,7 @@
       (m==='triage' || m==='mtriage') ? '' : 'none';
     document.getElementById('grpLbl').textContent = m==='mtriage' ? 'By park' : 'By model';
     document.getElementById('newcat').style.display = m==='clones' ? '' : 'none';
+    document.getElementById('newride').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('trseg').style.display = m==='triage' ? '' : 'none';
     document.getElementById('mtseg').style.display = m==='mtriage' ? '' : 'none';
     state.selClone = 0;
@@ -1607,6 +1613,11 @@
       // mode for one coaster — POST /api/rides with no date — so it records
       // the same activity row, and adding one somebody already has is a
       // no-op rather than a second credit.
+      // The ride's category, and moving it (Carter, 2026-09-24: "change/view
+      // what category rides are on on the ride page in edit").
+      '<div class="toolbar"><h3>Category</h3><p class="hint" id="catHint">Loading categories…</p>'+
+        '<div class="inline"><select id="catSel" style="width:auto;flex:0 1 320px"></select>'+
+        '<button id="catBtn" style="white-space:nowrap" disabled>Move</button><span class="toast" id="catToast"></span></div></div>'+
       '<div class="toolbar"><h3>Add a credit</h3><p class="hint">Give a rider this coaster. The date is optional; leave it blank for a credit with no known day.</p>'+
         '<div class="inline"><select id="crRider" style="width:auto;flex:0 1 190px"><option value="">Rider…</option></select>'+
         '<input id="crDate" type="date" style="width:160px"><button id="crBtn" style="white-space:nowrap">Add credit</button><span class="toast" id="crToast"></span></div></div>'+
@@ -1620,6 +1631,11 @@
     document.getElementById('mergeBtn').addEventListener('click', mergeCoaster);
     document.getElementById('delBtn').addEventListener('click', deleteCoaster);
     document.getElementById('crBtn').addEventListener('click', addCredit);
+    document.getElementById('catBtn').addEventListener('click', moveCategory);
+    document.getElementById('catSel').addEventListener('change', function(){
+      var g = inCat()[state.sel];
+      document.getElementById('catBtn').disabled = (this.value === String(g ? g.id : ''));
+    });
     fillRiders(); showCategory(id);
     // AFTER the content is in: setting it first leaves the browser holding the
     // old offset, which is how the top of a queued ride ended up off-screen.
@@ -1647,6 +1663,91 @@
     el.innerHTML = g
       ? '<span class="badge cat" title="'+esc(g.ids.length+' coasters in it')+'">category: '+esc(g.name)+'</span>'
       : '<span class="badge nocat">not in a category</span>';
+    // The picker: every site category, A-Z, with how many rides each holds.
+    var sel = document.getElementById('catSel'); if (!sel) return;
+    var groups = state.clones.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
+    sel.innerHTML = '<option value="">Not in a category</option>' + groups.map(function(x){
+      return '<option value="'+x.id+'">'+esc(x.name)+' ('+x.ids.length+')</option>';
+    }).join('');
+    sel.value = g ? String(g.id) : '';
+    document.getElementById('catBtn').disabled = true;
+    document.getElementById('catHint').innerHTML = g
+      ? 'In <b>'+esc(g.name)+'</b> with '+(g.ids.length-1)+' other ride'+(g.ids.length===2?'':'s')+'. Pick another to move it, or “Not in a category” to take it out.'
+      : 'Not in any category. Pick one to add it.';
+  }
+  // Move the open ride to another category, or out of its own. A ride can be
+  // in only one, so it leaves its old one first (the API refuses a ride that
+  // is already somewhere else). A category of one is not a category — the API
+  // will not keep one — so if leaving would strand a single ride, this asks
+  // whether to delete the old category instead.
+  async function moveCategory(){
+    var id = state.sel, toast = document.getElementById('catToast');
+    var to = document.getElementById('catSel').value, from = inCat()[id];
+    var dest = state.clones.filter(function(x){ return String(x.id)===to; })[0] || null;
+    if ((from ? String(from.id) : '') === to) return;
+    toast.textContent = "Saving…"; toast.className = "toast";
+    try {
+      if (from) {
+        var rest = from.ids.filter(function(x){ return x!==id; });
+        if (rest.length < 2) {
+          if (!confirm('Taking it out leaves "'+from.name+'" with only one ride, and a category needs two.\n\nDelete the "'+from.name+'" category?')) {
+            toast.textContent = ""; return;
+          }
+          await api("DELETE","/api/clones/"+from.id);
+        } else {
+          await api("PUT","/api/clones/"+from.id,{ name: from.name, note: from.note || "", ids: rest });
+        }
+      }
+      if (dest) {
+        await api("PUT","/api/clones/"+dest.id,{ name: dest.name, note: dest.note || "", ids: dest.ids.concat([id]) });
+      }
+      state.clones = (await api("GET","/api/clones")).groups || [];
+      toast.textContent = dest ? "Moved to "+dest.name+" ✓" : "Taken out ✓"; toast.className = "toast good";
+      showCategory(id);
+    } catch(e){
+      toast.textContent = "Error: "+e.message; toast.className = "toast bad";
+      try { state.clones = (await api("GET","/api/clones")).groups || []; showCategory(id); } catch(_){}
+    }
+  }
+
+  // ---------- a new coaster ----------
+  // Name, park and type, which is all /add asks for too; everything else is
+  // filled in the full editor it opens into. The park is picked from the parks
+  // that exist, so a typo cannot make a park nobody else has.
+  function newCoasterForm(){
+    var parks = {}; state.coasters.forEach(function(c){ if (c.park) parks[c.park]=1; });
+    Object.keys(state.geo).forEach(function(p){ parks[p]=1; });
+    var list = Object.keys(parks).sort(function(a,b){ return a.localeCompare(b,undefined,{sensitivity:"base"}); });
+    state.sel = null; renderCoasters();
+    document.getElementById('editor').innerHTML =
+      '<h2 style="margin:0 0 4px;font-size:1.15rem">New coaster</h2>'+
+      '<p class="hint">Name, park and type now; the stats in the editor it opens into. A park that is not listed goes in the Parks tab or on /add first.</p>'+
+      '<div class="grid">'+
+        '<div class="fld full"><label>Name</label><input id="nc_name" type="text" autocomplete="off"></div>'+
+        '<div class="fld full"><label>Park</label><select id="nc_park"><option value="">Pick a park…</option>'+
+          list.map(function(p){ return '<option>'+esc(p)+'</option>'; }).join('')+'</select></div>'+
+        '<div class="fld"><label>Type</label><select id="nc_type"><option>Steel</option><option>Wood</option></select></div>'+
+      '</div>'+
+      '<div class="actions"><button id="nc_go">Create coaster</button><button class="ghost" id="nc_cancel">Cancel</button><span class="toast" id="nc_toast"></span></div>';
+    document.getElementById('nc_name').focus();
+    document.getElementById('nc_cancel').addEventListener('click', function(){
+      document.getElementById('editor').innerHTML = '<div class="empty">Select an item to edit.</div>';
+    });
+    document.getElementById('nc_go').addEventListener('click', async function(){
+      var name = document.getElementById('nc_name').value.trim(), park = document.getElementById('nc_park').value;
+      var type = document.getElementById('nc_type').value, toast = document.getElementById('nc_toast');
+      if (!name || !park) { toast.textContent = "Give it a name and pick a park."; toast.className = "toast bad"; return; }
+      var twin = state.coasters.filter(function(c){ return c.park===park && String(c.name).toLowerCase()===name.toLowerCase(); })[0];
+      if (twin) { toast.innerHTML = 'Already here: <a href="#" id="nc_twin" style="color:var(--link)">#'+twin.id+' '+esc(twin.name)+'</a>'; toast.className = "toast bad";
+        document.getElementById('nc_twin').onclick = function(e){ e.preventDefault(); selectCoaster(twin.id); }; return; }
+      toast.textContent = "Creating…"; toast.className = "toast";
+      try {
+        var r = await api("POST","/api/coaster",{ name: name, park: park, type: type });
+        var c = { id: r.id, name: name, park: park, type: type };
+        state.coasters.push(c); state.byId[c.id] = c;
+        selectCoaster(c.id);
+      } catch(e){ toast.textContent = "Error: "+e.message; toast.className = "toast bad"; }
+    });
   }
   // The rider list for Add a credit, fetched once.
   var RIDERS = null;
