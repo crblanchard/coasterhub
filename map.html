@@ -382,13 +382,43 @@ Promise.all([
   // Bigger on a desktop, so the years fit on the right; a phone keeps the
   // narrower, shorter card that scrolls inside itself.
   var wide=window.innerWidth>640;
-  var POPUP={maxWidth: wide ? 440 : Math.min(320, window.innerWidth-72),
-             minWidth: wide ? 340 : 0,
-             maxHeight: wide ? Math.min(560, Math.round(window.innerHeight*0.62)) : Math.min(380, Math.round(window.innerHeight*0.42)),
-             // Auto-pan clear of the zoom buttons and the Visited boxes top-left,
-             // and of the switcher top-right: on a phone a popup opened up there
-             // sat under both.
-             autoPanPaddingTopLeft:[wide?230:160,16], autoPanPaddingBottomRight:[110,16]};
+  // A phone's card is one fixed width, a little narrower than it was, and a
+  // little shorter (Carter, 2026-09-24: "make these boxes narrower, a tiny bit
+  // shorter, and centred horizontally").
+  var PW=Math.min(280, window.innerWidth-96);
+  var POPUP= wide
+    ? {maxWidth:440, minWidth:340, maxHeight:Math.min(560, Math.round(window.innerHeight*0.62)),
+       // Auto-pan clear of the zoom buttons and the Visited boxes top-left,
+       // and of the switcher top-right.
+       autoPanPaddingTopLeft:[230,16], autoPanPaddingBottomRight:[110,16]}
+    // On a phone Leaflet's own auto-pan is off: it only nudges a popup until
+    // it fits, and with the Visited box's padding on the left that left every
+    // card hanging off the right edge. placePhone() below does it instead.
+    : {maxWidth:PW, minWidth:PW, maxHeight:Math.min(330, Math.round(window.innerHeight*0.36)), autoPan:false};
+  // Slide the map so the open card is centred left-to-right, and sits in the
+  // middle of the space between the controls at the top and the note at the
+  // bottom — the same place every time, whichever park was tapped.
+  function placePhone(e){
+    var el=e.popup.getElement(), size=map.getSize();
+    if(!el) return;
+    var top=0, bottom=size.y;
+    var c=map.getContainer().getBoundingClientRect();
+    Array.prototype.forEach.call(map.getContainer().querySelectorAll('.leaflet-top .leaflet-control'),function(k){
+      top=Math.max(top, k.getBoundingClientRect().bottom - c.top);
+    });
+    Array.prototype.forEach.call(map.getContainer().querySelectorAll('.leaflet-bottom.leaflet-left .leaflet-control'),function(k){
+      bottom=Math.min(bottom, k.getBoundingClientRect().top - c.top);
+    });
+    top+=8; bottom-=8;
+    var h=el.offsetHeight;                          // card plus its tip
+    var cardTop=top + Math.max(0, (bottom-top-h)/2);
+    var at=map.latLngToContainerPoint(e.popup.getLatLng());
+    // The tip's point is 10px above the marker (popupAnchor) and the card's
+    // bottom edge is where the tip starts, so the marker lands h+10 below the
+    // card's top.
+    map.panBy([at.x - size.x/2, at.y - (cardTop + h + 10)], {animate:true});
+  }
+  if(!wide) map.on('popupopen', placePhone);
   var pts=[];
   var group=L.layerGroup();
   placed.forEach(function(p){

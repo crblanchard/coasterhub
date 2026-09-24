@@ -3279,6 +3279,11 @@ the way.
   since a corner stacks in add order), which gives the Visited / Compare box the top-left corner.
   The rider menu ran off the right edge from that corner; `place()` in app.js now slides any
   rider menu left until it fits, on every page.
+  Then the popup (same day, *"centres unevenly … narrower, a tiny bit shorter, centred
+  horizontally"*): on a phone it is a fixed `min(280, width−96)` wide and `min(330, 36% of the
+  height)` tall, Leaflet's auto-pan is OFF, and `placePhone()` pans the map on `popupopen` so the
+  card is centred horizontally and in the middle of the space between the top controls and the
+  bottom note — measured from the controls' rects, so it follows them if they move.
 - **Desktop popup** is 340–440 wide and up to 62% of the height; operating rows carry their
   opening year on the right like the defunct ones. The phone keeps the small card and
   hides the operating year (`.yrs.op`).
