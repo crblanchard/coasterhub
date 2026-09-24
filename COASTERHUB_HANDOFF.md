@@ -518,6 +518,14 @@ page**. All asset refs are root-absolute (`/style.css`, `/app.js`, `/mark.svg`),
 
 ### The mark is one path, and the numbers are load-bearing (2026-08-05)
 
+> **Superseded 2026-09-24: the mark is the Solid pin now** — a filled sky-blue map pin with a
+> dark window in its head holding a small hill and the yellow car (Carter, picking from two rounds
+> of sketches at claude.ai/artifact/HckVneQ1B1DBBwftkX54Q5: *"it shows like this is the hub, this is
+> where stuff is"*). The window is `#111315`, the site's dark ground, so it reads the same on both
+> themes. The 16px cut drops the hill and grows the car. Same five files carry it (`mark.svg`,
+> `favicon.svg`, `favicon-small.svg`, `logo.svg`, `tools/render-icons.mjs`); icon links are at
+> `?v=20260924b` and the OG image at `?v=4`. The track notes below are history.
+
 The track in `mark.svg` is a **single continuous stroke** — lift hill, drop, under the loop,
 around it, and out. It used to be three pieces: two teal fragments with a coral circle butted
 against their ends, which read as a sticker parked next to a hill rather than part of the ride.

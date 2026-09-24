@@ -6,8 +6,7 @@
  *   npm i --no-save playwright-core && node tools/render-icons.mjs
  *
  * Chromium is expected at /opt/pw-browsers (the sandbox has it pre-installed).
- * The path here must match mark.svg; see "The mark is one path" in the handoff
- * before changing any of these numbers. */
+ * The drawing here must match mark.svg (the Solid pin, 2026-09-24). */
 import { chromium } from "playwright-core";
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -17,19 +16,22 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..") + "/";
 const exe = "/opt/pw-browsers/" + readdirSync("/opt/pw-browsers").find(d => d.startsWith("chromium-")) + "/chrome-linux/chrome";
 const browser = await chromium.launch({ executablePath: exe, args: ["--no-sandbox"] });
 
-const TRACK = "M7,54 C7,30 10,14.5 17,14.5 C24,14.5 27,47 34,47 C41,47 43.86,39.08 50.22,32.72 A9.5,9.5 0 1 0 36.78,32.72 C43.85,39.79 52,54 58,54";
-const CAR = '<rect x="11.5" y="8" width="12" height="6.4" rx="2.6" fill="#ffcc1f"/>'
-          + '<circle cx="14.7" cy="6.7" r="1.35" fill="#eaf7ff"/><circle cx="20.3" cy="6.7" r="1.35" fill="#eaf7ff"/>';
+// The Solid pin (2026-09-24) — must match mark.svg.
+const PIN = "M32,61 C32,61 12,41 12,25 A20,20 0 1 1 52,25 C52,41 32,61 32,61 Z";
+const BODY = `<path d="${PIN}" fill="#4cc3ff" stroke="#4cc3ff" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="32" cy="25" r="13" fill="#111315"/>
+  <path d="M22,31 C25,31 26.5,23.5 30,23.5 C33.5,23.5 35,31 38,31 C39.5,31 40.5,29.5 41.5,28.5" fill="none" stroke="#4cc3ff" stroke-width="2.8" stroke-linecap="round"/>
+  <rect x="25" y="16.5" width="10" height="5" rx="2" fill="#ffcc1f"/>`;
+// 16px: no hill, a smaller window and a bigger car — see favicon-small.svg.
+const SMALL = `<path d="${PIN}" fill="#4cc3ff" stroke="#4cc3ff" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="32" cy="25" r="11" fill="#111315"/>
+  <rect x="25" y="21" width="14" height="7.5" rx="3" fill="#ffcc1f"/>`;
 
 // tile: rx as a fraction of 64 so it scales; fill overridable for the OG composite
-const icon = ({ size, tile = "#1b1e22", rx = 14, w = 5.5, ground = true, car = CAR }) => `
+const icon = ({ size, tile = "#1b1e22", rx = 14, small = false }) => `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="${size}" height="${size}">
   ${tile ? `<rect width="64" height="64" rx="${rx}" fill="${tile}"/>` : ""}
-  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    ${ground ? '<line x1="6" y1="54" x2="58" y2="54" stroke="#4cc3ff" stroke-width="2" opacity="0.4"/>' : ""}
-    <path d="${TRACK}" stroke="#4cc3ff" stroke-width="${w}"/>
-    ${car}
-  </g></svg>`;
+  <g>${small ? SMALL : BODY}</g></svg>`;
 
 async function shot(html, width, height, out) {
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
@@ -41,9 +43,8 @@ async function shot(html, width, height, out) {
 
 // --- favicons + touch icon (no text, safe to re-render here) ---------------
 await shot(icon({ size: 32 }), 32, 32, "favicon-32.png");
-// 16px drops the ground line and the riders' heads — see favicon-small.svg
-await shot(icon({ size: 16, w: 7, ground: false, car: '<rect x="11" y="7.4" width="13" height="7" rx="3" fill="#ffcc1f"/>' }),
-           16, 16, "favicon-16.png");
+// 16px drops the hill in the window — see favicon-small.svg
+await shot(icon({ size: 16, small: true }), 16, 16, "favicon-16.png");
 // iOS rounds the corners itself, so this one stays square edge-to-edge
 await shot(icon({ size: 180, rx: 0 }), 180, 180, "apple-touch-icon.png");
 
@@ -82,7 +83,7 @@ await shot(
   `<div style="position:relative;width:1200px;height:630px">
      <img src="${og}" width="1200" height="630" style="display:block">
      <div style="position:absolute;left:500px;top:92px;width:201px;height:201px">
-       ${icon({ size: 201, tile: "#061121", rx: 14.3, w: 5.5 })}
+       ${icon({ size: 201, tile: "#061121", rx: 14.3 })}
      </div>
      <div style="position:absolute;left:0;top:396px;width:1200px;height:104px;
                  background-image:repeating-linear-gradient(to bottom,#04091a 0,#04091a 1px,#01030c 1px,#01030c 2px)"></div>
