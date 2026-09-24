@@ -67,6 +67,11 @@
   /* How many riders have this one. Filled in after the rider logs land, so it
      reserves no space and nothing reflows into it. */
   a.crow .rid{flex:none;color:var(--accent);font-size:.78rem;font-variant-numeric:tabular-nums}
+  /* Your ticks, when you are signed in (Carter, 2026-09-24: "on this page
+     don't see checks"): /count's park-view tick, a teal ✓ in a fixed slot so
+     the names line up. The slot only takes room once #list has .ticks. */
+  a.crow .tick{display:none;flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
+  #list.ticks a.crow .tick{display:inline-block}
   @media (max-width:560px){
     a.crow{gap:7px;padding:10px 13px}
     a.crow .mk{display:none}
@@ -218,6 +223,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   // leaves the park page complete rather than taking it down — the coasters are
   // the page, the riders are the extra.
   riders(mine).catch(function(e){ console.error(e); });
+  ticks(mine).catch(function(e){ console.error(e); });
 }).catch(fail);
 
 function tile(n,label){ return '<div class="tile"><b>'+esc(n)+'</b><span>'+esc(label)+'</span></div>'; }
@@ -233,10 +239,30 @@ function life(c){
 function row(c){
   var mk=CoasterHub.maker(c);
   return '<a class="crow" href="'+esc(CoasterHub.coasterHref(c))+'" data-c="'+c.id+'">'
+    +'<span class="tick" data-tick="'+c.id+'"></span>'
     +'<span class="cn">'+esc(c.name)+'</span>'
     +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
     +'<span class="end">'+life(c)+'<span class="rid" data-rid="'+c.id+'"></span></span>'
     +'</a>';
+}
+
+// The signed-in rider's ticks, and "x of y operating ridden" beside the
+// Coasters heading. Signed out, or no rider of your own: nothing changes.
+function ticks(mine){
+  return CoasterHub.me().then(function(a){
+    if(!(a && a.slug)) return;
+    return CoasterHub.fetchRides(a.slug).then(function(l){
+      var got={}; (l.rides||[]).forEach(function(r){ got[r.c]=1; });
+      mine.forEach(function(c){
+        var el=document.querySelector('[data-tick="'+c.id+'"]');
+        if(el && got[c.id]){ el.textContent='\u2713'; el.setAttribute('aria-label','Ridden'); }
+      });
+      $('list').classList.add('ticks');
+      var op=mine.filter(function(c){ return !c.closed; });
+      var n=op.filter(function(c){ return got[c.id]; }).length;
+      $('list_h').textContent='Coasters · you have ridden '+n+' of '+op.length+' operating';
+    });
+  });
 }
 
 // Every rider's log, the same way the everyone view of /count reads them: a
