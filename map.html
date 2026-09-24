@@ -70,8 +70,8 @@
   .pp li a{color:inherit;text-decoration:none;min-width:0}.pp li a:hover{color:var(--accent2);text-decoration:underline}
   /* The mark beside each coaster when there is somebody to mark: /count's
      park-view tick, exactly — a teal ✓ on the ones you have, an empty slot of
-     the same width on the ones you do not, so the names line up, and the
-     name muted on those. Not a box: it was the log page's checkbox for an
+     the same width on the ones you do not, so the names line up. (The name
+     was muted on those too until 2026-09-24; grey means defunct now.) Not a box: it was the log page's checkbox for an
      hour and read as something to click (Carter, 2026-09-21: "the checks like
      these, something less clickable"). */
   .pp li .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
@@ -79,7 +79,9 @@
      "only them" parks — and the same two colours in the headline. */
   .pp li .tick.them{color:#ff5a5f}
   .pp .k1{color:var(--accent2)} .pp .k2{color:#ff5a5f}
-  .pp li.miss a{color:var(--muted)}
+  /* Grey means defunct, as on /count's park view (2026-09-24); not ridden
+     is the missing tick. */
+  .pp li.gone a{color:var(--muted)}
   /* The defunct ones, under the operating list: their own small heading, the
      years on the right the way /count writes them (1990–2017, or "closed 2017"
      when the opening year is unknown), a tick where the rider has the credit —
@@ -297,7 +299,7 @@ Promise.all([
     var theirs=CMP && !!CMP.has[c.id];
     var op=c.opened ? String(c.opened).slice(0,4) : (c.yr ? String(c.yr) : '');
     var yrs = cl ? (op ? esc(op)+'–'+cl : 'closed '+cl) : esc(op);
-    return '<li'+(log?((got||theirs)?' class="got"':' class="miss"'):'')+'>'
+    return '<li class="'+(log?((got||theirs)?'got':'miss'):'')+(cl?' gone':'')+'">'
       +(log ? tick(got,'',YOU) : '')
       +(CMP ? tick(theirs,' them',CMP.name) : '')
       +'<a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'

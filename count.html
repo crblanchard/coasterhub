@@ -162,10 +162,13 @@
   .day .row .cmain .mk{font-size:.74rem;line-height:1.25}
   .day .row{align-items:flex-start}
   .day .row .life{align-self:flex-start}
-  /* Dimmed rather than hidden, the same way an unridden row reads on
-     /categories: the ones you are missing are the point of the list. */
-  .day .row.miss .cn{color:var(--muted)}
-  .day .row.miss .cn a{color:inherit}
+  /* Grey means DEFUNCT, and only that (Carter, 2026-09-24: "make operating
+     but not ridden coasters full, only grey for defunct"). It used to mean
+     "not ridden"; the missing tick already says that, so an operating coaster
+     you still need reads at full strength, and every defunct one is dimmed,
+     ridden or not. */
+  .day .row.gone .cn{color:var(--muted)}
+  .day .row.gone .cn a{color:inherit}
   .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
   /* Full-list table (came over with the old /coasters page) */
   .pill{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
@@ -984,7 +987,7 @@ function parkBody(park){
         // 2026-09-20). Beside it, it competed with the name for a phone's
         // width and the names were the ones that got clipped, which is why it
         // was hidden on a phone at all.
-        return '<div class="row'+(MINE?(got?' got':' miss'):'')+'">'
+        return '<div class="row'+(MINE?(got?' got':' miss'):'')+(r.cl?' gone':'')+'">'
           +(MINE?'<span class="tick">'+(got?'\u2713':'')+'</span>':'')
           +'<span class="cmain">'
             +'<span class="cn">'+clink(r)+'</span>'
