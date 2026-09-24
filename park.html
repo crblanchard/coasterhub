@@ -18,17 +18,18 @@
 <meta property="og:title" content="Coaster Hub — Park">
 <meta property="og:image" content="https://coasterhub.org/og-image.png?v=2">
 <style>
-  /* Four facts about the park, above its list. Same shape as the tiles the
-     count page uses, kept here rather than in style.css because nothing else
-     needs them yet. */
-  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 20px}
+  /* Two facts about the park, above its list: operating and defunct. There
+     were four — Coasters and Tallest as well — until Carter, 2026-09-24: "remove
+     the 'coasters' and 'tallest' cards from the top so we only have
+     operating/defunct up there." Same shape as the tiles the count page uses,
+     kept here rather than in style.css because nothing else needs them yet. */
+  .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 20px}
   .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
   .tile b{display:block;font-size:1.5rem;font-weight:800;color:var(--accent2);
           font-variant-numeric:tabular-nums;line-height:1.15}
   .tile span{display:block;color:var(--muted);font-size:.76rem;text-transform:uppercase;
              letter-spacing:.06em;margin-top:3px}
   @media (max-width:680px){
-    .tiles{grid-template-columns:repeat(2,1fr)}
     .tile b{font-size:1.25rem}
   }
 
@@ -188,7 +189,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 
   var meta=parks[PARK]||{};
   var mine=LIST.coasters.filter(function(c){return c.park===PARK;});
-  mine.sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
+  // Operating first, then defunct, A-Z within each (Carter, 2026-09-24: "sort
+  // coasters by operating then defunct").
+  mine.sort(function(a,b){return (!!a.closed-!!b.closed) || String(a.name).localeCompare(String(b.name));});
 
   document.querySelector('.hero h1').textContent=PARK;
   document.title=PARK+' — Coaster Hub';
@@ -198,16 +201,11 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 
   var open=mine.filter(function(c){return !c.closed;}).length;
   var gone=mine.length-open;
-  // Tallest and oldest are the two specs a whole park has an answer for. A park
-  // where nobody has filled the heights in gets a dash rather than a zero.
-  var tall=mine.reduce(function(m,c){return (c.h!=null&&(m==null||c.h>m))?c.h:m;},null);
-  var first=mine.reduce(function(m,c){return (c.yr!=null&&(m==null||c.yr<m))?c.yr:m;},null);
+  // The list heading used to add "· oldest opened 1990"; that went with the
+  // Coasters and Tallest tiles on the same ask.
   $('tiles').innerHTML=
-     tile(mine.length.toLocaleString(),'Coasters')
-    +tile(open.toLocaleString(),'Operating')
-    +tile(gone.toLocaleString(),'Defunct')
-    +tile(tall!=null?(Math.round(tall)+' ft'):'—','Tallest');
-  if(first!=null) $('list_h').textContent='Coasters · oldest opened '+first;
+     tile(open.toLocaleString(),'Operating')
+    +tile(gone.toLocaleString(),'Defunct');
 
   $('list').innerHTML=mine.map(row).join('')
     || '<div style="padding:18px 16px;color:var(--muted)">No coasters on the site for this park yet.</div>';
