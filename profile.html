@@ -752,7 +752,7 @@ function render(s){
      .bindPopup('<div class="pp"><b>'+p.park+'</b><br><small>'+p.region+'</small><br>'+detail+'</div>'));
     pts.push([p.lat,p.lon]);});
   function paintMarkers(){
-    const stroke=cssVar('--accent2'), fill=cssVar('--accent');
+    const stroke=cssVar('--accent2'), fill=cssVar('--accentfill');
     MARKERS.forEach(m=>m.setStyle({color:stroke,fillColor:fill}));
   }
   // A rider with no parks yet has no points to fit, and Leaflet throws "Bounds
@@ -816,7 +816,10 @@ function render(s){
   function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
   function drawCharts(){
   while(CH.length) CH.pop().destroy();   // a live chart on a reused canvas throws
-  const AX=cssVar('--muted'), GRID=cssVar('--soft2'), ACC=cssVar('--accent'),
+  // Bars and slices are FILLS, so they take the fill yellow, not --accent:
+  // on light, --accent is the darker marigold that text needs, and the bars
+  // came out brown (Carter, 2026-09-24: "make these the brighter yellow too").
+  const AX=cssVar('--muted'), GRID=cssVar('--soft2'), ACC=cssVar('--accentfill'),
         ACC2=cssVar('--accent2'), FILL=cssVar('--tint2'), PANEL=cssVar('--panel');
   Chart.defaults.color=AX; Chart.defaults.font.family='system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
   const grid={grid:{color:GRID},ticks:{color:AX}}, noLeg={plugins:{legend:{display:false}}};
