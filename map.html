@@ -75,6 +75,10 @@
      hour and read as something to click (Carter, 2026-09-21: "the checks like
      these, something less clickable"). */
   .pp li .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
+  /* Comparing: the other rider's tick, in amber — the colour of their
+     "only them" parks — and the same two colours in the headline. */
+  .pp li .tick.them{color:#f0a01e}
+  .pp .k1{color:var(--accent2)} .pp .k2{color:#f0a01e}
   .pp li.miss a{color:var(--muted)}
   /* The defunct ones, under the operating list: their own small heading, the
      years on the right the way /count writes them (1990–2017, or "closed 2017"
@@ -97,6 +101,24 @@
   .ctl.filt label{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--fg);padding:3px 0;font-size:.85rem;user-select:none;white-space:nowrap}
   .ctl.filt input{accent-color:var(--accent2);width:16px;height:16px;margin:0;flex:none;cursor:pointer}
   .ctl.filt small{color:var(--muted);font-variant-numeric:tabular-nums}
+  /* Each box's ramp, so the boxes are the legend. */
+  .ctl.filt .sw{flex:none;width:22px;height:8px;border-radius:4px}
+  .ctl.filt select{display:block;width:100%;margin:5px 0 3px;background-color:var(--well);color:var(--fg);
+    border:1px solid var(--line);border-radius:8px;padding:5px 6px;font-size:.8rem;cursor:pointer}
+  .ctl.filt label.cities{color:var(--muted);font-size:.8rem}
+  /* City names, drawn by the page (see drawCities). A dot and a name beside
+     it, haloed in the page colour so it reads over any tile, and the million-
+     plus cities a little heavier. The name sits right of the dot, or left
+     (.l), above (.t) or below (.b) when that is taken. */
+  .leaflet-div-icon.city{background:none;border:0}
+  .city i{position:absolute;left:-2.5px;top:-2.5px;width:5px;height:5px;border-radius:50%;background-color:var(--muted);opacity:.85}
+  .city span{position:absolute;left:5px;top:-8px;line-height:16px;white-space:nowrap;
+    font:500 11px system-ui,sans-serif;color:var(--muted);
+    text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 2px var(--bg)}
+  .city.big span{font-weight:600;color:var(--fg);opacity:.85}
+  .city.l span{left:auto;right:5px}
+  .city.t span,.city.b span{left:0;transform:translateX(-50%)}
+  .city.t span{top:-21px} .city.b span{top:3px}
   #err{position:absolute;z-index:2;left:16px;right:16px;top:16px;background:var(--tint2);border:1px solid var(--accent2);border-radius:12px;padding:14px 16px;display:none}
   /* Smaller on a phone: it was most of the screen (Carter, 2026-09-21: "make
      a little smaller on mobile? and so i can scroll within card"). LAST in
@@ -108,6 +130,9 @@
     .pp h3{font-size:.92rem}
     .pp .n{font-size:.76rem;margin:4px 0 2px}
     .pp li{font-size:.82rem;padding:2px 0;gap:6px}
+    /* An operating coaster's opening year is a desktop extra; the phone card
+       has no room for it. Defunct years stay — they are the point of that list. */
+    .pp li .yrs.op{display:none}
   }
 </style>
 </head>
@@ -200,16 +225,30 @@ who.addTo(map);
 CoasterHub.riderBadge(document.getElementById('hero_badge'),'map',slug);
 
 // A rider whose log cannot be read gets the everyone map rather than a map
-// that ticks nothing and says "0 of 15" at every park.
+// that ticks nothing and says "0 of 15" at every park. Who is signed in is
+// asked either way now: it decides whose friends the compare list offers, and
+// whether this is somebody ELSE's map (which opens on their visited parks).
+var acctP = CoasterHub.me().catch(function(){ return null; });
 var whose = slug ? Promise.resolve(slug)
-  : CoasterHub.me().then(function(a){ return (a && a.slug) || null; }).catch(function(){ return null; });
+  : acctP.then(function(a){ return (a && a.slug) || null; });
 Promise.all([
   whose.then(function(s){ return s ? CoasterHub.fetchRides(s).catch(function(){ return null; }) : null; }),
   CoasterHub.fetchCoasters(),
-  CoasterHub.fetchParks()
+  CoasterHub.fetchParks(),
+  acctP,
+  whose
 ]).then(function(res){
-  var log=res[0], coasters=res[1].coasters, parks=res[2];
+  var log=res[0], coasters=res[1].coasters, parks=res[2], acct=res[3], who=res[4];
   var MINE={}; if(log) (log.rides||[]).forEach(function(r){ MINE[r.c]=1; });
+  // Somebody else's map: a rider in the URL who is not the one signed in.
+  var others = !!(slug && log && !(acct && acct.slug===slug));
+  // What the map calls its rider: "You" on your own, their name on theirs.
+  var YOU = others ? (log.user||slug) : 'You';
+
+  // The rider being compared against (Carter, 2026-09-24: "select one of your
+  // friends and see where they've been ... and/or where neither of you have
+  // been"). null until one is picked.
+  var CMP=null;   // {slug, name, has:{coasterId:1}}
 
   // Per park: its coasters, operating and closed, A-Z within each, and whether
   // the rider has any credit there. A closed one counts: it was still a visit.
@@ -227,15 +266,27 @@ Promise.all([
     p.been = !!log && p.open.concat(p.closed).some(function(c){ return MINE[c.id]; });
   });
   var placed=all.filter(function(p){ return p.lat!=null && p.lon!=null; });
+  function theyBeen(p){ return !!CMP && p.open.concat(p.closed).some(function(c){ return CMP.has[c.id]; }); }
 
   // One row per coaster, operating or defunct: a tick when there is somebody
-  // to tick for, the name as a link, and for a defunct one its years.
+  // to tick for (two when comparing — the map's rider in teal, the other in
+  // amber), the name as a link, and its years on the right. Defunct rows always
+  // carry theirs; operating rows carry the opening year on a desktop, where
+  // the card is wide enough (Carter, 2026-09-24: "make park popups bigger to
+  // show ride opening years on the right like how defunct has").
+  function tick(got, cls, who){
+    return '<span class="tick'+cls+'" aria-label="'+esc(who)+': '+(got?'ridden':'not ridden')+'">'+(got?'✓':'')+'</span>';
+  }
   function row(c){
     var got=!!MINE[c.id], cl=c.closed ? String(c.closed).slice(0,4) : '';
-    return '<li'+(log?(got?' class="got"':' class="miss"'):'')+'>'
-      +(log ? '<span class="tick" aria-label="'+(got?'Ridden':'Not ridden')+'">'+(got?'\u2713':'')+'</span>' : '')
+    var theirs=CMP && !!CMP.has[c.id];
+    var op=c.opened ? String(c.opened).slice(0,4) : (c.yr ? String(c.yr) : '');
+    var yrs = cl ? (op ? esc(op)+'–'+cl : 'closed '+cl) : esc(op);
+    return '<li'+(log?((got||theirs)?' class="got"':' class="miss"'):'')+'>'
+      +(log ? tick(got,'',YOU) : '')
+      +(CMP ? tick(theirs,' them',CMP.name) : '')
       +'<a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'
-      +(cl ? '<span class="yrs">'+(c.yr ? esc(c.yr)+'–'+cl : 'closed '+cl)+'</span>' : '')
+      +(yrs ? '<span class="yrs'+(cl?'':' op')+'">'+yrs+'</span>' : '')
       +'</li>';
   }
   // The headline is "11 operating · 13 ridden" (his wording, third try): the first number is what is
@@ -245,88 +296,256 @@ Promise.all([
   // (Carter, 2026-09-21: "write it as 11 coasters > 13 ridden or however
   // many. then at the bottom show all defunct coasters too with closing years
   // and checkboxes as relevant". At Knott's that is 10 operating + 3 defunct.)
+  // Comparing, the second half is each of you: "11 operating · you 13 · Sean 4".
   function popup(p){
-    var ridden=p.open.concat(p.closed).filter(function(c){ return MINE[c.id]; }).length;
+    var both=p.open.concat(p.closed);
+    var ridden=both.filter(function(c){ return MINE[c.id]; }).length;
     var h='<div class="pp"><h3><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+' →</a></h3>'
       +'<small>'+esc(p.region)+'</small>'
-      +'<div class="n">'+(p.open.length ? p.open.length+' operating' : 'No operating coasters')
-      +(log ? ' · '+ridden+' ridden' : '')+'</div>';
+      +'<div class="n">'+(p.open.length ? p.open.length+' operating' : 'No operating coasters');
+    if(CMP){
+      var th=both.filter(function(c){ return CMP.has[c.id]; }).length;
+      h+=' · <span class="k1">✓ '+esc(YOU.toLowerCase()==='you'?'you':YOU)+' '+ridden+'</span>'
+        +' · <span class="k2">✓ '+esc(CMP.name)+' '+th+'</span>';
+    } else if(log) h+=' · '+ridden+' ridden';
+    h+='</div>';
     if(p.open.length) h+='<ul>'+p.open.map(row).join('')+'</ul>';
     if(p.closed.length) h+='<div class="n dead">'+p.closed.length+' defunct</div><ul class="dead">'+p.closed.map(row).join('')+'</ul>';
     return h+'</div>';
   }
-  // The colour ramp: pale at one coaster, the site's red in the middle, deep
-  // crimson at the busiest park. Square-root, not linear, because the median
-  // park has three and a linear ramp would leave two-thirds of the map the
-  // same pale pink. Dark digits on the pale end, white once the fill is dark
-  // enough to carry them.
+
+  // The colour ramps: pale at one coaster, a middle, deep at the busiest park.
+  // Square-root, not linear, because the median park has three and a linear
+  // ramp would leave two-thirds of the map the same pale colour. Dark digits
+  // on the pale end, white once the fill is dark enough to carry them.
+  //
+  // One ramp per KIND of park, all the same shape, so the colour says which
+  // kind and the depth still says how big (Carter, 2026-09-24: "make 'visited'
+  // blue to separate with the same color gradient"). Red is a park the map's
+  // rider has not been to (and every park on the everyone view), blue one they
+  // have. Comparing adds amber, only the other rider, and purple, both of you.
   var MAX=placed.reduce(function(m,p){ return Math.max(m,p.open.length); },1);
-  var STOPS=[[255,190,178],[255,90,95],[140,10,30]];
-  function rampT(t){
-    var i=t<.5?0:1, f=(t-i*.5)*2, a=STOPS[i], b=STOPS[i+1];
+  var RAMPS={
+    red:   {stops:[[255,190,178],[255,90,95],[140,10,30]],  ink:'#3a0810'},
+    blue:  {stops:[[196,222,255],[74,144,255],[14,46,140]], ink:'#0a1f4a'},
+    amber: {stops:[[255,228,170],[240,160,30],[140,78,0]],  ink:'#3a2400'},
+    purple:{stops:[[228,206,255],[160,104,240],[72,24,140]],ink:'#2a0a4a'}
+  };
+  function rampT(t, R){
+    var S=(R||RAMPS.red).stops, i=t<.5?0:1, f=(t-i*.5)*2, a=S[i], b=S[i+1];
     return 'rgb('+[0,1,2].map(function(k){ return Math.round(a[k]+(b[k]-a[k])*f); }).join(',')+')';
   }
-  function ramp(n){
+  function ramp(n, R){
     var t=Math.sqrt(Math.max(0,n-1)/Math.max(1,MAX-1));
-    return { bg:rampT(t), fg: t<.3 ? '#3a0810' : '#fff' };
+    return { bg:rampT(t,R), fg: t<.3 ? R.ink : '#fff' };
   }
+  function grad(R){ return 'linear-gradient(to right,'+rampT(0,R)+','+rampT(.5,R)+','+rampT(1,R)+')'; }
+  // Which bucket a park is in: the checkbox it answers to, and its ramp.
+  function kind(p){
+    if(!log) return 'all';
+    if(!CMP) return p.been ? 'been' : 'not';
+    var t=theyBeen(p);
+    return p.been ? (t ? 'both' : 'me') : (t ? 'them' : 'neither');
+  }
+  var KIND={
+    all:{R:RAMPS.red}, been:{R:RAMPS.blue}, not:{R:RAMPS.red},
+    both:{R:RAMPS.purple}, me:{R:RAMPS.blue}, them:{R:RAMPS.amber}, neither:{R:RAMPS.red}
+  };
+  function iconFor(p){
+    var n=p.open.length;
+    var full = log && n && p.open.every(function(c){ return MINE[c.id]; });
+    var col = n ? ramp(n, KIND[kind(p)].R) : null;
+    return L.divIcon({className:'pk'+(n?'':' none')+(full?' mine':''),
+      html:'<span'+(col ? ' style="background-color:'+col.bg+';color:'+col.fg+'"' : '')+'>'+n+'</span>',
+      iconSize:null, popupAnchor:[0,-10]});
+  }
+  // Bigger on a desktop, so the years fit on the right; a phone keeps the
+  // narrower, shorter card that scrolls inside itself.
+  var wide=window.innerWidth>640;
+  var POPUP={maxWidth: wide ? 440 : Math.min(320, window.innerWidth-72),
+             minWidth: wide ? 340 : 0,
+             maxHeight: wide ? Math.min(560, Math.round(window.innerHeight*0.62)) : Math.min(380, Math.round(window.innerHeight*0.42)),
+             // Auto-pan clear of the zoom buttons and the Visited boxes top-left,
+             // and of the switcher top-right: on a phone a popup opened up there
+             // sat under both.
+             autoPanPaddingTopLeft:[wide?230:160,16], autoPanPaddingBottomRight:[110,16]};
   var pts=[];
   var group=L.layerGroup();
   placed.forEach(function(p){
-    var n=p.open.length;
-    var full = log && n && p.open.every(function(c){ return MINE[c.id]; });
-    var col = n ? ramp(n) : null;
-    var icon=L.divIcon({className:'pk'+(n?'':' none')+(full?' mine':''),
-      html:'<span'+(col ? ' style="background-color:'+col.bg+';color:'+col.fg+'"' : '')+'>'+n+'</span>',
-      iconSize:null, popupAnchor:[0,-10]});
     // Where discs overlap, the bigger park is on top: the one worth clicking
-    // is the one you can see.
-    // Sized to the screen: a phone gets a narrower, shorter card that scrolls
-    // inside itself rather than one that is most of the screen.
-    p.marker=L.marker([p.lat,p.lon],{icon:icon, title:p.name, zIndexOffset:n*10})
-      .bindPopup(popup(p),{maxWidth:Math.min(320, window.innerWidth-72), maxHeight:Math.min(380, Math.round(window.innerHeight*0.42)),
-        // Auto-pan clear of the zoom buttons and the Visited boxes top-left,
-        // and of the switcher top-right: on a phone a popup opened up there
-        // sat under both.
-        autoPanPaddingTopLeft:[160,16], autoPanPaddingBottomRight:[110,16]});
+    // is the one you can see. The popup is built when it opens, so it always
+    // reflects the comparison as it stands.
+    p.marker=L.marker([p.lat,p.lon],{icon:iconFor(p), title:p.name, zIndexOffset:p.open.length*10})
+      .bindPopup(function(){ return popup(p); }, POPUP);
     pts.push([p.lat,p.lon]);
   });
   map.addLayer(group);
 
-  // Which parks are on the map. The note's two numbers follow along.
-  var SHOW={been:true, not:true};
-  function shown(p){ return p.been ? SHOW.been : SHOW.not; }
+  // Which parks are on the map. Somebody else's map opens on just the parks
+  // they have been to (Carter, 2026-09-24: "when you click on someone else's
+  // map make it default to just visited"); your own opens complete.
+  var SHOW={all:true, been:true, not:!others, both:true, me:true, them:true, neither:true};
+  function shown(p){ return SHOW[kind(p)]; }
   function refresh(){
     var vis=placed.filter(shown);
     group.clearLayers(); vis.forEach(function(p){ group.addLayer(p.marker); });
     var np=document.getElementById('np'), nc=document.getElementById('nc');
     if(np) np.textContent=vis.length;
     if(nc) nc.textContent=vis.reduce(function(a,p){ return a+p.open.length; },0).toLocaleString();
+    drawCities();
   }
+
+  // ---- city names --------------------------------------------------------
+  // Carter, 2026-09-24: "make it so cities can show up on map again but it's
+  // larger cities that come up first in a normal way". The tile labels were
+  // on for an hour on 2026-09-21 and came off because they are part of the
+  // picture and sat under the discs. These are drawn by the page instead
+  // (map-cities.json, GeoNames, 100k people and up — tools/build-cities.mjs),
+  // so a name can step aside: the biggest cities are placed first, each one
+  // only where it does not cover a disc or a name already placed — to the
+  // right of its dot, else the left, else not at all — and how big a city has
+  // to be to get a name falls as you zoom in. That is how an ordinary map
+  // behaves: Los Angeles from space, Anaheim once you are looking at Orange
+  // County. They sit in their own pane below the discs and take no clicks.
+  var CITIES=null, cityLayer=L.layerGroup().addTo(map);
+  map.createPane('cities'); map.getPane('cities').style.zIndex=450; map.getPane('cities').style.pointerEvents='none';
+  var SHOWCITIES=true;
+  try{ SHOWCITIES = localStorage.getItem('ch_map_cities')!=='0'; }catch(e){}
+  // Thousands of people a city needs to be named at each zoom.
+  function minPop(z){ return z<=2 ? 6000 : z<=3 ? 3000 : z<=4 ? 1200 : z<=5 ? 600 : z<=6 ? 300 : z<=7 ? 180 : 100; }
+  var measure=document.createElement('canvas').getContext('2d');
+  function drawCities(){
+    cityLayer.clearLayers();
+    if(!CITIES || !SHOWCITIES) return;
+    var z=map.getZoom(), min=minPop(z), size=map.getSize(), taken=[], discs=[];
+    function over(list,b){ return list.some(function(t){ return b[0]<t[2] && b[2]>t[0] && b[1]<t[3] && b[3]>t[1]; }); }
+    group.eachLayer(function(m){
+      var q=map.latLngToContainerPoint(m.getLatLng());
+      discs.push([q.x-11,q.y-11,q.x+11,q.y+11]);
+    });
+    var n=0;
+    for(var i=0;i<CITIES.length && n<140;i++){
+      var c=CITIES[i]; if(c[3]<min) break;          // biggest first, so the rest are smaller still
+      var q=map.latLngToContainerPoint([c[1],c[2]]);
+      if(q.x<-50 || q.y<-20 || q.x>size.x+50 || q.y>size.y+20) continue;
+      var big=c[3]>=1000;
+      // A city of two million is named even where discs crowd it — New York
+      // would otherwise never get a name, it has parks on every side. Its name
+      // goes under the discs rather than beside them. Smaller ones step aside.
+      var mega=c[3]>=2000;
+      var hit=function(b){ return over(taken,b) || (!mega && over(discs,b)); };
+      measure.font=(big?'600 ':'500 ')+'11px system-ui,sans-serif';
+      // The dot may sit under a disc (the disc wins, it is on top); the NAME
+      // may not. Four places to try, in the order a map reads them.
+      var w=measure.measureText(c[0]).width+4;
+      var spots=[['',[q.x+4,q.y-8,q.x+6+w,q.y+8]], [' l',[q.x-6-w,q.y-8,q.x-4,q.y+8]],
+                 [' t',[q.x-w/2,q.y-20,q.x+w/2,q.y-4]], [' b',[q.x-w/2,q.y+4,q.x+w/2,q.y+20]]];
+      var spot=null;
+      for(var k=0;k<spots.length && !spot;k++) if(!hit(spots[k][1])) spot=spots[k];
+      if(!spot) continue;
+      taken.push(spot[1]);
+      L.marker([c[1],c[2]],{pane:'cities', interactive:false, keyboard:false,
+        icon:L.divIcon({className:'city'+(big?' big':'')+spot[0], iconSize:null,
+                        html:'<i></i><span>'+esc(c[0])+'</span>'})}).addTo(cityLayer);
+      n++;
+    }
+  }
+  map.on('zoomend moveend', drawCities);
+  fetch('/map-cities.json').then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ CITIES=j; drawCities(); }).catch(function(){ /* no names: still a map */ });
+  map.attributionControl.addAttribution('Cities: <a href="https://www.geonames.org/">GeoNames</a>');
+
   refresh();
   if(pts.length) map.fitBounds(pts,{padding:[30,30]});
 
-  // The two boxes, top-left under the zoom buttons (Carter, 2026-09-21:
+  // The boxes, top-left under the zoom buttons (Carter, 2026-09-21:
   // "checkboxes in the top left that show ridden and not ridden while you're
-  // logged in"). Both on to start, so the map opens complete; untick one and
-  // that half of the parks goes. A park is visited when the rider has any
-  // credit there. Carter, on seeing it: "call it visited and not visited" —
-  // the coaster ticks in the popup stay Ridden, since those are about rides.
-  // The counts are of parks that are on the map — the unplaced
-  // ones are the note's business.
-  if(log){
-    var been=placed.filter(function(p){ return p.been; }).length;
-    var filt=L.control({position:'topleft'});
-    filt.onAdd=function(){
-      var d=L.DomUtil.create('div','ctl filt');
-      d.innerHTML='<label><input type="checkbox" id="f_been" checked> Visited <small>'+been+'</small></label>'
-        +'<label><input type="checkbox" id="f_not" checked> Not visited <small>'+(placed.length-been)+'</small></label>';
-      L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
-      return d;
+  // logged in"). A park is visited when the rider has any credit there.
+  // Carter, on seeing it: "call it visited and not visited" — the coaster
+  // ticks in the popup stay Ridden, since those are about rides. Each box
+  // carries a swatch of its ramp, so the boxes are the legend too.
+  //
+  // Comparing turns the two into four — both of you, only you, only them,
+  // neither of you — and "Cities" is always there.
+  function box(k, label, count, R){
+    return '<label><input type="checkbox" data-k="'+k+'"'+(SHOW[k]?' checked':'')+'>'
+      +(R ? '<span class="sw" style="background-image:'+grad(R)+'"></span>' : '')
+      +esc(label)+' <small>'+count+'</small></label>';
+  }
+  var filt=L.control({position:'topleft'}), fbox=null, FRIENDS=null;
+  filt.onAdd=function(){
+    fbox=L.DomUtil.create('div','ctl filt');
+    L.DomEvent.disableClickPropagation(fbox); L.DomEvent.disableScrollPropagation(fbox);
+    return fbox;
+  };
+  filt.addTo(map);
+  function drawFilt(){
+    var h='';
+    if(log){
+      var cnt={}; placed.forEach(function(p){ var k=kind(p); cnt[k]=(cnt[k]||0)+1; });
+      if(!CMP){
+        h+=box('been','Visited',cnt.been||0,RAMPS.blue)+box('not','Not visited',cnt.not||0,RAMPS.red);
+      } else {
+        h+=box('both','Both of you',cnt.both||0,RAMPS.purple)
+          +box('me','Only '+(others?YOU:'you'),cnt.me||0,RAMPS.blue)
+          +box('them','Only '+CMP.name,cnt.them||0,RAMPS.amber)
+          +box('neither','Neither of you',cnt.neither||0,RAMPS.red);
+      }
+      h+='<select id="cmp" aria-label="Compare with"><option value="">Compare with…</option>'+cmpOptions()+'</select>';
+    }
+    h+='<label class="cities"><input type="checkbox" id="f_cities"'+(SHOWCITIES?' checked':'')+'> Cities</label>';
+    fbox.innerHTML=h;
+    Array.prototype.forEach.call(fbox.querySelectorAll('input[data-k]'),function(el){
+      el.onchange=function(){ SHOW[this.getAttribute('data-k')]=this.checked; refresh(); };
+    });
+    fbox.querySelector('#f_cities').onchange=function(){
+      SHOWCITIES=this.checked;
+      try{ localStorage.setItem('ch_map_cities', SHOWCITIES?'1':'0'); }catch(e){}
+      drawCities();
     };
-    filt.addTo(map);
-    document.getElementById('f_been').onchange=function(){ SHOW.been=this.checked; refresh(); };
-    document.getElementById('f_not').onchange=function(){ SHOW.not=this.checked; refresh(); };
+    var sel=fbox.querySelector('#cmp');
+    if(sel){ sel.value=CMP?CMP.slug:''; sel.onchange=function(){ compare(this.value); }; }
+  }
+  // Who can be compared against: your friends first (the riders you follow,
+  // and you yourself when this is somebody else's map), then everybody else.
+  function cmpOptions(){
+    var skip=who, fr=FRIENDS||[], inF={}, o='';
+    fr.forEach(function(s){ inF[s]=1; });
+    var users=CoasterHub.USERS.filter(function(u){ return u.slug!==skip; })
+      .sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+    var f=users.filter(function(u){ return inF[u.slug]; }), rest=users.filter(function(u){ return !inF[u.slug]; });
+    function opt(u){ return '<option value="'+esc(u.slug)+'">'+esc(acct && u.slug===acct.slug ? u.name+' (you)' : u.name)+'</option>'; }
+    if(f.length) o+='<optgroup label="Friends">'+f.map(opt).join('')+'</optgroup>';
+    if(rest.length) o+='<optgroup label="'+(f.length?'Everyone else':'Riders')+'">'+rest.map(opt).join('')+'</optgroup>';
+    return o;
+  }
+  function compare(s){
+    if(!s){ CMP=null; redraw(); return; }
+    var u=CoasterHub.USERS.filter(function(x){ return x.slug===s; })[0];
+    CoasterHub.fetchRides(s).then(function(l){
+      var has={}; (l.rides||[]).forEach(function(r){ has[r.c]=1; });
+      CMP={slug:s, name:(u&&u.name)||l.user||s, has:has};
+      redraw();
+    }).catch(function(){ CMP=null; redraw(); });
+  }
+  function redraw(){
+    map.closePopup();
+    placed.forEach(function(p){ p.marker.setIcon(iconFor(p)); });
+    drawFilt(); refresh();
+  }
+  drawFilt();
+  if(log){
+    // Friends are the signed-in rider's follows. A 503 (follows not migrated),
+    // signed out, or no rider of your own: no Friends group, everybody listed.
+    var me=acct && acct.slug;
+    Promise.all([
+      CoasterHub.fetchUsers(),
+      me ? fetch('/api/follows/'+encodeURIComponent(me),{cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }) : null
+    ]).then(function(r){
+      var f=r[1] ? (r[1].following||[]).map(function(x){ return x.slug; }) : [];
+      if(me && others) f.unshift(me);
+      FRIENDS=f; drawFilt();
+    });
   }
 
   // The counts and the legend, bottom-left. This used to also fold out the
@@ -334,16 +553,19 @@ Promise.all([
   // button, these are all traveling coasters & companies" — a fair with no
   // fixed place is not a park missing a pin, so the note no longer says so.
   // (/edit still lists un-geocoded parks for the day one of them is real.)
+  // With a rider, the swatches on the boxes are the legend and the bar here
+  // just says what the depth means.
   var note=L.control({position:'bottomleft'});
   note.onAdd=function(){
     var d=L.DomUtil.create('div','ctl');
     var tot=placed.reduce(function(a,p){ return a+p.open.length; },0);
     d.innerHTML='<b id="np">'+placed.length+'</b> parks · <b id="nc">'+tot.toLocaleString()+'</b> operating coasters'
-      +' · 1 <span class="ramp" title="Operating coasters, fewest to most" style="background-image:linear-gradient(to right,'+rampT(0)+','+rampT(.5)+','+rampT(1)+')"></span> '+MAX;
+      +' · 1 <span class="ramp" title="Operating coasters, fewest to most" style="background-image:'+grad(log?RAMPS.blue:RAMPS.red)+'"></span> '+MAX;
     L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
     return d;
   };
   note.addTo(map);
+  refresh();
   document.title=(slug && log && log.user ? log.user+'’s Map' : 'Map')+' — Coaster Hub';
   document.body.setAttribute('data-ready','1');
 }).catch(fail);
