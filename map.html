@@ -183,7 +183,8 @@ var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true}).setView([30,-40],
 // key, dark or light to match the theme, OpenStreetMap if Esri stops
 // answering. See profile.html for the history behind each choice.
 //
-// No place names, on purpose. Esri's matching Reference layer (the canvas
+// No place names IN THE TILES, on purpose — the page draws its own now, see
+// drawCities below (2026-09-24). Esri's matching Reference layer (the canvas
 // base's city labels: Canvas/World_Dark_Gray_Reference, same host, no key) was
 // on for an hour on 2026-09-21 and came straight off — the labels sit under
 // the discs and every park is at a city, so "San Jose" was a disc with a
