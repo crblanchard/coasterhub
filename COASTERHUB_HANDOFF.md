@@ -3285,8 +3285,11 @@ would eat what you were typing. Other visitors still see a change within the fiv
 **Home.** Signed in: **You & your friends** (you, then the riders you follow) above **Top
 users**, sorted by **coasters ranked** (the number on the right of each row), then credits,
 then name — Carter's second pass the same day: *"sort top users by number of rides ranked"*.
-The first pass sorted by credits. The hero says "N coasters in the database"
-above "Pick a rider".
+The first pass sorted by credits. The database size moved out of the hero
+the same day (Carter: *"spacing is weird"*): it is now "N operating and M defunct coasters on
+the site →" (the /count Database subheader, linking there) under the feedback card. The first
+list is headed just **Friends**, and the hero's bottom padding is 4px with a 26px gap above
+the lists — before, a tall empty band sat inside the banner and the heading touched it.
 
 **/count.** A location select on the Parks and Rides views (states under United States with
 an "all of the United States" option, countries under Elsewhere — /log's split). The
