@@ -373,6 +373,11 @@
       <select id="f_rider" style="display:none"><option value="">All riders</option></select>
       <select id="f_year"><option value="">All years</option></select>
       <select id="f_park"><option value="">All parks</option></select>
+      <!-- Where (Carter, 2026-09-24: "on counts / park page add location
+           filter"). On the Parks view and the Rides view; filled from the
+           parks' own regions, states and countries split the way /log's
+           Locations picker splits them. -->
+      <select id="f_loc"><option value="">All locations</option></select>
       <label class="onlymine" id="f_mine_wrap" style="display:none">
         <input type="checkbox" id="f_mine"> Only parks I&rsquo;ve visited
       </label>
@@ -603,7 +608,11 @@ return Promise.all([
       // The subtitle named one of the three views and pointed at filters two
       // of them no longer show. What this page is, on the everyone view, is
       // the shared list.
-      heroSub('Every ride, park and coaster on the site.');
+      // Then, Carter 2026-09-24: "make the subheader say 'x operating and x
+      // defunct coasters on the site.'" — the size of the shared list, split
+      // the way every park and coaster page splits it.
+      var nOpen=coasters.filter(function(c){ return !c.closed; }).length;
+      heroSub(nOpen.toLocaleString()+' operating and '+(coasters.length-nOpen).toLocaleString()+' defunct coasters on the site.');
       document.title='Count — Coaster Hub';
     } else {
       var nm=esc(logs[0].user||'Carter');
@@ -644,6 +653,28 @@ function buildFilters(){
   var parks=[...new Set(LOG.map(function(r){return r.park;}).filter(Boolean))].sort(function(a,b){return a.localeCompare(b);});
   var psel=document.getElementById('f_park');
   parks.forEach(function(p){var o=document.createElement('option');o.value=p;o.textContent=p;psel.appendChild(o);});
+  // Locations: every region a park in this count sits in (BYPARK spans the
+  // whole database on the everyone view, and only this rider's rides here, so
+  // a rider's list offers the places they have been). US states under one
+  // heading with an "all of it" option, countries under another — the same
+  // split /log uses, because 54 locations in one alphabetical run puts Canada
+  // between California and Colorado.
+  var locs={};
+  LOG.forEach(function(r){ if(r.loc) locs[r.loc]=1; });
+  if(COMBINED) Object.keys(BYPARK).forEach(function(k){ BYPARK[k].forEach(function(r){ if(r.loc) locs[r.loc]=1; }); });
+  var lk=Object.keys(locs).sort(function(a,b){ return a.localeCompare(b); });
+  var us=lk.filter(isUS), rest=lk.filter(function(l){ return !isUS(l); });
+  var lsel=document.getElementById('f_loc');
+  function og(label, list, all){
+    if(!list.length) return;
+    var g=document.createElement('optgroup'); g.label=label;
+    if(all){ var o=document.createElement('option'); o.value=all; o.textContent='All of the '+label; g.appendChild(o); }
+    list.forEach(function(l){ var o=document.createElement('option'); o.value=l; o.textContent=l.replace(/, US$/,''); g.appendChild(o); });
+    lsel.appendChild(g);
+  }
+  og('United States', us, us.length>1 ? '*US' : '');
+  og('Elsewhere', rest, '');
+  if(lk.length<2){ lsel.style.display='none'; lsel.dataset.hidden='1'; }
   // Everyone view gets a rider filter, so you can still narrow to one person
   // without leaving the combined page.
   if(COMBINED){
@@ -665,9 +696,9 @@ function buildFilters(){
   if(!MINE || !COMBINED) document.getElementById('f_mine_wrap').dataset.hidden='1';
 }
 function wire(){
-  ['q','f_rider','f_year','f_park'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){page=0;render();});});
+  ['q','f_rider','f_year','f_park','f_loc'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){page=0;render();});});
   document.getElementById('reset').onclick=function(){
-    ['q','f_rider','f_year','f_park'].forEach(function(id){document.getElementById(id).value='';}); page=0; render();
+    ['q','f_rider','f_year','f_park','f_loc'].forEach(function(id){document.getElementById(id).value='';}); page=0; render();
   };
   document.getElementById('v_day').onclick=function(){setView('day');};
   document.getElementById('v_list').onclick=function(){setView('list');};
@@ -700,9 +731,11 @@ function setView(v){
   // is a filter you cannot see the effect of. filtered() ignores those three
   // on this view as well, so nothing goes on narrowing from a hidden control.
   var listing = v==='list';
-  var keep = v==='day' ? ['q','f_rider','f_year','f_park','reset']
-           : v==='parks' ? ['q','f_mine_wrap'] : [];
-  ['q','f_rider','f_year','f_park','reset','f_mine_wrap'].forEach(function(id){
+  // Location is the one exception on the park list: it narrows the list of
+  // PARKS, which is exactly what you can see it do.
+  var keep = v==='day' ? ['q','f_rider','f_year','f_park','f_loc','reset']
+           : v==='parks' ? ['q','f_loc','f_mine_wrap'] : [];
+  ['q','f_rider','f_year','f_park','f_loc','reset','f_mine_wrap'].forEach(function(id){
     var el=document.getElementById(id);
     if(el && !el.dataset.hidden) el.style.display = keep.indexOf(id)>=0 ? '' : 'none';
   });
@@ -726,7 +759,9 @@ function filtered(){
   var fy=onlyQ?'':document.getElementById('f_year').value;
   var fp=onlyQ?'':document.getElementById('f_park').value;
   var fr=onlyQ?'':document.getElementById('f_rider').value;
+  var fl=document.getElementById('f_loc').value;
   return LOG.filter(function(r){
+    if(fl&&!inLoc(r.loc,fl))return false;
     if(fr&&r.rider!==fr)return false;
     if(fy&&(!r.d||r.d.slice(0,4)!==fy))return false;
     if(fp&&r.park!==fp)return false;
@@ -734,6 +769,10 @@ function filtered(){
     return true;
   });
 }
+// A US region is "<State>, US" (or a bare "US" on a park nobody gave a state).
+function isUS(l){ return l==='US' || /, US$/.test(l); }
+// The location filter's test: one region exactly, or "*US" for every state.
+function inLoc(loc, fl){ return fl==='*US' ? isUS(loc||'') : loc===fl; }
 // Was this ride the rider's first on this coaster? See FIRST, built alongside
 // the log. An undated ride is never a new credit: it is not in a day card at
 // all, and a coaster carrying one is kept out of FIRST entirely.
