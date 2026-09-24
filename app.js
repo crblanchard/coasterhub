@@ -573,12 +573,16 @@
       .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   }
   function parkHref(park) { return "/park/" + slugify(park); }
-  // A manufacturer's page, /manufacturer/<maker> — derived the same way a
-  // park's is, and owned by nothing. A model is a card on that page, so a link
-  // to one is the maker's URL plus #<model>.
+  // A manufacturer's page, /manufacturer/<maker>, and a model's,
+  // /manufacturer/<maker>/<model> — derived the same way a park's is, and
+  // owned by nothing. (A model was a #card on the maker's page until
+  // 2026-09-24; manufacturer.html still opens that card for an old link.)
   function makerHref(manu, model) {
-    return "/manufacturer/" + slugify(manu) + (model ? "#" + slugify(model) : "");
+    return "/manufacturer/" + slugify(manu) + (model ? "/" + slugify(model) : "");
   }
+  // A location's page: a US state ("Ohio, US" -> /location/ohio-us), a
+  // country ("Japan" -> /location/japan), or the whole of the US (/location/us).
+  function locationHref(region) { return "/location/" + slugify(region); }
   // Takes a coaster row, or a name and a park.
   function coasterHref(c, park) {
     var obj = c && typeof c === "object";
@@ -948,7 +952,8 @@
     window.addEventListener("resize", function () { if (!menu.hidden) place(); });
   }
 
-  var RELOADS_ON_WRITE = { riders: 1, count: 1, map: 1, park: 1, coaster: 1, changes: 1, qc: 1, sitemap: 1 };
+  var RELOADS_ON_WRITE = { riders: 1, count: 1, map: 1, park: 1, coaster: 1, changes: 1, qc: 1, sitemap: 1,
+                           manufacturer: 1, location: 1 };
   function initNav(page) {
     if (typeof document === "undefined") return;
     applyTheme(readTheme());
@@ -1209,7 +1214,7 @@
 
   var api = { computeStats: computeStats, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
-              slugify: slugify, parkHref: parkHref, makerHref: makerHref, coasterHref: coasterHref,
+              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers, noteWrite: noteWrite,

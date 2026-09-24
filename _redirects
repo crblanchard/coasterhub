@@ -42,7 +42,13 @@
 # A coaster maker, and the list of them (2026-09-24). Same shape as a park:
 # the slug is derived from the name, and the page resolves it.
 /manufacturers        /manufacturer 200
+# A model: its own page since 2026-09-24. Two segments before one, as with parks.
+/manufacturer/:m/:model  /manufacturer 200
 /manufacturer/:m      /manufacturer 200
+
+# A state or a country, and the list of them (2026-09-24).
+/locations            /location   200
+/location/:loc        /location   200
 
 /user/:name/count     /count      200
 /user/:name/rankings  /rankings   200

@@ -195,8 +195,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 
   document.querySelector('.hero h1').textContent=PARK;
   document.title=PARK+' — Coaster Hub';
-  $('hero_sub').textContent=meta.region
-    ? meta.region
+  // The region is a link to its location page (2026-09-24).
+  $('hero_sub').innerHTML=meta.region
+    ? '<a href="'+esc(CoasterHub.locationHref(meta.region))+'" style="color:inherit;text-decoration:none;border-bottom:1px solid var(--line)">'+esc(meta.region)+'</a>'
     : 'A park on Coaster Hub.';
 
   var open=mine.filter(function(c){return !c.closed;}).length;

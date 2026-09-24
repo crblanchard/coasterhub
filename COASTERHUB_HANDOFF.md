@@ -3372,6 +3372,31 @@ card's tile and tagline (the card's navy backdrop and wordmark are pixels and st
 cached a week (`_headers`), so every page's icon links carry `?v=20260924` and the OG image
 `?v=3` — bump them again on the next logo change.
 
+### Model and location pages — the start of a click-through reference (2026-09-24)
+
+Carter: *"help me make manufacturers/models pages and location pages. For now don't need UI
+navigating to them, only from parks & coaster pages. Long term want to create a system to click
+into those and look like rcdb or something."*
+
+- **Model:** `/manufacturer/<maker>/<model>` (manufacturer.html, `model()`): who built it,
+  tiles (installations, operating, defunct, you), a **Statistics** sheet giving each spec's
+  spread across installations (one number for a true clone, a range otherwise, "(n of m known)"),
+  and an **Installations** table — name, park, location, opened, status, operating first.
+  `CoasterHub.makerHref(manu, model)` returns this path now (it was `#model` on the maker page;
+  that page still opens the card for an old link, and each card links to its model page).
+- **Location:** `/location/<slug>` (location.html): a US state (`ohio-us`), a country (`japan`),
+  or `/location/us` for the whole US (states table + parks, no coaster table — it would be ~800
+  rows). `/locations` is the index. The slug is `slugify(region)`; `CoasterHub.locationHref`.
+- **Reached from:** the region under a park's name and on a coaster page links to its location;
+  the coaster page's Manufacturer/Model specs link to maker and model. Nothing in the nav, the
+  footer or the site map, on purpose.
+- **Shared look:** `.dtable` (reference table) and `.specsheet` are in `style.css`, not a page,
+  so the next reference page uses the same ones.
+
+Where "like rcdb" goes next, when he wants it: a park page with a spec table per coaster rather
+than a list; a type/element index (launched, inverted, wooden); a "tallest / fastest in this
+location" block on location pages; and cross-links everywhere a name appears.
+
 ---
 
 ## Open tasks

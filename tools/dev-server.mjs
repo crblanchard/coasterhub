@@ -268,7 +268,8 @@ createServer(async (req, res) => {
   const pk = p.match(/^\/park\/([^/]+)(?:\/([^/]+))?\/?$/);
   if (pk) p = pk[2] ? "/coaster.html" : "/park.html";
   // A maker, and the list of them.
-  if (p === "/manufacturers" || /^\/manufacturer\/[^/]+\/?$/.test(p)) p = "/manufacturer.html";
+  if (p === "/manufacturers" || /^\/manufacturer\/[^/]+(\/[^/]+)?\/?$/.test(p)) p = "/manufacturer.html";
+  if (p === "/locations" || /^\/location\/[^/]+\/?$/.test(p)) p = "/location.html";
   const m = p.match(/^\/user\/[^/]+(\/.*)?$/);
   if (m) p = m[1] && m[1] !== "/" ? m[1] : "/profile";
   if (p === "/") p = "/index.html";

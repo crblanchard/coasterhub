@@ -61,6 +61,7 @@
   a.crow .pk{color:var(--muted);font-size:.8rem;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   a.crow .yrs{margin-left:auto;flex:none;padding-left:10px;font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
   a.crow .yrs.off{color:var(--accent)}
+  a.crow.mlink .cn{color:var(--accent2);font-weight:600}
   .panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   @media (max-width:560px){ a.crow .pk{display:none} details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
   .missing{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
@@ -124,7 +125,10 @@ function fail(e){ console.error(e); $('loading').style.display='none'; $('err').
 // /manufacturer/<slug> is one maker; /manufacturers (or a bare /manufacturer)
 // is the index. The slug is CoasterHub.slugify of the name, the same rule a
 // park's URL uses.
-var SLUG=decodeURIComponent((location.pathname.match(/^\/manufacturer\/([^\/]+)/)||[])[1]||'').toLowerCase();
+var PM=location.pathname.match(/^\/manufacturer\/([^\/]+)(?:\/([^\/]+))?/)||[];
+var SLUG=decodeURIComponent(PM[1]||'').toLowerCase();
+// /manufacturer/<maker>/<model> is one model (2026-09-24).
+var MSLUG=decodeURIComponent(PM[2]||'').toLowerCase();
 
 // Whose ticks: the signed-in rider, as on /count's park view. Signed out, no
 // ticks and no "you have ridden".
@@ -134,8 +138,9 @@ var mine=CoasterHub.me().then(function(a){
   }).catch(function(){ return null; }) : null;
 }).catch(function(){ return null; });
 
-Promise.all([CoasterHub.fetchCoasters(), mine]).then(function(res){
-  var coasters=res[0].coasters, MINE=res[1];
+var PARKS={};
+Promise.all([CoasterHub.fetchCoasters(), mine, CoasterHub.fetchParks().catch(function(){ return {}; })]).then(function(res){
+  var coasters=res[0].coasters, MINE=res[1]; PARKS=res[2]||{};
   var BY={};
   coasters.forEach(function(c){
     var m=String(c.manu||'').trim(); if(!m) return;
@@ -150,6 +155,11 @@ Promise.all([CoasterHub.fetchCoasters(), mine]).then(function(res){
     document.querySelector('.hero h1').textContent='Not found';
     document.title='Not found — Coaster Hub';
     return;
+  }
+  if(MSLUG){
+    var mo=BY[name].map(function(c){ return String(c.model||'').trim(); })
+      .filter(function(m){ return m && CoasterHub.slugify(m)===MSLUG; })[0];
+    if(mo) return model(name, mo, BY[name].filter(function(c){ return String(c.model||'').trim()===mo; }), MINE);
   }
   one(name, BY[name], MINE);
 }).catch(fail);
@@ -205,6 +215,7 @@ function one(name, cs, MINE){
     return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
       +'<span class="nm">'+esc(mo || 'No model on file')+'</span>'
       +'<span class="ct">'+(g!=null ? '<b>'+g+'</b> of ' : '')+list.length+'</span></summary>'
+      +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">The '+esc(mo)+' page, with its specs &rarr;</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
   }).join('');
   // A link to one model (/manufacturer/intamin#accelerator-coaster) opens it.
@@ -212,6 +223,57 @@ function one(name, cs, MINE){
     var d=document.getElementById(decodeURIComponent(location.hash.slice(1)));
     if(d && d.tagName==='DETAILS'){ d.open=true; d.scrollIntoView({behavior:'instant',block:'start'}); }
   }
+}
+// ---- one model ------------------------------------------------------------
+// A reference page for one model (Carter, 2026-09-24: pages to click through
+// "like rcdb"): who built it, how many there are and how many still run, the
+// spread of its specs, then every installation in a table — park, location,
+// opened, status — operating first.
+function model(maker, mo, cs, MINE){
+  var canon=CoasterHub.makerHref(maker, mo);
+  if(canon!==location.pathname) history.replaceState(null,'',canon+location.search);
+  document.querySelector('#hero_badge').textContent='Model';
+  document.querySelector('.hero h1').textContent=mo;
+  document.title=mo+' — '+maker+' — Coaster Hub';
+  $('hero_sub').innerHTML='A model by <a href="'+esc(CoasterHub.makerHref(maker))+'" style="color:var(--accent2);text-decoration:none">'+esc(maker)+'</a>.';
+  $('crumb').innerHTML='<a href="'+esc(CoasterHub.makerHref(maker))+'">&larr; Every '+esc(maker)+' model</a>';
+  var open=cs.filter(function(c){ return !c.closed; }).length;
+  var got=MINE ? cs.filter(function(c){ return MINE[c.id]; }).length : null;
+  $('tiles').innerHTML=tile(cs.length,cs.length===1?'Built':'Installations')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
+    +(got!=null ? tile(got+' of '+cs.length,'You have ridden') : tile(years(cs),'Years built'));
+  // The spread of each spec across the installations that have it: one
+  // number when they all agree (a clone), a range when they do not.
+  function spread(key, unit, round){
+    var v=cs.map(function(c){ return c[key]; }).filter(function(x){ return x!=null && x!==''; }).map(Number);
+    if(!v.length) return null;
+    var lo=Math.min.apply(null,v), hi=Math.max.apply(null,v), f=function(x){ return round ? Math.round(x).toLocaleString() : String(x); };
+    return (lo===hi ? f(lo) : f(lo)+'–'+f(hi))+(unit?' '+unit:'')+(v.length<cs.length ? ' <small>('+v.length+' of '+cs.length+' known)</small>' : '');
+  }
+  var types={}; cs.forEach(function(c){ if(c.type) types[c.type]=1; });
+  var specs=[['Height',spread('h','ft',true)],['Speed',spread('s','mph',true)],['Length',spread('l','ft',true)],
+             ['Inversions',spread('inv','',false)],['Type',Object.keys(types).sort().join(' / ')||null],['Years built',years(cs)]]
+    .filter(function(x){ return x[1]; });
+  var rows=cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
+  $('body').innerHTML=(specs.length ? '<div class="sect">Statistics</div><div class="specsheet">'
+      +specs.map(function(x){ return '<div><b>'+x[1]+'</b><span>'+esc(x[0])+'</span></div>'; }).join('')+'</div>' : '')
+    +'<div class="sect">Installations</div><div class="dtable-wrap"><table class="dtable"><thead><tr>'
+    +(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th>Park</th><th class="opt">Location</th><th class="num">Opened</th><th>Status</th></tr></thead><tbody>'
+    +rows.map(function(c){
+      var reg=(PARKS[c.park]||{}).region||'', op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):''), cl=c.closed?String(c.closed).slice(0,4):'';
+      return '<tr'+(cl?' class="gone"':'')+'>'
+        +(MINE?'<td class="tick">'+(MINE[c.id]?'\u2713':'')+'</td>':'')
+        +'<td class="nm"><a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></td>'
+        +'<td><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park||'')+'</a></td>'
+        +'<td class="sub opt">'+(reg?'<a href="'+esc(CoasterHub.locationHref(reg))+'">'+esc(reg)+'</a>':'')+'</td>'
+        +'<td class="num">'+esc(op)+'</td>'
+        +'<td><span class="st '+(cl?'off">Closed '+esc(cl):'on">Operating')+'</span></td></tr>';
+    }).join('')+'</tbody></table></div>';
+}
+function years(cs){
+  var y=cs.map(function(c){ return c.opened?Number(String(c.opened).slice(0,4)):(c.yr?Number(c.yr):null); }).filter(Boolean);
+  if(!y.length) return '';
+  var lo=Math.min.apply(null,y), hi=Math.max.apply(null,y);
+  return lo===hi ? String(lo) : lo+'–'+hi;
 }
 function crow(c, MINE){
   var got=MINE && MINE[c.id];
