@@ -21,6 +21,14 @@
   #loading{color:var(--muted);padding:40px 0}
   /* Hidden until something actually fails — same rule the other pages carry. */
   #err{display:none;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:20px;color:var(--fg)}
+  /* The two lists: your friends, then everyone by count (Carter, 2026-09-24). A
+     small heading over each, in the eyebrow's voice. The friends list shares
+     .riderlist's bottom margin, which is a page-end gap; between two lists it
+     only needs to be a section gap. */
+  .lh{display:block;margin:0 0 10px}
+  #friends{margin-bottom:34px}
+  .hint{color:var(--muted);font-size:.9rem;margin:0 0 34px}
+  .hint a{color:var(--accent2)}
 </style>
 </head>
 <body>
@@ -56,6 +64,9 @@
     <a class="btn" href="/account?tab=up">Create account</a>
     <a class="btn alt" href="/account">Log in</a>
   </p>
+  <!-- How big the shared list is, above the ask to pick somebody. Filled in
+       once /api/coasters answers; empty until then rather than a guess. -->
+  <p class="wide" id="dbline" hidden><b id="dbn"></b> coasters in the database.</p>
   <p class="wide">Pick a rider to see their count, stats, and rankings.</p>
 </div></section>
 
@@ -70,6 +81,14 @@
   <!-- One row per rider, in the same shape as the identity block at the top of
        a profile: picture, name, @username under it. The numbers sit on the
        right on a desktop and wrap under the name on a phone. -->
+  <!-- Signed in: the riders you follow first, then everyone, most credits at
+       the top. Signed out there are no friends to show, so it is just the one
+       list. -->
+  <div id="friends_wrap" hidden>
+    <span class="eyebrow lh">You &amp; your friends</span>
+    <div class="riderlist" id="friends"></div>
+  </div>
+  <span class="eyebrow lh" id="top_h" hidden>Top users</span>
   <div class="riderlist" id="list"></div>
 </div>
 
@@ -162,12 +181,24 @@ function row(u, st, ranked){
     + '</span></a>';
 }
 
+// Who you follow, for the top section. Signed out, not a rider, or a database
+// that has not run migrations/010-follows.sql yet (a 503): nobody, and the page
+// is the one list it always was.
+var following = CoasterHub.me().then(function(acct){
+  if (!acct || !acct.slug) return null;
+  return fetch('/api/follows/' + encodeURIComponent(acct.slug), { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ return { me: acct.slug, slugs: j ? (j.following || []).map(function(f){ return f.slug; }) : [] }; })
+    .catch(function(){ return { me: acct.slug, slugs: [] }; });
+}).catch(function(){ return null; });
+
 // Everyone, with the three things a count is measured in plus the length of
 // their ranking list. The rankings come from their own endpoint, one call per
 // rider, because a ranking is not part of a rider's ride data.
 CoasterHub.fetchUsers().then(function(){
   var users = CoasterHub.USERS.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
   return Promise.all([
+    following,
     CoasterHub.fetchCoasters(),
     CoasterHub.fetchParks(),
     Promise.all(users.map(function(u){
@@ -181,11 +212,31 @@ CoasterHub.fetchUsers().then(function(){
         .catch(function(){ return { order: [] }; });
     }))
   ]).then(function(res){
-    var coasters = res[0].coasters, parks = res[1], datas = res[2], ranks = res[3];
+    var fol = res[0], coasters = res[1].coasters, parks = res[2], datas = res[3], ranks = res[4];
+    document.getElementById('dbn').textContent = coasters.length.toLocaleString();
+    document.getElementById('dbline').hidden = false;
+    var rows = users.map(function(u, i){
+      var st = CoasterHub.computeStats(coasters, parks, datas[i]);
+      return { u: u, st: st, ranked: (ranks[i].order || []).length, credits: st.kpi.credits || 0 };
+    });
+    // Most credits first (Carter, 2026-09-24: "'top users' below whoever has
+    // the most rides"). Credits, not the ride total: rides are unknown or an
+    // import artifact for half the riders (see row() above), and the credit
+    // count is the number the whole site ranks people by. Name breaks a tie.
+    rows.sort(function(a, b){ return b.credits - a.credits || a.u.name.localeCompare(b.u.name); });
+    function html(list){ return list.map(function(x){ return row(x.u, x.st, x.ranked); }).join(''); }
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('list').innerHTML = users.map(function(u, i){
-      return row(u, CoasterHub.computeStats(coasters, parks, datas[i]), (ranks[i].order || []).length);
-    }).join('');
+    if (fol) {
+      // You first, then the people you follow, each list in count order.
+      var inF = {}; fol.slugs.forEach(function(s){ inF[s] = 1; });
+      var mine = rows.filter(function(x){ return x.u.slug === fol.me; })
+        .concat(rows.filter(function(x){ return inF[x.u.slug] && x.u.slug !== fol.me; }));
+      document.getElementById('friends').innerHTML = html(mine)
+        + (fol.slugs.length ? '' : '<p class="hint">You are not following anybody yet &mdash; open a rider&rsquo;s profile and press Follow, and they will sit up here with you.</p>');
+      document.getElementById('friends_wrap').hidden = false;
+      document.getElementById('top_h').hidden = false;
+    }
+    document.getElementById('list').innerHTML = html(rows);
   });
 }).catch(function(e){
   console.error(e);
