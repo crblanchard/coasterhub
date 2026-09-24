@@ -232,7 +232,7 @@
     // rows that carry both it has never once disagreed with `opened`, so it is
     // a second place to type the same fact and a second place to get it wrong.
     // readForm() derives it from Opened, the way /add already does.
-    ["opened","Opened (YYYY-MM-DD)","text"], ["closed","Closed (YYYY-MM-DD)","text"]
+    ["opened","Opened (year or YYYY-MM-DD)","text"], ["closed","Closed (year or YYYY-MM-DD)","text"]
   ];
   function fieldKind(k){ for (var i=0;i<FIELDS.length;i++) if (FIELDS[i][0]===k) return FIELDS[i][2]; return "text"; }
   // The specs a coaster row is expected to carry. Everything else (model, maker,
@@ -1833,12 +1833,25 @@
     // date does not keep a year that now belongs to nothing.
     var opened = body.opened;
     body.yr = (opened && /^\d{4}/.test(opened)) ? Number(String(opened).slice(0,4)) : null;
+    // A date's precision follows what was typed, but only when the date was
+    // CHANGED: older rows store a year-only date as '1999-06-01' with Prec
+    // 'year', and re-saving one of those untouched must not promote it to a
+    // real day. Typed '1999' = year, a full date = day, blank = nothing
+    // (Carter, 2026-09-24: year-only dates on /add, "fix on edit too").
+    var was = state.byId[state.sel] || {};
+    ["opened","closed"].forEach(function(k){
+      var v = body[k];
+      if (v != null && !/^\d{4}(-\d{2}-\d{2})?$/.test(v)) body.bad = "Dates are a year (1999) or a full date (1999-06-01).";
+      if (v !== (was[k] == null ? null : String(was[k]))) body[k+"Prec"] = v == null ? null : (v.length === 4 ? "year" : "day");
+    });
     return body;
   }
   async function saveCoaster(){
     var id=state.sel, toast=document.getElementById('toast'); toast.textContent="Saving…"; toast.className="toast";
     try {
-      var body = readForm(); await api("PUT","/api/coaster/"+id, body); Object.assign(state.byId[id], body);
+      var body = readForm();
+      if (body.bad) { toast.textContent = body.bad; toast.className = "toast bad"; return; }
+      await api("PUT","/api/coaster/"+id, body); Object.assign(state.byId[id], body);
       state.opts = { manu:distinct("manu"), model:distinct("model") };
       toast.textContent="Saved ✓"; toast.className="toast good"; render();
     } catch(e){ toast.textContent="Error: "+e.message; toast.className="toast bad"; }

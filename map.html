@@ -95,7 +95,20 @@
   .ctl{background-color:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;
     color:var(--muted);font-size:.8rem;box-shadow:0 2px 10px rgba(0,0,0,.25)}
   .ctl b{color:var(--fg)}
-  .ctl.who{padding:4px 6px}
+  /* The rider switcher. app.js builds the same badge it puts in a page's
+     hero, but every rule that styles that badge is scoped to .hero, and the
+     map has no hero: it came out as a bare browser button in a box made tall
+     and empty by the wrapper's 22px bottom margin (Carter, 2026-09-24: "this
+     box looks bad on desktop, make it bigger"). So it is styled here: a real
+     pill, the hero badge's look at a size you can hit, and no margin. */
+  .ctl.who{padding:5px;border-radius:999px}
+  .ctl.who .riderbadge{display:block;margin:0}
+  .ctl.who .riderbadge .badge{display:inline-flex;align-items:center;gap:8px;margin:0;
+    background-color:transparent;border:1px solid var(--ring);border-radius:999px;
+    padding:8px 16px;font-family:inherit;font-size:.9rem;font-weight:700;letter-spacing:.04em;
+    color:var(--accent2);cursor:pointer;transition:border-color .15s}
+  .ctl.who .riderbadge .badge:hover{border-color:var(--accent2)}
+  .ctl.who .riderbadge .badge:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
   /* Top-left, under the zoom buttons: which parks are on the map — the ones
      you have a credit at, the ones you do not. Only when there is somebody to
      ask that about; "visited" means nothing on the everyone view. */
@@ -130,6 +143,7 @@
     /* The whole screen is the map: no footer under it (the tab bar stays, it
        is how you get anywhere else). Carter, 2026-09-24. */
     footer.site{display:none}
+    .ctl.who .riderbadge .badge{padding:6px 12px;font-size:.82rem}
     /* The zoom buttons side by side in the top-right corner. */
     .leaflet-top.leaflet-right .leaflet-control-zoom{display:flex;flex-direction:row}
     .leaflet-top.leaflet-right .leaflet-control-zoom a{border-bottom:0}
