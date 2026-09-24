@@ -140,7 +140,7 @@
   /* ×N reads as part of the ride, so it follows the name; the remove control
      is what gets pushed to the far edge. */
   .basket .brow .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .basket .brow .x{color:var(--accent);cursor:pointer;padding:0 4px;margin-left:auto;flex:none}
+  .basket .brow .x{color:var(--bad);cursor:pointer;padding:0 4px;margin-left:auto;flex:none}
   /* You can stage more than one park before saving, so the basket says which
      park each row came from once there is more than one to tell apart. */
   .basket .bpark{color:var(--muted);font-size:.72rem;text-transform:uppercase;
@@ -155,7 +155,7 @@
   .miniform input,.miniform select{padding:9px 11px;font-size:.88rem}
   .miniform .grow{flex:1;min-width:170px}
   .miniform .note{flex-basis:100%;color:var(--muted);font-size:.78rem;margin:0}
-  .miniform .err{flex-basis:100%;color:var(--accent);font-size:.82rem;margin:0}
+  .miniform .err{flex-basis:100%;color:var(--bad);font-size:.82rem;margin:0}
   /* The locations filter. 54 of them is a list rather than a row of pills, so
      it scrolls inside the panel and columns up when there is width for it.
      column-count, not the `columns` shorthand — see CLAUDE.md on shorthands
@@ -195,7 +195,7 @@
   .addbar button{padding:7px 12px;font-size:.84rem}
   .tot{display:flex;justify-content:space-between;margin:12px 0;padding-top:12px;border-top:1px solid var(--line);font-weight:700}
   .msg{margin-top:12px;font-size:.88rem}
-  .msg.ok{color:var(--accent2)} .msg.bad{color:var(--accent)}
+  .msg.ok{color:var(--accent2)} .msg.bad{color:var(--bad)}
   .hint{color:var(--muted);font-size:.85rem;padding:18px 4px}
   @media (max-width:820px){ .grid{grid-template-columns:minmax(0,1fr)} }
 </style>

@@ -46,7 +46,7 @@
   tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
   tbody td.name{font-weight:600;color:var(--fg)}
   tbody tr:hover{background:var(--tint)}
-  tbody tr.incomplete td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+  tbody tr.incomplete td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
   td.muted{color:var(--muted)}
   .pill{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
   .pill.steel{color:var(--accent2)}.pill.wood{color:var(--accent)}
@@ -54,8 +54,8 @@
   #loading{color:var(--muted);padding:40px 0}
   /* A model that looks like another one: same letters once case, spacing and
      punctuation are gone — or a model with no maker. */
-  tbody tr.dupe td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
-  td .why{color:var(--accent);font-size:.75rem;margin-left:6px}
+  tbody tr.dupe td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+  td .why{color:var(--bad);font-size:.75rem;margin-left:6px}
   td a{color:inherit;text-decoration:none} td a:hover{color:var(--accent2);text-decoration:underline}
 </style>
 </head>
@@ -73,7 +73,7 @@
 </div>
 
 <section class="block" style="padding:8px 0 48px"><div class="container">
-  <p class="lead" style="margin-bottom:8px">Every model on the site, one row per maker and model, with how many coasters carry it. Unlisted, for internal use (Carter, 2026-09-24). The <b style="color:var(--accent)">red bar</b> flags a model that is probably another one spelled differently, or one with no maker. The model and the maker link to the maker&rsquo;s page; fixing a row happens in <a href="/edit" style="color:var(--accent2)">/edit</a>&rsquo;s Models pane.</p>
+  <p class="lead" style="margin-bottom:8px">Every model on the site, one row per maker and model, with how many coasters carry it. Unlisted, for internal use (Carter, 2026-09-24). The <b style="color:var(--bad)">red bar</b> flags a model that is probably another one spelled differently, or one with no maker. The model and the maker link to the maker&rsquo;s page; fixing a row happens in <a href="/edit" style="color:var(--accent2)">/edit</a>&rsquo;s Models pane.</p>
   <div id="loading">Loading the list…</div>
   <div id="ui" style="display:none">
     <div class="controls">

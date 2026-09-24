@@ -46,7 +46,7 @@
   tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
   tbody td.name{font-weight:600;color:var(--fg)}
   tbody tr:hover{background:var(--tint)}
-  tbody tr.incomplete td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+  tbody tr.incomplete td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
   td.muted{color:var(--muted)}
   .pill{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
   .pill.steel{color:var(--accent2)}.pill.wood{color:var(--accent)}
@@ -67,7 +67,7 @@
 </div>
 
 <section class="block" style="padding:8px 0 48px"><div class="container">
-  <p class="lead" style="margin-bottom:8px">Every coaster in <code>coasters.json</code> (the shared master list). Unlisted QC view. The <b style="color:var(--accent)">red bar</b> flags rows missing type/height/speed/length.</p>
+  <p class="lead" style="margin-bottom:8px">Every coaster in <code>coasters.json</code> (the shared master list). Unlisted QC view. The <b style="color:var(--bad)">red bar</b> flags rows missing type/height/speed/length.</p>
   <div id="loading">Loading the list…</div>
   <div id="ui" style="display:none">
     <div class="controls">

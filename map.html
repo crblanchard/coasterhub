@@ -75,10 +75,10 @@
      hour and read as something to click (Carter, 2026-09-21: "the checks like
      these, something less clickable"). */
   .pp li .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
-  /* Comparing: the other rider's tick, in amber — the colour of their
+  /* Comparing: the other rider's tick, in red — the colour of their
      "only them" parks — and the same two colours in the headline. */
-  .pp li .tick.them{color:#f0a01e}
-  .pp .k1{color:var(--accent2)} .pp .k2{color:#f0a01e}
+  .pp li .tick.them{color:#ff5a5f}
+  .pp .k1{color:var(--accent2)} .pp .k2{color:#ff5a5f}
   .pp li.miss a{color:var(--muted)}
   /* The defunct ones, under the operating list: their own small heading, the
      years on the right the way /count writes them (1990–2017, or "closed 2017"
@@ -270,7 +270,7 @@ Promise.all([
 
   // One row per coaster, operating or defunct: a tick when there is somebody
   // to tick for (two when comparing — the map's rider in teal, the other in
-  // amber), the name as a link, and its years on the right. Defunct rows always
+  // red), the name as a link, and its years on the right. Defunct rows always
   // carry theirs; operating rows carry the opening year on a desktop, where
   // the card is wide enough (Carter, 2026-09-24: "make park popups bigger to
   // show ride opening years on the right like how defunct has").
@@ -321,12 +321,17 @@ Promise.all([
   //
   // One ramp per KIND of park, all the same shape, so the colour says which
   // kind and the depth still says how big (Carter, 2026-09-24: "make 'visited'
-  // blue to separate with the same color gradient"). Red is a park the map's
-  // rider has not been to (and every park on the everyone view), blue one they
-  // have. Comparing adds amber, only the other rider, and purple, both of you.
+  // blue to separate with the same color gradient"). Yellow is a park the
+  // map's rider has not been to (and every park on the everyone view), blue
+  // one they have. Comparing adds red, only the other rider, and purple, both
+  // of you. (Until Launch Yellow, the same day, not-visited was red and "only
+  // them" amber; amber sat too close to the new yellow.)
   var MAX=placed.reduce(function(m,p){ return Math.max(m,p.open.length); },1);
   var RAMPS={
     red:   {stops:[[255,190,178],[255,90,95],[140,10,30]],  ink:'#3a0810'},
+    // The site's yellow (Launch Yellow, 2026-09-24). White digits cannot be
+    // read on it until it is deep, so it keeps dark digits much longer (dark).
+    yellow:{stops:[[255,238,168],[255,204,31],[168,112,0]],  ink:'#2e2200', dark:.8},
     blue:  {stops:[[196,222,255],[74,144,255],[14,46,140]], ink:'#0a1f4a'},
     amber: {stops:[[255,228,170],[240,160,30],[140,78,0]],  ink:'#3a2400'},
     purple:{stops:[[228,206,255],[160,104,240],[72,24,140]],ink:'#2a0a4a'}
@@ -337,7 +342,7 @@ Promise.all([
   }
   function ramp(n, R){
     var t=Math.sqrt(Math.max(0,n-1)/Math.max(1,MAX-1));
-    return { bg:rampT(t,R), fg: t<.3 ? R.ink : '#fff' };
+    return { bg:rampT(t,R), fg: t<(R.dark||.3) ? R.ink : '#fff' };
   }
   function grad(R){ return 'linear-gradient(to right,'+rampT(0,R)+','+rampT(.5,R)+','+rampT(1,R)+')'; }
   // Which bucket a park is in: the checkbox it answers to, and its ramp.
@@ -348,8 +353,8 @@ Promise.all([
     return p.been ? (t ? 'both' : 'me') : (t ? 'them' : 'neither');
   }
   var KIND={
-    all:{R:RAMPS.red}, been:{R:RAMPS.blue}, not:{R:RAMPS.red},
-    both:{R:RAMPS.purple}, me:{R:RAMPS.blue}, them:{R:RAMPS.amber}, neither:{R:RAMPS.red}
+    all:{R:RAMPS.yellow}, been:{R:RAMPS.blue}, not:{R:RAMPS.yellow},
+    both:{R:RAMPS.purple}, me:{R:RAMPS.blue}, them:{R:RAMPS.red}, neither:{R:RAMPS.yellow}
   };
   function iconFor(p){
     var n=p.open.length;
@@ -487,12 +492,12 @@ Promise.all([
     if(log){
       var cnt={}; placed.forEach(function(p){ var k=kind(p); cnt[k]=(cnt[k]||0)+1; });
       if(!CMP){
-        h+=box('been','Visited',cnt.been||0,RAMPS.blue)+box('not','Not visited',cnt.not||0,RAMPS.red);
+        h+=box('been','Visited',cnt.been||0,RAMPS.blue)+box('not','Not visited',cnt.not||0,RAMPS.yellow);
       } else {
         h+=box('both','Both of you',cnt.both||0,RAMPS.purple)
           +box('me','Only '+(others?YOU:'you'),cnt.me||0,RAMPS.blue)
-          +box('them','Only '+CMP.name,cnt.them||0,RAMPS.amber)
-          +box('neither','Neither of you',cnt.neither||0,RAMPS.red);
+          +box('them','Only '+CMP.name,cnt.them||0,RAMPS.red)
+          +box('neither','Neither of you',cnt.neither||0,RAMPS.yellow);
       }
       h+='<select id="cmp" aria-label="Compare with"><option value="">Compare with…</option>'+cmpOptions()+'</select>';
     }
@@ -557,7 +562,7 @@ Promise.all([
     var d=L.DomUtil.create('div','ctl');
     var tot=placed.reduce(function(a,p){ return a+p.open.length; },0);
     d.innerHTML='<b id="np">'+placed.length+'</b> parks · <b id="nc">'+tot.toLocaleString()+'</b> operating coasters'
-      +' · 1 <span class="ramp" title="Operating coasters, fewest to most" style="background-image:'+grad(log?RAMPS.blue:RAMPS.red)+'"></span> '+MAX;
+      +' · 1 <span class="ramp" title="Operating coasters, fewest to most" style="background-image:'+grad(log?RAMPS.blue:RAMPS.yellow)+'"></span> '+MAX;
     L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
     return d;
   };

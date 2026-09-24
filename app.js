@@ -698,7 +698,7 @@
       m.setAttribute("name", "theme-color");
       document.head.appendChild(m);
     }
-    m.setAttribute("content", t === "light" ? "#f5f7fb" : "#0b1020");
+    m.setAttribute("content", t === "light" ? "#f5f5f3" : "#111315");
 
     // Anything painted with JS rather than CSS — Chart.js canvases, Leaflet
     // markers — has to be told, or it keeps the palette it was built with.

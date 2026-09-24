@@ -3320,6 +3320,24 @@ that no longer exist) and `cole.json`/`colegarff.json`, `sean.json`/`seanpcoakle
 somebody visits the old slug with the API down. Worth teaching the sync to remove files for
 slugs `/api/users` no longer lists — not done here.
 
+### The palette is Launch Yellow (2026-09-24)
+
+Carter picked it from a preview artifact of six palettes (claude.ai/artifact/GsQsvhJm3aiHwgpgkbv7m7).
+Graphite `#111315`/`#1b1e22`, yellow `#ffcc1f` (`--accent`), sky blue `#4cc3ff` (`--accent2`). It
+replaced Midnight (navy, coral `#ff5a5f`, teal `#37d0c8`). Three new tokens in `style.css`:
+
+- `--accentfill` / `--onaccent`: the `.btn` fill and its text. Bright yellow with **dark** text in
+  both themes (white on this yellow is 1.4:1; Carter: *"I guess black is okay there"*).
+- `--accent` on light is **marigold `#b7791f`**, his pick of four readable golds — yellow text
+  on white cannot be read. It is 3.6:1, fine for the bold labels it mostly marks (Defunct).
+- `--bad`: errors, failed saves, delete hovers, the QC "red bar". They used `--accent` when it
+  was coral; a yellow error reads as a warning. Every page's `.msg.bad`/`.err`/`#err` points here.
+
+The map's not-visited ramp is yellow now (visited stays blue), "only them" in compare is red
+(amber sat too close to yellow), and the yellow ramp keeps dark digits until t≥.8. `/edit`'s dark
+palette moved to graphite with yellow buttons. **Not changed:** the logo mark and favicons still
+carry the old teal and coral.
+
 ---
 
 ## Open tasks

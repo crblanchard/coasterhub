@@ -20,11 +20,13 @@
      dark mode found twenty hard-coded light colours in the rules, which is
      how a page ends up with white inputs on a dark background. */
   :root { color-scheme:dark;
-    --ink:#f4f7ff; --muted:#9fb0d6; --bg:#0b1020; --panel:#121a33;
+    /* Graphite, yellow buttons, sky links: the site's Launch Yellow
+       (2026-09-24). --accent here is this page's "bad" red and stays red. */
+    --ink:#f3f4f6; --muted:#9aa3ad; --bg:#111315; --panel:#1b1e22;
     --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.2);
-    --soft:#182240; --soft2:#1f2b4d;
-    --accent:#ff7b7f; --ok:#4ad07a; --link:#7cc7ff;
-    --btn-bg:#37d0c8; --btn-fg:#07111f; --btn-hover:#5ee0d8;
+    --soft:#23272c; --soft2:#2b3036;
+    --accent:#ff7b7f; --ok:#4ad07a; --link:#4cc3ff;
+    --btn-bg:#ffcc1f; --btn-fg:#16181b; --btn-hover:#ffd84d;
     --bad-bg:rgba(255,90,95,.14); --bad-line:rgba(255,90,95,.45);
     --warn-bg:rgba(255,196,64,.14); --warn-fg:#ffd166;
     --ok-bg:rgba(74,208,122,.14); --shadow:rgba(0,0,0,.35); }
@@ -192,7 +194,7 @@
     else document.documentElement.removeAttribute('data-theme');
     var m=document.querySelector('meta[name="theme-color"]');
     if(!m){ m=document.createElement('meta'); m.setAttribute('name','theme-color'); document.head.appendChild(m); }
-    m.setAttribute('content', t==='light' ? '#faf7f2' : '#0b1020');
+    m.setAttribute('content', t==='light' ? '#faf7f2' : '#111315');
     var btns=document.querySelectorAll('[data-el="theme"]');
     for(var i=0;i<btns.length;i++){
       // The icon shows where the click GOES, as app.js does: a sun on the dark page.

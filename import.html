@@ -45,7 +45,7 @@
   .bhead .t{font-weight:600;font-size:.94rem}
   .bhead .d{color:var(--muted);font-size:.82rem;margin-left:auto;text-align:right}
   .bucket.warn .bhead .n{color:#ffc45a}
-  .bucket.bad .bhead .n{color:var(--accent)}
+  .bucket.bad .bhead .n{color:var(--bad)}
   .blist{max-height:44vh;overflow-y:auto;border-top:1px solid var(--line);display:none}
   .bucket.open .blist{display:block}
   .irow{display:flex;align-items:center;gap:10px;padding:9px 15px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.88rem}
@@ -62,7 +62,7 @@
   .irow.fix select{max-width:34%}
   .irow.fix .why{max-width:26%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .irow.fix.done .why{color:var(--accent2)}
-  .irow input[type=text].unknown{border-color:var(--accent)}
+  .irow input[type=text].unknown{border-color:var(--bad)}
   .fixbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:11px 15px;
     border-bottom:1px solid rgba(255,255,255,.05);color:var(--muted);font-size:.82rem}
   .fixbar button{padding:6px 11px;font-size:.8rem}
@@ -73,9 +73,9 @@
   .miniform input{padding:9px 11px;font-size:.88rem}
   .miniform .grow{flex:1;min-width:170px}
   .miniform .note{flex-basis:100%;color:var(--muted);font-size:.78rem;margin:0}
-  .miniform .err{flex-basis:100%;color:var(--accent);font-size:.82rem;margin:0}
+  .miniform .err{flex-basis:100%;color:var(--bad);font-size:.82rem;margin:0}
   .msg{margin-top:12px;font-size:.9rem}
-  .msg.ok{color:var(--accent2)} .msg.bad{color:var(--accent)}
+  .msg.ok{color:var(--accent2)} .msg.bad{color:var(--bad)}
   .msg a{color:var(--accent2)}
   .tot{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:16px 0 0}
   .tot .big{font-weight:800;font-size:1.05rem}

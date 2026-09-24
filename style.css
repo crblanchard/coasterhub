@@ -8,42 +8,56 @@
    background has to become "slightly darker". A theme cannot be a palette swap
    while that relationship is hardcoded. */
 :root{
-  --bg:#0b1020; --panel:#121a33; --fg:#f4f7ff; --muted:#9fb0d6;
-  --accent:#ff5a5f; --accent2:#37d0c8; --line:rgba(255,255,255,.10);
+  /* Launch Yellow (Carter, 2026-09-24, picked from a preview of six
+     palettes): graphite, a warm yellow and sky blue. It replaced "Midnight"
+     (navy #0b1020, coral #ff5a5f, teal #37d0c8). Yellow and blue are
+     opposites, so the loud accent and the link colour never compete. */
+  --bg:#111315; --panel:#1b1e22; --fg:#f3f4f6; --muted:#9aa3ad;
+  --accent:#ffcc1f; --accent2:#4cc3ff; --line:rgba(255,255,255,.10);
+  /* The accent as a FILL (the .btn), and the text on it. A separate token
+     from --accent because on light the text accent has to darken to be read
+     on white while the button keeps the bright yellow. Dark text on yellow:
+     white on this yellow is 1.4:1. */
+  --accentfill:#ffcc1f; --onaccent:#16181b;
+  /* Errors, failed saves and delete buttons. These used --accent when it was
+     coral; a yellow error reads as a warning, so they have a red of their own. */
+  --bad:#ff5a5f;
   --soft:rgba(255,255,255,.05);     /* faint fill lifted off the page */
   --soft2:rgba(255,255,255,.07);    /* one step up: inputs, hovered rows */
-  --well:#0e1730;                   /* recessed: sits *under* --panel */
-  --tint:rgba(55,208,200,.07);      /* accent wash */
-  --tint2:rgba(55,208,200,.14);
-  --ring:rgba(55,208,200,.35);      /* focus / hover border */
-  --veil:rgba(11,16,32,.78);        /* sticky header over scrolling content */
-  --veil2:rgba(11,16,32,.94);       /* mobile tab bar */
+  --well:#15171a;                   /* recessed: sits *under* --panel */
+  --tint:rgba(76,195,255,.07);      /* accent wash */
+  --tint2:rgba(76,195,255,.14);
+  --ring:rgba(76,195,255,.35);      /* focus / hover border */
+  --veil:rgba(17,19,21,.78);        /* sticky header over scrolling content */
+  --veil2:rgba(17,19,21,.94);       /* mobile tab bar */
   --shadow:rgba(0,0,0,.5);
-  --hero1:rgba(55,208,200,.16); --hero2:rgba(255,90,95,.16);
-  --onaccent:#fff;                  /* text on an --accent fill */
+  --hero1:rgba(76,195,255,.15); --hero2:rgba(255,204,31,.11);
   /* Heatmap ramp, least -> most. Light mode inverts the direction: on a dark
      page "more" is brighter, on a light page "more" is darker. */
-  --hm0:#1b2540; --hm1:#1f6f6a; --hm2:#2aa79e; --hm3:#37d0c8; --hm4:#8bf0ea;
+  --hm0:#20242a; --hm1:#1b4d6b; --hm2:#2a7fb0; --hm3:#4cc3ff; --hm4:#a9e3ff;
   --hmline:rgba(0,0,0,.15); --hmhover:#fff;
 }
 :root[data-theme="light"]{
-  --bg:#f5f7fb; --panel:#fff; --fg:#111827; --muted:#5a6b8c;
-  /* Both accents are darkened until they carry text on white: the dark-mode
-     teal is ~1.9:1 there, which is unreadable, not merely soft. */
-  --accent:#d92c33; --accent2:#0d7f78; --line:rgba(17,24,39,.13);
-  --soft:rgba(17,24,39,.04);
-  --soft2:rgba(17,24,39,.07);
-  --well:#eaeff7;
-  --tint:rgba(13,127,120,.07);
-  --tint2:rgba(13,127,120,.15);
-  --ring:rgba(13,127,120,.45);
-  --veil:rgba(245,247,251,.82);
-  --veil2:rgba(245,247,251,.94);
-  --shadow:rgba(17,24,39,.16);
-  --hero1:rgba(13,127,120,.13); --hero2:rgba(217,44,51,.11);
-  --onaccent:#fff;
-  --hm0:#e6ebf4; --hm1:#a8ded9; --hm2:#5cbdb4; --hm3:#1c9089; --hm4:#0b5f5a;
-  --hmline:rgba(17,24,39,.10); --hmhover:#111827;
+  --bg:#f5f5f3; --panel:#fff; --fg:#16181b; --muted:#5f6770;
+  /* The text accent darkens to marigold on white (Carter's pick of four,
+     2026-09-24); the button keeps the bright yellow through --accentfill.
+     Marigold is 3.6:1 on white, which is enough for the bold labels it mostly
+     marks (Defunct) but not for long runs of small text. */
+  --accent:#b7791f; --accent2:#0a6aa0; --line:rgba(22,24,27,.13);
+  --accentfill:#ffcc1f; --onaccent:#16181b;
+  --bad:#d92c33;
+  --soft:rgba(22,24,27,.04);
+  --soft2:rgba(22,24,27,.07);
+  --well:#ebebe8;
+  --tint:rgba(10,106,160,.07);
+  --tint2:rgba(10,106,160,.15);
+  --ring:rgba(10,106,160,.45);
+  --veil:rgba(245,245,243,.82);
+  --veil2:rgba(245,245,243,.94);
+  --shadow:rgba(22,24,27,.16);
+  --hero1:rgba(10,106,160,.12); --hero2:rgba(255,204,31,.16);
+  --hm0:#e8eaec; --hm1:#b5d9ee; --hm2:#5fa9d6; --hm3:#1f78b4; --hm4:#0a4f7a;
+  --hmline:rgba(22,24,27,.10); --hmhover:#16181b;
 }
 /* Panels sit on the page rather than glowing out of it, so on light they need
    an edge the dark theme gets for free from the contrast step. */
@@ -303,7 +317,7 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
 }
 
 /* Buttons */
-.btn{display:inline-block;background:var(--accent);color:var(--onaccent);padding:13px 24px;border-radius:12px;
+.btn{display:inline-block;background:var(--accentfill);color:var(--onaccent);padding:13px 24px;border-radius:12px;
   font-weight:600;transition:transform .12s,opacity .12s;border:0;cursor:pointer;font-size:1rem}
 .btn:hover{transform:translateY(-1px);opacity:.95}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg);margin-left:10px}
@@ -465,7 +479,7 @@ footer.site a:hover{color:var(--fg)}
    empty: the one small shift when a save reports back is cheaper than the
    permanent gap, and it lands on the thing you just did. */
 .profedit .msg:empty{display:none}
-.profedit .msg.ok{color:var(--accent2)} .profedit .msg.bad{color:var(--accent)}
+.profedit .msg.ok{color:var(--accent2)} .profedit .msg.bad{color:var(--bad)}
 .profedit .hint{color:var(--muted);font-size:.8rem;margin:-6px 0 14px;text-transform:none;
   letter-spacing:normal;font-weight:400}
 .profedit .who{display:flex;align-items:center;gap:16px;margin-bottom:10px}
@@ -602,7 +616,7 @@ footer.site a:hover{color:var(--fg)}
 .cropbox input[type=range]{width:100%;margin:5px 0 14px;accent-color:var(--accent2)}
 .cropbox .croprow{display:flex;gap:10px}
 .cropbox .msg{margin-top:12px;font-size:.88rem;min-height:1.2em}
-.cropbox .msg.ok{color:var(--accent2)} .cropbox .msg.bad{color:var(--accent)}
+.cropbox .msg.ok{color:var(--accent2)} .cropbox .msg.bad{color:var(--bad)}
 .cropbox button.primary{background:var(--accent2);border:0;color:var(--well);font-weight:700;
   border-radius:10px;padding:11px 18px;cursor:pointer;font-size:.92rem;font-family:inherit}
 .cropbox button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);
