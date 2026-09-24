@@ -111,9 +111,15 @@
     </form>
 
     <form id="form_up" style="display:none">
-      <label for="up_name">Username</label>
-      <input id="up_name" type="text" autocomplete="username" maxlength="40" required>
-      <p class="hint">This names your count and your page &mdash; coasterhub.org/user/&lt;you&gt;.</p>
+      <!-- Display name and username, the same pair the claim form asks for
+           (Carter, 2026-09-24: "add display name to the create account
+           screen"). The name is what the site shows; the username is the URL. -->
+      <label for="up_name">Display name</label>
+      <input id="up_name" type="text" autocomplete="name" maxlength="40" placeholder="Your name" required>
+      <label for="up_user">Username</label>
+      <input id="up_user" type="text" autocomplete="username" maxlength="32" placeholder="username" required>
+      <p class="hint">Your page will be coasterhub.org/user/&lt;username&gt;. Letters, numbers
+        and hyphens.</p>
       <label for="up_email">Email</label>
       <input id="up_email" type="email" autocomplete="username" required>
       <label for="up_pw">Password</label>
@@ -255,7 +261,8 @@ wire($('form_in'), $('in_go'), $('in_msg'),
   function(d){ location.href = landing(d.slug); });
 
 wire($('form_up'), $('up_go'), $('up_msg'),
-  function(){ return { name: $('up_name').value, email: $('up_email').value, password: $('up_pw').value }; },
+  function(){ return { name: $('up_name').value, slug: $('up_user').value.trim().toLowerCase(),
+                       email: $('up_email').value, password: $('up_pw').value }; },
   '/api/auth/signup',
   function(d){
     // A brand new count has nothing on a profile page yet, so send them to the

@@ -629,6 +629,14 @@ async function addUser(env, body) {
   const name = String(body && body.name || "").trim().replace(/\s+/g, " ");
   if (!name) return { bad: [400, "give the rider a name"] };
   if (name.length > 40) return { bad: [400, "that name is too long"] };
+  // A username typed by the person (signup, since 2026-09-24) is answered in
+  // username terms — "taken", "2-32 characters" — the way the claim form's is.
+  // One derived from a name (/log's + New rider) keeps the name-shaped errors.
+  if (body && body.slug) {
+    const slug = slugify(body.slug);
+    const problem = await slugProblem(env, slug, null);
+    if (problem) return { bad: [/taken/.test(problem) ? 409 : 400, problem] };
+  }
   const slug = slugify(body && body.slug || name);
   if (!/^[a-z0-9][a-z0-9-]{1,31}$/.test(slug)) {
     return { bad: [400, "that name needs at least two letters or numbers"] };

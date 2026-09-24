@@ -907,6 +907,22 @@ async function main() {
     check("a password under 8 characters is refused", r.status === 400);
     r = await call(db, "POST", "/api/auth/signup", { body: { email: "not-an-email", name: "Bad", password: "riding-things" } });
     check("a malformed email is refused", r.status === 400);
+
+    // Display name and username are separate on the signup form (2026-09-24).
+    r = await call(db, "POST", "/api/auth/signup",
+      { body: { email: "rae@example.com", name: "Rae Lin", slug: "coasterrae", password: "riding-things" } });
+    check("signup with a username: the URL is the username, the name is the display name",
+      r.status === 200 && r.data.slug === "coasterrae" && r.data.name === "Rae Lin"
+      && rows(db, "SELECT name FROM users WHERE slug = 'coasterrae'")[0]?.name === "Rae Lin", JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/auth/signup",
+      { body: { email: "rae2@example.com", name: "Someone Else", slug: "coasterrae", password: "riding-things" } });
+    check("...a username already in use is a 409 that says it is taken",
+      r.status === 409 && /taken/.test(r.data.error || ""), JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/auth/signup",
+      { body: { email: "rae3@example.com", name: "Rae Three", slug: "x", password: "riding-things" } });
+    check("...a one-character username is refused in username terms",
+      r.status === 400 && /username/.test(r.data.error || "")
+      && rows(db, "SELECT * FROM accounts WHERE email = 'rae3@example.com'").length === 0, JSON.stringify(r.data));
     r = await call(db, "POST", "/api/auth/signup", { body: { email: "s@t.u", name: "Stats", password: "riding-things" } });
     check("a rider name that collides with a page name is refused", r.status === 400, JSON.stringify(r.data));
   }
