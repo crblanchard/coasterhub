@@ -73,7 +73,18 @@
   .nearpick.on{border-color:var(--accent2);color:var(--accent2);font-weight:700}
   .nearpick .mi{color:var(--muted);font-weight:400;margin-left:5px}
   .nearpick.on .mi{color:var(--accent2)}
-  .setup{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:0 0 16px}
+  /* The park controls and the coaster search sit on the SAME columns as the
+     Coasters / This day panels under them — left column and the 340px right
+     one, same gap — and top-aligned, so the search box is level with the park
+     picker. As a wrapping flex row they matched neither: the park block
+     stopped short of the Coasters panel and the search box hung between the
+     two rows (Carter, 2026-09-24: "on desktop the stuff doesn't line up").
+     One column on a phone, the same breakpoint the panels use. */
+  .setup{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:10px 18px;align-items:start;margin:0 0 16px}
+  @media (max-width:820px){ .setup{grid-template-columns:minmax(0,1fr)} }
+  /* A search input renders 2px shorter than the select and buttons beside it
+     (38 vs 40); level them so the rows read as rows. */
+  .setup input[type=search]{min-height:40px;box-sizing:border-box}
   /* min-width:0 is load-bearing. .fld is a GRID ITEM, and a grid item's
      min-width is `auto` — it refuses to shrink below its content, so an input
      that wants to be wider than the card stretches .fld instead, and then
@@ -261,7 +272,7 @@
        were two rows of shouting between you and the thing you came to press.
        The labels are still THERE for a screen reader, just not drawn. -->
   <div class="setup">
-    <div class="fld" style="flex:1;min-width:240px"><label class="vh" for="park">Park</label>
+    <div class="fld"><label class="vh" for="park">Park</label>
       <div style="display:flex;gap:8px">
         <select id="park" style="flex:1;min-width:0"></select>
         <button class="ghost" id="nearme" type="button" title="Sort by how close they are to you"
@@ -282,7 +293,7 @@
       </div>
       <p class="geonote" id="geonote"></p>
     </div>
-    <div class="fld" style="flex:1;min-width:200px"><label class="vh" for="search">Search all coasters</label>
+    <div class="fld"><label class="vh" for="search">Search all coasters</label>
       <input id="search" type="search" placeholder="Search every coaster&hellip;" style="width:100%"></div>
   </div>
 
