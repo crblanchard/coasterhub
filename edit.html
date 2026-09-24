@@ -122,6 +122,10 @@
   .badge.partial { background:var(--warn-bg); color:var(--warn-fg); }
   .badge.settled { background:var(--ok-bg); color:var(--ok); }
   .badge.gone { background:var(--soft2); color:var(--muted); }
+  /* Which category the open coaster is in (Carter, 2026-09-24: "on the /edit
+     page show whether a ride is in a category"). */
+  .badge.cat { background:var(--ok-bg); color:var(--ok); }
+  .badge.nocat { background:var(--soft2); color:var(--muted); }
   /* The theme toggle: the same sun-and-moon the site's header carries. */
   .themetoggle { width:32px; height:32px; padding:0; border-radius:999px; background:var(--panel); border:1px solid var(--line2); color:var(--muted); display:inline-flex; align-items:center; justify-content:center; }
   .themetoggle:hover { background:var(--soft); color:var(--ink); }
@@ -270,6 +274,13 @@
     var r = await fetch(path, opt);
     var data = null; try { data = await r.json(); } catch(e){}
     if (!r.ok) throw new Error((data && data.error) || ("HTTP " + r.status));
+    // A write lands in D1 at once, but every other page reads the coaster and
+    // park lists through a five-minute browser cache, so the site went on
+    // showing the old row after a save here (Carter, 2026-09-24: "changes not
+    // yet applied to website?"). This is app.js's noteWrite(), re-stated
+    // because this page does not load app.js: for ten minutes this browser
+    // reads the lists fresh, and any other tab on the site reloads itself.
+    if (method !== "GET") { try { localStorage.setItem("ch_wrote", String(Date.now())); } catch(e){} }
     return data;
   }
 
@@ -1581,6 +1592,7 @@
       return '<div class="'+cls+'"><label>'+esc(f[1])+'</label>'+fieldControl(c,f)+'</div>';
     }).join("");
     var geoNote = geocoded(c.park) ? '<span class="badge onmap">park on map</span>' : '<span class="badge nomap">park not geocoded — add it in the Parks tab</span>';
+    geoNote += '<span id="catNote"></span>';
     document.getElementById('editor').innerHTML =
       (extra || '') +
       '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:1.15rem">'+esc(c.name)+'</h2>'+
@@ -1588,6 +1600,14 @@
       '<p class="hint">Edits update this coaster everywhere — every rider’s page reflects it automatically (they reference it by id).</p>'+
       '<div class="grid" id="form">'+fields+'</div>'+
       '<div class="actions"><button id="save">Save changes</button><button class="ghost" id="revert">Revert</button><span class="toast" id="toast"></span></div>'+
+      // Give a rider this coaster without leaving the editor (Carter,
+      // 2026-09-24: "'add new credit' button to /edit"). It is /log's list
+      // mode for one coaster — POST /api/rides with no date — so it records
+      // the same activity row, and adding one somebody already has is a
+      // no-op rather than a second credit.
+      '<div class="toolbar"><h3>Add a credit</h3><p class="hint">Give a rider this coaster. The date is optional; leave it blank for a credit with no known day.</p>'+
+        '<div class="inline"><select id="crRider" style="width:auto;flex:0 1 190px"><option value="">Rider…</option></select>'+
+        '<input id="crDate" type="date" style="width:160px"><button id="crBtn" style="white-space:nowrap">Add credit</button><span class="toast" id="crToast"></span></div></div>'+
       '<div class="toolbar"><h3>Merge duplicate</h3><p class="hint">Merge this into another coaster: all riders’ credits move to the target id, then this one is deleted.</p>'+
         '<div class="inline"><span>Merge #'+c.id+' → id</span><input id="mergeTo" type="number" style="width:110px" placeholder="target id"><button class="danger" id="mergeBtn">Merge</button></div></div>'+
       '<div class="toolbar"><h3>Delete</h3>'+
@@ -1597,6 +1617,8 @@
     document.getElementById('revert').addEventListener('click', function(){ selectCoaster(id); });
     document.getElementById('mergeBtn').addEventListener('click', mergeCoaster);
     document.getElementById('delBtn').addEventListener('click', deleteCoaster);
+    document.getElementById('crBtn').addEventListener('click', addCredit);
+    fillRiders(); showCategory(id);
     // AFTER the content is in: setting it first leaves the browser holding the
     // old offset, which is how the top of a queued ride ended up off-screen.
     //
@@ -1608,6 +1630,44 @@
     document.getElementById('editor').scrollTop = 0;
     window.scrollTo(0, 0);
     loadUsage(id);
+  }
+
+  // The category line in the editor's header. The site categories are
+  // /api/clones; loaded once here if no pane has loaded them yet, without the
+  // render() loadClones() does, so opening a coaster never redraws the list.
+  async function showCategory(id){
+    if (!state.clonesLoaded && !state.clones.length) {
+      try { state.clones = (await api("GET","/api/clones")).groups || []; } catch(e){ return; }
+    }
+    state.clonesLoaded = true;
+    var el = document.getElementById('catNote'); if (!el || state.sel!==id) return;
+    var g = inCat()[id];
+    el.innerHTML = g
+      ? '<span class="badge cat" title="'+esc(g.ids.length+' coasters in it')+'">category: '+esc(g.name)+'</span>'
+      : '<span class="badge nocat">not in a category</span>';
+  }
+  // The rider list for Add a credit, fetched once.
+  var RIDERS = null;
+  async function fillRiders(){
+    if (!RIDERS) { try { RIDERS = (await api("GET","/api/users")).users || []; } catch(e){ RIDERS = []; } }
+    var sel = document.getElementById('crRider'); if (!sel) return;
+    RIDERS.slice().sort(function(a,b){ return (a.name||a.slug).localeCompare(b.name||b.slug); }).forEach(function(u){
+      var o = document.createElement('option'); o.value = u.slug; o.textContent = u.name || u.slug; sel.appendChild(o);
+    });
+  }
+  async function addCredit(){
+    var id = state.sel, who = document.getElementById('crRider').value, d = document.getElementById('crDate').value || null;
+    var toast = document.getElementById('crToast');
+    if (!who) { toast.textContent = "Pick a rider."; toast.className = "toast bad"; return; }
+    toast.textContent = "Adding…"; toast.className = "toast";
+    try {
+      var r = await api("POST","/api/rides",{ user: who, d: d, entries: [{ c: id }] });
+      var name = document.getElementById('crRider').selectedOptions[0].textContent;
+      // An undated credit a rider already holds adds nothing, and says so.
+      toast.textContent = (r && r.added === 0) ? name+" already has it." : "Added to "+name+" ✓";
+      toast.className = "toast good";
+      loadUsage(id);
+    } catch(e){ toast.textContent = "Error: "+e.message; toast.className = "toast bad"; }
   }
 
   // Who still has this coaster. Answered before the button is live, so deleting
