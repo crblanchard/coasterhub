@@ -3235,6 +3235,87 @@ Profile · Count · **Map** · Log (`data-nav="map"`, which `applyRiderLinks` al
 `map` was in `PER_RIDER`: on Sean's page it points at Sean's map). Checked on one line at
 1200 and 900; the phone header hides the links and the tab bar is unchanged.
 
+### The 2026-09-24 list: map, /edit, home, parks, manufacturers
+
+One message from Carter with twenty-odd items; what each became, and the calls made along
+the way.
+
+**/map (all in `map.html`).**
+- **Visited is blue.** Every park kind has its own ramp, all the same three-stop
+  square-root shape, so the colour says which kind and the depth still says how big: red
+  = not visited (and every park on the everyone view), blue = visited. `RAMPS` holds them;
+  each ramp carries its own dark digit colour for the pale end.
+- **Compare.** A "Compare with…" select in the top-left control (friends first — the
+  signed-in rider's follows, plus you on somebody else's map — then everyone). Picking one
+  swaps the two boxes for four: both of you (purple), only you (blue), only them (amber),
+  neither (red). Each box carries a swatch of its ramp, so the boxes are the legend. The
+  popup gains a second tick column in amber and "you 19 · Sean 18" in the headline. The
+  popup is now built when it opens (`bindPopup(fn)`), and markers get `setIcon` on a
+  change, so nothing is rebuilt from scratch.
+- **City names are back, drawn by the page.** The Esri Reference tiles came off on
+  2026-09-21 because a tile label is part of the picture and sat under the discs. Now
+  `map-cities.json` (GeoNames via the `all-the-cities` npm package, ≥100k people, a place
+  within 15 km of a bigger one dropped so Brooklyn does not sit beside New York — rebuilt by
+  `tools/build-cities.mjs`) is placed greedily, biggest first: right of its dot, else left,
+  above, below, else not at all, never over a disc or another name. The population needed
+  falls with zoom (`minPop`). 2M+ cities ignore the discs (only names block them), because
+  New York has parks on every side and otherwise never got a name. A **Cities** box turns
+  them off (`ch_map_cities`). GeoNames is CC BY; the attribution names it.
+- **Somebody else's map opens on Visited only** (`SHOW.not = !others`, where others = a
+  rider in the URL who is not the one signed in). Your own opens complete.
+- **Desktop popup** is 340–440 wide and up to 62% of the height; operating rows carry their
+  opening year on the right like the defunct ones. The phone keeps the small card and
+  hides the operating year (`.yrs.op`).
+
+**/edit.** The coaster header carries **category: <name>** or **not in a category** (from
+`/api/clones`, loaded once without `loadClones()`'s re-render). **Add a credit** posts
+`/api/rides` with `d:null` or a date — /log's list mode for one coaster, so it records
+activity and an undated credit a rider already holds is a no-op ("already has it").
+
+**"Changes not applied to the website."** The lists carry `max-age=300`, so after a save the
+rest of the site read the old list for five minutes. Every page that writes now stamps
+`ch_wrote` in localStorage (`CoasterHub.noteWrite()`; /edit restates it since it does not
+load app.js), and for ten minutes after that THIS browser fetches the lists `no-store`.
+Only this browser: no-store for everybody would put the 1,239-row read back on every page
+view. Read-only pages open in another tab (`RELOADS_ON_WRITE` in app.js) reload when the
+stamp changes — never /log, /add, /import, /rankings, /account or a profile, where a reload
+would eat what you were typing. Other visitors still see a change within the five minutes.
+
+**Home.** Signed in: **You & your friends** (you, then the riders you follow) above **Top
+users**, everyone sorted by credits, most first. Carter wrote "most rides"; credits is what
+was used because the ride total is unknown or an import artifact for half the riders (the
+home page already hides it for unclaimed riders). The hero says "N coasters in the database"
+above "Pick a rider".
+
+**/count.** A location select on the Parks and Rides views (states under United States with
+an "all of the United States" option, countries under Elsewhere — /log's split). The
+everyone view's subheader: "N operating and M defunct coasters on the site."
+
+**Park page.** Operating first, then defunct; only the Operating and Defunct tiles; no "oldest
+opened" line.
+
+**Manufacturers.** `/manufacturers` (index) and `/manufacturer/<maker>` (tiles, then a card per
+model, biggest first, opened by `#<model>`), both `manufacturer.html`. `CoasterHub.makerHref(manu,
+model)`. A coaster's Manufacturer and Model specs link there, as do the count list's cells.
+**`/qc/models`** (`qc-models.html`) is the internal table: one row per maker+model, flagging
+two spellings of one model and a model with no maker. Flagging "same model name under several
+makers" was tried and dropped — Kiddie and Looper are generic and it buried the real ones.
+
+**/changes.** `migrations/022-drop-july-30-activity.sql` deletes every activity row dated
+2026-07-30 — 002's reconstruction of the alias table, not anything that happened that day.
+
+**Keltan's Hurricane.** Keltan is **`bugmonster1`** now; `keltan.json` is a leftover the sync no
+longer writes (see below). He rode three Fun Spot Kissimmee coasters on 2020-01-12 and does not
+hold Hurricane (#1242, Fun Spot America - Kissimmee, which replaced a wrong #1048 at Orlando).
+Handed to Carter as the /edit button or a console `fetch` of `POST /api/rides`.
+
+**Latent: a renamed rider's old `<slug>.json` stays forever.** `sync-static.mjs` writes one file
+per CURRENT slug and deletes nothing, so `keltan.json` (795 rides, 13 of them on coaster ids
+that no longer exist) and `cole.json`/`colegarff.json`, `sean.json`/`seanpcoakley.json`,
+`max.json`/`flyingdino.json` sit side by side, the old one frozen. Nothing reads them unless
+somebody visits the old slug with the API down. Worth teaching the sync to remove files for
+slugs `/api/users` no longer lists — not done here.
+
 ---
 
 ## Open tasks
@@ -3677,6 +3758,20 @@ matched loosely *within* a park; park names cannot be matched loosely at all.
   Sons, Pouzet Group are operators, not fixed parks — no coordinates, so they're skipped on the
   map. Considered an explicit `traveling` flag on the park so the UI can label them rather than
   them looking like missing data; deferred.
+- **Flag fair rides (noted 2026-09-24, Carter: "specially flag fair rides — maybe sort them
+  separately when tracking new roller coasters").** Traveling-show coasters (Butler, Ray
+  Cammack, Davis Cascadia, Helm & Sons, Pouzet — see Traveling shows above) are counted with
+  park coasters. Likely shape: a `fair` flag on the PARK (they are operator-parks already),
+  which /count, /map and the stats can then sort into their own group or leave out. Not
+  built.
+- **Relocated rides must not count twice (long-term, noted 2026-09-24).** When a coaster moves
+  parks it is one credit, ridden in two places. Today it is two rows in `coasters`, so a rider
+  who rode it at both gets two credits. Sketch: a `relocations` link (or a `same_ride` id, the
+  way clone groups are a curated link) so a rider's count collapses the pair to one credit
+  while each park page and the rider's log still show it at the park they rode it. The
+  counting rule (credit = `COUNT(DISTINCT coaster_id)`) is the part that has to change, and
+  everywhere that counts would need the same collapse — `computeStats`, `userTotal`, the home
+  rows, rankings. Not built.
 - **The two Boomers parks are now `Boomers! (Fountain Valley)` and `Boomers! (El Cajon)`.**
   They really are separate parks and the old names — `Boomers` and `Boomers!` — differed only
   by punctuation, which read like a typo. The city is in the name because `parks` is keyed by
