@@ -125,6 +125,15 @@
      decides, and placed above them it lost every property (the trap list in
      CLAUDE.md, again). */
   @media (max-width:640px){
+    /* The whole screen is the map: no footer under it (the tab bar stays, it
+       is how you get anywhere else). Carter, 2026-09-24. */
+    footer.site{display:none}
+    /* The zoom buttons side by side in the top-right corner. */
+    .leaflet-top.leaflet-right .leaflet-control-zoom{display:flex;flex-direction:row}
+    .leaflet-top.leaflet-right .leaflet-control-zoom a{border-bottom:0}
+    .leaflet-top.leaflet-right .leaflet-control-zoom a + a{border-left:1px solid #ccc}
+    .leaflet-top.leaflet-right .leaflet-control-zoom-in{border-radius:4px 0 0 4px}
+    .leaflet-top.leaflet-right .leaflet-control-zoom-out{border-radius:0 4px 4px 0}
     .leaflet-popup-content{margin:10px 12px;line-height:1.35}
     .pp h3{font-size:.92rem}
     .pp .n{font-size:.76rem;margin:4px 0 2px}
@@ -177,7 +186,13 @@ function fail(e){console.error(e);document.getElementById('err').style.display='
 // means none of that: a map of what each park has.
 var slug=CoasterHub.currentUser();
 
-var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true}).setView([30,-40],2);
+var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true,zoomControl:false}).setView([30,-40],2);
+// The zoom buttons. On a phone they go top-RIGHT, side by side, above the
+// rider switcher, so the Visited / Compare box can have the top-left corner
+// to itself (Carter, 2026-09-24). Added before the switcher: Leaflet stacks a
+// corner's controls in the order they are added.
+var PHONE=window.matchMedia('(max-width:640px)').matches;
+L.control.zoom({position: PHONE ? 'topright' : 'topleft'}).addTo(map);
 // The basemap, exactly as the profile page picks it: Esri's canvas tiles, no
 // key, dark or light to match the theme, OpenStreetMap if Esri stops
 // answering. See profile.html for the history behind each choice.

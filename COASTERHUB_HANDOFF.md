@@ -3273,6 +3273,12 @@ the way.
   GeoNames is CC BY; the attribution names it.
 - **Somebody else's map opens on Visited only** (`SHOW.not = !others`, where others = a
   rider in the URL who is not the one signed in). Your own opens complete.
+- **On a phone (2026-09-24, from Carter's screenshots):** no footer under the map (the tab bar
+  stays), the zoom buttons sit side by side top-RIGHT above the rider switcher (`PHONE` in
+  `map.html`; the map is built with `zoomControl:false` and the zoom added before the switcher,
+  since a corner stacks in add order), which gives the Visited / Compare box the top-left corner.
+  The rider menu ran off the right edge from that corner; `place()` in app.js now slides any
+  rider menu left until it fits, on every page.
 - **Desktop popup** is 340–440 wide and up to 62% of the height; operating rows carry their
   opening year on the right like the defunct ones. The phone keeps the small card and
   hides the operating year (`.yrs.op`).

@@ -878,6 +878,13 @@
       menu.style.position = "fixed";
       menu.style.left = Math.round(r.left) + "px";
       menu.style.top = Math.round(r.bottom + 6) + "px";
+      // Nor off the right edge. On /map the badge sits in the top-right corner,
+      // so a menu hung from its left edge ran off the side of a phone (Carter,
+      // 2026-09-24, with a screenshot). Slide it left until it fits.
+      var w = menu.offsetWidth;
+      if (r.left + w > window.innerWidth - 8) {
+        menu.style.left = Math.round(Math.max(8, window.innerWidth - 8 - w)) + "px";
+      }
       // Then, if that would run off the bottom, lift it until it fits. Measured
       // after it is visible, or the height is 0 and this does nothing.
       var h = menu.offsetHeight;
