@@ -1553,7 +1553,10 @@ function renderAdd(){
   var list=pool(), rows=[], seenG={};
   list.forEach(function(c){
     var g=CLONE[c.id];
-    if(!g){ rows.push({c:c}); return; }
+    // Racing sides are listed one by one (Carter, 2026-09-25: "show them
+    // separately in the list"); Rank asks whether to take them together —
+    // see askRacing().
+    if(!g || g.racing){ rows.push({c:c}); return; }
     if(seenG[g.key]) return;
     var mates=list.filter(function(x){ return CLONE[x.id]===g; });
     // One left of a category you already rank is not a family row, but it is
@@ -1570,12 +1573,9 @@ function renderAdd(){
   // arbitrary depths — which is exactly backwards, because they are the rows
   // that save the most work. Five Batmans added in one tap is the point of the
   // feature; it should not have to be hunted for.
-  // Racing pairs are the exception (Carter, 2026-09-25: "sort them with
-  // everything else and make them blend in"): one ride with two tracks, so
-  // it sits where its first side sorts and reads like any coaster row.
-  var cats=rows.filter(function(r){ return r.g && !r.g.racing; });
+  var cats=rows.filter(function(r){ return !!r.g; });
   var joins=rows.filter(function(r){ return !r.g && r.joins; });
-  var solo=rows.filter(function(r){ return (!r.g || r.g.racing) && !r.joins; });
+  var solo=rows.filter(function(r){ return !r.g && !r.joins; });
   rows=cats.concat(joins, solo);
   var shown=rows.slice(0,300);
   // Coasters, not rows: folding nine Batmans and Boomerangs into two rows does
@@ -1601,7 +1601,7 @@ function renderAdd(){
         +' you have been on that finish a category you already rank</div>';
     if(solo.length && (cats.length||joins.length) && ix===cats.length+joins.length)
       head='<div class="addsec">Everything else</div>';
-    if(row.g && !row.g.racing){
+    if(row.g){
       var g=row.g, n=row.ids.length, have=g.ids.length;
       return head+'<div class="addrow grp">'
         +'<span class="nm">'+esc(g.name)+'<span class="cnt">\u00d7'+n+'</span></span>'
@@ -1624,14 +1624,11 @@ function renderAdd(){
     var joinbit = row.joins
       ? '<span class="jn">joins '+esc(row.joins.name)+' \u00b7 '+row.jn+' ranked</span>'
       : '';
-    // A racing pair: the same row, named for the ride, and its buttons act on
-    // both sides (the family's data-hhg / data-addg).
-    var rg = row.g && row.g.racing ? row.g : null;
     return pre+'<div class="addrow">'
-      +'<span class="nm">'+esc(rg ? rg.name : c.name)+'</span>'
+      +'<span class="nm">'+esc(c.name)+'</span>'
       +'<span class="meta"><span class="pk">'+esc(c.park||'—')+'</span>'+joinbit+stat+'</span>'
-      +'<span class="acts"><button class="ghost" '+(rg?'data-hhg="'+rg.key+'"':'data-hh="'+c.id+'"')+'>Rank</button>'
-      +'<button class="ghost" '+(rg?'data-addg="'+rg.key+'"':'data-add="'+c.id+'"')+'>Add</button></span>'
+      +'<span class="acts"><button class="ghost" data-hh="'+c.id+'">Rank</button>'
+      +'<button class="ghost" data-add="'+c.id+'">Add</button></span>'
       +'</div>';
   }).join('') : ('<div class="hint">'+(
       ($('q').value.trim()||$('f_addpark').value||anyPicked())
@@ -1648,7 +1645,7 @@ function renderAdd(){
     };
   });
   $('addlist').querySelectorAll('[data-hh]').forEach(function(b){
-    b.onclick=function(){ openHH(+b.dataset.hh); };
+    b.onclick=function(){ askRacing(+b.dataset.hh); };
   });
   // The whole family, in one go and next to each other, so it is already one
   // row by the time you look at the list.
@@ -1732,7 +1729,7 @@ function joiners(){
   var inList={}; ORDER.forEach(function(id){ inList[id]=1; });
   MINE.forEach(function(id){
     if(inList[id]) return;
-    var g=CLONE[id]; if(!g || !ranked[g.key]) return;
+    var g=CLONE[id]; if(!g || !ranked[g.key] || g.racing) return;
     out.push({ id:id, g:g, n:ranked[g.key] });
   });
   return out;
@@ -1796,6 +1793,38 @@ function foldInto(id, g){
   if(ORDER.indexOf(id)<0) ORDER.push(id);
   snug(id, g);                      // in beside the rest of its family
   markDirty(); renderRank(); renderAdd();
+}
+// Rank on one side of a racing pair: ask first, "together or just this one?"
+// Together places every side you have ridden as one row (or, if a side is
+// already ranked, slots this one in beside it). Just this one pulls it out of
+// the pair, so it is ranked — and stays — a coaster of its own.
+function askRacing(id){
+  var g=CLONE[id];
+  if(!g || !g.racing) return openHH(id);
+  var inList={}; ORDER.forEach(function(x){ inList[x]=1; });
+  var mine={}; MINE.forEach(function(x){ mine[x]=1; });
+  var ranked=g.ids.filter(function(x){ return x!==id && inList[x] && CLONE[x]===g; });
+  var unranked=g.ids.filter(function(x){ return x!==id && !inList[x] && mine[x] && CLONE[x]===g; });
+  if(!ranked.length && !unranked.length) return openHH(id);   // nothing to pair with
+  var c=BYID[id]||{}, others=ranked.concat(unranked).map(function(x){ return (BYID[x]||{}).name; });
+  $('join_h').textContent='Rank '+g.name+' together?';
+  $('join_sub').innerHTML = ranked.length
+    ? '<b>'+esc(others.join(' & '))+'</b> is already in your list. Together, '
+      +esc(c.name)+' goes right beside it as one '+esc(g.name)+' row.'
+    : 'You have ridden <b>'+esc(others.join(' & '))+'</b> too. Together, they are '
+      +'placed once and show as one '+esc(g.name)+' row.';
+  $('join_list').innerHTML=''; $('join_prog').textContent='';
+  $('join_no').textContent='Just this one';
+  $('join_ok').textContent='Rank together';
+  $('join').style.display='flex';
+  var done=function(){ $('join').style.display='none'; $('join_no').textContent='Not now';
+                       $('join_no').onclick=closeJoins; };
+  $('join_ok').onclick=function(){ done();
+    if(ranked.length){ foldInto(id,g); setView('rank'); }
+    else openHH(id, unranked, g); };
+  $('join_no').onclick=function(){ done();
+    PULLED[id]=1; CATS.pulled=(CATS.pulled||[]).concat([id]); delete CLONE[id];
+    markPrefs(); openHH(id); };
 }
 function openHH(id, mates, g){
   mates=mates||[];

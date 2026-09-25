@@ -3528,6 +3528,14 @@ count, and /categories does not list them. Everything else (Add list folding, Ra
 the "belongs in a category you rank" fold for a list that has one side already, Gather,
 pull one side out) is the existing category machinery, unchanged.
 
+**Revised the same day** (Carter: *"show them separately in the list and when I start to
+rank 1 I get the prompt do you want to rank them together"*). The Add list shows each side
+as its own row, in its sorted place. Rank on a side goes through `askRacing()`: if another
+side is ridden-but-unranked or already ranked, the `#join` dialog asks **Rank together** (place
+all unranked sides as one row, or fold beside the ranked one) or **Just this one** (the side
+is pulled out of the pair, remembered in prefs, and ranked alone). Racing pairs are left out
+of the load-time `joiners()` prompt — the question is asked at Rank instead.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**
