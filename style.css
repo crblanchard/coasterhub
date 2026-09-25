@@ -380,11 +380,35 @@ footer.site a:hover{color:var(--fg)}
 /* Light/dark toggle — built by initTheme, sits left of the rider picker.
    Icon only: at 320px the header already spends its width on the wordmark,
    "Viewing" and the picker, and a labelled control does not fit. */
-.themetoggle{flex:none;display:flex;align-items:center;justify-content:center;
+.themetoggle,.srchbtn{flex:none;display:flex;align-items:center;justify-content:center;
   width:34px;height:34px;padding:0;border-radius:999px;cursor:pointer;
   background:var(--soft);border:1px solid var(--line);color:var(--muted);
   transition:color .15s,border-color .15s}
-.themetoggle:hover{color:var(--fg);border-color:var(--ring)}
+.themetoggle:hover,.srchbtn:hover{color:var(--fg);border-color:var(--ring)}
+/* Site search (app.js openSearch): a sheet from the top of the window, over a
+   dimmed page. Fixed and at the end of <body>, never inside a hero. */
+.srch{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.45);display:flex;justify-content:center;
+  align-items:flex-start;padding:10vh 16px 16px}
+.srch[hidden]{display:none}
+html.srchopen{overflow:hidden}
+.srchbox{width:100%;max-width:620px;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 24px 60px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column;max-height:80vh}
+.srchbar{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;border-bottom:1px solid var(--line);color:var(--muted)}
+.srchbar input{flex:1;min-width:0;border:0;background-color:transparent;color:var(--fg);font-size:1rem;padding:8px 0;outline:none}
+.srchx{flex:none;background-color:transparent;border:0;color:var(--accent2);font-weight:600;font-size:.9rem;cursor:pointer;padding:6px 4px}
+.srchres{overflow:auto;overscroll-behavior:contain;padding:6px}
+.srchhint{color:var(--muted);font-size:.9rem;margin:10px 12px}
+.srow{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;text-decoration:none;color:var(--fg)}
+.srow:hover,.srow.hi{background-color:var(--soft)}
+.srow .st{flex:1;min-width:0;display:flex;flex-direction:column}
+.srow .st b{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .st span{color:var(--muted);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow.gone .st b{color:var(--muted)}
+.srow .sk{flex:none;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+@media (max-width:680px){
+  .srch{padding:0;background:var(--bg)}
+  .srchbox{max-width:none;max-height:none;height:100%;border:0;border-radius:0;box-shadow:none}
+}
 /* The account control sits beside the theme toggle and borrows its shape, so
    the header's right-hand controls read as one set. Signed in it shows your
    initial; signed out, a person outline. */
@@ -422,8 +446,8 @@ footer.site a:hover{color:var(--fg)}
   .people{flex:none;justify-content:flex-end}
   .brand{flex:1 1 auto;min-width:0}
   .brand-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
-  .themetoggle,.acctlink{width:31px;height:31px}
-  .themetoggle svg,.acctlink svg{width:16px;height:16px}
+  .themetoggle,.acctlink,.srchbtn{width:31px;height:31px}
+  .themetoggle svg,.acctlink svg,.srchbtn svg{width:16px;height:16px}
 }
 /* Below ~375px even that isn't enough, and an ellipsised "Coaster H…" reads
    worse than no wordmark. The mark stays, and it still links home. */

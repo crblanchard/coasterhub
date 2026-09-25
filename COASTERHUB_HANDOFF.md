@@ -3584,6 +3584,28 @@ one best-first with its #position (and its model, on a maker page). `drawRanked(
 manufacturer.html, fed by `/api/rankings/<you>` fetched beside your rides; it draws whichever
 of page and ranking lands second. Nothing ranked, or signed out: no section.
 
+## Home is the hub; search is in every header (2026-09-25)
+
+Carter asked how to structure the site as it sprawled. Agreed (option 1): the four tabs other
+than Home are YOU (Log, Rankings, Credits, Profile); **Home is everything else** — the
+database's front door and the people. Explore did NOT get a tab (five is the ceiling).
+
+- **Search** (`openSearch`, `buildSearchIndex`, `searchFor` in app.js): a button in every
+  header's right corner (`accountCorner`, so /qc gets it too) and `/` on a keyboard. A sheet
+  from the top (full screen on a phone). Indexes coasters, parks, manufacturers, models,
+  locations and riders from the cached lists — no new endpoint. Ranking: exact, prefix,
+  word-start, initials ("B&M", "RMC", "KD"; a maker's initials beat a park's), then contains;
+  ties go park > maker > location > model > rider > coaster, operating first, shorter first.
+- **Home**: hero, then a search field (opens the same sheet), then five cards — Parks and
+  Coasters (the everyone view of /credits, `?view=parks|list`), Manufacturers, Locations, Map —
+  then Friends, Top users, Recent changes, and the feedback card last. The "N operating and M
+  defunct" line and the Map link are folded into the cards.
+- Still to do from the same plan: one shared template for park / coaster / maker / model /
+  location pages (breadcrumbs, tiles, "you" strip, shared rows), and moving Add new / Edit / QC
+  out of the everyone footer.
+- Data noticed while testing: a "B&M Invert" sits under a manufacturer spelled "Boll" (one
+  coaster) — fix in /edit.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**

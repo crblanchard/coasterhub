@@ -1106,6 +1106,7 @@
   // the rest of it (Carter, 2026-09-18).
   function accountCorner(host) {
     if (!host) return;
+    if (!host.querySelector(".srchbtn")) buildSearchButton(host);
     if (!host.querySelector(".themetoggle")) buildThemeToggle(host, true);
     if (!host.querySelector(".acctlink")) buildAccountLink(host);
   }
@@ -1248,13 +1249,167 @@
     }
   }
 
+  // ---- Search, from every page's header (2026-09-25) -----------------------
+  // One box that finds coasters, parks, manufacturers, models, locations and
+  // riders — the glue that lets the database side of the site go without a
+  // tab of its own (Carter: "yes 1": Home is the hub, search is in the
+  // header). Everything it searches is already fetched and cached by the
+  // pages (coasters, parks, users), so it costs nothing until it is opened,
+  // and then one pass over ~1,500 names per keystroke.
+  //
+  // Abbreviations work by initials: "B&M" and "bm" find Bolliger & Mabillard,
+  // "RMC" Rocky Mountain Construction, "KD" Kings Dominion.
+  var SEARCH_KINDS = { park: "Park", coaster: "Coaster", maker: "Manufacturer",
+                       model: "Model", loc: "Location", rider: "Rider" };
+  // Order among equally good matches: places before the rides in them.
+  var SEARCH_RANK = { park: 0, maker: 1, loc: 2, model: 3, rider: 4, coaster: 5 };
+  var searchIndex = null;
+  function norm(t) {
+    return String(t == null ? "" : t).toLowerCase().normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "").replace(/['\u2019]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  }
+  function initials(n) {
+    var w = n.split(" ").filter(function (x) { return x && !/^(the|of|and|de|du|la|le)$/.test(x); });
+    return w.length > 1 ? w.map(function (x) { return x.charAt(0); }).join("") : "";
+  }
+  function buildSearchIndex() {
+    if (searchIndex) return searchIndex;
+    searchIndex = Promise.all([
+      fetchCoasters().catch(function () { return { coasters: [] }; }),
+      fetchParks().catch(function () { return {}; }),
+      fetchUsers().catch(function () { return USERS; })
+    ]).then(function (res) {
+      var cs = (res[0] && res[0].coasters) || [], parks = res[1] || {}, users = res[2] || [];
+      var out = [], add = function (k, t, sub, href, extra) {
+        var n = norm(t);
+        out.push({ k: k, t: t, sub: sub, h: href, n: n, ini: initials(n), gone: !!(extra && extra.gone) });
+      };
+      var makers = {}, models = {}, locs = {}, pn = {};
+      cs.forEach(function (c) {
+        if (c.park) pn[c.park] = (pn[c.park] || 0) + 1;
+        var m = String(c.manu || "").trim(), mo = String(c.model || "").trim();
+        if (m) makers[m] = (makers[m] || 0) + 1;
+        if (m && mo) { var key = m + "\u0000" + mo; (models[key] = models[key] || { m: m, mo: mo, n: 0 }).n++; }
+        add("coaster", c.name, c.park || "", coasterHref(c), { gone: !!c.closed });
+      });
+      Object.keys(parks).forEach(function (p) {
+        var r = (parks[p] && parks[p].region) || "";
+        if (r) locs[r] = (locs[r] || 0) + 1;
+        add("park", p, r || ((pn[p] || 0) + " coasters"), parkHref(p));
+      });
+      Object.keys(makers).forEach(function (m) { add("maker", m, makers[m] + " coaster" + (makers[m] === 1 ? "" : "s"), makerHref(m)); });
+      Object.keys(models).forEach(function (k) { var x = models[k]; add("model", x.mo, x.m + " \u00b7 " + x.n, makerHref(x.m, x.mo)); });
+      Object.keys(locs).forEach(function (r) { add("loc", r, locs[r] + " park" + (locs[r] === 1 ? "" : "s"), locationHref(r)); });
+      users.forEach(function (u) { if (u && u.slug) add("rider", u.name || u.slug, "@" + u.slug, userPageHref(u.slug, "profile")); });
+      return out;
+    });
+    return searchIndex;
+  }
+  function searchFor(items, q) {
+    var nq = norm(q), cq = nq.replace(/ /g, "");
+    if (!nq) return [];
+    var hits = [];
+    items.forEach(function (it) {
+      var sc = -1, i = it.n.indexOf(nq);
+      if (it.n === nq) sc = 0;
+      else if (i === 0) sc = 1;
+      else if (i > 0 && it.n.charAt(i - 1) === " ") sc = 2;
+      // An abbreviation almost always means a maker ("B&M", "RMC"), so a maker's
+      // initials outrank a park that happens to share them (Bosque Mágico).
+      else if (cq.length >= 2 && it.ini && it.ini === cq) sc = it.k === "maker" ? 0.5 : 1.5;
+      else if (cq.length >= 2 && it.ini && it.ini.indexOf(cq) === 0) sc = 3;
+      else if (i > 0 && nq.length >= 3) sc = 4;
+      if (sc >= 0) hits.push({ it: it, sc: sc });
+    });
+    hits.sort(function (a, b) {
+      return a.sc - b.sc || SEARCH_RANK[a.it.k] - SEARCH_RANK[b.it.k]
+        || (a.it.gone ? 1 : 0) - (b.it.gone ? 1 : 0) || a.it.t.length - b.it.t.length
+        || a.it.t.localeCompare(b.it.t);
+    });
+    return hits.slice(0, 40).map(function (h) { return h.it; });
+  }
+  var searchEl = null;
+  function searchEsc(t) {
+    return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+  }
+  function openSearch(seed) {
+    if (typeof document === "undefined") return;
+    if (!searchEl) {
+      searchEl = document.createElement("div");
+      searchEl.className = "srch";
+      searchEl.hidden = true;
+      searchEl.innerHTML = '<div class="srchbox" role="dialog" aria-label="Search">'
+        + '<div class="srchbar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" '
+        + 'stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
+        + '<input type="search" placeholder="Coasters, parks, manufacturers, places, riders&hellip;" '
+        + 'autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Search">'
+        + '<button type="button" class="srchx">Close</button></div>'
+        + '<div class="srchres" role="listbox"></div></div>';
+      document.body.appendChild(searchEl);
+      var input = searchEl.querySelector("input"), res = searchEl.querySelector(".srchres");
+      var draw = function () {
+        buildSearchIndex().then(function (items) {
+          var q = input.value, hits = searchFor(items, q);
+          res.innerHTML = !norm(q)
+            ? '<p class="srchhint">Try a coaster, a park, a maker like <b>B&amp;M</b>, a state, or a rider.</p>'
+            : hits.length
+              ? hits.map(function (h, i) {
+                  return '<a class="srow' + (i === 0 ? " hi" : "") + (h.gone ? " gone" : "") + '" href="' + searchEsc(h.h) + '">'
+                    + '<span class="st"><b>' + searchEsc(h.t) + '</b><span>' + searchEsc(h.sub) + '</span></span>'
+                    + '<span class="sk">' + SEARCH_KINDS[h.k] + '</span></a>';
+                }).join("")
+              : '<p class="srchhint">Nothing called that.</p>';
+        });
+      };
+      input.addEventListener("input", draw);
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { var a = res.querySelector(".srow"); if (a) location.href = a.getAttribute("href"); }
+        else if (e.key === "Escape") closeSearch();
+      });
+      searchEl.querySelector(".srchx").addEventListener("click", closeSearch);
+      searchEl.addEventListener("click", function (e) { if (e.target === searchEl) closeSearch(); });
+      searchEl._draw = draw;
+    }
+    var inp = searchEl.querySelector("input");
+    if (seed != null) inp.value = seed;
+    searchEl.hidden = false;
+    document.documentElement.classList.add("srchopen");
+    inp.focus();
+    searchEl._draw();
+  }
+  function closeSearch() {
+    if (!searchEl) return;
+    searchEl.hidden = true;
+    document.documentElement.classList.remove("srchopen");
+  }
+  function buildSearchButton(host) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "srchbtn";
+    b.setAttribute("aria-label", "Search");
+    b.title = "Search";
+    b.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" '
+      + 'stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+    b.addEventListener("click", function () { openSearch(); });
+    host.insertBefore(b, host.firstChild);
+  }
+  // "/" opens it from anywhere on a keyboard, the way most sites do.
+  if (typeof document !== "undefined") document.addEventListener("keydown", function (e) {
+    if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target, tag = t && t.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) return;
+    e.preventDefault(); openSearch();
+  });
+
   var api = { computeStats: computeStats, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
-              adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner };
+              adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
+              openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);
