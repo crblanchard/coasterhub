@@ -58,7 +58,13 @@
   a.crow .rk{flex:none;min-width:2.6em;color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums}
   a.crow .md{margin-left:auto;flex:none;padding-left:10px;color:var(--muted);font-size:.8rem;white-space:nowrap}
   .panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
-  @media (max-width:560px){ a.crow .pk{display:none} details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
+  /* The park rides under the name rather than beside it (Carter, 2026-09-25:
+     "want to see park for each coaster"): on a phone there was no room for it
+     beside, so it was hidden, and every Batman read the same. */
+  a.crow .two{display:flex;flex-direction:column;min-width:0}
+  a.crow .two .pk{font-size:.78rem}
+  a.crow{align-items:center}
+  @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
 </style>
 </head>
 <body>
@@ -149,8 +155,7 @@ function drawRanked(){
   el.innerHTML='<div class="sect">In your rankings</div>'
     +'<div class="panel">'+r.map(function(c){
       return '<a class="crow" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="rk">#'+RANK[c.id]+'</span>'
-        +'<span class="cn">'+esc(c.name)+'</span>'
-        +'<span class="pk">'+esc(c.park||'')+'</span>'
+        +'<span class="two"><span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(c.park||'')+'</span></span>'
         +(!RANK_MODEL && c.model ? '<span class="md">'+esc(c.model)+'</span>' : '')+'</a>';
     }).join('')+'</div>';
 }
@@ -304,7 +309,7 @@ function crow(c, MINE){
   var yrs=cl ? (op?op+'–'+cl:'closed '+cl) : op;
   return '<a class="crow'+(MINE?(got?' got':' miss'):'')+'" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'">'
     +(MINE ? '<span class="tick">'+(got?'✓':'')+'</span>' : '')
-    +'<span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(c.park||'')+'</span>'
+    +'<span class="two"><span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(c.park||'')+'</span></span>'
     +(yrs ? '<span class="yrs'+(cl?' off':'')+'">'+esc(yrs)+'</span>' : '')+'</a>';
 }
 </script>
