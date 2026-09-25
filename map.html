@@ -201,12 +201,16 @@ function fail(e){console.error(e);document.getElementById('err').style.display='
 // means none of that: a map of what each park has.
 var slug=CoasterHub.currentUser();
 
-var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true,zoomControl:false}).setView([30,-40],2);
+// Opens on the US, and stops zooming out at 3 (Carter, 2026-09-25): at 2 a
+// phone showed the whole world as a strip with every park in three clumps.
+// It used to fit itself to every park, which is the same whole world.
+var PHONE=window.matchMedia('(max-width:640px)').matches;
+var map=L.map('map',{scrollWheelZoom:true,worldCopyJump:true,zoomControl:false,minZoom:3})
+  .setView(PHONE ? [38.5,-96] : [39,-96], PHONE ? 3 : 4);
 // The zoom buttons. On a phone they go top-RIGHT, side by side, above the
 // rider switcher, so the Visited / Compare box can have the top-left corner
 // to itself (Carter, 2026-09-24). Added before the switcher: Leaflet stacks a
 // corner's controls in the order they are added.
-var PHONE=window.matchMedia('(max-width:640px)').matches;
 L.control.zoom({position: PHONE ? 'topright' : 'topleft'}).addTo(map);
 // The basemap, exactly as the profile page picks it: Esri's canvas tiles, no
 // key, dark or light to match the theme, OpenStreetMap if Esri stops
@@ -259,8 +263,10 @@ CoasterHub.riderBadge(document.getElementById('hero_badge'),'map',slug);
 // asked either way now: it decides whose friends the compare list offers, and
 // whether this is somebody ELSE's map (which opens on their visited parks).
 var acctP = CoasterHub.me().catch(function(){ return null; });
-var whose = slug ? Promise.resolve(slug)
-  : acctP.then(function(a){ return (a && a.slug) || null; });
+// Bare /map is the everyone map, signed in or not — the badge says Global, so
+// it must not quietly be yours (Carter, 2026-09-25). Yours is /user/<you>/map,
+// which is where the badge and Profile's "View your map" go.
+var whose = Promise.resolve(slug || null);
 Promise.all([
   whose.then(function(s){ return s ? CoasterHub.fetchRides(s).catch(function(){ return null; }) : null; }),
   CoasterHub.fetchCoasters(),
@@ -437,7 +443,6 @@ Promise.all([
     map.panBy([at.x - size.x/2, at.y - (cardTop + h + 10)], {animate:true});
   }
   if(!wide) map.on('popupopen', placePhone);
-  var pts=[];
   var group=L.layerGroup();
   placed.forEach(function(p){
     // Where discs overlap, the bigger park is on top: the one worth clicking
@@ -445,7 +450,6 @@ Promise.all([
     // reflects the comparison as it stands.
     p.marker=L.marker([p.lat,p.lon],{icon:iconFor(p), title:p.name, zIndexOffset:p.open.length*10})
       .bindPopup(function(){ return popup(p); }, POPUP);
-    pts.push([p.lat,p.lon]);
   });
   map.addLayer(group);
 
@@ -525,7 +529,6 @@ Promise.all([
   map.attributionControl.addAttribution('Cities: <a href="https://www.geonames.org/">GeoNames</a>');
 
   refresh();
-  if(pts.length) map.fitBounds(pts,{padding:[30,30]});
 
   // The boxes, top-left under the zoom buttons (Carter, 2026-09-21:
   // "checkboxes in the top left that show ridden and not ridden while you're
