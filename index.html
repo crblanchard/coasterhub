@@ -35,7 +35,7 @@
      the Database view of /count uses as its subheader, linking there. */
   /* The hub: a search field that opens the header search, then the database's
      front door as five cards. Two across on a phone, one row on a desktop. */
-  .hub{padding-top:24px}
+  .hub{margin:0 0 34px}
   .hubsearch{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
     background-color:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
     color:var(--muted);font-size:.95rem;font-weight:400}
@@ -87,24 +87,6 @@
   </p>
 </div></section>
 
-<!-- The hub (Carter, 2026-09-25: Home is everything that is not yours — the
-     other four tabs are you). Search first, then the database's front door,
-     then the people, then what changed. The search box here is the header's
-     search, opened with whatever you tap into; there is only one. -->
-<div class="container hub">
-  <button type="button" class="hubsearch" id="hubsearch">
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <span>Search coasters, parks, manufacturers, places&hellip;</span>
-  </button>
-  <div class="xgrid">
-    <a href="/credits?view=parks"><b>Parks</b><span id="x_parks">&nbsp;</span></a>
-    <a href="/credits?view=list"><b>Coasters</b><span id="x_coasters">&nbsp;</span></a>
-    <a href="/manufacturers"><b>Manufacturers</b><span id="x_makers">&nbsp;</span></a>
-    <a href="/locations"><b>Locations</b><span id="x_locs">&nbsp;</span></a>
-    <a href="/map" class="wide2"><b>Map</b><span>Every park, where it is</span></a>
-  </div>
-</div>
 
 <div class="container"><div id="loading">Loading riders…</div></div>
 
@@ -124,6 +106,24 @@
     <span class="eyebrow lh">Friends</span>
     <div class="riderlist" id="friends"></div>
   </div>
+<!-- The hub (Carter, 2026-09-25: Home is everything that is not yours — the
+     other four tabs are you). Search first, then the database's front door,
+     below your friends (Carter, same day: "move this whole thing below friends"), above everyone else. The search box here is the header's
+     search, opened with whatever you tap into; there is only one. -->
+<div class="hub">
+  <button type="button" class="hubsearch" id="hubsearch">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <span>Search coasters, parks, manufacturers, places&hellip;</span>
+  </button>
+  <div class="xgrid">
+    <a href="/credits?view=list"><b>Coasters</b><span id="x_coasters">&nbsp;</span></a>
+    <a href="/credits?view=parks"><b>Parks</b><span id="x_parks">&nbsp;</span></a>
+    <a href="/manufacturers"><b>Manufacturers</b><span id="x_makers">&nbsp;</span></a>
+    <a href="/locations"><b>Locations</b><span id="x_locs">&nbsp;</span></a>
+    <a href="/map" class="wide2"><b>Map</b><span>Find your nearest ride</span></a>
+  </div>
+</div>
   <span class="eyebrow lh" id="top_h" hidden>Top users</span>
   <div class="riderlist" id="list"></div>
 </div>
@@ -241,7 +241,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   var set = function(id, t){ document.getElementById(id).textContent = t; };
   set('x_parks', Object.keys(parks).length.toLocaleString() + ' parks');
   set('x_coasters', nOpen.toLocaleString() + ' operating');
-  set('x_makers', Object.keys(makers).length.toLocaleString() + ' builders');
+  set('x_makers', Object.keys(makers).length.toLocaleString() + ' companies');
   set('x_locs', Object.keys(locs).length.toLocaleString() + ' states & countries');
 }).catch(function(){ /* the cards still link; they just go without numbers */ });
 
