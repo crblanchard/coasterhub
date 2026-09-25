@@ -249,6 +249,15 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
 }
 .track{position:absolute;inset:0;z-index:-1;opacity:.5}
 
+/* The database pages' banner (park, coaster, manufacturer, model, location):
+   compact, because the trail under it already says where you are and the
+   tiles are what you came for (Carter, 2026-09-25: "definitely yes"). Each
+   page's inline --hero-t/--hero-b still sets the padding. */
+.hero.compact .badge{margin-bottom:10px;padding:4px 11px;font-size:.68rem}
+.hero.compact h1,.hero.compact h1.wide{font-size:clamp(1.75rem,4.4vw,2.6rem);line-height:1.08}
+.hero.compact p{margin:8px 0 0;font-size:1rem}
+@media(max-width:680px){ .hero.compact{padding-top:14px} }
+
 /* The riders list (/riders). One row per person, in the same shape as the
    identity block at the top of their profile — picture, name, @username — so
    the list and the page it leads to read as the same thing. */
@@ -726,3 +735,13 @@ html.srchopen{overflow:hidden}
 .facts .pill{display:inline-block;font-size:.78rem;padding:2px 10px;border-radius:999px;border:1px solid var(--line)}
 .facts .pill.wood{color:var(--accent)} .facts .pill.steel{color:var(--accent2)}
 .facts.none{color:var(--muted);font-size:.88rem;margin:0}
+[data-cid]{cursor:pointer}
+[data-cid].open,[data-cid].open > td{background-color:var(--soft)}
+.cx{padding:4px 16px 14px;border-bottom:1px solid var(--soft);background-color:var(--soft)}
+tr.cx{padding:0}
+tr.cx > td{padding:4px 14px 14px;white-space:normal}
+.cx .go{display:inline-block;margin-top:8px;font-size:.86rem;font-weight:600;color:var(--accent2);text-decoration:none}
+.cx .cxin{position:sticky;left:14px}
+.dtable .cx a{color:var(--accent2)}
+.dtable .cx a.go:hover{text-decoration:none}
+.dtable tbody tr.cx:hover{background-color:var(--soft)}

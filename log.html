@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base href="/">
-<title>Add to your count — Coaster Hub</title>
+<title>Log rides — Coaster Hub</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="/style.css?v=20260805b">
 <script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
@@ -240,7 +240,7 @@
 
 <section class="hero" style="--hero-t:52px;--hero-b:20px"><div class="container">
   <span class="badge">Log</span>
-  <h1 style="max-width:20ch">Add to your count.</h1>
+  <h1 style="max-width:20ch">Log your rides.</h1>
   <p>Track today’s rides or add past credits.</p>
 </div></section>
 
@@ -283,7 +283,7 @@
       <select id="rider" style="width:100%"></select></div>
     <button class="ghost" id="newrider" type="button">+ New rider</button>
     <button class="ghost" id="rp_done" type="button">Done</button>
-    <p class="note">Rides go to this rider&rsquo;s count. Yours unless you change it.</p>
+    <p class="note">Rides go to this rider&rsquo;s credits. Yours unless you change it.</p>
   </div>
 
   <!-- No uppercase field labels any more. Two of them, over controls that
@@ -401,7 +401,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a><span data-contrib hidden></span></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a><span data-contrib hidden></span></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -1092,7 +1092,7 @@ function wireRiderAdd(){
       try{ localStorage.setItem('ch_rider',r.slug); }catch(e){}
       toggle(false); basket={}; renderBasket(); loadOwned();
       $('msg').className='msg ok';
-      $('msg').textContent='Added '+r.name+'. Anything you save now goes to their count.';
+      $('msg').textContent='Added '+r.name+'. Anything you save now goes to their credits.';
     }).catch(function(e){ $('nr_err').textContent='Could not add them: '+e.message; })
       .then(function(){ $('nr_save').disabled=false; });
   };
@@ -1222,7 +1222,7 @@ function renderList(){
   var have=0; list.forEach(function(c){ if(OWNED[c.id]) have++; });
   $('listhead').textContent = searching
     ? ('Search — '+list.length+' match'+(list.length===1?'':'es'))
-    : (park+' — '+list.length+(MODE==='list'?(' · '+have+' in your count'):''));
+    : (park+' — '+list.length+(MODE==='list'?(' · '+have+' in your credits'):''));
 
   // Steel/Wood said almost nothing — every row in a park reads the same. The
   // model is the interesting half, and the park only earns its place when you
@@ -1255,7 +1255,7 @@ function renderList(){
     var ctrl;
     if(MODE==='list'){
       ctrl = owned
-        ? '<span class="have">in your count</span>'
+        ? '<span class="have">in your credits</span>'
         : '<span class="tick'+(n?' on':'')+'"><svg viewBox="0 0 24 24" width="15" height="15" '
           +'fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" '
           +'stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>';
@@ -1403,7 +1403,7 @@ function save(){
       $('msg').className='msg ok';
       $('msg').innerHTML=(MODE==='day'
           ? ('Saved '+r.added+' ride'+(r.added===1?'':'s')+' across '+r.coasters+' coaster'+(r.coasters===1?'':'s')+'.')
-          : ('Added '+r.added+' coaster'+(r.added===1?'':'s')+' to your count.'))
+          : ('Added '+r.added+' coaster'+(r.added===1?'':'s')+' to your credits.'))
         +' Now on <b>'+r.credits.toLocaleString()+'</b> coaster'
         +(r.credits===1?'':'s')+' over '+r.total.toLocaleString()+' ride'+(r.total===1?'':'s')+'. '
         +'<a href="/user/'+encodeURIComponent(rider)+'/credits">View the log →</a>';

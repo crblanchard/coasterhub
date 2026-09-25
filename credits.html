@@ -438,7 +438,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a><span data-contrib hidden></span></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a><span data-contrib hidden></span></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -635,7 +635,7 @@ return Promise.all([
       // "Every ride" said and also says how many (Carter, 2026-09-20). LOG is
       // this one rider's log here — COMBINED took the branch above.
       document.querySelector('.hero h1').textContent =
-        MODE==='rides' ? ('All '+LOG.length.toLocaleString()+' rides in '+nm+'’s count.')
+        MODE==='rides' ? ('All '+LOG.length.toLocaleString()+' rides in '+nm+'’s credits.')
                        : (nm+'’s full credit list.');
       heroSub(MODE==='rides' ? ('Full list of '+nm+'’s logged rides on the site.') : '');
       document.title=nm+'’s Credits — Coaster Hub';

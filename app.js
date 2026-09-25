@@ -1337,6 +1337,58 @@
     return t.length ? '<div class="facts">' + t.join("") + '</div>' : '<p class="facts none">No stats on file yet.</p>';
   }
 
+  // Coaster rows that open in place (2026-09-25, Carter: every list should
+  // behave like the park page's). Any element with data-cid="<coaster id>"
+  // inside `root` — an <a class="crow"> or a table <tr> — toggles a .cx panel
+  // right after it: the facts, your rides and rank, and "Coaster page →".
+  // Other links in the row (a park, a maker) still go where they point, and a
+  // modified click (new tab) still follows the coaster link.
+  function openableCoasters(root) {
+    if (!root || root._openable) return;
+    root._openable = true;
+    root.addEventListener("click", function (e) {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+      if (e.target.closest(".cx")) return;
+      var row = e.target.closest("[data-cid]");
+      if (!row || !root.contains(row)) return;
+      var a = e.target.closest("a");
+      if (a && a !== row && !a.hasAttribute("data-cname")) return;
+      e.preventDefault();
+      var nx = row.nextElementSibling;
+      if (nx && nx.classList.contains("cx")) { nx.parentNode.removeChild(nx); row.classList.remove("open"); return; }
+      row.classList.add("open");
+      var id = Number(row.getAttribute("data-cid"));
+      var box, inner;
+      if (row.tagName === "TR") {
+        box = document.createElement("tr");
+        var td = document.createElement("td");
+        td.colSpan = row.children.length;
+        box.appendChild(td);
+        // A wide table scrolls sideways on a phone, and a cell spanning it is
+        // as wide as the table — the values sat off-screen to the right. The
+        // panel is pinned to the visible width of whatever scrolls it.
+        inner = document.createElement("div");
+        inner.className = "cxin";
+        var sc = row.closest(".dtable-wrap") || row.closest("table").parentNode;
+        if (sc && sc.clientWidth) inner.style.width = Math.max(200, sc.clientWidth - 28) + "px";
+        td.appendChild(inner);
+      } else { box = inner = document.createElement("div"); }
+      box.className = "cx";
+      inner.innerHTML = '<p class="facts none">Loading&hellip;</p>';
+      row.parentNode.insertBefore(box, row.nextSibling);
+      Promise.all([fetchCoasters(), you()]).then(function (r) {
+        var c = null, cs = (r[0] && r[0].coasters) || [], y = r[1], extra = [];
+        for (var i = 0; i < cs.length; i++) if (cs[i].id === id) { c = cs[i]; break; }
+        if (!c) { inner.innerHTML = '<p class="facts none">Not found.</p>'; return; }
+        var m = y && y.rides[id];
+        if (m) { if (m.first) extra.push([mdy(m.first), "First ridden"]); extra.push([m.n, "Your rides"]); }
+        if (y && y.rank[id]) extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your rank"]);
+        inner.innerHTML = coasterFacts(c, extra)
+          + '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>';
+      });
+    });
+  }
+
   // The footer's contributor links: Add new for anyone signed in (adding a
   // coaster is open to riders), Edit and QC for admins only. Everyone else's
   // footer is just the ways around the site.
@@ -1513,7 +1565,8 @@
               fetchRides: fetchRides, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts };
+              crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              openableCoasters: openableCoasters };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

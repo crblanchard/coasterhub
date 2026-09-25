@@ -3617,6 +3617,24 @@ database's front door and the people. Explore did NOT get a tab (five is the cei
 - Data noticed while testing: a "B&M Invert" sits under a manufacturer spelled "Boll" (one
   coaster) — fix in /edit.
 
+## Cleanup pass: rows open in place, compact banners, "credits" wording (2026-09-25)
+
+- **Every coaster list opens in place.** `CoasterHub.openableCoasters(root)`: any `[data-cid]`
+  row (an `a.crow` or a table `<tr>`, whose name link carries `data-cname`) toggles a `.cx`
+  panel after it — `coasterFacts` plus your first ride, rides and rank, and "Coaster page →".
+  Other links in the row (park, maker) still navigate; a modified click still opens the page.
+  In a table the panel is pinned (`.cxin`, sticky, JS-set width) to the visible width of the
+  sideways-scrolling `.dtable-wrap`, or its values sat off-screen on a phone. Wired on the
+  maker page (model lists, ranked list), model installations and location coasters. The
+  park page keeps its own `<details>` rows (riders inside), and rankings its own tap.
+- **Compact banners** on park, coaster, manufacturer/model and location: `.hero.compact`
+  (smaller badge, h1 clamp(1.75rem…2.6rem)), inline `--hero-t:30px;--hero-b:20px`.
+- **Site map is out of the footer** (the page stays; search replaced its job).
+- **"count" → "credits" in visible text**: Home title and line ("Log your rides. Track your
+  credits. Rank them."), /log title and headline ("Log your rides."), "View your credits" on
+  Profile, "in your credits" on /log, import/add/categories/sitemap wording. Code names
+  (`count` page key, `herocount`, comments) unchanged.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**

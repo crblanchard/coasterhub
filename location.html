@@ -40,7 +40,7 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero" style="--hero-t:56px;--hero-b:26px"><div class="container">
+<section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
   <!-- A plain badge, not a rider switcher: this page is about a place. -->
   <span class="badge" id="hero_badge">Location</span>
   <h1 class="wide" data-loading>Loading&hellip;</h1>
@@ -66,7 +66,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a><span data-contrib hidden></span></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a><span data-contrib hidden></span></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -93,6 +93,8 @@ var mine=CoasterHub.me().then(function(a){
   }).catch(function(){ return null; }) : null;
 }).catch(function(){ return null; });
 
+// Every coaster row opens in place (CoasterHub.openableCoasters).
+CoasterHub.openableCoasters(document.getElementById('body'));
 Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), mine]).then(function(res){
   var coasters=res[0].coasters, parks=res[1], MINE=res[2];
   // Every park, with its coasters, under its region.
@@ -170,9 +172,9 @@ function place(reg, ps, MINE, R){
       rows.map(function(c){
         var op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):''), cl=c.closed?String(c.closed).slice(0,4):'';
         var mk=c.manu ? '<a href="'+esc(CoasterHub.makerHref(c.manu, c.model||null))+'">'+esc(c.model||c.manu)+'</a>' : esc(c.model||'');
-        return '<tr'+(cl?' class="gone"':'')+'>'
+        return '<tr data-cid="'+c.id+'"'+(cl?' class="gone"':'')+'>'
           +(MINE?'<td class="tick">'+(MINE[c.id]?'✓':'')+'</td>':'')
-          +'<td class="nm"><a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></td>'
+          +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></td>'
           +'<td><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park)+'</a></td>'
           +'<td class="sub opt">'+mk+'</td><td class="num">'+esc(op)+'</td>'
           +'<td><span class="st '+(cl?'off">Closed '+esc(cl):'on">Operating')+'</span></td></tr>';
