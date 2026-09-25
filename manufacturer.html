@@ -238,7 +238,9 @@ function one(name, cs, MINE){
     var g=MINE ? list.filter(function(c){ return MINE[c.id]; }).length : null;
     return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
       +'<span class="nm">'+esc(mo || 'No model on file')+'</span>'
-      +'<span class="ct">'+(g!=null ? '<b>'+g+'</b> of ' : '')+list.length+'</span></summary>'
+      // Just the size of the model. The "9 of 10" you had ridden came out
+      // (Carter, 2026-09-25) — parked in the handoff's "Possible future updates".
+      +'<span class="ct">'+list.length+'</span></summary>'
       +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">The '+esc(mo)+' page, with its specs &rarr;</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
   }).join('');

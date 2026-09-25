@@ -3654,6 +3654,16 @@ as "Database".
   (Home · Coasters · Parks · Manufacturers · Locations · Map, plus Add new / Edit · QC by role)
   all point at the new pages.
 
+## Possible future updates
+
+Ideas Carter parked rather than dropped — pick from here when he asks "what next".
+
+- **"X of Y" ridden counts on model headers** (2026-09-25). The maker page's model rows
+  showed "**9** of 10" (how many of that model you have ridden). Taken out; the model row now
+  shows only its size. `g` (ridden count per model) is still computed in `one()` in
+  manufacturer.html if it comes back. The "you" line under the tiles still says "You have
+  ridden 41 of 51 operating" for the whole maker.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**
