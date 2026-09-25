@@ -3513,6 +3513,21 @@ one answer settles a family, and a new ride lands before or after a family, neve
 it. Checked with two synthetic families in a 199-ride list: each asked at most once. A family
 that is *scattered* (not gathered) is still several rows — the Gather bar fixes that.
 
+## Racing pairs are categories automatically (2026-09-25)
+
+Carter: rank one American Eagle and the other should come with it, *"just shows as American
+Eagle like a category."* `addRacers()` in rankings.html builds a category for every set of
+coasters at ONE park sharing a name before a bracketed suffix — "American Eagle (Red)" /
+"(Blue)" — unless a member is already in a real category. 21 of them today (Gemini, The
+Racer, Gwazi, Space Mountain, Stardust Racers, Matterhorn...). Numbered suffixes and ones with
+commas are skipped (Butler Amusements' "Orient Express (1)/(2)" are two kiddie coasters).
+Built on the page, never stored: key `d<lowest id>`, `racing:true`, note "Racing · Red &
+Blue". The prefs PUT accepts `d` keys now and `/api/categories/:slug` returns the raw
+`offKeys`/`numKeys` so off/numbers stick for them. They are left out of the Categories
+count, and /categories does not list them. Everything else (Add list folding, Rank as one,
+the "belongs in a category you rank" fold for a list that has one side already, Gather,
+pull one side out) is the existing category machinery, unchanged.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**

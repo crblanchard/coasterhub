@@ -702,6 +702,7 @@ if(!slug){
   .then(function(res){
     var coasters=res[0].coasters, parks=res[1], user=res[2], rank=res[3];
     CATS = res[4];
+    addRacers(coasters);
     buildClone();
     // A ranking is one person's opinion, so only that person may change it —
     // there is no admin override on this write (see the PUT in worker.js). The
@@ -890,7 +891,7 @@ function renderRank(){
       +'</span>'+members+'</div>';
   }).join('');
   $('gatherbar').style.display = scattered() ? 'flex' : 'none';
-  var live=(CATS.categories||[]).filter(function(g){ return !g.off; }).length;
+  var live=(CATS.categories||[]).filter(function(g){ return !g.off && !g.racing; }).length;
   $('catn').textContent = CATS.on===false ? 'off' : live;
   $('catn').className = CATS.on===false ? 'n off' : 'n';
   el.querySelectorAll('[data-up]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.up,-1); }; });
@@ -1010,6 +1011,39 @@ function ownerOf(id){
 }
 
 function catKey(g){ return g.key || ('c'+g.id); }
+
+// Racing and dueling pairs as categories, found rather than curated (Carter,
+// 2026-09-25: rank one American Eagle and the other should come with it, "like
+// a category"). The database names both tracks "American Eagle (Red)" /
+// "(Blue)" at one park, so a shared name before the brackets at the SAME park
+// is the family: Gemini, The Racer, Gwazi, Space Mountain, Stardust Racers...
+// ~20 of them. Built here on the page, not stored: nothing to maintain when a
+// pair is added in /edit. A pair already in any real category is left to it.
+// Key "d" + lowest member id, which the prefs PUT accepts, so switching one off
+// or pulling a side out to rank it alone is remembered like any category.
+// Skipped: numbered suffixes and ones with commas — "Orient Express (1)" and
+// "Wacky Worm (yellow track, blue supports)" are two different kiddie coasters
+// at a travelling fair, not one ride with two sides.
+function addRacers(coasters){
+  var taken={};
+  (CATS.categories||[]).forEach(function(g){ g.ids.forEach(function(id){ taken[id]=1; }); });
+  var fams={};
+  coasters.forEach(function(c){
+    var m=/^(.*?)\s*\(([^)]+)\)\s*$/.exec(c.name||'');
+    if(!m || !c.park || taken[c.id]) return;
+    if(/^\d+$/.test(m[2].trim()) || m[2].indexOf(',')>=0) return;
+    var k=c.park+'\u0000'+m[1].toLowerCase();
+    (fams[k]=fams[k]||{name:m[1], sides:[], ids:[]});
+    fams[k].sides.push(m[2].trim()); fams[k].ids.push(c.id);
+  });
+  Object.keys(fams).forEach(function(k){
+    var f=fams[k]; if(f.ids.length<2) return;
+    var key='d'+Math.min.apply(null,f.ids);
+    CATS.categories.push({ key:key, id:key, name:f.name, racing:true,
+      note:'Racing \u00b7 '+f.sides.join(' & '), ids:f.ids,
+      off:(CATS.offKeys||[]).indexOf(key)>=0, nums:(CATS.numKeys||[]).indexOf(key)>=0 });
+  });
+}
 
 var CHEV = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" '
   + 'stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" '
@@ -1569,8 +1603,9 @@ function renderAdd(){
       return head+'<div class="addrow grp">'
         +'<span class="nm">'+esc(g.name)+'<span class="cnt">\u00d7'+n+'</span></span>'
         +'<span class="meta"><span class="pk">'
-        +(n<have ? n+' of '+have+' left' : 'the same ride at '+n+' parks')
-        +(g.note?' \u00b7 '+esc(g.note):'')+'</span></span>'
+        +(g.racing ? esc(BYID[row.ids[0]]&&BYID[row.ids[0]].park||'')+' \u00b7 '+esc(g.note)
+          : (n<have ? n+' of '+have+' left' : 'the same ride at '+n+' parks')
+            +(g.note?' \u00b7 '+esc(g.note):''))+'</span></span>'
         +'<span class="acts"><button class="ghost" data-hhg="'+g.key+'">Rank</button>'
         +'<button class="ghost" data-addg="'+g.key+'">Add '+n+'</button></span>'
         +'</div>';

@@ -872,6 +872,10 @@ async function getCategories(env, slug) {
     // and an empty list is what somebody who has chosen nothing gets.
     on: prefs.on !== false,
     pulled,
+    // The raw keys too, for the categories the PAGE builds (racing pairs,
+    // "d" + id — see addRacers in rankings.html): the server has no row to
+    // hang off/nums on for those, so it hands the lists back as stored.
+    offKeys: [...off], numKeys: [...nums],
     categories: site.map((g) => dress(g, "c" + g.id))
       .concat(own.map((g) => dress(g, "r" + g.id))),
   };
@@ -1718,7 +1722,7 @@ export default {
         if (request.method === "PUT" && tail === "prefs") {
           const b = await request.json();
           const keys = (a) => Array.from(new Set((Array.isArray(a) ? a : [])
-            .map((x) => String(x)).filter((x) => /^[cr][0-9]{1,9}$/.test(x)))).slice(0, 500);
+            .map((x) => String(x)).filter((x) => /^[crd][0-9]{1,9}$/.test(x)))).slice(0, 500);
           const ids = (a) => Array.from(new Set((Array.isArray(a) ? a : [])
             .map((x) => Number(x)).filter((x) => Number.isInteger(x) && x > 0))).slice(0, 2000);
           const prefs = { on: b && b.on !== false, off: keys(b && b.off),
