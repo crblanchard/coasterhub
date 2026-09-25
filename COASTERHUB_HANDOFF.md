@@ -3579,7 +3579,7 @@ the shell that typed it.
 ## Your ranking on maker and model pages (2026-09-25)
 
 Signed in, /manufacturer/<m> and /manufacturer/<m>/<model> show **In your rankings**: how many
-of that maker's (model's) coasters you rank, best / middle / lowest position "of N", then each
+of that maker's (model's) coasters you rank, best / lowest position (Carter took "middle" out) "of N", then each
 one best-first with its #position (and its model, on a maker page). `drawRanked()` in
 manufacturer.html, fed by `/api/rankings/<you>` fetched beside your rides; it draws whichever
 of page and ranking lands second. Nothing ranked, or signed out: no section.

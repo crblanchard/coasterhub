@@ -158,10 +158,10 @@ function drawRanked(){
   var el=$('ranked'); if(!el || !RANK || !RANK_CS) return;
   var r=RANK_CS.filter(function(c){ return RANK[c.id]; }).sort(function(a,b){ return RANK[a.id]-RANK[b.id]; });
   if(!r.length){ el.innerHTML=''; return; }
-  var pos=r.map(function(c){ return RANK[c.id]; }), mid=pos[Math.floor((pos.length-1)/2)];
+  var pos=r.map(function(c){ return RANK[c.id]; });
   el.innerHTML='<div class="sect">In your rankings</div>'
     +'<p class="rsum"><b>'+r.length+'</b> ranked · best <b>#'+pos[0]+'</b>'
-    +(r.length>2?' · middle <b>#'+mid+'</b>':'')+(r.length>1?' · lowest <b>#'+pos[pos.length-1]+'</b>':'')
++(r.length>1?' · lowest <b>#'+pos[pos.length-1]+'</b>':'')
     +' <span>of '+RANKN+'</span></p>'
     +'<div class="panel">'+r.map(function(c){
       return '<a class="crow" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="rk">#'+RANK[c.id]+'</span>'
