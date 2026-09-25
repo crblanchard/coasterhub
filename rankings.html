@@ -1570,23 +1570,26 @@ function renderAdd(){
   // arbitrary depths — which is exactly backwards, because they are the rows
   // that save the most work. Five Batmans added in one tap is the point of the
   // feature; it should not have to be hunted for.
-  var cats=rows.filter(function(r){ return !!r.g; });
+  // Racing pairs are the exception (Carter, 2026-09-25: "sort them with
+  // everything else and make them blend in"): one ride with two tracks, so
+  // it sits where its first side sorts and reads like any coaster row.
+  var cats=rows.filter(function(r){ return r.g && !r.g.racing; });
   var joins=rows.filter(function(r){ return !r.g && r.joins; });
-  var solo=rows.filter(function(r){ return !r.g && !r.joins; });
+  var solo=rows.filter(function(r){ return (!r.g || r.g.racing) && !r.joins; });
   rows=cats.concat(joins, solo);
   var shown=rows.slice(0,300);
   // Coasters, not rows: folding nine Batmans and Boomerangs into two rows does
   // not mean seven went missing. The cap is on ROWS, so that is what the
   // "showing the first" clause has to count, and it only speaks when the cap
   // actually bit.
-  var folded=rows.length-list.length;
+  // "in N categories" counts real categories only: racing pairs pass as rows.
+  var inCats=0; cats.forEach(function(r){ inCats+=r.ids.length; });
   $('addcount').textContent=list.length
     ? (nf(list.length)+($('all_coasters').checked?' coasters':' of your coasters')+' not ranked yet'
-       +(folded<0?' \u00b7 '+(-folded+seenCount())+' of them in '+seenCount()
-                   +' categor'+(seenCount()===1?'y':'ies'):'')
+       +(cats.length?' \u00b7 '+inCats+' of them in '+cats.length
+                   +' categor'+(cats.length===1?'y':'ies'):'')
        +(shown.length<rows.length?' — showing the first '+shown.length+' rows':''))
     : '';
-  function seenCount(){ var n=0; for(var k in seenG) if(seenG[k]) n++; return n; }
   $('addlist').innerHTML=shown.length?shown.map(function(row,ix){
     // One line to say why the order is what it is, and one to hand the rest
     // back to the sort. Neither appears when there is nothing to separate.
@@ -1598,14 +1601,13 @@ function renderAdd(){
         +' you have been on that finish a category you already rank</div>';
     if(solo.length && (cats.length||joins.length) && ix===cats.length+joins.length)
       head='<div class="addsec">Everything else</div>';
-    if(row.g){
+    if(row.g && !row.g.racing){
       var g=row.g, n=row.ids.length, have=g.ids.length;
       return head+'<div class="addrow grp">'
         +'<span class="nm">'+esc(g.name)+'<span class="cnt">\u00d7'+n+'</span></span>'
         +'<span class="meta"><span class="pk">'
-        +(g.racing ? esc(BYID[row.ids[0]]&&BYID[row.ids[0]].park||'')+' \u00b7 '+esc(g.note)
-          : (n<have ? n+' of '+have+' left' : 'the same ride at '+n+' parks')
-            +(g.note?' \u00b7 '+esc(g.note):''))+'</span></span>'
+        +(n<have ? n+' of '+have+' left' : 'the same ride at '+n+' parks')
+        +(g.note?' \u00b7 '+esc(g.note):'')+'</span></span>'
         +'<span class="acts"><button class="ghost" data-hhg="'+g.key+'">Rank</button>'
         +'<button class="ghost" data-addg="'+g.key+'">Add '+n+'</button></span>'
         +'</div>';
@@ -1622,11 +1624,14 @@ function renderAdd(){
     var joinbit = row.joins
       ? '<span class="jn">joins '+esc(row.joins.name)+' \u00b7 '+row.jn+' ranked</span>'
       : '';
+    // A racing pair: the same row, named for the ride, and its buttons act on
+    // both sides (the family's data-hhg / data-addg).
+    var rg = row.g && row.g.racing ? row.g : null;
     return pre+'<div class="addrow">'
-      +'<span class="nm">'+esc(c.name)+'</span>'
+      +'<span class="nm">'+esc(rg ? rg.name : c.name)+'</span>'
       +'<span class="meta"><span class="pk">'+esc(c.park||'—')+'</span>'+joinbit+stat+'</span>'
-      +'<span class="acts"><button class="ghost" data-hh="'+c.id+'">Rank</button>'
-      +'<button class="ghost" data-add="'+c.id+'">Add</button></span>'
+      +'<span class="acts"><button class="ghost" '+(rg?'data-hhg="'+rg.key+'"':'data-hh="'+c.id+'"')+'>Rank</button>'
+      +'<button class="ghost" '+(rg?'data-addg="'+rg.key+'"':'data-add="'+c.id+'"')+'>Add</button></span>'
       +'</div>';
   }).join('') : ('<div class="hint">'+(
       ($('q').value.trim()||$('f_addpark').value||anyPicked())
