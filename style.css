@@ -727,6 +727,11 @@ html.srchopen{overflow:hidden}
 .sect{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:26px 0 8px}
 .missing{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
 .missing p{color:var(--muted);margin:8px 0 0}
+/* Two columns of label/value pairs rather than one long list (Carter,
+   2026-09-25: "make this two columns maybe? ... to save space"). Reading order
+   is across then down, so Type sits beside Manufacturer. */
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+.facts.none{display:block}
 .facts .kv{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:.88rem;padding:5px 0}
 .facts .kv > span{color:var(--muted);flex:none}
 .facts .kv > b{font-weight:500;text-align:right;min-width:0;font-variant-numeric:tabular-nums}
@@ -735,6 +740,14 @@ html.srchopen{overflow:hidden}
 .facts .pill{display:inline-block;font-size:.78rem;padding:2px 10px;border-radius:999px;border:1px solid var(--line)}
 .facts .pill.wood{color:var(--accent)} .facts .pill.steel{color:var(--accent2)}
 .facts.none{color:var(--muted);font-size:.88rem;margin:0}
+/* On a phone each pair stacks, label over value, so a long maker's name has
+   the whole column rather than what the label leaves it. */
+@media (max-width:560px){
+  .facts{column-gap:18px}
+  .facts .kv{flex-direction:column;align-items:flex-start;gap:1px;padding:5px 0}
+  .facts .kv > span{font-size:.74rem}
+  .facts .kv > b{text-align:left}
+}
 [data-cid]{cursor:pointer}
 [data-cid].open,[data-cid].open > td{background-color:var(--soft)}
 .cx{padding:4px 16px 14px;border-bottom:1px solid var(--soft);background-color:var(--soft)}
