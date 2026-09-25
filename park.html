@@ -108,7 +108,8 @@
     .crow .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
   }
 
-  /* Rider chips, inside an opened coaster. */
+  /* Rider chips: under the list (who has been here) and inside an opened
+     coaster (who has ridden it). */
   .who{display:flex;flex-wrap:wrap;gap:8px}
   .who a{display:flex;align-items:baseline;gap:7px;text-decoration:none;
          background:var(--panel);border:1px solid var(--line);border-radius:999px;
@@ -157,6 +158,10 @@
     <div class="tiles" id="tiles"></div>
     <div class="sect" id="list_h">Coasters</div>
     <div class="panel" id="list"></div>
+    <div id="who_wrap" style="display:none">
+      <div class="sect">Riders who have been here</div>
+      <div class="who" id="who"></div>
+    </div>
   </div>
   <div id="none" style="display:none">
     <div class="missing">
@@ -385,8 +390,21 @@ function showRiders(mine, perCoaster){
     Array.prototype.forEach.call(document.querySelectorAll('details.citem[open]'), function(d){
       var c=byId(Number(d.getAttribute('data-c'))); if(c) d.querySelector('.cbody').innerHTML=body(c);
     });
-    // (The "Riders who have been here" strip under the list was removed
-    // 2026-09-25: each coaster opens onto its own riders.)
+    // Riders who have been here: how many of the park's coasters each has.
+    // (Taken out and put back the same day, 2026-09-25 — Carter: "readd
+    // people on park pages, I like that".) Built from WHO, so it works from
+    // either path above.
+    var per={};
+    Object.keys(WHO).forEach(function(id){ (WHO[id]||[]).forEach(function(w){
+      (per[w.slug]=per[w.slug]||{slug:w.slug, name:w.name, n:0}).n++; }); });
+    var list=Object.keys(per).map(function(k){ return per[k]; })
+      .sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); });
+    if(!list.length) return;
+    $('who').innerHTML=list.map(function(p){
+      return '<a href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'">'+esc(p.name)
+        +'<i>'+p.n+' of '+mine.length+'</i></a>';
+    }).join('');
+    $('who_wrap').style.display='block';
 }
 </script>
 </body>

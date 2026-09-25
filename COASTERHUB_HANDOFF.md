@@ -3412,8 +3412,9 @@ popups, the model and location tables and old links all still point at it.
 
 Carter asked for speed and clutter advice, then *"can you remove clutter"*:
 
-- **Park page:** the "Riders who have been here" strip is gone — each coaster opens onto its own
-  riders now.
+- **Park page:** the "Riders who have been here" strip was taken out — and put back the same day
+  (Carter: *"readd people on park pages, I like that"*). It is built from the same per-coaster
+  rider data the opened rows use, so it costs no extra request.
 - **Home:** Recent changes shows 5 lines (was 12), and asks the API for `max(40, limit×8)` rows
   instead of 300; `/changes` still reads 300.
 - **Profile:** the calendar and the six charts sit behind **More stats** on a desktop too (they
