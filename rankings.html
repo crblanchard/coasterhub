@@ -1767,8 +1767,16 @@ function openHH(id, mates, g){
   }
   if(!ORDER.length){ ORDER=ORDER.concat([id]).concat(mates);
     markDirty(); renderRank(); renderAdd(); setView('rank'); return; }
-  hh={id:id, mates:mates, g:g||null, lo:0, hi:ORDER.length, asked:0, cmp:{},
-      most:Math.ceil(Math.log2(ORDER.length+1))+2};
+  // The search runs over ROWS, not positions (2026-09-25). A family of eight
+  // Boomerangs is eight positions but one row, and searching positions landed
+  // on it again and again — "Boomerangs" three times in one placing, each a
+  // different member, the same question (Carter: "had to go against SLCs and
+  // Boomerangs multiple times each"). B holds where each row starts in ORDER;
+  // lo/hi/cmp are indexes into B, so one answer settles a whole family, and a
+  // new ride can never land in the middle of one.
+  var B=blocks().map(function(b){ return b.from; });
+  hh={id:id, mates:mates, g:g||null, B:B, lo:0, hi:B.length, asked:0, cmp:{},
+      most:Math.ceil(Math.log2(B.length+1))+2};
   $('hh').style.display='flex';
   stepHH();
 }
@@ -1776,18 +1784,20 @@ function openHH(id, mates, g){
 function nextHH(){
   if(hh.lo<hh.hi) return Math.floor((hh.lo+hh.hi)/2);
   if(hh.lo-1>=0 && hh.cmp[hh.lo-1]===undefined) return hh.lo-1;          // the one above
-  if(hh.lo<ORDER.length && hh.cmp[hh.lo]===undefined) return hh.lo;       // the one below
+  if(hh.lo<hh.B.length && hh.cmp[hh.lo]===undefined) return hh.lo;        // the one below
   return -1;
 }
 function stepHH(){
   if(!hh) return;
   var mid=nextHH();
   if(mid<0){
-    ORDER.splice.apply(ORDER,[hh.lo,0,hh.id].concat(hh.mates||[]));
+    var at = hh.lo<hh.B.length ? hh.B[hh.lo] : ORDER.length;
+    ORDER.splice.apply(ORDER,[at,0,hh.id].concat(hh.mates||[]));
     closeHH(); markDirty(); renderRank(); renderAdd(); setView('rank');
     return;
   }
-  var a=BYID[hh.id]||{}, b=BYID[ORDER[mid]]||{};
+  var pos=hh.B[mid];                // mid is a row; pos is where it starts
+  var a=BYID[hh.id]||{}, b=BYID[ORDER[pos]]||{};
   var confirming=hh.lo>=hh.hi;
   // Placing a CATEGORY is one decision about five rides, so the card says the
   // category and what it is — not whichever member happened to lead the run,
@@ -1799,7 +1809,7 @@ function stepHH(){
   // sits together, so the real question is "better than the Boomerangs?" —
   // naming whichever Boomerang the binary search happened to land on asks
   // about a ride nobody recognises.
-  var bg = CLONE[ORDER[mid]];
+  var bg = CLONE[ORDER[pos]];
   var bName = bg ? bg.name : (b.name||'');
   var bSub;
   if (bg){
@@ -1813,7 +1823,7 @@ function stepHH(){
   $('hh_a').innerHTML='<b>'+esc(aName)+'</b><span>'+esc(aSub)+'</span>';
   $('hh_b').innerHTML='<b>'+esc(bName)+'</b><span>'+esc(bSub)+'</span>';
   $('hh_prog').textContent='Pick '+(hh.asked+1)+' · '
-    +(confirming?'confirming against your #':'against your #')+(mid+1);
+    +(confirming?'confirming against your #':'against your #')+(pos+1);
   $('hh_a').onclick=function(){ answerHH(mid,true); };   // candidate is better
   $('hh_b').onclick=function(){ answerHH(mid,false); };  // candidate is worse
 }

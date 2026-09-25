@@ -3503,6 +3503,16 @@ everything reads `$('park').value`; the box writes to it only through `choosePar
 the box un-picks the park. Near me / Locations / + Park sit on one row under it. The old
 "one match left = pick it" auto-choose is gone; the popup made it a surprise.
 
+## Head-to-head searches rows, not positions (2026-09-25)
+
+Carter: *"had to go against SLCs and Boomerangs multiple times each, I thought we resolved
+this."* The 2026-09-20 fix only renamed the right-hand card to the family; the binary search
+still ran over ORDER positions, so an eight-long Boomerang run was eight targets and got hit
+repeatedly. `openHH` now snapshots `blocks()` starts into `hh.B` and `lo/hi/cmp` index rows;
+one answer settles a family, and a new ride lands before or after a family, never inside
+it. Checked with two synthetic families in a 199-ride list: each asked at most once. A family
+that is *scattered* (not gathered) is still several rows — the Gather bar fixes that.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**
