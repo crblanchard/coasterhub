@@ -181,6 +181,7 @@
       <div class="seg" id="trseg"><button data-tf="todo" class="on">To look at</button><button data-tf="done">In a category</button><button data-tf="aside">Set aside</button></div>
       <div class="seg" id="mtseg"><button data-mf="todo" class="on">To look at</button><button data-mf="done">Has a model</button><button data-mf="aside">Set aside</button></div>
       <label class="cbrow" id="fIncWrap"><input type="checkbox" id="incOnly"> Only incomplete</label>
+      <label class="cbrow" id="fThinWrap" title="No stats at all, or just one of the six"><input type="checkbox" id="thinOnly"> Barely any stats</label>
       <label class="cbrow" id="fGeoWrap"><input type="checkbox" id="ungeoOnly"> Only un-geocoded</label>
       <label class="cbrow" id="fOpenWrap"><input type="checkbox" id="openOnly"> Only models still operating</label>
       <label class="cbrow" id="fGrpWrap"><input type="checkbox" id="byGroup"> <span id="grpLbl">By model</span></label>
@@ -358,6 +359,7 @@
     await loadGeo();
     document.getElementById('q').addEventListener('input', render);
     document.getElementById('incOnly').addEventListener('change', render);
+    document.getElementById('thinOnly').addEventListener('change', render);
     document.getElementById('ungeoOnly').addEventListener('change', render);
     document.getElementById('openOnly').addEventListener('change', render);
     document.getElementById('byGroup').addEventListener('change', function(){
@@ -444,6 +446,7 @@
     document.getElementById('mTriage').classList.toggle('on', m==='triage');
     document.getElementById('mMTriage').classList.toggle('on', m==='mtriage');
     document.getElementById('fIncWrap').style.display = m==='coasters' ? '' : 'none';
+    document.getElementById('fThinWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('fGeoWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('fOpenWrap').style.display = m==='models' ? '' : 'none';
     // One checkbox, two queues. What it groups BY is different in each — the
@@ -1594,16 +1597,23 @@
   function matches(){
     var q = document.getElementById('q').value.trim().toLowerCase();
     var incOnly = document.getElementById('incOnly').checked;
+    // "Barely any stats" (Carter, 2026-09-25): the ones worth filling in by
+    // hand — nothing at all, or only one of the six (usually just the type).
+    var thin = document.getElementById('thinOnly').checked;
     var ungeo = document.getElementById('ungeoOnly').checked;
     return state.coasters.filter(function(c){
       if (incOnly && !incomplete(c)) return false;
+      if (thin && statsHave(c).length > 1) return false;
       if (ungeo && geocoded(c.park)) return false;
       if (!q) return true;
       return (c.name||"").toLowerCase().indexOf(q)>=0 || (c.park||"").toLowerCase().indexOf(q)>=0;
     });
   }
   function renderCoasters(){
+    var thinSort = document.getElementById('thinOnly').checked;
     var rows = matches().sort(function(a,b){
+      // Emptiest first while going through the thin ones, then park and name.
+      if (thinSort) { var d = statsHave(a).length - statsHave(b).length; if (d) return d; }
       return (a.park||"").localeCompare(b.park||"", undefined, {sensitivity:"base"})
           || (a.name||"").localeCompare(b.name||"", undefined, {sensitivity:"base"});
     });
