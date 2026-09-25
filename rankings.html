@@ -203,7 +203,7 @@
   .addrow.grp{background:var(--tint);border-color:var(--accent2)}
   .addrow .cnt{color:var(--accent2);font-weight:800;font-size:.8rem;margin-left:7px}
   .catpill{display:inline-flex;align-items:center;gap:8px;background:var(--panel);
-           border:1px solid var(--line);border-radius:99px;padding:7px 14px;margin:0 0 12px;
+           border:1px solid var(--line);border-radius:99px;padding:7px 14px;margin:0;
            color:var(--fg);font-size:.85rem;font-weight:600;text-decoration:none}
   .catpill:hover{border-color:var(--accent2)}
   .catpill .n{color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums}
@@ -434,6 +434,15 @@
       <div class="seg">
         <button id="v_rank" class="on">The list</button><button id="v_add">Add coasters</button>
       </div>
+      <!-- The only thing /rankings gains for categories: one pill, and every
+           word of explanation behind it. In the bar beside Edit rather than a
+           row of its own (Carter, 2026-09-25: "not staggered vertically"). It shows for everybody, because it is
+           the only way anyone finds out the feature is there. -->
+      <a class="catpill" id="catpill" href="/categories">Categories
+        <span class="n" id="catn"></span>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+          stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6"/></svg></a>
       <span class="spacer"></span>
       <span class="status" id="status"></span>
       <button class="ghost" id="edit" hidden>Edit</button>
@@ -441,14 +450,6 @@
     </div>
 
     <div id="pane_rank">
-      <!-- The only thing /rankings gains for categories: one row, and every
-           word of explanation behind it. It shows for everybody, because it is
-           the only way anyone finds out the feature is there. -->
-      <a class="catpill" id="catpill" href="/categories">Categories
-        <span class="n" id="catn"></span>
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
-          stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m9 18 6-6-6-6"/></svg></a>
       <!-- Only shown when a clone family is split across the list — an existing
            ranking is never rearranged on load. -->
       <div class="gbar" id="gatherbar" style="display:none">
