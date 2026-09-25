@@ -56,7 +56,10 @@
      rider's own list. Scoped to .srow because .who is also a profile class. */
   /* Who ranked it: a row of chips along the bottom, not a column down the
      side (Carter, 2026-09-25: "put people along the bottom to save space"). */
-  .srow .who{border-top:1px solid var(--line);padding:9px 12px 11px;display:flex;flex-wrap:wrap;gap:6px}
+  .srow .who{border-top:1px solid var(--line);padding:9px 12px 11px}
+  .srow .who .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+  /* The coaster's stats under who ranked it (Carter, 2026-09-25). */
+  .srow .who .go{color:var(--accent2);font-size:.86rem;font-weight:600;text-decoration:none}
   .srow .who[hidden]{display:none}
   .srow .wrow{display:inline-flex;align-items:baseline;gap:6px;padding:5px 11px;border:1px solid var(--line);
     border-radius:999px;background-color:var(--soft);text-decoration:none;color:var(--fg)}
@@ -186,7 +189,8 @@ function render(){
           +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
           +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
       +'</div>'
-      +'<div class="who" hidden>'+full+'</div>'
+      +'<div class="who" hidden><div class="chips">'+full+'</div>'
+        +CoasterHub.coasterFacts(c, null, c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>'
       +'</div>';
   }).join('');
   // One open at a time would hide the comparison you just opened it to make,

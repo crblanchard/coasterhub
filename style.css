@@ -730,7 +730,10 @@ html.srchopen{overflow:hidden}
 /* Two columns of label/value pairs rather than one long list (Carter,
    2026-09-25: "make this two columns maybe? ... to save space"). Reading order
    is across then down, so Type sits beside Manufacturer. */
-.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px;align-items:start}
+.facts .fcol{grid-column:1;grid-row:1;min-width:0}
+.facts .fnum{grid-column:2;grid-row:1 / span 2}
+.facts .fgo{grid-column:1;grid-row:2;padding-top:6px}
 .facts.none{display:block}
 .facts .kv{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:.88rem;padding:5px 0}
 .facts .kv > span{color:var(--muted);flex:none}
@@ -742,7 +745,7 @@ html.srchopen{overflow:hidden}
 .facts.none{color:var(--muted);font-size:.88rem;margin:0}
 /* A phone keeps the one column, label left and value right (Carter,
    2026-09-25: "keep phone as it is"). */
-@media (max-width:560px){ .facts{display:block} }
+@media (max-width:560px){ .facts{display:block} .facts .fgo{padding-top:4px} }
 [data-cid]{cursor:pointer}
 [data-cid].open,[data-cid].open > td{background-color:var(--soft)}
 .cx{padding:4px 16px 14px;border-bottom:1px solid var(--soft);background-color:var(--soft)}

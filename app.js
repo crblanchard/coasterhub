@@ -1325,22 +1325,30 @@
 
   // One coaster's facts as label / value rows — the park page's open row and
   // a ranking's tapped row. `extra` rows (the reader's own) go last.
-  function coasterFacts(c, extra) {
-    var t = [], E = searchEsc;
-    function kv(v, label) { t.push('<div class="kv"><span>' + E(label) + '</span><b>' + v + '</b></div>'); }
+  function coasterFacts(c, extra, link) {
+    // Two groups (Carter, 2026-09-25): what it IS on the left — type, maker,
+    // model, dates — and its numbers on the right, with the reader's own rows
+    // under the numbers. `link` (e.g. "Coaster page →") sits under the left
+    // column, which is usually the shorter. A phone shows one column: the
+    // left group, then the right, then the link.
+    var info = [], nums = [], E = searchEsc;
+    function kv(t, v, label) { t.push('<div class="kv"><span>' + E(label) + '</span><b>' + v + '</b></div>'); }
     function when(v, prec) { return (prec === "day" && /^\d{4}-\d{2}-\d{2}/.test(String(v))) ? mdy(v) : String(v).slice(0, 4); }
-    if (c.type) kv('<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
-    if (c.manu) kv('<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
-    if (c.model) kv(c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model), "Model");
-    if (c.opened) kv(E(when(c.opened, c.openedPrec)), "Opened"); else if (c.yr) kv(E(c.yr), "Opened");
-    if (c.closed) kv(E(when(c.closed, c.closedPrec)), "Closed");
-    if (c.h != null) kv(Math.round(c.h), "Height (ft)");
-    if (c.s != null) kv(Math.round(c.s), "Speed (mph)");
-    if (c.l != null) kv(Math.round(c.l).toLocaleString(), "Length (ft)");
-    if (c.inv != null) kv(E(c.inv), "Inversions");
-    if (c.dur != null) { var d = Math.round(c.dur), mm = Math.floor(d / 60), r = d % 60; kv(mm ? (mm + ":" + (r < 10 ? "0" : "") + r) : (d + "s"), "Ride time"); }
-    (extra || []).forEach(function (x) { kv(x[0], x[1]); });
-    return t.length ? '<div class="facts">' + t.join("") + '</div>' : '<p class="facts none">No stats on file yet.</p>';
+    if (c.type) kv(info, '<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
+    if (c.manu) kv(info, '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
+    if (c.model) kv(info, c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model), "Model");
+    if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), "Opened"); else if (c.yr) kv(info, E(c.yr), "Opened");
+    if (c.closed) kv(info, E(when(c.closed, c.closedPrec)), "Closed");
+    if (c.h != null) kv(nums, Math.round(c.h), "Height (ft)");
+    if (c.s != null) kv(nums, Math.round(c.s), "Speed (mph)");
+    if (c.l != null) kv(nums, Math.round(c.l).toLocaleString(), "Length (ft)");
+    if (c.inv != null) kv(nums, E(c.inv), "Inversions");
+    if (c.dur != null) { var d = Math.round(c.dur), mm = Math.floor(d / 60), r = d % 60; kv(nums, mm ? (mm + ":" + (r < 10 ? "0" : "") + r) : (d + "s"), "Ride time"); }
+    if (c.laps != null && c.laps > 1) kv(nums, E(c.laps), "Laps");
+    (extra || []).forEach(function (x) { kv(nums, x[0], x[1]); });
+    if (!info.length && !nums.length) return '<p class="facts none">No stats on file yet.</p>' + (link ? '<div class="fgo">' + link + '</div>' : '');
+    return '<div class="facts"><div class="fcol">' + info.join("") + '</div><div class="fcol fnum">' + nums.join("") + '</div>'
+      + (link ? '<div class="fgo">' + link + '</div>' : '') + '</div>';
   }
 
   // Coaster rows that open in place (2026-09-25, Carter: every list should
@@ -1389,8 +1397,8 @@
         var m = y && y.rides[id];
         if (m) { if (m.first) extra.push([mdy(m.first), "First ridden"]); extra.push([m.n, "Your rides"]); }
         if (y && y.rank[id]) extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your rank"]);
-        inner.innerHTML = coasterFacts(c, extra)
-          + '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>';
+        inner.innerHTML = coasterFacts(c, extra,
+          '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>');
       });
     });
   }
