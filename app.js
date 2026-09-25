@@ -1513,7 +1513,7 @@
         buildSearchIndex().then(function (items) {
           var q = input.value, hits = searchFor(items, q);
           res.innerHTML = !norm(q)
-            ? '<p class="srchhint">Try a coaster, a park, a maker like <b>B&amp;M</b>, a state, or a rider.</p>'
+            ? '<p class="srchhint">Try a coaster, park, manufacturer, location, or user.</p>'
             : hits.length
               ? hits.map(function (h, i) {
                   return '<a class="srchrow' + (i === 0 ? " hi" : "") + (h.gone ? " gone" : "") + '" href="' + searchEsc(h.h) + '">'
