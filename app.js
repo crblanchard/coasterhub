@@ -1362,14 +1362,29 @@
     root._openable = true;
     root.addEventListener("click", function (e) {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
-      if (e.target.closest(".cx")) return;
+      var a = e.target.closest("a");
+      // Inside the open panel: links go; anywhere else closes it.
+      var cx = e.target.closest(".cx");
+      if (cx) {
+        if (a) return;
+        var prev = cx.previousElementSibling;
+        cx.parentNode.removeChild(cx);
+        if (prev) prev.classList.remove("open");
+        return;
+      }
       var row = e.target.closest("[data-cid]");
       if (!row || !root.contains(row)) return;
-      var a = e.target.closest("a");
-      if (a && a !== row && !a.hasAttribute("data-cname")) return;
+      var nx = row.nextElementSibling, isOpen = !!(nx && nx.classList.contains("cx"));
+      // The same rule as the ranking and park cards (Carter, 2026-09-25): a
+      // closed row opens on ANY tap, its links included; an open row's links
+      // (name, park, maker — for an a.crow row, its name) go where they point,
+      // and a tap anywhere else closes it.
+      if (isOpen) {
+        if (a && a !== row) return;
+        if (a === row && e.target.closest(".cn")) return;
+      }
       e.preventDefault();
-      var nx = row.nextElementSibling;
-      if (nx && nx.classList.contains("cx")) { nx.parentNode.removeChild(nx); row.classList.remove("open"); return; }
+      if (isOpen) { nx.parentNode.removeChild(nx); row.classList.remove("open"); return; }
       row.classList.add("open");
       var id = Number(row.getAttribute("data-cid"));
       var box, inner;

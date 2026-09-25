@@ -3661,7 +3661,13 @@ now, on /rankings (yours and Global) and /rankings/all: **a closed card opens on
 its name/park/location/model included; **an open card's** name, park, location and model
 are links (underlined while open), and a tap elsewhere closes it. Yours: `headLinks()` builds
 the head, the `[data-stat]` click handler does the rest (and in edit mode the name never
-navigates). Shared: `srowToggles()`. Stats inside use `coasterFacts(c, extra, link)` — info
+navigates). Shared: `srowToggles()`. **The same rule everywhere a card opens in place**
+(same day, "do the same everywhere"): park page rows (`details.citem`: name and model are
+links), `openableCoasters` rows (maker lists, model/location/`/coasters` tables — for an
+`a.crow` row only its `.cn` name navigates once open), the /credits full list (phone cards
+and desktop detail rows; a row with nothing to open just lets its links work) and /credits'
+day and park cards (the park name in a park card's summary is a link once open). A tap on
+an opened body that is not on a link closes it. Stats inside use `coasterFacts(c, extra, link)` — info
 left, numbers right on wide screens, "Coaster page →" under the left column.
 
 ## Possible future updates

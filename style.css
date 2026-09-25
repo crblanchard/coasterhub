@@ -747,6 +747,8 @@ html.srchopen{overflow:hidden}
    2026-09-25: "keep phone as it is"). */
 @media (max-width:560px){ .facts{display:block} .facts .fgo{padding-top:4px} }
 [data-cid]{cursor:pointer}
+/* Open, the row's words are links (see openableCoasters) — and look it. */
+[data-cid].open a,a.crow[data-cid].open .cn{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 [data-cid].open,[data-cid].open > td{background-color:var(--soft)}
 .cx{padding:4px 16px 14px;border-bottom:1px solid var(--soft);background-color:var(--soft)}
 tr.cx{padding:0}
