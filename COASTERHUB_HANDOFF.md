@@ -3479,6 +3479,18 @@ for now"*.
   only. Global is `/rankings` (the combined view, `!slug`); neither half is lit on someone
   else's list.
 
+## /edit on a phone (2026-09-25)
+
+*"/edit doesn't work at all on mobile, nothing happens when I click a coaster."* It did
+work: under 820px the grid is one column, so the editor sat below all ~1,100 list rows,
+57,000px down. Now the list and the editor take turns there (`.wrap.open`, `phoneFlip()`):
+a MutationObserver on `#editor` opens it whenever something other than the `.empty`
+placeholder is written, so every opener is covered without touching each one; the sticky
+"Back to the list" button restores the list's scroll position. That position is tracked by
+a scroll listener while the list shows, because `coasterEditor()` itself scrolls the window
+to 0 before the observer runs. The toolbar is not sticky on a phone (it wraps to ~470px).
+Desktop is unchanged.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**

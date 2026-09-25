@@ -67,6 +67,21 @@
   .seg button.on { background:var(--btn-bg); color:var(--btn-fg); }
   .wrap { display:grid; grid-template-columns: 1fr 1fr; gap:0; height:calc(100vh - 54px); }
   @media (max-width:820px){ .wrap { grid-template-columns:1fr; height:auto; } }
+  /* Phone (Carter, 2026-09-25: "nothing happens when I click a coaster"). One
+     column put the editor under all ~1,100 rows, 57,000px down, so a tap did
+     fill it — out of sight. Here the list and the editor take turns: opening
+     anything hides the list, and Back brings it back where you left it. The
+     toolbar stops being sticky, too: wrapped onto a phone it is ~470px tall. */
+  #edback { display:none; }
+  @media (max-width:820px){
+    header.bar { position:static; }
+    .wrap.open .list { display:none; }
+    .wrap:not(.open) .editor { display:none; }
+    .wrap.open #edback { display:block; position:sticky; top:0; z-index:4; width:100%;
+      text-align:left; border:0; border-bottom:1px solid var(--line); border-radius:0;
+      background:var(--panel); color:var(--accent2); font-weight:600; padding:12px 16px; }
+    .editor { padding:16px; }
+  }
   .list { overflow:auto; border-right:1px solid var(--line); }
   .row { padding:9px 16px; border-bottom:1px solid var(--line); cursor:pointer; font-size:.9rem; }
   .row:hover { background:var(--soft); }
@@ -179,6 +194,7 @@
     </header>
     <div class="wrap">
       <div class="list" id="list"></div>
+      <button type="button" id="edback">&larr; Back to the list</button>
       <div class="editor" id="editor"><div class="empty">Select an item to edit.</div></div>
     </div>
   </div>
@@ -387,6 +403,36 @@
       else selectPark(row.getAttribute('data-id'));
     });
     render();
+    phoneFlip();
+  }
+
+  // Phone only (see #edback's CSS): the list and the editor take turns. Every
+  // opener — a coaster, a park, a triage row, a category, "+ New coaster" —
+  // ends by filling #editor, so this watches that one place instead of
+  // touching each of them. Anything but the empty placeholder means open.
+  function phoneFlip(){
+    var wrap = document.querySelector('.wrap'), ed = document.getElementById('editor');
+    if (wrap.hasAttribute('data-flip')) return;   // boot() can run twice
+    wrap.setAttribute('data-flip', '');
+    // Where the list was, kept up to date while it shows. Not read at open
+    // time: coasterEditor() has already scrolled the window to 0 by then.
+    // (Scroll events arrive a frame late, after the observer below has set
+    // `open`, so that jump is never recorded.)
+    var listY = 0;
+    window.addEventListener('scroll', function(){
+      if (!wrap.classList.contains('open')) listY = window.pageYOffset;
+    }, { passive: true });
+    var narrow = function(){ return window.matchMedia('(max-width:820px)').matches; };
+    new MutationObserver(function(){
+      var open = !ed.querySelector(':scope > .empty');
+      if (open === wrap.classList.contains('open')) return;
+      wrap.classList.toggle('open', open);
+      if (open && narrow()) window.scrollTo({ top: wrap.offsetTop, behavior: 'instant' });
+    }).observe(ed, { childList: true });
+    document.getElementById('edback').addEventListener('click', function(){
+      wrap.classList.remove('open');
+      window.scrollTo({ top: listY, behavior: 'instant' });
+    });
   }
 
   function setMode(m){
