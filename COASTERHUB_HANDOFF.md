@@ -3559,8 +3559,22 @@ chrome is the assets' empty 404 falling through the Worker: the `_redirects` rew
 still unknown — nothing here can reach coasterhub.org). Rather than guess at `_redirects`,
 the Worker now answers any GET/HEAD that the assets 404 with the page `prettyPage(path)` names
 — the same table as the 200 rules (park/coaster, manufacturer(s), location(s), rankings/all,
-qc/models, /user/*). If another pretty URL ever goes white, add it there. Unverified live
-until Carter taps one; if it is STILL white, the request is not reaching the Worker at all.
+qc/models, /user/*). If another pretty URL ever goes white, add it there.
+
+**Root cause, found the same hour:** still white after that deploy, so ran the real thing —
+wrangler's local dev server (`wrangler dev --local`, wrangler installed from npm in the
+scratchpad; local mode needs no Cloudflare access). It applies `_redirects` the way
+production does and reproduced the empty 404 exactly. The rule was
+`/manufacturer/:m/:model`: the placeholder `:m` is a prefix of `:model`, and Cloudflare's
+substitution breaks on that. Renamed to `:maker` and the rule matches. The Worker fallback
+stays as a second line.
+
+For next time, running it: the local runtime rejects worker.js as-is ("Incorrect type for
+map entry 'DEV_SKIN'" — a named export that is not a handler; production accepts it), so
+run a copy with `export const DEV_SKIN` made a plain `const`, from a scratch wrangler.jsonc
+whose `assets.directory` is the repo. Requests need `x-forwarded-proto: https`, or the
+Worker's HTTPS redirect answers first. And stop it by pid — `pkill -f` on its name kills
+the shell that typed it.
 
 ## Open tasks
 

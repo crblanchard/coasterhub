@@ -176,6 +176,10 @@ those files are the fallback, and the sync overwrites them.
   two seconds and moved 70. Pass `behavior:'instant'` for any scroll the code
   drives itself. It also confounds tests: read `pageYOffset` right after a
   `scrollTo` and you get a value from the middle of the animation.
+- **`_redirects` placeholders must not be prefixes of each other.** `/manufacturer/:m/:model`
+  never matched on Cloudflare (`:m` starts `:model`), so every model page was a blank
+  white 404 live while `tools/dev-server.mjs`, which hand-copies the rules, served it fine.
+  To test `_redirects` for real, run wrangler's local dev server — handoff, 2026-09-25.
 - **Don't commit a `wrangler.jsonc` binding that isn't provisioned yet** — the
   automatic deploy fails on it.
 - **Code that needs a migration must degrade to a 503 naming the file**, never a

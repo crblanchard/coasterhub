@@ -43,8 +43,14 @@
 # the slug is derived from the name, and the page resolves it.
 /manufacturers        /manufacturer 200
 # A model: its own page since 2026-09-24. Two segments before one, as with parks.
-/manufacturer/:m/:model  /manufacturer 200
-/manufacturer/:m      /manufacturer 200
+# :maker, NOT :m. Cloudflare substitutes placeholders by name, and a name that
+# is the start of another (":m" / ":model") broke this rule outright: every
+# model page 404'd live as a blank white screen (2026-09-25). Found by running
+# wrangler's local dev server, which applies this file the way production
+# does; tools/dev-server.mjs only hand-copies it. Never give two placeholders
+# prefix names.
+/manufacturer/:maker/:model  /manufacturer 200
+/manufacturer/:maker  /manufacturer 200
 
 # A state or a country, and the list of them (2026-09-24).
 /locations            /location   200
