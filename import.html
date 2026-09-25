@@ -114,7 +114,7 @@
 
 <div id="gate" class="gate">
   <h2>Sign in to import</h2>
-  <p>An import goes to the credits of whoever is signed in, so it lands in the right place.</p>
+  <p>An import goes to the count of whoever is signed in, so it lands in the right place.</p>
   <a class="primary" id="gosignin" href="/account?next=/import"
      style="display:block;text-align:center;text-decoration:none;box-sizing:border-box">Sign in</a>
   <p style="margin:16px 0 10px">Riders who haven&rsquo;t claimed an account yet can still use the
@@ -173,7 +173,7 @@
     <div id="buckets"></div>
     <div class="tot">
       <span class="big" id="chosen">0 selected</span>
-      <button class="primary" id="save" disabled>Add to credits</button>
+      <button class="primary" id="save" disabled>Add to count</button>
       <span class="msg" id="msg"></span>
     </div>
   </div>
@@ -753,7 +753,7 @@ function renderReview(){
       +'Genuinely missing? <a href="/add" target="_blank" rel="noopener">Add it to the database &rarr;</a> '
       +'then <button class="ghost" type="button" id="reload">reload</button></div>'
       +R.fix.map(function(r,i){return fixHtml(r,i);}).join(''), true);
-  if(R.owned.length) h+=bucket('b_owned','',R.owned.length,'Already in your credits','skipped',
+  if(R.owned.length) h+=bucket('b_owned','',R.owned.length,'Already in the count','skipped',
       R.owned.map(function(r,i){return rowHtml(r,i,'owned');}).join(''), false);
   if(R.skipped.length) h+=bucket('b_skip','bad',R.skipped.length,'Skipped','no park, and you asked to skip those',
       R.skipped.map(function(r,i){return rowHtml(r,i,'skipped');}).join(''), false);
@@ -786,7 +786,7 @@ function setFixPark(r,park,typed){
     // Something the rider already has is resolved, but there is nothing to add —
     // leaving it ticked would promise a credit that never appears.
     if(r.c&&OWNED[r.c.id]) r.pick=false;
-    r.why=r.c?(OWNED[r.c.id]?'already in your credits'
+    r.why=r.c?(OWNED[r.c.id]?'already in the count'
                             :(hit.how==='exact'?'matched at '+park:hit.how))
              :(r.alts.length?'not at '+park:'pick one from '+park);
   } else {
@@ -823,7 +823,7 @@ function wireFix(){
       var i=+sel.dataset.f, r=ROWS.fix[i], c=sel.value?BY_ID[+sel.value]:null;
       r.c=c||null;
       if(c){ r.park=c.park; r.pick=!OWNED[c.id]; FIXES[r.key]=c.id;
-             r.why=OWNED[c.id]?'already in your credits':'picked by hand'; }
+             r.why=OWNED[c.id]?'already in the count':'picked by hand'; }
       else { r.pick=false; delete FIXES[r.key]; r.why=r.park?'pick one from '+r.park:'no park yet'; }
       refreshFix(i);
     };

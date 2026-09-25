@@ -145,7 +145,7 @@
         <input class="t" id="n_name" placeholder="Wacky Worms" maxlength="60">
         <label class="f" for="n_note">What it is — optional</label>
         <input class="t" id="n_note" placeholder="the same worm, everywhere" maxlength="60">
-        <label class="f" for="n_find">Rides — search your own credits</label>
+        <label class="f" for="n_find">Rides — search your own count</label>
         <input class="t" id="n_find" placeholder="Name or park">
         <div id="n_hits"></div>
         <div class="foot">
@@ -309,7 +309,7 @@ function picker(box, chosen, onPick){
       +(g?'<i>· in '+esc(g.name)+'</i>':'')+'</span>'
       +'<button class="mini add" type="button" data-take="'+id+'"'+(g?' disabled':'')
       +' aria-label="Add this ride">+</button></div>'; }).join('')
-    : '<p class="empty">Nothing in your credits matches.</p>';
+    : '<p class="empty">Nothing in your count matches.</p>';
   slot.querySelectorAll('[data-take]').forEach(function(b){
     b.onclick=function(){ onPick(+b.dataset.take); }; });
 }

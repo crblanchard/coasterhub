@@ -208,7 +208,7 @@
              map - view your count - update your rankings"). Same rule as the
              count button: the rider whose page this is, worded for whose it is. -->
         <a class="btn alt" data-nav="map" id="hero_map" href="/map">View your map</a>
-        <a class="btn alt" data-nav="count" id="hero_view" href="/credits">View your credits</a>
+        <a class="btn alt" data-nav="count" id="hero_view" href="/credits">View your count</a>
         <a class="btn alt own" data-nav="rankings" href="/rankings" hidden>Update your rankings</a>
       </div>
     </div>
@@ -535,7 +535,7 @@ function render(s){
     // Whose count you are about to look at. s.userName raw, not the escaped
     // copy: this is textContent, and an escaped one would print the entities.
     document.getElementById('hero_view').textContent =
-      mine ? 'View your credits' : ('View ' + (s.userName || 'this') + '’s credits');
+      mine ? 'View your count' : ('View ' + (s.userName || 'this') + '’s count');
     document.getElementById('hero_map').textContent =
       mine ? 'View your map' : ('View ' + (s.userName || 'this') + '’s map');
     CoasterHubProfile.mount(host,
@@ -696,7 +696,7 @@ function render(s){
     var html='';
     if(opened.length){ html+='<div class="cap" style="margin-bottom:12px">Opened on '+dayLabel+':</div>'+otdCards(opened,'opened','Opened'); }
     if(closed.length){ html+='<div class="cap" style="margin:'+(opened.length?'24px':'0')+' 0 12px">Closed on '+dayLabel+':</div>'+otdCards(closed,'closed','Closed'); }
-    if(!opened.length&&!closed.length){ html+='<p class="lead">Nothing in '+who+' credits opened or closed on '+dayLabel+'.</p>'; }
+    if(!opened.length&&!closed.length){ html+='<p class="lead">Nothing in '+who+' count opened or closed on '+dayLabel+'.</p>'; }
     if(rode.length){
       var subj=mine?'I':esc(s.userName);
       var phrase=has.activity

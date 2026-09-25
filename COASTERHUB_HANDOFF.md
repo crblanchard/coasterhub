@@ -3630,10 +3630,9 @@ database's front door and the people. Explore did NOT get a tab (five is the cei
 - **Compact banners** on park, coaster, manufacturer/model and location: `.hero.compact`
   (smaller badge, h1 clamp(1.75rem…2.6rem)), inline `--hero-t:30px;--hero-b:20px`.
 - **Site map is out of the footer** (the page stays; search replaced its job).
-- **"count" → "credits" in visible text**: Home title and line ("Log your rides. Track your
-  credits. Rank them."), /log title and headline ("Log your rides."), "View your credits" on
-  Profile, "in your credits" on /log, import/add/categories/sitemap wording. Code names
-  (`count` page key, `herocount`, comments) unchanged.
+- **"count" → "credits" wording was tried and reverted the same hour** (Carter: "revert back
+  for now"). The visible text still says "count" in places (Home line, /log headline "Add to
+  your count.", "View your count" on Profile); only the nav label and URL are Credits.
 
 ## Open tasks
 
