@@ -3491,6 +3491,18 @@ a scroll listener while the list shows, because `coasterEditor()` itself scrolls
 to 0 before the observer runs. The toolbar is not sticky on a phone (it wraps to ~470px).
 Desktop is unchanged.
 
+## /log: one park search box, no dropdown (2026-09-25)
+
+Carter: *"clean this up so parks pop up when you search. Remove the dropdown altogether."*
+The park `<select>` and the "Filter parks by name" box are now one `#parkq` search box with
+a popup (`#parkpop`, `parkPop()`): focus lists every park (nearest three first after Near
+me), typing narrows it (names that start with the text first), tap or Enter picks. The
+`<select id="park">` is still in the page, hidden — it is where the chosen park lives and
+everything reads `$('park').value`; the box writes to it only through `choosePark()`, and
+`showParkName()` puts the chosen name back in the box whenever you are not typing. Emptying
+the box un-picks the park. Near me / Locations / + Park sit on one row under it. The old
+"one match left = pick it" auto-choose is gone; the popup made it a surprise.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**

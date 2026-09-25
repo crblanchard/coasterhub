@@ -64,6 +64,26 @@
   .geonote a{color:var(--accent2);cursor:pointer}
   /* The nearest parks, as things you can press. A line that only NAMED the
      closest park still left you to go and find it in a 247-long dropdown. */
+  /* The park search and what pops up under it. Absolute inside .parkbox, not
+     fixed: nothing between here and the page clips it (it is not in the hero). */
+  .parkbox{position:relative}
+  .parkbox input{width:100%}
+  .parkpop{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 18px 40px rgba(0,0,0,.28);max-height:min(46vh,340px);overflow:auto;
+    overscroll-behavior:contain;padding:6px}
+  .parkpop.on{display:block}
+  .parkpop .pp{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;
+    background-color:transparent;border:0;border-radius:10px;padding:10px 12px;color:var(--fg);
+    font-weight:600;font-size:.95rem;cursor:pointer}
+  .parkpop .pp:hover,.parkpop .pp.hi{background-color:var(--soft)}
+  .parkpop .pp.on{color:var(--accent2)}
+  .parkpop .pp .m{margin-left:auto;flex:none;color:var(--muted);font-weight:500;font-size:.8rem}
+  .parkpop .ph{color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.09em;
+    text-transform:uppercase;padding:10px 12px 4px}
+  .parkpop .none{color:var(--muted);font-size:.88rem;padding:10px 12px}
+  .parktools{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .parktools button{flex:none;padding:9px 12px}
   .nearrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 0}
   .nearrow .lbl{color:var(--muted);font-size:.76rem}
   .nearpick{background-color:transparent;border:1px solid var(--line);color:var(--fg);
@@ -271,24 +291,26 @@
        were two rows of shouting between you and the thing you came to press.
        The labels are still THERE for a screen reader, just not drawn. -->
   <div class="setup">
-    <div class="fld"><label class="vh" for="park">Park</label>
-      <div style="display:flex;gap:8px">
-        <select id="park" style="flex:1;min-width:0"></select>
-        <button class="ghost" id="nearme" type="button" title="Sort by how close they are to you"
-                style="flex:none;padding:10px 12px">Near me</button>
-        <button class="ghost" id="newpark" type="button" style="flex:none;padding:10px 12px">+ Park</button>
+    <div class="fld"><label class="vh" for="parkq">Park</label>
+      <!-- One box, and the parks pop up under it as you type (Carter,
+           2026-09-25: "remove the dropdown altogether"). The <select> is
+           still here, hidden: it is where the chosen park LIVES — everything
+           reads $('park').value — and the box only ever writes to it through
+           choosePark(). -->
+      <select id="park" style="display:none" aria-hidden="true" tabindex="-1"></select>
+      <div class="parkbox">
+        <input id="parkq" type="search" placeholder="Search parks&hellip;"
+               autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go"
+               role="combobox" aria-autocomplete="list" aria-controls="parkpop" aria-expanded="false">
+        <div class="parkpop" id="parkpop" role="listbox"></div>
       </div>
-      <!-- 247 parks is a long scroll to reach one you can already name. Types
-           straight into the dropdown above rather than being a second list to
-           choose from, so there is still only one place the park is chosen. -->
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <input id="parkq" type="search" placeholder="Filter parks by name&hellip;"
-               autocomplete="off" style="flex:1;min-width:0">
+      <div class="parktools">
+        <button class="ghost" id="nearme" type="button" title="Sort by how close they are to you">Near me</button>
         <!-- Not everyone knows what a park is called; nearly everyone knows
              where they have been. Ticking a few states cuts 247 parks to a
              list you can read, which is most of the work of a first count. -->
-        <button class="ghost" id="regbtn" type="button"
-                style="flex:none;padding:10px 12px">Locations</button>
+        <button class="ghost" id="regbtn" type="button">Locations</button>
+        <button class="ghost" id="newpark" type="button">+ Park</button>
       </div>
       <p class="geonote" id="geonote"></p>
     </div>
@@ -692,6 +714,7 @@ function nearest(){
 function choosePark(name){
   sel().value=name;
   $('search').value='';
+  showParkName();
   renderList();
   // The pressed one is the selected one: the row is state, not just a shortcut.
   Array.prototype.forEach.call(document.querySelectorAll('.nearpick'), function(b){
@@ -865,7 +888,7 @@ function fillParks(keep){
   // so the park is still chosen in exactly one place. The park you have ALREADY
   // chosen always survives the filter — otherwise typing would silently blank
   // your selection and empty the coaster list under it.
-  var q=$('parkq') ? $('parkq').value.trim().toLowerCase() : '';
+  var q='';   // the box filters its own popup now (parkPop), not this list
   var all=names.length;
   names=names.filter(function(p){ return parkPasses(p) || p===cur; });
   if(q) names=names.filter(function(p){ return p.toLowerCase().indexOf(q)>=0 || p===cur; });
@@ -904,22 +927,92 @@ function fillParks(keep){
     : '\u2014 pick a park \u2014';
   sel.innerHTML='<option value="">'+esc(head)+'</option>'+body;
   if(cur) sel.value=cur;
+  showParkName();
 }
 
-// Typing is choosing, once there is only one thing left to choose. Two letters
-// minimum so a single keystroke cannot land you in a park by accident.
-function wireParkFilter(){
+// ---- the park search ------------------------------------------------------
+// Type, and the parks that match pop up under the box; tap one. Focusing the
+// box with nothing typed lists them all (nearest first after "Near me"), so it
+// still works for somebody who would rather scroll than spell. The box shows
+// the chosen park's name whenever you are not typing in it.
+function showParkName(){
   var q=$('parkq');
+  if(q && document.activeElement!==q) q.value=sel().value;
+}
+var POP_MAX=80;                     // rows drawn; the rest are a "keep typing"
+function parkPop(open){
+  var q=$('parkq'), pop=$('parkpop');
+  if(!open){ pop.classList.remove('on'); q.setAttribute('aria-expanded','false'); return; }
+  var t=q.value.trim().toLowerCase(), cur=sel().value;
+  if(t===cur.toLowerCase()) t='';   // the chosen name is not a search
+  var names=Object.keys(PCOUNT).filter(function(p){ return parkPasses(p,true)||p===cur; });
+  if(t) names=names.filter(function(p){ return p.toLowerCase().indexOf(t)>=0; });
+  // Names that START with what you typed first: "six" should reach the Six
+  // Flags parks before "Mystic Six".
+  names.sort(function(a,b){
+    if(t){ var d=(a.toLowerCase().indexOf(t)===0?0:1)-(b.toLowerCase().indexOf(t)===0?0:1); if(d) return d; }
+    return a.localeCompare(b);
+  });
+  var row=function(p,mi){
+    var n=PCOUNT[p]||0, meta=(mi!=null?showMiles(mi)+' · ':'')+n+(n===1?' coaster':' coasters');
+    return '<button type="button" class="pp'+(p===cur?' on':'')+'" role="option" data-p="'+esc(p)+'">'
+      +'<span>'+esc(p)+'</span><span class="m">'+meta+'</span></button>';
+  };
+  var html='';
+  if(HERE && !t){
+    var near=names.map(function(p){ return {p:p,mi:parkMiles(p)}; })
+      .filter(function(x){ return x.mi!=null; })
+      .sort(function(a,b){ return a.mi-b.mi; }).slice(0,NEAR_N);
+    var seen={}; near.forEach(function(x){ seen[x.p]=1; });
+    if(near.length) html+='<div class="ph">Nearest you</div>'+near.map(function(x){ return row(x.p,x.mi); }).join('')
+      +'<div class="ph">Everywhere else</div>';
+    names=names.filter(function(p){ return !seen[p]; });
+  }
+  html+=names.slice(0,POP_MAX).map(function(p){ return row(p,null); }).join('');
+  if(names.length>POP_MAX) html+='<div class="none">'+(names.length-POP_MAX)+' more — keep typing</div>';
+  if(!html) html='<div class="none">No park called that'+(regionsOn()?' in the locations you ticked':'')
+    +'. <a href="#" id="pp_new">Add it?</a></div>';
+  pop.innerHTML=html;
+  var hi=pop.querySelector('.pp'); if(hi&&t) hi.classList.add('hi');
+  pop.classList.add('on'); q.setAttribute('aria-expanded','true');
+  var nw=$('pp_new'); if(nw) nw.onmousedown=function(e){ e.preventDefault(); q.blur(); $('newpark').click(); };
+}
+function pickFromPop(p){
+  var q=$('parkq');
+  parkPop(false);
+  choosePark(p);
+  q.value=p; q.blur();
+}
+function wireParkFilter(){
+  var q=$('parkq'), pop=$('parkpop');
+  q.addEventListener('focus',function(){
+    q.select(); parkPop(true);
+    // On a phone the keyboard takes the bottom half, which is where the list
+    // pops up. Bring the box to the top so the parks land in what is left.
+    if(window.matchMedia('(max-width:680px)').matches) setTimeout(function(){
+      window.scrollTo({ top: q.getBoundingClientRect().top + window.pageYOffset - 70, behavior: 'instant' });
+    }, 250);
+  });
   q.addEventListener('input',function(){
-    fillParks();
-    var t=q.value.trim().toLowerCase();
-    if(t.length<2) return;
-    // Only among the parks on offer: with a location filter on, a name that
-    // matches one hidden park and one shown one is not "only one thing left".
-    var hits=Object.keys(PCOUNT).filter(function(p){
-      return parkPasses(p) && p.toLowerCase().indexOf(t)>=0; });
-    if(hits.length===1 && sel().value!==hits[0]) choosePark(hits[0]);
-    else renderList();
+    // Emptying the box (its x, or backspacing it out) un-picks the park.
+    if(!q.value && sel().value){ choosePark(''); }
+    parkPop(true);
+  });
+  q.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){ e.preventDefault();
+      var b=pop.querySelector('.pp.hi')||pop.querySelector('.pp');
+      if(b) pickFromPop(b.getAttribute('data-p')); }
+    else if(e.key==='Escape'){ q.blur(); }
+  });
+  // mousedown, not click: a click lands after the box has blurred, and the
+  // blur is what closes the popup. Holding the focus keeps the row there.
+  pop.addEventListener('mousedown',function(e){ e.preventDefault(); });
+  pop.addEventListener('click',function(e){
+    var b=e.target.closest && e.target.closest('.pp');
+    if(b) pickFromPop(b.getAttribute('data-p'));
+  });
+  q.addEventListener('blur',function(){
+    setTimeout(function(){ if(document.activeElement!==q){ parkPop(false); showParkName(); } },120);
   });
 }
 
@@ -1083,7 +1176,7 @@ function wireAdders(){
 // notice a park it was never told about (see the restore note in boot).
 var SHOWN=null;
 function pickPark(){ choosePark($('park').value); }
-function syncPark(){ if($('park').value!==SHOWN) renderList(); }
+function syncPark(){ showParkName(); if($('park').value!==SHOWN) renderList(); }
 
 // Closed for good. Nothing else about a coaster changes where it sits in the
 // list, so this is the only test the sorts need.
