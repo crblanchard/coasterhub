@@ -127,13 +127,12 @@ function draw(){
     +(MINE ? ' · you have been to <b>'+list.filter(function(p){ return p.been; }).length.toLocaleString()+'</b>' : '');
   var near = so==='near' && HERE;
   $('thead').innerHTML='<tr><th>Park</th><th class="opt">Location</th>'+(near?'<th class="num">Distance</th>':'')
-    +'<th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You</th>':'')+'</tr>';
+    +'<th class="num">Operating</th><th class="num opt">Defunct</th></tr>';
   $('rows').innerHTML=list.map(function(p){
     return '<tr><td class="nm"><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+'</a></td>'
       +'<td class="sub opt">'+(p.region?'<a href="'+esc(CoasterHub.locationHref(p.region))+'">'+esc(short(p.region))+'</a>':'')+'</td>'
       +(near?'<td class="num">'+(p.mi==null?'':(p.mi<10?p.mi.toFixed(1):Math.round(p.mi).toLocaleString())+' mi')+'</td>':'')
-      +'<td class="num">'+p.open+'</td><td class="num opt">'+p.gone+'</td>'
-      +(MINE?'<td class="num">'+(p.open?p.got+' of '+p.open:'')+'</td>':'')+'</tr>';
+      +'<td class="num">'+p.open+'</td><td class="num opt">'+p.gone+'</td>'+'</tr>';
   }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Nothing matches.</td></tr>';
 }
 </script>

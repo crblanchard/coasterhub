@@ -1305,13 +1305,13 @@
                     : "You have not ridden it yet");
         if (y.rank[c.id]) bits.push("ranked <b>#" + y.rank[c.id] + "</b> of " + y.ranked);
       } else {
-        var op = cs.filter(function (c) { return !c.closed; });
-        var got = op.filter(function (c) { return y.rides[c.id]; }).length;
-        bits.push("You have ridden <b>" + got + " of " + op.length + "</b> operating");
+        // No "ridden X of Y operating" (Carter, 2026-09-25: "remove all that" —
+        // parked in the handoff's Possible future updates). Your ranking only.
         var rk = cs.filter(function (c) { return y.rank[c.id]; })
           .map(function (c) { return y.rank[c.id]; }).sort(function (a, b) { return a - b; });
-        if (rk.length) bits.push("<b>" + rk.length + "</b> ranked, best <b>#" + rk[0] + "</b> of " + y.ranked);
+        if (rk.length) bits.push("You have ranked <b>" + rk.length + "</b> \u00b7 best <b>#" + rk[0] + "</b> of " + y.ranked);
       }
+      if (!bits.length) { el.hidden = true; return; }
       el.className = "youline";
       el.innerHTML = bits.join(" \u00b7 ");
       el.hidden = false;

@@ -152,19 +152,17 @@ function place(reg, ps, MINE, R){
     var st=Object.keys(R).filter(isUS).map(function(r){ var c=counts(R[r], MINE); c.r=r; return c; })
       .sort(function(a,b){ return b.open-a.open || a.r.localeCompare(b.r); });
     h+='<div class="sect">States</div>'+table(
-      '<th>State</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You, operating</th>':''),
+      '<th>State</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>',
       st.map(function(c){ return '<tr><td class="nm"><a href="'+esc(CoasterHub.locationHref(c.r))+'">'+esc(shortName(c.r))+'</a></td>'
-        +'<td class="num">'+c.parks+'</td><td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'
-        +(MINE?'<td class="num">'+c.got+' of '+c.open+'</td>':'')+'</tr>'; }).join(''));
+        +'<td class="num">'+c.parks+'</td><td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'+'</tr>'; }).join(''));
   }
   var pk=ps.map(function(p){ var c=counts([p], MINE); c.p=p; return c; })
     .sort(function(a,b){ return b.open-a.open || b.all-a.all || a.p.name.localeCompare(b.p.name); });
   h+='<div class="sect">Parks</div>'+table(
-    '<th>Park</th>'+(us?'<th class="opt">State</th>':'')+'<th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You, operating</th>':''),
+    '<th>Park</th>'+(us?'<th class="opt">State</th>':'')+'<th class="num">Operating</th><th class="num opt">Defunct</th>',
     pk.map(function(c){ return '<tr><td class="nm"><a href="'+esc(CoasterHub.parkHref(c.p.name))+'">'+esc(c.p.name)+'</a></td>'
       +(us?'<td class="sub opt"><a href="'+esc(CoasterHub.locationHref(c.p.region))+'">'+esc(shortName(c.p.region))+'</a></td>':'')
-      +'<td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'
-      +(MINE?'<td class="num">'+c.got+' of '+c.open+'</td>':'')+'</tr>'; }).join(''));
+      +'<td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'+'</tr>'; }).join(''));
   if(!us){
     var rows=k.cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
     h+='<div class="sect">Coasters</div>'+table(
@@ -193,10 +191,9 @@ function index(R, MINE){
   var by=function(a,b){ return b.open-a.open || a.r.localeCompare(b.r); };
   var us=regs.filter(function(c){ return isUS(c.r); }).sort(by), rest=regs.filter(function(c){ return !isUS(c.r); }).sort(by);
   $('hero_sub').textContent=us.length+' states and '+rest.length+' other countries on the site.';
-  var head='<th>Location</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You, operating</th>':'');
+  var head='<th>Location</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>';
   function row(c){ return '<tr><td class="nm"><a href="'+esc(CoasterHub.locationHref(c.r))+'">'+esc(shortName(c.r))+'</a></td>'
-    +'<td class="num">'+c.parks+'</td><td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'
-    +(MINE?'<td class="num">'+c.got+' of '+c.open+'</td>':'')+'</tr>'; }
+    +'<td class="num">'+c.parks+'</td><td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'+'</tr>'; }
   $('body').innerHTML='<div class="sect"><a href="/location/us" style="color:inherit">United States &rarr;</a></div>'+table(head, us.map(row).join(''))
     +'<div class="sect">Elsewhere</div>'+table(head, rest.map(row).join(''));
 }
