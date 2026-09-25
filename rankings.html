@@ -107,6 +107,23 @@
      from the artifact, in the file I did not apply the lesson to. */
   .rrow .members{flex:0 0 100%;min-width:0;margin:7px 0 1px;padding-top:7px;
                  border-top:1px solid var(--line)}
+  /* Tap a coaster (read-only) for its stats, the park page's label/value rows
+     (Carter, 2026-09-25: "click on [it] and get compact stats like some other
+     pages have"). Same min-width:0 lesson as .members above. */
+  .rrow.tap{flex-wrap:wrap}
+  #mine.readonly .rrow.tap{cursor:pointer}
+  #mine.readonly .rrow.tap.open{background:var(--soft)}
+  .rrow .rstats{flex:0 0 100%;min-width:0;margin:7px 0 1px;padding-top:6px;border-top:1px solid var(--line)}
+  #mine:not(.readonly) .rrow .rstats{display:none}
+  .rstats .kv{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+    font-size:.84rem;padding:4px 0}
+  .rstats .kv > span{color:var(--muted);flex:none}
+  .rstats .kv > b{font-weight:500;text-align:right;min-width:0;font-variant-numeric:tabular-nums}
+  .rstats a{color:var(--accent2);text-decoration:none}
+  .rstats a:hover{text-decoration:underline}
+  .rstats .pill{display:inline-block;font-size:.74rem;padding:1px 9px;border-radius:999px;border:1px solid var(--line)}
+  .rstats .pill.wood{color:var(--accent)} .rstats .pill.steel{color:var(--accent2)}
+  .rstats .go{display:inline-block;margin-top:6px;font-size:.84rem;font-weight:600}
   .rrow .mrow{display:flex;align-items:center;gap:9px;padding:4px 0}
   .rrow .mrow .mp{color:var(--accent2);font-weight:700;font-size:.75rem;
                   font-variant-numeric:tabular-nums;min-width:2.2em;text-align:right;flex:none}
@@ -814,6 +831,27 @@ function markDirty(){
 }
 
 // ------------------------------------------------------------ ranked list ---
+// Which rows have their stats open. Only drawn for open rows, so a 300-long
+// list costs nothing until you tap one.
+var STATOPEN={};
+function statsFor(id){
+  if(!STATOPEN[id]) return '';
+  var c=BYID[id]||{}, t=[];
+  function spec(v,label){ t.push('<div class="kv"><span>'+esc(label)+'</span><b>'+v+'</b></div>'); }
+  function when(v,prec){ return (prec==='day' && /^\d{4}-\d{2}-\d{2}/.test(String(v))) ? CoasterHub.mdy(v) : String(v).slice(0,4); }
+  if(c.type) spec('<span class="pill '+(c.type==='Wood'?'wood':'steel')+'">'+esc(c.type)+'</span>','Type');
+  if(c.manu) spec('<a href="'+esc(CoasterHub.makerHref(c.manu))+'">'+esc(c.manu)+'</a>','Manufacturer');
+  if(c.model) spec(c.manu?'<a href="'+esc(CoasterHub.makerHref(c.manu,c.model))+'">'+esc(c.model)+'</a>':esc(c.model),'Model');
+  if(c.opened) spec(esc(when(c.opened,c.openedPrec)),'Opened'); else if(c.yr) spec(esc(c.yr),'Opened');
+  if(c.closed) spec(esc(when(c.closed,c.closedPrec)),'Closed');
+  if(c.h!=null) spec(Math.round(c.h),'Height (ft)');
+  if(c.s!=null) spec(Math.round(c.s),'Speed (mph)');
+  if(c.l!=null) spec(Math.round(c.l).toLocaleString(),'Length (ft)');
+  if(c.inv!=null) spec(esc(c.inv),'Inversions');
+  if(c.dur!=null){ var d=Math.round(c.dur), m=Math.floor(d/60), r=d%60; spec(m?(m+':'+(r<10?'0':'')+r):(d+'s'),'Ride time'); }
+  return '<div class="rstats">'+(t.join('')||'<div class="kv"><span>No stats on file yet.</span></div>')
+    +(c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>';
+}
 function renderRank(){
   var el=$('ranklist');
   $('rank_empty').style.display=ORDER.length?'none':'block';
@@ -825,7 +863,7 @@ function renderRank(){
     // and maker like any row, and the span it holds. No wash, no ×2, nothing
     // to open. It still moves and deletes as one block.
     var cat = b.g && !b.g.racing;
-    if (b.g && b.g.racing) return '<div class="rrow" data-i="'+i+'" data-rid="'+b.ids[0]+'">'
+    if (b.g && b.g.racing) return '<div class="rrow tap'+(STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'" data-rid="'+b.ids[0]+'" data-stat="'+b.ids[0]+'">'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
       +'<span class="pos rng">'+(b.from+1)+'\u2013'+(b.to+1)+'</span>'
       +'<span class="nm"><b>'+esc(b.g.name)+'</b><span class="sub">'
@@ -836,7 +874,7 @@ function renderRank(){
       +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
       +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
       +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
-      +'</span></div>';
+      +'</span>'+statsFor(b.ids[0])+'</div>';
     // A run of the same ride is one row: "Batman: The Ride x5", numbered with
     // the span it occupies. It still holds five positions — the list saved is
     // unchanged — you just answer for it once.
@@ -897,8 +935,9 @@ function renderRank(){
           +'<button class="tiny" type="button" data-allback="'+key+'" '
           +'style="margin-top:7px">Pull all back in</button></div>' : '')
       +'</div>' : '';
-    return '<div class="rrow'+(b.g?' grp':'')+(b.g&&OPEN[key]?' open':'')+'" data-i="'+i+'"'
-      +' data-rid="'+b.ids[0]+'"'
+    return '<div class="rrow'+(b.g?' grp':' tap')+(b.g&&OPEN[key]?' open':'')
+      +(!b.g&&STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'"'
+      +' data-rid="'+b.ids[0]+'"'+(b.g?'':' data-stat="'+b.ids[0]+'"')
       +(b.g?' data-open="'+key+'" role="button" tabindex="0" aria-expanded="'
             +(OPEN[key]?'true':'false')+'"':'')+'>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
@@ -908,8 +947,16 @@ function renderRank(){
         +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
         +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
         +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
-      +'</span>'+members+'</div>';
+      +'</span>'+members+(b.g?'':statsFor(b.ids[0]))+'</div>';
   }).join('');
+  // Read-only only: in edit mode a tap on a row is the start of a drag.
+  el.querySelectorAll('[data-stat]').forEach(function(r){
+    r.addEventListener('click', function(ev){
+      if(!$('mine').classList.contains('readonly')) return;
+      if(ev.target.closest('a, button')) return;
+      var id=+r.dataset.stat; STATOPEN[id]=!STATOPEN[id]; renderRank();
+    });
+  });
   $('gatherbar').style.display = scattered() ? 'flex' : 'none';
   var live=(CATS.categories||[]).filter(function(g){ return !g.off && !g.racing; }).length;
   $('catn').textContent = CATS.on===false ? 'off' : live;

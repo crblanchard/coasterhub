@@ -3542,6 +3542,14 @@ or chevron. **Save is now also the way out of edit mode**: always pressable, it 
 anything changed and then returns to read-only (`doneEditing`); with nothing to save it just
 leaves. It used to sit disabled after a save, so there was no way out but a reload.
 
+## Tap a ranked coaster for its stats (2026-09-25)
+
+In read-only mode a plain or racing row on /rankings opens the park page's label/value
+stats under it (`statsFor(id)`, `STATOPEN`, `.rstats`): type pill, maker and model links,
+opened/closed, height, speed, length, inversions, ride time, and a "Coaster page →" link.
+Only open rows render stats. Hidden in edit mode, where a tap on a row is the start of a
+drag. Category rows keep their own expander.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**
