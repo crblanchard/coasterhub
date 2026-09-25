@@ -1038,9 +1038,14 @@
         // rider badge in their hero is how you look at someone else's, and
         // Rankings has a Mine | Global switch. Signed out, they follow the
         // page you are reading, as before.
-        var target = (key === "profile") ? myOwn : (myOwn || forSlug);
+        // ...but only in the header and the tab bar. A button on the page
+        // itself — "View Sean's map" / "View Sean's count" on Sean's profile —
+        // is about the rider you are reading, and pointing it home took you to
+        // your own map every time (Carter, 2026-09-25).
         var els = document.querySelectorAll('[data-nav="' + key + '"]');
         for (var q = 0; q < els.length; q++) {
+          var inNav = !!(els[q].closest && els[q].closest("nav.links, .tabbar"));
+          var target = (key === "profile") ? myOwn : (inNav ? (myOwn || forSlug) : forSlug);
           els[q].setAttribute("href", userPageHref(target, key));
         }
       }
