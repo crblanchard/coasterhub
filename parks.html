@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parks — Coaster Hub</title>
+<meta name="description" content="Every amusement park on Coaster Hub.">
+<link rel="stylesheet" href="/style.css?v=20260805b">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png?v=20260924b" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260924b">
+<meta property="og:title" content="Coaster Hub — Parks">
+<meta property="og:image" content="https://coasterhub.org/og-image.png?v=4">
+<style>
+  /* The site's own lists (2026-09-25): every coaster (/coasters) and every
+     park (/parks) as reference tables, the way /locations is. They took over
+     the everyone view of /credits, which is now only ever a rider's own.
+     Tables are .dtable, banner .hero.compact, rows open in place — all shared. */
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+  .filters input[type=search]{flex:1 1 220px;min-width:0}
+  .filters select{flex:0 1 auto;min-width:0;max-width:100%;cursor:pointer}
+  /* Same look as /credits' .controls. background-COLOR, never the shorthand. */
+  .filters input,.filters select{background-color:var(--panel);border:1px solid var(--line);color:var(--fg);
+    padding:10px 12px;border-radius:10px;font-size:.9rem}
+  @media (max-width:680px){ .filters select{flex:1 1 40%} }
+  .shown{color:var(--muted);font-size:.84rem;margin:0 0 10px}
+  .shown b{color:var(--fg)}
+  .more{color:var(--muted);font-size:.86rem;padding:12px 14px}
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260924b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="riders">Home</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/log" data-nav="log" class="navlog">+ Log</a>
+    <a href="/credits" data-nav="count">Credits</a>
+    <a href="/account" data-nav="profile">Profile</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
+  <span class="badge" id="hero_badge">Parks</span>
+  <h1 class="wide">Parks</h1>
+  <p class="wide" id="hero_sub">&nbsp;</p>
+</div></section>
+
+<section class="block" style="padding-top:20px"><div class="container">
+  <div id="err" style="display:none"><strong>Couldn&rsquo;t load the data.</strong> This page reads external data files, so it needs to be served over the web.</div>
+  <div id="loading">Loading&hellip;</div>
+  <div id="ui" style="display:none">
+    <div class="filters">
+      <input id="q" type="search" placeholder="Search parks&hellip;" autocomplete="off">
+      <select id="f_loc"><option value="">Everywhere</option></select>
+      <select id="f_mine" hidden><option value="">Visited or not</option><option value="y">Visited</option><option value="n">Not visited</option></select>
+      <select id="f_sort"><option value="name">A–Z</option><option value="most">Most coasters</option><option value="near">Nearest to me</option></select>
+    </div>
+    <p class="shown" id="shown"></p>
+    <div class="dtable-wrap"><table class="dtable"><thead id="thead"></thead><tbody id="rows"></tbody></table></div>
+  </div>
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a><span data-contrib hidden></span></div>
+</div></footer>
+
+<script src="/app.js?v=20260805b"></script>
+<script>
+document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('parks');
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function $(id){return document.getElementById(id);}
+function fail(e){ console.error(e); $('loading').style.display='none'; $('err').style.display='block'; }
+var P=[], MINE=null, HERE=null;
+function short(r){ return r==='US' ? 'United States' : String(r||'').replace(/, US$/,''); }
+Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.you()]).then(function(r){
+  var cs=r[0].coasters||[], parks=r[1]||{}; MINE=r[2] ? r[2].rides : null;
+  var by={};
+  Object.keys(parks).forEach(function(n){ var g=parks[n]||{}; by[n]={ name:n, region:g.region||'', lat:g.lat, lon:g.lon, open:0, gone:0, got:0 }; });
+  cs.forEach(function(c){ var p=by[c.park]; if(!p) return;
+    if(c.closed) p.gone++; else { p.open++; if(MINE && MINE[c.id]) p.got++; }
+    if(MINE && MINE[c.id]) p.been=true; });
+  P=Object.keys(by).map(function(k){ return by[k]; });
+  $('hero_sub').textContent=P.length.toLocaleString()+' parks on the site.';
+  var locs={}; P.forEach(function(p){ if(p.region) locs[p.region]=1; });
+  $('f_loc').innerHTML+=Object.keys(locs).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return '<option value="'+esc(m)+'">'+esc(m)+'</option>'; }).join('');
+  if(MINE) $('f_mine').hidden=false;
+  ['q','f_loc','f_mine'].forEach(function(id){ $(id).addEventListener('input', draw); $(id).addEventListener('change', draw); });
+  $('f_sort').addEventListener('change', function(){
+    if($('f_sort').value!=='near' || HERE) return draw();
+    if(!navigator.geolocation){ $('f_sort').value='name'; return draw(); }
+    $('shown').textContent='Finding you…';
+    navigator.geolocation.getCurrentPosition(function(g){ HERE={lat:g.coords.latitude, lon:g.coords.longitude}; draw(); },
+      function(){ $('f_sort').value='name'; draw(); }, {timeout:8000, maximumAge:300000});
+  });
+  $('loading').style.display='none'; $('ui').style.display='block';
+  draw();
+}).catch(fail);
+function miles(p){
+  if(!HERE || p.lat==null || p.lon==null) return null;
+  var R=3958.8, k=Math.PI/180, dLat=(p.lat-HERE.lat)*k, dLon=(p.lon-HERE.lon)*k;
+  var h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(HERE.lat*k)*Math.cos(p.lat*k)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function draw(){
+  var q=$('q').value.trim().toLowerCase(), lc=$('f_loc').value, mn=$('f_mine').value, so=$('f_sort').value;
+  var list=P.filter(function(p){
+    if(q && p.name.toLowerCase().indexOf(q)<0) return false;
+    if(lc && p.region!==lc) return false;
+    if(MINE && mn==='y' && !p.been) return false;
+    if(MINE && mn==='n' && p.been) return false;
+    return true;
+  });
+  list.forEach(function(p){ p.mi=miles(p); });
+  if(so==='most') list.sort(function(a,b){ return b.open-a.open || b.gone-a.gone || a.name.localeCompare(b.name); });
+  else if(so==='near' && HERE) list.sort(function(a,b){ if(a.mi==null) return 1; if(b.mi==null) return -1; return a.mi-b.mi; });
+  else list.sort(function(a,b){ return a.name.localeCompare(b.name); });
+  $('shown').innerHTML='<b>'+list.length.toLocaleString()+'</b> park'+(list.length===1?'':'s')
+    +(MINE ? ' · you have been to <b>'+list.filter(function(p){ return p.been; }).length.toLocaleString()+'</b>' : '');
+  var near = so==='near' && HERE;
+  $('thead').innerHTML='<tr><th>Park</th><th class="opt">Location</th>'+(near?'<th class="num">Distance</th>':'')
+    +'<th class="num">Operating</th><th class="num opt">Defunct</th>'+(MINE?'<th class="num">You</th>':'')+'</tr>';
+  $('rows').innerHTML=list.map(function(p){
+    return '<tr><td class="nm"><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+'</a></td>'
+      +'<td class="sub opt">'+(p.region?'<a href="'+esc(CoasterHub.locationHref(p.region))+'">'+esc(short(p.region))+'</a>':'')+'</td>'
+      +(near?'<td class="num">'+(p.mi==null?'':(p.mi<10?p.mi.toFixed(1):Math.round(p.mi).toLocaleString())+' mi')+'</td>':'')
+      +'<td class="num">'+p.open+'</td><td class="num opt">'+p.gone+'</td>'
+      +(MINE?'<td class="num">'+(p.open?p.got+' of '+p.open:'')+'</td>':'')+'</tr>';
+  }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Nothing matches.</td></tr>';
+}
+</script>
+</body>
+</html>

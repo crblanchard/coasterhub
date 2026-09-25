@@ -85,7 +85,8 @@
 /user/:name/count     /user/:name/credits          301
 /count                /credits                     301
 
-# /coasters was folded into the count page as its "Full list" view.
-# 301, not 200: the old URLs should settle on the new one.
+# /user/<name>/coasters was folded into the credits page as its "Full list"
+# view. 301, not 200: the old URLs should settle on the new one. (A bare
+# /coasters is its own page again since 2026-09-25 — every coaster on the
+# site — served straight from coasters.html, so it has no rule.)
 /user/:name/coasters  /user/:name/credits?view=list  301
-/coasters             /credits?view=list             301

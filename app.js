@@ -827,7 +827,8 @@
   // Global is only offered where there IS an everyone view. /count and
   // /rankings both have one; a profile is one person by definition, so its
   // menu is riders only.
-  var GLOBAL_PAGES = { count: 1, rankings: 1 };
+  // /count lost its everyone view on 2026-09-25 (it is /coasters and /parks now).
+  var GLOBAL_PAGES = { rankings: 1 };
 
   function riderBadge(host, page, slug) {
     if (!host || typeof document === "undefined") return;
@@ -977,7 +978,7 @@
   }
 
   var RELOADS_ON_WRITE = { riders: 1, count: 1, map: 1, park: 1, coaster: 1, changes: 1, qc: 1, sitemap: 1,
-                           manufacturer: 1, location: 1 };
+                           manufacturer: 1, location: 1, coasters: 1, parks: 1 };
   function initNav(page) {
     if (typeof document === "undefined") return;
     applyTheme(readTheme());

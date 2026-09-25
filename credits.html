@@ -438,7 +438,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a><span data-contrib hidden></span></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a><span data-contrib hidden></span></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -502,11 +502,23 @@ if(slug){
   }).catch(function(){ /* signed out: leave it hidden */ });
 }
 COMBINED = !slug;
+// No rider in the address: this page is always somebody's now (2026-09-25).
+// The site-wide lists are /coasters and /parks; you go to your own credits,
+// and a visitor to the list they asked for. Old links (/credits?view=list,
+// ?view=parks) land where they meant. The everyone code below is kept but
+// never runs — the promise it waits on is never settled.
+if(!slug){
+  var want=new URLSearchParams(location.search).get('view');
+  CoasterHub.me().catch(function(){ return null; }).then(function(a){
+    if(a && a.slug && !want) return location.replace(CoasterHub.userPageHref(a.slug,'count'));
+    location.replace(want==='parks' ? '/parks' : '/coasters');
+  });
+}
 
 // Everyone = whoever is in the rider list, which includes anyone added on /log
 // or /import since this browser last looked. A rider whose log can't be read
 // (no static file yet, API down) contributes nothing rather than failing the page.
-(slug ? Promise.resolve([{slug:slug}]) : CoasterHub.fetchUsers().then(function(){return CoasterHub.USERS;}))
+(slug ? Promise.resolve([{slug:slug}]) : new Promise(function(){ /* forwarding — see above */ }))
 .then(function(WHO){
 // One rider: their log. Everyone: every log in ONE request (/api/rides-all,
 // 2026-09-25), falling back to one request per rider if that cannot answer.
