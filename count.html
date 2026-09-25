@@ -1179,6 +1179,7 @@ var CreditList=(function(){
         // empty test above, so a row with no park still gets its em-dash rather
         // than a link to /park/.
         if(col.k==='name')return '<td class="'+(col.cls||'')+'"'+k+'>'+clink(c)+'</td>';
+        if(col.k==='first')return '<td'+k+'>'+esc(CoasterHub.mdy(v))+'</td>';
         if(col.k==='park')return '<td'+k+'>'+plink(v)+'</td>';
         // The maker and the model link to the maker's page (2026-09-24).
         if(col.k==='manu')return '<td'+k+'><a href="'+esc(CoasterHub.makerHref(v))+'">'+esc(v)+'</a></td>';

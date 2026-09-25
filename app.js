@@ -583,6 +583,12 @@
   // A location's page: a US state ("Ohio, US" -> /location/ohio-us), a
   // country ("Japan" -> /location/japan), or the whole of the US (/location/us).
   function locationHref(region) { return "/location/" + slugify(region); }
+  // A date as Carter reads one: 7/24/2021 (2026-09-25: "make dates show as
+  // m/d/yyyy"). A bare year stays a year; anything else comes back as it was.
+  function mdy(d) {
+    var m = String(d == null ? "" : d).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? (+m[2]) + "/" + (+m[3]) + "/" + m[1] : String(d == null ? "" : d);
+  }
   // Takes a coaster row, or a name and a park.
   function coasterHref(c, park) {
     var obj = c && typeof c === "object";
@@ -1214,7 +1220,7 @@
 
   var api = { computeStats: computeStats, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
-              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, coasterHref: coasterHref,
+              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers, noteWrite: noteWrite,
