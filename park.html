@@ -44,6 +44,9 @@
   .cbody .lbl{color:var(--muted);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:0 0 6px}
   @media (max-width:560px){ .cbody{padding:4px 12px 14px} }
   .cbody .nobody{color:var(--muted);font-size:.85rem;margin:0}
+  .crow a{color:inherit;text-decoration:none}
+  .citem[open] > .crow a{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+  .citem[open] > .crow a:hover{color:var(--accent2);text-decoration-color:currentColor}
   .crow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .crow:hover .cn{color:var(--accent2)}
   /* Who built it. Shrinks before anything else and ellipsizes rather than
@@ -239,12 +242,25 @@ function life(c){
     +'<span class="yrs">'+years+'</span></span>';
 }
 var CHEV='<svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+// Same as the ranking cards (Carter, 2026-09-25): a closed row opens on any
+// tap, its name and model included; open, those two are links, and a tap
+// anywhere else on the row — body included — closes it.
+document.addEventListener('click', function(e){
+  var d=e.target.closest && e.target.closest('details.citem'); if(!d) return;
+  var a=e.target.closest('a');
+  if(a && a.closest('summary')){
+    if(d.open) return;                 // open: follow the link
+    e.preventDefault(); d.open=true;   // closed: just open
+    return;
+  }
+  if(!a && !e.target.closest('summary') && e.target.closest('.cbody')) d.open=false;
+});
 function row(c){
   var mk=CoasterHub.maker(c);
   return '<details class="citem" data-c="'+c.id+'"><summary class="crow'+(c.closed?' gone':'')+'">'
     +'<span class="tick" data-tick="'+c.id+'"></span>'
-    +'<span class="cn">'+esc(c.name)+'</span>'
-    +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
+    +'<a class="cn" href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'
+    +(mk?(c.manu?'<a class="mk" href="'+esc(CoasterHub.makerHref(c.manu, c.model||null))+'">'+esc(mk)+'</a>':'<span class="mk">'+esc(mk)+'</span>'):'')
     +'<span class="end">'+life(c)+'<span class="rid" data-rid="'+c.id+'"></span>'+CHEV+'</span>'
     +'</summary><div class="cbody"></div></details>';
 }
