@@ -417,11 +417,11 @@
     // REPLACES this (adoptUsers). Kept in step by hand when a rider renames —
     // carter became crblanchard on 2026-09-14, and <slug>.json was renamed with
     // it so the fallback still resolves.
-    { slug: "crblanchard", name: "Carter" },
-    { slug: "cole",   name: "Cole"   },
-    { slug: "keltan", name: "Keltan" },
-    { slug: "max",    name: "Max"    },
-    { slug: "sean",   name: "Sean"   }
+    { slug: "crblanchard",  name: "Carter" },
+    { slug: "colegarff",    name: "Cole"   },
+    { slug: "bugmonster1",  name: "Keltan Kemp" },
+    { slug: "flyingdino",   name: "MaxG"   },
+    { slug: "seanpcoakley", name: "Sean"   }
   ];
 
   // ---- Riders are whoever is in D1, not only the array above ---------------

@@ -86,7 +86,12 @@
      The hidden sections are hidden with display:none, so the charts inside them
      come back measuring zero — MORE_RESIZE() in the script tells them to
      measure again on the way out. */
-  #morewrap{display:none}
+  /* On a desktop too since 2026-09-25 (Carter: "remove clutter"): the
+     calendar and the six charts wait behind More stats. On This Day and the
+     records stay out, since they are short and about the person; on a phone
+     they fold away as well. */
+  #morewrap{padding:6px 0 30px}
+  body.moreclosed #sec_activity,body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
   @media (max-width:680px){
     #content{display:flex;flex-direction:column}
     #sec_top{order:1}
@@ -269,11 +274,10 @@
   <div id="map"></div>
 </div></section>
 
-<!-- Phones only; see the 680px block in this page's <style>. On a small screen
-     the page is picture, numbers, buttons, tiles, map — and then stops. Records,
-     the calendar and the six charts are things you go looking for rather than
-     things you came for, so they wait behind one tap instead of eight screens of
-     scrolling. On a desktop this button does not exist and nothing is hidden. -->
+<!-- The calendar and the six charts are things you go looking for rather than
+     things you came for, so they wait behind one tap. On a phone Records and
+     On This Day wait too (the 680px block in this page's <style>); on a desktop
+     they stay, and only the calendar and charts fold (since 2026-09-25). -->
 <div id="morewrap"><div class="container">
   <button type="button" id="morebtn" class="morebtn" aria-expanded="false">More stats</button>
 </div></div>

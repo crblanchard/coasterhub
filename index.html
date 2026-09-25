@@ -130,7 +130,7 @@
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
-<script src="/changes-feed.js?v=20260916"></script>
+<script src="/changes-feed.js?v=20260925"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('riders');
@@ -257,7 +257,9 @@ CoasterHub.fetchUsers().then(function(){
 
 // The short feed. No filter bar and no polling — this is a glance on the way
 // past, and /changes is the page you open when you want to read it.
-CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 12 });
+// Five lines, not twelve (Carter, 2026-09-25: "remove clutter"); History ->
+// is the whole feed.
+CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 5 });
 </script>
 </body>
 </html>

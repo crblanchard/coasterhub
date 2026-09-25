@@ -3408,6 +3408,26 @@ count, most first. Built on first open; re-rendered when the rider logs land. Th
 longer links to `/park/<park>/<coaster>`, but **coaster.html stays**: the count list, the map
 popups, the model and location tables and old links all still point at it.
 
+### Clutter pass (2026-09-25)
+
+Carter asked for speed and clutter advice, then *"can you remove clutter"*:
+
+- **Park page:** the "Riders who have been here" strip is gone — each coaster opens onto its own
+  riders now.
+- **Home:** Recent changes shows 5 lines (was 12), and asks the API for `max(40, limit×8)` rows
+  instead of 300; `/changes` still reads 300.
+- **Profile:** the calendar and the six charts sit behind **More stats** on a desktop too (they
+  already did on a phone; On This Day and Records still fold there). Charts re-measure on open
+  (`MORE_RESIZE`).
+- **Stale rider files deleted:** `cole.json`, `max.json`, `sean.json`, `keltan.json` were frozen
+  copies from before those riders claimed new usernames. The dev server, the staging seed, the
+  Worker's `/api/admin/seed` and app.js's offline `USERS` seed now name `colegarff`,
+  `flyingdino`, `seanpcoakley` and `bugmonster1` (the local dev slugs stay cole/max/sean/keltan).
+
+Not done yet, and the bigger speed wins: summary endpoints so the home page, park pages and the
+everyone count stop fetching every rider's full log (one request per rider today), and edge-caching
+`/api/coasters` for signed-in readers too (it bypasses the cache on any cookie).
+
 ---
 
 ## Open tasks

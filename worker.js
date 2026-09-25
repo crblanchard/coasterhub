@@ -1411,10 +1411,11 @@ async function seed(env, origin) {
   const coasters = (await fetchAsset(env, origin, "/coasters.json")).coasters;
   const parks = await fetchAsset(env, origin, "/parks.json");
   const users = [
-    { slug: "carter", name: "Carter", file: "/carter.json" },
-    { slug: "cole",   name: "Cole",   file: "/cole.json" },
-    { slug: "max",    name: "Max",    file: "/max.json" },
-    { slug: "keltan", name: "Keltan", file: "/keltan.json" },
+    // The riders' current files (2026-09-25; the old ones were frozen copies).
+    { slug: "carter", name: "Carter", file: "/crblanchard.json" },
+    { slug: "cole",   name: "Cole",   file: "/colegarff.json" },
+    { slug: "max",    name: "Max",    file: "/flyingdino.json" },
+    { slug: "keltan", name: "Keltan", file: "/bugmonster1.json" },
   ];
 
   const batch = [];

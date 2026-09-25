@@ -127,9 +127,13 @@ function seed() {
 
   // Every rider whose export is in the repo. The file is named for the slug,
   // except Carter's, which is still under the name the site launched with.
-  const RIDERS = [["crblanchard.json", "carter", "Carter"], ["cole.json", "cole", "Cole"],
-                  ["max.json", "max", "Max"], ["sean.json", "sean", "Sean"],
-                  ["keltan.json", "keltan", "Keltan"]];
+  const RIDERS = [["crblanchard.json", "carter", "Carter"], ["colegarff.json", "cole", "Cole"],
+                  ["flyingdino.json", "max", "Max"], ["seanpcoakley.json", "sean", "Sean"],
+                  ["bugmonster1.json", "keltan", "Keltan"]];
+  // The files are the riders' CURRENT slugs (they renamed when they claimed:
+  // colegarff, flyingdino, seanpcoakley, bugmonster1); the local slugs stay
+  // short so the tests and the docs keep working. The old cole/max/sean/keltan
+  // .json files were frozen copies and were deleted on 2026-09-25.
   const iu = db.prepare("INSERT OR REPLACE INTO users (slug,name,mode) VALUES (?,?,'rides')");
   const ir = db.prepare("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,?)");
   let rides = 0;

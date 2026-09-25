@@ -42,9 +42,9 @@ for (const [name, p] of Object.entries(parks)) {
 
 // The file is named for the slug, except Carter's, which still carries the name
 // the site launched under.
-const RIDERS = [["crblanchard.json", "carter", "Carter"], ["cole.json", "cole", "Cole"],
-                ["max.json", "max", "Max"], ["sean.json", "sean", "Sean"],
-                ["keltan.json", "keltan", "Keltan"]];
+const RIDERS = [["crblanchard.json", "carter", "Carter"], ["colegarff.json", "cole", "Cole"],
+                ["flyingdino.json", "max", "Max"], ["seanpcoakley.json", "sean", "Sean"],
+                ["bugmonster1.json", "keltan", "Keltan"]];
 let rides = 0;
 for (const [file, slug, fallback] of RIDERS) {
   const p = join(ROOT, file);

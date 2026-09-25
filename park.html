@@ -108,7 +108,7 @@
     .crow .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
   }
 
-  /* Riders down the side of the park: how much of it each of them has. */
+  /* Rider chips, inside an opened coaster. */
   .who{display:flex;flex-wrap:wrap;gap:8px}
   .who a{display:flex;align-items:baseline;gap:7px;text-decoration:none;
          background:var(--panel);border:1px solid var(--line);border-radius:999px;
@@ -157,10 +157,6 @@
     <div class="tiles" id="tiles"></div>
     <div class="sect" id="list_h">Coasters</div>
     <div class="panel" id="list"></div>
-    <div id="who_wrap" style="display:none">
-      <div class="sect">Riders who have been here</div>
-      <div class="who" id="who"></div>
-    </div>
   </div>
   <div id="none" style="display:none">
     <div class="missing">
@@ -349,21 +345,20 @@ function riders(mine){
                        .catch(function(){ return null; });
     }));
   }).then(function(all){
-    var perCoaster={}, perRider=[];
+    var perCoaster={};
     all.forEach(function(x){
       if(!x) return;
-      var seen={}, n=0, laps={};
+      var seen={}, laps={};
       x.log.rides.forEach(function(r){
         if(!here[r.c]) return;
         laps[r.c]=(laps[r.c]||0)+1;
         if(seen[r.c]) return;
-        seen[r.c]=1; n++;
+        seen[r.c]=1;
         perCoaster[r.c]=(perCoaster[r.c]||0)+1;
       });
       Object.keys(laps).forEach(function(id){
         (WHO[id]=WHO[id]||[]).push({slug:x.u.slug, name:x.u.name||x.u.slug, n:laps[id]});
       });
-      if(n) perRider.push({slug:x.u.slug, name:x.u.name||x.u.slug, n:n});
     });
     // Counts on the rows. The number is riders, not rides: this is a park page,
     // and "3" here means three people have been on it.
@@ -376,13 +371,9 @@ function riders(mine){
     Array.prototype.forEach.call(document.querySelectorAll('details.citem[open]'), function(d){
       var c=byId(Number(d.getAttribute('data-c'))); if(c) d.querySelector('.cbody').innerHTML=body(c);
     });
-    if(!perRider.length) return;
-    perRider.sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); });
-    $('who').innerHTML=perRider.map(function(p){
-      return '<a href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'">'+esc(p.name)
-        +'<i>'+p.n+' of '+mine.length+'</i></a>';
-    }).join('');
-    $('who_wrap').style.display='block';
+    // The "Riders who have been here" strip that used to follow the list is
+    // gone (Carter, 2026-09-25: "remove clutter"): each coaster now opens onto
+    // its own riders, so the strip was saying the same thing a second time.
   });
 }
 </script>

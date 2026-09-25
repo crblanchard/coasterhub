@@ -367,7 +367,10 @@
     }
 
     function load(quiet){
-      return fetch('/api/activity?limit=300')
+      // A short list (the home page) needs only enough rows to fold into its few
+      // lines, not the 300 /changes reads: ranking saves and credit bursts fold
+      // together, so a few rows per line is plenty.
+      return fetch('/api/activity?limit=' + (limit ? Math.max(40, limit * 8) : 300))
         .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); })
         .then(function(j){
           // Sort here rather than trusting the order back: the two `at` formats are
