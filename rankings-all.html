@@ -68,7 +68,9 @@
      and closes it, and so does the chips' background. */
   .srow{cursor:pointer}
   .srow .n a{color:inherit;text-decoration:none}
-  .srow .n a:hover{color:var(--accent2);text-decoration:underline}
+  /* Open, the name, park, place and model are links — and look it. */
+  .stog[aria-expanded="true"] .n a{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+  .stog[aria-expanded="true"] .n a:hover{color:var(--accent2);text-decoration-color:currentColor}
 
   .srow .wn{font-size:.84rem}
   .srow .wp{color:var(--accent2);font-weight:700;font-size:.84rem;flex:none;
@@ -260,7 +262,11 @@ function srowToggles(root){
     var tog=row.querySelector('.stog'), who=row.querySelector('.who');
     var flip=function(){ var open=tog.getAttribute('aria-expanded')==='true';
       tog.setAttribute('aria-expanded', open?'false':'true'); who.hidden=open; };
-    row.addEventListener('click', function(e){ if(e.target.closest('a')) return; flip(); });
+    // Closed, any tap opens it (links included); open, the links go.
+    row.addEventListener('click', function(e){
+      var a=e.target.closest('a');
+      if(a){ if(tog.getAttribute('aria-expanded')==='true') return; e.preventDefault(); }
+      flip(); });
     tog.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); flip(); } });
   });
 }

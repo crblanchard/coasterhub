@@ -365,8 +365,10 @@
   /* The name, park, location and model are links; the rest of the row opens
      and closes it, and so does the chips' background. */
   .srow{cursor:pointer}
-  .srow .n a{color:inherit;text-decoration:none}
-  .srow .n a:hover{color:var(--accent2);text-decoration:underline}
+  .srow .n a,.rrow .nm a{color:inherit;text-decoration:none}
+  /* Open, the name, park, place and model are links — and look it. */
+  .stog[aria-expanded="true"] .n a,.rrow.open .nm a{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+  .stog[aria-expanded="true"] .n a:hover,.rrow.open .nm a:hover{color:var(--accent2);text-decoration-color:currentColor}
 
   .srow .wn{font-size:.84rem}
   .srow .wp{color:var(--accent2);font-weight:700;font-size:.84rem;flex:none;
@@ -852,10 +854,7 @@ function renderRank(){
     if (b.g && b.g.racing) return '<div class="rrow tap'+(STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'" data-rid="'+b.ids[0]+'" data-stat="'+b.ids[0]+'">'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
       +'<span class="pos rng">'+(b.from+1)+'\u2013'+(b.to+1)+'</span>'
-      +'<span class="nm"><b>'+esc(b.g.name)+'</b><span class="sub">'
-      +'<span class="pl">'+esc(one.park||'')+(one.loc?' \u00b7 '+esc(one.loc):'')+'</span>'
-      +(CoasterHub.maker(one)?'<span class="mk">'+esc(CoasterHub.maker(one))+'</span>':'')
-      +'</span></span>'
+      +headLinks(one, b.g.name)
       +'<span class="acts">'
       +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
       +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
@@ -871,10 +870,7 @@ function renderRank(){
         +'<span class="sub"><span class="pl">'+esc(b.g.note||'the same ride at '+b.ids.length+' parks')+'</span>'
         +'</span></span>'
       : '<span class="pos">'+(b.from+1)+'</span>'
-        +'<span class="nm"><b>'+esc(one.name||('#'+b.ids[0]))+'</b><span class="sub">'
-        +'<span class="pl">'+esc(one.park||'')+(one.loc?' \u00b7 '+esc(one.loc):'')+'</span>'
-        +(CoasterHub.maker(one)?'<span class="mk">'+esc(CoasterHub.maker(one))+'</span>':'')
-        +'</span></span>';
+        +headLinks(one);
     var key = b.g ? catKey(b.g) : '';
     var numbered = b.g ? !!NUMS[key] : false;
     var gone = b.g ? strays(b.g, b) : [];
@@ -938,9 +934,15 @@ function renderRank(){
   // Read-only only: in edit mode a tap on a row is the start of a drag.
   el.querySelectorAll('[data-stat]').forEach(function(r){
     r.addEventListener('click', function(ev){
-      if(!$('mine').classList.contains('readonly')) return;
-      if(ev.target.closest('a, button')) return;
-      var id=+r.dataset.stat; STATOPEN[id]=!STATOPEN[id]; renderRank();
+      var a=ev.target.closest('a');
+      // Editing: the row is for dragging; its name is not a way off the page.
+      if(!$('mine').classList.contains('readonly')){ if(a && a.closest('.nm')) ev.preventDefault(); return; }
+      if(ev.target.closest('button')) return;
+      var id=+r.dataset.stat;
+      // Closed, a tap anywhere opens it — the name and park included. Open,
+      // those are links (Carter, 2026-09-25), and the rest of the row closes it.
+      if(a){ if(STATOPEN[id]) return; ev.preventDefault(); }
+      STATOPEN[id]=!STATOPEN[id]; renderRank();
     });
   });
   $('gatherbar').style.display = scattered() ? 'flex' : 'none';
@@ -2040,12 +2042,27 @@ function srowName(c, mk){
     +(c.loc?' \u00b7 '+L(c.loc.replace(/, US$/,''), CoasterHub.locationHref(c.loc)):'')+'</span>'
     +(mk?'<span class="mk">'+L(mk, c.manu ? CoasterHub.makerHref(c.manu, c.model||null) : '')+'</span>':'')+'</span></span>';
 }
+// A ranked row's head: the coaster, park, location and maker, each a link to
+// its page — live only once the row is open (see the click handlers).
+function headLinks(c, name){
+  var L=function(t,h){ return h ? '<a href="'+esc(h)+'">'+esc(t)+'</a>' : esc(t); };
+  var mk=CoasterHub.maker(c);
+  return '<span class="nm"><b>'+L(name||c.name||'', c.park ? CoasterHub.coasterHref(c) : '')+'</b><span class="sub">'
+    +'<span class="pl">'+L(c.park||'', c.park ? CoasterHub.parkHref(c.park) : '')
+    +(c.loc?' \u00b7 '+L(c.loc, CoasterHub.locationHref(c.loc)):'')+'</span>'
+    +(mk?'<span class="mk">'+L(mk, c.manu ? CoasterHub.makerHref(c.manu, c.model||null) : '')+'</span>':'')
+    +'</span></span>';
+}
 function srowToggles(root){
   Array.prototype.forEach.call(root.querySelectorAll('.srow'), function(row){
     var tog=row.querySelector('.stog'), who=row.querySelector('.who');
     var flip=function(){ var open=tog.getAttribute('aria-expanded')==='true';
       tog.setAttribute('aria-expanded', open?'false':'true'); who.hidden=open; };
-    row.addEventListener('click', function(e){ if(e.target.closest('a')) return; flip(); });
+    // Closed, any tap opens it (links included); open, the links go.
+    row.addEventListener('click', function(e){
+      var a=e.target.closest('a');
+      if(a){ if(tog.getAttribute('aria-expanded')==='true') return; e.preventDefault(); }
+      flip(); });
     tog.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); flip(); } });
   });
 }

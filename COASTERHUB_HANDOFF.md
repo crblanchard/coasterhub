@@ -3654,6 +3654,16 @@ as "Database".
   (Home · Coasters · Parks · Manufacturers · Locations · Map, plus Add new / Edit · QC by role)
   all point at the new pages.
 
+## Ranking cards: tap opens, then the words are links (2026-09-25)
+
+Carter, on a phone: links in the ranking cards worked in some places and not others. Rule
+now, on /rankings (yours and Global) and /rankings/all: **a closed card opens on any tap**,
+its name/park/location/model included; **an open card's** name, park, location and model
+are links (underlined while open), and a tap elsewhere closes it. Yours: `headLinks()` builds
+the head, the `[data-stat]` click handler does the rest (and in edit mode the name never
+navigates). Shared: `srowToggles()`. Stats inside use `coasterFacts(c, extra, link)` — info
+left, numbers right on wide screens, "Coaster page →" under the left column.
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
