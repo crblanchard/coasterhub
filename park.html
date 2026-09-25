@@ -273,7 +273,7 @@ function body(c){
   // The facts are shared with a ranking's tapped row (CoasterHub.coasterFacts);
   // yours go below every fact about the coaster itself (Carter, 2026-09-25).
   var mine=MYR && MYR[c.id], extra=[];
-  if(mine){ if(mine.first) extra.push([esc(CoasterHub.mdy(mine.first)),'First ridden']); extra.push([esc(mine.n),'Your rides']); }
+  if(mine){ extra.push([esc(mine.n),'Your rides']); if(mine.first) extra.push([esc(CoasterHub.mdy(mine.first)),'First ridden']); }
   var was=CoasterHub.formerNames(LIST, c.id, c.name);
   var who=WHO[c.id];
   return (was.length?'<p class="former">Formerly '+was.map(function(n){ return '<b>'+esc(n)+'</b>'; }).join(', ')+'.</p>':'')

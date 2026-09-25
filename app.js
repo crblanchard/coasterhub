@@ -1331,7 +1331,7 @@
     // under the numbers. `link` (e.g. "Coaster page →") sits under the left
     // column, which is usually the shorter. A phone shows one column: the
     // left group, then the right, then the link.
-    var info = [], nums = [], E = searchEsc;
+    var info = [], nums = [], mine = [], E = searchEsc;
     function kv(t, v, label) { t.push('<div class="kv"><span>' + E(label) + '</span><b>' + v + '</b></div>'); }
     function when(v, prec) { return (prec === "day" && /^\d{4}-\d{2}-\d{2}/.test(String(v))) ? mdy(v) : String(v).slice(0, 4); }
     if (c.type) kv(info, '<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
@@ -1345,9 +1345,12 @@
     if (c.inv != null) kv(nums, E(c.inv), "Inversions");
     if (c.dur != null) { var d = Math.round(c.dur), mm = Math.floor(d / 60), r = d % 60; kv(nums, mm ? (mm + ":" + (r < 10 ? "0" : "") + r) : (d + "s"), "Ride time"); }
     if (c.laps != null && c.laps > 1) kv(nums, E(c.laps), "Laps");
-    (extra || []).forEach(function (x) { kv(nums, x[0], x[1]); });
-    if (!info.length && !nums.length) return '<p class="facts none">No stats on file yet.</p>' + (link ? '<div class="fgo">' + link + '</div>' : '');
+    (extra || []).forEach(function (x) { kv(mine, x[0], x[1]); });
+    if (!info.length && !nums.length && !mine.length) return '<p class="facts none">No stats on file yet.</p>' + (link ? '<div class="fgo">' + link + '</div>' : '');
+    // Yours (rides, first ridden, rank) under the left column on a wide
+    // screen (Carter, 2026-09-25); last of all on a phone.
     return '<div class="facts"><div class="fcol">' + info.join("") + '</div><div class="fcol fnum">' + nums.join("") + '</div>'
+      + (mine.length ? '<div class="fme">' + mine.join("") + '</div>' : '')
       + (link ? '<div class="fgo">' + link + '</div>' : '') + '</div>';
   }
 
@@ -1410,7 +1413,7 @@
         for (var i = 0; i < cs.length; i++) if (cs[i].id === id) { c = cs[i]; break; }
         if (!c) { inner.innerHTML = '<p class="facts none">Not found.</p>'; return; }
         var m = y && y.rides[id];
-        if (m) { if (m.first) extra.push([mdy(m.first), "First ridden"]); extra.push([m.n, "Your rides"]); }
+        if (m) { extra.push([m.n, "Your rides"]); if (m.first) extra.push([mdy(m.first), "First ridden"]); }
         if (y && y.rank[id]) extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your rank"]);
         inner.innerHTML = coasterFacts(c, extra,
           '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>');
