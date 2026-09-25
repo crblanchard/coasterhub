@@ -62,6 +62,11 @@
   a.crow .yrs{margin-left:auto;flex:none;padding-left:10px;font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
   a.crow .yrs.off{color:var(--accent)}
   a.crow.mlink .cn{color:var(--accent2);font-weight:600}
+  /* Your ranking of this maker / model (#ranked). */
+  a.crow .rk{flex:none;min-width:2.6em;color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums}
+  a.crow .md{margin-left:auto;flex:none;padding-left:10px;color:var(--muted);font-size:.8rem;white-space:nowrap}
+  .rsum{margin:0 0 10px;color:var(--muted);font-size:.88rem}
+  .rsum b{color:var(--fg);font-variant-numeric:tabular-nums}
   .panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
   @media (max-width:560px){ a.crow .pk{display:none} details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
   .missing{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
@@ -132,10 +137,39 @@ var MSLUG=decodeURIComponent(PM[2]||'').toLowerCase();
 // Whose ticks: the signed-in rider, as on /count's park view. Signed out, no
 // ticks and no "you have ridden".
 var mine=CoasterHub.me().then(function(a){
-  return (a && a.slug) ? CoasterHub.fetchRides(a.slug).then(function(l){
+  if(!(a && a.slug)) return null;
+  // Your ranking too (Carter, 2026-09-25: "where your B&Ms or B&M inverts
+  // fall in your rankings"). Never fatal: no list, no panel.
+  fetch('/api/rankings/'+encodeURIComponent(a.slug),{cache:'no-store',credentials:'same-origin'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ var o=(j&&j.order)||[]; RANKN=o.length; RANK={}; o.forEach(function(id,i){ RANK[id]=i+1; }); })
+    .catch(function(){}).then(function(){ RANK_READY(); });
+  return CoasterHub.fetchRides(a.slug).then(function(l){
     var m={}; (l.rides||[]).forEach(function(r){ m[r.c]=1; }); return m;
-  }).catch(function(){ return null; }) : null;
+  }).catch(function(){ return null; });
 }).catch(function(){ return null; });
+
+// Where this maker's (or model's) coasters sit in your ranking, best first.
+// Drawn into #ranked whenever both the page and the ranking have arrived,
+// whichever lands second.
+var RANK=null, RANKN=0, RANK_CS=null, RANK_MODEL=false;
+function RANK_READY(){ drawRanked(); }
+function drawRanked(){
+  var el=$('ranked'); if(!el || !RANK || !RANK_CS) return;
+  var r=RANK_CS.filter(function(c){ return RANK[c.id]; }).sort(function(a,b){ return RANK[a.id]-RANK[b.id]; });
+  if(!r.length){ el.innerHTML=''; return; }
+  var pos=r.map(function(c){ return RANK[c.id]; }), mid=pos[Math.floor((pos.length-1)/2)];
+  el.innerHTML='<div class="sect">In your rankings</div>'
+    +'<p class="rsum"><b>'+r.length+'</b> ranked · best <b>#'+pos[0]+'</b>'
+    +(r.length>2?' · middle <b>#'+mid+'</b>':'')+(r.length>1?' · lowest <b>#'+pos[pos.length-1]+'</b>':'')
+    +' <span>of '+RANKN+'</span></p>'
+    +'<div class="panel">'+r.map(function(c){
+      return '<a class="crow" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="rk">#'+RANK[c.id]+'</span>'
+        +'<span class="cn">'+esc(c.name)+'</span>'
+        +'<span class="pk">'+esc(c.park||'')+'</span>'
+        +(!RANK_MODEL && c.model ? '<span class="md">'+esc(c.model)+'</span>' : '')+'</a>';
+    }).join('')+'</div>';
+}
 
 var PARKS={};
 Promise.all([CoasterHub.fetchCoasters(), mine, CoasterHub.fetchParks().catch(function(){ return {}; })]).then(function(res){
@@ -208,7 +242,8 @@ function one(name, cs, MINE){
     +(got!=null ? ' — you have ridden '+got+'.' : '.');
   $('tiles').innerHTML=tile(cs.length,'Coasters')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
     +tile(models.filter(Boolean).length,'Models');
-  $('body').innerHTML='<div class="sect">Models</div>'+models.map(function(mo){
+  RANK_CS=cs; RANK_MODEL=false;
+  $('body').innerHTML='<div id="ranked"></div><div class="sect">Models</div>'+models.map(function(mo){
     var list=byModel[mo].slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
     var g=MINE ? list.filter(function(c){ return MINE[c.id]; }).length : null;
     return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
@@ -217,6 +252,7 @@ function one(name, cs, MINE){
       +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">The '+esc(mo)+' page, with its specs &rarr;</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
   }).join('');
+  drawRanked();
   // A link to one model (/manufacturer/intamin#accelerator-coaster) opens it.
   if(location.hash){
     var d=document.getElementById(decodeURIComponent(location.hash.slice(1)));
@@ -255,6 +291,7 @@ function model(maker, mo, cs, MINE){
   var rows=cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
   $('body').innerHTML=(specs.length ? '<div class="sect">Statistics</div><div class="specsheet">'
       +specs.map(function(x){ return '<div><b>'+x[1]+'</b><span>'+esc(x[0])+'</span></div>'; }).join('')+'</div>' : '')
+    +'<div id="ranked"></div>'
     +'<div class="sect">Installations</div><div class="dtable-wrap"><table class="dtable"><thead><tr>'
     +(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th>Park</th><th class="opt">Location</th><th class="num">Opened</th><th>Status</th></tr></thead><tbody>'
     +rows.map(function(c){
@@ -267,6 +304,7 @@ function model(maker, mo, cs, MINE){
         +'<td class="num">'+esc(op)+'</td>'
         +'<td><span class="st '+(cl?'off">Closed '+esc(cl):'on">Operating')+'</span></td></tr>';
     }).join('')+'</tbody></table></div>';
+  RANK_CS=cs; RANK_MODEL=true; drawRanked();
 }
 function years(cs){
   var y=cs.map(function(c){ return c.opened?Number(String(c.opened).slice(0,4)):(c.yr?Number(c.yr):null); }).filter(Boolean);

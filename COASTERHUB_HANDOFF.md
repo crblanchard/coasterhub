@@ -3576,6 +3576,14 @@ whose `assets.directory` is the repo. Requests need `x-forwarded-proto: https`, 
 Worker's HTTPS redirect answers first. And stop it by pid — `pkill -f` on its name kills
 the shell that typed it.
 
+## Your ranking on maker and model pages (2026-09-25)
+
+Signed in, /manufacturer/<m> and /manufacturer/<m>/<model> show **In your rankings**: how many
+of that maker's (model's) coasters you rank, best / middle / lowest position "of N", then each
+one best-first with its #position (and its model, on a maker page). `drawRanked()` in
+manufacturer.html, fed by `/api/rankings/<you>` fetched beside your rides; it draws whichever
+of page and ranking lands second. Nothing ranked, or signed out: no section.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**
