@@ -740,14 +740,9 @@ html.srchopen{overflow:hidden}
 .facts .pill{display:inline-block;font-size:.78rem;padding:2px 10px;border-radius:999px;border:1px solid var(--line)}
 .facts .pill.wood{color:var(--accent)} .facts .pill.steel{color:var(--accent2)}
 .facts.none{color:var(--muted);font-size:.88rem;margin:0}
-/* On a phone each pair stacks, label over value, so a long maker's name has
-   the whole column rather than what the label leaves it. */
-@media (max-width:560px){
-  .facts{column-gap:18px}
-  .facts .kv{flex-direction:column;align-items:flex-start;gap:1px;padding:5px 0}
-  .facts .kv > span{font-size:.74rem}
-  .facts .kv > b{text-align:left}
-}
+/* A phone keeps the one column, label left and value right (Carter,
+   2026-09-25: "keep phone as it is"). */
+@media (max-width:560px){ .facts{display:block} }
 [data-cid]{cursor:pointer}
 [data-cid].open,[data-cid].open > td{background-color:var(--soft)}
 .cx{padding:4px 16px 14px;border-bottom:1px solid var(--soft);background-color:var(--soft)}
