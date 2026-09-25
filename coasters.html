@@ -58,8 +58,8 @@
   <div id="ui" style="display:none">
     <div class="filters">
       <input id="q" type="search" placeholder="Search name or park&hellip;" autocomplete="off">
-      <select id="f_status"><option value="">Operating &amp; defunct</option><option value="open">Operating</option><option value="gone">Defunct</option></select>
-      <select id="f_type"><option value="">Steel &amp; wood</option><option>Steel</option><option>Wood</option></select>
+      <select id="f_status"><option value="">Any status</option><option value="open">Operating</option><option value="gone">Defunct</option></select>
+      <select id="f_type"><option value="">Any type</option><option>Steel</option><option>Wood</option></select>
       <select id="f_manu"><option value="">Every company</option></select>
       <select id="f_loc"><option value="">Everywhere</option></select>
       <select id="f_mine" hidden><option value="">Ridden or not</option><option value="y">Ridden</option><option value="n">Not ridden</option></select>
@@ -127,7 +127,7 @@ function draw(){
   $('shown').innerHTML='<b>'+list.length.toLocaleString()+'</b> coaster'+(list.length===1?'':'s')
     +(MINE ? ' · you have ridden <b>'+list.filter(function(c){ return MINE[c.id]; }).length.toLocaleString()+'</b>' : '');
   var metric = so==='h' ? 'Height' : so==='s' ? 'Speed' : 'Opened';
-  $('thead').innerHTML='<tr>'+(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th>Park</th><th class="opt">Company / model</th><th class="num">'+metric+'</th><th>Status</th></tr>';
+  $('thead').innerHTML='<tr>'+(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th>Park</th><th class="opt">Company / model</th><th class="num">'+metric+'</th><th class="opt">Status</th></tr>';
   $('rows').innerHTML=list.slice(0,CAP).map(function(c){
     var cl=c.closed?String(c.closed).slice(0,4):'';
     var val = so==='h' ? (c.h!=null?Math.round(c.h)+' ft':'') : so==='s' ? (c.s!=null?Math.round(c.s)+' mph':'') : (yr(c)||'');
@@ -137,7 +137,7 @@ function draw(){
       +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></td>'
       +'<td><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park||'')+'</a></td>'
       +'<td class="sub opt">'+mk+'</td><td class="num">'+esc(val)+'</td>'
-      +'<td><span class="st '+(cl?'off">Closed '+esc(cl):'on">Operating')+'</span></td></tr>';
+      +'<td class="opt"><span class="st '+(cl?'off">Closed '+esc(cl):'on">Operating')+'</span></td></tr>';
   }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Nothing matches.</td></tr>';
   $('more').hidden = list.length<=CAP;
   $('more').textContent='Showing the first '+CAP+' — search or filter to narrow it.';

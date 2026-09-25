@@ -3634,6 +3634,26 @@ database's front door and the people. Explore did NOT get a tab (five is the cei
   for now"). The visible text still says "count" in places (Home line, /log headline "Add to
   your count.", "View your count" on Profile); only the nav label and URL are Credits.
 
+## /coasters and /parks; /credits is only ever a rider's (2026-09-25)
+
+Carter agreed the breakdown: the site's data gets its own pages and Credits stops doubling
+as "Database".
+- **coasters.html** (`/coasters`): every coaster, `.dtable`, filters (search, status, type,
+  company, location, ridden/not when signed in) and sorts (A–Z, newest, oldest, tallest,
+  fastest — the number column follows the sort). Draws the first 300 rows. Rows open in place
+  (`openableCoasters`). A link can preset filters: `?status=open&manu=Intamin&sort=h`.
+- **parks.html** (`/parks`): every park — location, operating, defunct, and "You: 16 of 20".
+  Filters: search, location, visited/not; sorts A–Z, most coasters, nearest (asks for
+  location only when chosen).
+- **/credits with no rider** now forwards: signed in, to your own credits; otherwise to
+  /coasters, or /parks for `?view=parks`. Its everyone code is still in the file but never
+  runs. The rider badge on /credits no longer offers "Global" (`GLOBAL_PAGES` is rankings only).
+- `_redirects`: the old `/coasters → /credits?view=list` 301 is gone (coasters.html serves it);
+  `/user/:name/coasters` still 301s to that rider's list.
+- Home's Coasters/Parks cards, the park/coaster "not found" links and crumbs, and the footer
+  (Home · Coasters · Parks · Manufacturers · Locations · Map, plus Add new / Edit · QC by role)
+  all point at the new pages.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**
