@@ -352,13 +352,20 @@
   .srow .chev{color:var(--muted);flex:none;align-self:center;transition:transform .15s ease}
   .stog[aria-expanded="true"] .chev{transform:rotate(180deg)}
   /* Scoped to .srow: .who is also a class on the profile and the rider rows. */
-  .srow .who{border-top:1px solid var(--line);padding:2px 14px 6px}
-  .srow .wrow{display:flex;align-items:center;justify-content:space-between;gap:12px;
-              padding:9px 0;text-decoration:none;color:var(--fg);
-              border-bottom:1px solid var(--line)}
-  .srow .wrow:last-child{border-bottom:0}
-  .srow .wrow:hover .wn{color:var(--accent2)}
-  .srow .wn{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Who ranked it: a row of chips along the bottom, not a column down the
+     side (Carter, 2026-09-25: "put people along the bottom to save space"). */
+  .srow .who{border-top:1px solid var(--line);padding:9px 12px 11px;display:flex;flex-wrap:wrap;gap:6px}
+  .srow .who[hidden]{display:none}
+  .srow .wrow{display:inline-flex;align-items:baseline;gap:6px;padding:5px 11px;border:1px solid var(--line);
+    border-radius:999px;background-color:var(--soft);text-decoration:none;color:var(--fg)}
+  .srow .wrow:hover{border-color:var(--accent2)}
+  /* The name, park, location and model are links; the rest of the row opens
+     and closes it, and so does the chips' background. */
+  .srow{cursor:pointer}
+  .srow .n a{color:inherit;text-decoration:none}
+  .srow .n a:hover{color:var(--accent2);text-decoration:underline}
+
+  .srow .wn{font-size:.84rem}
   .srow .wp{color:var(--accent2);font-weight:700;font-size:.84rem;flex:none;
             font-variant-numeric:tabular-nums}
   .note{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:62ch;
@@ -666,28 +673,20 @@ if(!slug){
         // Ranked, so number them: this is a top ten and the position is half of
         // what it says. /rankings/all numbers the same way.
         return '<div class="srow">'
-          +'<button class="stog" type="button" aria-expanded="false">'
+          +'<div class="stog" role="button" tabindex="0" aria-expanded="false">'
             +'<span class="pos">'+(i+1)+'</span>'
-            +'<span class="n"><b>'+esc(c.name)+'</b><span class="sub">'
-              +'<span class="pl">'+esc(c.park)+(c.loc?' \u00b7 '+esc(c.loc):'')+'</span>'
-              +(mk?'<span class="mk">'+esc(mk)+'</span>':'')+'</span></span>'
+            +srowName(c, mk)
             +'<span class="meta"><b>'+t.n+' lists</b>avg #'+(Math.round(avg*10)/10)+'</span>'
             +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" '
               +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
               +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
-          +'</button>'
+          +'</div>'
           +'<div class="who" hidden>'+full+'</div>'
           +'</div>';
       }).join('');
       // Independent toggles: closing the row you opened this one to compare
       // against is the one thing you never want.
-      Array.prototype.forEach.call($('shared').querySelectorAll('.stog'), function(btn){
-        btn.addEventListener('click', function(){
-          var open = btn.getAttribute('aria-expanded') === 'true';
-          btn.setAttribute('aria-expanded', open ? 'false' : 'true');
-          btn.parentNode.querySelector('.who').hidden = open;
-        });
-      });
+      srowToggles($('shared'));
     } else {
       $('shared_sub').textContent='';
       $('shared').innerHTML='<div class="note">'+(started.length<2
@@ -2025,6 +2024,26 @@ function save(then){
       }
       $('status').textContent='Save failed: '+e.message;
     });
+}
+
+// A shared-ranking row: the name, park, location and model each go to their
+// page; a tap anywhere else on the row — the chips' background included —
+// opens or closes it (Carter, 2026-09-25). A rider chip goes to their list.
+function srowName(c, mk){
+  var L=function(t,h){ return h ? '<a href="'+esc(h)+'">'+esc(t)+'</a>' : esc(t); };
+  return '<span class="n"><b>'+L(c.name, c.park ? CoasterHub.coasterHref(c) : '')+'</b><span class="sub">'
+    +'<span class="pl">'+L(c.park, c.park ? CoasterHub.parkHref(c.park) : '')
+    +(c.loc?' \u00b7 '+L(c.loc.replace(/, US$/,''), CoasterHub.locationHref(c.loc)):'')+'</span>'
+    +(mk?'<span class="mk">'+L(mk, c.manu ? CoasterHub.makerHref(c.manu, c.model||null) : '')+'</span>':'')+'</span></span>';
+}
+function srowToggles(root){
+  Array.prototype.forEach.call(root.querySelectorAll('.srow'), function(row){
+    var tog=row.querySelector('.stog'), who=row.querySelector('.who');
+    var flip=function(){ var open=tog.getAttribute('aria-expanded')==='true';
+      tog.setAttribute('aria-expanded', open?'false':'true'); who.hidden=open; };
+    row.addEventListener('click', function(e){ if(e.target.closest('a')) return; flip(); });
+    tog.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); flip(); } });
+  });
 }
 </script>
 </body>

@@ -1516,7 +1516,7 @@
             ? '<p class="srchhint">Try a coaster, a park, a maker like <b>B&amp;M</b>, a state, or a rider.</p>'
             : hits.length
               ? hits.map(function (h, i) {
-                  return '<a class="srow' + (i === 0 ? " hi" : "") + (h.gone ? " gone" : "") + '" href="' + searchEsc(h.h) + '">'
+                  return '<a class="srchrow' + (i === 0 ? " hi" : "") + (h.gone ? " gone" : "") + '" href="' + searchEsc(h.h) + '">'
                     + '<span class="st"><b>' + searchEsc(h.t) + '</b><span>' + searchEsc(h.sub) + '</span></span>'
                     + '<span class="sk">' + SEARCH_KINDS[h.k] + '</span></a>';
                 }).join("")
@@ -1525,7 +1525,7 @@
       };
       input.addEventListener("input", draw);
       input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") { var a = res.querySelector(".srow"); if (a) location.href = a.getAttribute("href"); }
+        if (e.key === "Enter") { var a = res.querySelector(".srchrow"); if (a) location.href = a.getAttribute("href"); }
         else if (e.key === "Escape") closeSearch();
       });
       searchEl.querySelector(".srchx").addEventListener("click", closeSearch);

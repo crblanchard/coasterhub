@@ -407,13 +407,13 @@ html.srchopen{overflow:hidden}
 .srchx{flex:none;background-color:transparent;border:0;color:var(--accent2);font-weight:600;font-size:.9rem;cursor:pointer;padding:6px 4px}
 .srchres{overflow:auto;overscroll-behavior:contain;padding:6px}
 .srchhint{color:var(--muted);font-size:.9rem;margin:10px 12px}
-.srow{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;text-decoration:none;color:var(--fg)}
-.srow:hover,.srow.hi{background-color:var(--soft)}
-.srow .st{flex:1;min-width:0;display:flex;flex-direction:column}
-.srow .st b{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.srow .st span{color:var(--muted);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.srow.gone .st b{color:var(--muted)}
-.srow .sk{flex:none;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.srchrow{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;text-decoration:none;color:var(--fg)}
+.srchrow:hover,.srchrow.hi{background-color:var(--soft)}
+.srchrow .st{flex:1;min-width:0;display:flex;flex-direction:column}
+.srchrow .st b{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srchrow .st span{color:var(--muted);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srchrow.gone .st b{color:var(--muted)}
+.srchrow .sk{flex:none;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 @media (max-width:680px){
   .srch{padding:0;background:var(--bg)}
   .srchbox{max-width:none;max-height:none;height:100%;border:0;border-radius:0;box-shadow:none}
