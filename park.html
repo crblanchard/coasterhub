@@ -288,13 +288,14 @@ function body(c){
   if(c.model) spec(c.manu?'<a href="'+esc(CoasterHub.makerHref(c.manu,c.model))+'">'+esc(c.model)+'</a>':esc(c.model),'Model');
   if(c.opened) spec(esc(when(c.opened,c.openedPrec)),'Opened'); else if(c.yr) spec(esc(c.yr),'Opened');
   if(c.closed) spec(esc(when(c.closed,c.closedPrec)),'Closed');
-  var mine=MYR && MYR[c.id];
-  if(mine){ spec(mine.first?esc(CoasterHub.mdy(mine.first)):'—','First ridden'); spec(esc(mine.n),'Your rides'); }
   if(c.h!=null) spec(Math.round(c.h),'Height (ft)');
   if(c.s!=null) spec(Math.round(c.s),'Speed (mph)');
   if(c.l!=null) spec(Math.round(c.l).toLocaleString(),'Length (ft)');
   if(c.inv!=null) spec(esc(c.inv),'Inversions');
   if(c.dur!=null){ var d=Math.round(c.dur), m=Math.floor(d/60), r=d%60; spec(m?(m+':'+(r<10?'0':'')+r):(d+'s'),'Ride time'); }
+  // Yours, below every fact about the coaster itself (Carter, 2026-09-25).
+  var mine=MYR && MYR[c.id];
+  if(mine){ if(mine.first) spec(esc(CoasterHub.mdy(mine.first)),'First ridden'); spec(esc(mine.n),'Your rides'); }
   var was=CoasterHub.formerNames(LIST, c.id, c.name);
   var who=WHO[c.id];
   return (was.length?'<p class="former">Formerly '+was.map(function(n){ return '<b>'+esc(n)+'</b>'; }).join(', ')+'.</p>':'')

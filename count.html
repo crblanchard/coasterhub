@@ -325,6 +325,10 @@
     #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmodel)::before{
       content:attr(data-label);color:var(--muted);flex:none}
     #c_body td.muted[data-k=park],#c_body td.muted[data-k=loc]{color:var(--muted)}
+    /* An opened card leaves out the lines with nothing on file rather than
+       listing em-dashes (Carter, 2026-09-25: "hide rows that don't have
+       data"). One .muted more specific than the rule above, so it wins. */
+    #c_body tr.open td.muted:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmodel){display:none}
   }
 </style>
 </head>
@@ -1027,9 +1031,12 @@ var CreditList=(function(){
   var ALLCOLS=[
     {k:'name',t:'Name',cls:'name'},{k:'park',t:'Park'},{k:'loc',t:'Location'},
     {k:'type',t:'Type'},{k:'manu',t:'Manufacturer'},{k:'model',t:'Model'},
-    {k:'yr',t:'Opened',num:true},{k:'first',t:'First Ridden'},{k:'rides',t:'Rides',num:true},
+    // The coaster's own facts first, then yours (First Ridden, Rides) below
+    // them, and "Inversions" spelled out (Carter, 2026-09-25).
+    {k:'yr',t:'Opened',num:true},
     {k:'h',t:'Height (ft)',num:true},{k:'s',t:'Speed (mph)',num:true},
-    {k:'l',t:'Length (ft)',num:true},{k:'inv',t:'Inv',num:true},{k:'status',t:'Status'}
+    {k:'l',t:'Length (ft)',num:true},{k:'inv',t:'Inversions',num:true},
+    {k:'first',t:'First Ridden'},{k:'rides',t:'Rides',num:true},{k:'status',t:'Status'}
   ];
 
   function open(){
