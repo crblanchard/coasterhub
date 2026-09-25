@@ -259,8 +259,8 @@ createServer(async (req, res) => {
   // than a route that works in neither.
   const st = p.match(/^(\/user\/[^/]+)\/stats$/);
   if (st) { res.writeHead(301, { location: st[1] }); res.end(); return; }
-  const rd = p.match(/^(\/user\/[^/]+)?\/rides$/);
-  if (rd) { res.writeHead(301, { location: (rd[1] || "") + "/count" }); res.end(); return; }
+  const rd = p.match(/^(\/user\/[^/]+)?\/(rides|count)$/);
+  if (rd) { res.writeHead(301, { location: (rd[1] || "") + "/credits" + url.search }); res.end(); return; }
   if (p === "/stats") { res.writeHead(301, { location: "/" }); res.end(); return; }
   if (p === "/home" || p === "/riders") { res.writeHead(301, { location: "/" }); res.end(); return; }
   if (p === "/database") { res.writeHead(301, { location: "/qc" }); res.end(); return; }

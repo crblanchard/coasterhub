@@ -3467,7 +3467,11 @@ for now"*.
   **Map left the header** — it is in the footer, on Home (under the database line), and
   Profile's "View your map".
 - "Count" is **Credits** everywhere it is a label (tabs, header, footer, /count's titles).
-  The URL and the `count` key did not change.
+  The internal page key is still `count` (PER_RIDER, data-nav, TABS). **The URL moved
+  the same day**: count.html is credits.html, `/credits` and `/user/<slug>/credits`;
+  `userPageHref` is the one place that turns the `count` key into the `credits` segment.
+  `/count`, `/user/:name/count` (and the older /rides, /coasters) 301 there, query kept.
+  `credits` is a reserved slug in worker.js.
 - Rankings and Credits open on YOUR list once signed in: `applyRiderLinks` targets
   `myOwn || forSlug` for them (Profile was already `myOwn`). Signed out they still follow
   the page you are reading. The hero rider badge is how you look at someone else's.

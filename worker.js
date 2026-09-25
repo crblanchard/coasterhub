@@ -667,7 +667,7 @@ const RESERVED_SLUGS = new Set(["api","user","users","admin","new","all","everyo
   // "park" and "coaster" joined the list when /park/<park>/<coaster> landed:
   // a rider called Park would shadow every one of those pages.
   "park", "coaster", "ride",
-  "home","stats","rides","count","rankings","coasters","parks","log","add","edit","import",
+  "home","stats","rides","count","credits","rankings","coasters","parks","log","add","edit","import",
   "changes","database","qc","sitemap","index","account","accounts","login","logout",
   "signup","signin","profile","riders","me","auth","session","settings"]);
 function slugify(s) {

@@ -552,8 +552,11 @@
     // Nobody picked: the page's own everyone view. A profile needs a person, and
     // with nobody signed in the useful answer is the page that gets you one —
     // /account, which bounces a signed-in visitor to their own page anyway.
-    if (!slug) return page === "profile" ? "/account" : "/" + page;
-    return page === "profile" ? "/user/" + slug : "/user/" + slug + "/" + page;
+    // The "count" page's URL says credits (2026-09-25); the key stayed "count"
+    // everywhere else, so this is the only place that translates it.
+    var seg = page === "count" ? "credits" : page;
+    if (!slug) return page === "profile" ? "/account" : "/" + seg;
+    return page === "profile" ? "/user/" + slug : "/user/" + slug + "/" + seg;
   }
 
   // ---- Parks and coasters have URLs too ------------------------------------
@@ -1135,7 +1138,7 @@
     { k: "riders",   label: "Home",     path: "/",         fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
     { k: "log",      label: "Log",      path: "/log",      fixed: true, plus: true },
-    { k: "count",    label: "Credits",  path: "/count" },
+    { k: "count",    label: "Credits",  path: "/credits" },
     { k: "profile",  label: "Profile",  path: "/account" }
   ];
   // Five is the ceiling, and this is five: measured at 320px (the narrowest

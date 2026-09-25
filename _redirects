@@ -50,7 +50,7 @@
 /locations            /location   200
 /location/:loc        /location   200
 
-/user/:name/count     /count      200
+/user/:name/credits   /credits    200
 /user/:name/rankings  /rankings   200
 /user/:name/map       /map        200
 /user/:name/add       /add        200
@@ -71,10 +71,15 @@
 # The page is /count now, not /rides — it holds a rider's whole count (the day
 # log, every ride, and the full credit list), and "rides" was one of the three
 # things on it. Same reasoning as the profile losing /stats.
-/user/:name/rides     /user/:name/count            301
-/rides                /count                       301
+/user/:name/rides     /user/:name/credits          301
+/rides                /credits                     301
+
+# ...and /credits since 2026-09-25, to match the label everywhere else.
+# (count.html became credits.html; the internal page key is still "count".)
+/user/:name/count     /user/:name/credits          301
+/count                /credits                     301
 
 # /coasters was folded into the count page as its "Full list" view.
 # 301, not 200: the old URLs should settle on the new one.
-/user/:name/coasters  /user/:name/count?view=list  301
-/coasters             /count?view=list             301
+/user/:name/coasters  /user/:name/credits?view=list  301
+/coasters             /credits?view=list             301
