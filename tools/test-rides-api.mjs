@@ -2583,8 +2583,8 @@ async function main() {
     const waits = [];
     const cctx = { waitUntil(p) { waits.push(p); } };
     const settle = () => Promise.all(waits.splice(0));
-    const get = async (db, path, cookie) => {
-      const headers = cookie ? { cookie } : {};
+    const get = async (db, path, cookie, extra) => {
+      const headers = Object.assign(cookie ? { cookie } : {}, extra || {});
       const res = await worker.fetch(new Request("https://coasterhub.org" + path, { headers }),
         { DB: new FakeD1(db), ADMIN_PASSWORD: PW }, cctx);
       await settle();
@@ -2611,11 +2611,15 @@ async function main() {
       check("a query string reads the same entry rather than making another",
         store.size === 1 && r.coasters.length === before, store.size + " entries");
 
+      // Since 2026-09-25 a signed-in read uses the cache too (the list is the
+      // same for everyone); only a read that asks for no-cache skips it, which
+      // is what /edit and app.js's post-write reads send.
       r = await get(db, "/api/coasters", cookie);
-      check("a signed-in read bypasses it and sees the new row",
+      check("a signed-in read is served from the cache as well",
+        hits === 3 && r.coasters.length === before, hits + " hits, " + r.coasters.length + " coasters");
+      r = await get(db, "/api/coasters", cookie, { "cache-control": "no-cache" });
+      check("a no-cache read bypasses it and sees the new row",
         r.coasters.length === before + 1, r.coasters.length + " coasters");
-      check("...and is not stored, so it cannot be served to anybody else",
-        store.size === 1, store.size + " entries");
 
       // A write through the API, which is what afterWrite hangs off.
       const res = await worker.fetch(new Request("https://coasterhub.org/api/coaster", {
@@ -2632,6 +2636,30 @@ async function main() {
     } finally {
       delete globalThis.caches;
     }
+  }
+
+  // ---- /api/summary, /api/rides-all, /api/park-riders (2026-09-25) --------
+  {
+    const db = freshDb();
+    db.exec("INSERT OR IGNORE INTO users (slug,name,mode) VALUES ('ann','Ann','rides'),('bo','Bo','rides')");
+    db.exec("INSERT INTO coasters (id,name,park,type) VALUES (901,'Alpha','Summ Park','Steel'),(902,'Beta','Summ Park','Wood'),(903,'Gamma','Other','Steel')");
+    db.exec("INSERT INTO rides (user_slug,coaster_id,d) VALUES ('ann',901,'2024-01-01'),('ann',901,'2024-01-01'),('ann',902,NULL),('bo',903,NULL)");
+    let r = await call(db, "GET", "/api/summary");
+    const ann = (r.data.users || []).find(u => u.slug === "ann"), bo = (r.data.users || []).find(u => u.slug === "bo");
+    check("summary: credits are distinct coasters, rides counted when a re-ride exists",
+      ann && ann.credits === 2 && ann.rides === 3 && ann.ranked === 0, JSON.stringify(ann));
+    check("summary: no re-ride on record means rides is null", bo && bo.credits === 1 && bo.rides === null, JSON.stringify(bo));
+    r = await call(db, "GET", "/api/rides-all");
+    const a2 = (r.data.riders || []).find(x => x.slug === "ann");
+    check("rides-all: one answer, each rider's log in the /api/rides shape",
+      a2 && a2.user === "Ann" && a2.rides.length === 3 && a2.rides[0].c === 901 && "i" in a2.rides[0], JSON.stringify(a2));
+    r = await call(db, "GET", "/api/park-riders?park=" + encodeURIComponent("Summ Park"));
+    check("park-riders: who rode each coaster at the park, with ride counts",
+      r.data.riders && r.data.riders[901][0].slug === "ann" && r.data.riders[901][0].n === 2
+      && r.data.riders[902].length === 1 && !r.data.riders[903], JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/coasters");
+    const g = (r.data.coasters || []).find(c => c.id === 903);
+    check("/api/coasters leaves empty fields out", g && !("h" in g) && !("closed" in g) && g.name === "Gamma", JSON.stringify(g));
   }
 
   console.log("\n" + pass + " passed, " + fail + " failed\n");

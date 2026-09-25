@@ -16,7 +16,7 @@
  * Coasters + user files are fetched together so credit ids stay consistent
  * with any merges. Compact one-line JSON is used to match the existing files.
  */
-import { writeFile } from "node:fs/promises";
+import { writeFile, readFile, readdir, unlink } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -47,10 +47,10 @@ async function main() {
   await writeFile(join(ROOT, "parks.json"), compact(parks));
   console.log(`  parks.json     <- ${Object.keys(parks).length} parks`);
 
-  let slugs = FALLBACK_SLUGS;
+  let slugs = FALLBACK_SLUGS, fromApi = false;
   try {
     const u = await getJSON("/api/users");
-    if (u.users && u.users.length) slugs = u.users.map((x) => x.slug);
+    if (u.users && u.users.length) { slugs = u.users.map((x) => x.slug); fromApi = true; }
   } catch (e) {
     console.log("  (no /api/users — falling back to the built-in rider list)");
   }
@@ -68,6 +68,24 @@ async function main() {
     const n = (user.rides || user.credits || []).length;
     await writeFile(join(ROOT, slug + ".json"), compact(user));
     console.log(`  ${slug}.json`.padEnd(17) + `<- ${n} ${user.rides ? "rides" : "credits"}`);
+  }
+
+  // A rider who renames (claiming picks a new username) gets a new file, and
+  // the old one used to sit here frozen for ever — four of them did until
+  // 2026-09-25. Delete any rider file whose slug the API no longer lists. A
+  // rider file is recognised by its shape ({user, rides}), never by name, so
+  // coasters.json, parks.json and map-cities.json are never touched.
+  // ONLY when the list came from the API: the built-in fallback list is old,
+  // and pruning against it would delete every current rider's file.
+  const keep = new Set(slugs.map((x) => x + ".json"));
+  for (const f of fromApi ? await readdir(ROOT) : []) {
+    if (!f.endsWith(".json") || keep.has(f)) continue;
+    let j = null;
+    try { j = JSON.parse(await readFile(join(ROOT, f), "utf8")); } catch (e) { continue; }
+    if (j && typeof j === "object" && !Array.isArray(j) && "user" in j && Array.isArray(j.rides)) {
+      await unlink(join(ROOT, f));
+      console.log(`  ${f}`.padEnd(17) + "<- removed (no rider has this slug now)");
+    }
   }
 
   console.log("Done. Review `git diff`, then commit if it looks right.");

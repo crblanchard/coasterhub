@@ -509,10 +509,19 @@ COMBINED = !slug;
 // (no static file yet, API down) contributes nothing rather than failing the page.
 (slug ? Promise.resolve([{slug:slug}]) : CoasterHub.fetchUsers().then(function(){return CoasterHub.USERS;}))
 .then(function(WHO){
-return Promise.all([
-  Promise.all(WHO.map(function(u){
+// One rider: their log. Everyone: every log in ONE request (/api/rides-all,
+// 2026-09-25), falling back to one request per rider if that cannot answer.
+function perRider(){
+  return Promise.all(WHO.map(function(u){
     return CoasterHub.fetchRides(u.slug).catch(function(){ return {user:u.name||u.slug,rides:[]}; });
-  })),
+  }));
+}
+return Promise.all([
+  slug ? perRider() : CoasterHub.fetchAllRides().then(function(all){
+    if(!all) return perRider();
+    var by={}; all.forEach(function(x){ by[x.slug]=x; });
+    return WHO.map(function(u){ var x=by[u.slug]; return x ? {user:x.user, rides:x.rides} : {user:u.name||u.slug, rides:[]}; });
+  }),
   CoasterHub.fetchCoasters(),
   CoasterHub.fetchParks(),
   // Signed out is not a failure here, it is an answer: no ticks, no fraction.

@@ -339,6 +339,16 @@ function ticks(mine){
 // rider whose log cannot be read contributes nothing rather than failing.
 function riders(mine){
   var here={}; mine.forEach(function(c){ here[c.id]=1; });
+  // Who rode what here, in ONE request (/api/park-riders, 2026-09-25); if that
+  // cannot answer, every rider's log as before.
+  return fetch('/api/park-riders?park='+encodeURIComponent(PARK)).then(function(r){ return r.ok ? r.json() : null; })
+    .catch(function(){ return null; }).then(function(j){
+      if(!j || !j.riders) return ridersSlow(mine, here);
+      Object.keys(j.riders).forEach(function(id){ WHO[id]=j.riders[id]; });
+      showRiders(mine, Object.keys(WHO).reduce(function(o,id){ o[id]=WHO[id].length; return o; },{}));
+    });
+}
+function ridersSlow(mine, here){
   return CoasterHub.fetchUsers().then(function(){
     return Promise.all(CoasterHub.USERS.map(function(u){
       return CoasterHub.fetchRides(u.slug).then(function(log){ return {u:u, log:log}; })
@@ -360,8 +370,12 @@ function riders(mine){
         (WHO[id]=WHO[id]||[]).push({slug:x.u.slug, name:x.u.name||x.u.slug, n:laps[id]});
       });
     });
-    // Counts on the rows. The number is riders, not rides: this is a park page,
-    // and "3" here means three people have been on it.
+    showRiders(mine, perCoaster);
+  });
+}
+// Counts on the rows, then the open rows redrawn. The number is riders, not
+// rides: "3" here means three people have been on it.
+function showRiders(mine, perCoaster){
     Object.keys(perCoaster).forEach(function(id){
       var el=document.querySelector('[data-rid="'+id+'"]');
       if(el) el.textContent=perCoaster[id]+(perCoaster[id]===1?' rider':' riders');
@@ -371,10 +385,8 @@ function riders(mine){
     Array.prototype.forEach.call(document.querySelectorAll('details.citem[open]'), function(d){
       var c=byId(Number(d.getAttribute('data-c'))); if(c) d.querySelector('.cbody').innerHTML=body(c);
     });
-    // The "Riders who have been here" strip that used to follow the list is
-    // gone (Carter, 2026-09-25: "remove clutter"): each coaster now opens onto
-    // its own riders, so the strip was saying the same thing a second time.
-  });
+    // (The "Riders who have been here" strip under the list was removed
+    // 2026-09-25: each coaster opens onto its own riders.)
 }
 </script>
 </body>

@@ -206,29 +206,36 @@ var following = CoasterHub.me().then(function(acct){
 // rider, because a ranking is not part of a rider's ride data.
 CoasterHub.fetchUsers().then(function(){
   var users = CoasterHub.USERS.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
-  return Promise.all([
-    following,
-    CoasterHub.fetchCoasters(),
-    CoasterHub.fetchParks(),
-    Promise.all(users.map(function(u){
-      // A rider with no data yet is a rider with an empty count, not an error:
-      // a brand-new account would otherwise take the whole page down with it.
-      return CoasterHub.fetchUser(u.slug).catch(function(){ return { user: u.name, rides: [] }; });
-    })),
-    Promise.all(users.map(function(u){
-      return fetch('/api/rankings/' + encodeURIComponent(u.slug))
-        .then(function(r){ return r.ok ? r.json() : { order: [] }; })
-        .catch(function(){ return { order: [] }; });
-    }))
-  ]).then(function(res){
-    var fol = res[0], coasters = res[1].coasters, parks = res[2], datas = res[3], ranks = res[4];
+  // Each rider's credits, rides and ranked count in ONE request (/api/summary,
+  // 2026-09-25). If that cannot answer (API down), fall back to what this page
+  // used to do: every rider's log and ranking, one pair of requests each.
+  var counts = CoasterHub.fetchSummary().then(function(sum){
+    if (sum) {
+      var by = {}; sum.forEach(function(x){ by[x.slug] = x; });
+      return users.map(function(u){ var x = by[u.slug] || {};
+        return { credits: x.credits || 0, rides: x.rides == null ? null : x.rides, ranked: x.ranked || 0 }; });
+    }
+    return Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(),
+      Promise.all(users.map(function(u){
+        return CoasterHub.fetchUser(u.slug).catch(function(){ return { user: u.name, rides: [] }; }); })),
+      Promise.all(users.map(function(u){
+        return fetch('/api/rankings/' + encodeURIComponent(u.slug))
+          .then(function(r){ return r.ok ? r.json() : { order: [] }; })
+          .catch(function(){ return { order: [] }; }); }))
+    ]).then(function(r){
+      return users.map(function(u, i){ var k = CoasterHub.computeStats(r[0].coasters, r[1], r[2][i]).kpi;
+        return { credits: k.credits || 0, rides: k.rides, ranked: (r[3][i].order || []).length }; });
+    });
+  });
+  return Promise.all([following, CoasterHub.fetchCoasters(), counts]).then(function(res){
+    var fol = res[0], coasters = res[1].coasters, cnt = res[2];
     var nOpen = coasters.filter(function(c){ return !c.closed; }).length;
     document.getElementById('db_open').textContent = nOpen.toLocaleString();
     document.getElementById('db_gone').textContent = (coasters.length - nOpen).toLocaleString();
     document.getElementById('dbline').hidden = false;
     var rows = users.map(function(u, i){
-      var st = CoasterHub.computeStats(coasters, parks, datas[i]);
-      return { u: u, st: st, ranked: (ranks[i].order || []).length, credits: st.kpi.credits || 0 };
+      return { u: u, st: { kpi: { credits: cnt[i].credits, rides: cnt[i].rides } },
+               ranked: cnt[i].ranked, credits: cnt[i].credits };
     });
     // Most coasters RANKED first — the number on the right of each row
     // (Carter, 2026-09-24, second pass: "sort top users by number of rides

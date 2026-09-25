@@ -356,6 +356,21 @@
     return p;
   }
   function fetchCoasters() { return shared("coasters", "/api/coasters", "/coasters.json"); }
+  // The summaries (2026-09-25): one request instead of one per rider. Both
+  // resolve to null when the API cannot answer, and the caller falls back to
+  // reading each rider's log, which also works from the static files.
+  function fetchSummary() {
+    return fetch("/api/summary", wroteLately() ? LIVE : undefined)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return (j && j.users) || null; })
+      .catch(function () { return null; });
+  }
+  function fetchAllRides() {
+    return fetch("/api/rides-all", wroteLately() ? LIVE : undefined)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return (j && j.riders) || null; })
+      .catch(function () { return null; });
+  }
   function fetchParks() { return shared("parks", "/api/parks", "/parks.json"); }
   function fetchUser(slug) { return fetchJSON("/api/user/" + slug, "/" + slug + ".json", LIVE); }
 
@@ -1223,7 +1238,7 @@
               slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
-              fetchRides: fetchRides, fetchUsers: fetchUsers, mergeUsers: mergeUsers, noteWrite: noteWrite,
+              fetchRides: fetchRides, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;

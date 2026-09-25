@@ -3424,9 +3424,31 @@ Carter asked for speed and clutter advice, then *"can you remove clutter"*:
   Worker's `/api/admin/seed` and app.js's offline `USERS` seed now name `colegarff`,
   `flyingdino`, `seanpcoakley` and `bugmonster1` (the local dev slugs stay cole/max/sean/keltan).
 
-Not done yet, and the bigger speed wins: summary endpoints so the home page, park pages and the
-everyone count stop fetching every rider's full log (one request per rider today), and edge-caching
-`/api/coasters` for signed-in readers too (it bypasses the cache on any cookie).
+**Speed, the same day** (Carter: *"1 and 2 to start plus leftover file removal"*):
+
+- **Summary endpoints** (worker.js `getSummary` / `getAllRides` / `getParkRiders`):
+  `GET /api/summary` (per rider: credits, rides — null unless a re-ride exists, the computeStats
+  rule — and ranked), `GET /api/rides-all` (every log, `/api/rides` shape) and
+  `GET /api/park-riders?park=` (`{riders:{coasterId:[{slug,name,n}]}}`). Home, the everyone view of
+  /count and the park page each make ONE request now instead of one (home: two) per rider. Each
+  page keeps the old per-rider path as its fallback when the endpoint cannot answer (API down →
+  static files). `CoasterHub.fetchSummary()` / `fetchAllRides()` resolve to null on failure.
+  Checked: summary numbers equal computeStats' for all five dev riders.
+- **Edge cache for signed-in readers:** `edgeUsable()` no longer skips a request because it has a
+  cookie; it skips one that sends `Cache-Control: no-cache` / `Pragma: no-cache`, which is what
+  `fetch(…, {cache:"no-store"})` sends — /edit on every read, app.js for ten minutes after a write
+  (`noteWrite`). `/api/summary` and `/api/rides-all` are edge-cached for 60s and purged by any write
+  like the lists.
+- **Slimmer list:** `coasterRow()` leaves empty fields out instead of sending null (readers all
+  test `== null` or truthiness). The next static sync shrinks `coasters.json` the same way.
+- **Leftover files deleted:** `logo.png`, `logo-original.png` (the old logo's rasters),
+  `tools/import-captaincoaster.js` + `coaster-overrides.json` (a scraper for a site we must not
+  scrape), `tools/build-aliases.mjs` (a July one-off), `tools/import-credits.js` (superseded by
+  /import). `tools/sync-static.mjs` now deletes a rider file (recognised by its `{user, rides}`
+  shape) whose slug the API no longer lists — only when the list came from the API.
+
+Still open: #3 (load Chart.js and Leaflet on the profile only when their sections are opened) and
+#4 (shorter comments — Carter wants them kept, trimmed to what a fresh session needs).
 
 ---
 

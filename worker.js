@@ -82,7 +82,11 @@ const LIST_CACHE = { "cache-control": "public, max-age=300" };
 // rather than a bug. `caches` is also absent in the node:sqlite test harness
 // and inert on a workers.dev hostname, so every call is guarded: a cache that
 // is not there must cost correctness nothing.
-const EDGE_CACHED = { "/api/coasters": 1, "/api/parks": 1, "/api/clones": 1 };
+const EDGE_CACHED = { "/api/coasters": 1, "/api/parks": 1, "/api/clones": 1,
+                      "/api/summary": 1, "/api/rides-all": 1 };
+// The two summaries change on every ride logged, so they keep a minute, not
+// five. A write purges them with the rest (edgeDrop).
+const SUMMARY_CACHE = { "cache-control": "public, max-age=60" };
 
 // Every table keyed by a coaster id besides rides and aliases. A merge repoints
 // them to the survivor and a delete sweeps them, because a row left pointing at
@@ -100,8 +104,16 @@ function edgeKey(url, path) {
   const u = new URL(url);
   return new Request(u.origin + (path || u.pathname), { method: "GET" });
 }
+// Signed-in readers use the edge cache too since 2026-09-25: these lists are
+// the same for everybody, and skipping the cache for any cookie meant every
+// signed-in page view read ~1,240 rows from D1. What stays fresh is any request
+// that ASKS to be: fetch(..., {cache:"no-store"}) sends Cache-Control: no-cache,
+// which is what /edit sends on every read and what app.js sends for ten
+// minutes after a write (noteWrite). So an editor still sees their own change.
 function edgeUsable(request) {
-  return typeof caches !== "undefined" && caches.default && !request.headers.get("cookie");
+  if (typeof caches === "undefined" || !caches.default) return false;
+  const cc = (request.headers.get("cache-control") || "") + " " + (request.headers.get("pragma") || "");
+  return !/no-cache|no-store/i.test(cc);
 }
 async function edgeGet(request) {
   if (!edgeUsable(request)) return null;
@@ -513,9 +525,12 @@ function passwordProblem(s) {
 const COASTER_FIELDS = ["name","park","type","manu","model","h","s","l","inv","dur","laps","yr","opened","openedPrec","closed","closedPrec"];
 
 // ---- Row <-> API shape helpers -------------------------------------------
+// Empty fields are LEFT OUT, not sent as null (2026-09-25): about a quarter of
+// the 1,100-row list was `"dur":null` and friends. Every reader tests with
+// `== null` or truthiness, so a missing key reads the same as a null one.
 function coasterRow(r) {
   const o = { id: r.id };
-  for (const f of COASTER_FIELDS) o[f] = r[f] === undefined ? null : r[f];
+  for (const f of COASTER_FIELDS) if (r[f] != null && r[f] !== "") o[f] = r[f];
   return o;
 }
 
@@ -592,6 +607,41 @@ async function getUser(env, slug) {
 // The rider list lives in D1, not only in the USERS array in app.js, so someone
 // added on /log or /import can be picked and written to straight away instead of
 // waiting for a deploy. app.js still ships USERS as the offline fallback.
+async function getSummary(env) {
+  const users = await getUsers(env);
+  const { results: rc } = await env.DB.prepare(
+    "SELECT r.user_slug AS s, COUNT(DISTINCT r.coaster_id) AS credits, COUNT(*) AS n " +
+    "FROM rides r JOIN coasters c ON c.id = r.coaster_id GROUP BY r.user_slug").all();
+  let rk = [];
+  try {
+    rk = (await env.DB.prepare("SELECT user_slug AS s, COUNT(*) AS n FROM rankings GROUP BY user_slug").all()).results;
+  } catch (e) { /* no rankings table: nobody has ranked anything */ }
+  const R = {}, K = {};
+  rc.forEach((r) => { R[r.s] = r; });
+  rk.forEach((r) => { K[r.s] = r.n; });
+  return users.map((u) => {
+    const r = R[u.slug] || { credits: 0, n: 0 };
+    return { ...u, credits: r.credits, rides: r.n > r.credits ? r.n : null, ranked: K[u.slug] || 0 };
+  });
+}
+async function getAllRides(env) {
+  const { results: us } = await env.DB.prepare("SELECT slug, name FROM users ORDER BY name").all();
+  const { results } = await env.DB.prepare(
+    "SELECT id, user_slug, coaster_id, d FROM rides ORDER BY user_slug, d IS NULL, d, id").all();
+  const by = {};
+  results.forEach((x) => { (by[x.user_slug] = by[x.user_slug] || []).push({ i: x.id, c: x.coaster_id, d: x.d }); });
+  return us.map((u) => ({ slug: u.slug, user: u.name, rides: by[u.slug] || [] }));
+}
+async function getParkRiders(env, park) {
+  const { results } = await env.DB.prepare(
+    "SELECT r.coaster_id AS c, r.user_slug AS slug, u.name AS name, COUNT(*) AS n " +
+    "FROM rides r JOIN coasters k ON k.id = r.coaster_id JOIN users u ON u.slug = r.user_slug " +
+    "WHERE k.park = ? GROUP BY r.coaster_id, r.user_slug").bind(park).all();
+  const out = {};
+  results.forEach((x) => { (out[x.c] = out[x.c] || []).push({ slug: x.slug, name: x.name || x.slug, n: x.n }); });
+  return out;
+}
+
 async function getUsers(env) {
   // Tried with the profile columns and retried without: this is the one query
   // every page makes, and it must not start failing the moment it runs against
@@ -1555,6 +1605,30 @@ export default {
       if (request.method === "GET" && path === "/api/clones") {
         if (!await haveClones(env)) return json({ groups: [] }, 200, LIST_CACHE);
         return edgePut(ctx, request, json({ groups: await getClones(env) }, 200, LIST_CACHE));
+      }
+      // ---- summaries (2026-09-25) ------------------------------------------
+      // One request where pages used to make one per rider. The home page
+      // fetched every rider's full ride log and ranking just to print "562
+      // credits / 221 ranked"; the park page and the everyone view of /count
+      // fetched every log to see who had ridden what.
+      //
+      // /api/summary: per rider, credits (distinct coasters that still exist),
+      // rides (null unless a re-ride is on record — computeStats' rideCounts
+      // rule) and ranked.
+      if (request.method === "GET" && path === "/api/summary") {
+        return edgePut(ctx, request, json({ users: await getSummary(env) }, 200, SUMMARY_CACHE));
+      }
+      // /api/rides-all: every rider's log in one answer, same row shape as
+      // /api/rides/:slug. For the everyone view of /count.
+      if (request.method === "GET" && path === "/api/rides-all") {
+        return edgePut(ctx, request, json({ riders: await getAllRides(env) }, 200, SUMMARY_CACHE));
+      }
+      // /api/park-riders?park=<name>: for one park, who has ridden each coaster
+      // and how many times. { riders: { <coasterId>: [{slug,name,n}] } }.
+      if (request.method === "GET" && path === "/api/park-riders") {
+        const park = url.searchParams.get("park") || "";
+        if (!park) return err(400, "need ?park=");
+        return json({ riders: await getParkRiders(env, park) });
       }
       // Who exists. Public: the rider pickers and every /user/<slug>/ page read it.
       if (request.method === "GET" && path === "/api/users") return json({ users: await getUsers(env) });

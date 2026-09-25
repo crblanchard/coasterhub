@@ -6,12 +6,10 @@ tools/
 migrations/
 COASTERHUB_HANDOFF.md
 
-# Artwork nothing links to. logo-original.png alone is 1 MB, and all four were
-# being deployed and served on a domain where no page has ever asked for one.
-# They stay in git — logo-original.png is the master the others were cut from —
-# they are just not part of the site any more. Delete a line to put one back.
-logo-original.png
-logo.png
+# Artwork nothing links to: kept in git as the logo's source files (logo.svg is
+# the mark plus wordmark; favicon-small.svg the 16px cut, drawn by
+# tools/render-icons.mjs), not served. The old raster logos were deleted
+# 2026-09-25 with the move to the Solid pin.
 logo.svg
 favicon-small.svg
 

@@ -99,7 +99,7 @@ those files are the fallback, and the sync overwrites them.
 
 ## Traps that have each cost a deploy
 
-- **CRLF files:** `README.md`, `style.css`, `tools/import-credits.js`. Edit them
+- **CRLF files:** `README.md`, `style.css`. Edit them
   in binary mode; a text-mode write flattens the line endings and the diff
   becomes the entire file. (Checked 2026-09-18: `index.html` is LF and has been
   for a while, and `stats.html` is gone — this list used to name both. Check with
