@@ -427,7 +427,7 @@
       <span class="spacer"></span>
       <span class="status" id="status"></span>
       <button class="ghost" id="edit" hidden>Edit</button>
-      <button class="primary" id="save" disabled>Save</button>
+      <button class="primary" id="save">Save</button>
     </div>
 
     <div id="pane_rank">
@@ -788,7 +788,10 @@ function wire(){
   });
   $('gather').onclick=gather;
   buildAddParks();
-  $('save').onclick=save;
+  // Save is also how you leave edit mode (Carter, 2026-09-25: "I can't click
+  // save to exit update mode, it says saved already"). Nothing to save: just
+  // leave. Something to save: leave once it has saved, stay if it failed.
+  $('save').onclick=function(){ if(dirty||prefsDirty) save(doneEditing); else doneEditing(); };
   $('hh_cancel').onclick=closeHH;
   // Rotating the phone changes what fits, so re-decide. fitMeta() clears its
   // own state first, which means speed comes back when there's room again.
@@ -817,6 +820,23 @@ function renderRank(){
   var bs=blocks();
   el.innerHTML=bs.map(function(b,i){
     var one=BYID[b.ids[0]]||{};
+    // A racing pair reads as ONE coaster (Carter, 2026-09-25: "appear as one,
+    // not as a category, but keep the two numbers"): the ride's name, its park
+    // and maker like any row, and the span it holds. No wash, no ×2, nothing
+    // to open. It still moves and deletes as one block.
+    var cat = b.g && !b.g.racing;
+    if (b.g && b.g.racing) return '<div class="rrow" data-i="'+i+'" data-rid="'+b.ids[0]+'">'
+      +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
+      +'<span class="pos rng">'+(b.from+1)+'\u2013'+(b.to+1)+'</span>'
+      +'<span class="nm"><b>'+esc(b.g.name)+'</b><span class="sub">'
+      +'<span class="pl">'+esc(one.park||'')+(one.loc?' \u00b7 '+esc(one.loc):'')+'</span>'
+      +(CoasterHub.maker(one)?'<span class="mk">'+esc(CoasterHub.maker(one))+'</span>':'')
+      +'</span></span>'
+      +'<span class="acts">'
+      +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
+      +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
+      +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
+      +'</span></div>';
     // A run of the same ride is one row: "Batman: The Ride x5", numbered with
     // the span it occupies. It still holds five positions — the list saved is
     // unchanged — you just answer for it once.
@@ -1935,7 +1955,12 @@ function savePrefs(){
     .catch(function(){ return false; });
 }
 
-function save(){
+function doneEditing(){
+  $('mine').classList.add('readonly');
+  $('hero_p').textContent='Judgment-free zone.';
+  closeHH();
+}
+function save(then){
   $('save').disabled=true;
   $('status').className='status'; $('status').textContent='Saving…';
   fetch('/api/rankings/'+slug,{method:'PUT',credentials:'same-origin',
@@ -1956,6 +1981,8 @@ function save(){
       // rather than letting the number move silently on another page.
       $('status').textContent='Saved · '+j.count+' ranked'
         + (j.credited ? ' · +'+j.credited+' credit'+(j.credited>1?'s':'') : '');
+      $('save').disabled=false;
+      if (typeof then==='function') then();
     })
     .catch(function(e){
       $('save').disabled=false;

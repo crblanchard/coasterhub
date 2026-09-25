@@ -3536,6 +3536,12 @@ all unranked sides as one row, or fold beside the ranked one) or **Just this one
 is pulled out of the pair, remembered in prefs, and ranked alone). Racing pairs are left out
 of the load-time `joiners()` prompt — the question is asked at Rank instead.
 
+In the ranked list a racing block is drawn as a plain coaster row (`renderRank`, early return
+on `b.g.racing`): the ride's name, park, maker and the span it holds ("117–118") — no wash, ×2
+or chevron. **Save is now also the way out of edit mode**: always pressable, it saves if
+anything changed and then returns to read-only (`doneEditing`); with nothing to save it just
+leaves. It used to sit disabled after a save, so there was no way out but a reload.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**
