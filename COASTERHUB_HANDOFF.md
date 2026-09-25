@@ -3550,6 +3550,18 @@ opened/closed, height, speed, length, inversions, ride time, and a "Coaster page
 Only open rows render stats. Hidden in edit mode, where a tap on a row is the start of a
 drag. Category rows keep their own expander.
 
+## Model pages were a white screen live (2026-09-25)
+
+Carter: every "The <model> page, with its specs →" link on a maker page gave a plain white
+screen (0 of 5), while all 186 of them work on the dev server. A white screen with no site
+chrome is the assets' empty 404 falling through the Worker: the `_redirects` rewrite
+`/manufacturer/:m/:model /manufacturer 200` evidently never matched on Cloudflare (why is
+still unknown — nothing here can reach coasterhub.org). Rather than guess at `_redirects`,
+the Worker now answers any GET/HEAD that the assets 404 with the page `prettyPage(path)` names
+— the same table as the 200 rules (park/coaster, manufacturer(s), location(s), rankings/all,
+qc/models, /user/*). If another pretty URL ever goes white, add it there. Unverified live
+until Carter taps one; if it is STILL white, the request is not reaching the Worker at all.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**

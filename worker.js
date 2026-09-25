@@ -359,6 +359,22 @@ export const DEV_SKIN =
 
 // Only text/html, and only the <head> — an asset that is not a page is passed
 // straight back, and a page with no </head> is left exactly as it was.
+// The page each pretty URL is served by — the 200 (rewrite) rules of
+// _redirects, as code. Only consulted when the asset lookup 404s.
+function prettyPage(path) {
+  const p = path.replace(/\/+$/, "") || "/";
+  let m;
+  if (/^\/park\/[^/]+\/[^/]+$/.test(p)) return "/coaster";
+  if (/^\/park\/[^/]+$/.test(p)) return "/park";
+  if (p === "/manufacturers" || /^\/manufacturer\/[^/]+(\/[^/]+)?$/.test(p)) return "/manufacturer";
+  if (p === "/locations" || /^\/location\/[^/]+$/.test(p)) return "/location";
+  if (p === "/rankings/all") return "/rankings-all";
+  if (p === "/qc/models") return "/qc-models";
+  if ((m = p.match(/^\/user\/[^/]+\/(credits|rankings|map|add)$/))) return "/" + m[1];
+  if (/^\/user\/[^/]+$/.test(p)) return "/profile";
+  return null;
+}
+
 async function devSkin(res, env) {
   if (!devAs(env)) return res;
   const type = res.headers.get("content-type") || "";
@@ -1572,7 +1588,24 @@ export default {
       });
     }
 
-    if (!path.startsWith("/api/")) return devSkin(await env.ASSETS.fetch(request), env);
+    if (!path.startsWith("/api/")) {
+      const res = await env.ASSETS.fetch(request);
+      // The pretty URLs are _redirects rewrites, and live the model pages
+      // (/manufacturer/<m>/<model>) came back as a blank white screen every time
+      // (Carter, 2026-09-25, "0/5") while working everywhere locally — the
+      // rewrite never matched, so the request fell through to here and got the
+      // assets' empty 404. So the Worker answers any page-shaped 404 itself,
+      // from the same table: whatever _redirects does or does not do, the page
+      // loads. Keep prettyPage() in step with the 200 rules there.
+      if (res.status === 404 && (request.method === "GET" || request.method === "HEAD")) {
+        const page = prettyPage(path);
+        if (page) {
+          const alt = await env.ASSETS.fetch(new Request(new URL(page, request.url).toString(), request));
+          if (alt.ok) return devSkin(alt, env);
+        }
+      }
+      return devSkin(res, env);
+    }
     if (!env.DB) return err(503, "database not bound yet");
 
     try {
