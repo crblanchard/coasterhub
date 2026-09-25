@@ -3397,6 +3397,17 @@ Where "like rcdb" goes next, when he wants it: a park page with a spec table per
 than a list; a type/element index (launched, inverted, wooden); a "tallest / fastest in this
 location" block on location pages; and cross-links everywhere a name appears.
 
+### A park page's coasters open in place (2026-09-25)
+
+Carter: *"on parks make it so you can open and view stats, then below that list of riders. Guess
+we don't need individual roller coaster pages."* Each row on `park.html` is a `<details>`
+(`.citem`, summary `.crow`, the row the link used to be): opening it shows the coaster's former
+names, a `.specsheet` of what is on file (maker and model linked, type, height, speed, length,
+inversions, ride time, opened/closed), then **Riders** — everyone who has it, with their ride
+count, most first. Built on first open; re-rendered when the rider logs land. The park page no
+longer links to `/park/<park>/<coaster>`, but **coaster.html stays**: the count list, the map
+popups, the model and location tables and old links all still point at it.
+
 ---
 
 ## Open tasks
