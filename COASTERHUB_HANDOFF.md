@@ -3453,6 +3453,28 @@ Still open: #3 (load Chart.js and Leaflet on the profile only when their section
 
 ---
 
+## Five places, the same on phone and desktop (2026-09-25)
+
+Supersedes the header and tab-bar orders recorded above. Carter wanted Rankings first-class
+("so people do their own and see global") and logging a ride one tap away. Agreed list:
+**Home · Rankings · [+] Log · Credits · Profile**, and *"on desktop match the list at the top
+for now"*.
+
+- Tab bar: `TABS` in app.js, in that order. Log has `plus: true` — a raised 50px
+  `--accentfill` disc (`.plusdisc`) with the label on the row's baseline. Home got a house
+  icon (the key is still `riders`).
+- Header, all 17 pages: the same five; Log is a yellow pill (`nav.links a.navlog`).
+  **Map left the header** — it is in the footer, on Home (under the database line), and
+  Profile's "View your map".
+- "Count" is **Credits** everywhere it is a label (tabs, header, footer, /count's titles).
+  The URL and the `count` key did not change.
+- Rankings and Credits open on YOUR list once signed in: `applyRiderLinks` targets
+  `myOwn || forSlug` for them (Profile was already `myOwn`). Signed out they still follow
+  the page you are reading. The hero rider badge is how you look at someone else's.
+- /rankings hero has a **Mine | Global** switch (`.hero .segsw`, `#mineglobal`), signed in
+  only. Global is `/rankings` (the combined view, `!slug`); neither half is lit on someone
+  else's list.
+
 ## Open tasks
 
 ### 1. ~~Full editing of past days in `/log`~~ — **built 2026-09-21**

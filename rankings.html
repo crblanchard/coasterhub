@@ -374,10 +374,9 @@
   <nav class="links">
     <a href="/" data-nav="riders">Home</a>
     <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/log" data-nav="log" class="navlog">+ Log</a>
+    <a href="/count" data-nav="count">Credits</a>
     <a href="/account" data-nav="profile">Profile</a>
-    <a href="/count" data-nav="count">Count</a>
-    <a href="/map" data-nav="map">Map</a>
-    <a href="/log" data-nav="log">Log</a>
   </nav>
   <div class="people" id="people"></div>
 </div></header>
@@ -386,6 +385,8 @@
   <span class="badge" id="hero_badge">Rankings</span>
   <h1 style="max-width:20ch" id="hero_h1" data-loading>Loading&hellip;</h1>
   <p id="hero_p">Not tallest or fastest — best.</p>
+  <!-- Mine | Global (2026-09-25). Signed in only; filled below. -->
+  <div class="segsw" id="mineglobal" hidden><a id="sw_mine">Mine</a><a id="sw_all" href="/rankings">Global</a></div>
 </div></section>
 
 <section class="block" style="padding-top:16px"><div class="container">
@@ -522,7 +523,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/count">Count</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/edit">Edit</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/count">Credits</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/edit">Edit</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -537,6 +538,16 @@ var nf=function(n){return n==null?'—':n.toLocaleString();};
 var fig=function(v,label){return '<div class="fig"><b>'+v+'</b><span>'+label+'</span></div>';};
 
 var slug=CoasterHub.currentUser();
+// Mine | Global: the Rankings tab opens on your list, and this is the way
+// across to everyone's and back. Neither is lit on somebody else's list.
+CoasterHub.me().then(function(acct){
+  if(!acct||!acct.slug) return;
+  var m=$('sw_mine');
+  m.href=CoasterHub.userPageHref(acct.slug,'rankings');
+  m.classList.toggle('on',slug===acct.slug);
+  $('sw_all').classList.toggle('on',!slug);
+  $('mineglobal').hidden=false;
+}).catch(function(){});
 var BYID={}, MINE=[], ORDER=[], dirty=false, view='rank';
 var CANEDIT=false;
 

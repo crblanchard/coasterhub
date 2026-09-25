@@ -1017,10 +1017,9 @@
     // so its only links are the "Full credit list" ones in the Rides and Stats
     // heroes, and those need the rider too.
     // Profile is always YOUR profile when we know who you are — it is the way
-    // back (Carter's call, 2026-09-16). Count and Rankings follow whoever you
-    // are reading, so that looking at Sean's count and tapping Rankings gets you
-    // Sean's; Profile is the one that breaks out of that, and landing on your
-    // own page re-remembers you, so the other two come back with you. myOwn is
+    // back (Carter's call, 2026-09-16). Since 2026-09-25 Count and Rankings are
+    // yours too once signed in (they used to follow whoever you were reading);
+    // a visitor's still follow the page. myOwn is
     // filled in once /api/auth/me answers, and is null for a visitor — for whom
     // Profile keeps meaning the page they are on.
     var myOwn = null;
@@ -1031,7 +1030,11 @@
         // sign-in page when we do not. Never the rider you happen to be reading
         // — signed out that made "Profile" a link to Cole, or on /riders a link
         // to the page you were already standing on.
-        var target = (key === "profile") ? myOwn : forSlug;
+        // Rankings and Credits open on YOUR list too (2026-09-25) — the
+        // rider badge in their hero is how you look at someone else's, and
+        // Rankings has a Mine | Global switch. Signed out, they follow the
+        // page you are reading, as before.
+        var target = (key === "profile") ? myOwn : (myOwn || forSlug);
         var els = document.querySelectorAll('[data-nav="' + key + '"]');
         for (var q = 0; q < els.length; q++) {
           els[q].setAttribute("href", userPageHref(target, key));
@@ -1123,12 +1126,17 @@
   // list in one place, where "Rides" named one of the three and read as a twin
   // of "Log". "Profile" is /user/<slug>, a rider's page rather than a chart
   // screen. "Riders" is /riders, which is where /stats used to point.
+  // 2026-09-25, Carter: Home · Rankings · [+] · Credits · Profile. Logging a
+  // ride is the reason to open the site, so it is the raised button in the
+  // middle (`plus`). Home is the everyone hub; Rankings, Credits (/count) and
+  // Profile are YOURS once we know who you are — see applyRiderLinks. The
+  // desktop header lists the same five in the same order.
   var TABS = [
     { k: "riders",   label: "Home",     path: "/",         fixed: true },
     { k: "rankings", label: "Rankings", path: "/rankings" },
-    { k: "profile",  label: "Profile",  path: "/account" },
-    { k: "count",    label: "Count",    path: "/count" },
-    { k: "log",      label: "Log",      path: "/log",      fixed: true }
+    { k: "log",      label: "Log",      path: "/log",      fixed: true, plus: true },
+    { k: "count",    label: "Credits",  path: "/count" },
+    { k: "profile",  label: "Profile",  path: "/account" }
   ];
   // Five is the ceiling, and this is five: measured at 320px (the narrowest
   // phone) the widest label, "Rankings", fills 58 of its 64px slot. A sixth tab
@@ -1137,7 +1145,7 @@
   // from the signed-in account's picture when there is one (see buildTabBar),
   // and this outline of a person is the same placeholder /riders uses.
   var TAB_ICONS = {
-    riders:   '<path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4M15.5 4.3a3.5 3.5 0 0 1 0 6.4"/>',
+    riders:   '<path d="M4 10.5 12 4l8 6.5V20h-5v-6h-6v6H4z"/>',
     rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>',
     profile:  '<path d="M19 20v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>',
     count:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
@@ -1150,10 +1158,14 @@
     nav.setAttribute("aria-label", "Primary");
     nav.innerHTML = TABS.map(function (t) {
       var href = (t.fixed || !slug) ? t.path : userPageHref(slug, t.k);
+      var cls = (t.plus ? "plus" : "") + (t.k === page ? " on" : "");
+      var svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'
+        + (t.plus ? "2.4" : "1.8") + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        + TAB_ICONS[t.k] + '</svg>';
       return '<a href="' + href + '" data-nav="' + t.k + '"'
-        + (t.k === page ? ' class="on" aria-current="page"' : '') + '>'
-        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
-        + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + TAB_ICONS[t.k] + '</svg>'
+        + (cls.trim() ? ' class="' + cls.trim() + '"' : '')
+        + (t.k === page ? ' aria-current="page"' : '') + '>'
+        + (t.plus ? '<i class="plusdisc">' + svg + '</i>' : svg)
         + '<span>' + t.label + '</span></a>';
     }).join("");
     document.body.appendChild(nav);

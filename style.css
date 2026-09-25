@@ -89,6 +89,10 @@ header.nav{position:sticky;top:0;z-index:10;-webkit-backdrop-filter:blur(10px);b
 nav.links{display:flex;gap:26px;flex:0 0 auto;justify-content:center}
 nav.links a{color:var(--muted);font-weight:500;font-size:.95rem;transition:color .15s}
 nav.links a:hover,nav.links a.active{color:var(--fg)}
+/* Log in the header is the same call to action as the tab bar's raised +. */
+nav.links a.navlog{color:var(--onaccent);background:var(--accentfill);font-weight:600;
+  padding:5px 13px;border-radius:999px;margin:-5px 0}
+nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:brightness(1.06)}
 .people{flex:1 1 0;min-width:0}
 
 /* Hero */
@@ -135,6 +139,14 @@ nav.links a:hover,nav.links a.active{color:var(--fg)}
 .rbitem.on{color:var(--accent2);font-weight:700}
 .hero h1{font-size:clamp(2.4rem,6.5vw,4rem);line-height:1.03;font-weight:800;letter-spacing:-.02em;max-width:14ch}
 .hero p{color:var(--muted);font-size:clamp(1rem,2.2vw,1.2rem);margin:20px 0 30px;max-width:52ch}
+/* A two-way switch in a hero — Rankings' Mine | Global. */
+.hero .segsw{display:inline-flex;margin:-12px 0 8px;padding:3px;border:1px solid var(--line);
+  border-radius:999px;background:var(--soft)}
+.hero .segsw[hidden]{display:none}
+.hero .segsw a{padding:6px 16px;border-radius:999px;color:var(--muted);font-weight:600;
+  font-size:.9rem;text-decoration:none}
+.hero .segsw a:hover{color:var(--fg)}
+.hero .segsw a.on{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.18)}
 /* A second hero paragraph is the page talking about itself rather than the
    site, so it is quieter and closer than the first. */
 .hero p + p{font-size:.98rem;margin:-18px 0 26px}
@@ -446,6 +458,18 @@ footer.site a:hover{color:var(--fg)}
     border:1px solid var(--line)}
   .tabbar a.on .tabav{border-color:var(--accent2)}
   .tabbar a:active{background:var(--soft)}
+  /* Log, the raised yellow button in the middle (TABS' `plus`). The disc rises
+     out of the bar; the label stays on the row's baseline with the others. */
+  .tabbar a.plus{gap:3px;padding-top:0}
+  .tabbar a.plus:active{background:none}
+  .tabbar .plusdisc{display:flex;align-items:center;justify-content:center;
+    width:50px;height:50px;margin-top:-20px;border-radius:999px;
+    background:var(--accentfill);color:var(--onaccent);
+    box-shadow:0 4px 14px rgba(0,0,0,.28);border:3px solid var(--bg)}
+  .tabbar .plusdisc svg{width:24px;height:24px}
+  .tabbar a.plus:active .plusdisc{transform:scale(.94)}
+  .tabbar a.plus.on{color:var(--muted)}
+  .tabbar a.plus.on span{color:var(--accent)}
 }
 
 /* No panel, no border: this sits in the hero and should read as part of it —
