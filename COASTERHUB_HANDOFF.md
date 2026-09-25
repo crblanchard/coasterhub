@@ -3600,9 +3600,20 @@ database's front door and the people. Explore did NOT get a tab (five is the cei
   Coasters (the everyone view of /credits, `?view=parks|list`), Manufacturers, Locations, Map —
   then Friends, Top users, Recent changes, and the feedback card last. The "N operating and M
   defunct" line and the Map link are folded into the cards.
-- Still to do from the same plan: one shared template for park / coaster / maker / model /
-  location pages (breadcrumbs, tiles, "you" strip, shared rows), and moving Add new / Edit / QC
-  out of the everyone footer.
+- **Done the same day — one template for the database pages.** Shared in app.js:
+  `crumbs(el, [[label, href], ..., [current]])`, `you()` (your rides id->{n,first} and ranking
+  id->position, fetched once per page), `youStrip(el, coasters)` ("You have ridden 16 of 20
+  operating · 17 ranked, best #99 of 150"; for ONE coaster: times, first date, rank) and
+  `coasterFacts(c, extra)` (the label/value rows — park page's opened row and a ranking's
+  tapped row). Shared CSS in style.css under "The database pages": `.crumbs .tiles .tile
+  .youline .sect .missing .facts`. **`.panel` is deliberately NOT shared** — profile and log
+  use that name for a padded box. Each page: `#crumb`, `#tiles`, `#you` under the tiles.
+  Trails: Locations › Ohio › Cedar Point › Maverick; Manufacturers › B&M › B&M Invert;
+  Locations › United States › Ohio. The per-page "you have ridden" bits (park list heading,
+  maker hero line, model/location tiles, the maker ranking panel's summary) went into the
+  one line.
+- **Footer**: Home · Map · Manufacturers · Locations · Site map for everyone; `footerContrib()`
+  adds Add new when signed in and Edit · QC for admins (`[data-contrib]` span).
 - Data noticed while testing: a "B&M Invert" sits under a manufacturer spelled "Boll" (one
   coaster) — fix in /edit.
 

@@ -1098,6 +1098,7 @@
 
     buildTabBar(page, slug);
     applyRiderLinks(slug);
+    footerContrib();
   }
 
   // The two controls every header carries on its right: the theme toggle and
@@ -1247,6 +1248,108 @@
       }
       for (var _i = 0; _i < _load.length; _i++) _load[_i].textContent = _bag[_i % _bag.length];
     }
+  }
+
+  // ---- The database pages' shared parts (2026-09-25) ------------------------
+  // Park, coaster, manufacturer, model and location pages each had their own
+  // copy of these and drifted (Carter: "feel like it's getting messy"). One
+  // copy each, here and in style.css (.crumbs, .tiles, .youline, .facts).
+
+  // Breadcrumbs: [[label, href], ...], the last one the page you are on.
+  function crumbs(el, trail) {
+    if (!el) return;
+    el.className = "crumbs";
+    el.innerHTML = trail.filter(function (t) { return t && t[0]; }).map(function (t, i, all) {
+      var last = i === all.length - 1;
+      return last || !t[1] ? '<span>' + searchEsc(t[0]) + '</span>'
+        : '<a href="' + searchEsc(t[1]) + '">' + searchEsc(t[0]) + '</a>';
+    }).join('<i aria-hidden="true">\u203a</i>');
+  }
+
+  // Who you are, what you have ridden (id -> {n, first}) and where you rank
+  // each coaster (id -> position), fetched once per page. null signed out.
+  var youP = null;
+  function you() {
+    if (!youP) youP = me().then(function (a) {
+      if (!a || !a.slug) return null;
+      return Promise.all([
+        fetchRides(a.slug).catch(function () { return { rides: [] }; }),
+        fetch("/api/rankings/" + encodeURIComponent(a.slug), { cache: "no-store", credentials: "same-origin" })
+          .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      ]).then(function (r) {
+        var rides = {}, rank = {}, order = (r[1] && r[1].order) || [];
+        (r[0].rides || []).forEach(function (x) {
+          var m = rides[x.c] || (rides[x.c] = { n: 0, first: null });
+          m.n++; if (x.d && (!m.first || x.d < m.first)) m.first = x.d;
+        });
+        order.forEach(function (id, i) { rank[id] = i + 1; });
+        return { slug: a.slug, rides: rides, rank: rank, ranked: order.length };
+      });
+    }).catch(function () { return null; });
+    return youP;
+  }
+
+  // The "you" line under a page's tiles: for a set of coasters, how many of
+  // the operating ones you have ridden and your best ranked; for one coaster,
+  // how many times, since when, and where it ranks. Nothing signed out.
+  function youStrip(el, cs) {
+    if (!el) return;
+    you().then(function (y) {
+      if (!y) { el.hidden = true; return; }
+      var bits = [];
+      if (cs.length === 1) {
+        var c = cs[0], m = y.rides[c.id];
+        bits.push(m ? "You have ridden it <b>" + (m.n > 1 ? m.n + " times" : "once") + "</b>"
+                      + (m.first ? ", first on <b>" + mdy(m.first) + "</b>" : "")
+                    : "You have not ridden it yet");
+        if (y.rank[c.id]) bits.push("ranked <b>#" + y.rank[c.id] + "</b> of " + y.ranked);
+      } else {
+        var op = cs.filter(function (c) { return !c.closed; });
+        var got = op.filter(function (c) { return y.rides[c.id]; }).length;
+        bits.push("You have ridden <b>" + got + " of " + op.length + "</b> operating");
+        var rk = cs.filter(function (c) { return y.rank[c.id]; })
+          .map(function (c) { return y.rank[c.id]; }).sort(function (a, b) { return a - b; });
+        if (rk.length) bits.push("<b>" + rk.length + "</b> ranked, best <b>#" + rk[0] + "</b> of " + y.ranked);
+      }
+      el.className = "youline";
+      el.innerHTML = bits.join(" \u00b7 ");
+      el.hidden = false;
+    });
+  }
+
+  // One coaster's facts as label / value rows — the park page's open row and
+  // a ranking's tapped row. `extra` rows (the reader's own) go last.
+  function coasterFacts(c, extra) {
+    var t = [], E = searchEsc;
+    function kv(v, label) { t.push('<div class="kv"><span>' + E(label) + '</span><b>' + v + '</b></div>'); }
+    function when(v, prec) { return (prec === "day" && /^\d{4}-\d{2}-\d{2}/.test(String(v))) ? mdy(v) : String(v).slice(0, 4); }
+    if (c.type) kv('<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
+    if (c.manu) kv('<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
+    if (c.model) kv(c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model), "Model");
+    if (c.opened) kv(E(when(c.opened, c.openedPrec)), "Opened"); else if (c.yr) kv(E(c.yr), "Opened");
+    if (c.closed) kv(E(when(c.closed, c.closedPrec)), "Closed");
+    if (c.h != null) kv(Math.round(c.h), "Height (ft)");
+    if (c.s != null) kv(Math.round(c.s), "Speed (mph)");
+    if (c.l != null) kv(Math.round(c.l).toLocaleString(), "Length (ft)");
+    if (c.inv != null) kv(E(c.inv), "Inversions");
+    if (c.dur != null) { var d = Math.round(c.dur), mm = Math.floor(d / 60), r = d % 60; kv(mm ? (mm + ":" + (r < 10 ? "0" : "") + r) : (d + "s"), "Ride time"); }
+    (extra || []).forEach(function (x) { kv(x[0], x[1]); });
+    return t.length ? '<div class="facts">' + t.join("") + '</div>' : '<p class="facts none">No stats on file yet.</p>';
+  }
+
+  // The footer's contributor links: Add new for anyone signed in (adding a
+  // coaster is open to riders), Edit and QC for admins only. Everyone else's
+  // footer is just the ways around the site.
+  function footerContrib() {
+    var el = document.querySelector("footer.site [data-contrib]");
+    if (!el) return;
+    me().then(function (a) {
+      if (!a) return;
+      var l = [['/add', 'Add new']];
+      if (a.admin) l.push(['/edit', 'Edit'], ['/qc', 'QC']);
+      el.innerHTML = l.map(function (x) { return ' &nbsp;&middot;&nbsp; <a href="' + x[0] + '">' + x[1] + '</a>'; }).join("");
+      el.hidden = false;
+    }).catch(function () {});
   }
 
   // ---- Search, from every page's header (2026-09-25) -----------------------
@@ -1409,7 +1512,8 @@
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
-              openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor };
+              openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
+              crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

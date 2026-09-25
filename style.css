@@ -697,3 +697,32 @@ html.srchopen{overflow:hidden}
 .specsheet b{display:block;font-size:1.05rem;font-weight:800;font-variant-numeric:tabular-nums}
 .specsheet span{display:block;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
 .specsheet small{color:var(--muted);font-weight:600;font-size:.78rem}
+
+/* ---- The database pages (park, coaster, manufacturer, model, location) ----
+   One set of shapes for all five (2026-09-25); they each used to carry their
+   own copy. app.js draws into them: crumbs(), youStrip(), coasterFacts(). .panel stays
+   per page: profile and log use the name for a different, padded box. */
+.crumbs{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0 0 14px;font-size:.86rem;color:var(--muted)}
+.crumbs a{color:var(--muted);text-decoration:none}
+.crumbs a:hover{color:var(--accent2)}
+.crumbs span{color:var(--fg)}
+.crumbs i{font-style:normal;opacity:.6}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;min-width:0}
+.tile b{display:block;font-size:1.5rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.15}
+.tile span{display:block;color:var(--muted);font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+@media (max-width:680px){ .tiles{grid-template-columns:repeat(2,1fr)} .tile b{font-size:1.25rem} }
+.youline{margin:0 0 6px;padding:10px 14px;border-radius:12px;background:var(--tint);border:1px solid var(--line);
+  color:var(--muted);font-size:.9rem;line-height:1.5}
+.youline b{color:var(--fg);font-variant-numeric:tabular-nums}
+.sect{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:26px 0 8px}
+.missing{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
+.missing p{color:var(--muted);margin:8px 0 0}
+.facts .kv{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:.88rem;padding:5px 0}
+.facts .kv > span{color:var(--muted);flex:none}
+.facts .kv > b{font-weight:500;text-align:right;min-width:0;font-variant-numeric:tabular-nums}
+.facts a{color:var(--accent2);text-decoration:none}
+.facts a:hover{text-decoration:underline}
+.facts .pill{display:inline-block;font-size:.78rem;padding:2px 10px;border-radius:999px;border:1px solid var(--line)}
+.facts .pill.wood{color:var(--accent)} .facts .pill.steel{color:var(--accent2)}
+.facts.none{color:var(--muted);font-size:.88rem;margin:0}

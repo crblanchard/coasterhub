@@ -115,14 +115,7 @@
   #mine.readonly .rrow.tap.open{background:var(--soft)}
   .rrow .rstats{flex:0 0 100%;min-width:0;margin:7px 0 1px;padding-top:6px;border-top:1px solid var(--line)}
   #mine:not(.readonly) .rrow .rstats{display:none}
-  .rstats .kv{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
-    font-size:.84rem;padding:4px 0}
-  .rstats .kv > span{color:var(--muted);flex:none}
-  .rstats .kv > b{font-weight:500;text-align:right;min-width:0;font-variant-numeric:tabular-nums}
-  .rstats a{color:var(--accent2);text-decoration:none}
-  .rstats a:hover{text-decoration:underline}
-  .rstats .pill{display:inline-block;font-size:.74rem;padding:1px 9px;border-radius:999px;border:1px solid var(--line)}
-  .rstats .pill.wood{color:var(--accent)} .rstats .pill.steel{color:var(--accent2)}
+  .rstats a.go{color:var(--accent2);text-decoration:none}
   .rstats .go{display:inline-block;margin-top:6px;font-size:.84rem;font-weight:600}
   .rrow .mrow{display:flex;align-items:center;gap:9px;padding:4px 0}
   .rrow .mrow .mp{color:var(--accent2);font-weight:700;font-size:.75rem;
@@ -540,7 +533,7 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/credits">Credits</a> &nbsp;&middot;&nbsp; <a href="/add">Add new</a> &nbsp;&middot;&nbsp; <a href="/edit">Edit</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Site map</a><span data-contrib hidden></span></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -836,20 +829,9 @@ function markDirty(){
 var STATOPEN={};
 function statsFor(id){
   if(!STATOPEN[id]) return '';
-  var c=BYID[id]||{}, t=[];
-  function spec(v,label){ t.push('<div class="kv"><span>'+esc(label)+'</span><b>'+v+'</b></div>'); }
-  function when(v,prec){ return (prec==='day' && /^\d{4}-\d{2}-\d{2}/.test(String(v))) ? CoasterHub.mdy(v) : String(v).slice(0,4); }
-  if(c.type) spec('<span class="pill '+(c.type==='Wood'?'wood':'steel')+'">'+esc(c.type)+'</span>','Type');
-  if(c.manu) spec('<a href="'+esc(CoasterHub.makerHref(c.manu))+'">'+esc(c.manu)+'</a>','Manufacturer');
-  if(c.model) spec(c.manu?'<a href="'+esc(CoasterHub.makerHref(c.manu,c.model))+'">'+esc(c.model)+'</a>':esc(c.model),'Model');
-  if(c.opened) spec(esc(when(c.opened,c.openedPrec)),'Opened'); else if(c.yr) spec(esc(c.yr),'Opened');
-  if(c.closed) spec(esc(when(c.closed,c.closedPrec)),'Closed');
-  if(c.h!=null) spec(Math.round(c.h),'Height (ft)');
-  if(c.s!=null) spec(Math.round(c.s),'Speed (mph)');
-  if(c.l!=null) spec(Math.round(c.l).toLocaleString(),'Length (ft)');
-  if(c.inv!=null) spec(esc(c.inv),'Inversions');
-  if(c.dur!=null){ var d=Math.round(c.dur), m=Math.floor(d/60), r=d%60; spec(m?(m+':'+(r<10?'0':'')+r):(d+'s'),'Ride time'); }
-  return '<div class="rstats">'+(t.join('')||'<div class="kv"><span>No stats on file yet.</span></div>')
+  var c=BYID[id]||{};
+  // The same facts the park page opens to (CoasterHub.coasterFacts).
+  return '<div class="rstats">'+CoasterHub.coasterFacts(c)
     +(c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>';
 }
 function renderRank(){
