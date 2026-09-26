@@ -143,8 +143,9 @@ function place(reg, ps, MINE, R){
   CoasterHub.crumbs($('crumb'), [['Locations','/locations'],
     (!us && isUS(reg)) ? ['United States','/location/us'] : null, [name]]);
   var k=counts(ps, MINE);
-  $('tiles').innerHTML=tile(k.parks,k.parks===1?'Park':'Parks')+tile(k.open,'Operating coasters')+tile(k.gone,'Defunct coasters')
-    +tile(k.all,'Coasters, all time');
+  // No "Coasters, all time" tile (Carter, 2026-09-26): it was the two before
+  // it added together.
+  $('tiles').innerHTML=tile(k.parks,k.parks===1?'Park':'Parks')+tile(k.open,'Operating coasters')+tile(k.gone,'Defunct coasters');
   CoasterHub.youStrip($('you'), k.cs);
   var h='';
   if(us){
