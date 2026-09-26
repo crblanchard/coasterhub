@@ -413,6 +413,8 @@ html.srchopen{overflow:hidden}
 .srchrow .st b{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .srchrow .st span{color:var(--muted);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .srchrow.gone .st b{color:var(--muted)}
+/* "formerly Intimidator", "moved to Himeji Central Park": why this row matched. */
+.srchrow .st .srchtag{font-style:normal;color:var(--accent2);font-weight:600}
 .srchrow .sk{flex:none;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 @media (max-width:680px){
   .srch{padding:0;background:var(--bg)}

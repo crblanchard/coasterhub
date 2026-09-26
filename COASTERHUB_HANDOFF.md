@@ -3714,6 +3714,23 @@ migration, and neither shows on /changes (`FEED_HIDDEN`).
 **Merge and delete keep it tidy** (`tidySameRide`): the table is in `KEYED_BY_COASTER`, a
 merge repoints a home, a set whose home vanished takes its lowest id, and a set of one goes.
 
+**Park page and search (same day, second pass).** An opened row on a park page carries the
+same "Same ride as …" line. In search, the other row of a relocated ride is labelled
+"moved to <home's park>".
+
+**Past names, and why not every alias is one.** Search indexes every `coaster_aliases` name,
+so "Vortex" finds Patriot, labelled "formerly Vortex" (Carter: *"the new one comes up with a
+'formerly called x' label"*). The ride page already said "Formerly …" — but the alias table is
+half import spellings ("Space Mountain (2005-)", "Racer 75 [left]", "The Voyage", "Top Thrill"
+under Top Thrill 2), so both now go through `isPastName()` in app.js: a name is dropped if it
+is the current one once brackets, asterisks, a leading "The" and punctuation are gone, if it
+contains or is contained by it, or if it is two letters off. That takes the visible set from
+124 aliases to 39 coasters. Every alias still FINDS its coaster in search; only real past
+names get the label. About ten import labels still pass because nothing in the name gives
+them away — "Pinfari Galaxy", "SBF Spinner", "Weird Ass Pinfarri BS", "Kiddie Coaster" on
+Sea Serpent. The alias `note` column does not separate them either (`rename` holds both
+kinds). If they matter, the fix is a per-alias "not a past name" flag curated in /edit.
+
 **Not done:** `/credits`' everyone view ("Database") and the maker/location pages' "N of M
 ridden" still count rows, not rides; `youStrip` on a coaster page reports rides at that row
 only; the `ranked` count in `/api/summary` is rows in `rankings` (only off if a list still

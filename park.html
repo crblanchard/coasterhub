@@ -276,7 +276,14 @@ function body(c){
   if(mine){ extra.push([esc(mine.n),'Your rides']); if(mine.first) extra.push([esc(CoasterHub.mdy(mine.first)),'First ridden']); }
   var was=CoasterHub.formerNames(LIST, c.id, c.name);
   var who=WHO[c.id];
+  // A relocated ride (023-same-ride.sql): where else it stood, and that it
+  // is one credit — the same line the coaster page carries.
+  var mates=CoasterHub.sameRideRows(LIST.coasters, c);
   return (was.length?'<p class="former">Formerly '+was.map(function(n){ return '<b>'+esc(n)+'</b>'; }).join(', ')+'.</p>':'')
+    +(mates.length?'<p class="former">Same ride as '+mates.map(function(x){
+        return '<a href="'+esc(CoasterHub.coasterHref(x))+'"><b>'+esc(x.name)+'</b></a> at '
+          +'<a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>';
+      }).join(' and ')+' — it moved parks, so riding it at either is one credit.</p>':'')
     +CoasterHub.coasterFacts(c, extra)
     +'<div><p class="lbl">Riders</p>'
     +(who===undefined ? '<p class="nobody">Loading&hellip;</p>'

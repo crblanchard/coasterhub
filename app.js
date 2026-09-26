@@ -718,10 +718,46 @@
   // They are real and they still resolve; they are just not news, and printing
   // "Formerly Flash: Vertical Velocity" on Flash: Vertical Velocity reads as a
   // bug. Same slug, same name as far as a URL is concerned.
+  //
+  // Widened 2026-09-26 when search started labelling old names ("formerly
+  // Vortex"): the table also holds spellings off import sheets that are more
+  // than punctuation — "Space Mountain (2005-)", "Racer 75 [left]", "The
+  // Voyage", "Top Thrill" under Top Thrill 2, "Catwoman's Whip". isPastName()
+  // drops a name that is the current one once brackets, asterisks, a leading
+  // "The" and punctuation are gone, that contains or is contained by it, or
+  // that is two letters off it. What is left is a real rename: Vortex ->
+  // Patriot, Intimidator -> Thunder Striker, Avalanche -> Reptilian. A few
+  // import labels still pass ("Pinfari Galaxy" on a traveling show's coaster),
+  // because nothing in the name says they are not one.
+  function squashName(t) {
+    return String(t || "").toLowerCase().replace(/\([^)]*\)|\[[^\]]*\]/g, "").replace(/\*/g, "")
+      .replace(/^\s*the\s+/, "").replace(/[^a-z0-9]/g, "");
+  }
+  function nearlySame(a, b) {
+    if (Math.abs(a.length - b.length) > 2) return false;
+    var prev = [], cur, i, j;
+    for (j = 0; j <= b.length; j++) prev[j] = j;
+    for (i = 1; i <= a.length; i++) {
+      cur = [i];
+      for (j = 1; j <= b.length; j++)
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[b.length] <= 2;
+  }
+  function isPastName(former, current) {
+    var x = squashName(former), y = squashName(current);
+    if (!x || x === y) return false;
+    if ((x.length >= 4 && y.indexOf(x) >= 0) || (y.length >= 4 && x.indexOf(y) >= 0)) return false;
+    return !nearlySame(x, y);
+  }
   function formerNames(list, id, current) {
-    var now = slugify(current);
+    var seen = {};
     return ((list && list.aliases) || [])
-      .filter(function (a) { return a.c === id && slugify(a.n) !== now; })
+      .filter(function (a) {
+        if (a.c !== id || !isPastName(a.n, current)) return false;
+        var k = squashName(a.n); if (seen[k]) return false; seen[k] = 1; return true;
+      })
       .map(function (a) { return a.n; });
   }
 
@@ -1504,15 +1540,33 @@
       var cs = (res[0] && res[0].coasters) || [], parks = res[1] || {}, users = res[2] || [];
       var out = [], add = function (k, t, sub, href, extra) {
         var n = norm(t);
-        out.push({ k: k, t: t, sub: sub, h: href, n: n, ini: initials(n), gone: !!(extra && extra.gone) });
+        out.push({ k: k, t: t, sub: sub, h: href, n: n, ini: initials(n), gone: !!(extra && extra.gone),
+                   was: (extra && extra.was) || null, moved: (extra && extra.moved) || null });
       };
+      var byId = {};
+      cs.forEach(function (c) { byId[c.id] = c; });
       var makers = {}, models = {}, locs = {}, pn = {};
       cs.forEach(function (c) {
         if (c.park) pn[c.park] = (pn[c.park] || 0) + 1;
         var m = String(c.manu || "").trim(), mo = String(c.model || "").trim();
         if (m) makers[m] = (makers[m] || 0) + 1;
         if (m && mo) { var key = m + "\u0000" + mo; (models[key] = models[key] || { m: m, mo: mo, n: 0 }).n++; }
-        add("coaster", c.name, c.park || "", coasterHref(c), { gone: !!c.closed });
+        // A relocated ride's other row says where the ride is now.
+        var home = c.same && c.same !== c.id ? byId[c.same] : null;
+        add("coaster", c.name, c.park || "", coasterHref(c),
+            { gone: !!c.closed, moved: home && home.park !== c.park ? home.park : null });
+      });
+      // Former names find the coaster under its current name, labelled with
+      // the one that matched (Carter, 2026-09-26: "the new one comes up with a
+      // 'formerly called x' label"). Searched on the old name, shown as the new.
+      (((res[0] && res[0].aliases) || [])).forEach(function (a) {
+        var c = byId[a.c];
+        if (!c || norm(a.n) === norm(c.name)) return;
+        // Every alias still FINDS the coaster (an import spelling is how
+        // somebody may type it); only a real past name gets the label.
+        out.push({ k: "coaster", t: c.name, sub: c.park || "", h: coasterHref(c), n: norm(a.n),
+                   ini: initials(norm(a.n)), gone: !!c.closed,
+                   was: isPastName(a.n, c.name) ? a.n : null, moved: null });
       });
       Object.keys(parks).forEach(function (p) {
         var r = (parks[p] && parks[p].region) || "";
@@ -1548,6 +1602,10 @@
         || (a.it.gone ? 1 : 0) - (b.it.gone ? 1 : 0) || a.it.t.length - b.it.t.length
         || a.it.t.localeCompare(b.it.t);
     });
+    // One row per page: a coaster matching on its name AND a former name
+    // keeps whichever matched better (the sort put it first).
+    var seen = {};
+    hits = hits.filter(function (h) { if (seen[h.it.h]) return false; seen[h.it.h] = 1; return true; });
     return hits.slice(0, 40).map(function (h) { return h.it; });
   }
   var searchEl = null;
@@ -1578,7 +1636,10 @@
             : hits.length
               ? hits.map(function (h, i) {
                   return '<a class="srchrow' + (i === 0 ? " hi" : "") + (h.gone ? " gone" : "") + '" href="' + searchEsc(h.h) + '">'
-                    + '<span class="st"><b>' + searchEsc(h.t) + '</b><span>' + searchEsc(h.sub) + '</span></span>'
+                    + '<span class="st"><b>' + searchEsc(h.t) + '</b><span>' + searchEsc(h.sub)
+                    + (h.was ? ' <i class="srchtag">formerly ' + searchEsc(h.was) + '</i>' : '')
+                    + (h.moved ? ' <i class="srchtag">moved to ' + searchEsc(h.moved) + '</i>' : '')
+                    + '</span></span>'
                     + '<span class="sk">' + SEARCH_KINDS[h.k] + '</span></a>';
                 }).join("")
               : '<p class="srchhint">Nothing called that.</p>';
