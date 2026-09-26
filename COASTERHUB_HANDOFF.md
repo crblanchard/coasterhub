@@ -440,6 +440,21 @@ run a no-op.
 rename path above was untestable locally and *looked* fine, because every current name still
 matched. That is exactly the class of thing this harness exists to catch.
 
+### `/edit` asks who you are, not for a password (2026-09-26)
+
+The password box is gone. `/edit` reads `/api/auth/me` and lets an **admin account** straight
+through; the session cookie authorizes every write, so the page carries no `x-admin-token` at
+all any more. Three answers and each says what to do about it: signed out gets a Sign in button,
+signed in without the flag gets named and told the page is admin only, an admin gets the editor.
+
+**The Worker is unchanged.** `adminOk()` has always taken either the shared password or
+`accounts.is_admin`, so `ADMIN_PASSWORD` is still the break-glass key on the API and
+`/api/admin/login` still serves /log, /import and /add. Only this page stopped offering it.
+
+**This depends entirely on `accounts.is_admin` being set.** An account without it cannot get
+into /edit at all now — there is no password to fall back on from the page. The check is
+`SELECT slug, is_admin FROM accounts;` and the fix is an `UPDATE`, both in the D1 console.
+
 ### `min-width:0`, or a field grows out through its card (2026-09-20)
 
 /log's date field pushed out past the right edge of its panel on a phone. The input was not the
