@@ -122,6 +122,8 @@
   .day .inner .parklink a:hover{text-decoration:underline}
   #c_body td a{color:inherit;text-decoration:none}
   #c_body td a:hover{color:var(--accent2);text-decoration:underline}
+  /* A relocated ride's other park, under the one the row names. */
+  #c_body .also{display:block;font-size:.78rem;color:var(--muted);white-space:normal}
   /* The park list is a LIST, not a stack of cards. 247 of them is a long scroll
      on a phone, and the card chrome — a border, a panel, a gap — was costing
      about half the rows that fit on a screen. Off it comes: one continuous
@@ -571,13 +573,16 @@ return Promise.all([
     LOG=[];
     logs.forEach(function(log){
       var seen={}, repeats=false;
-      log.rides.forEach(function(r){ if(seen[r.c]) repeats=true; seen[r.c]=1; });
+      log.rides.forEach(function(r){ var k=CoasterHub.rideKey(byId[r.c])||r.c; if(seen[k]) repeats=true; seen[k]=1; });
       log.rides.forEach(function(r){
         // The coaster's OWN dates, not the rider's: when it opened and, if it
         // is gone, when it closed. `yr` is the opening year where the full
         // date is not known, so fall back to it rather than showing nothing.
         var row=shape(byId[r.c]||{}, r.c);
         row.i=r.i; row.d=r.d||null; row.rider=log.user; row.rep=repeats;
+        // The credit key: a relocated ride's rows share one, so riding it at
+        // its new park is a re-ride, not a new credit (023-same-ride.sql).
+        row.k=CoasterHub.rideKey(byId[r.c])||r.c;
         LOG.push(row);
       });
     });
@@ -588,7 +593,7 @@ return Promise.all([
     FIRST={};
     var murky={};
     LOG.forEach(function(r){
-      var k=(r.rider||'')+'|'+r.c;
+      var k=(r.rider||'')+'|'+r.k;
       if(!r.d){ murky[k]=1; return; }
       if(!FIRST[k] || r.d<FIRST[k]) FIRST[k]=r.d;
     });
@@ -816,7 +821,7 @@ function inLoc(loc, fl){ return fl==='*US' ? isUS(loc||'') : loc===fl; }
 // Was this ride the rider's first on this coaster? See FIRST, built alongside
 // the log. An undated ride is never a new credit: it is not in a day card at
 // all, and a coaster carrying one is kept out of FIRST entirely.
-function isNew(r){ return !!r.d && FIRST[(r.rider||'')+'|'+r.c]===r.d; }
+function isNew(r){ return !!r.d && FIRST[(r.rider||'')+'|'+r.k]===r.d; }
 function fmtDate(d){
   if(!d)return '—';
   var p=d.split('-'); if(p.length!==3)return d;
@@ -1088,8 +1093,12 @@ var CreditList=(function(){
     return CoasterHub.loadUser().then(function(s){
       DATA=s.coasters.filter(function(c){return s.byCoaster[c.id];}).map(function(c){
         var d=s.byCoaster[c.id], pk=s.parks&&s.parks[c.park];
+        // A relocated ride is one row here (computeStats keys byCoaster by
+        // credit); `alsoAt` names the other parks this rider rode it at.
+        var also=(d.also||[]).map(function(id){ return s.coastersById[id]; }).filter(Boolean);
         return Object.assign({},c,{loc:pk&&pk.region?pk.region:'',rides:d.rides,first:d.first,
-                                   status:c.closed?'Defunct':'Operating'});
+                                   status:c.closed?'Defunct':'Operating',
+                                   alsoAt:also.map(function(x){ return x.park; })});
       });
       var anyFirst=DATA.some(function(c){return c.first;});
       var anyRides=DATA.some(function(c){return c.rides!=null;});
@@ -1226,7 +1235,9 @@ var CreditList=(function(){
         // than a link to /park/.
         if(col.k==='name')return '<td class="'+(col.cls||'')+'"'+k+'>'+clink(c)+'</td>';
         if(col.k==='first')return '<td'+k+'>'+esc(CoasterHub.mdy(v))+'</td>';
-        if(col.k==='park')return '<td'+k+'>'+plink(v)+'</td>';
+        if(col.k==='park')return '<td'+k+'>'+plink(v)
+          +((c.alsoAt&&c.alsoAt.length)?'<span class="also">also ridden at '
+            +c.alsoAt.map(plink).join(', ')+'</span>':'')+'</td>';
         // The maker and the model link to the maker's page (2026-09-24).
         if(col.k==='manu')return '<td'+k+'><a href="'+esc(CoasterHub.makerHref(v))+'">'+esc(v)+'</a></td>';
         if(col.k==='model'&&c.manu)return '<td'+k+'><a href="'+esc(CoasterHub.makerHref(c.manu,v))+'">'+esc(v)+'</a></td>';

@@ -227,10 +227,19 @@ CoasterHub.fetchUsers().then(function(){
       BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
 
     var tally={};
+    // By ride, not by row: a relocated coaster's rows share a credit key
+    // (023-same-ride.sql), so riders who ranked it at different parks ranked
+    // one ride, shown at its home now. Unknown ids go first — a merged-away
+    // coaster is not a row — then a second row of the same ride, so positions
+    // match what the rider's own page shows.
     users.forEach(function(u,i){
-      (all[i].order||[]).forEach(function(id,pos){
-        if(!BYID[id]) return;              // a merged-away coaster is not a row
-        var t=tally[id]||(tally[id]={c:BYID[id],n:0,sum:0,who:[]});
+      var seen={};
+      (all[i].order||[]).filter(function(id){
+        if(!BYID[id]) return false;
+        var k=CoasterHub.rideKey(BYID[id]); if(seen[k]) return false; seen[k]=1; return true;
+      }).forEach(function(id,pos){
+        var k=CoasterHub.rideKey(BYID[id]);
+        var t=tally[k]||(tally[k]={c:BYID[k]||BYID[id],n:0,sum:0,who:[]});
         t.n++; t.sum+=pos+1; t.who.push({name:u.name,slug:u.slug,pos:pos+1});
       });
     });

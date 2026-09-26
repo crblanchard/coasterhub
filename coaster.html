@@ -100,6 +100,7 @@
   <div id="ui" style="display:none">
     <p id="crumb"></p>
     <p class="former" id="former" style="display:none"></p>
+    <p class="former" id="moved" style="display:none"></p>
     <div class="status" id="status"></div>
     <div class="specs" id="specs"></div>
     <p id="you" hidden style="margin-top:12px"></p>
@@ -187,6 +188,17 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   if(was.length){
     $('former').innerHTML='Formerly '+was.map(function(n){return '<b>'+esc(n)+'</b>';}).join(', ')+'.';
     $('former').style.display='block';
+  }
+
+  // A relocated ride (023-same-ride.sql): its other park's row, and why a
+  // rider who rode it at both has one credit, not two.
+  var mates=CoasterHub.sameRideRows(LIST.coasters, C);
+  if(mates.length){
+    $('moved').innerHTML='Same ride as '+mates.map(function(x){
+      return '<a href="'+esc(CoasterHub.coasterHref(x))+'"><b>'+esc(x.name)+'</b></a> at '
+        +'<a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>';
+    }).join(' and ')+' — it moved parks, so riding it at either is one credit.';
+    $('moved').style.display='block';
   }
 
   var gone=!!C.closed;

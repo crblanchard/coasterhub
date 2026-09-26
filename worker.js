@@ -99,7 +99,39 @@ const KEYED_BY_COASTER = [
   ["rider_category_members", "coaster"],
   ["category_skipped", "coaster"],
   ["model_skipped", "coaster"],
+  // Its `ride` column holds coaster ids too; tidySameRide() below repairs a
+  // set whose home was the one merged or deleted.
+  ["same_ride", "coaster"],
 ];
+
+// Relocated-ride sets (023-same-ride.sql) after a merge or delete: a set whose
+// home is gone takes its lowest remaining id as the new home, and a set left
+// with one coaster is not a set. `from`/`to` repoint the home first when a
+// merge moved it. The table is tens of rows, so it is read whole and fixed in
+// JS rather than in clever SQL. Silent before the migration.
+async function tidySameRide(env, from, to) {
+  try {
+    if (from && to) {
+      await env.DB.prepare("UPDATE same_ride SET ride = ? WHERE ride = ?").bind(to, from).run();
+    }
+    const { results } = await env.DB.prepare("SELECT coaster, ride FROM same_ride").all();
+    const sets = new Map();
+    for (const r of results) {
+      if (!sets.has(r.ride)) sets.set(r.ride, []);
+      sets.get(r.ride).push(r.coaster);
+    }
+    const out = [];
+    for (const [ride, ids] of sets) {
+      if (ids.length < 2) {
+        out.push(env.DB.prepare("DELETE FROM same_ride WHERE ride = ?").bind(ride));
+      } else if (!ids.includes(ride)) {
+        out.push(env.DB.prepare("UPDATE same_ride SET ride = ? WHERE ride = ?")
+          .bind(Math.min(...ids), ride));
+      }
+    }
+    if (out.length) await env.DB.batch(out);
+  } catch (e) { /* no same_ride table yet */ }
+}
 function edgeKey(url, path) {
   const u = new URL(url);
   return new Request(u.origin + (path || u.pathname), { method: "GET" });
@@ -547,12 +579,24 @@ const COASTER_FIELDS = ["name","park","type","manu","model","h","s","l","inv","d
 function coasterRow(r) {
   const o = { id: r.id };
   for (const f of COASTER_FIELDS) if (r[f] != null && r[f] !== "") o[f] = r[f];
+  // A relocated ride's set (migrations/023-same-ride.sql): the id this coaster
+  // counts as. Present on every member, the home included, and absent on the
+  // other 99% — so `c.same || c.id` is a coaster's credit key everywhere.
+  if (r.same != null) o.same = r.same;
   return o;
 }
 
 async function getCoasters(env) {
-  const { results } = await env.DB.prepare("SELECT * FROM coasters ORDER BY id").all();
-  return results.map(coasterRow);
+  // Retried without the join before migration 023: this list is what every
+  // page draws from, and it must not fail over a table that is not there yet.
+  try {
+    const { results } = await env.DB.prepare(
+      "SELECT c.*, s.ride AS same FROM coasters c LEFT JOIN same_ride s ON s.coaster = c.id ORDER BY c.id").all();
+    return results.map(coasterRow);
+  } catch (e) {
+    const { results } = await env.DB.prepare("SELECT * FROM coasters ORDER BY id").all();
+    return results.map(coasterRow);
+  }
 }
 // Former names, so a rename or a retheme doesn't read as a missing coaster.
 // Someone typing "Intimidator" at Carowinds should land on Thunder Striker
@@ -625,9 +669,20 @@ async function getUser(env, slug) {
 // waiting for a deploy. app.js still ships USERS as the offline fallback.
 async function getSummary(env) {
   const users = await getUsers(env);
-  const { results: rc } = await env.DB.prepare(
-    "SELECT r.user_slug AS s, COUNT(DISTINCT r.coaster_id) AS credits, COUNT(*) AS n " +
-    "FROM rides r JOIN coasters c ON c.id = r.coaster_id GROUP BY r.user_slug").all();
+  // A relocated ride is one credit wherever it was ridden (023-same-ride.sql),
+  // so the count is of distinct CREDIT KEYS, not coaster ids. Before the
+  // migration there is nothing to collapse and the plain count is the answer.
+  let rc;
+  try {
+    rc = (await env.DB.prepare(
+      "SELECT r.user_slug AS s, COUNT(DISTINCT COALESCE(sr.ride, r.coaster_id)) AS credits, COUNT(*) AS n " +
+      "FROM rides r JOIN coasters c ON c.id = r.coaster_id " +
+      "LEFT JOIN same_ride sr ON sr.coaster = r.coaster_id GROUP BY r.user_slug").all()).results;
+  } catch (e) {
+    rc = (await env.DB.prepare(
+      "SELECT r.user_slug AS s, COUNT(DISTINCT r.coaster_id) AS credits, COUNT(*) AS n " +
+      "FROM rides r JOIN coasters c ON c.id = r.coaster_id GROUP BY r.user_slug").all()).results;
+  }
   let rk = [];
   try {
     rk = (await env.DB.prepare("SELECT user_slug AS s, COUNT(*) AS n FROM rankings GROUP BY user_slug").all()).results;
@@ -945,11 +1000,20 @@ async function knownCoasterIds(env, ids) {
   return known;
 }
 
-// Credits are the headline number (distinct coasters); rides counts the laps.
+// Credits are the headline number (distinct rides — a relocated coaster's two
+// rows are one, see getSummary); rides counts the laps.
 async function userTotal(env, slug) {
-  const t = await env.DB.prepare(
-    "SELECT COUNT(DISTINCT coaster_id) AS credits, COUNT(*) AS rides FROM rides WHERE user_slug = ?"
-  ).bind(slug).first();
+  let t;
+  try {
+    t = await env.DB.prepare(
+      "SELECT COUNT(DISTINCT COALESCE(sr.ride, r.coaster_id)) AS credits, COUNT(*) AS rides " +
+      "FROM rides r LEFT JOIN same_ride sr ON sr.coaster = r.coaster_id WHERE r.user_slug = ?"
+    ).bind(slug).first();
+  } catch (e) {
+    t = await env.DB.prepare(
+      "SELECT COUNT(DISTINCT coaster_id) AS credits, COUNT(*) AS rides FROM rides WHERE user_slug = ?"
+    ).bind(slug).first();
+  }
   return t ? { credits: t.credits, rides: t.rides } : { credits: 0, rides: 0 };
 }
 
@@ -1287,7 +1351,7 @@ async function recordCredits(env, slug, { rides, coasters, newCredits }) {
 // a curation session eat all 300 rows and leave the feed looking empty. The
 // rows stay in `activity` — they are the record of what changed and when, and
 // the /qc and admin panes can still read them.
-const FEED_HIDDEN = ["clone_set", "clone_removed",
+const FEED_HIDDEN = ["clone_set", "clone_removed", "same_ride_set", "same_ride_removed",
                      "model_renamed", "model_merged", "model_assigned",
                      // "Kumba had 6 details updated" is the same housekeeping
                      // wearing a coaster's name: filling in the specs of rows
@@ -2411,6 +2475,89 @@ export default {
         return json({ ok: true, slug: slug, name: u.name, url: url.origin + "/account?claim=" + code });
       }
 
+      // ---- same ride, relocated (admin) -----------------------------------
+      //
+      // Two coaster rows that are one physical ride which moved parks
+      // (migrations/023-same-ride.sql). Each row stays — the park pages and
+      // the riders' logs keep showing it where it was ridden — and the link
+      // makes every count treat them as one credit. Curated in /edit, never
+      // guessed: a shared name across parks is far more often a clone or a
+      // theme than a move.
+      const SAME_503 = "run migrations/023-same-ride.sql first";
+      const haveSameRide = async () => {
+        try { await env.DB.prepare("SELECT 1 FROM same_ride LIMIT 1").first(); return true; }
+        catch (e) { return false; }
+      };
+      // What each of `ids` counts as now: its set's home, or null for none.
+      const sameOf = async (ids) => {
+        const out = {};
+        ids.forEach((x) => { out[x] = null; });
+        if (!ids.length) return out;
+        const { results } = await env.DB.prepare(
+          "SELECT coaster, ride FROM same_ride WHERE coaster IN (" + ids.map(() => "?").join(",") + ")"
+        ).bind(...ids).all();
+        results.forEach((r) => { out[r.coaster] = r.ride; });
+        return out;
+      };
+
+      // Link { ids:[...], home? }. Linking a coaster that is already in a set
+      // brings the whole set along, so the third park of a ride that moved
+      // twice is one more link, not a rebuild. `home` is the id the ride
+      // counts as — where it is now — and defaults to the existing set's home,
+      // else the first id given.
+      if (request.method === "POST" && path === "/api/same-ride") {
+        if (!await haveSameRide()) return err(503, SAME_503);
+        const b = await request.json();
+        const ids = Array.from(new Set((Array.isArray(b && b.ids) ? b.ids : [])
+          .map((x) => Number(x)).filter((x) => Number.isInteger(x) && x > 0)));
+        if (ids.length < 2) return err(400, "a relocated ride needs at least two coasters");
+        if (ids.length > 20) return err(400, "that is too many coasters for one ride");
+        const marks = ids.map(() => "?").join(",");
+        const { results: old } = await env.DB.prepare(
+          "SELECT coaster, ride FROM same_ride WHERE ride IN " +
+          "(SELECT ride FROM same_ride WHERE coaster IN (" + marks + "))"
+        ).bind(...ids).all();
+        const all = Array.from(new Set(ids.concat(old.map((r) => r.coaster))));
+        const allMarks = all.map(() => "?").join(",");
+        const { results: found } = await env.DB.prepare(
+          "SELECT id, name, park FROM coasters WHERE id IN (" + allMarks + ")").bind(...all).all();
+        if (found.length !== all.length) return err(404, "one of those coasters does not exist");
+        const asked = Number(b && b.home);
+        const oldHome = old.length ? old.find((r) => r.coaster === r.ride) : null;
+        const home = all.includes(asked) ? asked : (oldHome ? oldHome.ride : ids[0]);
+        await env.DB.batch([
+          env.DB.prepare("DELETE FROM same_ride WHERE coaster IN (" + allMarks + ")").bind(...all),
+          ...all.map((cid) => env.DB.prepare(
+            "INSERT INTO same_ride (coaster, ride) VALUES (?, ?)").bind(cid, home)),
+        ]);
+        // Two separate sets that were each already linked become one, and the
+        // set that lost its home to this one is tidied rather than stranded.
+        await tidySameRide(env);
+        const h = found.find((c) => c.id === home);
+        await recordActivity(env, "same_ride_set", {
+          subject: h.name, n: all.length,
+          detail: { ride: home, at: found.map((c) => ({ id: c.id, park: c.park })) },
+        });
+        return afterWrite(ctx, env, request, json({ ok: true, ride: home, ids: all, same: await sameOf(all) }));
+      }
+
+      // Unlink one coaster from its set. The rest stay linked; a set left with
+      // one coaster goes, and one that lost its home picks a new one.
+      const srm = path.match(/^\/api\/same-ride\/(\d+)$/);
+      if (srm && request.method === "DELETE") {
+        if (!await haveSameRide()) return err(503, SAME_503);
+        const id = Number(srm[1]);
+        const row = await env.DB.prepare("SELECT ride FROM same_ride WHERE coaster = ?").bind(id).first();
+        if (!row) return err(404, "that coaster is not linked to another");
+        const { results: mates } = await env.DB.prepare(
+          "SELECT coaster FROM same_ride WHERE ride = ?").bind(row.ride).all();
+        await env.DB.prepare("DELETE FROM same_ride WHERE coaster = ?").bind(id).run();
+        await tidySameRide(env);
+        const c = await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(id).first();
+        await recordActivity(env, "same_ride_removed", { subject: c ? c.name : null, detail: { id: id } });
+        return afterWrite(ctx, env, request, json({ ok: true, same: await sameOf(mates.map((m) => m.coaster)) }));
+      }
+
       // ---- clone groups (admin) ------------------------------------------
       //
       // Curated here rather than computed, because no rule gets it right on its
@@ -2658,6 +2805,7 @@ export default {
           try { await env.DB.prepare("DELETE FROM " + table + " WHERE " + col + " = ?").bind(id).run(); }
           catch (e) { /* that table is not in this database yet */ }
         }
+        await tidySameRide(env);
         const detail = { id: id, park: row.park };
         if (drop && results.length) {
           detail.riders = results.map((r) => ({ slug: r.slug, name: r.name, rides: r.rides }));
@@ -2754,6 +2902,7 @@ export default {
             ]);
           } catch (e) { /* that table is not in this database yet */ }
         }
+        await tidySameRide(env, from, to);
         const dst = await env.DB.prepare("SELECT name, park FROM coasters WHERE id = ?").bind(to).first();
         await recordActivity(env, "coaster_merged", {
           subject: dst ? dst.name : null,

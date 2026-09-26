@@ -48,11 +48,30 @@
       .slice(0, n);
   }
 
+  // A coaster's credit key: a relocated ride's rows share one (`same`, from
+  // /api/coasters — see migrations/023-same-ride.sql), every other coaster is
+  // its own. Anything that counts credits or dedupes a list of coasters by
+  // "is this the same ride" goes through this, never through the bare id.
+  function rideKey(c) { return c ? (c.same || c.id) : null; }
+  // The other rows of c's relocated ride, oldest park first by opening date.
+  function sameRideRows(coasters, c) {
+    if (!c || !c.same) return [];
+    return coasters.filter(function (x) { return x.same === c.same && x.id !== c.id; })
+      .sort(function (a, b) { return String(a.opened || a.yr || "").localeCompare(String(b.opened || b.yr || "")); });
+  }
+
   function yearOf(d) { return parseInt(String(d).slice(0, 4), 10); }
 
   function computeStats(coasters, parks, userInput) {
     var byId = {};
     coasters.forEach(function (c) { byId[c.id] = c; });
+    // A relocated ride is one credit ridden in two places (023-same-ride.sql):
+    // every count below is by CREDIT KEY — `same`, the set's home id, or the
+    // coaster's own id. Where it was ridden (parks, regions, the day log) still
+    // reads the row it was ridden at. `rep` is the row that stands for each
+    // credit: the home if this rider rode it there, else the first they rode.
+    function keyOf(id) { var c = byId[id]; return (c && c.same) || +id; }
+    var rep = {}, placeCount = {}, places = {};
 
     // ---- Normalize any input into: a full dated log (if any), per-credit ride
     // counts (if known), a first-ridden date per credit (if known), the credit
@@ -73,11 +92,15 @@
 
     ridesInput.forEach(function (r) {
       if (!(r.c in byId)) return;
-      creditSet[r.c] = true;
-      creditCount[r.c] = (creditCount[r.c] || 0) + 1;
+      var k = keyOf(r.c);
+      creditSet[k] = true;
+      creditCount[k] = (creditCount[k] || 0) + 1;
+      if (!placeCount[r.c]) (places[k] = places[k] || []).push(+r.c);
+      placeCount[r.c] = (placeCount[r.c] || 0) + 1;
+      if (!rep[k] || r.c === k) rep[k] = r.c;
       if (r.d) {
         log.push({ c: r.c, d: r.d });
-        if (!firstRidden[r.c] || r.d < firstRidden[r.c]) firstRidden[r.c] = r.d;
+        if (!firstRidden[k] || r.d < firstRidden[k]) firstRidden[k] = r.d;
       }
     });
 
@@ -93,7 +116,11 @@
 
     var hasFirstDates = Object.keys(firstRidden).length > 0;
 
-    var creditList = creditIds.map(function (id) { return byId[id]; });
+    var creditList = creditIds.map(function (k) { return byId[rep[k]]; });
+    // Every row ridden, a relocated ride's two included: what the park and
+    // region counts read, because riding it in Ohio and then in Texas is two
+    // places visited even though it is one credit.
+    var placeList = Object.keys(placeCount).map(function (id) { return byId[id]; });
 
     // ---- Timeline aggregates (need first-ridden dates; work for log OR dates) -
     var newByYear = {}, years = new Set();
@@ -128,16 +155,18 @@
     creditList.forEach(function (c) {
       if (c.type === "Wood") wood++; else steel++;
       if (c.manu) manu[c.manu] = (manu[c.manu] || 0) + 1;
-      var lreg = parks[c.park] && parks[c.park].region; if (lreg) loc[lreg] = (loc[lreg] || 0) + 1;
       uniqueFt += (c.l || 0); invUnique += (c.inv || 0);
+    });
+    placeList.forEach(function (c) {
+      var lreg = parks[c.park] && parks[c.park].region; if (lreg) loc[lreg] = (loc[lreg] || 0) + 1;
       parkCredits[c.park] = (parkCredits[c.park] || 0) + 1;
     });
 
     // ---- Ride-count aggregates (need per-credit counts; re-rides included) ---
     var totalRides = 0, distFt = 0, invExp = 0, rideSec = 0;
     if (hasCounts) {
-      Object.keys(creditCount).forEach(function (id) {
-        var c = byId[id], n = creditCount[id];
+      Object.keys(placeCount).forEach(function (id) {
+        var c = byId[id], n = placeCount[id];
         totalRides += n;
         distFt += (c.l || 0) * (c.laps || 1) * n;
         invExp += (c.inv || 0) * (c.laps || 1) * n;
@@ -190,7 +219,7 @@
     // location (one value per park). Coasters whose park isn't in parks.json
     // simply don't contribute a state/country.
     var states = new Set(), countries = new Set();
-    creditList.forEach(function (c) {
+    placeList.forEach(function (c) {
       var pg = parks[c.park];
       var reg = pg && pg.region; if (!reg) return;
       var kv = regionKind(reg);
@@ -203,7 +232,7 @@
     // First-ridden events with a full (mm-dd) date — powers "on this day".
     var firstRides = Object.keys(firstRidden)
       .filter(function (id) { return String(firstRidden[id]).length >= 10; })
-      .map(function (id) { return { c: +id, d: firstRidden[id] }; });
+      .map(function (k) { return { c: rep[k], d: firstRidden[k] }; });
 
     return {
       // activity  = full dated ride log (unlocks calendar + rides/year + biggest days)
@@ -243,7 +272,7 @@
         fastest: fastest && { name: fastest.name, val: fastest.s, unit: "mph" },
         longest: longest && { name: longest.name, val: longest.l, unit: "ft" },
         oldest: oldest && { name: oldest.name, val: curYear - oldest.yr, unit: "yrs" },
-        most_ridden: mostRiddenId && { name: byId[mostRiddenId].name, val: creditCount[mostRiddenId], unit: "rides" },
+        most_ridden: mostRiddenId && { name: byId[rep[mostRiddenId]].name, val: creditCount[mostRiddenId], unit: "rides" },
         most_visited_park: mostVisitedPark && { name: mostVisitedPark, val: parkVisitDays[mostVisitedPark], unit: "visits" }
       },
       day_detail: dayDetail,
@@ -251,15 +280,21 @@
       geo: { states: [...states].sort(), countries: [...countries].sort(),
              n_states: states.size, n_countries: nCountries, n_parks: parksGeo.length },
       parksGeo: parksGeo,
+      // One entry per CREDIT, keyed by the row that stands for it (`rep`), so
+      // a list built from this shows a relocated ride once. Its rides, first
+      // and last cover every row of it; `also` names the other rows this rider
+      // rode it at, for a "also ridden at Old Park" line.
       byCoaster: (function () {
         var m = {};
-        Object.keys(creditSet).forEach(function (id) {
-          var dates = log.filter(function (r) { return r.c == id; }).map(function (r) { return r.d; }).sort();
-          m[id] = {
-            rides: creditCount[id] != null ? creditCount[id] : (dates.length || null),
-            first: dates[0] || firstRidden[id] || null,
+        Object.keys(creditSet).forEach(function (k) {
+          var dates = log.filter(function (r) { return keyOf(r.c) == k; }).map(function (r) { return r.d; }).sort();
+          var e = m[rep[k]] = {
+            rides: creditCount[k] != null ? creditCount[k] : (dates.length || null),
+            first: dates[0] || firstRidden[k] || null,
             last: dates[dates.length - 1] || null, dates: dates
           };
+          var also = places[k].filter(function (id) { return id != rep[k]; });
+          if (also.length) e.also = also;
         });
         return m;
       })(),
@@ -1589,7 +1624,7 @@
     e.preventDefault(); openSearch();
   });
 
-  var api = { computeStats: computeStats, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
+  var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,

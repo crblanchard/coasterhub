@@ -572,6 +572,19 @@ CoasterHub.me().then(function(acct){
   $('mineglobal').hidden=false;
 }).catch(function(){});
 var BYID={}, MINE=[], ORDER=[], dirty=false, view='rank';
+// A coaster's credit key: a relocated ride's rows share one (023-same-ride.sql),
+// so it is ranked once, whichever park's row stands for it.
+function KEY(id){ return CoasterHub.rideKey(BYID[id])||id; }
+// Keep the first (best-placed) row of each ride. A list saved before two rows
+// were linked as one ride can hold both; the lower one goes the next time the
+// list is saved, which is the right answer — it is one ride, one place.
+function oneEach(order){
+  var seen={};
+  return order.filter(function(id){
+    if(!BYID[id]) return false;
+    var k=KEY(id); if(seen[k]) return false; seen[k]=1; return true;
+  });
+}
 var CANEDIT=false;
 
 // ---------------------------------------------------------------- load ------
@@ -595,18 +608,20 @@ if(!slug){
     coasters.forEach(function(c){ var pk=parks[c.park];
       BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
 
-    // Drop ids we can't name — a merged-away coaster shouldn't break the page.
+    // Drop ids we can't name — a merged-away coaster shouldn't break the page —
+    // and a relocated ride's second row.
     var lists=CoasterHub.USERS.map(function(u,i){
-      return {user:u, claimed:!!all[i].claimed,
-              order:(all[i].order||[]).filter(function(id){return BYID[id];})};
+      return {user:u, claimed:!!all[i].claimed, order:oneEach(all[i].order||[])};
     });
     var started=lists.filter(function(l){return l.order.length;});
 
     // How many lists each coaster is on, and where it sits on average.
     var tally={};
     lists.forEach(function(l){
+      // By ride, not by row: two riders who ranked a relocated coaster at
+      // different parks ranked the same ride, shown at its home now.
       l.order.forEach(function(id,i){
-        var t=tally[id]||(tally[id]={id:id,n:0,sum:0,who:[]});
+        var k=KEY(id), t=tally[k]||(tally[k]={id:k,n:0,sum:0,who:[]});
         t.n++; t.sum+=i+1;
         t.who.push({name:l.user.name,slug:l.user.slug,pos:i+1});
       });
@@ -756,14 +771,20 @@ if(!slug){
     coasters.forEach(function(c){ var pk=parks[c.park];
       BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
 
-    // The pool you rank from: your own credits — one entry per coaster, so a
-    // coaster ridden thirty times is still ranked once.
+    // The pool you rank from: your own credits — one entry per credit, so a
+    // coaster ridden thirty times is still ranked once, and so is one ridden
+    // at two parks because it moved. That ride's row is the one already in the
+    // list, else its home now if you rode it there, else the one you rode.
+    ORDER=oneEach(rank.order||[]);
+    var inList={}; ORDER.forEach(function(id){ inList[KEY(id)]=id; });
     var seen={};
     (user.rides||[]).forEach(function(x){
-      var id=(typeof x==='object')?x.c:x; if(BYID[id]) seen[id]=1;
+      var id=(typeof x==='object')?x.c:x; if(!BYID[id]) return;
+      var k=KEY(id);
+      if(inList[k]) seen[k]=inList[k];
+      else if(!seen[k] || id===k) seen[k]=id;
     });
-    MINE=Object.keys(seen).map(Number);
-    ORDER=(rank.order||[]).filter(function(id){return BYID[id];});
+    MINE=Object.keys(seen).map(function(k){ return seen[k]; });
 
     var nm=esc(user.user||slug);
     $('hero_h1').textContent=nm+'’s favorites, ranked.';
@@ -1485,10 +1506,20 @@ function anyPicked(){ return FACETS.some(function(f){ return picked(f).length>0;
 // every maker you had not picked, and applying the search box would collapse
 // the panel out from under you as you typed a maker's name into it.
 function scoped(){
-  var ids=$('all_coasters').checked?Object.keys(BYID).map(Number):MINE;
   var pk=$('f_addpark').value;
-  return ids.map(function(id){return BYID[id];})
+  return pool().map(function(id){return BYID[id];})
             .filter(function(c){ return c && (!pk || c.park===pk); });
+}
+// Your credits, or every coaster — less the other row of any relocated ride
+// you have already ridden or ranked at one park, which would otherwise be
+// offered as a second, unranked copy of the same ride.
+function pool(){
+  if(!$('all_coasters').checked) return MINE;
+  var taken={};
+  MINE.concat(ORDER).forEach(function(id){ taken[KEY(id)]=id; });
+  return Object.keys(BYID).map(Number).filter(function(id){
+    var t=taken[KEY(id)]; return !t || t===id;
+  });
 }
 
 // Parks that actually have something in scope, with how many. Rebuilt when the
@@ -1497,7 +1528,7 @@ function scoped(){
 // change event (the same trap /log documents).
 function buildAddParks(){
   var sel=$('f_addpark'), keep=sel.value, seen={};
-  ($('all_coasters').checked?Object.keys(BYID).map(Number):MINE).forEach(function(id){
+  pool().forEach(function(id){
     var c=BYID[id]; if(c&&c.park) seen[c.park]=(seen[c.park]||0)+1;
   });
   sel.innerHTML='<option value="">All parks</option>'+Object.keys(seen).sort(function(a,b){

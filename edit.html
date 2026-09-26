@@ -151,6 +151,14 @@
   /* A bare `label` rule above upper-cases every label as a field caption; this one is a sentence, so it reads like the hint beside it. */
   .toolbar .dropRides{display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;color:var(--ink);text-transform:none;letter-spacing:0;font-size:.85rem;font-weight:400}
   .toolbar .dropRides input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--btn-bg)}
+  /* Same ride, relocated: one line per row of the ride, and the finder's hits. */
+  .srrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--line)}
+  .srrow:last-child{border-bottom:0}
+  .srrow .srnm{flex:1 1 220px;min-width:0;font-size:.9rem}
+  .srrow .srnm small{color:var(--muted);margin-left:4px}
+  .srrow button{padding:5px 10px;font-size:.8rem}
+  .srrow .srhome{font-size:.72rem;padding:2px 8px;border-radius:20px;background:var(--ok-bg);color:var(--ok);font-weight:600}
+  #srHits:not(:empty){margin-top:6px}
 </style>
 </head>
 <body>
@@ -1677,6 +1685,13 @@
       '<div class="toolbar"><h3>Add a credit</h3><p class="hint">Give a rider this coaster. The date is optional; leave it blank for a credit with no known day.</p>'+
         '<div class="inline"><select id="crRider" style="width:auto;flex:0 1 190px"><option value="">Rider…</option></select>'+
         '<input id="crDate" type="date" style="width:160px"><button id="crBtn" style="white-space:nowrap">Add credit</button><span class="toast" id="crToast"></span></div></div>'+
+      // Same ride at two parks because it moved (Carter, 2026-09-26: "a tool
+      // to assign rides as 'the same'"). Not a merge — each park keeps its row
+      // and its riders — just one credit for anyone who rode it at both.
+      '<div class="toolbar"><h3>Same ride, relocated</h3><p class="hint" id="srHint"></p>'+
+        '<div id="srList"></div>'+
+        '<div class="inline" style="margin-top:8px"><input id="srQ" type="search" autocomplete="off" placeholder="Find its other park’s row — name or park…" style="flex:0 1 360px"><span class="toast" id="srToast"></span></div>'+
+        '<div id="srHits"></div></div>'+
       '<div class="toolbar"><h3>Merge duplicate</h3><p class="hint">Merge this into another coaster: all riders’ credits move to the target id, then this one is deleted.</p>'+
         '<div class="inline"><span>Merge #'+c.id+' → id</span><input id="mergeTo" type="number" style="width:110px" placeholder="target id"><button class="danger" id="mergeBtn">Merge</button></div></div>'+
       '<div class="toolbar"><h3>Delete</h3>'+
@@ -1692,7 +1707,8 @@
       var g = inCat()[state.sel];
       document.getElementById('catBtn').disabled = (this.value === String(g ? g.id : ''));
     });
-    fillRiders(); showCategory(id);
+    fillRiders(); showCategory(id); showSameRide(id);
+    document.getElementById('srQ').addEventListener('input', function(){ sameRideHits(id); });
     // AFTER the content is in: setting it first leaves the browser holding the
     // old offset, which is how the top of a queued ride ended up off-screen.
     //
@@ -1764,6 +1780,103 @@
       toast.textContent = "Error: "+e.message; toast.className = "toast bad";
       try { state.clones = (await api("GET","/api/clones")).groups || []; showCategory(id); } catch(_){}
     }
+  }
+
+  // ---------- same ride, relocated ----------
+  // The rows of `id`'s ride, home first. `same` comes with /api/coasters.
+  function sameRideSet(id){
+    var c = state.byId[id]; if (!c || !c.same) return [];
+    return state.coasters.filter(function(x){ return x.same === c.same; })
+      .sort(function(a,b){ return (b.id===c.same) - (a.id===c.same) || a.id - b.id; });
+  }
+  function srLine(x, acts){
+    var yrs = [x.opened ? String(x.opened).slice(0,4) : (x.yr || ''), x.closed ? String(x.closed).slice(0,4) : ''];
+    var when = yrs[0] || yrs[1] ? ' <small>'+esc(yrs[0]||'?')+(x.closed ? '–'+esc(yrs[1]) : '–now')+'</small>' : '';
+    return '<div class="srrow"><span class="srnm"><b>'+esc(x.name)+'</b> at '+esc(x.park||'—')+' <small>#'+x.id+'</small>'+when+'</span>'+acts+'</div>';
+  }
+  function showSameRide(id){
+    var list = document.getElementById('srList'); if (!list || state.sel!==id) return;
+    var set = sameRideSet(id), c = state.byId[id];
+    document.getElementById('srHint').innerHTML = set.length
+      ? 'One ride at '+set.length+' parks: anyone who rode it at more than one gets <b>one credit</b>, and it is ranked once. '
+        + 'Each park keeps its own row. The <b>home</b> is the row it counts as — usually where it is now.'
+      : 'If this coaster moved parks and is also listed at its old (or new) park, link the two here. '
+        + 'Nothing is merged: each park keeps its row and its riders, and anyone who rode both gets one credit.';
+    list.innerHTML = set.map(function(x){
+      var home = x.id === c.same;
+      return srLine(x, (home ? '<span class="srhome">home</span>'
+          : '<button class="ghost" data-srhome="'+x.id+'">Make home</button>')
+        + '<button class="danger" data-srout="'+x.id+'">Unlink</button>');
+    }).join('');
+    list.querySelectorAll('[data-srhome]').forEach(function(b){ b.onclick = function(){
+      sameRideLink(id, set.map(function(x){ return x.id; }), +b.getAttribute('data-srhome'));
+    }; });
+    list.querySelectorAll('[data-srout]').forEach(function(b){ b.onclick = function(){
+      sameRideUnlink(id, +b.getAttribute('data-srout'));
+    }; });
+    sameRideHits(id);
+  }
+  // What to offer: typed text searches name and park; with nothing typed, the
+  // same name at another park — the likeliest move, though a shared name is
+  // far more often a clone, which is why nothing links without a click.
+  function sameRideHits(id){
+    var box = document.getElementById('srHits'); if (!box || state.sel!==id) return;
+    var c = state.byId[id], q = document.getElementById('srQ').value.trim().toLowerCase();
+    var mine = {}; sameRideSet(id).forEach(function(x){ mine[x.id]=1; }); mine[id] = 1;
+    var hits = state.coasters.filter(function(x){
+      if (mine[x.id]) return false;
+      if (q.length >= 2) return ((x.name||'')+' '+(x.park||'')).toLowerCase().indexOf(q) >= 0 || String(x.id) === q;
+      return !q && (x.name||'').toLowerCase() === (c.name||'').toLowerCase() && x.park !== c.park;
+    }).slice(0, 8);
+    box.innerHTML = (hits.length && !q ? '<p class="hint" style="margin:0 0 2px">Same name at another park:</p>' : '')
+      + hits.map(function(x){
+        var other = x.same ? ' <small>(already linked at '+sameRideSet(x.id).length+' parks)</small>' : '';
+        return srLine(x, other + '<button data-srlink="'+x.id+'">Same ride</button>');
+      }).join('')
+      + (q.length >= 2 && !hits.length ? '<p class="hint">Nothing matches.</p>' : '');
+    box.querySelectorAll('[data-srlink]').forEach(function(b){ b.onclick = function(){
+      var o = state.byId[+b.getAttribute('data-srlink')];
+      // A new pair's home is the one still running, else the later opening;
+      // a pair touching an existing set keeps that set's home (the API's rule).
+      var home = null;
+      if (!c.same && !o.same) {
+        var score = function(x){ return (x.closed ? 0 : 1e5) + (+(String(x.opened||x.yr||'').slice(0,4)) || 0); };
+        home = score(o) > score(c) ? o.id : c.id;
+      }
+      if (!confirm('Link #'+c.id+' '+c.name+' ('+c.park+') and #'+o.id+' '+o.name+' ('+o.park+') as the SAME ride?\n\n'
+        + 'Anyone who rode both will have one credit for it instead of two.')) return;
+      sameRideLink(id, [c.id, o.id], home);
+    }; });
+  }
+  function applySame(map){
+    Object.keys(map || {}).forEach(function(k){
+      var x = state.byId[k]; if (!x) return;
+      if (map[k] == null) delete x.same; else x.same = map[k];
+    });
+  }
+  async function sameRideLink(id, ids, home){
+    var toast = document.getElementById('srToast');
+    toast.textContent = "Saving…"; toast.className = "toast";
+    try {
+      var body = { ids: ids }; if (home) body.home = home;
+      var r = await api("POST","/api/same-ride", body);
+      applySame(r.same);
+      document.getElementById('srQ').value = '';
+      showSameRide(id);
+      toast.textContent = "Linked ✓"; toast.className = "toast good";
+    } catch(e){ toast.textContent = "Error: "+e.message; toast.className = "toast bad"; }
+  }
+  async function sameRideUnlink(id, out){
+    var x = state.byId[out];
+    if (!confirm('Unlink #'+out+' '+x.name+' ('+x.park+')?\n\nIt becomes its own credit again.')) return;
+    var toast = document.getElementById('srToast');
+    toast.textContent = "Saving…"; toast.className = "toast";
+    try {
+      var r = await api("DELETE","/api/same-ride/"+out);
+      applySame(r.same);
+      showSameRide(id);
+      toast.textContent = "Unlinked ✓"; toast.className = "toast good";
+    } catch(e){ toast.textContent = "Error: "+e.message; toast.className = "toast bad"; }
   }
 
   // ---------- a new coaster ----------

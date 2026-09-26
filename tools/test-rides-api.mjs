@@ -34,6 +34,7 @@ const MIGRATION_012 = readFileSync(join(ROOT, "migrations", "012-clone-groups.sq
 const MIGRATION_013 = readFileSync(join(ROOT, "migrations", "013-rider-categories.sql"), "utf8");
 const MIGRATION_015 = readFileSync(join(ROOT, "migrations", "015-category-triage.sql"), "utf8");
 const MIGRATION_017 = readFileSync(join(ROOT, "migrations", "017-model-triage.sql"), "utf8");
+const MIGRATION_023 = readFileSync(join(ROOT, "migrations", "023-same-ride.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
 // D1 rejects a statement with more bound parameters than SQLite's compiled-in
@@ -119,6 +120,8 @@ function freshDb() {
   db.exec(MIGRATION_013);
   db.exec(MIGRATION_015);
   db.exec(MIGRATION_015);
+  db.exec(MIGRATION_023);
+  db.exec(MIGRATION_023);
   return db;
 }
 
@@ -2660,6 +2663,77 @@ async function main() {
     r = await call(db, "GET", "/api/coasters");
     const g = (r.data.coasters || []).find(c => c.id === 903);
     check("/api/coasters leaves empty fields out", g && !("h" in g) && !("closed" in g) && g.name === "Gamma", JSON.stringify(g));
+  }
+
+  // ---- same ride, relocated (023, 2026-09-26) ------------------------------
+  {
+    const db = freshDb();
+    db.exec("INSERT OR IGNORE INTO users (slug,name,mode) VALUES ('ann','Ann','rides'),('bo','Bo','rides')");
+    db.exec("INSERT INTO coasters (id,name,park,type) VALUES (951,'Mover','Old Park','Steel'),(952,'Mover','New Park','Steel'),(953,'Mover','Third Park','Steel'),(954,'Other','New Park','Wood')");
+    db.exec("INSERT INTO rides (user_slug,coaster_id,d) VALUES ('ann',951,'2001-06-01'),('ann',952,'2020-06-01'),('ann',952,'2020-06-01'),('ann',954,NULL),('bo',951,NULL)");
+    const credits = async (slug) => ((await call(db, "GET", "/api/summary")).data.users || []).find(u => u.slug === slug).credits;
+    check("same ride: before linking, two rows are two credits", await credits("ann") === 3);
+
+    let r = await call(db, "POST", "/api/same-ride", { body: { ids: [951, 952], home: 952 } });
+    check("same ride: linking is admin only", r.status === 401, r.status);
+    r = await call(db, "POST", "/api/same-ride", { token: PW, body: { ids: [951] } });
+    check("same ride: one coaster is not a relocation", r.status === 400, r.status);
+    r = await call(db, "POST", "/api/same-ride", { token: PW, body: { ids: [951, 99999] } });
+    check("same ride: an unknown id is refused", r.status === 404, r.status);
+    r = await call(db, "POST", "/api/same-ride", { token: PW, body: { ids: [951, 952], home: 952 } });
+    check("same ride: linked, both count as the home",
+      r.status === 200 && r.data.ride === 952 && r.data.same[951] === 952 && r.data.same[952] === 952, JSON.stringify(r.data));
+    check("same ride: the link is not on /changes",
+      !((await call(db, "GET", "/api/activity")).data.events || []).some(e => /same_ride/.test(e.kind)));
+    check("same ride: summary counts the pair as ONE credit, rides unchanged", await credits("ann") === 2);
+    r = await call(db, "GET", "/api/summary");
+    check("same ride: ride total still counts every lap",
+      r.data.users.find(u => u.slug === "ann").rides === 4, JSON.stringify(r.data.users));
+    check("same ride: a rider who rode one side is unaffected", await credits("bo") === 1);
+    r = await call(db, "GET", "/api/coasters");
+    const by = {}; r.data.coasters.forEach(c => { by[c.id] = c; });
+    check("same ride: /api/coasters carries `same` on each member only",
+      by[951].same === 952 && by[952].same === 952 && !("same" in by[953]) && !("same" in by[954]));
+
+    r = await call(db, "POST", "/api/rides", { token: PW, body: { user: "ann", d: "2024-01-01", entries: [{ c: 953, n: 1 }] } });
+    check("same ride: a third park is a new credit until linked", r.status === 200 && r.data.credits === 3, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/same-ride", { token: PW, body: { ids: [953, 951] } });
+    check("same ride: linking to a member joins the whole set, home kept",
+      r.status === 200 && r.data.ride === 952 && r.data.ids.length === 3 && r.data.same[953] === 952, JSON.stringify(r.data));
+    check("same ride: and the third ride stops counting", await credits("ann") === 2);
+
+    r = await call(db, "DELETE", "/api/same-ride/952", { token: PW });
+    check("same ride: unlinking the home re-homes the rest",
+      r.status === 200 && r.data.same[952] === null && r.data.same[951] === 951 && r.data.same[953] === 951, JSON.stringify(r.data));
+    check("same ride: ...so 952 is its own credit again", await credits("ann") === 3);
+    r = await call(db, "DELETE", "/api/same-ride/953", { token: PW });
+    check("same ride: a set left with one coaster goes",
+      rows(db, "SELECT * FROM same_ride").length === 0, JSON.stringify(rows(db, "SELECT * FROM same_ride")));
+    r = await call(db, "DELETE", "/api/same-ride/953", { token: PW });
+    check("same ride: unlinking a coaster in no set is a 404", r.status === 404, r.status);
+
+    // Merge and delete keep the table honest.
+    await call(db, "POST", "/api/same-ride", { token: PW, body: { ids: [951, 952, 953], home: 952 } });
+    r = await call(db, "POST", "/api/merge", { token: PW, body: { from: 952, to: 954 } });
+    let sr = rows(db, "SELECT coaster, ride FROM same_ride ORDER BY coaster");
+    check("same ride: merging the home away moves the set to the survivor",
+      r.status === 200 && JSON.stringify(sr) === JSON.stringify([{coaster:951,ride:954},{coaster:953,ride:954},{coaster:954,ride:954}]), JSON.stringify(sr));
+    r = await call(db, "DELETE", "/api/coaster/954?dropRides=1", { token: PW });
+    sr = rows(db, "SELECT coaster, ride FROM same_ride ORDER BY coaster");
+    check("same ride: deleting the home picks a new one",
+      r.status === 200 && JSON.stringify(sr) === JSON.stringify([{coaster:951,ride:951},{coaster:953,ride:951}]), JSON.stringify(sr));
+
+    // Before the migration: the list and the counts still work, writes 503.
+    const old = freshDb();
+    old.exec("DROP TABLE same_ride");
+    old.exec("INSERT OR IGNORE INTO users (slug,name,mode) VALUES ('ann','Ann','rides')");
+    r = await call(old, "GET", "/api/coasters");
+    check("same ride: /api/coasters works before 023", r.status === 200 && r.data.coasters.length > 0, r.status);
+    r = await call(old, "GET", "/api/summary");
+    check("same ride: summary works before 023", r.status === 200, r.status);
+    r = await call(old, "POST", "/api/same-ride", { token: PW, body: { ids: [1, 2] } });
+    check("same ride: linking before 023 is a 503 naming the file",
+      r.status === 503 && /023-same-ride/.test(r.data.error), JSON.stringify(r.data));
   }
 
   console.log("\n" + pass + " passed, " + fail + " failed\n");

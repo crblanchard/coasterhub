@@ -3670,6 +3670,55 @@ day and park cards (the park name in a park card's summary is a link once open).
 an opened body that is not on a link closes it. Stats inside use `coasterFacts(c, extra, link)` — info
 left, numbers right on wide screens, "Coaster page →" under the left column.
 
+## Same ride, relocated (2026-09-26)
+
+Carter: *"When rides are relocated from park to park they should still count as one credit
+only. We need a tool to assign rides as 'the same'."* Built on the 2026-09-24 sketch.
+
+**The data.** `migrations/023-same-ride.sql`: `same_ride(coaster PRIMARY KEY, ride)`. One row
+per coaster in a set, the set's **home** included (`coaster = ride`). The home is the id the
+ride counts as — usually where it is now. Both `coasters` rows stay: each park page, map pin
+and day in a rider's log keeps showing it where it was ridden. It is NOT a merge and NOT a
+clone group (a clone family is different rides of one design, each its own credit; a coaster
+can be in both).
+
+**How it reaches the pages.** `/api/coasters` puts `same: <home id>` on every member and on
+nothing else, so `coasters.json` carries it after the next sync. **A coaster's credit key is
+`CoasterHub.rideKey(c)` = `c.same || c.id`.** Anything that counts credits or asks "is this
+the same ride" goes through it:
+
+- Worker: `getSummary` and `userTotal` count `DISTINCT COALESCE(same_ride.ride, coaster_id)`
+  (with a retry on the plain count before the migration). So home rows, /log's and /import's
+  "now on N", and anything else reading those agree.
+- `computeStats`: credits, steel/wood, makers, records, timeline and first-ridden are by key;
+  **parks, regions, states/countries and the map read every row ridden** (riding it in Ohio
+  and then Texas is two places visited, one credit). `byCoaster` is one entry per credit,
+  keyed by the row that stands for it (the home if this rider rode it there, else the first
+  they rode), with combined rides/first/last and `also: [other row ids]`.
+- `/credits`: the Coasters list shows one row with "also ridden at <park>" under the park;
+  the day cards' "new credit" mark is by key, so riding it at its new park is a re-ride.
+- `/rankings`: a ride is ranked once. The pool offers one row per key (the ranked one, else
+  the home if ridden, else the one ridden); "Search all coasters" hides the other row of a
+  ride you already have. A list saved with both rows shows only the higher one
+  (`oneEach`), and saving drops the lower. The shared list and `/rankings/all` tally by
+  key and show the home.
+- Coaster page: "Same ride as X at Y — it moved parks, so riding it at either is one credit."
+
+**The tool.** `/edit` → a coaster → **Same ride, relocated**. Offers the same name at other
+parks with nothing typed, or searches name/park/#id. **Same ride** links (a new pair's home
+defaults to the one still operating, else the later opening); linking to a row already in a
+set joins the whole set. **Make home** / **Unlink** per row. API: `POST /api/same-ride
+{ids, home?}`, `DELETE /api/same-ride/:id`, admin; both 503 naming the file before the
+migration, and neither shows on /changes (`FEED_HIDDEN`).
+
+**Merge and delete keep it tidy** (`tidySameRide`): the table is in `KEYED_BY_COASTER`, a
+merge repoints a home, a set whose home vanished takes its lowest id, and a set of one goes.
+
+**Not done:** `/credits`' everyone view ("Database") and the maker/location pages' "N of M
+ridden" still count rows, not rides; `youStrip` on a coaster page reports rides at that row
+only; the `ranked` count in `/api/summary` is rows in `rankings` (only off if a list still
+holds both rows and has not been re-saved).
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
@@ -4131,14 +4180,8 @@ matched loosely *within* a park; park names cannot be matched loosely at all.
   park coasters. Likely shape: a `fair` flag on the PARK (they are operator-parks already),
   which /count, /map and the stats can then sort into their own group or leave out. Not
   built.
-- **Relocated rides must not count twice (long-term, noted 2026-09-24).** When a coaster moves
-  parks it is one credit, ridden in two places. Today it is two rows in `coasters`, so a rider
-  who rode it at both gets two credits. Sketch: a `relocations` link (or a `same_ride` id, the
-  way clone groups are a curated link) so a rider's count collapses the pair to one credit
-  while each park page and the rider's log still show it at the park they rode it. The
-  counting rule (credit = `COUNT(DISTINCT coaster_id)`) is the part that has to change, and
-  everywhere that counts would need the same collapse — `computeStats`, `userTotal`, the home
-  rows, rankings. Not built.
+- ~~**Relocated rides must not count twice**~~ — **built 2026-09-26**, see "Same ride,
+  relocated" above.
 - **The two Boomers parks are now `Boomers! (Fountain Valley)` and `Boomers! (El Cajon)`.**
   They really are separate parks and the old names — `Boomers` and `Boomers!` — differed only
   by punctuation, which read like a typo. The city is in the name because `parks` is keyed by

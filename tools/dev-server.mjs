@@ -86,7 +86,7 @@ const db = new DatabaseSync(DB_FILE);
 const SCHEMA = ["000-base-schema.sql", "003-accounts.sql", "007-password-resets.sql",
                 "010-follows.sql", "012-clone-groups.sql", "013-rider-categories.sql",
                 "014-claimed-accounts.sql", "015-category-triage.sql",
-                "017-model-triage.sql", "018-merge-orphans.sql"];
+                "017-model-triage.sql", "018-merge-orphans.sql", "023-same-ride.sql"];
 for (const f of SCHEMA) {
   const p = join(ROOT, "migrations", f);
   if (!existsSync(p)) { console.warn("! missing migration " + f); continue; }
