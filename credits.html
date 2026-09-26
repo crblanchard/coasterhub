@@ -857,6 +857,11 @@ function renderDays(rows){
     var laps={}; list.forEach(function(r){ laps[r.c]=(laps[r.c]||0)+1; });
     var seen={}, uniqRows=[];
     list.forEach(function(r){ if(!seen[r.c]){seen[r.c]=1;uniqRows.push(r);} });
+    // A–Z within the day (Carter, 2026-09-26). Left alone it was the order the
+    // rows were saved, which is coaster-id order — roughly when each coaster
+    // was added to the site, which means nothing to someone reading the day.
+    // The parks keep the order they were ridden in; the sort is inside each.
+    uniqRows.sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
     var pk=[...new Set(list.map(function(r){return r.park;}))];
     // Without a re-ride anywhere in their log, "8 rides · 8 coasters" would be
     // saying the same thing twice — these are 8 credits picked up that day.
