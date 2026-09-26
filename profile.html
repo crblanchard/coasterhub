@@ -297,7 +297,7 @@
 <section class="block" id="sec_overtime"><div class="container">
   <span class="eyebrow">History</span><h2>Rides over time</h2>
   <div class="chart-grid">
-    <div class="panel wide"><h3>Credits over time</h3><div class="cap">Cumulative new coasters ridden by year</div><div class="cwrap"><canvas id="cCum"></canvas></div></div>
+    <div class="panel wide"><h3>Credits over time</h3><div class="cap" id="cCumCap">Cumulative new coasters ridden by year</div><div class="cwrap"><canvas id="cCum"></canvas></div></div>
     <div class="panel" id="panel_rides_year"><h3>Rides per year</h3><div class="cap">Total rides incl. re-rides</div><div class="cwrap"><canvas id="cRides"></canvas></div></div>
     <div class="panel"><h3>New credits per year</h3><div class="cap">First-time coasters</div><div class="cwrap"><canvas id="cNew"></canvas></div></div>
   </div>
@@ -837,7 +837,20 @@ function render(s){
   Chart.defaults.color=AX; Chart.defaults.font.family='system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
   const grid={grid:{color:GRID},ticks:{color:AX}}, noLeg={plugins:{legend:{display:false}}};
   if(has.timeline){
-  CH.push(new Chart(cCum,{type:'line',data:{labels:s.years,datasets:[{data:s.cumulative_credits,borderColor:ACC2,backgroundColor:FILL,fill:true,tension:.3,pointRadius:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}}));
+  // Credits with no first-ridden date (an import, a count typed in) have no
+  // year to land in, so the line used to stop at the dated ones — 115 for a
+  // rider on 674 (Carter, 2026-09-26). They are the dashed floor now, and the
+  // line climbs from it to the real total. Monotone, so it cannot dip below a
+  // year it already passed.
+  const dated=(s.cumulative_credits||[]).slice(-1)[0]||0, floor=Math.max(0,(k.credits||0)-dated);
+  const cumDs=[{data:s.cumulative_credits.map(v=>v+floor),borderColor:ACC2,backgroundColor:FILL,fill:floor?'+1':true,
+                cubicInterpolationMode:'monotone',pointRadius:2,borderWidth:2}];
+  if(floor) cumDs.push({data:s.years.map(()=>floor),borderColor:AX,borderDash:[5,5],borderWidth:1.5,pointRadius:0,fill:false});
+  const cap=document.getElementById('cCumCap');
+  if(cap) cap.textContent = floor
+    ? 'Total credits by year. Dashed: '+floor.toLocaleString()+' with no first-ridden date.'
+    : 'Cumulative new coasters ridden by year';
+  CH.push(new Chart(cCum,{type:'line',data:{labels:s.years,datasets:cumDs},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}}));
   CH.push(new Chart(cNew,{type:'bar',data:{labels:s.years,datasets:[{data:s.new_credits_per_year,backgroundColor:ACC2,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}}));
   }
   if(has.activity){
