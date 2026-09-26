@@ -1507,13 +1507,20 @@ function anyPicked(){ return FACETS.some(function(f){ return picked(f).length>0;
 // the panel out from under you as you typed a maker's name into it.
 function scoped(){
   var pk=$('f_addpark').value;
-  return pool().map(function(id){return BYID[id];})
+  return rankable().map(function(id){return BYID[id];})
             .filter(function(c){ return c && (!pk || c.park===pk); });
 }
 // Your credits, or every coaster — less the other row of any relocated ride
 // you have already ridden or ranked at one park, which would otherwise be
 // offered as a second, unranked copy of the same ride.
-function pool(){
+//
+// NOT called pool(): there is already a pool() below (the Add panel's filtered
+// list, which calls scoped()), and a second function declaration of the same
+// name silently replaces the first — this one was, so scoped() called pool()
+// called scoped() until the stack ran out, and every rider's ranking page died
+// on load for an evening (2026-09-26). check-inline-js cannot see that; it
+// only parses. Grep before naming a top-level function on a 2,000-line page.
+function rankable(){
   if(!$('all_coasters').checked) return MINE;
   var taken={};
   MINE.concat(ORDER).forEach(function(id){ taken[KEY(id)]=id; });
@@ -1528,7 +1535,7 @@ function pool(){
 // change event (the same trap /log documents).
 function buildAddParks(){
   var sel=$('f_addpark'), keep=sel.value, seen={};
-  pool().forEach(function(id){
+  rankable().forEach(function(id){
     var c=BYID[id]; if(c&&c.park) seen[c.park]=(seen[c.park]||0)+1;
   });
   sel.innerHTML='<option value="">All parks</option>'+Object.keys(seen).sort(function(a,b){

@@ -3882,6 +3882,18 @@ then below top ten do latest five 'recent visits' similar form to activity"*.
   style would beat the rule (CLAUDE.md), which is also why the old "clear the tiles' inline
   padding when the top ten shows" line in `renderTop` is gone.
 
+## A rider's /rankings died on load for an evening (2026-09-26)
+
+The relocated-ride change (commit 12c7154) added a `pool()` to rankings.html for "the coasters
+you could rank, one row per ride". The page already had a `pool()` further down — the Add
+panel's filtered list, which calls `scoped()`. Two top-level function declarations of one
+name parse fine and the LATER one wins, so `scoped()` → `pool()` → `scoped()` … until the
+stack ran out, `renderAdd()` threw inside the load promise, and every rider's own ranking
+page showed "Couldn't load your coasters." Carter noticed it as "rankings don't show like
+half the time". Mine is `rankable()` now. **`tools/check-inline-js.mjs` fails a page that
+declares the same column-0 function twice**, which is how this would have been caught before
+the push; it could not before, because it only parsed.
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
