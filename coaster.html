@@ -51,6 +51,13 @@
   a.rrow{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:.9rem;
          color:var(--fg);text-decoration:none;border-bottom:1px solid var(--soft)}
   a.rrow:last-child{border-bottom:0}
+  /* A relocated ride's parks, one row each (see ROWS). */
+  .lrow{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;padding:11px 16px;font-size:.9rem;border-bottom:1px solid var(--soft)}
+  .lrow:last-child{border-bottom:0}
+  .lrow .dash{color:var(--muted)}
+  .lrow a{color:var(--accent2);text-decoration:none}
+  .lrow a:hover{text-decoration:underline}
+  .lrow .when{margin-left:auto;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums}
   a.rrow:hover{background:var(--soft)}
   a.rrow .nm{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   a.rrow:hover .nm{color:var(--accent2)}
@@ -100,10 +107,13 @@
   <div id="ui" style="display:none">
     <p id="crumb"></p>
     <p class="former" id="former" style="display:none"></p>
-    <p class="former" id="moved" style="display:none"></p>
     <div class="status" id="status"></div>
     <div class="specs" id="specs"></div>
     <p id="you" hidden style="margin-top:12px"></p>
+    <div id="reloc_wrap" style="display:none">
+      <div class="sect">Relocations</div>
+      <div class="panel" id="reloc"></div>
+    </div>
     <div id="who_wrap" style="display:none">
       <div class="sect" id="who_h">Who has ridden it</div>
       <div class="panel" id="who"></div>
@@ -199,18 +209,20 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 
   // A relocated ride (023-same-ride.sql): its other park's row, and why a
   // rider who rode it at both has one credit, not two.
-  // Where else it has run, as its own line under the former names: "Formerly
-  // Pandemonium at Six Flags Discovery Kingdom, 2008–2012."
-  var mates=ROWS.slice(1);
-  if(mates.length){
-    $('moved').innerHTML=mates.map(function(x){
-      var yrs=[x.opened?String(x.opened).slice(0,4):(x.yr||''), x.closed?String(x.closed).slice(0,4):''];
-      var when=yrs[0]||yrs[1] ? ', '+esc(yrs[0]||'?')+'–'+(yrs[1]?esc(yrs[1]):'') : '';
-      return (x.closed?'Formerly ':'Also listed as ')
-        +(x.name!==C.name?'<b>'+esc(x.name)+'</b> ':'')
-        +'at <a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>'+when;
-    }).join('. ')+'. One ride, one credit wherever it was ridden.';
-    $('moved').style.display='block';
+  // Every park the ride has run at, newest first (Carter, 2026-09-26:
+  // "Relocations:" then "Joker - Six Flags Mexico (2013-)", "Pandemonium - Six
+  // Flags Discovery Kingdom (2008-2012)"). The home is where it is now, so it
+  // leads; the rest go by when they opened.
+  if(ROWS.length>1){
+    var yr=function(x){ return x.opened?String(x.opened).slice(0,4):(x.yr?String(x.yr):''); };
+    var hist=[C].concat(ROWS.slice(1).sort(function(a,b){ return yr(b).localeCompare(yr(a)); }));
+    $('reloc').innerHTML=hist.map(function(x){
+      var op=yr(x), cl=x.closed?String(x.closed).slice(0,4):'';
+      return '<div class="lrow"><b>'+esc(x.name)+'</b><span class="dash">–</span>'
+        +'<a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>'
+        +((op||cl)?'<span class="when">'+esc(op||'?')+'–'+esc(cl)+'</span>':'')+'</div>';
+    }).join('');
+    $('reloc_wrap').style.display='block';
   }
 
   var gone=!!C.closed;

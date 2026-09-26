@@ -3732,6 +3732,12 @@ Flags Mexico — now Joker." Search sends the old row's entry to the home page t
 "now Joker at Six Flags Mexico"; the dedupe-by-href keeps one entry when both rows match.
 The old row is still a real `coasters` row — logs, the map and park counts use it.
 
+**The "Formerly Pandemonium at …" line became a Relocations section** (Carter, same day:
+"below you have not ridden it yet show a section that says 'Relocations:' ... 'Joker - Six
+Flags Mexico (2013-)' then 'Pandemonium - Six Flags Discovery Kingdom (2008-2012)'"). One
+row per park, the home first then newest to oldest, name – park link – years. It sits between
+the "you" line and the per-park rider lists. Park pages keep their one-line note.
+
 **On /changes (2026-09-26).** `same_ride_set` is no longer in `FEED_HIDDEN` — linking two rows
 changes riders' counts, which is what the feed is for. It reads "Pandemonium at Six Flags
 Discovery Kingdom moved to Six Flags Mexico as Joker — one ride, one credit"; the event's
