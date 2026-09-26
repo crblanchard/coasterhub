@@ -2739,6 +2739,27 @@ async function main() {
       r.status === 503 && /023-same-ride/.test(r.data.error), JSON.stringify(r.data));
   }
 
+  // ---- the feed follows a corrected day (2026-09-26) ------------------------
+  {
+    const db = freshDb();
+    db.exec("INSERT OR IGNORE INTO users (slug,name,mode) VALUES ('sam','Sam','rides')");
+    db.exec("INSERT INTO coasters (id,name,park,type) VALUES (971,'A','Feed Park','Steel'),(972,'B','Feed Park','Steel')");
+    let r = await call(db, "POST", "/api/rides", { token: PW, body: { user: "sam", d: "2026-09-12", entries: [{ c: 971, n: 4 }, { c: 972, n: 2 }] } });
+    const line = async () => ((await call(db, "GET", "/api/activity")).data.events || [])
+      .find(e => e.kind === "rides" && e.actor === "sam");
+    let e = await line();
+    check("feed: a logged day reads as logged", r.status === 200 && e && e.detail.rides === 6 && e.detail.coasters === 2, JSON.stringify(e));
+    db.exec("DELETE FROM rides WHERE user_slug='sam' AND coaster_id=971 AND id NOT IN (SELECT MIN(id) FROM rides WHERE user_slug='sam' AND coaster_id=971)");
+    e = await line();
+    check("feed: a day cut down in SQL shows what it holds now", e && e.detail.rides === 3 && e.n === 3 && e.detail.coasters === 2, JSON.stringify(e));
+    db.exec("DELETE FROM rides WHERE user_slug='sam' AND coaster_id=972");
+    e = await line();
+    check("feed: ...coasters too", e && e.detail.rides === 1 && e.detail.coasters === 1, JSON.stringify(e));
+    db.exec("DELETE FROM rides WHERE user_slug='sam'");
+    e = await line();
+    check("feed: a day that no longer exists drops its line", !e, JSON.stringify(e));
+  }
+
   console.log("\n" + pass + " passed, " + fail + " failed\n");
   process.exit(fail ? 1 : 0);
 }

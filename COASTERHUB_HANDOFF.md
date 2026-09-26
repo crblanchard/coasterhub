@@ -3848,6 +3848,17 @@ database was never wrong.
 /changes: "Recorded as it happens." is gone (Carter); the note only shows when there are
 backfilled entries to explain, which live has none of.
 
+## The feed follows a corrected day (2026-09-26)
+
+The Sep 12 copy to Sean went in doubled (the /log bug above), was fixed with a DELETE in the
+D1 console, and the feed went on saying "Sean logged 30 rides" over a 15-ride day. Carter:
+*"should say 15 because it was corrected"*. `getActivity` now runs `trimLoggedDays`: every
+`rides` event carrying a date is checked against that rider's day as it stands — rides,
+coasters and new credits are capped at what the day holds now, and a day that no longer
+exists drops its line. **Capped, not replaced**: a day logged in two sittings is two lines,
+each its own part, and neither should grow to the whole day. So a correction by SQL, by
+"Change that day" or by deleting rides all show without touching `activity`.
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".

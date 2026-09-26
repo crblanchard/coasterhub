@@ -1372,13 +1372,46 @@ async function getActivity(env, limit) {
   const names = await env.DB.prepare("SELECT slug, name FROM users").all();
   const by = {};
   for (const u of names.results) by[u.slug] = u.name;
-  return {
-    events: results.map(r => ({
-      id: r.id, at: r.at, actor: r.actor, actorName: r.actor ? (by[r.actor] || r.actor) : null,
-      kind: r.kind, subject: r.subject, n: r.n,
-      detail: r.detail ? JSON.parse(r.detail) : null,
-    })),
-  };
+  const events = results.map(r => ({
+    id: r.id, at: r.at, actor: r.actor, actorName: r.actor ? (by[r.actor] || r.actor) : null,
+    kind: r.kind, subject: r.subject, n: r.n,
+    detail: r.detail ? JSON.parse(r.detail) : null,
+  }));
+  await trimLoggedDays(env, events);
+  return { events };
+}
+
+// A "logged N rides on <day>" line says what was logged THEN; the day can be
+// corrected afterwards — a copy that doubled every lap, fixed in the D1
+// console, went on saying "30 rides" over a 15-ride day (Carter, 2026-09-26:
+// "should say 15 because it was corrected"). So each such line is checked
+// against the rider's day as it stands: never more rides or coasters than the
+// day now holds, and a day that no longer exists drops its line. Capped rather
+// than replaced, because two separate logs of one day are two lines that each
+// said their own part, and neither should swell to the whole day.
+async function trimLoggedDays(env, events) {
+  const want = events.filter((e) => e.kind === "rides" && e.actor && e.detail && e.detail.date);
+  if (!want.length) return;
+  const dates = [...new Set(want.map((e) => e.detail.date))];
+  const now = {};
+  for (let i = 0; i < dates.length; i += SQL_VARS) {
+    const part = dates.slice(i, i + SQL_VARS);
+    const { results } = await env.DB.prepare(
+      "SELECT user_slug AS s, d, COUNT(*) AS n, COUNT(DISTINCT coaster_id) AS c FROM rides " +
+      "WHERE d IN (" + part.map(() => "?").join(",") + ") GROUP BY user_slug, d"
+    ).bind(...part).all();
+    for (const r of results) now[r.s + "|" + r.d] = r;
+  }
+  for (let i = events.length - 1; i >= 0; i--) {
+    const e = events[i];
+    if (!(e.kind === "rides" && e.actor && e.detail && e.detail.date)) continue;
+    const day = now[e.actor + "|" + e.detail.date];
+    if (!day) { events.splice(i, 1); continue; }
+    if (e.detail.rides != null && e.detail.rides > day.n) e.detail.rides = day.n;
+    if (e.n != null && e.n > day.n) e.n = day.n;
+    if (e.detail.coasters != null && e.detail.coasters > day.c) e.detail.coasters = day.c;
+    if (e.detail.newCredits != null && e.detail.newCredits > day.c) e.detail.newCredits = day.c;
+  }
 }
 
 // The park a batch of coasters belongs to, for "logged 5 rides at Kings Island".
