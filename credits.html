@@ -381,14 +381,14 @@
         <button id="v_day">Rides</button><button id="v_parks" class="on">Parks</button><button id="v_list">Coasters</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
-      <select id="f_rider" style="display:none"><option value="">All riders</option></select>
-      <select id="f_year"><option value="">All years</option></select>
-      <select id="f_park"><option value="">All parks</option></select>
+      <select id="f_rider" style="display:none"><option value="">Rider</option></select>
+      <select id="f_year"><option value="">Year</option></select>
+      <select id="f_park"><option value="">Park</option></select>
       <!-- Where (Carter, 2026-09-24: "on counts / park page add location
            filter"). On the Parks view and the Rides view; filled from the
            parks' own regions, states and countries split the way /log's
            Locations picker splits them. -->
-      <select id="f_loc"><option value="">All locations</option></select>
+      <select id="f_loc"><option value="">Location</option></select>
       <label class="onlymine" id="f_mine_wrap" style="display:none">
         <input type="checkbox" id="f_mine"> Only parks I&rsquo;ve visited
       </label>
@@ -427,12 +427,12 @@
         <button id="c_reset">Reset</button>
       </div>
       <div class="controls" id="c_filters">
-        <select id="c_f_status"><option value="">All statuses</option><option value="Operating">Operating</option><option value="Defunct">Defunct</option></select>
-        <select id="c_f_type"><option value="">All types</option></select>
-        <select id="c_f_manu"><option value="">All manufacturers</option></select>
-        <select id="c_f_model"><option value="">All models</option></select>
-        <select id="c_f_park"><option value="">All parks</option></select>
-        <select id="c_f_loc"><option value="">All locations</option></select>
+        <select id="c_f_status"><option value="">Status</option><option value="Operating">Operating</option><option value="Defunct">Defunct</option></select>
+        <select id="c_f_type"><option value="">Type</option></select>
+        <select id="c_f_manu"><option value="">Manufacturer</option></select>
+        <select id="c_f_model"><option value="">Model</option></select>
+        <select id="c_f_park"><option value="">Park</option></select>
+        <select id="c_f_loc"><option value="">Location</option></select>
       </div>
       <div class="count" id="c_count"></div>
       <div id="c_loading" style="color:var(--muted);padding:30px 0">Loading the full list&hellip;</div>

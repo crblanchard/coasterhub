@@ -64,7 +64,7 @@
   .chips a.me{border-color:var(--accent2);background:var(--soft);font-weight:600}
   .chips .chip{display:flex;align-items:baseline;gap:7px;border-radius:999px;padding:7px 13px;
                font-size:.85rem;color:var(--muted);background:transparent;border:1px dashed var(--line)}
-  .chips .notyet{font-weight:600}
+  .chips .notyet{font-weight:600;gap:10px}
   .chips button.more{cursor:pointer;font:inherit;font-size:.85rem;border-style:solid;color:var(--accent2)}
   .chips button.more:hover{border-color:var(--accent2)}
   /* The folded chips join the row as if they had always been in it. */
@@ -288,7 +288,7 @@ function fmtDay(d){
 // Riders, as chips (Carter, 2026-09-26, all three of these):
 //  * YOU first and highlighted, carrying what the "You have ridden it" bar
 //    said — your rides, your first year, where you rank it — and a dashed
-//    "not yet" chip when you have not. Signed out, there is no you.
+//    "You · none" chip when you have not. Signed out, there is no you.
 //  * Then everybody in the order they first rode it, so the chips read like
 //    the History above them; undated rides after, most rides first.
 //  * Past CAP chips the rest fold into "+N more", which opens them in place.
@@ -331,7 +331,7 @@ function riders(){
     });
     var rode=lists.some(function(l){ return l.mine; });
     var shown=lists.filter(function(l){ return l.out.length; });
-    // Signed in and never on it: the "not yet" chip is the whole section if
+    // Signed in and never on it: the "You · none" chip is the whole section if
     // nobody else has ridden it either.
     if(me && !rode){
       if(shown.length) shown[0].notYet=true;
@@ -349,7 +349,7 @@ function riders(){
     };
     $('who_wrap').innerHTML='<div class="sect">Riders</div><div class="riders">'+shown.map(function(l){
       var r=l.row;
-      var chips=(l.notYet?['<span class="chip notyet">You<i>not yet</i></span>']:[])
+      var chips=(l.notYet?['<span class="chip notyet">You<i>none</i></span>']:[])
         .concat(l.out.map(function(p){ return chip(p, l.mine===p); }));
       var more=chips.length>CAP ? chips.length-CAP : 0;
       return (moved?'<p class="at">At <a href="'+esc(CoasterHub.parkHref(r.park))+'">'+esc(r.park)+'</a>'

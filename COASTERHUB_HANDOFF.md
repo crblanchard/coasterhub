@@ -3747,7 +3747,8 @@ went through plain lines and settled on **chips**, the same ones a park page's o
 shows — "Carter  20 rides · 2018", the full first date as the tooltip — under a plain
 **"Riders"** heading (not "N riders"). Then (same day) **your chip comes first**, highlighted, and replaces
 the "You have ridden it N times" bar — it carries your rides, first year and "#N in your
-ranking"; if you have not ridden it, a dashed "You · not yet" chip. The rest are **ordered by
+ranking"; if you have not ridden it, a dashed "You  none" chip (it said "not yet" until Carter
+asked for "none" with a little more space). The rest are **ordered by
 first ride** (undated after), and past `CAP` (12) they fold into a **"+N more"** chip that
 opens in place. `youStrip` is no longer called on the coaster page.
 
@@ -3809,6 +3810,16 @@ show my own changes in there"), but the section only appears once you follow som
 followed it would be a "Friend activity" of just you; hidden signed out. Following nobody, Friends
 shows you and the hint "You're not following anyone yet. Search for friends above or find users in
 the list below." The link reads "All activity →" and goes to /changes.
+
+## Filter labels are the noun (2026-09-26)
+
+Carter: *"filter should say every manufacturer"*, then *"make them all status / type /
+manufacturer / location / ridden / a-z"*. A filter's unset option is now just what it
+filters — **Status, Type, Manufacturer, Location, Ridden** on /coasters; **Location,
+Visited** on /parks; **Rider, Year, Park, Location** and **Status, Type, Manufacturer, Model,
+Park, Location** on a rider's /credits. Where the noun is also an option ("Ridden",
+"Visited"), the option reads "Ridden only" / "Visited only" so a picked filter never looks
+unset. /coasters' column is "Model" (was "Company / model"). Follow this for new filters.
 
 ## Possible future updates
 
