@@ -3859,6 +3859,21 @@ exists drops its line. **Capped, not replaced**: a day logged in two sittings is
 each its own part, and neither should grow to the whole day. So a correction by SQL, by
 "Change that day" or by deleting rides all show without touching `activity`.
 
+## Profile: numbers beside the buttons, and Recent visits (2026-09-26)
+
+Carter: *"on desktop lets make 562/2394/231 to the left of all the buttons to save space?
+then below top ten do latest five 'recent visits' similar form to activity"*.
+
+- **Desktop hero** (641px and up, profile.html only): `.herocount` is a row — the three
+  numbers, then the button column — instead of numbers stacked over buttons. Phones keep
+  the stack (style.css's 640px rule).
+- **Recent visits** (`#sec_visits`) sits under the top ten: the newest five dated days as
+  feed rows (`.feed`/`.ev`, the calendar icon) — "**Park** — 15 rides on 13 coasters" with
+  the date where the feed puts its time; two parks in a day are joined with "&". Read off
+  `computeStats`' `day_detail`, coasters per day off `byCoaster[].dates`, so no request of
+  its own. The heading links to the rider's credits. Hidden for a rider with no dated
+  days. On a phone it takes `order:1` beside the top ten (source order breaks the tie).
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
