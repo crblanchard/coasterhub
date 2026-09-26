@@ -3795,8 +3795,9 @@ holds both rows and has not been re-saved).
 
 Carter: *"search bar back above friends on homepage"* and *"below friends do 'friend activity'
 which is basically just /changes but the latest five things your friends have done."* The
-search button is the first thing under the hero again (the Coasters/Parks/… cards stay where
-they were, below your friends). **Friend activity** is a second mount of the shared feed with
+search button is the first thing under the hero again, and the Coasters/Parks/Manufacturers/Locations/Map
+cards sit right under it (Carter, same day: "move the ... buttons below search at the top") —
+the whole `.hub` is above Friends now. **Friend activity** is a second mount of the shared feed with
 the new `who` option (`CoasterHubFeed.mount({ feed, limit: 5, who: [slugs], empty })`), which
 keeps only events whose `actor` is one of those riders — so rides, credits, rankings,
 imports, day edits; database curation has no actor and never shows. It reads the full
@@ -3804,8 +3805,10 @@ imports, day edits; database curation has no actor and never shows. It reads the
 applied** (Carter: "last five things or last three days so they both govern"): at most five,
 and nothing before local midnight two days ago — the feed's new `days: 3` option — so on a
 Saturday it reaches back through Thursday. **Your own activity is in it too** (Carter: "also
-show my own changes in there"), so it shows whenever you are signed in, following anybody or
-not; hidden signed out. The link reads "All activity →" and goes to /changes.
+show my own changes in there"), but the section only appears once you follow somebody — with nobody
+followed it would be a "Friend activity" of just you; hidden signed out. Following nobody, Friends
+shows you and the hint "You're not following anyone yet. Search for friends above or find users in
+the list below." The link reads "All activity →" and goes to /changes.
 
 ## Possible future updates
 

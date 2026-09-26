@@ -301,7 +301,7 @@ CoasterHub.fetchUsers().then(function(){
       var mine = rows.filter(function(x){ return x.u.slug === fol.me; })
         .concat(rows.filter(function(x){ return inF[x.u.slug] && x.u.slug !== fol.me; }));
       document.getElementById('friends').innerHTML = html(mine)
-        + (fol.slugs.length ? '' : '<p class="hint">You are not following anybody yet &mdash; open a rider&rsquo;s profile and press Follow, and they will sit up here with you.</p>');
+        + (fol.slugs.length ? '' : '<p class="hint">You&rsquo;re not following anyone yet. Search for friends above or find users in the list below.</p>');
       document.getElementById('friends_wrap').hidden = false;
       // You and the people you follow (Carter, 2026-09-26: "also show my own
       // changes in there too") — so it shows whenever you are signed in.
