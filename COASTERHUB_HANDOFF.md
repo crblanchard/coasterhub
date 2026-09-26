@@ -3718,6 +3718,20 @@ merge repoints a home, a set whose home vanished takes its lowest id, and a set 
 same "Same ride as …" line. In search, the other row of a relocated ride is labelled
 "moved to <home's park>".
 
+**One page per ride (third pass, same day).** Carter: *"pandemonium at sfdk page disappears
+and link redirects to joker ... '2 riders have ridden it at x park' ... you can appear on both
+lists but still only counts once."* So `coaster.html` resolves an old row to its home
+(`CoasterHub.rideHome`) and the canonical-URL `replaceState` rewrites the address, the same way
+a renamed coaster's old link heals. The page then carries "Formerly **Pandemonium** at Six
+Flags Discovery Kingdom, 2008–2012. One ride, one credit wherever it was ridden.", fills any
+stat the home row lacks from an older row (same machine), splits riders into one list per
+park ("2 riders have ridden it at Six Flags Discovery Kingdom (as Pandemonium)"), and the
+"you" line sums both parks (`youStrip`'s third argument). On the old park's page the row stays
+(it is part of that park's history) but links to the ride's page and opens to "Moved to Six
+Flags Mexico — now Joker." Search sends the old row's entry to the home page too, labelled
+"now Joker at Six Flags Mexico"; the dedupe-by-href keeps one entry when both rows match.
+The old row is still a real `coasters` row — logs, the map and park counts use it.
+
 **Past names, and why not every alias is one.** Search indexes every `coaster_aliases` name,
 so "Vortex" finds Patriot, labelled "formerly Vortex" (Carter: *"the new one comes up with a
 'formerly called x' label"*). The ride page already said "Formerly …" — but the alias table is

@@ -53,6 +53,13 @@
   // its own. Anything that counts credits or dedupes a list of coasters by
   // "is this the same ride" goes through this, never through the bare id.
   function rideKey(c) { return c ? (c.same || c.id) : null; }
+  // The row whose page a relocated ride lives on: its home. Every other coaster
+  // is its own.
+  function rideHome(coasters, c) {
+    if (!c || !c.same || c.same === c.id) return c;
+    for (var i = 0; i < coasters.length; i++) if (coasters[i].id === c.same) return coasters[i];
+    return c;
+  }
   // The other rows of c's relocated ride, oldest park first by opening date.
   function sameRideRows(coasters, c) {
     if (!c || !c.same) return [];
@@ -1369,17 +1376,27 @@
   // The "you" line under a page's tiles: for a set of coasters, how many of
   // the operating ones you have ridden and your best ranked; for one coaster,
   // how many times, since when, and where it ranks. Nothing signed out.
-  function youStrip(el, cs) {
+  // `ids`, for one coaster: every row of its ride when it moved parks
+  // (023-same-ride.sql), so the line counts the rides at both and the ranking
+  // of whichever row the list holds.
+  function youStrip(el, cs, ids) {
     if (!el) return;
     you().then(function (y) {
       if (!y) { el.hidden = true; return; }
       var bits = [];
       if (cs.length === 1) {
-        var c = cs[0], m = y.rides[c.id];
+        var c = cs[0], m = y.rides[c.id], rk = y.rank[c.id];
+        (ids || []).forEach(function (id) {
+          var o = y.rides[id];
+          if (id !== c.id && o) {
+            m = m ? { n: m.n + o.n, first: !m.first || (o.first && o.first < m.first) ? o.first : m.first } : o;
+          }
+          if (id !== c.id && y.rank[id] && (!rk || y.rank[id] < rk)) rk = y.rank[id];
+        });
         bits.push(m ? "You have ridden it <b>" + (m.n > 1 ? m.n + " times" : "once") + "</b>"
                       + (m.first ? ", first on <b>" + mdy(m.first) + "</b>" : "")
                     : "You have not ridden it yet");
-        if (y.rank[c.id]) bits.push("ranked <b>#" + y.rank[c.id] + "</b> of " + y.ranked);
+        if (rk) bits.push("ranked <b>#" + rk + "</b> of " + y.ranked);
       } else {
         // No "ridden X of Y operating" (Carter, 2026-09-25: "remove all that" —
         // parked in the handoff's Possible future updates). Your ranking only.
@@ -1551,10 +1568,12 @@
         var m = String(c.manu || "").trim(), mo = String(c.model || "").trim();
         if (m) makers[m] = (makers[m] || 0) + 1;
         if (m && mo) { var key = m + "\u0000" + mo; (models[key] = models[key] || { m: m, mo: mo, n: 0 }).n++; }
-        // A relocated ride's other row says where the ride is now.
+        // A relocated ride is one page, the home's (coaster.html sends an old
+        // row there), so the old row's entry goes straight to it and says
+        // where the ride is now.
         var home = c.same && c.same !== c.id ? byId[c.same] : null;
-        add("coaster", c.name, c.park || "", coasterHref(c),
-            { gone: !!c.closed, moved: home && home.park !== c.park ? home.park : null });
+        add("coaster", c.name, c.park || "", coasterHref(home || c),
+            { gone: !!c.closed, moved: home ? (home.name !== c.name ? home.name + " at " : "") + home.park : null });
       });
       // Former names find the coaster under its current name, labelled with
       // the one that matched (Carter, 2026-09-26: "the new one comes up with a
@@ -1638,7 +1657,7 @@
                   return '<a class="srchrow' + (i === 0 ? " hi" : "") + (h.gone ? " gone" : "") + '" href="' + searchEsc(h.h) + '">'
                     + '<span class="st"><b>' + searchEsc(h.t) + '</b><span>' + searchEsc(h.sub)
                     + (h.was ? ' <i class="srchtag">formerly ' + searchEsc(h.was) + '</i>' : '')
-                    + (h.moved ? ' <i class="srchtag">moved to ' + searchEsc(h.moved) + '</i>' : '')
+                    + (h.moved ? ' <i class="srchtag">now ' + searchEsc(h.moved) + '</i>' : '')
                     + '</span></span>'
                     + '<span class="sk">' + SEARCH_KINDS[h.k] + '</span></a>';
                 }).join("")
@@ -1685,7 +1704,7 @@
     e.preventDefault(); openSearch();
   });
 
-  var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
+  var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,

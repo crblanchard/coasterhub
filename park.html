@@ -259,7 +259,8 @@ function row(c){
   var mk=CoasterHub.maker(c);
   return '<details class="citem" data-c="'+c.id+'"><summary class="crow'+(c.closed?' gone':'')+'">'
     +'<span class="tick" data-tick="'+c.id+'"></span>'
-    +'<a class="cn" href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'
+    // A relocated ride's old row goes straight to the ride's one page.
+    +'<a class="cn" href="'+esc(CoasterHub.coasterHref(CoasterHub.rideHome(LIST.coasters, c)))+'">'+esc(c.name)+'</a>'
     +(mk?(c.manu?'<a class="mk" href="'+esc(CoasterHub.makerHref(c.manu, c.model||null))+'">'+esc(mk)+'</a>':'<span class="mk">'+esc(mk)+'</span>'):'')
     +'<span class="end">'+life(c)+'<span class="rid" data-rid="'+c.id+'"></span>'+CHEV+'</span>'
     +'</summary><div class="cbody"></div></details>';
@@ -276,14 +277,22 @@ function body(c){
   if(mine){ extra.push([esc(mine.n),'Your rides']); if(mine.first) extra.push([esc(CoasterHub.mdy(mine.first)),'First ridden']); }
   var was=CoasterHub.formerNames(LIST, c.id, c.name);
   var who=WHO[c.id];
-  // A relocated ride (023-same-ride.sql): where else it stood, and that it
-  // is one credit — the same line the coaster page carries.
-  var mates=CoasterHub.sameRideRows(LIST.coasters, c);
+  // A relocated ride (023-same-ride.sql). The old park's row says where the
+  // ride went; the home's row says where it came from.
+  var home=CoasterHub.rideHome(LIST.coasters, c), moved='';
+  var parkLink=function(x){ return '<a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>'; };
+  if(home!==c){
+    moved='Moved to '+parkLink(home)+(home.name!==c.name
+      ? ' — now <a href="'+esc(CoasterHub.coasterHref(home))+'"><b>'+esc(home.name)+'</b></a>' : '')
+      +'. One ride, one credit.';
+  } else {
+    var from=CoasterHub.sameRideRows(LIST.coasters, c);
+    if(from.length) moved=from.map(function(x){
+      return (x.closed?'Formerly ':'Also listed as ')+(x.name!==c.name?'<b>'+esc(x.name)+'</b> ':'')+'at '+parkLink(x);
+    }).join('. ')+'. One ride, one credit.';
+  }
   return (was.length?'<p class="former">Formerly '+was.map(function(n){ return '<b>'+esc(n)+'</b>'; }).join(', ')+'.</p>':'')
-    +(mates.length?'<p class="former">Same ride as '+mates.map(function(x){
-        return '<a href="'+esc(CoasterHub.coasterHref(x))+'"><b>'+esc(x.name)+'</b></a> at '
-          +'<a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>';
-      }).join(' and ')+' — it moved parks, so riding it at either is one credit.</p>':'')
+    +(moved?'<p class="former">'+moved+'</p>':'')
     +CoasterHub.coasterFacts(c, extra)
     +'<div><p class="lbl">Riders</p>'
     +(who===undefined ? '<p class="nobody">Loading&hellip;</p>'
