@@ -2683,8 +2683,11 @@ async function main() {
     r = await call(db, "POST", "/api/same-ride", { token: PW, body: { ids: [951, 952], home: 952 } });
     check("same ride: linked, both count as the home",
       r.status === 200 && r.data.ride === 952 && r.data.same[951] === 952 && r.data.same[952] === 952, JSON.stringify(r.data));
-    check("same ride: the link is not on /changes",
-      !((await call(db, "GET", "/api/activity")).data.events || []).some(e => /same_ride/.test(e.kind)));
+    r = await call(db, "GET", "/api/activity");
+    const ev = ((r.data && r.data.events) || []).find(e => e.kind === "same_ride_set");
+    check("same ride: the link shows on /changes, naming both parks",
+      ev && ev.subject === "Mover" && ev.detail.ride === 952
+      && ev.detail.at.some(a => a.park === "Old Park" && a.name === "Mover"), JSON.stringify(r.data).slice(0, 300));
     check("same ride: summary counts the pair as ONE credit, rides unchanged", await credits("ann") === 2);
     r = await call(db, "GET", "/api/summary");
     check("same ride: ride total still counts every lap",

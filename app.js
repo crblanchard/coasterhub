@@ -1555,11 +1555,21 @@
       fetchUsers().catch(function () { return USERS; })
     ]).then(function (res) {
       var cs = (res[0] && res[0].coasters) || [], parks = res[1] || {}, users = res[2] || [];
+      // `w`: every word the row can be found by — its name plus what places it
+      // (a coaster's park, a model's maker, a park's region), so "joker six
+      // flags" finds Joker at Six Flags Mexico (Carter, 2026-09-26).
       var out = [], add = function (k, t, sub, href, extra) {
         var n = norm(t);
         out.push({ k: k, t: t, sub: sub, h: href, n: n, ini: initials(n), gone: !!(extra && extra.gone),
-                   was: (extra && extra.was) || null, moved: (extra && extra.moved) || null });
+                   was: (extra && extra.was) || null, moved: (extra && extra.moved) || null,
+                   w: words(t, extra && extra.ctx) });
       };
+      // ...and the place's initials, which is how people write parks: "sfdk".
+      function words(t, ctx) {
+        var w = norm(t + " " + (ctx || "")).split(" "), ini = initials(norm(ctx || ""));
+        if (ini.length > 1) w.push(ini);
+        return w;
+      }
       var byId = {};
       cs.forEach(function (c) { byId[c.id] = c; });
       var makers = {}, models = {}, locs = {}, pn = {};
@@ -1573,7 +1583,8 @@
         // where the ride is now.
         var home = c.same && c.same !== c.id ? byId[c.same] : null;
         add("coaster", c.name, c.park || "", coasterHref(home || c),
-            { gone: !!c.closed, moved: home ? (home.name !== c.name ? home.name + " at " : "") + home.park : null });
+            { gone: !!c.closed, moved: home ? (home.name !== c.name ? home.name + " at " : "") + home.park : null,
+              ctx: c.park || "" });
       });
       // Former names find the coaster under its current name, labelled with
       // the one that matched (Carter, 2026-09-26: "the new one comes up with a
@@ -1585,25 +1596,73 @@
         // somebody may type it); only a real past name gets the label.
         out.push({ k: "coaster", t: c.name, sub: c.park || "", h: coasterHref(c), n: norm(a.n),
                    ini: initials(norm(a.n)), gone: !!c.closed,
-                   was: isPastName(a.n, c.name) ? a.n : null, moved: null });
+                   was: isPastName(a.n, c.name) ? a.n : null, moved: null,
+                   w: words(a.n, c.park) });
       });
       Object.keys(parks).forEach(function (p) {
         var r = (parks[p] && parks[p].region) || "";
         if (r) locs[r] = (locs[r] || 0) + 1;
-        add("park", p, r || ((pn[p] || 0) + " coasters"), parkHref(p));
+        add("park", p, r || ((pn[p] || 0) + " coasters"), parkHref(p), { ctx: r });
       });
       Object.keys(makers).forEach(function (m) { add("maker", m, makers[m] + " coaster" + (makers[m] === 1 ? "" : "s"), makerHref(m)); });
-      Object.keys(models).forEach(function (k) { var x = models[k]; add("model", x.mo, x.m + " \u00b7 " + x.n, makerHref(x.m, x.mo)); });
+      Object.keys(models).forEach(function (k) { var x = models[k]; add("model", x.mo, x.m + " \u00b7 " + x.n, makerHref(x.m, x.mo), { ctx: x.m }); });
       Object.keys(locs).forEach(function (r) { add("loc", r, locs[r] + " park" + (locs[r] === 1 ? "" : "s"), locationHref(r)); });
       users.forEach(function (u) { if (u && u.slug) add("rider", u.name || u.slug, "@" + u.slug, userPageHref(u.slug, "profile")); });
       return out;
     });
     return searchIndex;
   }
+  // Edit distance, giving up past `max` (it is only ever asked "is this one
+  // or two letters off"), so a keystroke over ~1,500 rows stays cheap.
+  // Two swapped letters count as one typo ("kignda", "flgas").
+  function editDist(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    var pp = null, prev = [], cur, i, j, lo;
+    for (j = 0; j <= b.length; j++) prev[j] = j;
+    for (i = 1; i <= a.length; i++) {
+      cur = [i]; lo = i;
+      for (j = 1; j <= b.length; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+        if (pp && i > 1 && j > 1 && a.charAt(i - 1) === b.charAt(j - 2) && a.charAt(i - 2) === b.charAt(j - 1))
+          cur[j] = Math.min(cur[j], pp[j - 2] + 1);
+        if (cur[j] < lo) lo = cur[j];
+      }
+      if (lo > max) return max + 1;
+      pp = prev; prev = cur;
+    }
+    return prev[b.length];
+  }
+  // How far one typed word is from the nearest word of a row: 0 when it
+  // starts a word, else the typos between it and a word (or the start of one,
+  // for a word still being typed). Short words must be exact — "sx" is not a
+  // typo of anything worth guessing. -1 when nothing is close.
+  function wordMiss(t, words, fuzzy) {
+    var best = -1, tol = !fuzzy || t.length < 4 ? 0 : t.length >= 7 ? 2 : 1;
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i];
+      if (w.indexOf(t) === 0) return 0;
+      if (!tol) continue;
+      var d = Math.min(editDist(t, w, tol), editDist(t, w.slice(0, t.length), tol),
+                       editDist(t, w.slice(0, t.length + 1), tol));
+      if (d <= tol && (best < 0 || d < best)) best = d;
+    }
+    return best;
+  }
+  // Every typed word found in the row (name + park), and the total typos.
+  function wordsMiss(toks, words, fuzzy) {
+    var sum = 0;
+    for (var i = 0; i < toks.length; i++) {
+      var m = wordMiss(toks[i], words, fuzzy);
+      if (m < 0) return -1;
+      sum += m;
+    }
+    return sum;
+  }
   function searchFor(items, q) {
     var nq = norm(q), cq = nq.replace(/ /g, "");
     if (!nq) return [];
-    var hits = [];
+    var toks = nq.split(" ");
+    var hits = [], seenH = {};
     items.forEach(function (it) {
       var sc = -1, i = it.n.indexOf(nq);
       if (it.n === nq) sc = 0;
@@ -1614,8 +1673,21 @@
       else if (cq.length >= 2 && it.ini && it.ini === cq) sc = it.k === "maker" ? 0.5 : 1.5;
       else if (cq.length >= 2 && it.ini && it.ini.indexOf(cq) === 0) sc = 3;
       else if (i > 0 && nq.length >= 3) sc = 4;
-      if (sc >= 0) hits.push({ it: it, sc: sc });
+      // Words across the name and what places it: "joker six flags". Better
+      // when the first word starts the name itself.
+      else if (toks.length > 1 && it.w && wordsMiss(toks, it.w, false) === 0) sc = it.n.indexOf(toks[0]) === 0 ? 2.5 : 3.5;
+      if (sc >= 0) { hits.push({ it: it, sc: sc }); seenH[it.h] = 1; }
     });
+    // Typos (Carter: "fuzzy return ... when you make a typo things still come
+    // up"): only when the exact passes found little, so a good query's list is
+    // not padded with near-misses. "kignda ka", "six flgas mexico".
+    if (hits.length < 8) {
+      items.forEach(function (it) {
+        if (seenH[it.h] || !it.w) return;
+        var m = wordsMiss(toks, it.w, true);
+        if (m > 0) hits.push({ it: it, sc: 5 + m });
+      });
+    }
     hits.sort(function (a, b) {
       return a.sc - b.sc || SEARCH_RANK[a.it.k] - SEARCH_RANK[b.it.k]
         || (a.it.gone ? 1 : 0) - (b.it.gone ? 1 : 0) || a.it.t.length - b.it.t.length

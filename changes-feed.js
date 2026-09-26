@@ -52,6 +52,8 @@
           : kind === 'park_renamed' ? 'edited'
           : kind === 'park_merged' ? 'merged'
           : kind === 'coaster_deleted' ? 'deleted'
+          : kind === 'same_ride_set' ? 'merged'
+          : kind === 'same_ride_removed' ? 'edited'
           : kind;
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
       + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
@@ -73,7 +75,7 @@
   // Which park names are real ones, and which coaster names name exactly one
   // coaster. Both only so a name can be turned into a link it will not 404 on
   // — see the linking block below. Filled in the same place as PARK_BY_ID.
-  var PARKS = {}, COASTER_PARK = {};
+  var PARKS = {}, COASTER_PARK = {}, NAME_BY_ID = {};
   function parkName(e){
     var d = e.detail || {};
     return d.park || (PARK_BY_ID && PARK_BY_ID[d.to != null ? d.to : d.id]) || null;
@@ -194,6 +196,28 @@
         + (lost.length ? ' — the ' + nr + ' ride' + (nr === 1 ? '' : 's') + ' on it by '
             + lost.map(function(r){ return riderLink(r.slug, esc(r.name || r.slug)); }).join(', ')
             + ' went with it' : '');
+    }
+    // A relocated ride linked as one (023-same-ride.sql): "Pandemonium at Six
+    // Flags Discovery Kingdom moved to Six Flags Mexico as Joker — one ride, one
+    // credit." `detail.at` is every row of it; `ride` the one it counts as now.
+    if (e.kind === 'same_ride_set'){
+      var rows = d.at || [], home = null, olds = [];
+      rows.forEach(function(x){
+        x = { id: x.id, park: x.park, name: x.name || NAME_BY_ID[x.id] || (x.id === d.ride ? e.subject : null) };
+        if (x.id === d.ride) home = x; else olds.push(x);
+      });
+      if (!home || !olds.length) return (sub || 'A coaster') + ' was linked to its other park — one ride, one credit';
+      var place = function(x){ return (x.name ? rideLink(x.name, x.park, '<span class="sub">' + esc(x.name) + '</span>') : 'A coaster')
+        + (x.park ? ' at ' + parkLink(x.park, esc(x.park)) : ''); };
+      var sameName = olds.every(function(x){ return x.name === home.name; });
+      return olds.map(place).join(' and ') + ' moved to ' + parkLink(home.park, esc(home.park || 'another park'))
+        + (sameName ? '' : ' as ' + rideLink(home.name, home.park, '<span class="sub">' + esc(home.name) + '</span>'))
+        + ' — one ride, one credit';
+    }
+    if (e.kind === 'same_ride_removed'){
+      var f = d.from;
+      return (sub ? rideLink(e.subject, d.park, sub) : 'A coaster') + (d.park ? ' at ' + parkLink(d.park, esc(d.park)) : '')
+        + ' is its own credit again' + (f && f.name ? ', no longer the same ride as ' + rideLink(f.name, f.park, esc(f.name)) : '');
     }
     if (e.kind === 'clone_set'){
       var made = !!d.made, again = (d.saves || 1) > 1;
@@ -403,9 +427,10 @@
     // sentences simply stay as they were.
     if (global.CoasterHub && global.CoasterHub.fetchCoasters) {
       global.CoasterHub.fetchCoasters().then(function(res){
-        PARK_BY_ID = {}; PARKS = {}; COASTER_PARK = {};
+        PARK_BY_ID = {}; PARKS = {}; COASTER_PARK = {}; NAME_BY_ID = {};
         (res.coasters || []).forEach(function(c){
           if (c.park){ PARK_BY_ID[c.id] = c.park; PARKS[c.park] = 1; }
+          if (c.name) NAME_BY_ID[c.id] = c.name;
           if (!c.name) return;
           // Second sighting of a name means it names two coasters, and a link
           // built from the name alone would be a coin toss. Null it rather than

@@ -1351,7 +1351,10 @@ async function recordCredits(env, slug, { rides, coasters, newCredits }) {
 // a curation session eat all 300 rows and leave the feed looking empty. The
 // rows stay in `activity` — they are the record of what changed and when, and
 // the /qc and admin panes can still read them.
-const FEED_HIDDEN = ["clone_set", "clone_removed", "same_ride_set", "same_ride_removed",
+// A relocated ride being linked (same_ride_set) is NOT hidden: it changes
+// riders' counts, which is what the feed is for (Carter, 2026-09-26: "show the
+// merge in /changes").
+const FEED_HIDDEN = ["clone_set", "clone_removed",
                      "model_renamed", "model_merged", "model_assigned",
                      // "Kumba had 6 details updated" is the same housekeeping
                      // wearing a coaster's name: filling in the specs of rows
@@ -2536,7 +2539,7 @@ export default {
         const h = found.find((c) => c.id === home);
         await recordActivity(env, "same_ride_set", {
           subject: h.name, n: all.length,
-          detail: { ride: home, at: found.map((c) => ({ id: c.id, park: c.park })) },
+          detail: { ride: home, at: found.map((c) => ({ id: c.id, park: c.park, name: c.name })) },
         });
         return afterWrite(ctx, env, request, json({ ok: true, ride: home, ids: all, same: await sameOf(all) }));
       }
@@ -2553,8 +2556,10 @@ export default {
           "SELECT coaster FROM same_ride WHERE ride = ?").bind(row.ride).all();
         await env.DB.prepare("DELETE FROM same_ride WHERE coaster = ?").bind(id).run();
         await tidySameRide(env);
-        const c = await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(id).first();
-        await recordActivity(env, "same_ride_removed", { subject: c ? c.name : null, detail: { id: id } });
+        const c = await env.DB.prepare("SELECT name, park FROM coasters WHERE id = ?").bind(id).first();
+        const h = await env.DB.prepare("SELECT name, park FROM coasters WHERE id = ?").bind(row.ride).first();
+        await recordActivity(env, "same_ride_removed", { subject: c ? c.name : null,
+          detail: { id: id, park: c ? c.park : null, from: h ? { name: h.name, park: h.park } : null } });
         return afterWrite(ctx, env, request, json({ ok: true, same: await sameOf(mates.map((m) => m.coaster)) }));
       }
 

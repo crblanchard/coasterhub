@@ -3732,6 +3732,20 @@ Flags Mexico — now Joker." Search sends the old row's entry to the home page t
 "now Joker at Six Flags Mexico"; the dedupe-by-href keeps one entry when both rows match.
 The old row is still a real `coasters` row — logs, the map and park counts use it.
 
+**On /changes (2026-09-26).** `same_ride_set` is no longer in `FEED_HIDDEN` — linking two rows
+changes riders' counts, which is what the feed is for. It reads "Pandemonium at Six Flags
+Discovery Kingdom moved to Six Flags Mexico as Joker — one ride, one credit"; the event's
+`detail.at` carries each row's id, park and (since this change) name, and older events fall
+back to the coaster list by id. `same_ride_removed` shows too ("… is its own credit again").
+
+**Search matches name + park, and forgives typos (2026-09-26).** Every index row has `w`, its
+words plus what places it (a coaster's park, a model's maker, a park's region) and that
+place's initials, so "joker six flags", "joker mexico" and "medusa sfdk" all land. When the
+exact passes find fewer than 8 rows, a typo pass runs: each typed word of 4+ letters may be
+one edit off a word of the row (two for 7+ letters), a swapped pair counting as one — "kignda
+ka", "six flgas mexico", "steel vengance", "millenium force". Words under 4 letters must be
+exact. ~3ms a keystroke over the whole index.
+
 **Past names, and why not every alias is one.** Search indexes every `coaster_aliases` name,
 so "Vortex" finds Patriot, labelled "formerly Vortex" (Carter: *"the new one comes up with a
 'formerly called x' label"*). The ride page already said "Formerly …" — but the alias table is
