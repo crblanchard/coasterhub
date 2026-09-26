@@ -59,7 +59,17 @@
            background:var(--panel);border:1px solid var(--line);border-radius:999px;
            padding:7px 13px;font-size:.85rem;color:var(--fg)}
   .chips a:hover{border-color:var(--accent2)}
-  .chips a i{font-style:normal;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+  .chips i{font-style:normal;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+  /* Yours: first, and in the accent. "Not yet" is the same chip, dashed. */
+  .chips a.me{border-color:var(--accent2);background:var(--soft);font-weight:600}
+  .chips .chip{display:flex;align-items:baseline;gap:7px;border-radius:999px;padding:7px 13px;
+               font-size:.85rem;color:var(--muted);background:transparent;border:1px dashed var(--line)}
+  .chips .notyet{font-weight:600}
+  .chips button.more{cursor:pointer;font:inherit;font-size:.85rem;border-style:solid;color:var(--accent2)}
+  .chips button.more:hover{border-color:var(--accent2)}
+  /* The folded chips join the row as if they had always been in it. */
+  .chips .rest{display:contents}
+  .chips .rest[hidden]{display:none}
 
   /* Former names. A retheme is the normal way a coaster changes its name, and
      the old one is what somebody following an old link typed. */
@@ -99,7 +109,6 @@
     <p class="former" id="former" style="display:none"></p>
     <div class="status" id="status"></div>
     <div class="specs" id="specs"></div>
-    <p id="you" hidden style="margin-top:12px"></p>
     <div id="reloc_wrap" style="display:none">
       <div class="sect">History</div>
       <div class="hist" id="reloc"></div>
@@ -182,7 +191,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   CoasterHub.crumbs($('crumb'), [meta.region ? ['Locations','/locations'] : ['Parks','/parks'],
     meta.region ? [meta.region.replace(/, US$/,''), CoasterHub.locationHref(meta.region)] : null,
     [C.park, CoasterHub.parkHref(C.park)], [C.name]]);
-  CoasterHub.youStrip($('you'), [C], ROWS.map(function(x){ return x.id; }));
+  // No "You have ridden it" bar: that is your chip under Riders now.
 
   // Former names: the whole reason an old link still works, so the page says so
   // rather than silently showing a name the reader did not ask for.
@@ -276,15 +285,30 @@ function fmtDay(d){
   return CoasterHub.mdy(d);
 }
 
+// Riders, as chips (Carter, 2026-09-26, all three of these):
+//  * YOU first and highlighted, carrying what the "You have ridden it" bar
+//    said — your rides, your first year, where you rank it — and a dashed
+//    "not yet" chip when you have not. Signed out, there is no you.
+//  * Then everybody in the order they first rode it, so the chips read like
+//    the History above them; undated rides after, most rides first.
+//  * Past CAP chips the rest fold into "+N more", which opens them in place.
+// A relocated ride gets an "At <park>" line over each park's chips, and a
+// rider who rode it at both is on both.
+var CAP=12;
 function riders(){
-  return CoasterHub.fetchUsers().then(function(){
-    return Promise.all(CoasterHub.USERS.map(function(u){
-      return CoasterHub.fetchRides(u.slug).then(function(log){ return {u:u, log:log}; })
-                       .catch(function(){ return null; });
-    }));
-  }).then(function(all){
-    // One list per park the ride has run at — a rider who rode it at both is
-    // on both, and it is still one credit on their count (Carter, 2026-09-26).
+  return Promise.all([
+    CoasterHub.fetchUsers().then(function(){
+      return Promise.all(CoasterHub.USERS.map(function(u){
+        return CoasterHub.fetchRides(u.slug).then(function(log){ return {u:u, log:log}; })
+                         .catch(function(){ return null; });
+      }));
+    }),
+    CoasterHub.you().catch(function(){ return null; })
+  ]).then(function(res){
+    var all=res[0], me=res[1];
+    // Your ranking of the ride: the best-placed of its rows in your list.
+    var rank=0;
+    if(me) ROWS.forEach(function(x){ var k=me.rank[x.id]; if(k && (!rank || k<rank)) rank=k; });
     var lists=ROWS.map(function(row){
       var out=[];
       all.forEach(function(x){
@@ -297,28 +321,47 @@ function riders(){
         });
         if(laps) out.push({slug:x.u.slug, name:x.u.name||x.u.slug, laps:laps, first:first});
       });
-      // Most laps first, then alphabetically — the same order the park page
-      // puts its riders in.
-      out.sort(function(a,b){ return b.laps-a.laps || a.name.localeCompare(b.name); });
-      return {row:row, out:out};
-    }).filter(function(l){ return l.out.length; });
-    if(!lists.length) return;
-    // One "Riders" heading (Carter, 2026-09-26), and for a relocated ride an
-    // "At <park>" line over each park's chips — a rider who rode it at both
-    // is on both.
-    var moved=ROWS.length>1;
-    $('who_wrap').innerHTML='<div class="sect">Riders</div><div class="riders">'+lists.map(function(l){
+      out.sort(function(a,b){
+        if(!!a.first!==!!b.first) return a.first?-1:1;
+        return (a.first&&b.first&&a.first.localeCompare(b.first)) || b.laps-a.laps || a.name.localeCompare(b.name);
+      });
+      var mine=me ? out.filter(function(p){ return p.slug===me.slug; })[0] : null;
+      if(mine) out=[mine].concat(out.filter(function(p){ return p!==mine; }));
+      return {row:row, out:out, mine:mine};
+    });
+    var rode=lists.some(function(l){ return l.mine; });
+    var shown=lists.filter(function(l){ return l.out.length; });
+    // Signed in and never on it: the "not yet" chip is the whole section if
+    // nobody else has ridden it either.
+    if(me && !rode){
+      if(shown.length) shown[0].notYet=true;
+      else shown=[{row:C, out:[], notYet:true}];
+    }
+    if(!shown.length) return;
+    var moved=ROWS.length>1, ranked=false;
+    var chip=function(p, isMe){
+      var bits=[p.laps+' ride'+(p.laps===1?'':'s')];
+      if(p.first) bits.push(String(p.first).slice(0,4));
+      if(isMe && rank && !ranked){ bits.push('#'+rank+' in your ranking'); ranked=true; }
+      return '<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'"'
+        +(p.first?' title="First rode it '+esc(fmtDay(p.first))+'"':'')+'>'
+        +(isMe?'You':esc(p.name))+'<i>'+esc(bits.join(' · '))+'</i></a>';
+    };
+    $('who_wrap').innerHTML='<div class="sect">Riders</div><div class="riders">'+shown.map(function(l){
       var r=l.row;
+      var chips=(l.notYet?['<span class="chip notyet">You<i>not yet</i></span>']:[])
+        .concat(l.out.map(function(p){ return chip(p, l.mine===p); }));
+      var more=chips.length>CAP ? chips.length-CAP : 0;
       return (moved?'<p class="at">At <a href="'+esc(CoasterHub.parkHref(r.park))+'">'+esc(r.park)+'</a>'
           +(r.name!==C.name?' (as '+esc(r.name)+')':'')+'</p>':'')
-        // Chips: the name, then rides and the year they first rode it; the full
-        // first date is the tooltip.
-        +'<div class="chips">'+l.out.map(function(p){
-        return '<a href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'"'
-          +(p.first?' title="First rode it '+esc(fmtDay(p.first))+'"':'')+'>'+esc(p.name)
-          +'<i>'+p.laps+' ride'+(p.laps===1?'':'s')+(p.first?' · '+esc(String(p.first).slice(0,4)):'')+'</i></a>';
-      }).join('')+'</div>';
+        +'<div class="chips">'+chips.slice(0,CAP).join('')
+        +(more?'<span class="rest" hidden>'+chips.slice(CAP).join('')+'</span>'
+          +'<button type="button" class="chip more">+'+more+' more</button>':'')
+        +'</div>';
     }).join('')+'</div>';
+    $('who_wrap').querySelectorAll('button.more').forEach(function(b){
+      b.onclick=function(){ var r=b.previousElementSibling; r.hidden=false; b.remove(); };
+    });
     $('who_wrap').style.display='block';
   });
 }

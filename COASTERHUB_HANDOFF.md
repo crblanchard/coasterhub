@@ -3745,7 +3745,11 @@ is one link away in the hero and the crumbs. The riders are one section on every
 "At <park> (as <old name>)" line above each park's list on a relocated ride. The riders
 went through plain lines and settled on **chips**, the same ones a park page's opened coaster
 shows — "Carter  20 rides · 2018", the full first date as the tooltip — under a plain
-**"Riders"** heading (not "N riders").
+**"Riders"** heading (not "N riders"). Then (same day) **your chip comes first**, highlighted, and replaces
+the "You have ridden it N times" bar — it carries your rides, first year and "#N in your
+ranking"; if you have not ridden it, a dashed "You · not yet" chip. The rest are **ordered by
+first ride** (undated after), and past `CAP` (12) they fold into a **"+N more"** chip that
+opens in place. `youStrip` is no longer called on the coaster page.
 
 **Wording (Carter, 2026-09-26): no "one ride, one credit" anywhere.** The feed reads
 "Pandemonium at Six Flags Discovery Kingdom merged with Joker at Six Flags Mexico — ride
