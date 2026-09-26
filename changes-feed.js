@@ -417,11 +417,14 @@
             // timestamped anywhere, so the older entries are reconstructed from the
             // alias table and carry a date but not a time or a name.
             var back = EVENTS.filter(function(e){ return e.detail && e.detail.backfilled; }).length;
+            // "Recorded as it happens." went (Carter, 2026-09-26); the note is
+            // only there now when it has something to explain.
             noteEl.innerHTML = back
-              ? 'Recorded as it happens. The ' + back + ' oldest entries were rebuilt from the '
+              ? 'The ' + back + ' oldest entries were rebuilt from the '
                 + 'record of former names &mdash; those have a date but no time, and no-one attached, '
                 + 'because nothing before this page existed was ever timestamped.'
-              : 'Recorded as it happens.';
+              : '';
+            noteEl.hidden = !back;
           }
           render();
         })

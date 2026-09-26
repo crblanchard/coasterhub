@@ -3821,6 +3821,25 @@ Park, Location** on a rider's /credits. Where the noun is also an option ("Ridde
 "Visited"), the option reads "Ridden only" / "Visited only" so a picked filter never looks
 unset. /coasters' column is "Model" (was "Company / model"). Follow this for new filters.
 
+## Copy a day to a friend (2026-09-26)
+
+Carter: *"Sean was with me at sfmm on sep 12 what's the easiest way to give him my rides"*.
+On /log, picking a date you have already logged says "You logged 15 rides on 13 coasters
+this day. Change that day · **Copy to a friend**". The link opens a rider picker inline;
+**Copy** is one `POST /api/rides` as that rider with your laps, on the same date — so it is
+their activity row and their sync, exactly as if they had logged it. Before posting it reads
+their log and asks if they already have rides on that date (a second copy doubles every lap).
+**Their undated rows are left alone** — Carter's call ("keep undated rides"), which differs
+from the 2026-08-05 trip copies that replaced placeholders; their credits do not change for
+coasters they already had, their ride total goes up by every lap copied.
+
+**Admin only**, because writing to another rider's count is admin-only on the server
+(`mayWriteRider`); the link is hidden for everyone else. Opening it to all riders would need
+the friend to accept the day first — not built.
+
+/changes: "Recorded as it happens." is gone (Carter); the note only shows when there are
+backfilled entries to explain, which live has none of.
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".

@@ -175,6 +175,9 @@
   .miniform input,.miniform select{padding:9px 11px;font-size:.88rem}
   .miniform .grow{flex:1;min-width:170px}
   .miniform .note{flex-basis:100%;color:var(--muted);font-size:.78rem;margin:0}
+  /* "Copy to a friend" under the date: a small picker inside the sentence. */
+  #dayhint .copysel{width:auto;display:inline-block;padding:4px 8px;font-size:.85rem;margin:4px 4px 4px 0}
+  #dayhint .copybtn{padding:5px 12px;font-size:.85rem;margin-right:6px}
   .miniform .err{flex-basis:100%;color:var(--bad);font-size:.82rem;margin:0}
   /* The locations filter. 54 of them is a list rather than a row of pills, so
      it scrolls inside the panel and columns up when there is width for it.
@@ -577,10 +580,58 @@ function offerDay(){
     var n=Object.keys(day).reduce(function(a,k){return a+day[k];},0), c=Object.keys(day).length;
     h.style.display='';
     h.innerHTML='You logged '+n+' ride'+(n===1?'':'s')+' on '+c+' coaster'+(c===1?'':'s')+' this day. '
-      +'<a href="#" id="dayload">Change that day</a>';
+      +'<a href="#" id="dayload">Change that day</a>'
+      +(canCopy()?' &middot; <a href="#" id="daycopy">Copy to a friend</a>':'');
   } else { h.style.display='none'; h.innerHTML=''; return; }
   var a=$('dayload'); if(a) a.onclick=function(e){ e.preventDefault(); beginEdit(d); };
+  var cp=$('daycopy'); if(cp) cp.onclick=function(e){ e.preventDefault(); copyPanel(d); };
   var b=$('dayback'); if(b) b.onclick=function(e){ e.preventDefault(); cancelEdit(); };
+}
+// ---- Copying a day to a friend (Carter, 2026-09-26) -------------------------
+// "Sean was with me at SFMM on Sep 12": the same rides, laps and all, logged
+// for somebody else on the same date — one POST /api/rides as them, so it is
+// their activity row and their sync, exactly as if they had logged it. Their
+// undated rows are left alone (Carter's call: "keep undated rides").
+//
+// Writing to another rider's count is admin-only on the server (mayWriteRider),
+// so the link only appears for an admin. Opening it to everyone would need the
+// friend to accept the day first — not built.
+function canCopy(){ return !!TOKEN || !!(ME && ME.admin); }
+function copyPanel(d){
+  var h=$('dayhint'), day=DAYS[d]; if(!day) return;
+  var me=$('rider').value;
+  var who=(CoasterHub.USERS||[]).filter(function(u){ return u.slug && u.slug!==me; })
+    .sort(function(a,b){ return (a.name||a.slug).localeCompare(b.name||b.slug); });
+  h.innerHTML='Copy '+esc(niceDay(d))+' to '
+    +'<select id="copyto" class="copysel"><option value="">Pick a rider&hellip;</option>'
+    +who.map(function(u){ return '<option value="'+esc(u.slug)+'">'+esc(u.name||u.slug)+'</option>'; }).join('')
+    +'</select> <button type="button" id="copygo" class="copybtn">Copy</button> '
+    +'<a href="#" id="copyx">Cancel</a>';
+  $('copyx').onclick=function(e){ e.preventDefault(); offerDay(); };
+  $('copygo').onclick=function(){
+    var to=$('copyto').value; if(!to){ $('copyto').focus(); return; }
+    var name=$('copyto').selectedOptions[0].textContent;
+    var entries=Object.keys(day).map(function(k){ return {c:+k, n:day[k]}; });
+    var laps=entries.reduce(function(a,e){ return a+e.n; },0);
+    $('copygo').disabled=true;
+    // Their log first: a second copy of the same day would double every lap.
+    CoasterHub.fetchRides(to).then(function(log){
+      var there=(log.rides||[]).filter(function(r){ return r.d===d; }).length;
+      if(there && !confirm(name+' already has '+there+' ride'+(there===1?'':'s')+' on '+niceDay(d)
+          +'.\n\nAdd your '+laps+' on top of them?')) throw new Error('cancelled');
+      return api('POST','/api/rides',{user:to, d:d, entries:entries});
+    }).then(function(r){
+      h.innerHTML='Copied '+laps+' ride'+(laps===1?'':'s')+' on '+entries.length+' coaster'+(entries.length===1?'':'s')
+        +' to <a href="'+esc(CoasterHub.userPageHref(to,'count'))+'">'+esc(name)+'</a> &#10003;'
+        +(r && r.credits!=null?' — now on '+Number(r.credits).toLocaleString()+' credits.':'')
+        +' <a href="#" id="copymore">Copy to someone else</a>';
+      $('copymore').onclick=function(e){ e.preventDefault(); copyPanel(d); };
+    }).catch(function(e){
+      if(e && e.message==='cancelled'){ $('copygo').disabled=false; return; }
+      $('copygo').disabled=false;
+      h.insertAdjacentHTML('beforeend',' <span style="color:var(--bad)">Couldn&rsquo;t copy: '+esc(e.message||e)+'</span>');
+    });
+  };
 }
 function beginEdit(d){
   EDITING=d;
