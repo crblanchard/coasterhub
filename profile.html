@@ -98,6 +98,19 @@
     .herotop.split .herocount h1{margin:0}
     .herotop.split .herocount .heroacts{margin-top:0}
   }
+  /* Recent visits: feed rows that open (see the script). The summary IS the
+     .ev row, so it loses the disclosure triangle and gains a chevron. */
+  details.visit>summary{list-style:none;cursor:pointer}
+  details.visit>summary::-webkit-details-marker{display:none}
+  details.visit .chev{flex:none;color:var(--muted);margin:6px 0 0 4px;transition:transform .15s}
+  details.visit[open] .chev{transform:rotate(180deg)}
+  details.visit[open]>summary{border-bottom-color:transparent}
+  .vbody{padding:0 0 12px 43px;border-bottom:1px solid var(--line)}
+  .vrow{display:flex;align-items:baseline;gap:8px;padding:5px 0;font-size:.92rem}
+  .vrow a{color:var(--fg);text-decoration:none}
+  .vrow a:hover{color:var(--accent2);text-decoration:underline}
+  .vrow .vpk{color:var(--muted);font-size:.82rem}
+  .vrow .vlap{color:var(--accent);font-size:.85rem;font-variant-numeric:tabular-nums}
   #morewrap{padding:6px 0 30px}
   body.moreclosed #sec_activity,body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
   @media (max-width:680px){
@@ -651,24 +664,43 @@ function render(s){
   }
   // Recent visits: the newest five dated days, one line each — where, how many
   // rides on how many coasters, and the date where the feed puts its time.
+  // Each opens to that day's coasters, A–Z with laps (Carter, 2026-09-26: "make
+  // it openable"); the card rule applies — a closed row opens on any tap, park
+  // link included, and once open the links are links.
   (function(){
     var DD=s.day_detail||{}, days=Object.keys(DD).sort().reverse().slice(0,5);
     if(!days.length) return;
     var slug=CoasterHub.currentUser();
-    var perDay={};                         // date -> coasters ridden that day
+    var byDay={};                          // date -> [{c, n}] for the five shown
+    days.forEach(function(d){ byDay[d]=[]; });
     Object.keys(s.byCoaster||{}).forEach(function(id){
-      var seen={}; (s.byCoaster[id].dates||[]).forEach(function(d){ if(!seen[d]){ seen[d]=1; perDay[d]=(perDay[d]||0)+1; } });
+      var n={}; (s.byCoaster[id].dates||[]).forEach(function(d){ if(byDay[d]) n[d]=(n[d]||0)+1; });
+      Object.keys(n).forEach(function(d){ byDay[d].push({c:(s.coastersById||{})[id], n:n[d]}); });
     });
+    var fmt=function(d){ var p=d.split('-');
+      return new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).toLocaleDateString(undefined,{timeZone:'UTC',month:'short',day:'numeric',year:'numeric'}); };
     var CAL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/></svg>';
+    var CHEV='<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
     document.getElementById('visits_h').href=CoasterHub.userPageHref(slug,'count');
     document.getElementById('visits').innerHTML=days.map(function(d){
-      var x=DD[d], c=perDay[d]||0;
+      var x=DD[d], rows=byDay[d].filter(function(r){ return r.c; })
+        .sort(function(a,b){ return String(a.c.name).localeCompare(String(b.c.name)); });
       var parks=x.p.map(function(pp){ return '<a href="'+esc(CoasterHub.parkHref(pp[0]))+'"><b>'+esc(pp[0])+'</b></a>'; }).join(' &amp; ');
-      return '<div class="ev log"><span class="ic">'+CAL+'</span>'
+      return '<details class="visit"><summary class="ev log"><span class="ic">'+CAL+'</span>'
         +'<span class="tx">'+parks+' &mdash; '+nf(x.t)+' ride'+(x.t===1?'':'s')
-        +(c?' on '+nf(c)+' coaster'+(c===1?'':'s'):'')+'</span>'
-        +'<span class="when">'+esc(CoasterHub.mdy(d))+'</span></div>';
+        +(rows.length?' on '+nf(rows.length)+' coaster'+(rows.length===1?'':'s'):'')+'</span>'
+        +'<span class="when">'+esc(fmt(d))+'</span>'+CHEV+'</summary>'
+        +'<div class="vbody">'+rows.map(function(r){
+          return '<div class="vrow"><a href="'+esc(CoasterHub.coasterHref(r.c))+'">'+esc(r.c.name)+'</a>'
+            +(x.p.length>1?'<span class="vpk">'+esc(r.c.park)+'</span>':'')
+            +(r.n>1?'<span class="vlap">&times;'+r.n+'</span>':'')+'</div>';
+        }).join('')+'</div></details>';
     }).join('');
+    document.getElementById('visits').addEventListener('click', function(e){
+      var det=e.target.closest('details.visit'); if(!det) return;
+      var a=e.target.closest('a');
+      if(a && a.closest('summary') && !det.open){ e.preventDefault(); det.open=true; }
+    });
     document.getElementById('sec_visits').style.display='';
   })();
 

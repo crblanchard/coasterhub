@@ -3872,7 +3872,9 @@ then below top ten do latest five 'recent visits' similar form to activity"*.
   the date where the feed puts its time; two parks in a day are joined with "&". Read off
   `computeStats`' `day_detail`, coasters per day off `byCoaster[].dates`, so no request of
   its own. The heading links to the rider's credits. Hidden for a rider with no dated
-  days. On a phone it takes `order:1` beside the top ten (source order breaks the tie).
+  days. Each row is a `<details>` (Carter: "make it openable") that opens to the day's
+  coasters A–Z with laps (and the park, on a two-park day); dates read "Sep 12, 2026". The
+  card rule: a tap on a closed row opens it, park link included; open, the links work. On a phone it takes `order:1` beside the top ten (source order breaks the tie).
 
 ## Possible future updates
 
