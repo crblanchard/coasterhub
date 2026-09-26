@@ -277,20 +277,15 @@ function body(c){
   if(mine){ extra.push([esc(mine.n),'Your rides']); if(mine.first) extra.push([esc(CoasterHub.mdy(mine.first)),'First ridden']); }
   var was=CoasterHub.formerNames(LIST, c.id, c.name);
   var who=WHO[c.id];
-  // A relocated ride (023-same-ride.sql). The old park's row says where the
-  // ride went; the home's row says where it came from.
-  var home=CoasterHub.rideHome(LIST.coasters, c), moved='';
-  var parkLink=function(x){ return '<a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>'; };
-  if(home!==c){
-    moved='Moved to '+parkLink(home)+(home.name!==c.name
-      ? ' — now <a href="'+esc(CoasterHub.coasterHref(home))+'"><b>'+esc(home.name)+'</b></a>' : '')
-      +'. One ride, one credit.';
-  } else {
-    var from=CoasterHub.sameRideRows(LIST.coasters, c);
-    if(from.length) moved=from.map(function(x){
-      return (x.closed?'Formerly ':'Also listed as ')+(x.name!==c.name?'<b>'+esc(x.name)+'</b> ':'')+'at '+parkLink(x);
-    }).join('. ')+'. One ride, one credit.';
-  }
+  // A relocated ride (023-same-ride.sql): "Merged with Joker at Six Flags
+  // Mexico — ride relocated", from whichever side you are looking at (Carter's
+  // wording, 2026-09-26).
+  var others=[CoasterHub.rideHome(LIST.coasters, c)].concat(CoasterHub.sameRideRows(LIST.coasters, c))
+    .filter(function(x, i, all){ return x.id!==c.id && all.indexOf(x)===i; });
+  var moved=others.length ? 'Merged with '+others.map(function(x){
+      return '<a href="'+esc(CoasterHub.coasterHref(CoasterHub.rideHome(LIST.coasters, x)))+'"><b>'+esc(x.name)+'</b></a> at '
+        +'<a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>';
+    }).join(' and ')+' — ride relocated.' : '';
   return (was.length?'<p class="former">Formerly '+was.map(function(n){ return '<b>'+esc(n)+'</b>'; }).join(', ')+'.</p>':'')
     +(moved?'<p class="former">'+moved+'</p>':'')
     +CoasterHub.coasterFacts(c, extra)

@@ -3738,6 +3738,12 @@ Flags Mexico (2013-)' then 'Pandemonium - Six Flags Discovery Kingdom (2008-2012
 row per park, the home first then newest to oldest, name – park link – years. It sits between
 the "you" line and the per-park rider lists. Park pages keep their one-line note.
 
+**Wording (Carter, 2026-09-26): no "one ride, one credit" anywhere.** The feed reads
+"Pandemonium at Six Flags Discovery Kingdom merged with Joker at Six Flags Mexico — ride
+relocated" (unlinking: "… unmerged from Joker at Six Flags Mexico"); a park page row reads
+"Merged with Joker at Six Flags Mexico — ride relocated." from either side. Use that phrasing
+for anything new.
+
 **On /changes (2026-09-26).** `same_ride_set` is no longer in `FEED_HIDDEN` — linking two rows
 changes riders' counts, which is what the feed is for. It reads "Pandemonium at Six Flags
 Discovery Kingdom moved to Six Flags Mexico as Joker — one ride, one credit"; the event's

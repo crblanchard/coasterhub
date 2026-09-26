@@ -1798,10 +1798,10 @@
     var list = document.getElementById('srList'); if (!list || state.sel!==id) return;
     var set = sameRideSet(id), c = state.byId[id];
     document.getElementById('srHint').innerHTML = set.length
-      ? 'One ride at '+set.length+' parks: anyone who rode it at more than one gets <b>one credit</b>, and it is ranked once. '
+      ? 'Merged across '+set.length+' parks — ride relocated. Riders who rode it at more than one count it once, and rank it once. '
         + 'Each park keeps its own row. The <b>home</b> is the row it counts as — usually where it is now.'
       : 'If this coaster moved parks and is also listed at its old (or new) park, link the two here. '
-        + 'Nothing is merged: each park keeps its row and its riders, and anyone who rode both gets one credit.';
+        + 'Each park keeps its row and its riders; anyone who rode both counts it once.';
     list.innerHTML = set.map(function(x){
       var home = x.id === c.same;
       return srLine(x, (home ? '<span class="srhome">home</span>'
@@ -1843,8 +1843,8 @@
         var score = function(x){ return (x.closed ? 0 : 1e5) + (+(String(x.opened||x.yr||'').slice(0,4)) || 0); };
         home = score(o) > score(c) ? o.id : c.id;
       }
-      if (!confirm('Link #'+c.id+' '+c.name+' ('+c.park+') and #'+o.id+' '+o.name+' ('+o.park+') as the SAME ride?\n\n'
-        + 'Anyone who rode both will have one credit for it instead of two.')) return;
+      if (!confirm('Merge #'+c.id+' '+c.name+' ('+c.park+') with #'+o.id+' '+o.name+' ('+o.park+') — ride relocated?\n\n'
+        + 'Anyone who rode both will count it once.')) return;
       sameRideLink(id, [c.id, o.id], home);
     }; });
   }

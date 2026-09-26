@@ -197,27 +197,26 @@
             + lost.map(function(r){ return riderLink(r.slug, esc(r.name || r.slug)); }).join(', ')
             + ' went with it' : '');
     }
-    // A relocated ride linked as one (023-same-ride.sql): "Pandemonium at Six
-    // Flags Discovery Kingdom moved to Six Flags Mexico as Joker — one ride, one
-    // credit." `detail.at` is every row of it; `ride` the one it counts as now.
+    // A relocated ride linked as one (023-same-ride.sql), in Carter's words
+    // (2026-09-26): "Pandemonium at Six Flags Discovery Kingdom merged with
+    // Joker at Six Flags Mexico — ride relocated". `detail.at` is every row of
+    // it; `ride` the one it counts as now.
     if (e.kind === 'same_ride_set'){
       var rows = d.at || [], home = null, olds = [];
       rows.forEach(function(x){
         x = { id: x.id, park: x.park, name: x.name || NAME_BY_ID[x.id] || (x.id === d.ride ? e.subject : null) };
         if (x.id === d.ride) home = x; else olds.push(x);
       });
-      if (!home || !olds.length) return (sub || 'A coaster') + ' was linked to its other park — one ride, one credit';
+      if (!home || !olds.length) return (sub || 'A coaster') + ' merged with its other park — ride relocated';
       var place = function(x){ return (x.name ? rideLink(x.name, x.park, '<span class="sub">' + esc(x.name) + '</span>') : 'A coaster')
         + (x.park ? ' at ' + parkLink(x.park, esc(x.park)) : ''); };
-      var sameName = olds.every(function(x){ return x.name === home.name; });
-      return olds.map(place).join(' and ') + ' moved to ' + parkLink(home.park, esc(home.park || 'another park'))
-        + (sameName ? '' : ' as ' + rideLink(home.name, home.park, '<span class="sub">' + esc(home.name) + '</span>'))
-        + ' — one ride, one credit';
+      return olds.map(place).join(' and ') + ' merged with ' + place(home) + ' — ride relocated';
     }
     if (e.kind === 'same_ride_removed'){
       var f = d.from;
       return (sub ? rideLink(e.subject, d.park, sub) : 'A coaster') + (d.park ? ' at ' + parkLink(d.park, esc(d.park)) : '')
-        + ' is its own credit again' + (f && f.name ? ', no longer the same ride as ' + rideLink(f.name, f.park, esc(f.name)) : '');
+        + ' unmerged' + (f && f.name ? ' from ' + rideLink(f.name, f.park, '<span class="sub">' + esc(f.name) + '</span>')
+          + (f.park ? ' at ' + parkLink(f.park, esc(f.park)) : '') : '');
     }
     if (e.kind === 'clone_set'){
       var made = !!d.made, again = (d.saves || 1) > 1;
