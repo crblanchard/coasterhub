@@ -3738,6 +3738,13 @@ Flags Mexico (2013-)' then 'Pandemonium - Six Flags Discovery Kingdom (2008-2012
 row per park, the home first then newest to oldest, name – park link – years. It sits between
 the "you" line and the per-park rider lists. Park pages keep their one-line note.
 
+**Then "History", as text (same day).** The Relocations cards became a **History** section of
+plain lines — "**Joker** – Six Flags Mexico (2013–)" — still between the "you" line and the
+riders. **"More at <park>" is gone** from the coaster page (Carter: "for now remove"); the park
+is one link away in the hero and the crumbs. The riders are one section headed **"N riders"**
+on every coaster page (distinct people, so someone on both parks' lists counts once), with an
+"At <park> (as <old name>)" line above each park's list on a relocated ride.
+
 **Wording (Carter, 2026-09-26): no "one ride, one credit" anywhere.** The feed reads
 "Pandemonium at Six Flags Discovery Kingdom merged with Joker at Six Flags Mexico — ride
 relocated" (unlinking: "… unmerged from Joker at Six Flags Mexico"); a park page row reads

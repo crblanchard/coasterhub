@@ -51,13 +51,15 @@
   a.rrow{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:.9rem;
          color:var(--fg);text-decoration:none;border-bottom:1px solid var(--soft)}
   a.rrow:last-child{border-bottom:0}
-  /* A relocated ride's parks, one row each (see ROWS). */
-  .lrow{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;padding:11px 16px;font-size:.9rem;border-bottom:1px solid var(--soft)}
-  .lrow:last-child{border-bottom:0}
-  .lrow .dash{color:var(--muted)}
-  .lrow a{color:var(--accent2);text-decoration:none}
-  .lrow a:hover{text-decoration:underline}
-  .lrow .when{margin-left:auto;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums}
+  /* History: a relocated ride's parks as plain lines, not cards (Carter,
+     2026-09-26). The per-park rider lists put their park in the same place. */
+  .hist p,.who .at{margin:0 0 4px;font-size:.92rem;line-height:1.5}
+  .hist a{color:var(--accent2);text-decoration:none}
+  .hist a:hover{text-decoration:underline}
+  .hist .yrs{color:var(--muted)}
+  .who .at{color:var(--muted);margin:14px 0 6px}
+  .who .at:first-child{margin-top:0}
+  .who .at a{color:var(--accent2);text-decoration:none}
   a.rrow:hover{background:var(--soft)}
   a.rrow .nm{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   a.rrow:hover .nm{color:var(--accent2)}
@@ -66,10 +68,6 @@
                padding-left:10px;white-space:nowrap}
 
   /* The rest of the park, so a coaster page is not a dead end. */
-  .sibs{display:flex;flex-wrap:wrap;gap:8px}
-  .sibs a{background:var(--panel);border:1px solid var(--line);border-radius:999px;
-          padding:7px 13px;font-size:.85rem;color:var(--fg);text-decoration:none}
-  .sibs a:hover{border-color:var(--accent2);color:var(--accent2)}
 
   /* Former names. A retheme is the normal way a coaster changes its name, and
      the old one is what somebody following an old link typed. */
@@ -111,16 +109,12 @@
     <div class="specs" id="specs"></div>
     <p id="you" hidden style="margin-top:12px"></p>
     <div id="reloc_wrap" style="display:none">
-      <div class="sect">Relocations</div>
-      <div class="panel" id="reloc"></div>
+      <div class="sect">History</div>
+      <div class="hist" id="reloc"></div>
     </div>
     <div id="who_wrap" style="display:none">
       <div class="sect" id="who_h">Who has ridden it</div>
       <div class="panel" id="who"></div>
-    </div>
-    <div id="sibs_wrap" style="display:none">
-      <div class="sect" id="sibs_h">More at this park</div>
-      <div class="sibs" id="sibs"></div>
     </div>
   </div>
   <div id="none" style="display:none">
@@ -207,10 +201,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
     $('former').style.display='block';
   }
 
-  // A relocated ride (023-same-ride.sql): its other park's row, and why a
-  // rider who rode it at both has one credit, not two.
-  // Every park the ride has run at, newest first (Carter, 2026-09-26:
-  // "Relocations:" then "Joker - Six Flags Mexico (2013-)", "Pandemonium - Six
+  // History: every park the ride has run at, newest first, as lines of text
+  // (Carter, 2026-09-26: "Joker - Six Flags Mexico (2013-)", "Pandemonium - Six
   // Flags Discovery Kingdom (2008-2012)"). The home is where it is now, so it
   // leads; the rest go by when they opened.
   if(ROWS.length>1){
@@ -218,9 +210,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
     var hist=[C].concat(ROWS.slice(1).sort(function(a,b){ return yr(b).localeCompare(yr(a)); }));
     $('reloc').innerHTML=hist.map(function(x){
       var op=yr(x), cl=x.closed?String(x.closed).slice(0,4):'';
-      return '<div class="lrow"><b>'+esc(x.name)+'</b><span class="dash">–</span>'
-        +'<a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>'
-        +((op||cl)?'<span class="when">'+esc(op||'?')+'–'+esc(cl)+'</span>':'')+'</div>';
+      return '<p><b>'+esc(x.name)+'</b> – <a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>'
+        +((op||cl)?' <span class="yrs">('+esc(op||'?')+'–'+esc(cl)+')</span>':'')+'</p>';
     }).join('');
     $('reloc_wrap').style.display='block';
   }
@@ -260,16 +251,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   $('loading').style.display='none';
   $('ui').style.display='block';
 
-  // The rest of the park, so this is not a dead end.
-  var sibs=LIST.coasters.filter(function(x){return x.park===C.park && x.id!==C.id;});
-  sibs.sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
-  if(sibs.length){
-    $('sibs_h').textContent='More at '+C.park;
-    $('sibs').innerHTML=sibs.map(function(x){
-      return '<a href="'+esc(CoasterHub.coasterHref(x))+'">'+esc(x.name)+'</a>';
-    }).join('');
-    $('sibs_wrap').style.display='block';
-  }
+  // "More at <park>" went (Carter, 2026-09-26): the park is one link away in
+  // the hero and the crumbs.
 
   // Who has ridden it, filled in afterwards: the specs are the page and the
   // riders are the extra, so a rider list that cannot be read leaves this page
@@ -329,19 +312,24 @@ function riders(){
       return {row:row, out:out};
     }).filter(function(l){ return l.out.length; });
     if(!lists.length) return;
-    var moved=ROWS.length>1;
-    $('who_wrap').innerHTML=lists.map(function(l){
-      var n=l.out.length, r=l.row;
-      var h=n+(n===1?' rider has':' riders have')+' ridden it'
-        +(moved?' at '+r.park+(r.name!==C.name?' (as '+r.name+')':''):'');
-      return '<div class="sect">'+esc(h)+'</div><div class="panel">'+l.out.map(function(p){
+    // One heading, "3 riders" — people, not rows, so a rider on two parks'
+    // lists counts once — and for a relocated ride a line per park above its
+    // list (Carter, 2026-09-26).
+    var moved=ROWS.length>1, who={};
+    lists.forEach(function(l){ l.out.forEach(function(p){ who[p.slug]=1; }); });
+    var n=Object.keys(who).length;
+    $('who_wrap').innerHTML='<div class="sect">'+n+(n===1?' rider':' riders')+'</div><div class="who">'+lists.map(function(l){
+      var r=l.row;
+      return (moved?'<p class="at">At <a href="'+esc(CoasterHub.parkHref(r.park))+'">'+esc(r.park)+'</a>'
+          +(r.name!==C.name?' (as '+esc(r.name)+')':'')+'</p>':'')
+        +'<div class="panel">'+l.out.map(function(p){
         return '<a class="rrow" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'">'
           +'<span class="nm">'+esc(p.name)+'</span>'
           +(p.laps>1?'<span class="lap">×'+p.laps+'</span>':'')
           +(p.first?'<span class="when">first '+esc(fmtDay(p.first))+'</span>':'')
           +'</a>';
       }).join('')+'</div>';
-    }).join('');
+    }).join('')+'</div>';
     $('who_wrap').style.display='block';
   });
 }
