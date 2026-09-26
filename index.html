@@ -117,12 +117,12 @@
     <span class="eyebrow lh">Friends</span>
     <div class="riderlist" id="friends"></div>
   </div>
-  <!-- The last five things the people you follow did — /changes cut to them
-       (Carter, 2026-09-26). Hidden signed out or following nobody. -->
+  <!-- What you and the people you follow did: at most five things, none older
+       than three days (Carter, 2026-09-26). Hidden signed out. -->
   <div id="factivity_wrap" hidden>
     <span class="eyebrow lh">Friend activity</span>
     <div class="feed" id="factivity"></div>
-    <p class="more"><a href="/changes">All changes &rarr;</a></p>
+    <p class="more"><a href="/changes">All activity &rarr;</a></p>
   </div>
 <!-- The hub (Carter, 2026-09-25: Home is everything that is not yours — the
      other four tabs are you). The database's front door, below your friends
@@ -170,7 +170,7 @@
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
-<script src="/changes-feed.js?v=20260926"></script>
+<script src="/changes-feed.js?v=20260926b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('riders');
@@ -302,10 +302,15 @@ CoasterHub.fetchUsers().then(function(){
       document.getElementById('friends').innerHTML = html(mine)
         + (fol.slugs.length ? '' : '<p class="hint">You are not following anybody yet &mdash; open a rider&rsquo;s profile and press Follow, and they will sit up here with you.</p>');
       document.getElementById('friends_wrap').hidden = false;
-      var others = fol.slugs.filter(function(s){ return s !== fol.me; });
-      if (others.length) {
-        CoasterHubFeed.mount({ feed: document.getElementById('factivity'), limit: 5, who: others,
-                               empty: 'Nothing from your friends yet.' });
+      // You and the people you follow (Carter, 2026-09-26: "also show my own
+      // changes in there too") — so it shows whenever you are signed in.
+      var others = [fol.me].concat(fol.slugs.filter(function(s){ return s !== fol.me; }));
+      if (fol.me) {
+        // Five at most, and nothing older than three days — whichever cuts
+        // first (Carter, 2026-09-26: "last five things or last three days so
+        // they both govern").
+        CoasterHubFeed.mount({ feed: document.getElementById('factivity'), limit: 5, days: 3, who: others,
+                               empty: 'Nothing from you or your friends in the last three days.' });
         document.getElementById('factivity_wrap').hidden = false;
       }
       document.getElementById('top_h').hidden = false;

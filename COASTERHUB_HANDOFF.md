@@ -3800,9 +3800,12 @@ they were, below your friends). **Friend activity** is a second mount of the sha
 the new `who` option (`CoasterHubFeed.mount({ feed, limit: 5, who: [slugs], empty })`), which
 keeps only events whose `actor` is one of those riders — so rides, credits, rankings,
 imports, day edits; database curation has no actor and never shows. It reads the full
-300-row activity list, since a few riders' last five can be well down it. Hidden signed out
-and when you follow nobody (the Friends hint already says how to follow). "All changes →"
-goes to /changes.
+300-row activity list, since a few riders' last five can be well down it. **Two limits, both
+applied** (Carter: "last five things or last three days so they both govern"): at most five,
+and nothing before local midnight two days ago — the feed's new `days: 3` option — so on a
+Saturday it reaches back through Thursday. **Your own activity is in it too** (Carter: "also
+show my own changes in there"), so it shows whenever you are signed in, following anybody or
+not; hidden signed out. The link reads "All activity →" and goes to /changes.
 
 ## Possible future updates
 

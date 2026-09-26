@@ -9,8 +9,9 @@
  *   CoasterHubFeed.mount({ feed: el, note: el, filter: el, limit: 40, poll: true })
  *
  * `who` (an array of rider slugs) keeps only what THOSE riders did — the home
- * page's "Friend activity" (2026-09-26) — and `empty` is what an empty feed
- * says instead of "Nothing here yet."
+ * page's "Friend activity" (2026-09-26) — `days` keeps only the last N calendar
+ * days (today counts as one), applied with `limit` so whichever is shorter
+ * wins, and `empty` is what an empty feed says instead of "Nothing here yet."
  *
  * `feed` is the only required one. Every mount keeps its own events, filter and
  * park lookup, so two on a page would not tread on each other.
@@ -357,11 +358,15 @@
     var limit = opts.limit || 0;
     var EVENTS = [], FILTER = 'all';
     var WHO = null;
+    // Local midnight at the start of the oldest day still in the window.
+    var SINCE = 0;
+    if (opts.days) { var d0 = new Date(); d0.setHours(0, 0, 0, 0); d0.setDate(d0.getDate() - (opts.days - 1)); SINCE = d0.getTime(); }
     if (opts.who) { WHO = {}; opts.who.forEach(function(s){ WHO[s] = 1; }); }
 
     function render(){
       var list = groupRuns(EVENTS.filter(function(e){
         if (WHO && !(e.actor && WHO[e.actor])) return false;
+        if (SINCE && atTime(e.at) < SINCE) return false;
         if (FILTER === 'riders')   return !!RIDER_KINDS[e.kind];
         if (FILTER === 'database') return !RIDER_KINDS[e.kind];
         return true;
