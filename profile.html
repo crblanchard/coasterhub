@@ -125,7 +125,8 @@
     color:var(--fg);font-family:inherit;font-size:.95rem;font-weight:600;
     padding:14px 18px;border-radius:12px;cursor:pointer}
   .morebtn:hover{border-color:var(--accent2);color:var(--accent2)}
-  .hm-year{display:flex;align-items:center;gap:10px;margin-bottom:3px}
+  .hm-year{display:flex;align-items:center;gap:10px;margin-bottom:3px;min-width:0}
+  .hm-svg{flex:1 1 auto;min-width:0;width:100%;height:auto;display:block}
   .hm-lbl{width:38px;color:var(--muted);font-size:.75rem;text-align:right;flex:none}
   .hm-cell{stroke:var(--hmline);stroke-width:.5;cursor:pointer}
   .hm-cell:hover{stroke:var(--hmhover);stroke-width:1.2}
@@ -283,7 +284,7 @@
 
 <section class="block" id="sec_activity"><div class="container">
   <span class="eyebrow">Activity</span><h2>Every riding day</h2>
-  <p class="lead">Each square is a day; darker means more rides. Hover for the date, parks, and count.</p>
+  <p class="lead">Each square is a day; darker means more rides. Tap or hover one for the date, parks, and count.</p>
   <div class="hm-wrap" id="heatmap"></div>
   <div class="hm-legend">Less
     <span class="sw hm-l0"></span>
@@ -777,6 +778,7 @@ function render(s){
   // darker — and a fill baked in here would survive the toggle unchanged.
   function level(n){ return !n?0 : n<3?1 : n<8?2 : n<20?3 : 4; }
   const CELL=12, GAP=2, hm=document.getElementById('heatmap');
+  document.addEventListener('click',()=>{ tip.style.display='none'; });
   function showTip(e,iso){
     const info=DAY[iso];
     let html='<div class="d">'+new Date(iso+'T00:00').toLocaleDateString(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric'})+'</div>';
@@ -784,6 +786,7 @@ function render(s){
     else { html+='<div style="color:var(--muted)">No rides</div>'; }
     tip.innerHTML=html; tip.style.display='block';
     let x=e.clientX+14, y=e.clientY+14; if(x+250>window.innerWidth) x=e.clientX-14-tip.offsetWidth;
+    x=Math.max(8, Math.min(x, window.innerWidth-tip.offsetWidth-8));
     tip.style.left=x+'px'; tip.style.top=y+'px';
   }
   if(has.activity) for(let yr=k.year_min; yr<=k.year_max; yr++){
@@ -793,7 +796,12 @@ function render(s){
     const days=((yr%4==0&&yr%100!=0)||yr%400==0)?366:365;
     const cols=Math.ceil((days+startWd)/7);
     const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width',cols*(CELL+GAP)); svg.setAttribute('height',7*(CELL+GAP));
+    // Scales to the width it is given (Carter, 2026-09-26: the year ran off a
+    // phone's edge at a fixed 742px). viewBox keeps the drawing; the CSS caps
+    // it at its natural size on a wide screen and lets it shrink on a narrow one.
+    svg.setAttribute('viewBox','0 0 '+(cols*(CELL+GAP))+' '+(7*(CELL+GAP)));
+    svg.setAttribute('class','hm-svg');
+    svg.style.maxWidth=(cols*(CELL+GAP))+'px';
     for(let doy=0; doy<days; doy++){
       const d=new Date(yr,0,1+doy);
       const iso=yr+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -805,6 +813,8 @@ function render(s){
       rect.setAttribute('class','hm-cell hm-l'+level(n));
       rect.addEventListener('mousemove',e=>showTip(e,iso));
       rect.addEventListener('mouseleave',()=>tip.style.display='none');
+      // A phone has no hover: a tap shows the day, a tap elsewhere hides it.
+      rect.addEventListener('click',e=>{ e.stopPropagation(); showTip(e,iso); });
       svg.appendChild(rect);
     }
     row.appendChild(svg); hm.appendChild(row);
