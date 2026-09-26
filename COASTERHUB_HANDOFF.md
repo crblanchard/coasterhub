@@ -3747,9 +3747,11 @@ on every coaster page (distinct people, so someone on both parks' lists counts o
 
 **Wording (Carter, 2026-09-26): no "one ride, one credit" anywhere.** The feed reads
 "Pandemonium at Six Flags Discovery Kingdom merged with Joker at Six Flags Mexico — ride
-relocated" (unlinking: "… unmerged from Joker at Six Flags Mexico"); a park page row reads
-"Merged with Joker at Six Flags Mexico — ride relocated." from either side. Use that phrasing
-for anything new.
+relocated" (unlinking: "… unmerged from Joker at Six Flags Mexico"); a park page row
+USED to read "Merged with Joker at Six Flags Mexico — ride relocated." from either side; Carter
+did not like "merged" there, so now only the OLD park's row says anything: "Relocated to Six
+Flags Mexico in 2013 — now Joker." The new park's row says nothing. "Merged … ride relocated"
+stays on /changes, which is a record of database changes.
 
 **On /changes (2026-09-26).** `same_ride_set` is no longer in `FEED_HIDDEN` — linking two rows
 changes riders' counts, which is what the feed is for. It reads "Pandemonium at Six Flags
