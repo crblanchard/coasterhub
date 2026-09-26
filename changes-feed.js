@@ -8,6 +8,10 @@
  *
  *   CoasterHubFeed.mount({ feed: el, note: el, filter: el, limit: 40, poll: true })
  *
+ * `who` (an array of rider slugs) keeps only what THOSE riders did — the home
+ * page's "Friend activity" (2026-09-26) — and `empty` is what an empty feed
+ * says instead of "Nothing here yet."
+ *
  * `feed` is the only required one. Every mount keeps its own events, filter and
  * park lookup, so two on a page would not tread on each other.
  */
@@ -352,16 +356,19 @@
     var noteEl = opts.note || null, filterEl = opts.filter || null;
     var limit = opts.limit || 0;
     var EVENTS = [], FILTER = 'all';
+    var WHO = null;
+    if (opts.who) { WHO = {}; opts.who.forEach(function(s){ WHO[s] = 1; }); }
 
     function render(){
       var list = groupRuns(EVENTS.filter(function(e){
+        if (WHO && !(e.actor && WHO[e.actor])) return false;
         if (FILTER === 'riders')   return !!RIDER_KINDS[e.kind];
         if (FILTER === 'database') return !RIDER_KINDS[e.kind];
         return true;
       }));
       if (limit) list = list.slice(0, limit);
       if (!list.length){
-        feedEl.innerHTML = '<div class="empty">Nothing here yet.</div>';
+        feedEl.innerHTML = '<div class="empty">' + esc(opts.empty || 'Nothing here yet.') + '</div>';
         return;
       }
       var html = '', lastDay = null;
@@ -393,7 +400,8 @@
       // A short list (the home page) needs only enough rows to fold into its few
       // lines, not the 300 /changes reads: ranking saves and credit bursts fold
       // together, so a few rows per line is plenty.
-      return fetch('/api/activity?limit=' + (limit ? Math.max(40, limit * 8) : 300))
+      // A `who` feed is a few riders out of everyone, so it reads the long list.
+      return fetch('/api/activity?limit=' + (limit && !WHO ? Math.max(40, limit * 8) : 300))
         .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); })
         .then(function(j){
           // Sort here rather than trusting the order back: the two `at` formats are

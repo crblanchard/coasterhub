@@ -41,7 +41,11 @@
     color:var(--muted);font-size:.95rem;font-weight:400}
   .hubsearch:hover{border-color:var(--ring)}
   .hubsearch span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .xgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0 0}
+  .hubsearch.top{margin:0 0 26px}
+  #factivity_wrap{margin:0 0 34px}
+  #factivity_wrap .more{margin:12px 0 0;font-size:.9rem}
+  #factivity_wrap .more a{color:var(--accent2);font-weight:600;text-decoration:none}
+  .xgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:0}
   .xgrid a{display:flex;flex-direction:column;gap:3px;padding:13px 15px;border-radius:12px;
     background-color:var(--panel);border:1px solid var(--line);text-decoration:none;color:var(--fg);min-width:0}
   .xgrid a:hover{border-color:var(--accent2)}
@@ -102,20 +106,29 @@
   <!-- Signed in: the riders you follow first, then everyone, most credits at
        the top. Signed out there are no friends to show, so it is just the one
        list. -->
-  <div id="friends_wrap" hidden>
-    <span class="eyebrow lh">Friends</span>
-    <div class="riderlist" id="friends"></div>
-  </div>
-<!-- The hub (Carter, 2026-09-25: Home is everything that is not yours — the
-     other four tabs are you). Search first, then the database's front door,
-     below your friends (Carter, same day: "move this whole thing below friends"), above everyone else. The search box here is the header's
-     search, opened with whatever you tap into; there is only one. -->
-<div class="hub">
-  <button type="button" class="hubsearch" id="hubsearch">
+  <!-- Search first, above Friends (Carter, 2026-09-26: "search bar back above
+       friends"). It opens the header's search; there is only one. -->
+  <button type="button" class="hubsearch top" id="hubsearch">
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
     <span>Search coasters, parks, manufacturers, places&hellip;</span>
   </button>
+  <div id="friends_wrap" hidden>
+    <span class="eyebrow lh">Friends</span>
+    <div class="riderlist" id="friends"></div>
+  </div>
+  <!-- The last five things the people you follow did — /changes cut to them
+       (Carter, 2026-09-26). Hidden signed out or following nobody. -->
+  <div id="factivity_wrap" hidden>
+    <span class="eyebrow lh">Friend activity</span>
+    <div class="feed" id="factivity"></div>
+    <p class="more"><a href="/changes">All changes &rarr;</a></p>
+  </div>
+<!-- The hub (Carter, 2026-09-25: Home is everything that is not yours — the
+     other four tabs are you). The database's front door, below your friends
+     (Carter, 2026-09-25: "move this whole thing below friends"), above
+     everyone else. The search that used to open it is above Friends now. -->
+<div class="hub">
   <div class="xgrid">
     <a href="/coasters"><b>Coasters</b><span id="x_coasters">&nbsp;</span></a>
     <a href="/parks"><b>Parks</b><span id="x_parks">&nbsp;</span></a>
@@ -157,7 +170,7 @@
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
-<script src="/changes-feed.js?v=20260925"></script>
+<script src="/changes-feed.js?v=20260926"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('riders');
@@ -289,6 +302,12 @@ CoasterHub.fetchUsers().then(function(){
       document.getElementById('friends').innerHTML = html(mine)
         + (fol.slugs.length ? '' : '<p class="hint">You are not following anybody yet &mdash; open a rider&rsquo;s profile and press Follow, and they will sit up here with you.</p>');
       document.getElementById('friends_wrap').hidden = false;
+      var others = fol.slugs.filter(function(s){ return s !== fol.me; });
+      if (others.length) {
+        CoasterHubFeed.mount({ feed: document.getElementById('factivity'), limit: 5, who: others,
+                               empty: 'Nothing from your friends yet.' });
+        document.getElementById('factivity_wrap').hidden = false;
+      }
       document.getElementById('top_h').hidden = false;
     }
     document.getElementById('list').innerHTML = html(rows);

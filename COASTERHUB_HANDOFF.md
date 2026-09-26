@@ -3791,6 +3791,19 @@ ridden" still count rows, not rides; `youStrip` on a coaster page reports rides 
 only; the `ranked` count in `/api/summary` is rows in `rankings` (only off if a list still
 holds both rows and has not been re-saved).
 
+## Home: search above Friends, and Friend activity (2026-09-26)
+
+Carter: *"search bar back above friends on homepage"* and *"below friends do 'friend activity'
+which is basically just /changes but the latest five things your friends have done."* The
+search button is the first thing under the hero again (the Coasters/Parks/… cards stay where
+they were, below your friends). **Friend activity** is a second mount of the shared feed with
+the new `who` option (`CoasterHubFeed.mount({ feed, limit: 5, who: [slugs], empty })`), which
+keeps only events whose `actor` is one of those riders — so rides, credits, rankings,
+imports, day edits; database curation has no actor and never shows. It reads the full
+300-row activity list, since a few riders' last five can be well down it. Hidden signed out
+and when you follow nobody (the Friends hint already says how to follow). "All changes →"
+goes to /changes.
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
