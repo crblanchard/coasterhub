@@ -3837,6 +3837,14 @@ coasters they already had, their ride total goes up by every lap copied.
 (`mayWriteRider`); the link is hidden for everyone else. Opening it to all riders would need
 the friend to accept the day first — not built.
 
+**A doubling bug this turned up in /log (fixed the same day).** `boot()` calls `loadOwned()`
+twice — once at once, once when the rider list lands — and both filled the same `DAYS` map,
+so every logged day counted each ride twice ("You logged 30 rides" on a 15-ride day). Worse,
+"Change that day" loads the basket from `DAYS`, so saving an edited day would have written
+the doubled laps back. Each call now builds fresh maps and only the latest one
+(`OWNED_GEN`) is swapped in. Found because the new note put the number on screen; the
+database was never wrong.
+
 /changes: "Recorded as it happens." is gone (Carter); the note only shows when there are
 backfilled entries to explain, which live has none of.
 

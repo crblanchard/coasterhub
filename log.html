@@ -430,6 +430,7 @@ var OWNED={};    // coaster id -> true, what this rider already has in their cou
 // becomes "move it to", and an empty basket means "remove the day". Carter's
 // follow-up from the day /log shipped; built 2026-09-21.
 var DAYS={};
+var OWNED_GEN=0;   // which loadOwned() call is the latest; see there
 var EDITING=null;
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -552,13 +553,20 @@ function boot(){
 // the server's guard still refuses to double-count.
 function loadOwned(){
   var slug=$('rider').value;
-  OWNED={}; DAYS={};
+  // Built into fresh maps and swapped in whole. boot() calls this twice (once
+  // straight away, once when the rider list lands), and when both filled the
+  // SAME maps every day counted each ride twice — "You logged 30 rides" on a
+  // 15-ride day (Carter, 2026-09-26). The later answer simply replaces the
+  // earlier one now.
+  var gen=++OWNED_GEN;
   return CoasterHub.fetchRides(slug).then(function(log){
-    if($('rider').value!==slug) return;            // rider changed mid-flight
+    if($('rider').value!==slug || gen!==OWNED_GEN) return;   // rider changed, or a newer load is in flight
+    var owned={}, days={};
     (log.rides||[]).forEach(function(r){
-      OWNED[r.c]=true;
-      if(r.d){ var day=DAYS[r.d]||(DAYS[r.d]={}); day[r.c]=(day[r.c]||0)+1; }
+      owned[r.c]=true;
+      if(r.d){ var day=days[r.d]||(days[r.d]={}); day[r.c]=(day[r.c]||0)+1; }
     });
+    OWNED=owned; DAYS=days;
     renderList(); offerDay();
   }).catch(function(){ renderList(); });
 }
