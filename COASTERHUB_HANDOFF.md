@@ -3741,11 +3741,11 @@ the "you" line and the per-park rider lists. Park pages keep their one-line note
 **Then "History", as text (same day).** The Relocations cards became a **History** section of
 plain lines — "**Joker** – Six Flags Mexico (2013–)" — still between the "you" line and the
 riders. **"More at <park>" is gone** from the coaster page (Carter: "for now remove"); the park
-is one link away in the hero and the crumbs. The riders are one section headed **"N riders"**
-on every coaster page (distinct people, so someone on both parks' lists counts once), with an
-"At <park> (as <old name>)" line above each park's list on a relocated ride. The rider lists
-are plain lines too, not cards: "**Carter** ×20 · first 9/28/2018" (Carter: "make these not
-cards").
+is one link away in the hero and the crumbs. The riders are one section on every coaster page, with an
+"At <park> (as <old name>)" line above each park's list on a relocated ride. The riders
+went through plain lines and settled on **chips**, the same ones a park page's opened coaster
+shows — "Carter  20 rides · 2018", the full first date as the tooltip — under a plain
+**"Riders"** heading (not "N riders").
 
 **Wording (Carter, 2026-09-26): no "one ride, one credit" anywhere.** The feed reads
 "Pandemonium at Six Flags Discovery Kingdom merged with Joker at Six Flags Mexico — ride

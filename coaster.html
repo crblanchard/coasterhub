@@ -45,18 +45,21 @@
              letter-spacing:.06em;margin-top:4px}
   @media (max-width:680px){ .specs{grid-template-columns:repeat(2,1fr)} }
 
-  /* History and the riders are plain lines, not cards (Carter, 2026-09-26):
-     name, then laps and first ride in muted text. A relocated ride's rider
-     lists each open with an "At <park>" line. */
-  .hist p,.who p{margin:0 0 4px;font-size:.92rem;line-height:1.5}
-  .hist a,.who .at a{color:var(--accent2);text-decoration:none}
-  .hist a:hover,.who .at a:hover{text-decoration:underline}
-  .hist .yrs,.who .yrs{color:var(--muted)}
-  .who .wl a{color:var(--fg);text-decoration:none}
-  .who .wl a:hover b{color:var(--accent2)}
-  .who .lap{color:var(--accent);font-size:.85rem;font-variant-numeric:tabular-nums}
-  .who .at{color:var(--muted);margin:14px 0 4px}
-  .who .at:first-child{margin-top:0}
+  /* History is plain lines (Carter, 2026-09-26). */
+  .hist p,.riders .at{margin:0 0 4px;font-size:.92rem;line-height:1.5}
+  .hist a,.riders .at a{color:var(--accent2);text-decoration:none}
+  .hist a:hover,.riders .at a:hover{text-decoration:underline}
+  .hist .yrs{color:var(--muted)}
+  /* Riders are chips, the same ones a park page's opened coaster shows; a
+     relocated ride gets an "At <park>" line over each park's chips. */
+  .riders .at{color:var(--muted);margin:16px 0 8px}
+  .riders .at:first-child{margin-top:0}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips a{display:flex;align-items:baseline;gap:7px;text-decoration:none;
+           background:var(--panel);border:1px solid var(--line);border-radius:999px;
+           padding:7px 13px;font-size:.85rem;color:var(--fg)}
+  .chips a:hover{border-color:var(--accent2)}
+  .chips a i{font-style:normal;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
 
   /* Former names. A retheme is the normal way a coaster changes its name, and
      the old one is what somebody following an old link typed. */
@@ -300,22 +303,20 @@ function riders(){
       return {row:row, out:out};
     }).filter(function(l){ return l.out.length; });
     if(!lists.length) return;
-    // One heading, "3 riders" — people, not rows, so a rider on two parks'
-    // lists counts once — and for a relocated ride a line per park above its
-    // list (Carter, 2026-09-26).
-    var moved=ROWS.length>1, who={};
-    lists.forEach(function(l){ l.out.forEach(function(p){ who[p.slug]=1; }); });
-    var n=Object.keys(who).length;
-    $('who_wrap').innerHTML='<div class="sect">'+n+(n===1?' rider':' riders')+'</div><div class="who">'+lists.map(function(l){
+    // One "Riders" heading (Carter, 2026-09-26), and for a relocated ride an
+    // "At <park>" line over each park's chips — a rider who rode it at both
+    // is on both.
+    var moved=ROWS.length>1;
+    $('who_wrap').innerHTML='<div class="sect">Riders</div><div class="riders">'+lists.map(function(l){
       var r=l.row;
       return (moved?'<p class="at">At <a href="'+esc(CoasterHub.parkHref(r.park))+'">'+esc(r.park)+'</a>'
           +(r.name!==C.name?' (as '+esc(r.name)+')':'')+'</p>':'')
-        // Lines of text, like History above — not cards (Carter, 2026-09-26).
-        +'<div class="wl">'+l.out.map(function(p){
-        return '<p><a href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'"><b>'+esc(p.name)+'</b></a>'
-          +(p.laps>1?' <span class="lap">×'+p.laps+'</span>':'')
-          +(p.first?' <span class="yrs">· first '+esc(fmtDay(p.first))+'</span>':'')
-          +'</p>';
+        // Chips: the name, then rides and the year they first rode it; the full
+        // first date is the tooltip.
+        +'<div class="chips">'+l.out.map(function(p){
+        return '<a href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'"'
+          +(p.first?' title="First rode it '+esc(fmtDay(p.first))+'"':'')+'>'+esc(p.name)
+          +'<i>'+p.laps+' ride'+(p.laps===1?'':'s')+(p.first?' · '+esc(String(p.first).slice(0,4)):'')+'</i></a>';
       }).join('')+'</div>';
     }).join('')+'</div>';
     $('who_wrap').style.display='block';
