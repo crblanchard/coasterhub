@@ -3867,14 +3867,20 @@ then below top ten do latest five 'recent visits' similar form to activity"*.
 - **Desktop hero** (641px and up, profile.html only): `.herocount` is a row — the three
   numbers, then the button column — instead of numbers stacked over buttons. Phones keep
   the stack (style.css's 640px rule).
-- **Recent visits** (`#sec_visits`) sits under the top ten: the newest five dated days as
+- **Recent visits** (`#sec_visits`) — first moved under the top ten, then to the TOP of the
+  page, above it (Carter: "show recent visits at the top actually"): the newest five dated days as
   feed rows (`.feed`/`.ev`, the calendar icon) — "**Park** — 15 rides on 13 coasters" with
   the date where the feed puts its time; two parks in a day are joined with "&". Read off
   `computeStats`' `day_detail`, coasters per day off `byCoaster[].dates`, so no request of
   its own. The heading links to the rider's credits. Hidden for a rider with no dated
   days. Each row is a `<details>` (Carter: "make it openable") that opens to the day's
   coasters A–Z with laps (and the park, on a two-park day); dates read "Sep 12, 2026". The
-  card rule: a tap on a closed row opens it, park link included; open, the links work. On a phone it takes `order:1` beside the top ten (source order breaks the tie).
+  card rule: a tap on a closed row opens it, park link included; open, the links work. On a phone it takes `order:1` with the top ten, and source order puts it first.
+- **Less dead space** (Carter: "cut down on all this dead space a lot"): on the profile
+  `#content section.block` is 30px top and bottom (24px on a phone) instead of style.css's
+  64px, h2s are tighter, and the sections carry no inline padding any more — an inline
+  style would beat the rule (CLAUDE.md), which is also why the old "clear the tiles' inline
+  padding when the top ten shows" line in `renderTop` is gone.
 
 ## Possible future updates
 

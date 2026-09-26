@@ -111,12 +111,21 @@
   .vrow a:hover{color:var(--accent2);text-decoration:underline}
   .vrow .vpk{color:var(--muted);font-size:.82rem}
   .vrow .vlap{color:var(--accent);font-size:.85rem;font-variant-numeric:tabular-nums}
+  /* Far less air between sections (Carter, 2026-09-26: "cut down on all this
+     dead space a lot"): style.css gives every section.block 64px above and
+     below, which on a page of short lists was 130px between one and the next.
+     The first section also sits close under the hero. No inline paddings on
+     these sections any more — an inline style would beat this (CLAUDE.md). */
+  #content section.block{padding:30px 0}
+  #content section.block h2{margin:4px 0 12px}
+  #sec_visits{padding-top:22px !important}
+  @media (max-width:680px){ #content section.block{padding:24px 0} }
   #morewrap{padding:6px 0 30px}
   body.moreclosed #sec_activity,body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
   @media (max-width:680px){
     #content{display:flex;flex-direction:column}
+    #sec_visits{order:1}     /* first, then the top ten: same order, source breaks the tie */
     #sec_top{order:1}
-    #sec_visits{order:1}     /* after the top ten: same order, later in the source */
     #sec_kpis{order:2}
     #sec_geo{order:3}
     #morewrap{order:4;display:block;padding:2px 0 22px}
@@ -258,29 +267,30 @@
 
 <main id="content" style="display:none">
 <div class="container"><p class="ridernote" id="ridernote" style="display:none"></p></div>
+<!-- The last five days this rider logged, in the activity feed's form —
+     first on the page (Carter, 2026-09-26: "below top ten do latest five
+     'recent visits'", then "show recent visits at the top actually").
+     Read off computeStats' day_detail, so it costs nothing extra; hidden for a
+     rider with no dated days. -->
+<section class="block" id="sec_visits" style="display:none"><div class="container">
+  <span class="eyebrow">Lately</span>
+  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">every day &rarr;</span></a></h2>
+  <div class="feed" id="visits"></div>
+</div></section>
+
 <!-- Their ten favorites, ABOVE the tiles (Carter's call, 2026-09-17): what
      somebody liked best is more interesting than how many states they have been
      to. The heading is the link to the whole list, so the section needs no "see
      all" button of its own. Hidden entirely when there is nothing ranked — an
      empty top ten is not a fact about somebody, it just means they have not got
      round to it, and then the tiles lead as before. -->
-<section class="block" id="sec_top" style="display:none;padding-top:28px"><div class="container">
+<section class="block" id="sec_top" style="display:none"><div class="container">
   <span class="eyebrow">Ranked</span>
   <h2><a class="toplink" id="top_h" href="/rankings">Top ten</a></h2>
   <div class="toplist" id="toplist"></div>
 </div></section>
 
-<!-- The last five days this rider logged, in the activity feed's form
-     (Carter, 2026-09-26: "below top ten do latest five 'recent visits'").
-     Read off computeStats' day_detail, so it costs nothing extra; hidden for a
-     rider with no dated days. -->
-<section class="block" id="sec_visits" style="display:none;padding-top:28px"><div class="container">
-  <span class="eyebrow">Lately</span>
-  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">every day &rarr;</span></a></h2>
-  <div class="feed" id="visits"></div>
-</div></section>
-
-<section class="block" id="sec_kpis" style="padding-top:28px"><div class="container">
+<section class="block" id="sec_kpis"><div class="container">
   <div class="kpis">
     <div class="kpi"><div class="num" id="k_credits"></div><div class="lbl">Credits</div><div class="sub" id="k_split"></div></div>
     <div class="kpi" id="kpi_rides"><div class="num" id="k_rides"></div><div class="lbl">Total Rides</div></div>
@@ -656,11 +666,6 @@ function render(s){
         +'</span></span></div>';
     }).join('');
     sec.style.display='';
-    // The tiles carry a tightened top padding because they used to lead the
-    // page. They do not any more, so give them the normal space between
-    // blocks — but only when this section is actually showing, since with
-    // nothing ranked the tiles lead again and want the tight one back.
-    document.getElementById('sec_kpis').style.paddingTop='';
   }
   // Recent visits: the newest five dated days, one line each — where, how many
   // rides on how many coasters, and the date where the feed puts its time.
