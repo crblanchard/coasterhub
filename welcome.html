@@ -30,6 +30,7 @@
   #wel .preview{background:var(--tint2);border-radius:12px;padding:10px 14px;font-size:.88rem;margin:0 0 6px}
   #wel .preview b{color:var(--fg)}
   #wel .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:6px 0 22px}
+  #wel .steps[hidden]{display:none}
   #wel .steps div{height:4px;border-radius:4px;background:var(--soft2)}
   #wel .steps div.on{background:var(--accent2)}
   #wel .steps div.now{background:var(--accentfill)}
@@ -55,6 +56,9 @@
   #wel .item .tx span{display:block;color:var(--muted);font-size:.84rem}
   #wel .tick{flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center}
   #wel .item.on .tick{background:var(--accent2);border-color:var(--accent2)}
+  /* Already in your count (?add=1): checked, and not yours to uncheck here. */
+  #wel .item.owned{cursor:default;opacity:.6}
+  #wel .item.owned:hover{background:none}
   #wel .item.on .tick::after{content:"";width:10px;height:6px;border:solid var(--bg);border-width:0 0 2.5px 2.5px;transform:rotate(-45deg) translate(1px,-1px)}
   #wel .item.gone .tx b{color:var(--muted)}
   #wel .tag{flex:none;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gone)}
@@ -69,6 +73,20 @@
   @media (max-width:680px){
     #wel .sticky{bottom:calc(74px + env(safe-area-inset-bottom,0px));padding-bottom:30px;background:linear-gradient(to top,var(--bg) 80%,transparent)}
   }
+  /* When: one "first ridden" per park, or one per coaster, and an optional
+     ride-count estimate (Carter, 2026-09-27). Quiet, under the lists. */
+  #wel .when{margin:18px 0 0;padding:14px;border:1px dashed var(--line);border-radius:14px}
+  #wel .when label.f{margin-top:0}
+  #wel .wrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  #wel input[type=date],#wel input[type=number]{font:inherit;font-size:16px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;color-scheme:inherit}
+  #wel input[type=date]{min-width:0;max-width:100%}
+  #wel .wlinks{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+  #wel .per{margin-top:12px;display:grid;gap:8px}
+  #wel .per .pr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  #wel .per .pr b{flex:1 1 140px;min-width:0;font-weight:600;font-size:.92rem}
+  #wel .per input[type=number]{width:74px}
+  #wel .per.split .pr b{flex-basis:100%}
+  #wel .per .pr i{font-style:normal;color:var(--muted);font-size:.8rem}
   #wel .big{font-size:3.4rem;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
   #wel .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
   #wel .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
@@ -159,25 +177,33 @@ function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
 //                           that already exists is not something a setup
 //                           screen should be writing into. ?preview=1 forces it.
 var ME=null, PREVIEW=false, HAD=0, OLD_ORDER=[];
+// ?add=1 — "Add credits" for a count that already exists (2026-09-27, the /log
+// tab and /credits' "Add missing credits" come here): the same parks and
+// checks, with what you have already ridden checked and locked, the corner
+// counting your whole count, and only the new checks saved. No count screen,
+// no ranking; it ends on where to go next.
+var ADD=false, OWNED={}, OWNKEY={};
 var PARKS=[], CO=[], BYID={}, POPULAR=[], REGIONS={us:[],rest:[],count:{}};
 
 function regionLabel(r){ return r==='US' ? 'United States (no state)' : /, US$/.test(r) ? r.replace(/, US$/,'') : r; }
 
 var S;
-function fresh(){ S={ near:null, regions:{}, regOpen:false, step:'account', parks:[], pi:0, ridden:{}, ranked:[], queue:[], cmp:null, cmps:0, total:0, saved:false }; }
+function fresh(){ S={ pdate:{}, split:{}, counts:false, cd:{}, cn:{}, near:null, regions:{}, regOpen:false, step:'account', parks:[], pi:0, ridden:{}, ranked:[], queue:[], cmp:null, cmps:0, total:0, saved:false }; }
 fresh();
 
 // Credits are RIDES, not rows: a coaster that moved parks is one credit
 // however many of its rows are checked (023-same-ride.sql).
 function checked(){ return CO.filter(function(c){ return S.ridden[c.id]; }); }
 function credits(){ var seen={}; return checked().filter(function(c){ if(seen[c.key]) return false; seen[c.key]=1; return true; }); }
+// Your whole count while adding: what you had plus new rides.
+function total(){ var n=Object.keys(OWNKEY).length; credits().forEach(function(c){ if(!OWNKEY[c.key]) n++; }); return n; }
 
 var STEP_ORDER={account:0,parks:1,coasters:2,count:2,rank:3,done:4};
 function go(step){ S.step=step; render(); window.scrollTo({top:0,behavior:'instant'}); }
 
 var lastLive=-1;
 function live(){
-  var on=S.step==='coasters', n=credits().length, el=$('live');
+  var on=S.step==='coasters', n=ADD?total():credits().length, el=$('live');
   el.hidden=!on; if(!on){ lastLive=-1; return; }
   $('liven').textContent=n; $('livel').textContent=n===1?'credit':'credits';
   if(lastLive>=0 && n!==lastLive){ el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
@@ -186,7 +212,8 @@ function live(){
 function render(){
   var n=STEP_ORDER[S.step];
   Array.prototype.forEach.call($('steps').children,function(d,i){ d.className = i<n ? 'on' : (i===n ? 'now' : ''); });
-  ({account:vAccount, parks:vParks, coasters:vCoasters, count:vCount, rank:vRank, done:vDone})[S.step]();
+  $('steps').hidden=ADD;
+  ({account:vAccount, parks:vParks, coasters:vCoasters, count:vCount, rank:vRank, done:vDone, added:vAdded})[S.step]();
   live();
 }
 function send(method, url, body){
@@ -227,7 +254,8 @@ function parkRow(p){
   var on=S.parks.indexOf(p)>=0;
   return '<button type="button" class="item'+(on?' on':'')+'" data-p="'+p.i+'"><span class="tick"></span>'
     +'<span class="tx"><b>'+esc(p.name)+'</b><span>'+esc(p.region?regionLabel(p.region):'')+(p.region?' · ':'')+plural(p.coasters.length,'coaster')
-    +(S.near&&p.lat!=null?' · '+miles(p)+' mi':'')+'</span></span></button>';
+    +(S.near&&p.lat!=null?' · '+miles(p)+' mi':'')
+    +(ADD&&p.have?' · '+p.have+' in your count':'')+'</span></span></button>';
 }
 // Great-circle miles from where Near me found you.
 function miles(p){
@@ -242,8 +270,10 @@ function nearest(){
 }
 function vParks(){
   $('view').innerHTML =
-    '<div class="eyebrow">Step 1 of 2</div><h1>Which parks have you been to?</h1>'
-   +'<p class="lead">Pick every park you&rsquo;ve ridden a coaster at. Next you&rsquo;ll check the coasters at each one.</p>'
+    (ADD ? '<div class="eyebrow">Add credits</div><h1>Which parks?</h1>'
+      +'<p class="lead">Pick the parks, then check what you&rsquo;ve ridden. Anything already in your count is checked for you.</p>'
+    : '<div class="eyebrow">Step 1 of 2</div><h1>Which parks have you been to?</h1>'
+      +'<p class="lead">Pick every park you&rsquo;ve ridden a coaster at. Next you&rsquo;ll check the coasters at each one.</p>')
    +'<div class="srow"><input type="search" id="pq" placeholder="Search '+PARKS.length+' parks" autocomplete="off">'
    +'<button type="button" class="locbtn'+(S.near?' on':'')+'" id="nearbtn">Near me</button>'
    +'<button type="button" class="locbtn" id="locbtn" aria-expanded="false">Locations</button></div>'
@@ -336,27 +366,56 @@ function years(c){
 function vCoasters(){
   var p=S.parks[S.pi];
   var open=p.coasters.filter(function(c){ return !c.gone && !c.moved; }), gone=p.coasters.filter(function(c){ return c.gone || c.moved; });
-  var row=function(c){ return '<button type="button" class="item'+(S.ridden[c.id]?' on':'')+(c.gone||c.moved?' gone':'')+'" data-c="'+c.id+'"><span class="tick"></span>'
+  var row=function(c){ var own=ADD&&OWNED[c.id];
+    return '<button type="button" class="item'+(S.ridden[c.id]||own?' on':'')+(own?' owned':'')+(c.gone||c.moved?' gone':'')+'"'+(own?' disabled title="Already in your count"':' data-c="'+c.id+'"')+'><span class="tick"></span>'
       +'<span class="tx"><b>'+esc(c.name)+'</b><span>'+esc([c.model, c.h?c.h+' ft':'', years(c)].filter(Boolean).join(' · '))+'</span></span>'
       +(c.moved?'<span class="tag">Relocated</span>':c.gone?'<span class="tag">Defunct</span>':'')+'</button>'; };
   var last = S.pi===S.parks.length-1;
   $('view').innerHTML =
     '<div class="eyebrow">Park '+(S.pi+1)+' of '+S.parks.length+'</div><h1>'+esc(p.name)+'</h1>'
-   +'<p class="lead">Check the coasters you&rsquo;ve ridden here. You can add dates and re-rides later.</p>'
+   +'<p class="lead">Check the coasters you&rsquo;ve ridden here. '+(ADD?'The ones already in your count are checked.':'You can add dates and re-rides later.')+'</p>'
    +'<div class="sechead"><h2>Operating</h2>'+(open.length?'<button type="button" class="link small" id="all">Check all</button>':'')+'</div>'
    +'<div class="list">'+(open.map(row).join('')||'<div class="empty">None operating.</div>')+'</div>'
    +(gone.length?'<div class="sechead"><h2>Defunct/relocated</h2></div><div class="list">'+gone.map(row).join('')+'</div>':'')
+   +'<div class="when" id="when"></div>'
    +'<div class="sticky"><div class="row2"><button class="go alt" type="button" id="cback">Back</button>'
-   +'<button class="go" type="button" id="cnext">'+(last?'See my count':'Next park')+'</button></div>'
+   +'<button class="go" type="button" id="cnext">'+(last?(ADD?'Add them':'See my count'):'Next park')+'</button></div>'
    +'<p class="small muted" id="ctally" style="text-align:center;margin:8px 0 0"></p></div>';
   function tally(){ var n=p.coasters.filter(function(c){ return S.ridden[c.id]; }).length;
-    $('ctally').textContent = plural(n,'coaster')+' checked here'; live(); }
+    $('ctally').textContent = ADD ? plural(n,'new credit')+' here' : plural(n,'coaster')+' checked here'; live(); when(); }
+  // First ridden: one date for the park (blank = unknown), or one per coaster;
+  // and, if asked for, about how many times each. The per-coaster lines are
+  // only the checked ones, so they follow the checks.
+  var today=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+  function when(){
+    var split=!!S.split[p.i], picked=p.coasters.filter(function(c){ return S.ridden[c.id]; });
+    $('when').innerHTML =
+      (split ? '' : '<label class="f" for="pdate">First ridden</label><div class="wrow">'
+        +'<input type="date" id="pdate" max="'+today+'" value="'+esc(S.pdate[p.i]||'')+'">'
+        +'<span class="small muted">Leave blank if you don&rsquo;t know.</span></div>')
+      +((split||S.counts) && picked.length ? '<div class="per'+(split?' split':'')+'">'+picked.map(function(c){
+          return '<div class="pr"><b>'+esc(c.name)+'</b>'
+            +(split?'<input type="date" data-cd="'+c.id+'" max="'+today+'" value="'+esc(S.cd[c.id]||'')+'" aria-label="First rode '+esc(c.name)+'">':'')
+            +(S.counts?'<input type="number" min="1" max="500" inputmode="numeric" placeholder="1" data-cn="'+c.id+'" value="'+esc(S.cn[c.id]||'')+'" aria-label="Times ridden, '+esc(c.name)+'"><i>rides</i>':'')
+            +'</div>'; }).join('')+'</div>'
+        : (split||S.counts) ? '<p class="small muted" style="margin:10px 0 0">Check a coaster to fill these in.</p>' : '')
+      +'<div class="wlinks"><button type="button" class="link small" id="splitbtn">'+(split?'One date for the whole park':'Different date for each')+'</button>'
+      +'<button type="button" class="link small" id="countbtn">'+(S.counts?'Hide ride counts':'Add ride counts')+'</button></div>';
+    if($('pdate')) $('pdate').onchange=function(){ S.pdate[p.i]=this.value; };
+    $('when').oninput=function(e){ var t=e.target;
+      if(t.dataset.cd) S.cd[t.dataset.cd]=t.value;
+      if(t.dataset.cn) S.cn[t.dataset.cn]=t.value; };
+    $('splitbtn').onclick=function(e){ e.stopPropagation();
+      if(!split) picked.forEach(function(c){ if(!S.cd[c.id] && S.pdate[p.i]) S.cd[c.id]=S.pdate[p.i]; });
+      S.split[p.i]=!split; when(); };
+    $('countbtn').onclick=function(e){ e.stopPropagation(); S.counts=!S.counts; when(); };
+  }
   $('view').onclick=function(e){
     var r=e.target.closest('[data-c]'); if(!r) return;
     var id=+r.dataset.c; if(S.ridden[id]) delete S.ridden[id]; else S.ridden[id]=1;
     r.classList.toggle('on',!!S.ridden[id]); tally();
   };
-  if($('all')) $('all').onclick=function(e){ e.stopPropagation(); open.forEach(function(c){ S.ridden[c.id]=1; }); vCoasters(); };
+  if($('all')) $('all').onclick=function(e){ e.stopPropagation(); open.forEach(function(c){ if(!(ADD&&OWNED[c.id])) S.ridden[c.id]=1; }); vCoasters(); };
   $('cback').onclick=function(e){ e.stopPropagation(); if(S.pi>0){ S.pi--; vCoasters(); window.scrollTo({top:0,behavior:'instant'}); } else go('parks'); };
   $('cnext').onclick=function(e){ e.stopPropagation(); if(!last){ S.pi++; vCoasters(); window.scrollTo({top:0,behavior:'instant'}); } else saveCredits(); };
   tally();
@@ -367,12 +426,34 @@ function vCoasters(){
 // call /log's "Add credits" list makes, which adds nothing for a coaster the
 // rider already has.
 function saveCredits(){
-  var ids=checked().map(function(c){ return c.id; });
-  if(PREVIEW || !ids.length){ go('count'); return; }
+  var cs=checked();
+  var after=ADD?'added':'count';
+  if(PREVIEW || !cs.length){ go(after); return; }
   $('cnext').disabled=true; $('cnext').textContent='Saving…';
-  send('POST','/api/rides',{ user:ME.slug, d:null, entries:ids.map(function(id){ return {c:id}; }) }).then(function(r){
-    if(!r.ok) throw new Error(r.data.error||('error '+r.status));
-    S.saved=true; CoasterHub.noteWrite(); go('count');
+  // A dated first ride goes in on its day; everything else — undated credits,
+  // and every ride past the first from the estimate — goes in one undated call
+  // (`extra`, which the worker adds on top). Days first, so the undated call's
+  // "only if new" guard skips the coasters those just added.
+  var byDay={}, undated=[];
+  cs.forEach(function(c){
+    var d=(S.split[c.park.i] ? S.cd[c.id] : S.pdate[c.park.i]) || '';
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) d='';
+    var n=S.counts ? Math.max(1, Math.min(500, Math.round(+S.cn[c.id]||1))) : 1;
+    if(d) (byDay[d]=byDay[d]||[]).push({c:c.id, n:1});
+    if(!d || n>1) undated.push({c:c.id, extra:n-1});
+  });
+  var calls=Object.keys(byDay).sort().map(function(d){ return {user:ME.slug, d:d, entries:byDay[d]}; });
+  if(undated.length) calls.push({user:ME.slug, d:null, entries:undated});
+  // A retry after a failure carries on from the call that failed: re-sending
+  // a day that already saved would log its rides twice.
+  if(S.pend) calls=S.pend; S.pend=calls;
+  calls.slice().reduce(function(chain, body){
+    return chain.then(function(){ return send('POST','/api/rides',body).then(function(r){
+      if(!r.ok) throw new Error(r.data.error||('error '+r.status));
+      S.pend.shift(); }); });
+  }, Promise.resolve()).then(function(){
+    S.pend=null;
+    S.saved=true; CoasterHub.noteWrite(); go(after);
   }).catch(function(e){
     $('cnext').disabled=false; $('cnext').textContent='Try again';
     $('ctally').textContent='Could not save your credits: '+(e.message||e);
@@ -452,6 +533,25 @@ function finish(){
   }).catch(function(){ S.rankSaved=false; S.rankErr='could not reach the server'; go('done'); });
 }
 
+// ---- added: the end of ?add=1 ---------------------------------------------------
+function vAdded(){
+  var cs=credits().filter(function(c){ return !OWNKEY[c.key]; }), H=function(page){ return CoasterHub.userPageHref(ME.slug,page); };
+  var link=function(href,title,sub){ return '<a class="note" href="'+esc(href)+'"><b>'+title+' &rarr;</b><span>'+sub+'</span></a>'; };
+  $('view').innerHTML =
+    '<div class="eyebrow">Add credits</div><h1>'+(cs.length?'Added '+plural(cs.length,'credit')+'.':'Nothing new to add.')+'</h1>'
+   +'<p class="lead">Your count is '+total().toLocaleString()+'.</p>'
+   +(cs.length?'<ol class="rank">'+cs.slice(0,12).map(function(c){ return '<li><b>'+esc(c.name)+'</b><span>'+esc(c.park.name)+'</span></li>'; }).join('')+'</ol>'
+     +(cs.length>12?'<p class="small muted" style="margin:0">and '+(cs.length-12)+' more.</p>':''):'')
+   +'<div class="next">'
+   +link(H('count'),'Your credits','Every coaster you&rsquo;ve ridden, by park.')
+   +(cs.length?link(H('rankings'),'Add to your rankings','Rank more places them two at a time.'):'')
+   +link('/log','+ Log a day','At a park? Record today&rsquo;s rides with the date.')
+   +'</div><div style="margin-top:18px"><button class="go alt" type="button" id="again">Add more</button></div>';
+  $('again').onclick=function(){
+    cs.forEach(function(c){ OWNED[c.id]=1; OWNKEY[c.key]=1; c.park.have=(c.park.have||0)+1; });
+    fresh(); go('parks'); };
+}
+
 // ---- 5. done: where to go from here -------------------------------------------
 function vDone(){
   var cs=credits(), rest=cs.length-S.ranked.length, parks={};
@@ -504,7 +604,14 @@ Promise.all([
   ME={slug:acct.slug};
   return CoasterHub.you().then(function(y){
     HAD = y ? Object.keys(y.rides).length : 0;
-    PREVIEW = HAD>0 || new URLSearchParams(location.search).get('preview')==='1';
+    var qs=new URLSearchParams(location.search);
+    ADD = qs.get('add')==='1';
+    if(ADD){
+      Object.keys((y&&y.rides)||{}).forEach(function(id){ var c=BYID[id]; if(!c) return;
+        OWNED[id]=1; OWNKEY[c.key]=1; c.park.have=(c.park.have||0)+1; });
+      document.title='Add credits — Coaster Hub';
+    }
+    PREVIEW = !ADD && (HAD>0 || qs.get('preview')==='1');
     if(PREVIEW){
       $('preview').hidden=false;
       $('preview').innerHTML='<b>Preview.</b> '+(HAD?'Your count already has '+plural(HAD,'coaster')+', so nothing':'Nothing')

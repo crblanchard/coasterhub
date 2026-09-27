@@ -357,6 +357,21 @@ async function main() {
 
     r = await call(db, "POST", "/api/rides", { token: PW, body: { user: "carter", d: "07/28/2026", entries: [{ c: 1, n: 1 }] } });
     check("a MALFORMED date is still rejected (null is not a free pass)", r.status === 400);
+
+    // `extra` (/welcome's ride-count estimate): that many more undated rows,
+    // on top of the credit, whether or not the credit row was new.
+    db.exec("INSERT INTO coasters (id,name,park,type) VALUES (94,'X1','Cedar Point','Steel'),(95,'X2','Cedar Point','Steel'),(96,'X3','Cedar Point','Steel')");
+    const before = rows(db, "SELECT * FROM rides WHERE user_slug='cole' AND coaster_id=94").length;
+    r = await call(db, "POST", "/api/rides", { token: PW, body: { user: "cole", d: null, entries: [{ c: 94, extra: 4 }] } });
+    check("extra on a new undated credit writes the credit plus the extra rides",
+      r.status === 200 && rows(db, "SELECT * FROM rides WHERE user_slug='cole' AND coaster_id=94").length === before + 5, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/rides", { token: PW, body: { user: "cole", d: "2026-07-01", entries: [{ c: 95, n: 1 }] } });
+    r = await call(db, "POST", "/api/rides", { token: PW, body: { user: "cole", d: null, entries: [{ c: 95, extra: 2 }] } });
+    check("a dated first ride plus an undated estimate: one dated row, the rest undated",
+      rows(db, "SELECT * FROM rides WHERE user_slug='cole' AND coaster_id=95 AND d='2026-07-01'").length === 1
+      && rows(db, "SELECT * FROM rides WHERE user_slug='cole' AND coaster_id=95 AND d IS NULL").length === 2);
+    r = await call(db, "POST", "/api/rides", { token: PW, body: { user: "cole", d: null, entries: [{ c: 96, extra: 99999 }] } });
+    check("extra is clamped", rows(db, "SELECT * FROM rides WHERE user_slug='cole' AND coaster_id=96").length === 501);
   }
 
   console.log("\nDELETE /api/ride");

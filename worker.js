@@ -1132,7 +1132,14 @@ async function addRides(env, b) {
     let n = Math.round(Number(e && e.n));
     if (!Number.isFinite(n) || n < 1) n = 1;
     if (n > 50) n = 50;                       // laps clamp: a typo can't insert 5000 rows
-    norm.push({ c: c, n: n });
+    // `extra`: rides ON TOP, undated — the "about how many times?" estimate
+    // /welcome asks for (2026-09-27, Carter: "so people can estimate how many
+    // rides they've taken on each ride for later stats"). Unlike the undated
+    // credit itself these are not guarded: the rider typed the number.
+    let extra = Math.round(Number(e && e.extra));
+    if (!Number.isFinite(extra) || extra < 0) extra = 0;
+    if (extra > 500) extra = 500;
+    norm.push({ c: c, n: n, extra: extra });
   }
 
   const ids = [...new Set(norm.map(e => e.c))];
@@ -1162,6 +1169,9 @@ async function addRides(env, b) {
       for (let k = 0; k < e.n; k++) {
         batch.push(env.DB.prepare("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,?)").bind(slug, e.c, d));
       }
+    }
+    for (let k = 0; k < e.extra; k++) {
+      batch.push(env.DB.prepare("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,NULL)").bind(slug, e.c));
     }
   }
 

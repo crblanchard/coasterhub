@@ -4598,3 +4598,33 @@ ranking** now does the same with ten, like /welcome. The button hides when nothi
 is unranked or the list is empty (the empty state has its own button). On phones
 the bar drops its spacer and empty status so Categories · Rank more · Edit fit one
 line at 390px (it wraps at 360, acceptably).
+
+## Add credits = the setup flow; first-ridden dates and ride counts (2026-09-27)
+
+Suggestion 2: **`/welcome?add=1`** is "Add credits" for an existing count. Same parks
+(Near me, Locations) and checks; coasters already in your count show checked,
+dimmed and disabled; the corner counts your WHOLE count (owned ride keys + new);
+the last park's button says *Add them*; it saves only the new checks and ends on
+"Added N credits · Your count is M" with Credits / Add to your rankings / + Log a day
+and *Add more*. No count screen, no ranking, no step bar.
+- /log's **Add credits** tab (and `?mode=list`, and the empty-count first load) go
+  there — but only when the rider selected on /log is YOU (`toAddCredits`). An admin
+  with somebody else selected still gets the old list, which the new flow cannot do.
+  The list code is still in log.html for that reason.
+- /credits' "Add missing credits" links to it.
+
+Carter, mid-build: *"add a small date box at the bottom that says first ridden -
+leave blank if unknown ... a button to split up dates for each credit ... a smaller
+'add ride count' so people can estimate how many rides"*. On every park's coaster
+step (new sign-ups and ?add=1 alike), under the lists:
+- **First ridden** — one date for the park; blank = undated, as before.
+- *Different date for each* — a date per CHECKED coaster (seeded from the park date).
+- *Add ride counts* — "about how many rides" per checked coaster, global toggle.
+- Saving: one `POST /api/rides` per date (`n:1` each — the first ride), then ONE
+  undated call carrying everything undated plus `extra: n-1` for every estimate.
+  **`extra` is new in the Worker**: that many more undated rows, NOT guarded by the
+  "only if new" rule (the rider typed the number), clamped 0-500. Tested in
+  test-rides-api. Days go first so the undated call's guard skips what they added.
+  A failed save retries from the call that failed (`S.pend`), never re-sending a day.
+- Ride estimates stay undated on purpose: putting 30 rides on the first-ridden date
+  would make a day card and the feed say you rode it 30 times that day.

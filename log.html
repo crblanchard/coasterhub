@@ -546,7 +546,8 @@ function boot(){
   // ?mode=list opens straight on "Coaster credits". The two modes are different
   // jobs — tonight's laps versus filling in years of them — and the profile page
   // links at each one by name, so the link has to be able to say which.
-  setMode(new URLSearchParams(location.search).get('mode') === 'list' ? 'list' : 'day');
+  setMode('day');
+  if(new URLSearchParams(location.search).get('mode') === 'list') toAddCredits(function(){ setMode('list'); });
   $('rider').addEventListener('change',function(){
     try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
     showRider();
@@ -581,7 +582,7 @@ function loadOwned(){
     if(!FIRST_LOAD_DONE){
       FIRST_LOAD_DONE=true;
       if(!(log.rides||[]).length && MODE==='day' && !new URLSearchParams(location.search).get('mode') && !basketCount()){
-        setMode('list');
+        toAddCredits(function(){ setMode('list'); });
         $('modehint').textContent='New here? Pick a park you’ve been to and tick the coasters you rode.';
       }
     }
@@ -676,8 +677,22 @@ function cancelEdit(){
 function wireMode(){
   var btns=$('modesw').querySelectorAll('button');
   for(var i=0;i<btns.length;i++)(function(b){
-    b.onclick=function(){ if(MODE!==b.getAttribute('data-mode')) setMode(b.getAttribute('data-mode')); };
+    b.onclick=function(){
+      var m=b.getAttribute('data-mode'); if(MODE===m) return;
+      if(m==='list') toAddCredits(function(){ setMode('list'); }); else setMode(m);
+    };
   })(btns[i]);
+}
+// Adding past credits for YOURSELF is the park-by-park flow now (/welcome?add=1,
+// 2026-09-27: "reuse the setup's flow for adding past credits"). The list here
+// stays for an admin adding to somebody else's count, which that flow does not
+// do. An empty count gets the whole setup, ranking included.
+function toAddCredits(orElse){
+  CoasterHub.you().then(function(y){
+    if(y && y.slug && $('rider').value===y.slug){
+      location.href = Object.keys(y.rides).length ? '/welcome?add=1' : '/welcome';
+    } else orElse();
+  }).catch(orElse);
 }
 
 function setMode(m){
