@@ -476,13 +476,16 @@ function typical(n){ return ({2:1,3:3,4:5,5:7,6:10,7:13,8:16,9:19,10:22})[n] || 
 function tallest(cs){ return cs.slice().sort(function(a,b){ return (b.h||0)-(a.h||0) || a.name.localeCompare(b.name); }); }
 function vCount(){
   var cs=credits(), parks={}, tall=null;
+  // Total rides (Carter, 2026-09-27, in place of Tallest): one per checked
+  // coaster, or the estimate where one was given.
+  var rides=0; checked().forEach(function(c){ rides += S.counts ? Math.max(1, Math.min(500, Math.round(+S.cn[c.id]||1))) : 1; });
   checked().forEach(function(c){ parks[c.park.name]=1; });
   cs.forEach(function(c){ if(!tall||(c.h||0)>(tall.h||0)) tall=c; });
   $('view').innerHTML =
     '<div class="eyebrow">Your count</div><div class="big" id="bign">0</div><h1 style="margin-top:4px">'+(cs.length===1?'coaster.':'coasters.')+'</h1>'
    +'<div class="tiles"><div class="tile"><b>'+Object.keys(parks).length+'</b><span>Parks</span></div>'
    +'<div class="tile"><b>'+cs.filter(function(c){ return !c.gone && !c.moved; }).length+'</b><span>Still open</span></div>'
-   +'<div class="tile"><b>'+(tall&&tall.h?tall.h+' ft':'—')+'</b><span>Tallest</span></div></div>'
+   +'<div class="tile"><b>'+rides.toLocaleString()+'</b><span>Total rides</span></div></div>'
    +(cs.length?'<p class="lead">Now rank them. We&rsquo;ll start with your '+(cs.length>STARTN?STARTN+' tallest':(cs.length===1?'one coaster':plural(cs.length,'coaster')))
        +(cs.length>1?' &mdash; about '+typical(Math.min(STARTN,cs.length))+' quick choices between two. The rest can come later.':'.')+'</p>'
      +'<button class="go" type="button" id="toRank">'+(cs.length>STARTN?'Rank my top '+STARTN:'Rank them')+'</button><div style="margin-top:10px"><button class="go alt" type="button" id="skip">Skip for now</button></div>'
