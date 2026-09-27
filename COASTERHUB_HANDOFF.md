@@ -3995,6 +3995,12 @@ using the prototype as it is and sends changes FOR THE REAL SITE; collect them h
 3. **The park search gets the Locations checkbox filter** — the same state/country picker
    /log has (`REGSEL`, readRegions/wireRegions in log.html); reuse it rather than rebuild.
    The live path for a new user today (/log in Add credits mode) already has it.
+4. **No "pick which to rank" step.** After the count, ranking starts straight away on the
+   rider's **10 tallest** credits (all of them if fewer). Binary insertion over 10 takes
+   19-25 choices, typically 22 (8 would be ~16, 15 ~41); the count screen says "about 22".
+5. **A live credit counter in the corner** while ticking coasters, bumping as it changes.
+
+Round 3 with 1-5: https://claude.ai/artifact/25ikHbLwC8SqmaSFQpe6fy
 
 ## Possible future updates
 
