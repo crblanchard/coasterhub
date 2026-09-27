@@ -4671,3 +4671,12 @@ newest first) is read by changes-feed.js when mounted with `site:true` (only
 and has its own **Site** filter (Database excludes them). A failed read costs the
 updates, never the feed. The rule for keeping it is in CLAUDE.md. Backfilled from
 git history for 2026-09-26 18:16 onward (this run of work); earlier history was not.
+
+## Profile tabs: parked (2026-09-27)
+
+Mocked up (artifact Fv6fgnuhH4qFo81Fn92pjf: Overview · Credits · Rankings · Map under one
+profile header). Carter liked tabs on everyone's profile and a header of name, numbers
+and Log a day, but on the bottom bar: *"drop credits and rankings would make sense but idk
+i feel like those need to be down there. thats why im hesitant ... it'll make it
+confusing to have two ways to get to all your own pages"*. Not built. If it comes back,
+the open question is exactly that: tabs only make sense if the bar stops duplicating them.
