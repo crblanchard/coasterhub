@@ -4909,3 +4909,10 @@ head-to-head and stops a Rank more batch.
   (`mates`, `g` — the card reads "Batman clones · B&M Invert · 8 in your count").
   Skip and Cancel put back all of its rides. Only reordering INSIDE a category (the
   member grips) still waits for the filter to be cleared.
+
+## Footer: the six links only (2026-09-27)
+
+Carter: "change footer to home / coasters / parks / manufacturers / locations / map".
+Every footer already had those; the Add new (signed in) and Edit · QC (admin) links that
+`footerContrib()` appended are off (the call is commented out in initNav). The pages
+still exist at /add, /edit and /qc.

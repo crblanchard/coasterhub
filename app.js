@@ -1309,7 +1309,10 @@
 
     buildTabBar(page, slug);
     applyRiderLinks(slug);
-    footerContrib();
+    // Footer is the six ways around the site and nothing else (Carter,
+    // 2026-09-27: "change footer to home / coasters / parks / manufacturers /
+    // locations / map"). Add new, Edit and QC are at /add, /edit and /qc.
+    // footerContrib();
   }
 
   // The two controls every header carries on its right: the theme toggle and
