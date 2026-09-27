@@ -3951,6 +3951,25 @@ mobile ... except for map purposes"*. Four parts, because iOS Safari ignores
 None of this can be tested here — Chromium does not match the iOS `@supports` or fire
 `gesturestart` — so check new work on a real iPhone.
 
+## Four small improvements from the interview (2026-09-27)
+
+Carter picked these over the bigger plan ("1 2 maybe 3 maybe 4 ... both sound alright"):
+
+1. **Add to home screen** — `site.webmanifest` (standalone, dark, `icon-192/512.png` from
+   tools/render-icons.mjs) plus the iOS web-app meta tags, linked from every page's head.
+   No service worker: iOS does not need one to install, and offline logging was not asked
+   for. A new page needs the same head tags (copy from index.html).
+2. **An empty count says where to start.** Your own empty /credits and profile show a "Start
+   your count" card (`.startcard`) → `/log?mode=list` or /import, instead of "No parks match
+   those filters" and zero tiles; the profile hides its tiles and map at zero. /log opens on
+   Add credits with a "New here?" hint when the rider has nothing yet (once, on first load,
+   never over a mode picked or linked).
+3. **"Start ranking"** on an owner's empty ranking: one button that turns on Edit and opens
+   Add coasters, with a line saying start with ten or so favorites and let Rank place each
+   by comparison. The starter-set idea (don't face 200 at once) is carried by that advice,
+   not by code — the list is not cut down.
+4. **"See all credits →"** under the profile's Recent visits.
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".

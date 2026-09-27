@@ -761,10 +761,16 @@ if(!slug){
       if (!mineToEdit) return;
       var edit = $('edit');
       edit.hidden = false;
-      // Your own empty list gets the how-to with it.
-      $('rank_empty').innerHTML = 'Nothing ranked yet. Press <b>Edit</b>, then open '
-        + '<b>Add coasters</b> to pick some — <b>Add</b> drops one on the end, '
-        + '<b>Rank</b> finds its spot by comparison.';
+      // Your own empty list: one button into it rather than a how-to that
+      // sent you looking for Edit and then Add coasters (2026-09-27, Carter:
+      // ranking made easy for new users, "not everything to start" when
+      // somebody has 200 credits). It does both steps, and the line under it
+      // says to start with a handful: Rank places each one by comparison.
+      $('rank_empty').innerHTML = '<b>Nothing ranked yet.</b> Start with your ten or so favorites — '
+        + '<b>Rank</b> finds each one&rsquo;s spot by asking which of two you liked more. '
+        + 'The rest can come later.<div style="margin-top:12px">'
+        + '<button type="button" class="btn" id="rank_start">Start ranking</button></div>';
+      $('rank_start').onclick = function(){ edit.onclick(); setView('add'); };
       edit.onclick = function(){
         $('mine').classList.remove('readonly');
         // The read-only line, plus the one thing edit mode has to say: that

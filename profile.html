@@ -190,6 +190,8 @@
   .startcard p{color:var(--muted);margin:6px 0 16px;max-width:52ch}
   .startcard .btn{display:inline-block;margin-right:14px}
   .startcard .alt{color:var(--accent2);font-weight:600;text-decoration:none;white-space:nowrap}
+  .visitsall{margin:12px 0 0;font-size:.92rem}
+  .visitsall a{color:var(--accent2);font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>
@@ -295,6 +297,10 @@
   <span class="eyebrow">Lately</span>
   <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">every day &rarr;</span></a></h2>
   <div class="feed" id="visits"></div>
+  <!-- The way on to the whole count, where the five end (2026-09-27): "my
+       stuff is split up" was the thing Carter found hardest, and this puts the
+       next step where the eye already is. -->
+  <p class="visitsall"><a id="visits_all" href="/credits">See all credits &rarr;</a></p>
 </div></section>
 
 <!-- Their ten favorites, ABOVE the tiles (Carter's call, 2026-09-17): what
@@ -706,6 +712,7 @@ function render(s){
     var CAL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/></svg>';
     var CHEV='<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
     document.getElementById('visits_h').href=CoasterHub.userPageHref(slug,'count');
+    document.getElementById('visits_all').href=CoasterHub.userPageHref(slug,'count');
     document.getElementById('visits').innerHTML=days.map(function(d){
       var x=DD[d], rows=byDay[d].filter(function(r){ return r.c; })
         .sort(function(a,b){ return String(a.c.name).localeCompare(String(b.c.name)); });
