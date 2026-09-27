@@ -25,6 +25,13 @@
   .seg button{background:transparent;border:0;color:var(--muted);padding:10px 16px;cursor:pointer;font-size:.9rem;font-family:inherit}
   .seg button.on{background:var(--tint2);color:var(--fg)}
   .spacer{flex:1}
+  /* A phone fits Categories, Rank more and Edit on one line only without the
+     spacer's two gaps and an empty status (2026-09-27, measured: 344px of 342). */
+  @media (max-width:480px){
+    #mine > .bar:first-child .spacer,#mine > .bar:first-child .status:empty{display:none}
+    #mine > .bar:first-child #rankmore{margin-left:auto}
+    #mine > .bar:first-child .ghost{padding-left:12px;padding-right:12px}
+  }
   .status{color:var(--muted);font-size:.84rem}
   .status.dirty{color:var(--accent)}
   .status.ok{color:var(--accent2)}
@@ -462,6 +469,7 @@
           <path d="m9 18 6-6-6-6"/></svg></a>
       <span class="spacer"></span>
       <span class="status" id="status"></span>
+      <button class="ghost" id="rankmore" hidden>Rank more</button>
       <button class="ghost" id="edit" hidden>Edit</button>
       <button class="primary" id="save">Save</button>
     </div>
@@ -770,7 +778,11 @@ if(!slug){
         + '<b>Rank</b> finds each one&rsquo;s spot by asking which of two you liked more. '
         + 'The rest can come later.<div style="margin-top:12px">'
         + '<button type="button" class="btn" id="rank_start">Start ranking</button></div>';
-      $('rank_start').onclick = function(){ edit.onclick(); setView('add'); };
+      // Straight into head-to-head with the ten tallest, the way /welcome
+      // starts a new count (2026-09-27).
+      $('rank_start').onclick = function(){ rankMore(10); };
+      $('rankmore').onclick = function(){ rankMore(5); };
+      moreButton();
       edit.onclick = function(){
         $('mine').classList.remove('readonly');
         // The read-only line, plus the one thing edit mode has to say: that
@@ -840,7 +852,8 @@ function wire(){
   // save to exit update mode, it says saved already"). Nothing to save: just
   // leave. Something to save: leave once it has saved, stay if it failed.
   $('save').onclick=function(){ if(dirty||prefsDirty) save(doneEditing); else doneEditing(); };
-  $('hh_cancel').onclick=closeHH;
+  // Cancel stops a Rank-more batch too, keeping what it had already placed.
+  $('hh_cancel').onclick=function(){ var was=!!RQ; RQ=null; closeHH(); if(was && dirty) save(); };
   // Rotating the phone changes what fits, so re-decide. fitMeta() clears its
   // own state first, which means speed comes back when there's room again.
   var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(fitMeta,120); });
@@ -873,6 +886,7 @@ function statsFor(id){
     c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>';
 }
 function renderRank(){
+  moreButton();
   var el=$('ranklist');
   $('rank_empty').style.display=ORDER.length?'none':'block';
   var bs=blocks();
@@ -1936,10 +1950,10 @@ function openHH(id, mates, g){
   // `g` means a whole family is being placed at once, none of it ranked yet —
   // that one really is a comparison.
   if(fam && !g && ORDER.some(function(x){ return CLONE[x]===fam; })){
-    foldInto(id, fam); setView('rank'); return;
+    foldInto(id, fam); setView('rank'); if(RQ) setTimeout(nextRQ,0); return;
   }
   if(!ORDER.length){ ORDER=ORDER.concat([id]).concat(mates);
-    markDirty(); renderRank(); renderAdd(); setView('rank'); return; }
+    markDirty(); renderRank(); renderAdd(); setView('rank'); if(RQ) setTimeout(nextRQ,0); return; }
   // The search runs over ROWS, not positions (2026-09-25). A family of eight
   // Boomerangs is eight positions but one row, and searching positions landed
   // on it again and again — "Boomerangs" three times in one placing, each a
@@ -1967,6 +1981,7 @@ function stepHH(){
     var at = hh.lo<hh.B.length ? hh.B[hh.lo] : ORDER.length;
     ORDER.splice.apply(ORDER,[at,0,hh.id].concat(hh.mates||[]));
     closeHH(); markDirty(); renderRank(); renderAdd(); setView('rank');
+    if(RQ) setTimeout(nextRQ,0);
     return;
   }
   var pos=hh.B[mid];                // mid is a row; pos is where it starts
@@ -1995,7 +2010,7 @@ function stepHH(){
     +(hh.g ? ' ('+n+' rides, as one)' : '')+' — every pick narrows it to one exact spot.';
   $('hh_a').innerHTML='<b>'+esc(aName)+'</b><span>'+esc(aSub)+'</span>';
   $('hh_b').innerHTML='<b>'+esc(bName)+'</b><span>'+esc(bSub)+'</span>';
-  $('hh_prog').textContent='Pick '+(hh.asked+1)+' · '
+  $('hh_prog').textContent=(RQ?'Coaster '+RQ.done+' of '+RQ.total+' · ':'')+'Pick '+(hh.asked+1)+' · '
     +(confirming?'confirming against your #':'against your #')+(pos+1);
   $('hh_a').onclick=function(){ answerHH(mid,true); };   // candidate is better
   $('hh_b').onclick=function(){ answerHH(mid,false); };  // candidate is worse
@@ -2008,6 +2023,41 @@ function answerHH(mid,better){
   stepHH();
 }
 function closeHH(){ hh=null; $('hh').style.display='none'; }
+
+// ---- Rank more (Carter, 2026-09-27) ------------------------------------------
+// Ranking kept getting called hidden: to rank anything you had to find Edit,
+// then Add coasters, then pick one. "Rank 5 more" takes your five tallest
+// unranked credits and runs each through the same head-to-head, one after the
+// other, then saves. A ride whose category is already in the list folds in
+// without a question (openHH does that), so it costs nothing.
+var RQ=null;          // {ids:[...], done, total} while a batch is running
+function unranked(){
+  var inList={}; ORDER.forEach(function(id){ inList[KEY(id)]=1; });
+  return MINE.filter(function(id){ return !inList[KEY(id)]; })
+    .sort(function(a,b){ var x=BYID[a]||{}, y=BYID[b]||{};
+      return (y.h||0)-(x.h||0) || String(x.name).localeCompare(String(y.name)); });
+}
+function moreButton(){
+  var b=$('rankmore'); if(!b) return;
+  var n=CANEDIT ? unranked().length : 0;
+  b.hidden = !n || !ORDER.length;
+  b.textContent = 'Rank more';
+  b.title = 'Place your next '+Math.min(5,n)+' unranked credits, two at a time ('+n+' left)';
+}
+function rankMore(n){
+  var ids=unranked().slice(0,n); if(!ids.length) return;
+  $('edit').onclick && $('edit').onclick();
+  setView('rank');
+  RQ={ids:ids, done:0, total:ids.length};
+  nextRQ();
+}
+function nextRQ(){
+  if(!RQ) return;
+  var id=RQ.ids.shift();
+  if(id==null){ RQ=null; if(dirty) save(); return; }
+  RQ.done++;
+  openHH(id);
+}
 
 // ------------------------------------------------------------------ save ----
 // Still no password — see RANKINGS_NEED_TOKEN in worker.js. Ranking is the part
@@ -2040,6 +2090,7 @@ function savePrefs(){
 }
 
 function doneEditing(){
+  RQ=null;
   $('mine').classList.add('readonly');
   $('hero_p').textContent='Judgment-free zone.';
   closeHH();

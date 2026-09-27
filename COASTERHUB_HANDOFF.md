@@ -4586,3 +4586,15 @@ sign-up lands, and wants the homepage to send people to sign-up itself):
   fully set up they won't need to use those regularly"*. No buttons, no banners.
 - **Homepage (signed out):** "Create account" is now "Start your count" (still
   `/account?tab=up`), with one line under it on what happens next.
+
+## Rank more (2026-09-27)
+
+Suggestion 1 of the four. On a rider's own /rankings, a **Rank more** button beside
+Edit takes their five tallest unranked credits (one per ride, `KEY`) and runs each
+through the existing head-to-head (`openHH`) back to back — the dialog says "Coaster
+2 of 5" — then saves. Cancel stops the batch and saves what was placed. A ride whose
+category is already ranked folds in with no question. The empty list's **Start
+ranking** now does the same with ten, like /welcome. The button hides when nothing
+is unranked or the list is empty (the empty state has its own button). On phones
+the bar drops its spacer and empty status so Categories · Rank more · Edit fit one
+line at 390px (it wraps at 360, acceptably).
