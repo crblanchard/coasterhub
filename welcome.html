@@ -327,11 +327,17 @@ function vParks(){
 // "Defunct/relocated" rather than "closed" (Carter, 2026-09-27). A row that is
 // the OLD home of a ride that moved says Relocated; anything else closed says
 // Defunct.
+// A closed coaster shows when it ran, "1991–2016" (Carter, 2026-09-27: "show
+// closing dates here"); an open one just the year it opened.
+function years(c){
+  if(!c.closedYr) return c.yr ? String(c.yr) : '';
+  return (c.yr && String(c.yr)!==c.closedYr ? c.yr+'–' : c.yr ? '' : 'closed ')+c.closedYr;
+}
 function vCoasters(){
   var p=S.parks[S.pi];
   var open=p.coasters.filter(function(c){ return !c.gone && !c.moved; }), gone=p.coasters.filter(function(c){ return c.gone || c.moved; });
   var row=function(c){ return '<button type="button" class="item'+(S.ridden[c.id]?' on':'')+(c.gone||c.moved?' gone':'')+'" data-c="'+c.id+'"><span class="tick"></span>'
-      +'<span class="tx"><b>'+esc(c.name)+'</b><span>'+esc([c.model, c.h?c.h+' ft':'', c.yr||''].filter(Boolean).join(' · '))+'</span></span>'
+      +'<span class="tx"><b>'+esc(c.name)+'</b><span>'+esc([c.model, c.h?c.h+' ft':'', years(c)].filter(Boolean).join(' · '))+'</span></span>'
       +(c.moved?'<span class="tag">Relocated</span>':c.gone?'<span class="tag">Defunct</span>':'')+'</button>'; };
   var last = S.pi===S.parks.length-1;
   $('view').innerHTML =
@@ -480,7 +486,7 @@ Promise.all([
   (list.coasters||[]).forEach(function(c){
     var m=pmeta[c.park]||{};
     var p=byName[c.park] || (byName[c.park]={name:c.park, region:m.region||'', lat:typeof m.lat==='number'?m.lat:null, lon:typeof m.lon==='number'?m.lon:null, coasters:[], riders:0});
-    var o={ id:c.id, name:c.name, park:p, h:c.h, yr:c.yr, model:c.model, gone:!!c.closed,
+    var o={ id:c.id, name:c.name, park:p, h:c.h, yr:c.yr, model:c.model, gone:!!c.closed, closedYr:c.closed?String(c.closed).slice(0,4):'',
             key:CoasterHub.rideKey(c), moved:!!(c.same && c.same!==c.id) };
     p.coasters.push(o); CO.push(o); BYID[c.id]=o;
   });
