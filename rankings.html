@@ -221,6 +221,24 @@
           text-transform:uppercase;letter-spacing:.09em}
   .addrow.grp{background:var(--tint);border-color:var(--accent2)}
   .addrow .cnt{color:var(--accent2);font-weight:800;font-size:.8rem;margin-left:7px}
+  /* No `font` shorthand: it would reset the pill's size and weight (CLAUDE.md). */
+  button.catpill{font-family:inherit;cursor:pointer;color:var(--fg)}
+  #mine:not(.readonly) #mfbtn{display:none}
+  .mfpanel{flex:0 0 100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:2px}
+  .mfpanel[hidden]{display:none}
+  .mfpanel input{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
+  .mflist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 14px;max-height:280px;overflow-y:auto;margin-top:8px}
+  .mflist label{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.9rem;cursor:pointer;min-width:0}
+  .mflist label input{width:17px;height:17px;flex:none;accent-color:var(--accent2)}
+  .mflist label span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mflist label i{font-style:normal;color:var(--muted);font-size:.8rem;margin-left:auto;flex:none}
+  .mfacts{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+  /* A shorter header (Carter, 2026-09-27: "way too big ... make the text one
+     line if applicable and cut on dead space above and below my name"). IDs,
+     so they beat style.css's .hero h1 / .hero p without touching other pages. */
+  #hero_h1{max-width:none;font-size:clamp(1.9rem,4.2vw,2.8rem);margin-top:2px}
+  #hero_p{margin:6px 0 14px}
+  .mfnote{color:var(--muted);font-size:.86rem;margin:0 0 6px}
   .catpill{display:inline-flex;align-items:center;gap:8px;background:var(--panel);
            border:1px solid var(--line);border-radius:99px;padding:7px 14px;margin:0;
            color:var(--fg);font-size:.85rem;font-weight:600;text-decoration:none}
@@ -457,9 +475,9 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero" style="--hero-t:56px;--hero-b:22px"><div class="container">
+<section class="hero" style="--hero-t:26px;--hero-b:18px"><div class="container">
   <span class="badge" id="hero_badge">Rankings</span>
-  <h1 style="max-width:20ch" id="hero_h1" data-loading>Loading&hellip;</h1>
+  <h1 id="hero_h1" data-loading>Loading&hellip;</h1>
   <p id="hero_p">Not tallest or fastest — best.</p>
   <!-- Mine | Global (2026-09-25). Signed in only; filled below. -->
   <div class="segsw" id="mineglobal" hidden><a id="sw_mine">Mine</a><a id="sw_all" href="/rankings">Global</a></div>
@@ -501,6 +519,14 @@
            word of explanation behind it. In the bar beside Edit rather than a
            row of its own (Carter, 2026-09-25: "not staggered vertically"). It shows for everybody, because it is
            the only way anyone finds out the feature is there. -->
+      <!-- Filter the list to one or more models (Carter, 2026-09-27: "a model
+           filter where you can search or check from a list ... all the rmc
+           hybrids i've been on"). Read-only view only: dragging needs the
+           whole list, so Edit clears it. -->
+      <button class="catpill" id="mfbtn" type="button" aria-expanded="false" aria-controls="mfpanel">Models<span class="n" id="mfn"></span>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+          stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m6 9 6 6 6-6"/></svg></button>
       <a class="catpill" id="catpill" href="/categories">Categories
         <span class="n" id="catn"></span>
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
@@ -510,6 +536,11 @@
       <span class="status" id="status"></span>
       <button class="ghost" id="rankmore" hidden>Rank more</button>
       <button class="ghost" id="edit" hidden>Edit</button>
+      <div class="mfpanel" id="mfpanel" hidden>
+        <input type="search" id="mfq" placeholder="Search models&hellip;" autocomplete="off" aria-label="Search models">
+        <div class="mflist" id="mflist"></div>
+        <div class="mfacts"><button type="button" class="ghost" id="mfclear">Clear</button><button type="button" class="ghost" id="mfdone">Done</button></div>
+      </div>
       <button class="primary" id="save">Save</button>
     </div>
 
@@ -828,6 +859,8 @@ if(!slug){
         rankMore(ask.length, ask);
       }
       edit.onclick = function(){
+        // The model filter is a reading tool; dragging needs every row.
+        if(Object.keys(MSEL).length){ MSEL={}; $('mfpanel').hidden=true; mfDraw(); }
         $('mine').classList.remove('readonly');
         // The read-only line, plus the one thing edit mode has to say: that
         // the list is draggable.
@@ -859,7 +892,7 @@ if(!slug){
     document.title=nm+'’s Rankings — Coaster Hub';
 
     $('loading').style.display='none'; $('mine').style.display='block';
-    wire(); renderRank(); renderAdd(); loadGlobal();
+    wire(); mfWire(); renderRank(); renderAdd(); loadGlobal();
     // And again once everything is drawn: whichever of these two runs last is
     // the one that finds both the categories and the ownership in place.
     maybeOfferJoins();
@@ -974,12 +1007,42 @@ function statsFor(id){
   return '<div class="rstats">'+CoasterHub.coasterFacts(c, extra,
     c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'', among)+'</div>';
 }
+// ---- model filter ------------------------------------------------------------
+// Which models to show (maker() — the model, or the maker when there is none).
+// Empty = everything. Rows keep their real numbers; a category row stays when
+// any ride in it matches.
+var MSEL={};
+function mfOn(){ return Object.keys(MSEL).length>0 && $('mine').classList.contains('readonly'); }
+function mfMatch(b){ return b.ids.some(function(id){ return MSEL[CoasterHub.maker(BYID[id]||{})]; }); }
+function mfDraw(){
+  var q=($('mfq').value||'').trim().toLowerCase(), n={}, seen={};
+  ORDER.forEach(function(id){ var k=KEY(id); if(seen[k]) return; seen[k]=1; var m=CoasterHub.maker(BYID[id]||{}); if(m) n[m]=(n[m]||0)+1; });
+  var names=Object.keys(n).filter(function(m){ return !q || m.toLowerCase().indexOf(q)>=0; })
+    .sort(function(a,b){ return (MSEL[b]?1:0)-(MSEL[a]?1:0) || n[b]-n[a] || a.localeCompare(b); });
+  $('mflist').innerHTML=names.map(function(m){
+    return '<label><input type="checkbox" data-m="'+esc(m)+'"'+(MSEL[m]?' checked':'')+'><span>'+esc(m)+'</span><i>'+n[m]+'</i></label>';
+  }).join('') || '<p class="mfnote" style="margin:6px 0">No model called that in this list.</p>';
+  var k=Object.keys(MSEL).length;
+  $('mfn').textContent = k ? String(k) : '';
+}
+function mfWire(){
+  $('mfbtn').onclick=function(){ var p=$('mfpanel'); p.hidden=!p.hidden; this.setAttribute('aria-expanded',String(!p.hidden)); if(!p.hidden){ mfDraw(); $('mfq').focus(); } };
+  $('mfq').addEventListener('input', mfDraw);
+  $('mflist').addEventListener('change', function(e){ var m=e.target.getAttribute('data-m'); if(m==null) return;
+    if(e.target.checked) MSEL[m]=1; else delete MSEL[m]; mfDraw(); renderRank(); });
+  $('mfclear').onclick=function(){ MSEL={}; $('mfq').value=''; mfDraw(); renderRank(); };
+  $('mfdone').onclick=function(){ $('mfpanel').hidden=true; $('mfbtn').setAttribute('aria-expanded','false'); };
+}
+
 function renderRank(){
   moreButton();
   var el=$('ranklist');
   $('rank_empty').style.display=ORDER.length?'none':'block';
-  var bs=blocks();
-  el.innerHTML=bs.map(function(b,i){
+  var bs=blocks(), mf=mfOn();
+  var note = mf ? '<p class="mfnote">Showing '+bs.filter(mfMatch).reduce(function(t,b){ return t+b.ids.filter(function(id){ return MSEL[CoasterHub.maker(BYID[id]||{})]; }).length; },0)
+    +' of your '+Object.keys(MSEL).map(esc).join(', ')+' &middot; <a href="#" id="mfoff" style="color:var(--accent2)">show all</a></p>' : '';
+  el.innerHTML=note+bs.map(function(b,i){
+    if(mf && !mfMatch(b)) return '';
     var one=BYID[b.ids[0]]||{};
     // A racing pair reads as ONE coaster (Carter, 2026-09-25: "appear as one,
     // not as a category, but keep the two numbers"): the ride's name, its park
@@ -1072,6 +1135,7 @@ function renderRank(){
         +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
       +'</span>'+members+(b.g?'':statsFor(b.ids[0]))+'</div>';
   }).join('');
+  if($('mfoff')) $('mfoff').onclick=function(e){ e.preventDefault(); MSEL={}; mfDraw(); renderRank(); };
   // Read-only only: in edit mode a tap on a row is the start of a drag.
   el.querySelectorAll('[data-stat]').forEach(function(r){
     r.addEventListener('click', function(ev){

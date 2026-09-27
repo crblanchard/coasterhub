@@ -4853,3 +4853,15 @@ browser per page load.
   same `years()`).
 - Migration 025 confirmed live (all 48 now Wood); the Sync action was started from
   here via the GitHub connector (`sync-static.yml`, ref main).
+
+## Rankings: Models filter; a shorter header (2026-09-27)
+
+- **Models** pill left of Categories (read-only view): search box + checklist of the
+  models in the list with counts (maker(), one per ride), multi-select. Checked models
+  show only matching rows with their REAL positions ("Showing 12 of your RMC Hybrid ·
+  show all"); a category row stays when any member matches. Edit clears it — dragging
+  needs every row. `button.catpill` uses font-family only; `font:inherit` (shorthand)
+  had reset the pill's size and weight.
+- Header: `--hero-t 26px / --hero-b 18px`, `#hero_h1` one line where it fits
+  (clamp 1.9–2.8rem, no max-width), `#hero_p` 6px/14px margins. 540px → 245px tall on
+  a computer. Other pages keep the big hero until Carter says otherwise.
