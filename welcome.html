@@ -266,7 +266,7 @@ function miles(p){
   return m<10 ? m.toFixed(1) : Math.round(m).toLocaleString();
 }
 function nearest(){
-  return PARKS.filter(function(p){ return p.lat!=null; }).map(function(p){ return {p:p, m:+String(miles(p)).replace(/,/g,'')}; })
+  return PARKS.filter(function(p){ return p.lat!=null && (!ADD || S.visited || !p.have); }).map(function(p){ return {p:p, m:+String(miles(p)).replace(/,/g,'')}; })
     .sort(function(a,b){ return a.m-b.m; }).slice(0,20).map(function(x){ return x.p; });
 }
 function vParks(){
@@ -279,6 +279,10 @@ function vParks(){
    +'<button type="button" class="locbtn'+(S.near?' on':'')+'" id="nearbtn">Near me</button>'
    +'<button type="button" class="locbtn" id="locbtn" aria-expanded="false">Locations</button></div>'
    +'<p class="small muted" id="nearmsg" style="margin:8px 0 0" hidden></p>'
+   // Adding to a count, the parks you have been to are hidden by default
+   // (Carter, 2026-09-27: "sort to only parks you haven't visited ... a check
+   // box at the top to include parks i've visited but it defaults to off").
+   +(ADD?'<label class="lrow" style="margin-top:12px"><input type="checkbox" id="visited"'+(S.visited?' checked':'')+'><span>Include parks I&rsquo;ve been to</span></label>':'')
    +'<div class="locpanel" id="locpanel" hidden></div>'
    +'<div class="chips" id="picked"></div>'
    +'<div class="sechead"><h2 id="ph"></h2></div>'
@@ -296,16 +300,18 @@ function vParks(){
   }
   function draw(){
     var q=$('pq').value.trim().toLowerCase();
-    var regs=Object.keys(S.regions), inReg=function(p){ return !regs.length || S.regions[p.region]; };
+    var regs=Object.keys(S.regions), inReg=function(p){ return (!regs.length || S.regions[p.region]) && (!ADD || S.visited || !p.have); };
     var rows = q ? PARKS.filter(function(p){ return inReg(p) && (p.name+' '+p.region).toLowerCase().indexOf(q)>=0; }).slice(0,40)
              : regs.length ? PARKS.filter(inReg)
              : S.near ? nearest()
+             : ADD && !S.visited ? PARKS.filter(inReg).sort(function(a,b){ return b.riders-a.riders || b.coasters.length-a.coasters.length; }).slice(0,16)
              : POPULAR;
     $('locbtn').textContent = regs.length ? 'Locations · '+regs.length : 'Locations';
     $('locbtn').classList.toggle('on', regs.length>0);
     $('ph').textContent = q ? (rows.length?'Matching parks':'')
       : regs.length ? plural(rows.length,'park')+' in '+(regs.length===1?regionLabel(regs[0]):plural(regs.length,'location'))
       : S.near ? 'Nearest to you'
+      : ADD && !S.visited ? 'Popular parks you haven’t been to'
       : 'Popular with Coaster Hub riders';
     $('plist').innerHTML = rows.map(parkRow).join('') || '<div class="empty">No park called that yet. Try part of the name, or the city.</div>';
     $('picked').innerHTML = S.parks.map(function(p){ return '<button type="button" class="chip" data-x="'+p.i+'">'+esc(p.name)+' <i>&times;</i></button>'; }).join('');
@@ -313,6 +319,7 @@ function vParks(){
     $('pnext').textContent = S.parks.length ? 'Next: check coasters at '+plural(S.parks.length,'park') : 'Pick at least one park';
   }
   $('pq').addEventListener('input',draw);
+  if($('visited')) $('visited').addEventListener('change',function(){ S.visited=this.checked; draw(); });
   // Near me (Carter, 2026-09-27): the phone's location, once, then the parks
   // sorted by distance. Asked only when pressed; a refusal says so and the
   // list stays as it was.
