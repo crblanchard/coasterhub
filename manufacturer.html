@@ -42,6 +42,13 @@
   details.mdl summary .ct b{color:var(--accent2)}
   details.mdl[open] summary{border-bottom:1px solid var(--soft)}
   details.mdl:target{border-color:var(--accent2)}
+  /* One list, not a card per model (Carter, 2026-09-27): the models share a
+     panel and a hairline between them. */
+  .mlist details.mdl{border:0;border-radius:0;margin:0;border-bottom:1px solid var(--soft);background:none}
+  .mlist details.mdl:last-child{border-bottom:0}
+  .mlist details.mdl summary{padding:10px 16px}
+  .mlist details.mdl:target > summary{background:var(--soft)}
+  .mlist details.mdl[open] > summary .nm{color:var(--accent2)}
   /* Opened from a #model link: clear of the sticky header. */
   details.mdl{scroll-margin-top:84px}
 
@@ -69,6 +76,8 @@
   a.crow .two{display:flex;flex-direction:column;min-width:0}
   a.crow .two .pk{font-size:.78rem}
   a.crow{align-items:center}
+  a.crow.mk .yrs{color:var(--muted)}
+  a.crow.mk.open{background:var(--soft)}
   @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
 </style>
 </head>
@@ -193,15 +202,17 @@ Promise.all([CoasterHub.fetchCoasters(), mine, CoasterHub.fetchParks().catch(fun
   one(name, BY[name], MINE);
 }).catch(fail);
 
-// Every maker, most coasters first, with how many models and how many are
-// still running. A search box, because there are a hundred-odd of them.
+// Every maker, A–Z (Carter, 2026-09-27), each row saying how many of its
+// coasters still run and how many are gone. A tap opens the maker's numbers in
+// place, the way a coaster row opens its stats; the name goes to its page.
 function index(BY, MINE){
   var list=Object.keys(BY).map(function(m){
     var cs=BY[m], models={};
-    cs.forEach(function(c){ if(c.model) models[c.model]=1; });
-    return { name:m, n:cs.length, open:cs.filter(function(c){ return !c.closed; }).length,
-             models:Object.keys(models).length, got:MINE ? cs.filter(function(c){ return MINE[c.id]; }).length : null };
-  }).sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); });
+    cs.forEach(function(c){ if(c.model) models[c.model]=(models[c.model]||0)+1; });
+    return { name:m, cs:cs, n:cs.length, open:cs.filter(function(c){ return !c.closed; }).length,
+             models:models, nm:Object.keys(models).length, got:MINE ? cs.filter(function(c){ return MINE[c.id]; }).length : null };
+  }).sort(function(a,b){ return a.name.localeCompare(b.name, undefined, {sensitivity:'base'}); });
+  var BYN={}; list.forEach(function(m){ BYN[m.name]=m; });
   document.querySelector('.hero h1').textContent='Manufacturers';
   $('hero_sub').textContent=list.length+' manufacturers built the coasters on the site.';
   document.title='Manufacturers — Coaster Hub';
@@ -211,11 +222,40 @@ function index(BY, MINE){
   function draw(){
     var q=$('find').value.trim().toLowerCase();
     $('mlist').innerHTML=list.filter(function(m){ return !q || m.name.toLowerCase().indexOf(q)>=0; }).map(function(m){
-      return '<a class="crow" href="'+esc(CoasterHub.makerHref(m.name))+'"><span class="cn">'+esc(m.name)+'</span>'
-        +'<span class="pk">'+m.models+' model'+(m.models===1?'':'s')+' · '+m.open+' operating</span>'
-        +'<span class="yrs">'+(m.got!=null ? m.got+' of ' : '')+m.n+' coaster'+(m.n===1?'':'s')+'</span></a>';
+      return '<a class="crow mk" data-mk="'+esc(m.name)+'" href="'+esc(CoasterHub.makerHref(m.name))+'">'
+        +'<span class="two"><span class="cn">'+esc(m.name)+'</span><span class="pk">'+m.nm+' model'+(m.nm===1?'':'s')+'</span></span>'
+        +'<span class="yrs">'+m.open+' operating / '+(m.n-m.open)+' defunct</span></a>';
     }).join('') || '<div style="padding:16px;color:var(--muted)">No manufacturer by that name.</div>';
   }
+  function facts(m){
+    var E=esc, info=[], nums=[], mine=[];
+    function kv(t,v,l){ t.push('<div class="kv"><span>'+E(l)+'</span><b>'+v+'</b></div>'); }
+    var top=Object.keys(m.models).sort(function(a,b){ return m.models[b]-m.models[a] || a.localeCompare(b); }).slice(0,3);
+    top.forEach(function(mo,i){ kv(info,'<a href="'+E(CoasterHub.makerHref(m.name, mo))+'">'+E(mo)+'</a> <i style="font-style:normal;color:var(--muted);font-size:.85em">'+m.models[mo]+'</i>', i ? '' : 'Top models'); });
+    kv(info, E(years(m.cs)||'—'), 'Years built');
+    kv(nums, m.n, 'Coasters'); kv(nums, m.open, 'Operating'); kv(nums, m.n-m.open, 'Defunct'); kv(nums, m.nm, 'Models');
+    if(m.got!=null) kv(mine, m.got+' of '+m.n, 'You\u2019ve ridden');
+    return '<div class="facts"><div class="fcol">'+info.join('')+'</div><div class="fcol fnum">'+nums.join('')+'</div>'
+      +(mine.length?'<div class="fme">'+mine.join('')+'</div>':'')
+      +'<div class="fgo"><a class="go" href="'+E(CoasterHub.makerHref(m.name))+'">Manufacturer page &rarr;</a></div></div>';
+  }
+  // Clicks inside an open panel are app.js's (openableCoasters on #body):
+  // links go, anywhere else closes it. This handles the rows themselves.
+  $('mlist').addEventListener('click', function(e){
+    if(e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    if(e.target.closest('.cx')) return;
+    var row=e.target.closest('a.mk'); if(!row) return;
+    var nx=row.nextElementSibling, isOpen=!!(nx && nx.classList.contains('cx'));
+    if(isOpen && e.target.closest('.cn')) return;
+    e.preventDefault();
+    Array.prototype.forEach.call($('mlist').querySelectorAll('.cx'), function(o){
+      var pr=o.previousElementSibling; if(pr) pr.classList.remove('open'); o.parentNode.removeChild(o);
+    });
+    if(isOpen) return;
+    var m=BYN[row.getAttribute('data-mk')]; if(!m) return;
+    var box=document.createElement('div'); box.className='cx'; box.innerHTML=facts(m);
+    row.classList.add('open'); row.parentNode.insertBefore(box, row.nextSibling);
+  });
   $('find').addEventListener('input', draw);
   draw();
 }
@@ -238,7 +278,7 @@ function one(name, cs, MINE){
   $('tiles').innerHTML=tile(cs.length,'Coasters')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
     +tile(models.filter(Boolean).length,'Models');
   RANK_CS=cs; RANK_MODEL=false;
-  $('body').innerHTML='<div id="ranked"></div><div class="sect">Models</div>'+models.map(function(mo){
+  $('body').innerHTML='<div id="ranked"></div><div class="sect">Models</div><div class="panel mlist">'+models.map(function(mo){
     var list=byModel[mo].slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
     var g=MINE ? list.filter(function(c){ return MINE[c.id]; }).length : null;
     return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
@@ -248,7 +288,7 @@ function one(name, cs, MINE){
       +'<span class="ct">'+list.length+'</span></summary>'
       +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">The '+esc(mo)+' page, with its specs &rarr;</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
-  }).join('');
+  }).join('')+'</div>';
   drawRanked();
   // A link to one model (/manufacturer/intamin#accelerator-coaster) opens it.
   if(location.hash){

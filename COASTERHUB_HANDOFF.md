@@ -4925,3 +4925,11 @@ under the hero. Every footer ends "… · Map · Sitemap".
 Also: **American spelling in anything a rider reads** ("Favorites", not "Favourites").
 A sweep found no other visible British spellings; the comments still have some, which
 don't matter.
+
+Carter, 2026-09-27, /manufacturers: **A–Z** (was biggest first), each row "N operating /
+N defunct" with its model count under the name. A tap opens the maker's numbers in place
+(top three models, years built, coasters/operating/defunct/models, you've ridden, and
+"Manufacturer page →"), one open at a time; the name on an open row goes to the page.
+The row handler is in `index()`; clicks inside the open panel are left to
+`openableCoasters` on `#body`, which closes it. On one maker's page the models are **one
+list** (`.panel.mlist`, hairlines between) instead of a card per model.
