@@ -281,6 +281,7 @@ function dur(s){
 // stores 1995-06-01 to mean "sometime in 1995", and printing that as a day
 // would be inventing a fact.
 function fullDate(d,prec,fallbackYear){
+  if(d && prec==='month' && /^\d{4}-\d{2}/.test(String(d))) return CoasterHub.monthYear(d);   // Jul 2014
   if(!d || prec!=='day') return fallbackYear;
   var p=String(d).split('-'); if(p.length!==3) return fallbackYear;
   var dt=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));

@@ -175,7 +175,7 @@
              so "1999" was silently dropped and nothing saved (Carter,
              2026-09-24). A year or a full date, stored the way /edit and
              migration 021 store them: '1999' with Prec 'year', or the day. -->
-        <div class="fld date"><label for="c_opened">Opened</label><input id="c_opened" type="text" inputmode="numeric" placeholder="1999 or 1999-06-01" autocomplete="off"></div>
+        <div class="fld date"><label for="c_opened">Opened</label><input id="c_opened" type="text" inputmode="numeric" placeholder="1999, 1999-06 or 1999-06-01" autocomplete="off"></div>
         <div class="fld date"><label for="c_closed">Closed</label><input id="c_closed" type="text" inputmode="numeric" placeholder="year or date" autocomplete="off"><small class="opt">Blank if still operating</small></div>
       </div>
       <div class="dupe" id="c_dupe"></div>
@@ -468,18 +468,19 @@ function saveCoaster(){
   if(checkCoaster()) return void($('c_msg').className='msg bad',
     $('c_msg').textContent='That looks like a duplicate — see above.');
 
-  // A year (1999) or a full date (1999-06-01); anything else is refused with
+  // A year (1999), a month (1999-06) or a full date (1999-06-01); anything else is refused with
   // a message rather than dropped.
   function when(id){
     var v=$(id).value.trim();
     if(!v) return {v:null, prec:null};
     if(/^\d{4}$/.test(v)) return {v:v, prec:'year'};
+    if(/^\d{4}-(0[1-9]|1[0-2])$/.test(v)) return {v:v, prec:'month'};
     if(/^\d{4}-\d{2}-\d{2}$/.test(v)) return {v:v, prec:'day'};
     return {bad:true};
   }
   var o=when('c_opened'), cz=when('c_closed');
   if(o.bad||cz.bad) return void($('c_msg').className='msg bad',
-    $('c_msg').textContent='Dates are a year (1999) or a full date (1999-06-01).');
+    $('c_msg').textContent='Dates are a year (1999), a month (1999-06) or a full date (1999-06-01).');
   var opened=o.v, closed=cz.v;
   // Compared by what both sides know: the year if either is only a year.
   var byYear = o.prec==='year' || cz.prec==='year';

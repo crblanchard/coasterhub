@@ -4785,3 +4785,12 @@ nothing was ridden on it either the section is hidden. Map 520 → 420px tall.
 - Carter liked the profile's number CARDS after all ("like to see the stats
   separated"): they are back, tighter (12px radius, 12/14 padding, 1.6rem number, 10px
   gap; 8px two-up on a phone). Records stay as rows.
+
+## Month-only dates (2026-09-27)
+
+Carter: *"make me be able to add opening month if day isnt known"*. A third precision,
+**'month'**: /edit and /add accept `YYYY-MM` (month 01-12) for Opened and Closed and
+store `openedPrec`/`closedPrec = 'month'`; the Worker stores the precision it is sent,
+so no migration. Shown as "Jul 2019" — `CoasterHub.monthYear()` in app.js, used by
+coasterFacts' `when()` and coaster.html's `fullDate()`. Everything that only wants a
+year still reads the first four characters; On this day still needs 'day'.

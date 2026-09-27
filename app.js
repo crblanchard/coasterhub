@@ -645,6 +645,11 @@
   function locationHref(region) { return "/location/" + slugify(region); }
   // A date as Carter reads one: 7/24/2021 (2026-09-25: "make dates show as
   // m/d/yyyy"). A bare year stays a year; anything else comes back as it was.
+  // "Jul 2014" for a date known only to the month (openedPrec 'month').
+  function monthYear(d) {
+    var p = String(d).split("-");
+    return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][(+p[1] || 1) - 1] + " " + p[0];
+  }
   function mdy(d) {
     var m = String(d == null ? "" : d).match(/^(\d{4})-(\d{2})-(\d{2})/);
     return m ? (+m[2]) + "/" + (+m[3]) + "/" + m[1] : String(d == null ? "" : d);
@@ -1424,7 +1429,11 @@
     // left group, then the right, then the link.
     var info = [], nums = [], mine = [], E = searchEsc;
     function kv(t, v, label) { t.push('<div class="kv"><span>' + E(label) + '</span><b>' + v + '</b></div>'); }
-    function when(v, prec) { return (prec === "day" && /^\d{4}-\d{2}-\d{2}/.test(String(v))) ? mdy(v) : String(v).slice(0, 4); }
+    function when(v, prec) {
+      if (prec === "day" && /^\d{4}-\d{2}-\d{2}/.test(String(v))) return mdy(v);
+      if (prec === "month" && /^\d{4}-\d{2}/.test(String(v))) return monthYear(v);
+      return String(v).slice(0, 4);
+    }
     if (c.type) kv(info, '<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
     var amg = function (t) { return t ? '<i class="among">' + E(t) + '</i>' : ''; };
     if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
@@ -1803,7 +1812,7 @@
 
   var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
-              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, coasterHref: coasterHref,
+              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,

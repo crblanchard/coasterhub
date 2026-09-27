@@ -273,7 +273,7 @@
     // rows that carry both it has never once disagreed with `opened`, so it is
     // a second place to type the same fact and a second place to get it wrong.
     // readForm() derives it from Opened, the way /add already does.
-    ["opened","Opened (year or YYYY-MM-DD)","text"], ["closed","Closed (year or YYYY-MM-DD)","text"]
+    ["opened","Opened (year, YYYY-MM or YYYY-MM-DD)","text"], ["closed","Closed (year, YYYY-MM or YYYY-MM-DD)","text"]
   ];
   function fieldKind(k){ for (var i=0;i<FIELDS.length;i++) if (FIELDS[i][0]===k) return FIELDS[i][2]; return "text"; }
   // The specs a coaster row is expected to carry. Everything else (model, maker,
@@ -2019,8 +2019,10 @@
     var was = state.byId[state.sel] || {};
     ["opened","closed"].forEach(function(k){
       var v = body[k];
-      if (v != null && !/^\d{4}(-\d{2}-\d{2})?$/.test(v)) body.bad = "Dates are a year (1999) or a full date (1999-06-01).";
-      if (v !== (was[k] == null ? null : String(was[k]))) body[k+"Prec"] = v == null ? null : (v.length === 4 ? "year" : "day");
+      // A month with no day (Carter, 2026-09-27: "make me be able to add
+      // opening month if day isnt known") is its own precision, 'month'.
+      if (v != null && !/^\d{4}(-(0[1-9]|1[0-2])(-\d{2})?)?$/.test(v)) body.bad = "Dates are a year (1999), a month (1999-06) or a full date (1999-06-01).";
+      if (v !== (was[k] == null ? null : String(was[k]))) body[k+"Prec"] = v == null ? null : (v.length === 4 ? "year" : v.length === 7 ? "month" : "day");
     });
     return body;
   }
