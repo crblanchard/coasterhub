@@ -1413,7 +1413,10 @@
 
   // One coaster's facts as label / value rows — the park page's open row and
   // a ranking's tapped row. `extra` rows (the reader's own) go last.
-  function coasterFacts(c, extra, link) {
+  // `among` (optional): { manu: "3 of 12", model: "1 of 4" } — where the coaster
+  // sits among the reader's own ranked rides by that maker and of that model,
+  // shown small and grey before the value (Carter, 2026-09-27).
+  function coasterFacts(c, extra, link, among) {
     // Two groups (Carter, 2026-09-25): what it IS on the left — type, maker,
     // model, dates — and its numbers on the right, with the reader's own rows
     // under the numbers. `link` (e.g. "Coaster page →") sits under the left
@@ -1423,8 +1426,9 @@
     function kv(t, v, label) { t.push('<div class="kv"><span>' + E(label) + '</span><b>' + v + '</b></div>'); }
     function when(v, prec) { return (prec === "day" && /^\d{4}-\d{2}-\d{2}/.test(String(v))) ? mdy(v) : String(v).slice(0, 4); }
     if (c.type) kv(info, '<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
-    if (c.manu) kv(info, '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
-    if (c.model) kv(info, c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model), "Model");
+    var amg = function (t) { return t ? '<i class="among">' + E(t) + '</i>' : ''; };
+    if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
+    if (c.model) kv(info, amg(among && among.model) + (c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model)), "Model");
     if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), "Opened"); else if (c.yr) kv(info, E(c.yr), "Opened");
     if (c.closed) kv(info, E(when(c.closed, c.closedPrec)), "Closed");
     if (c.h != null) kv(nums, Math.round(c.h), "Height (ft)");

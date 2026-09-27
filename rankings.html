@@ -128,6 +128,7 @@
   .rrow .rstats{flex:0 0 100%;min-width:0;margin:7px 0 1px;padding-top:6px;border-top:1px solid var(--line)}
   #mine:not(.readonly) .rrow .rstats{display:none}
   .rstats a.go{color:var(--accent2);text-decoration:none}
+  .rstats .among{font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px}
   .rstats .go{display:inline-block;margin-top:6px;font-size:.84rem;font-weight:600}
   .rrow .mrow{display:flex;align-items:center;gap:9px;padding:4px 0}
   .rrow .mrow .mp{color:var(--accent2);font-weight:700;font-size:.75rem;
@@ -961,9 +962,18 @@ function statsFor(id){
   // something that says 'global ranking: ' with the number").
   var g=GLOBAL && GLOBAL.by[KEY(id)];
   var extra=[[ g ? '#'+g.pos+' of '+GLOBAL.of : (GLOBAL ? 'Not on 2+ lists yet' : '&hellip;'), 'Global ranking' ]];
-  // The same facts the park page opens to (CoasterHub.coasterFacts).
+  // The same facts the park page opens to (CoasterHub.coasterFacts), with where
+  // it sits among this list's rides by the same maker and of the same model
+  // ("1 of 10") — counted one per ride, in list order.
+  var mi=0, mn=0, di=0, dn=0, seen={};
+  ORDER.forEach(function(x){
+    var k=KEY(x), o=BYID[x]; if(seen[k] || !o) return; seen[k]=1;
+    if(c.manu && o.manu===c.manu){ mn++; if(k===KEY(id)) mi=mn; }
+    if(c.model && o.model===c.model && o.manu===c.manu){ dn++; if(k===KEY(id)) di=dn; }
+  });
+  var among={ manu: mi ? mi+' of '+mn : '', model: di ? di+' of '+dn : '' };
   return '<div class="rstats">'+CoasterHub.coasterFacts(c, extra,
-    c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>';
+    c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'', among)+'</div>';
 }
 function renderRank(){
   moreButton();

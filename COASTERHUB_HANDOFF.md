@@ -4742,3 +4742,13 @@ background/theme colour is the light ground. The CSS is untouched (dark under ba
 `:root`, light under `[data-theme="light"]`), so a page is dark only when someone
 chose dark — the toggle has always stored both answers. Riders who never touched the
 toggle move from dark to light.
+
+## "1 of 9" beside maker and model (2026-09-27)
+
+Carter: *"small grey text next to manufacturer and model that says 1 of 10 ... to show
+where it ranks in your S&S's and your 4D's specific to your list."* An opened row on
+/rankings shows, before the Manufacturer and Model values, where the ride sits among
+that list's rides by the same maker / of the same model (maker+model must both match),
+counted one per ride key in list order. `coasterFacts(c, extra, link, among)` in app.js
+takes it as an optional fourth argument ({manu, model} strings, class `among`); other
+callers pass nothing and are unchanged.
