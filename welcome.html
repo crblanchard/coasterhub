@@ -466,7 +466,7 @@ function vDone(){
    +(S.ranked.length?'<div class="sechead"><h2>Your top '+Math.min(10,S.ranked.length)+'</h2></div><ol class="rank">'
       +S.ranked.slice(0,10).map(function(c){ return '<li><b>'+esc(c.name)+'</b><span>'+esc(c.park.name)+'</span></li>'; }).join('')+'</ol>':'')
    +'<div class="sechead"><h2>What&rsquo;s next</h2></div><div class="next">'
-   +link(H('profile'),'Your profile','Your count, top ten and recent visits &mdash; what friends see.')
+   +link(H('profile'),'Your profile','Your count, top ten, and recent visits.')
    +link(H('rankings'),'Add to your rankings',rest>0?plural(rest,'credit')+' still to rank, a few at a time.':'Reorder your list any time.')
    +link('/install','Add to Home Screen','Opens full-screen with its own icon, like an app.')
    +'</div>'
