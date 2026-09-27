@@ -4762,3 +4762,14 @@ callers pass nothing and are unchanged.
   on the right in the accent (Carter: "model is more prominent"); row 2: park · location
   side by side on the left (location gets its " · " from CSS), status on the right where
   the location used to be. Two lines instead of three. The chevron still sits top right.
+
+## Profile below the top ten, tightened (2026-09-27)
+
+Carter: "make changes you like". The headline numbers are one strip with hairlines
+between (no tile boxes; 2-up on a phone); "Total rides" is REMOVED rather than hidden
+when it doesn't apply, because a hidden tile still took a slot in the phone grid.
+Records are rows (label · name · value), two columns filled down on a computer; the
+On-this-day lists reuse that row. When nothing opened or closed on the date, On this
+day collapses to one line ("On this day: … 22 rides on September 27 …"), and when
+nothing was ridden on it either the section is hidden. Map 520 → 420px tall.
+/rankings' Global master list rows centre vertically against their two-line right side.

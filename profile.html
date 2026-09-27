@@ -26,9 +26,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-top:8px}
-  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
-  .kpi .num{font-size:2rem;font-weight:800;letter-spacing:-.02em;line-height:1}
+  /* The headline numbers as one strip, not five boxes (2026-09-27, "make
+     changes you like" after the top ten lost its cards): hairlines between. */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;margin-top:4px}
+  .kpi{padding:4px 22px}
+  .kpi:first-child{padding-left:0}
+  .kpi + .kpi{border-left:1px solid var(--line)}
+  .kpi .num{font-size:1.8rem;font-weight:800;letter-spacing:-.02em;line-height:1}
   .kpi .lbl{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin-top:8px}
   .kpi .sub{color:var(--accent2);font-size:.78rem;margin-top:6px}
   /* A standing note about a rider's own data — something known to be missing or
@@ -43,7 +47,11 @@
   .panel .cap{color:var(--muted);font-size:.82rem;margin-bottom:16px}
   .panel.wide{grid-column:1/-1}
   .cwrap{position:relative;height:300px}
-  .records{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:8px}
+  /* Records as rows, like the top ten: what, which, how much. Two columns on a
+     computer, filled down. */
+  .records{display:grid;grid-template-columns:1fr;margin-top:6px}
+  @media (min-width:641px){ .records{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:column;
+    grid-template-rows:repeat(var(--rows,3),auto);column-gap:32px} }
   /* The top ten as the same rows as /rankings (Carter, 2026-09-27: "make
      /profile show as A also not B so it can be clickable"): a line between
      rows, no box; wider than a phone one line with the model on the right, on
@@ -76,12 +84,16 @@
   .toplink{color:inherit;text-decoration:none}
   .toplink:hover{color:var(--accent2)}
   .toplink .arw{color:var(--accent2);font-weight:400;margin-left:8px;font-size:.8em}
-  .rec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-  .rec .tag{color:var(--accent2);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
-  .rec .rname{font-weight:700;font-size:1.05rem;margin:8px 0 2px}
-  .rec .rval{color:var(--accent);font-weight:800;font-size:1.3rem}
-  .rec .rval span{color:var(--muted);font-weight:600;font-size:.8rem}
-  #map{height:520px;border-radius:14px;z-index:1}
+  .rec{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line);min-width:0}
+  .rec .tag{flex:none;width:9.2em;white-space:nowrap;color:var(--accent2);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+  .rec .rname{flex:1;min-width:0;font-weight:600;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rec .rval{flex:none;color:var(--fg);font-weight:800;font-size:.95rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .rec .rval span{color:var(--muted);font-weight:600;font-size:.78rem}
+  /* On this day, when nothing opened or closed that date: one line, no heading. */
+  #content #sec_otd.quiet{padding:4px 0 18px}
+  #sec_otd.quiet h2{display:none}
+  #sec_otd.quiet .note{margin:0}
+  #map{height:420px;border-radius:14px;z-index:1}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
   .leaflet-popup-content{margin:12px 14px}
   .pp b{font-size:1rem}.pp small{color:var(--muted)}
@@ -149,7 +161,10 @@
     body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
     /* Two up, not "as many as fit": at 320px auto-fit drops to one column and
        five tiles become five screens. */
-    .kpis{grid-template-columns:1fr 1fr}
+    .kpis{grid-template-columns:1fr 1fr;row-gap:16px}
+    .kpi{padding:2px 14px}
+    .kpi + .kpi{border-left:0}
+    .kpi:nth-child(odd){padding-left:0}
     /* Close the gaps. On a phone the hero is five short blocks stacked — name,
        bio, follows, account buttons, numbers — and the desktop spacing between
        them added up to most of a screen of nothing. */
@@ -836,9 +851,11 @@ function render(s){
 
   // Total Rides tile only when ride counts are known AND mean something.
   if(showRides){
-    document.getElementById('k_rides').textContent=nf(k.rides);
+    if(document.getElementById('k_rides')) document.getElementById('k_rides').textContent=nf(k.rides);
   } else {
-    document.getElementById('kpi_rides').style.display='none';
+    // Removed, not hidden: a hidden tile still counts in the phone's two-up
+    // grid and pushed the second row's first tile off the left edge.
+    if(document.getElementById('kpi_rides')) document.getElementById('kpi_rides').remove();
   }
 
   // Distance tile: total (with re-rides) when counts exist, else unique track.
@@ -862,7 +879,9 @@ function render(s){
   const R=s.records;
   const order=[['tallest','Tallest'],['fastest','Fastest'],['longest','Longest'],['oldest','Oldest'],['most_ridden','Most Ridden'],['most_visited_park','Most Visited']];
   const fmt=v=>typeof v==='number'?(Number.isInteger(v)?v.toLocaleString():v.toLocaleString(undefined,{maximumFractionDigits:1})):v;
-  document.getElementById('records').innerHTML=order.map(([key,label])=>{const r=R[key];if(!r)return'';return '<div class="rec"><div class="tag">'+label+'</div><div class="rname">'+r.name+'</div><div class="rval">'+fmt(r.val)+' <span>'+r.unit+'</span></div></div>';}).join('');
+  const recs=order.filter(([key])=>R[key]);
+  document.getElementById('records').style.setProperty('--rows', Math.ceil(recs.length/2));
+  document.getElementById('records').innerHTML=recs.map(([key,label])=>{const r=R[key];return '<div class="rec"><span class="tag">'+label+'</span><span class="rname">'+r.name+'</span><span class="rval">'+fmt(r.val)+' <span>'+r.unit+'</span></span></div>';}).join('');
 
   // On This Day
   (function(){
@@ -873,8 +892,8 @@ function render(s){
     // not in the title (Carter's copy pass, 2026-09-17).
     var cy=now.getFullYear();
     function otdCards(list,key,label){
-      return '<div class="records">'+list.map(function(c){var y=c[key].slice(0,4);var age=cy-parseInt(y,10);
-        return '<div class="rec"><div class="tag">'+label+' '+y+'</div><div class="rname">'+c.name+'</div><div class="rval" style="font-size:.92rem;color:var(--muted);font-weight:600">'+c.park+' · '+age+' yrs ago</div></div>';}).join('')+'</div>';
+      return '<div class="records" style="--rows:'+Math.ceil(list.length/2)+'">'+list.map(function(c){var y=c[key].slice(0,4);var age=cy-parseInt(y,10);
+        return '<div class="rec"><span class="tag">'+label+' '+y+'</span><span class="rname">'+c.name+'</span><span class="rval" style="color:var(--muted);font-weight:600">'+c.park+' · '+age+' yrs ago</span></div>';}).join('')+'</div>';
     }
     var opened=(s.coasters||[]).filter(function(c){return s.byCoaster[c.id]&&c.opened&&c.openedPrec==='day'&&c.opened.slice(5)===mmdd;}).sort(function(a,b){return a.opened.localeCompare(b.opened);});
     var closed=(s.coasters||[]).filter(function(c){return s.byCoaster[c.id]&&c.closed&&c.closedPrec==='day'&&c.closed.slice(5)===mmdd;}).sort(function(a,b){return a.closed.localeCompare(b.closed);});
@@ -891,14 +910,17 @@ function render(s){
     var html='';
     if(opened.length){ html+='<div class="cap" style="margin-bottom:12px">Opened on '+dayLabel+':</div>'+otdCards(opened,'opened','Opened'); }
     if(closed.length){ html+='<div class="cap" style="margin:'+(opened.length?'24px':'0')+' 0 12px">Closed on '+dayLabel+':</div>'+otdCards(closed,'closed','Closed'); }
-    if(!opened.length&&!closed.length){ html+='<p class="lead">Nothing in '+who+' count opened or closed on '+dayLabel+'.</p>'; }
+    var quiet=!opened.length&&!closed.length;
+    document.getElementById('sec_otd').classList.toggle('quiet', quiet);
     if(rode.length){
       var subj=mine?'I':esc(s.userName);
       var phrase=has.activity
         ? (mine?'I have':subj+' has')+' taken <b style="color:var(--accent2)">'+rode.length+'</b> ride'+(rode.length>1?'s':'')
         : subj+' first rode <b style="color:var(--accent2)">'+rode.length+'</b> coaster'+(rode.length>1?'s':'');
-      html+='<p class="note" style="margin-top:16px">'+phrase+' on '+dayLabel+' over the years ('+rodeYears.join(', ')+').</p>';
+      html+='<p class="note"'+(quiet?'':' style="margin-top:16px"')+'>'+(quiet?'<b>On this day:</b> ':'')+phrase+' on '+dayLabel+' over the years ('+rodeYears.join(', ')+').</p>';
     }
+    // Nothing opened, closed or ridden on this date: the section says nothing.
+    if(quiet && !rode.length) document.getElementById('sec_otd').style.display='none';
     document.getElementById('otd').innerHTML=html;
   })();
 
