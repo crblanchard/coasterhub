@@ -4691,3 +4691,16 @@ admin one. `tokenOk()` stays in the Worker: with the secret unset it returns fal
 for everything, and the local harness and test-rides-api still use a test password
 through it. Anything in this file that says "curl with x-admin-token" no longer works
 live — sign in as an admin in the browser and use a console `fetch` instead.
+
+## Ranked lists without cards (2026-09-27)
+
+Carter: the top ten "use[s] a lot of dead space"; shown three mockups (artifact
+Rp9PAkoucspTC5r5rx79uY), he picked **B for the profile, A for /rankings**.
+- Profile top ten: plain rows with a line between, name over "park · model" (region
+  dropped here), and on screens over 640px two columns filled DOWN (1-5 left, 6-10
+  right) via `grid-auto-flow:column` and a `--rows` of half the list.
+- /rankings (your list, edit mode included, and the shared rows): no boxes, a line
+  between rows. Over 560px one line — name, park · region, model pushed right; on a
+  phone two lines, name over park · region · model with an ellipsis. Categories keep
+  their tint so a family still reads as one. The overrides sit at the END of
+  rankings.html's style block on purpose, one for one against the card rules.

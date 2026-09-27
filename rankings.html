@@ -399,6 +399,32 @@
     .rrow .nm{flex:1 1 6em}
     .rrow .acts button{width:26px;height:26px}
   }
+  /* Rows, not cards (Carter, 2026-09-27, option A of three: the ranked list
+     "use[s] a lot of dead space"). Same idea as the profile's Recent visits: a
+     line between rows and no box. Wider than a phone it is one line — name,
+     park, and the model on the right; on a phone, name over park · model.
+     Categories keep their tint so a folded family still reads as one. Last in
+     the sheet on purpose: these override the card rules above, one for one. */
+  .rank,.shared{gap:0}
+  .rrow,.srow{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0}
+  .rrow{padding:7px 4px}
+  .rrow.over{box-shadow:inset 0 2px 0 var(--accent2)}
+  .rrow.grp{background:var(--tint);border-radius:8px;border-bottom-color:transparent;margin:2px 0}
+  .stog{padding:8px 4px}
+  @media (min-width:561px){
+    .rrow .nm,.srow .n{display:flex;align-items:baseline;gap:10px}
+    .rrow .nm b,.srow .n b{flex:0 1 auto;min-width:0}
+    .rrow .nm .sub,.srow .n .sub{flex:1 1 0;min-width:0;display:flex;gap:10px;font-size:.8rem}
+    .rrow .nm .sub .pl,.srow .n .sub .pl{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rrow .nm .sub .mk,.srow .n .sub .mk{margin-left:auto;flex:none;white-space:nowrap}
+    .rrow .nm .mk::before,.srow .n .mk::before{content:none}
+  }
+  /* A phone: two lines, not three — park and model share the second one. */
+  @media (max-width:560px){
+    .rrow .nm .sub,.srow .n .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .rrow .nm .pl,.rrow .nm .mk,.srow .n .pl,.srow .n .mk{display:inline}
+    .rrow .nm .mk::before,.srow .n .mk::before{content:" · "}
+  }
 </style>
 </head>
 <body>
