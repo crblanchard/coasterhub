@@ -57,7 +57,7 @@
   /* Someone else's list: just the ranking, read-only. Hide the controls rather
      than disable them — a greyed drag handle still invites a drag — and say
      nothing about it. The heading already names whose list this is. */
-  #mine.readonly .grip,#mine.readonly .acts,#mine.readonly #save,
+  #mine.readonly .grip,#mine.readonly .acts,#mine.readonly #save,#mine.readonly #cancel,
   #mine.readonly #v_add,#mine.readonly #pane_add,#mine.readonly .seg{display:none}
   /* A category still OPENS while the list is read-only — looking at what is
      inside one is reading, not editing. What goes is everything that changes
@@ -539,6 +539,7 @@
         <div class="mflist" id="mflist"></div>
         <div class="mfacts"><button type="button" class="ghost" id="mfclear">Clear</button><button type="button" class="ghost" id="mfdone">Done</button></div>
       </div>
+      <button class="ghost" id="cancel" type="button">Cancel</button>
       <button class="primary" id="save">Save</button>
     </div>
 
@@ -858,6 +859,7 @@ if(!slug){
         rankMore(ask.length, ask);
       }
       edit.onclick = function(){
+        snapEdit();
         $('mine').classList.remove('readonly');
         // The read-only line, plus the one thing edit mode has to say: that
         // the list is draggable.
@@ -925,6 +927,7 @@ function wire(){
   // Save is also how you leave edit mode (Carter, 2026-09-25: "I can't click
   // save to exit update mode, it says saved already"). Nothing to save: just
   // leave. Something to save: leave once it has saved, stay if it failed.
+  $('cancel').onclick=function(){ closeHH(); RQ=null; cancelEdit(); };
   $('save').onclick=function(){ if(dirty||prefsDirty) save(doneEditing); else doneEditing(); };
   // Cancel stops a Rank-more batch too, keeping what it had already placed.
   $('hh_cancel').onclick=function(){
@@ -2315,6 +2318,21 @@ function savePrefs(){
     .catch(function(){ return false; });
 }
 
+// Cancel (Carter, 2026-09-27: "even in normal edit we don't have cancel"):
+// back to the list as it was when Edit was pressed — or as last saved, if a
+// save happened since (Rank more saves at the end of its run) — and out of
+// edit mode. Category changes made while editing go back too.
+var SNAP=null;
+function snapEdit(){ SNAP={ order:ORDER.slice(), cats:JSON.stringify(CATS) }; }
+function cancelEdit(){
+  if(SNAP){
+    ORDER=SNAP.order.slice();
+    CATS=JSON.parse(SNAP.cats); buildClone();
+  }
+  dirty=false; prefsDirty=false;
+  $('status').className='status'; $('status').textContent='';
+  doneEditing(); renderRank(); renderAdd(); setView('rank');
+}
 function doneEditing(){
   RQ=null;
   $('mine').classList.add('readonly');
@@ -2337,6 +2355,7 @@ function save(then){
       // DRAWN, so a failure here is worth a line and never worth losing the
       // save that already worked.
       if (prefsDirty) savePrefs();
+      snapEdit();                       // Cancel now goes back to this
       $('status').className='status ok';
       // Ranking something you had not logged adds it to your count, so say so
       // rather than letting the number move silently on another page.

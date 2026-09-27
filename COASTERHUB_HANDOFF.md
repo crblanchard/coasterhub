@@ -4889,3 +4889,12 @@ the ride it moved past; Cancel re-inserts it where it was (`hh.restore`). Catego
 do not move while filtered.
 The filter line reads "Showing 12 of your credits · B&M Inverts, RMC Hybrids" — models
 A–Z, always plural.
+
+## Cancel in rankings edit mode (2026-09-27)
+
+Carter: "even in normal edit we don't have cancel we should add that". A **Cancel**
+button sits left of Save while editing (hidden read-only, like Save). `snapEdit()` copies
+ORDER and CATS when Edit is pressed and again after every successful save (Rank more
+saves when its run ends), so Cancel = discard unsaved changes: ORDER and categories go
+back, `buildClone()`, dirty/prefsDirty cleared, edit mode left. It also closes an open
+head-to-head and stops a Rank more batch.
