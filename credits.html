@@ -127,6 +127,8 @@
   .day .inner .parklink a:hover{text-decoration:underline}
   #c_body td a{color:inherit;text-decoration:none}
   #c_body td a:hover{color:var(--accent2);text-decoration:underline}
+  /* The shared facts panel keeps its links blue, as on every other page. */
+  #c_body tr.cx a{color:var(--accent2)}
   /* A relocated ride's other park, under the one the row names. */
   #c_body .also{display:block;font-size:.78rem;color:var(--muted);white-space:normal}
   /* The park list is a LIST, not a stack of cards. 247 of them is a long scroll
@@ -204,12 +206,6 @@
   /* A row's detail line: the columns the table no longer spends width on.
      A real <tr> with a colspan rather than a CSS trick, because anything that
      re-flows one row of a table takes its column alignment with it. */
-  tr.det{display:none}
-  tr.det.on{display:table-row}
-  tr.det td{padding:0 12px 14px;border-bottom:1px solid var(--soft);white-space:normal}
-  tr.det .dl{display:flex;flex-wrap:wrap;gap:8px 28px}
-  tr.det .dl div{font-size:.82rem;color:var(--fg)}
-  tr.det .dl b{color:var(--muted);font-weight:600;margin-right:7px}
   @media (min-width:681px){
     /* Fourteen columns of nowrap measured 2,315px inside a 1,030px page, so
        Height, Speed and Rides sat off the right-hand edge and reading one
@@ -239,11 +235,6 @@
       width:6px;height:6px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
       transform:rotate(45deg);transition:transform .15s}
     #c_body tr.open td[data-k=status]::after{transform:rotate(-135deg);top:18px}
-  }
-  @media (max-width:680px){
-    /* The card layout already shows everything; the detail row would be a
-       second copy of it. */
-    #c_body tr.det{display:none}
   }
   @media (max-width:680px){
     /* Denser day cards. Three stacked lines at 14px of padding measured 110px
@@ -334,16 +325,14 @@
     /* Status is excluded too now: it is pinned top right whether the row is
        open or shut, so repeating it as a labelled line below would be saying
        the same thing twice. */
-    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmodel){
-      display:flex;grid-column:1/-1;justify-content:space-between;align-items:baseline;gap:14px;
-      text-align:left;font-size:.78rem;color:var(--fg);padding:4px 0 0;white-space:normal}
-    #c_body tr.open td:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmodel)::before{
-      content:attr(data-label);color:var(--muted);flex:none}
+    /* An opened row shows the shared facts panel (a tr.cx after it). */
+    #c_body tr.cx{display:block;padding:0 2px 10px;border-bottom:1px solid var(--line)}
+    #c_body tr.cx > td{display:block;padding:4px 0 0}
+    #c_body tr.cx .cxin{width:auto !important}
     #c_body td.muted[data-k=park],#c_body td.muted[data-k=loc]{color:var(--muted)}
     /* An opened card leaves out the lines with nothing on file rather than
        listing em-dashes (Carter, 2026-09-25: "hide rows that don't have
        data"). One .muted more specific than the rule above, so it wins. */
-    #c_body tr.open td.muted:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmodel){display:none}
   }
   /* An empty count, your own: where to start (see emptyCount). */
   .startcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:6px 0 0}
@@ -1198,25 +1187,7 @@ var CreditList=(function(){
     // The card rule (Carter, 2026-09-25): a closed row opens on ANY tap, its
     // name and park links included; open, those links go, and a tap anywhere
     // else — the detail row included — closes it.
-    $('c_body').addEventListener('click',function(e){
-      var tr=e.target.closest('tr'); if(!tr) return;
-      var a=e.target.closest('a');
-      if(tr.classList.contains('det')){
-        if(a) return;
-        var up=tr.previousElementSibling; tr.classList.remove('on'); if(up) up.classList.remove('open');
-        return;
-      }
-      var phone=window.matchMedia('(max-width:680px)').matches;
-      var det=tr.nextElementSibling, hasDet=!!(det && det.classList.contains('det'));
-      if(!phone && !hasDet) return;          // nothing to open: links just work
-      var open=tr.classList.contains('open');
-      if(a){ if(open) return; e.preventDefault(); }
-      // One open at a time (2026-09-27): opening a row closes whichever was.
-      if(!open) Array.prototype.forEach.call($('c_body').querySelectorAll('tr.open'), function(o){
-        o.classList.remove('open'); var dd=o.nextElementSibling; if(dd && dd.classList.contains('det')) dd.classList.remove('on'); });
-      tr.classList.toggle('open');
-      if(hasDet && !phone) det.classList.toggle('on');
-    });
+    CoasterHub.openableCoasters($('c_body'));
     $('c_sort').addEventListener('change',function(){
       var p=$('c_sort').value.split('|'); sortKey=p[0]; sortDir=+p[1]; draw();
     });
@@ -1297,24 +1268,10 @@ var CreditList=(function(){
       // 2026-09-20 is that under a name and a park the useful third line is
       // what the thing IS. maker() is the model, falling back to the
       // manufacturer for a row that has no model on file.
-      // And the line behind the chevron: the measurements the desktop table
-      // stopped spending width on. Empty values are left out rather than
-      // printed as em-dashes — a detail line of dashes is worse than a short
-      // one. A row with nothing to add gets no detail row at all, and its
-      // chevron does nothing, which is why `det` is checked before it is
-      // written.
-      var det = COLS.filter(function(col){ return DESK_HIDE.indexOf(col.k) >= 0; })
-        .map(function(col){
-          var v = c[col.k];
-          if (v == null || v === '') return '';
-          if (col.k === 'type') return '<div><b>'+esc(col.t)+'</b><span class="pill '
-            + (v === 'Wood' ? 'wood' : 'steel') + '">' + esc(v) + '</span></div>';
-          return '<div><b>'+esc(col.t)+'</b>'+esc(v)+'</div>';
-        }).join('');
-      return '<tr>'+cells
-        +'<td class="cmodel" data-k="_model">'+esc(CoasterHub.maker(c))+'</td></tr>'
-        + (det ? '<tr class="det"><td colspan="'+(COLS.length+1)+'">'
-                 + '<div class="dl">'+det+'</div></td></tr>' : '');
+      // Opens to the same facts panel as every other coaster list
+      // (CoasterHub.openableCoasters, 2026-09-27) — not a table of its own.
+      return '<tr data-cid="'+c.id+'">'+cells
+        +'<td class="cmodel" data-k="_model">'+esc(CoasterHub.maker(c))+'</td></tr>';
     }).join('');
   }
   return {open:open};

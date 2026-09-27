@@ -4837,3 +4837,19 @@ browser per page load.
 - Park pages' opened coaster: "Your ranking #78 of 236" instead of "Your rides", plus the
   grey maker/model counts (`CoasterHub.amongIn(order, byId, c)`, now shared; the grey
   style is inline in coasterFacts so it works on every page).
+
+## One opened-coaster panel everywhere; model page tweaks (2026-09-27)
+
+- Carter: "make this on every page you see coasters ... for consistency". app.js
+  `openableCoasters` now shows **Your ranking** (not Your rides), **First ridden**, and
+  the grey maker/model counts from the reader's ranking (`amongIn`). The profile still
+  passes its own counts and `noRank`.
+- /credits' Coasters table dropped its own detail row (`tr.det`, the desktop "dl" of
+  hidden columns, and the phone's labelled reveal lines) and uses `openableCoasters`
+  too: rows carry `data-cid`, the panel is a `tr.cx`; phone CSS styles `tr.cx`.
+- Model page: the you-line reads "You've ridden N · best ranked #9 of 236"; no
+  "(5 of 9 known)" after spec ranges; Years built is open-ended ("2011–") when the
+  newest is from the last three years or still to come (also on manufacturer pages,
+  same `years()`).
+- Migration 025 confirmed live (all 48 now Wood); the Sync action was started from
+  here via the GitHub connector (`sync-static.yml`, ref main).

@@ -1529,7 +1529,11 @@
         // parked in the handoff's Possible future updates). Your ranking only.
         var rk = cs.filter(function (c) { return y.rank[c.id]; })
           .map(function (c) { return y.rank[c.id]; }).sort(function (a, b) { return a - b; });
-        if (rk.length) bits.push("You have ranked <b>" + rk.length + "</b> \u00b7 best <b>#" + rk[0] + "</b> of " + y.ranked);
+        // Led by how many you have ridden (Carter, 2026-09-27: "make the first one
+        // say 'you've ridden'"), then your best-placed one.
+        var rode = cs.filter(function (c) { return y.rides[c.id]; }).length;
+        if (rode) bits.push("You&rsquo;ve ridden <b>" + rode + "</b>");
+        if (rk.length) bits.push("best ranked <b>#" + rk[0] + "</b> of " + y.ranked);
       }
       if (!bits.length) { el.hidden = true; return; }
       el.className = "youline";
@@ -1647,12 +1651,23 @@
         var c = null, cs = (r[0] && r[0].coasters) || [], y = r[1], extra = [];
         for (var i = 0; i < cs.length; i++) if (cs[i].id === id) { c = cs[i]; break; }
         if (!c) { inner.innerHTML = '<p class="facts none">Not found.</p>'; return; }
-        var m = y && y.rides[id];
-        if (m) { extra.push([m.n, "Your rides"]); if (m.first) extra.push([mdy(m.first), "First ridden"]); }
-        if (y && y.rank[id] && !opts.noRank) extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your rank"]);
+        // The same lines everywhere a coaster opens (Carter, 2026-09-27: "make
+        // this on every page you see coasters ... for consistency"): your
+        // ranking rather than your ride count, first ridden, and the grey
+        // maker/model counts from your ranking. The profile passes its own
+        // (the list on screen is the profile owner's) and no "Your ranking".
+        var m = y && y.rides[id], among = opts.among ? opts.among(c) : null;
+        if (y && y.rank[id] && !opts.noRank) {
+          extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your ranking"]);
+          if (!among) {
+            var byId = {}; cs.forEach(function (o) { byId[o.id] = o; });
+            var order = Object.keys(y.rank).map(Number).sort(function (a, b) { return y.rank[a] - y.rank[b]; });
+            among = amongIn(order, byId, c);
+          }
+        }
+        if (m && m.first) extra.push([mdy(m.first), "First ridden"]);
         inner.innerHTML = coasterFacts(c, extra,
-          '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>',
-          opts.among ? opts.among(c) : null);
+          '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>', among);
       });
     });
   }

@@ -279,7 +279,8 @@ function model(maker, mo, cs, MINE){
     var v=cs.map(function(c){ return c[key]; }).filter(function(x){ return x!=null && x!==''; }).map(Number);
     if(!v.length) return null;
     var lo=Math.min.apply(null,v), hi=Math.max.apply(null,v), f=function(x){ return round ? Math.round(x).toLocaleString() : String(x); };
-    return (lo===hi ? f(lo) : f(lo)+'–'+f(hi))+(unit?' '+unit:'')+(v.length<cs.length ? ' <small>('+v.length+' of '+cs.length+' known)</small>' : '');
+    // No "(5 of 9 known)" (Carter, 2026-09-27: "hide amount known").
+    return (lo===hi ? f(lo) : f(lo)+'–'+f(hi))+(unit?' '+unit:'');
   }
   var types={}; cs.forEach(function(c){ if(c.type) types[c.type]=1; });
   var specs=[['Height',spread('h','ft',true)],['Speed',spread('s','mph',true)],['Length',spread('l','ft',true)],
@@ -307,6 +308,9 @@ function years(cs){
   var y=cs.map(function(c){ return c.opened?Number(String(c.opened).slice(0,4)):(c.yr?Number(c.yr):null); }).filter(Boolean);
   if(!y.length) return '';
   var lo=Math.min.apply(null,y), hi=Math.max.apply(null,y);
+  // Built within the last three years (or due to open): still in production,
+  // so the range stays open — "2011–" (Carter, 2026-09-27).
+  if(hi>=new Date().getFullYear()-3) return lo+'–';
   return lo===hi ? String(lo) : lo+'–'+hi;
 }
 function crow(c, MINE){
