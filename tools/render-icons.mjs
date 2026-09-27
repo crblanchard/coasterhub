@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* Rebuild the icon rasters from the mark's geometry, so they can never drift
  * from mark.svg. Writes favicon-16.png, favicon-32.png, apple-touch-icon.png,
+ * icon-192.png, icon-512.png,
  * and recomposites the tile in og-image.png (only the tile — see below).
  *
  *   npm i --no-save playwright-core && node tools/render-icons.mjs
@@ -47,6 +48,11 @@ await shot(icon({ size: 32 }), 32, 32, "favicon-32.png");
 await shot(icon({ size: 16, small: true }), 16, 16, "favicon-16.png");
 // iOS rounds the corners itself, so this one stays square edge-to-edge
 await shot(icon({ size: 180, rx: 0 }), 180, 180, "apple-touch-icon.png");
+// Home-screen icons for the web app manifest (site.webmanifest, 2026-09-27):
+// Android asks for 192 and 512. Rounded like the favicon — Android does not
+// round an "any" icon itself.
+await shot(icon({ size: 192 }), 192, 192, "icon-192.png");
+await shot(icon({ size: 512 }), 512, 512, "icon-512.png");
 
 // --- og-image: composite ---------------------------------------------------
 // The card is redrawn ON TOP OF ITSELF: the tile, and the tagline under the
