@@ -176,11 +176,8 @@
 <body>
   <div class="card" id="gate">
     <h1>Coaster Hub — Editor</h1>
-    <p class="sub">Admin only. Enter the password to continue.</p>
-    <div style="margin-top:16px"><label for="pw">Admin password</label>
-      <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••"></div>
-    <div style="margin-top:14px"><button id="go" style="width:100%">Unlock</button></div>
-    <div class="msg" id="msg"></div>
+    <p class="sub" id="gate_sub">Admin only. Sign in with an admin account to continue.</p>
+    <div style="margin-top:16px"><a id="go" href="/account?next=/edit" style="display:block;text-align:center;text-decoration:none;font-size:.9rem;font-weight:600;border-radius:8px;background:var(--btn-bg);color:var(--btn-fg);padding:9px 13px">Sign in</a></div>
     <div style="margin-top:14px;display:flex;justify-content:flex-end"><button class="themetoggle" type="button" data-el="theme" aria-label="Switch theme" title="Switch theme"></button></div>
   </div>
 
@@ -328,25 +325,8 @@
   }
 
   // ---------- login ----------
-  var pw=document.getElementById('pw'), msg=document.getElementById('msg');
-  function showMsg(t,c){ msg.textContent=t; msg.className="msg "+(c||""); }
-  async function unlock(){
-    var p = pw.value; if(!p){ showMsg("Enter a password.","bad"); return; }
-    showMsg("Checking…");
-    try {
-      var r = await fetch('/api/admin/login',{ method:"POST", headers:{ "x-admin-token": p } });
-      if (r.ok){
-        TOKEN = p; try{ sessionStorage.setItem('ch_admin', p); }catch(e){}
-        document.getElementById('gate').style.display="none";
-        document.getElementById('app').style.display="block";
-        boot();
-      } else if (r.status===401){ showMsg("Incorrect password — or ADMIN_PASSWORD isn’t set on the Worker yet.","bad"); }
-      else { showMsg("Unexpected response ("+r.status+").","bad"); }
-    } catch(e){ showMsg("Network error: "+e.message,"bad"); }
-  }
-  document.getElementById('go').addEventListener('click', unlock);
-  pw.addEventListener('keydown', function(e){ if(e.key==="Enter") unlock(); });
-  try { var saved=sessionStorage.getItem('ch_admin'); if(saved){ pw.value=saved; } } catch(e){}
+  // Accounts only (2026-09-27): the admin password is gone. Signed in but not
+  // an admin, the gate says so rather than offering a sign-in you already did.
 
   // An admin ACCOUNT gets in without the password. This page does not load
   // app.js (it is standalone on purpose), so it asks the API directly rather
@@ -355,12 +335,16 @@
   fetch('/api/auth/me',{credentials:'same-origin'})
     .then(function(r){ return r.ok ? r.json() : {account:null}; })
     .then(function(d){
+      if (d && d.account && !d.account.admin){
+        document.getElementById('gate_sub').textContent = "Admin only. You're signed in as @" + d.account.slug + ", which isn't an admin account.";
+        document.getElementById('go').style.display = "none";
+      }
       if (!(d && d.account && d.account.admin)) return;
       document.getElementById('gate').style.display = "none";
       document.getElementById('app').style.display = "block";
       boot();
     })
-    .catch(function(){ /* offline: the password gate is still there */ });
+    .catch(function(){ /* offline: the gate stays */ });
 
   // ---------- boot ----------
   function distinct(key){

@@ -4680,3 +4680,14 @@ and Log a day, but on the bottom bar: *"drop credits and rankings would make sen
 i feel like those need to be down there. thats why im hesitant ... it'll make it
 confusing to have two ways to get to all your own pages"*. Not built. If it comes back,
 the open question is exactly that: tabs only make sense if the bar stops duplicating them.
+
+## The admin password is gone (2026-09-27)
+
+Every rider has an account (checked live: no `users` row without one), so Carter
+deleted the **ADMIN_PASSWORD** secret from the Worker, and the password boxes came off
+/log, /import, /add and /edit. /edit's gate is now "Admin only. Sign in with an admin
+account" with a sign-in link, and a signed-in non-admin is told their account isn't an
+admin one. `tokenOk()` stays in the Worker: with the secret unset it returns false
+for everything, and the local harness and test-rides-api still use a test password
+through it. Anything in this file that says "curl with x-admin-token" no longer works
+live — sign in as an admin in the browser and use a console `fetch` instead.

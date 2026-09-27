@@ -260,13 +260,9 @@
 <!-- gate -->
 <div id="gate" class="gate">
   <h2>Sign in to log rides</h2>
-  <p>You must be logged in to log rides in the database.</p>
+  <p>Sign in to log rides to your count.</p>
   <a class="primary" id="gosignin" href="/account?next=/log"
      style="display:block;text-align:center;text-decoration:none;box-sizing:border-box">Sign in</a>
-  <p style="margin:16px 0 10px">Riders who haven&rsquo;t claimed an account yet can still use the
-     shared password.</p>
-  <input id="pw" type="password" placeholder="Shared password" autocomplete="current-password">
-  <button class="ghost" id="unlock" style="width:100%">Unlock</button>
   <div class="msg bad" id="gate_msg"></div>
 </div>
 
@@ -452,37 +448,14 @@ function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp
 function $(id){return document.getElementById(id);}
 
 // ---- gate ------------------------------------------------------------------
-// Two ways in, tried in this order:
-//   1. an account — the normal one now, and the only one that attributes the
-//      rides to a person rather than to whoever holds a password;
-//   2. the shared admin password, same pattern as /edit, so unlocking one
-//      unlocks the other. Still here for the riders who have not claimed an
-//      account yet, and it is what the park/coaster adders on this page need.
+// Signed in, or nothing. The shared password went on 2026-09-27 (Carter: "drop
+// it altogether") — every rider has an account now.
 var ME=null;
 CoasterHub.me().then(function(acct){
   ME=acct;
   if(acct){ $('gate').style.display='none'; $('app').style.display='block'; boot(); return; }
-  try{ TOKEN=sessionStorage.getItem('ch_admin')||''; }catch(e){}
-  if(TOKEN) verify(TOKEN,true);
 });
-$('unlock').onclick=function(){ verify($('pw').value,false); };
-$('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') verify($('pw').value,false); });
 
-function verify(pw,quiet){
-  if(!pw)return;
-  fetch('/api/admin/login',{method:'POST',headers:{'x-admin-token':pw}})
-    .then(function(r){
-      if(!r.ok) throw new Error('bad');
-      TOKEN=pw;
-      try{ sessionStorage.setItem('ch_admin',pw); }catch(e){}
-      $('gate').style.display='none'; $('app').style.display='block';
-      boot();
-    })
-    .catch(function(){
-      try{ sessionStorage.removeItem('ch_admin'); }catch(e){}
-      if(!quiet) $('gate_msg').textContent='Wrong password.';
-    });
-}
 
 // TOKEN is '' when you got in with an account: the session cookie authorizes the
 // request instead, and the Worker falls through to it when the header is empty.
