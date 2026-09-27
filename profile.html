@@ -44,15 +44,15 @@
   .panel.wide{grid-column:1/-1}
   .cwrap{position:relative;height:300px}
   .records{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:8px}
-  /* The top ten as plain rows, no cards (Carter, 2026-09-27, option B of three:
-     "a lot of dead space"). Two columns on a wide screen — 1-5 down the left,
-     6-10 down the right — and one column on a phone. Name over park · model. */
-  .toplist{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:1fr}
-  @media (min-width:641px){
-    .toplist{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:column;
-             grid-template-rows:repeat(var(--rows,5),auto);column-gap:32px}
-  }
-  .trow{display:flex;align-items:baseline;gap:12px;padding:8px 2px;border-bottom:1px solid var(--line);min-width:0}
+  /* The top ten as the same rows as /rankings (Carter, 2026-09-27: "make
+     /profile show as A also not B so it can be clickable"): a line between
+     rows, no box; wider than a phone one line with the model on the right, on
+     a phone name over park · model. A row opens in place to its facts
+     (CoasterHub.openableCoasters), which start under the name. */
+  .toplist{display:flex;flex-direction:column;margin-top:10px}
+  .trow{display:flex;align-items:center;gap:12px;padding:8px 4px;border-bottom:1px solid var(--line);
+        min-width:0;color:inherit;text-decoration:none;cursor:pointer}
+  .trow:hover,.trow.open{background:var(--soft)}
   .trow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);
              min-width:1.7em;text-align:right;flex:none;font-size:.95rem}
   .trow .n{flex:1;min-width:0}
@@ -61,6 +61,15 @@
   .trow .n .sub{display:block;color:var(--muted);font-size:.8rem;line-height:1.3;
                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .trow .n .mk::before{content:" · "}
+  @media (min-width:561px){
+    .trow .n{display:flex;align-items:baseline;gap:10px}
+    .trow .n b{flex:0 1 auto;min-width:0}
+    .trow .n .sub{flex:1 1 0;min-width:0;display:flex;gap:10px}
+    .trow .n .pl{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .trow .n .mk{margin-left:auto;flex:none;white-space:nowrap}
+    .trow .n .mk::before{content:none}
+  }
+  .toplist .cx{padding-left:calc(1.7em + 16px);border-bottom:1px solid var(--line)}
   /* The heading IS the link to the whole list. Underlined on hover only, so it
      reads as a heading first. */
   .toplink{color:inherit;text-decoration:none}
@@ -734,15 +743,14 @@ function render(s){
     h.innerHTML = (ten.length<10 ? ('Top '+ten.length) : 'Top ten')
       + '<span class="arw">' + (known.length>ten.length
           ? ('all '+nf(known.length)+' &rarr;') : 'the whole list &rarr;') + '</span>';
-    // Fill the left column first: half the rows, rounded up.
-    document.getElementById('toplist').style.setProperty('--rows', Math.ceil(ten.length/2));
     document.getElementById('toplist').innerHTML=ten.map(function(c,i){
-      return '<div class="trow"><span class="pos">'+(i+1)+'</span>'
+      return '<a class="trow" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="pos">'+(i+1)+'</span>'
         +'<span class="n"><b>'+esc(c.name)+'</b><span class="sub">'
-        +'<span class="pl">'+esc(c.park||'')+'</span>'
+        +'<span class="pl">'+esc(c.park||'')+(((s.parks||{})[c.park]||{}).region?' \u00b7 '+esc(s.parks[c.park].region):'')+'</span>'
         +(CoasterHub.maker(c)?'<span class="mk">'+esc(CoasterHub.maker(c))+'</span>':'')
-        +'</span></span></div>';
+        +'</span></span></a>';
     }).join('');
+    CoasterHub.openableCoasters(document.getElementById('toplist'));
     sec.style.display='';
   }
   // Recent visits: the newest five dated days, one line each — where, how many

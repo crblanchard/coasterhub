@@ -409,6 +409,11 @@
   .rrow,.srow{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0}
   .rrow{padding:7px 4px}
   .rrow.over{box-shadow:inset 0 2px 0 var(--accent2)}
+  /* An opened row's facts start under the coaster's name, not under its number
+     (Carter, 2026-09-27): the number column is 1.8em plus its 4px margin, the
+     9px gap and the 2px the read-only list gives it. The two fact columns then
+     split what is left. */
+  #mine.readonly .rrow .rstats{padding-left:calc(1.8em + 15px)}
   .rrow.grp{background:var(--tint);border-radius:8px;border-bottom-color:transparent;margin:2px 0}
   .stog{padding:8px 4px}
   @media (min-width:561px){
