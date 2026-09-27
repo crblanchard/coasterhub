@@ -3900,6 +3900,32 @@ half the time". Mine is `rankable()` now. **`tools/check-inline-js.mjs` fails a 
 declares the same column-0 function twice**, which is how this would have been caught before
 the push; it could not before, because it only parsed.
 
+## Direction, from an interview with Carter (2026-09-27)
+
+Read this before designing anything new. Carter's answers, in his words where he gave them:
+
+- **Audience: the wider coaster community**, not just the friend group. First impressions,
+  sign-up and "where do I start" matter.
+- **Priorities: logging and ranking — made easy for NEW users** (their own rides, their own
+  first ranking). Logging for a group or comparing with friends were not picked.
+- **Biggest UI problem: hard to find things.** Specifically "my stuff is split up" (profile
+  vs credits vs map vs rankings) and "categories & ranking tools" (hidden behind Edit).
+- **Look: more app-like.** Of the app-like things, **add to home screen** matters most
+  (installable, own icon, no browser bars). Offline logging, sheets and speed were not picked.
+- **Nav: Home · Explore · Log · Rankings · Me.** Explore = search + coasters/parks/
+  manufacturers/locations/map. Me = profile, credits, map, settings in one place — "tabs or
+  profile page, open to either".
+- **First visit: sign up and add their credits.** Home leads with that for a signed-out visitor.
+- **Onboarding credits: pick parks you have been to, then tick coasters** per park.
+- **First ranking: head-to-head, but not everything at once** — "if they add like 200
+  coasters not everything to start, that would be a lot". So a guided head-to-head over a
+  starter set (their biggest/most-ridden/most-ranked-by-others, say 10-20), the rest offered
+  later in batches.
+
+Suggested order (proposed 2026-09-27, not yet agreed): (1) add to home screen, (2) the new
+five-tab nav with Me and Explore, (3) signed-out home + park-then-coasters onboarding,
+(4) guided head-to-head first ranking.
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
