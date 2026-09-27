@@ -254,7 +254,7 @@ function vAccount(){
 function parkRow(p){
   var on=S.parks.indexOf(p)>=0;
   return '<button type="button" class="item'+(on?' on':'')+'" data-p="'+p.i+'"><span class="tick"></span>'
-    +'<span class="tx"><b>'+esc(p.name)+'</b><span>'+esc(p.region?regionLabel(p.region):'')+(p.region?' · ':'')+plural(p.coasters.length,'coaster')
+    +'<span class="tx"><b>'+esc(p.name)+'</b><span>'+esc(p.region?regionLabel(p.region):'')+(p.region?' · ':'')+plural(p.open,'operating coaster')
     +(S.near&&p.lat!=null?' · '+miles(p)+' mi':'')
     +(ADD&&p.have?' · '+p.have+' in your count':'')+'</span></span></button>';
 }
@@ -282,7 +282,7 @@ function vParks(){
    // Adding to a count, the parks you have been to are hidden by default
    // (Carter, 2026-09-27: "sort to only parks you haven't visited ... a check
    // box at the top to include parks i've visited but it defaults to off").
-   +(ADD?'<label class="lrow" style="margin-top:12px"><input type="checkbox" id="visited"'+(S.visited?' checked':'')+'><span>Include parks I&rsquo;ve been to</span></label>':'')
+   +(ADD?'<label class="lrow" style="margin-top:12px"><input type="checkbox" id="visited"'+(S.visited?' checked':'')+'><span>Include parks I&rsquo;ve logged</span></label>':'')
    +'<div class="locpanel" id="locpanel" hidden></div>'
    +'<div class="chips" id="picked"></div>'
    +'<div class="sechead"><h2 id="ph"></h2></div>'
@@ -311,7 +311,7 @@ function vParks(){
     $('ph').textContent = q ? (rows.length?'Matching parks':'')
       : regs.length ? plural(rows.length,'park')+' in '+(regs.length===1?regionLabel(regs[0]):plural(regs.length,'location'))
       : S.near ? 'Nearest to you'
-      : ADD && !S.visited ? 'Popular parks you haven’t been to'
+      : ADD && !S.visited ? 'Popular parks you haven’t logged'
       : 'Popular with Coaster Hub riders';
     $('plist').innerHTML = rows.map(parkRow).join('') || '<div class="empty">No park called that yet. Try part of the name, or the city.</div>';
     $('picked').innerHTML = S.parks.map(function(p){ return '<button type="button" class="chip" data-x="'+p.i+'">'+esc(p.name)+' <i>&times;</i></button>'; }).join('');
@@ -603,7 +603,9 @@ Promise.all([
     p.coasters.push(o); CO.push(o); BYID[c.id]=o;
   });
   PARKS=Object.keys(byName).map(function(k){ return byName[k]; }).sort(function(a,b){ return a.name.localeCompare(b.name); });
-  PARKS.forEach(function(p,i){ p.i=i; p.coasters.sort(function(a,b){ return a.name.localeCompare(b.name); }); });
+  // Parks list the coasters still running (Carter, 2026-09-27: "make the
+  // numbers say operating coasters only").
+  PARKS.forEach(function(p,i){ p.i=i; p.open=p.coasters.filter(function(c){ return !c.gone && !c.moved; }).length; p.coasters.sort(function(a,b){ return a.name.localeCompare(b.name); }); });
   // Popular = how many riders have ridden something there.
   riders.forEach(function(u){ var seen={};
     (u.rides||[]).forEach(function(x){ var c=BYID[x.c]; if(c && !seen[c.park.name]){ seen[c.park.name]=1; c.park.riders++; } }); });

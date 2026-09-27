@@ -60,6 +60,10 @@
   #importlink{color:var(--accent2);font-size:.88rem;font-weight:600;margin-left:14px;
     white-space:nowrap}
   #importlink:hover{text-decoration:underline}
+  .loglinks{margin:0 0 6px;display:flex;gap:18px;flex-wrap:wrap}
+  .loglinks a{color:var(--accent2);font-size:.88rem;font-weight:600;text-decoration:none}
+  .loglinks a:hover{text-decoration:underline}
+  .loglinks #importlink{margin-left:0}
   .modehint{color:var(--muted);font-size:.83rem;margin:0 0 16px;max-width:74ch}
   /* Whose count, as a sentence. A second pill beside the header's rider picker
      was the thing that made this page confusing; a line of text is not. */
@@ -249,8 +253,8 @@
 
 <section class="hero" style="--hero-t:52px;--hero-b:20px"><div class="container">
   <span class="badge">Log</span>
-  <h1 style="max-width:20ch">Add to your count.</h1>
-  <p>Track today’s rides or add past credits.</p>
+  <h1 style="max-width:20ch">Log a day.</h1>
+  <p>Where are you today? Tap + once per ride.</p>
 </div></section>
 
 <!-- gate -->
@@ -268,11 +272,14 @@
 
 <!-- app -->
 <section class="block" id="app" style="display:none;padding:8px 0 60px"><div class="container">
-  <div class="modesw" id="modesw">
+  <!-- One job (2026-09-27): /log records a day. Past credits are the
+       park-by-park flow (/welcome?add=1), so the Log rides / Add credits switch
+       only shows while an admin has the old list open for somebody else. -->
+  <div class="modesw" id="modesw" style="display:none">
     <button type="button" class="on" data-mode="day">Log rides</button>
     <button type="button" data-mode="list">Add credits</button>
   </div>
-  <a href="/import" id="importlink">Import a list &rarr;</a>
+  <p class="loglinks"><a href="/welcome?add=1" id="addpast">Add past credits &rarr;</a><a href="/import" id="importlink">Import a list &rarr;</a></p>
   <p class="modehint" id="modehint"></p>
   <!-- The "coaster or park not in the database? Add it here" line that used to
        sit here is gone (2026-09-17): the page was reading as a wall of text
@@ -543,6 +550,7 @@ function boot(){
   $('date').addEventListener('input',offerDay);
   wireAdders(); wireRiderAdd(); wireRiderLine(); wireNearMe(); wireParkFilter();
   wireRegions(); wireMode();
+  $('addpast').onclick=function(e){ e.preventDefault(); toAddCredits(function(){ setMode('list'); }); };
   // ?mode=list opens straight on "Coaster credits". The two modes are different
   // jobs — tonight's laps versus filling in years of them — and the profile page
   // links at each one by name, so the link has to be able to say which.
@@ -699,6 +707,7 @@ function setMode(m){
   MODE=m;
   var btns=$('modesw').querySelectorAll('button');
   for(var i=0;i<btns.length;i++) btns[i].classList.toggle('on',btns[i].getAttribute('data-mode')===m);
+  $('modesw').style.display = m==='list' ? '' : 'none';
   // Credits mode keeps the date field, optional and blank: filling in a trip you
   // remember the day of is worth recording, and a credit with a first-ridden
   // date is a better row than one without. Blank stays undated, as before.
@@ -714,7 +723,9 @@ function setMode(m){
   // One line each. The long version pointed at /import, which is now a link
   // two inches above it, and spelled out what the + buttons already show.
   $('modehint').textContent = m==='day'
-    ? 'A dated visit — tap + once per ride, re-rides included.'
+    // Carter, 2026-09-27: "add language somewhere that says rides on new
+    // coasters automatically add that ride to your credit list".
+    ? 'Re-rides included. Riding a coaster that isn’t in your count yet adds it to your credits too.'
     : 'All the coasters on your count. No need to add dates or ride counts.';
   $('save').textContent = m==='day' ? 'Save day' : 'Add to my count';
   $('baskethead').textContent = m==='day' ? 'This day' : 'Staged';
@@ -1490,6 +1501,10 @@ function save(){
   if(d && !/^\d{4}-\d{2}-\d{2}$/.test(d)){
     $('msg').className='msg bad'; $('msg').textContent='That date is not valid.'; return; }
   $('save').disabled=true; $('msg').className='msg'; $('msg').textContent='Saving…';
+  // Which of these were not in the count yet: after a day, the offer to rank
+  // them (2026-09-27), so a new credit does not sit unranked until someone
+  // remembers.
+  var fresh=MODE==='day' ? ids.filter(function(k){ return !OWNED[k]; }) : [];
   api('POST','/api/rides',{user:rider,d:d,entries:entries})
     .then(function(r){
       ids.forEach(function(k){ OWNED[k]=true; });   // so list mode marks them at once
@@ -1500,7 +1515,9 @@ function save(){
           : ('Added '+r.added+' coaster'+(r.added===1?'':'s')+' to your count.'))
         +' Now on <b>'+r.credits.toLocaleString()+'</b> coaster'
         +(r.credits===1?'':'s')+' over '+r.total.toLocaleString()+' ride'+(r.total===1?'':'s')+'. '
-        +'<a href="/user/'+encodeURIComponent(rider)+'/credits">View the log →</a>';
+        +'<a href="/user/'+encodeURIComponent(rider)+'/credits">View the log →</a>'
+        +(fresh.length ? '<div style="margin-top:10px"><a class="btn" href="/user/'+encodeURIComponent(rider)+'/rankings?rank='+fresh.join(',')+'">Rank your '
+          +(fresh.length===1?'new credit':fresh.length+' new credits')+'</a></div>' : '');
     })
     .catch(function(e){
       $('save').disabled=false;

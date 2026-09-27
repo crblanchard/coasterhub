@@ -4628,3 +4628,20 @@ step (new sign-ups and ?add=1 alike), under the lists:
   A failed save retries from the call that failed (`S.pend`), never re-sending a day.
 - Ride estimates stay undated on purpose: putting 30 rides on the first-ridden date
   would make a day card and the feed say you rode it 30 times that day.
+
+## /log is one job; rank the new ones (2026-09-27)
+
+- /log's hero is "Log a day." The Log rides / Add credits switch is hidden; in its
+  place two links, *Add past credits →* (`toAddCredits`: your own count goes to
+  /welcome?add=1, an admin with somebody else selected gets the old list, and the
+  switch reappears only in that list) and *Import a list →*.
+- The day hint says it: "Riding a coaster that isn't in your count yet adds it to your
+  credits too." (Carter: "add language somewhere that says rides on new coasters
+  automatically add that ride to your credit list".)
+- After saving a day that included coasters not in the count, the message carries a
+  **Rank your N new credits** button → `/user/<slug>/rankings?rank=<ids>`, which runs
+  Rank more on just those (still-unranked, one per ride) and strips the query so a
+  refresh does not ask again.
+- /welcome?add=1: "Popular parks you haven't logged" / "Include parks I've logged"
+  (Carter: people add parks they have *been* to but not logged). Park rows count
+  OPERATING coasters only ("19 operating coasters").

@@ -785,6 +785,11 @@ if(!slug){
       $('rank_start').onclick = function(){ rankMore(10); };
       $('rankmore').onclick = function(){ rankMore(5); };
       moreButton();
+      var ask=(new URLSearchParams(location.search).get('rank')||'').split(',').map(Number).filter(Boolean);
+      if(ask.length){
+        history.replaceState(null,'',location.pathname);   // a refresh does not ask again
+        rankMore(ask.length, ask);
+      }
       edit.onclick = function(){
         $('mine').classList.remove('readonly');
         // The read-only line, plus the one thing edit mode has to say: that
@@ -2055,8 +2060,13 @@ function moreButton(){
   b.textContent = 'Rank more';
   b.title = 'Place your next '+Math.min(5,n)+' unranked credits, two at a time ('+n+' left)';
 }
-function rankMore(n){
-  var ids=unranked().slice(0,n); if(!ids.length) return;
+function rankMore(n, only){
+  var pool=unranked();
+  // ?rank=<ids> from /log after a day with new credits: just those, if they
+  // are still unranked (one per ride, as ever).
+  if(only){ var want={}; only.forEach(function(id){ want[KEY(id)]=1; });
+    pool=pool.filter(function(id){ return want[KEY(id)]; }); }
+  var ids=pool.slice(0,n); if(!ids.length) return;
   $('edit').onclick && $('edit').onclick();
   setView('rank');
   RQ={ids:ids, done:0, total:ids.length};
