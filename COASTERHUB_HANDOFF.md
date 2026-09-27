@@ -3983,7 +3983,9 @@ the nav (ask before adding it there).
 Prototype (a private artifact, trial only, nothing saved):
 https://claude.ai/artifact/YSYJChPKzms2KHswRnwvP2 — account → pick parks → tick coasters
 park by park → your count → pick up to 10 favorites (tallest pre-ticked) → head-to-head
-binary insertion → a profile-like summary. **Not built into the site; wait for Carter's go**
+binary insertion → a profile-like summary. Round 2 with changes 1-3 below:
+https://claude.ai/artifact/7gQ6SNyWiuP4uBnfDKiCH3 (Carter: fold each round of changes into a
+NEW artifact rather than updating the old one). **Not built into the site; wait for Carter's go**
 (it changes how sign-up works — see "ask before major changes" in CLAUDE.md). Carter keeps
 using the prototype as it is and sends changes FOR THE REAL SITE; collect them here:
 
