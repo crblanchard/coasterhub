@@ -24,8 +24,10 @@ they're separate entries"*. **`site-updates.json`** feeds the "Site update" rows
 /changes (and its Site filter). With each push that changes what riders see:
 - If the newest entry's `at` is within 2 hours of now, fold your change into its `text`
   and move its `at` to now. Otherwise put a new `{at, text}` on top.
-- `text` is **a sentence or two** (Carter: "it's okay if it doesn't actually capture all
-  the changes") — what a rider would notice, plainly. `at` is UTC ISO
+- `text` is **at most two sentences, major highlights only** (Carter, 2026-09-27: "Always
+  limit to two sentences with major changes it doesn't matter if it doesn't include
+  everything done"). When folding into an entry, REWRITE it to two sentences — never
+  append a third. `at` is UTC ISO
   (`date -u +%Y-%m-%dT%H:%M:%SZ`). Skip handoff/CLAUDE.md-only commits.
 
 ## What this sandbox can and cannot reach
