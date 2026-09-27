@@ -80,6 +80,8 @@
   /* A–Z down the first column, then the second. One column on a phone. */
   .mmods{columns:2;column-gap:28px;padding-top:6px}
   .mmods .mm{break-inside:avoid}
+  .mmods.mstats{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .mmods .mm b{font-weight:500;font-variant-numeric:tabular-nums}
   .mmods .mm{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:.88rem;padding:5px 0}
   .mmods .mm a{color:var(--accent2);text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mmods .mm a:hover{text-decoration:underline}
@@ -236,9 +238,10 @@ function index(BY, MINE){
         +'<span class="yrs">'+m.open+' operating / '+(m.n-m.open)+' defunct</span></a>';
     }).join('') || '<div style="padding:16px;color:var(--muted)">No manufacturer by that name.</div>';
   }
-  // The open panel is every model the maker has, two columns, each with a
-  // grey "ridden/total" (Carter, 2026-09-27) — no operating/defunct split
-  // here, the row already says that. Signed out, just the total.
+  // The open panel (Carter, 2026-09-27): four numbers in two columns —
+  // operating, defunct, years built, you've ridden — then, after a gap, every
+  // model the maker has, each with a grey "ridden/total" (just the total
+  // signed out).
   function facts(m){
     var E=esc, got={};
     if(MINE) m.cs.forEach(function(c){ if(MINE[c.id] && c.model) got[c.model]=(got[c.model]||0)+1; });
@@ -249,7 +252,10 @@ function index(BY, MINE){
         +'<i>'+(MINE ? (g||0)+'/' : '')+n+'</i></div>';
     };
     var nog=MINE ? m.cs.filter(function(c){ return !c.model && MINE[c.id]; }).length : 0;
-    return '<div class="mmods">'+ms.map(function(mo){ return cell(mo, m.models[mo], got[mo], CoasterHub.makerHref(m.name, mo)); }).join('')
+    var st=function(l,v){ return '<div class="mm"><span>'+E(l)+'</span><b>'+E(v)+'</b></div>'; };
+    var stats=st('Operating', m.open)+st('Defunct', m.n-m.open)+st('Years built', years(m.cs)||'\u2014')
+      +(m.got!=null ? st('You\u2019ve ridden', m.got+' of '+m.n) : '');
+    return '<div class="mmods mstats">'+stats+'</div><div class="mmods">'+ms.map(function(mo){ return cell(mo, m.models[mo], got[mo], CoasterHub.makerHref(m.name, mo)); }).join('')
       +(none ? cell('No model on file', none, nog, null) : '')+'</div>'
       +'<a class="go" href="'+E(CoasterHub.makerHref(m.name))+'">Manufacturer page &rarr;</a>';
   }
