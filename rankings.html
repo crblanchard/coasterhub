@@ -223,7 +223,10 @@
   .addrow .cnt{color:var(--accent2);font-weight:800;font-size:.8rem;margin-left:7px}
   /* No `font` shorthand: it would reset the pill's size and weight (CLAUDE.md). */
   button.catpill{font-family:inherit;cursor:pointer;color:var(--fg)}
-  #mine:not(.readonly) #mfbtn{display:none}
+  /* Filtered and editing: no dragging (the rows in between are hidden); the
+     arrows move a ride past the next one shown, then ask about the gap. */
+  #mine.mf:not(.readonly) .rrow .grip{visibility:hidden}
+  #mine.mf:not(.readonly) .rrow.grp .acts{visibility:hidden}
   .mfpanel{flex:0 0 100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:2px}
   .mfpanel[hidden]{display:none}
   .mfpanel input{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
@@ -617,6 +620,7 @@
     </div>
     <div class="hhfoot">
       <span class="prog" id="hh_prog"></span>
+      <button class="ghost" id="hh_skip" hidden></button>
       <button class="ghost" id="hh_cancel">Cancel</button>
     </div>
   </div>
@@ -854,8 +858,6 @@ if(!slug){
         rankMore(ask.length, ask);
       }
       edit.onclick = function(){
-        // The model filter is a reading tool; dragging needs every row.
-        if(Object.keys(MSEL).length){ MSEL={}; $('mfpanel').hidden=true; mfDraw(); }
         $('mine').classList.remove('readonly');
         // The read-only line, plus the one thing edit mode has to say: that
         // the list is draggable.
@@ -925,7 +927,14 @@ function wire(){
   // leave. Something to save: leave once it has saved, stay if it failed.
   $('save').onclick=function(){ if(dirty||prefsDirty) save(doneEditing); else doneEditing(); };
   // Cancel stops a Rank-more batch too, keeping what it had already placed.
-  $('hh_cancel').onclick=function(){ var was=!!RQ; RQ=null; closeHH(); if(was && dirty) save(); };
+  $('hh_cancel').onclick=function(){
+    // A filtered move took the ride out of the list first: put it back.
+    if(hh && hh.restore!=null){ ORDER.splice(hh.restore,0,hh.id); closeHH(); renderRank(); return; }
+    var was=!!RQ; RQ=null; closeHH(); if(was && dirty) save(); };
+  $('hh_skip').onclick=function(){
+    if(!hh || hh.skipAt==null) return;
+    var at = hh.skipAt<hh.B.length ? hh.B[hh.skipAt] : ORDER.length;
+    ORDER.splice(at,0,hh.id); closeHH(); markDirty(); renderRank(); };
   // Rotating the phone changes what fits, so re-decide. fitMeta() clears its
   // own state first, which means speed comes back when there's room again.
   var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(fitMeta,120); });
@@ -1007,7 +1016,7 @@ function statsFor(id){
 // Empty = everything. Rows keep their real numbers; a category row stays when
 // any ride in it matches.
 var MSEL={};
-function mfOn(){ return Object.keys(MSEL).length>0 && $('mine').classList.contains('readonly'); }
+function mfOn(){ return Object.keys(MSEL).length>0; }
 function mfMatch(b){ return b.ids.some(function(id){ return MSEL[CoasterHub.maker(BYID[id]||{})]; }); }
 function mfDraw(){
   var q=($('mfq').value||'').trim().toLowerCase(), n={}, seen={};
@@ -1031,11 +1040,14 @@ function mfWire(){
 
 function renderRank(){
   moreButton();
+  $('mine').classList.toggle('mf', mfOn());
   var el=$('ranklist');
   $('rank_empty').style.display=ORDER.length?'none':'block';
   var bs=blocks(), mf=mfOn();
   var note = mf ? '<p class="mfnote">Showing '+bs.filter(mfMatch).reduce(function(t,b){ return t+b.ids.filter(function(id){ return MSEL[CoasterHub.maker(BYID[id]||{})]; }).length; },0)
-    +' of your '+Object.keys(MSEL).map(esc).join(', ')+' &middot; <a href="#" id="mfoff" style="color:var(--accent2)">show all</a></p>' : '';
+    // "Showing 19 of your credits · B&M Inverts" — always plural (Carter, 2026-09-27).
+    +' of your credits &middot; '+Object.keys(MSEL).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return esc(/s$/i.test(m)?m:m+'s'); }).join(', ')
+    +' &middot; <a href="#" id="mfoff" style="color:var(--accent2)">show all</a></p>' : '';
   el.innerHTML=note+bs.map(function(b,i){
     if(mf && !mfMatch(b)) return '';
     var one=BYID[b.ids[0]]||{};
@@ -1426,6 +1438,7 @@ function keepPut(sel, change){
 
 // Move the block CONTAINING position i by one block in direction d.
 function move(i,d){
+  if(mfOn()) return moveFiltered(i,d);
   var bs=blocks(), at=-1, k;
   for(k=0;k<bs.length;k++) if(i>=bs[k].from&&i<=bs[k].to){ at=k; break; }
   if(at<0) return;
@@ -1437,6 +1450,36 @@ function move(i,d){
     ORDER=head.concat(d>0?b.ids.concat(a.ids):a.ids.concat(b.ids)).concat(tail);
     markDirty(); renderRank();
   });
+}
+
+// Moving a ride while the model filter is on (Carter, 2026-09-27, option 2 of
+// "pull Nemesis Inferno down below Banshee — would we have to compare it to
+// everything else in that gap?"). ↓ takes it past the next ride SHOWN; that
+// ride and the one shown after it are the bounds, and the head-to-head asks
+// only about the hidden rides between them. "Just put it after …" skips the
+// questions; Cancel puts it back where it was. Categories do not move here.
+function moveFiltered(i, d){
+  var bs=blocks(), at=-1, k;
+  for(k=0;k<bs.length;k++) if(i>=bs[k].from&&i<=bs[k].to){ at=k; break; }
+  if(at<0 || bs[at].g) return;
+  var vis=[]; bs.forEach(function(b,x){ if(mfMatch(b)) vis.push(x); });
+  var v=vis.indexOf(at), t=vis[v+d]; if(t==null) return;
+  var id=bs[at].ids[0], was=ORDER.indexOf(id);
+  var past=bs[t].ids[0];                                  // the ride it moves past
+  var beyond=vis[v+2*d]!=null ? bs[vis[v+2*d]].ids[0] : null;  // the next one shown after that
+  ORDER.splice(was,1);
+  var B2=blocks(), where=function(x){ for(var q=0;q<B2.length;q++) if(B2[q].ids.indexOf(x)>=0) return q; return -1; };
+  var lo, hi;
+  if(d>0){ lo=where(past)+1; hi= beyond!=null ? where(beyond) : B2.length; }
+  else   { hi=where(past);   lo= beyond!=null ? where(beyond)+1 : 0; }
+  hh={id:id, mates:[], g:null, B:B2.map(function(b){ return b.from; }), lo:lo, hi:hi, asked:0, cmp:{},
+      restore:was, skipAt: d>0 ? lo : hi,
+      skipLabel: 'Just put it '+(d>0?'after ':'above ')+((BYID[past]||{}).name||'it')};
+  // The bounds are already decided — do not ask about them again.
+  if(lo-1>=0) hh.cmp[lo-1]=false;
+  if(hi<hh.B.length) hh.cmp[hi]=true;
+  $('hh').style.display='flex';
+  stepHH();
 }
 
 // Pointer-based drag: works with touch and mouse alike (HTML5 drag-and-drop
@@ -2152,6 +2195,8 @@ function stepHH(){
     return;
   }
   var pos=hh.B[mid];                // mid is a row; pos is where it starts
+  $('hh_skip').hidden = hh.skipAt==null;
+  if(hh.skipAt!=null) $('hh_skip').textContent=hh.skipLabel;
   var a=BYID[hh.id]||{}, b=BYID[ORDER[pos]]||{};
   var confirming=hh.lo>=hh.hi;
   // Placing a CATEGORY is one decision about five rides, so the card says the
@@ -2198,7 +2243,7 @@ function answerHH(mid,better){
   hh.asked++;
   stepHH();
 }
-function closeHH(){ hh=null; $('hh').style.display='none'; }
+function closeHH(){ hh=null; $('hh').style.display='none'; $('hh_skip').hidden=true; }
 
 // ---- Rank more (Carter, 2026-09-27) ------------------------------------------
 // Ranking kept getting called hidden: to rank anything you had to find Edit,

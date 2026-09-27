@@ -4875,3 +4875,17 @@ changes, credits, import, install, log, sitemap and rankings moved from the big 
 edited in binary) gives `.hero.compact .segsw` and a second paragraph room under the
 line. Rankings' page-local header rules were removed in favour of the shared style.
 Profile (/user/<slug>) and the home page keep their own hero layouts.
+
+## Moving rides while the Models filter is on (2026-09-27)
+
+Carter's question: dragging Nemesis Inferno below Banshee inside the B&M Inverts view —
+what about the rides hidden in between? Option 2, built: the filter now stays on in edit
+mode (`#mine.mf`: grips and category arrows hidden). ↑/↓ on a single ride call
+`moveFiltered()`: the ride shown next is one bound, the one shown after it the other;
+the ride is taken out of ORDER and `hh` runs a head-to-head bounded to the block range
+between them (the bounds preset in `hh.cmp` so they are never re-asked). Nothing hidden
+in the gap = it just moves. "Just put it after/above …" (`hh_skip`) places it next to
+the ride it moved past; Cancel re-inserts it where it was (`hh.restore`). Categories
+do not move while filtered.
+The filter line reads "Showing 12 of your credits · B&M Inverts, RMC Hybrids" — models
+A–Z, always plural.
