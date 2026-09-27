@@ -142,7 +142,7 @@ function draw(){
       +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></td>'
       +'<td><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park||'')+'</a></td>'
       +'<td class="sub opt">'+mk+'</td><td class="num">'+esc(val)+'</td>'
-      +'<td class="opt"><span class="st '+(cl?'off">Closed '+esc(cl):'on">Operating')+'</span></td></tr>';
+      +'<td class="opt"><span class="st '+(cl?'off">Closed '+esc(cl):c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span></td></tr>';
   }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Nothing matches.</td></tr>';
   $('more').hidden = list.length<=CAP;
   $('more').textContent='Showing the first '+CAP+' — search or filter to narrow it.';

@@ -4794,3 +4794,17 @@ store `openedPrec`/`closedPrec = 'month'`; the Worker stores the precision it is
 so no migration. Shown as "Jul 2019" — `CoasterHub.monthYear()` in app.js, used by
 coasterFacts' `when()` and coaster.html's `fullDate()`. Everything that only wants a
 year still reads the first four characters; On this day still needs 'day'.
+
+## "Closing soon" (2026-09-27)
+
+Carter: *"If a ride has a defunct date in the future make it group with operating and
+show 'CLOSING SOON' for status in red instead of defunct"*. `markClosing()` in app.js
+runs on the list `fetchCoasters()` returns: a `closed` date still ahead (compared at its
+own precision — a closing month or year that is the current one has arrived) moves to
+`closing`/`closingPrec` and `closed` is cleared, so every page's "operating" test counts
+it as open with no change of its own. Status spots show `CoasterHub.CLOSING_SOON` (red)
+when `c.closing` is set: coaster, park, credits (day rows and the table), log, coasters,
+manufacturer, location, welcome; coasterFacts adds a red "Closing" line. /edit reads
+the API itself and still sees the real date. Live on 2026-09-27: Timberhawk, The Wild
+Thing, Loup-Garou, Thunderation, Euro Mir. Cost: one pass over ~1,200 rows in the
+browser per page load.

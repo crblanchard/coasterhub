@@ -229,8 +229,10 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   var op=C.opened?String(C.opened).slice(0,4):(C.yr!=null?String(C.yr):'');
   var cl=gone?String(C.closed).slice(0,4):'';
   if(op||cl){
-    $('status').innerHTML='<span class="stat'+(gone?' off':' on')+'">'+(gone?'Defunct':'Operating')+'</span>'
-      +'<span class="yrs">'+esc(gone?(op?op+'–'+cl:'closed '+cl):('opened '+fullDate(C.opened,C.openedPrec,op)))+'</span>';
+    // A closing date still ahead: open, and saying so in red (app.js markClosing).
+    $('status').innerHTML=(C.closing ? CoasterHub.CLOSING_SOON : '<span class="stat'+(gone?' off':' on')+'">'+(gone?'Defunct':'Operating')+'</span>')
+      +'<span class="yrs">'+esc(gone?(op?op+'–'+cl:'closed '+cl):('opened '+fullDate(C.opened,C.openedPrec,op)
+        +(C.closing?' · closing '+(fullDate(C.closing,C.closingPrec,String(C.closing).slice(0,4))):'')))+'</span>';
   }
 
   // Only the specs this row actually carries. A grid half full of em-dashes

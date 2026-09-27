@@ -252,7 +252,7 @@ function life(c){
   var cl=c.closed?String(c.closed).slice(0,4):'';
   if(!op && !cl) return '';
   var years=cl ? (op?esc(op)+'–'+esc(cl):'closed '+esc(cl)) : esc(op);
-  return '<span class="life"><span class="stat'+(cl?' off':' on')+'">'+(cl?'Defunct':'Operating')+'</span>'
+  return '<span class="life">'+(c.closing?CoasterHub.CLOSING_SOON:'<span class="stat'+(cl?' off':' on')+'">'+(cl?'Defunct':'Operating')+'</span>')
     +'<span class="yrs">'+years+'</span></span>';
 }
 var CHEV='<svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';

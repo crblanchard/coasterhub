@@ -181,7 +181,7 @@ function place(reg, ps, MINE, R){
           +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></td>'
           +'<td><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park)+'</a></td>'
           +'<td class="sub opt">'+mk+'</td><td class="num">'+esc(op)+'</td>'
-          +'<td><span class="st '+(cl?'off">Closed '+esc(cl):'on">Operating')+'</span></td></tr>';
+          +'<td><span class="st '+(cl?'off">Closed '+esc(cl):c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span></td></tr>';
       }).join(''));
   }
   $('body').innerHTML=h;

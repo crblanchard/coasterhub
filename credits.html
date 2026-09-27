@@ -574,7 +574,7 @@ return Promise.all([
       var pk=parks[c.park];
       return { c:id, name:c.name||('#'+id), park:c.park||'—',
                op:c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):''),
-               cl:c.closed?String(c.closed).slice(0,4):'',
+               cl:c.closed?String(c.closed).slice(0,4):'', soon:!!c.closing,
                manu:c.manu||'', model:c.model||'',
                loc:(pk&&pk.region)?pk.region:'' };
     }
@@ -968,7 +968,7 @@ function life(r){
     ? (r.op ? esc(r.op)+'–'+esc(r.cl) : 'closed '+esc(r.cl))
     : esc(r.op);
   return '<span class="life">'
-    + '<span class="stat'+(gone?' off':' on')+'">'+(gone?'Defunct':'Operating')+'</span>'
+    + (r.soon ? CoasterHub.CLOSING_SOON : '<span class="stat'+(gone?' off':' on')+'">'+(gone?'Defunct':'Operating')+'</span>')
     + '<span class="yrs">'+years+'</span></span>';
 }
 
@@ -1272,6 +1272,7 @@ var CreditList=(function(){
         if(col.k==='type')return '<td'+k+'>'+(v?'<span class="pill '+(v==='Wood'?'wood':'steel')+'">'+v+'</span>':'<span class="muted">—</span>')+'</td>';
         if(col.k==='status')return c.closed
           ? '<td'+k+'><span class="pill def">Defunct</span><span class="cyear">'+String(c.closed).slice(0,4)+'</span></td>'
+          : c.closing ? '<td'+k+'><span class="pill soon" style="color:var(--bad);border-color:var(--bad)">Closing soon</span></td>'
           : '<td'+k+'><span class="pill op">Operating</span></td>';
         if(v==null||v==='')return '<td class="muted"'+k+'>—</td>';
         // The two columns that are also pages of their own. Checked after the

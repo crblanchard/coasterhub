@@ -377,7 +377,7 @@ function vCoasters(){
   var row=function(c){ var own=ADD&&OWNED[c.id];
     return '<button type="button" class="item'+(S.ridden[c.id]||own?' on':'')+(own?' owned':'')+(c.gone||c.moved?' gone':'')+'"'+(own?' disabled title="Already in your count"':' data-c="'+c.id+'"')+'><span class="tick"></span>'
       +'<span class="tx"><b>'+esc(c.name)+'</b><span>'+esc([c.model, c.h?c.h+' ft':'', years(c)].filter(Boolean).join(' · '))+'</span></span>'
-      +(c.moved?'<span class="tag">Relocated</span>':c.gone?'<span class="tag">Defunct</span>':'')+'</button>'; };
+      +(c.moved?'<span class="tag">Relocated</span>':c.gone?'<span class="tag">Defunct</span>':c.soon?'<span class="tag" style="color:var(--bad)">Closing soon</span>':'')+'</button>'; };
   var last = S.pi===S.parks.length-1;
   $('view').innerHTML =
     '<div class="eyebrow">Park '+(S.pi+1)+' of '+S.parks.length+'</div><h1>'+esc(p.name)+'</h1>'
@@ -598,7 +598,7 @@ Promise.all([
   (list.coasters||[]).forEach(function(c){
     var m=pmeta[c.park]||{};
     var p=byName[c.park] || (byName[c.park]={name:c.park, region:m.region||'', lat:typeof m.lat==='number'?m.lat:null, lon:typeof m.lon==='number'?m.lon:null, coasters:[], riders:0});
-    var o={ id:c.id, name:c.name, park:p, h:c.h, yr:c.yr, model:CoasterHub.maker(c), gone:!!c.closed, closedYr:c.closed?String(c.closed).slice(0,4):'',
+    var o={ id:c.id, name:c.name, park:p, h:c.h, yr:c.yr, model:CoasterHub.maker(c), gone:!!c.closed, soon:!!c.closing, closedYr:c.closed?String(c.closed).slice(0,4):'',
             key:CoasterHub.rideKey(c), moved:!!(c.same && c.same!==c.id) };
     p.coasters.push(o); CO.push(o); BYID[c.id]=o;
   });

@@ -1315,6 +1315,7 @@ function renderList(){
   // Say nothing when nothing is known — the same rule /count's life() follows.
   function flag(c){
     if(c.closed) return '<span class="stat off">Defunct</span>';
+    if(c.closing) return CoasterHub.CLOSING_SOON;
     if(c.opened||c.yr) return '<span class="stat on">Operating</span>';
     return '';
   }

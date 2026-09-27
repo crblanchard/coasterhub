@@ -397,7 +397,29 @@
     p.then(done, done);
     return p;
   }
-  function fetchCoasters() { return shared("coasters", "/api/coasters", "/coasters.json"); }
+  // A closing date still ahead is not closed (Carter, 2026-09-27: "If a ride has
+  // a defunct date in the future make it group with operating and show 'CLOSING
+  // SOON'"). Moved once, here, where every page gets the list: `closed` is
+  // cleared so every "operating" test on the site counts it as open, and the
+  // date moves to `closing` for the pages that say "Closing soon". Compared at
+  // the date's own precision, so a closing month or year that is this one has
+  // arrived. /edit reads the API directly and still sees the real `closed`.
+  function stillOpen(v, prec) {
+    var t = new Date(), today = t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
+    var s = String(v), n = prec === "year" ? 4 : prec === "month" ? 7 : (s.length >= 10 ? 10 : s.length);
+    return s.slice(0, n) > today.slice(0, n);
+  }
+  function markClosing(r) {
+    ((r && r.coasters) || []).forEach(function (c) {
+      if (c.closed && !c.closing && stillOpen(c.closed, c.closedPrec)) {
+        c.closing = c.closed; c.closingPrec = c.closedPrec; c.closed = null; c.closedPrec = null;
+      }
+    });
+    return r;
+  }
+  function fetchCoasters() { return shared("coasters", "/api/coasters", "/coasters.json").then(markClosing); }
+  // "Closing soon" in red, for any status spot (see markClosing).
+  var CLOSING_SOON = '<span class="stat soon" style="color:var(--bad)">Closing soon</span>';
   // The summaries (2026-09-25): one request instead of one per rider. Both
   // resolve to null when the API cannot answer, and the caller falls back to
   // reading each rider's log, which also works from the static files.
@@ -1440,6 +1462,7 @@
     if (c.model) kv(info, amg(among && among.model) + (c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model)), "Model");
     if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), "Opened"); else if (c.yr) kv(info, E(c.yr), "Opened");
     if (c.closed) kv(info, E(when(c.closed, c.closedPrec)), "Closed");
+    if (c.closing) kv(info, '<span style="color:var(--bad)">' + E(when(c.closing, c.closingPrec)) + '</span>', "Closing");
     if (c.h != null) kv(nums, Math.round(c.h), "Height (ft)");
     if (c.s != null) kv(nums, Math.round(c.s), "Speed (mph)");
     if (c.l != null) kv(nums, Math.round(c.l).toLocaleString(), "Length (ft)");
@@ -1812,7 +1835,7 @@
 
   var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
-              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, coasterHref: coasterHref,
+              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, CLOSING_SOON: CLOSING_SOON, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
