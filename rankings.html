@@ -308,10 +308,11 @@
 
   /* everyone: the summary */
   .figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:30px}
-  .fig{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px}
-  .fig b{display:block;font-size:1.7rem;font-weight:800;color:var(--accent2);letter-spacing:-.02em;
-         font-variant-numeric:tabular-nums;line-height:1.15}
-  .fig span{color:var(--muted);font-size:.8rem}
+  /* The same compact cards as the profile's headline numbers (2026-09-27). */
+  .fig{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .fig b{display:block;font-size:1.6rem;font-weight:800;color:var(--fg);letter-spacing:-.02em;
+         font-variant-numeric:tabular-nums;line-height:1}
+  .fig span{display:block;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
   .sechd{margin:0 0 14px}
   .sechd h2{font-size:1.15rem;letter-spacing:-.01em}
   .sechd p{color:var(--muted);font-size:.88rem;margin-top:5px;max-width:62ch}

@@ -4808,3 +4808,12 @@ manufacturer, location, welcome; coasterFacts adds a red "Closing" line. /edit r
 the API itself and still sees the real date. Live on 2026-09-27: Timberhawk, The Wild
 Thing, Loup-Garou, Thunderation, Euro Mir. Cost: one pass over ~1,200 rows in the
 browser per page load.
+
+## Park "Riders here" card; Global cards match the profile (2026-09-27)
+
+- Park pages get a third card after the rider data lands: distinct riders with any
+  ride at the park ("11 Riders here"), from the same WHO map the rows' "N riders" use.
+  Three to a row on a phone too (`#tiles` override in park.html).
+- Carter: park and coaster pages otherwise stay as they are ("not much data ... can
+  leave a little bit of open space"); "you rank it higher than most" waits for more users.
+- The Global tab's three figures use the profile's compact card style.

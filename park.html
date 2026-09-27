@@ -109,6 +109,8 @@
   .who a:hover{border-color:var(--accent2)}
   .who a i{font-style:normal;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
 
+  /* Three cards (operating, defunct, riders here) stay on one row on a phone. */
+  @media (max-width:680px){ #tiles{grid-template-columns:repeat(3,1fr)} }
 </style>
 </head>
 <body>
@@ -410,6 +412,12 @@ function showRiders(mine, perCoaster){
     });
     // Every coaster nobody has: an empty list rather than "Loading" for ever.
     mine.forEach(function(c){ WHO[c.id]=(WHO[c.id]||[]).sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); }); });
+    // A third card: how many riders on the site have ridden something here
+    // (Carter, 2026-09-27: "add a third card that says x riders have visited").
+    var been={}; mine.forEach(function(c){ (WHO[c.id]||[]).forEach(function(w){ been[w.slug]=1; }); });
+    var nb=Object.keys(been).length;
+    if(!document.getElementById('tile_riders'))
+      $('tiles').insertAdjacentHTML('beforeend', tile(nb.toLocaleString(), nb===1?'Rider here':'Riders here').replace('<div class="tile"','<div class="tile" id="tile_riders"'));
     Array.prototype.forEach.call(document.querySelectorAll('details.citem[open]'), function(d){
       var c=byId(Number(d.getAttribute('data-c'))); if(c) d.querySelector('.cbody').innerHTML=body(c);
     });
