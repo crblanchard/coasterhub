@@ -26,15 +26,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
-  /* The headline numbers as one strip, not five boxes (2026-09-27, "make
-     changes you like" after the top ten lost its cards): hairlines between. */
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;margin-top:4px}
-  .kpi{padding:4px 22px}
-  .kpi:first-child{padding-left:0}
-  .kpi + .kpi{border-left:1px solid var(--line)}
-  .kpi .num{font-size:1.8rem;font-weight:800;letter-spacing:-.02em;line-height:1}
-  .kpi .lbl{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin-top:8px}
-  .kpi .sub{color:var(--accent2);font-size:.78rem;margin-top:6px}
+  /* The headline numbers keep their cards (Carter, 2026-09-27: "kinda like the
+     cards for these ... like to see the stats separated"), just tighter than
+     they were: less padding, a smaller number, a smaller gap. */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:4px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .kpi .num{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .kpi .lbl{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
+  .kpi .sub{color:var(--accent2);font-size:.76rem;margin-top:4px}
   /* A standing note about a rider's own data — something known to be missing or
      unresolved, kept visible so it doesn't get forgotten. See RIDER_NOTES. */
   .ridernote{margin:22px 0 -6px;padding:11px 15px;border:1px solid var(--line);
@@ -161,10 +160,7 @@
     body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
     /* Two up, not "as many as fit": at 320px auto-fit drops to one column and
        five tiles become five screens. */
-    .kpis{grid-template-columns:1fr 1fr;row-gap:16px}
-    .kpi{padding:2px 14px}
-    .kpi + .kpi{border-left:0}
-    .kpi:nth-child(odd){padding-left:0}
+    .kpis{grid-template-columns:1fr 1fr;gap:8px}
     /* Close the gaps. On a phone the hero is five short blocks stacked — name,
        bio, follows, account buttons, numbers — and the desktop spacing between
        them added up to most of a screen of nothing. */

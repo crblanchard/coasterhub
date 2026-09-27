@@ -400,7 +400,6 @@ function prettyPage(path) {
   if (/^\/park\/[^/]+$/.test(p)) return "/park";
   if (p === "/manufacturers" || /^\/manufacturer\/[^/]+(\/[^/]+)?$/.test(p)) return "/manufacturer";
   if (p === "/locations" || /^\/location\/[^/]+$/.test(p)) return "/location";
-  if (p === "/rankings/all") return "/rankings-all";
   if (p === "/qc/models") return "/qc-models";
   if ((m = p.match(/^\/user\/[^/]+\/(credits|rankings|map|add)$/))) return "/" + m[1];
   if (/^\/user\/[^/]+$/.test(p)) return "/profile";
@@ -1718,6 +1717,11 @@ export default {
         },
       });
     }
+
+    // /rankings/all was the whole shared list on a page of its own; the Global
+    // tab on /rankings shows all of it now (Carter, 2026-09-27: "delete
+    // /rankings/all right what's the point of that"). Old links land there.
+    if (path.replace(/\/+$/, "") === "/rankings/all") return Response.redirect(new URL("/rankings", url).toString(), 301);
 
     if (!path.startsWith("/api/")) {
       const res = await env.ASSETS.fetch(request);

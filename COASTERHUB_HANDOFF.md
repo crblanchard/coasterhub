@@ -4773,3 +4773,15 @@ On-this-day lists reuse that row. When nothing opened or closed on the date, On 
 day collapses to one line ("On this day: … 22 rides on September 27 …"), and when
 nothing was ridden on it either the section is hidden. Map 520 → 420px tall.
 /rankings' Global master list rows centre vertically against their two-line right side.
+
+## /rankings/all is gone; headline number cards back (2026-09-27)
+
+- Carter: *"delete /rankings/all right what's the point of that"*. rankings-all.html is
+  deleted. The Global tab on /rankings now draws the WHOLE master list (it showed ten
+  and linked out for the rest). `/rankings/all` 301s to `/rankings` from the Worker
+  itself (before the asset fetch — _redirects rules are not trusted to fire, see the
+  model-page 404s), from _redirects, and from dev-server.mjs. The "Most lists" sort
+  that page had went with it.
+- Carter liked the profile's number CARDS after all ("like to see the stats
+  separated"): they are back, tighter (12px radius, 12/14 padding, 1.6rem number, 10px
+  gap; 8px two-up on a phone). Records stay as rows.

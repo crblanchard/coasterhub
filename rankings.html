@@ -477,9 +477,6 @@
         <p id="shared_sub"></p>
       </div>
       <div class="shared" id="shared"></div>
-      <p id="shared_more" style="margin-top:14px;display:none">
-        <a href="/rankings/all" style="color:var(--accent2);font-weight:600">The whole shared list &rarr;</a>
-      </p>
     </div>
 
     <div class="sechd" style="margin-top:38px">
@@ -734,8 +731,8 @@ if(!slug){
 
     if(shared.length){
       $('shared_sub').textContent='Coasters ranked by 2+ users';
-      $('shared_more').style.display = shared.length > 10 ? 'block' : 'none';
-      $('shared').innerHTML=shared.slice(0,10).map(function(t,i){
+      // All of it: the separate /rankings/all page that held the rest is gone.
+      $('shared').innerHTML=shared.map(function(t,i){
         var c=BYID[t.id], avg=t.sum/t.n, mk=CoasterHub.maker(c);
         // Opening the row is the answer to the obvious question a shared list
         // raises — who, and how high? Each name goes to that rider's own list.
@@ -745,7 +742,7 @@ if(!slug){
             +'<span class="wp">#'+w.pos+'</span></a>';
         }).join('');
         // Ranked, so number them: this is a top ten and the position is half of
-        // what it says. /rankings/all numbers the same way.
+        // what it says.
         return '<div class="srow">'
           +'<div class="stog" role="button" tabindex="0" aria-expanded="false">'
             +'<span class="pos">'+(i+1)+'</span>'
@@ -921,8 +918,8 @@ function markDirty(){
 }
 
 // ---------------------------------------------------------- global ranking ---
-// The Global tab's master list, worked out the same way rankings-all.html does
-// it: every rider's list one entry per ride, only rides on 2+ lists, ordered by
+// The Global tab's master list, worked out the same way the Global tab's own
+// list below is: every rider's list one entry per ride, only rides on 2+ lists, ordered by
 // average placing (then by how many lists). Fetched once, after the page draws,
 // and only used when a row is opened. Later (Carter): how far your placing is
 // from that average — the numbers are all here for it.
