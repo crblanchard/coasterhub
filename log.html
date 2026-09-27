@@ -627,7 +627,9 @@ function copyPanel(d){
       var there=(log.rides||[]).filter(function(r){ return r.d===d; }).length;
       if(there && !confirm(name+' already has '+there+' ride'+(there===1?'':'s')+' on '+niceDay(d)
           +'.\n\nAdd your '+laps+' on top of them?')) throw new Error('cancelled');
-      return api('POST','/api/rides',{user:to, d:d, entries:entries});
+      // copyOf: the feed line lands a minute after yours for this date, not
+      // at the moment Copy was pressed (see addRides in worker.js).
+      return api('POST','/api/rides',{user:to, d:d, entries:entries, copyOf:me});
     }).then(function(r){
       h.innerHTML='Copied '+laps+' ride'+(laps===1?'':'s')+' on '+entries.length+' coaster'+(entries.length===1?'':'s')
         +' to <a href="'+esc(CoasterHub.userPageHref(to,'count'))+'">'+esc(name)+'</a> &#10003;'

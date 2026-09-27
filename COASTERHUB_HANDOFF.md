@@ -3833,6 +3833,12 @@ their log and asks if they already have rides on that date (a second copy double
 from the 2026-08-05 trip copies that replaced placeholders; their credits do not change for
 coasters they already had, their ride total goes up by every lap copied.
 
+**A copied day sits one minute after the original in the feed** (Carter, 2026-09-26: "mine
+was 10:46pm so maybe make his 10:47pm - one minute later as standard practice"). /log sends
+`copyOf: <your slug>`; `addRides` finds your `rides` activity row for that date and stamps
+the copy's row at its time + 60s (and records `copiedFrom`). No such row: stamped now, as
+usual. Sean's Sep 12 row was moved by hand to 2026-09-13T05:47:20.262Z to match.
+
 **Admin only**, because writing to another rider's count is admin-only on the server
 (`mayWriteRider`); the link is hidden for everyone else. Opening it to all riders would need
 the friend to accept the day first — not built.

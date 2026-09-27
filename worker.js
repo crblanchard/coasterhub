@@ -1192,12 +1192,31 @@ async function addRides(env, b) {
       await recordCredits(env, slug, { rides: inserted, coasters: norm.length,
                                        newCredits: total.credits - wasCredits });
     } else {
+      // A day copied from a friend's (/log's "Copy to a friend", `copyOf` is
+      // the rider it came from) sits in the feed one minute after THEIR line
+      // for that date rather than at the moment Copy was pressed — Carter's
+      // standing practice (2026-09-26: "mine was 10:46pm so maybe make his
+      // 10:47pm - one minute later as standard practice"). No such line, or
+      // no copyOf, and it is stamped now as usual.
+      let at = null;
+      const from = b && typeof b.copyOf === "string" ? b.copyOf.toLowerCase() : null;
+      if (from) {
+        try {
+          const src = await env.DB.prepare(
+            "SELECT at FROM activity WHERE kind = 'rides' AND actor = ? AND detail LIKE ? ORDER BY at LIMIT 1"
+          ).bind(from, '%"date":"' + d + '"%').first();
+          const t = src && Date.parse(src.at);
+          if (t) at = new Date(t + 60 * 1000).toISOString();
+        } catch (e) { /* stamped now, as any other day */ }
+      }
       await recordActivity(env, "rides", {
         actor: slug,
         subject: await parkLabel(env, ids),
         n: inserted,
         detail: { rides: inserted, coasters: norm.length,
-                  newCredits: total.credits - wasCredits, date: d },
+                  newCredits: total.credits - wasCredits, date: d,
+                  ...(from ? { copiedFrom: from } : {}) },
+        at,
       });
     }
   }
@@ -1220,11 +1239,11 @@ async function addRides(env, b) {
 //
 // Never let this break a write: an activity row is a nice-to-have, the edit is
 // not. Every call is wrapped and failures are swallowed.
-async function recordActivity(env, kind, { actor = null, subject = null, n = null, detail = null } = {}) {
+async function recordActivity(env, kind, { actor = null, subject = null, n = null, detail = null, at = null } = {}) {
   try {
     await env.DB.prepare(
       "INSERT INTO activity (at, actor, kind, subject, n, detail) VALUES (?,?,?,?,?,?)"
-    ).bind(new Date().toISOString(), actor, kind, subject, n,
+    ).bind(at || new Date().toISOString(), actor, kind, subject, n,
            detail == null ? null : JSON.stringify(detail)).run();
   } catch (e) { /* the edit already succeeded; a missing feed row is not worth a 500 */ }
 }

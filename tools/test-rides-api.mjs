@@ -2760,6 +2760,23 @@ async function main() {
     check("feed: a day that no longer exists drops its line", !e, JSON.stringify(e));
   }
 
+  // ---- a copied day sits a minute after the original in the feed ----------
+  {
+    const db = freshDb();
+    db.exec("INSERT OR IGNORE INTO users (slug,name,mode) VALUES ('ann','Ann','rides'),('bo','Bo','rides')");
+    db.exec("INSERT INTO coasters (id,name,park,type) VALUES (981,'C','Copy Park','Steel')");
+    await call(db, "POST", "/api/rides", { token: PW, body: { user: "ann", d: "2026-09-12", entries: [{ c: 981, n: 2 }] } });
+    db.exec("UPDATE activity SET at='2026-09-13T05:46:20.262Z' WHERE actor='ann' AND kind='rides'");
+    let r = await call(db, "POST", "/api/rides", { token: PW, body: { user: "bo", d: "2026-09-12", entries: [{ c: 981, n: 2 }], copyOf: "ann" } });
+    const row = rows(db, "SELECT at, detail FROM activity WHERE actor='bo' AND kind='rides'")[0];
+    check("copy: the copied day's feed line is one minute after the original's",
+      r.status === 200 && row && row.at === "2026-09-13T05:47:20.262Z" && JSON.parse(row.detail).copiedFrom === "ann", JSON.stringify(row));
+    r = await call(db, "POST", "/api/rides", { token: PW, body: { user: "bo", d: "2026-09-10", entries: [{ c: 981, n: 1 }], copyOf: "ann" } });
+    const row2 = rows(db, "SELECT at FROM activity WHERE actor='bo' AND kind='rides' AND detail LIKE '%2026-09-10%'")[0];
+    check("copy: with no original line for that date it is stamped now",
+      r.status === 200 && row2 && Math.abs(Date.parse(row2.at) - Date.now()) < 60000, JSON.stringify(row2));
+  }
+
   console.log("\n" + pass + " passed, " + fail + " failed\n");
   process.exit(fail ? 1 : 0);
 }
