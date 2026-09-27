@@ -779,18 +779,18 @@
   // "rankings"): point the per-rider links at the current person, mark the
   // active link, and render the rider picker (alphabetical).
   // ---- Theme ---------------------------------------------------------------
-  // Dark is the default and the only thing the CSS renders without help, so a
-  // visitor who has never touched the toggle gets the right page with no JS at
-  // all. Only "light" is ever stored; anything else (or a blocked localStorage)
-  // falls back to dark rather than guessing.
+  // LIGHT is the default (Carter, 2026-09-27: "make the site default to light
+  // mode when opening for the first time"); it used to be dark. The CSS still
+  // draws dark without help and light under data-theme="light", which the
+  // snippet in every page's <head> sets before paint unless "dark" is stored.
+  // The toggle stores both answers, so anyone who ever chose dark keeps it.
   //
-  // The system preference is deliberately NOT consulted: Carter asked for dark
-  // unless you hit the toggle, and honouring prefers-color-scheme would hand a
-  // light page to everyone whose laptop is in light mode — the opposite.
+  // The system preference is deliberately NOT consulted: one site-wide default,
+  // then the toggle.
   var THEME_KEY = "ch_theme";
   function readTheme() {
-    try { return window.localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark"; }
-    catch (e) { return "dark"; }
+    try { return window.localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
+    catch (e) { return "light"; }
   }
   function applyTheme(t) {
     var el = document.documentElement;

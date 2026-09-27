@@ -12,7 +12,7 @@
 <title>Editor — Coaster Hub</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="dark light">
-<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <style>
   /* Two palettes, one set of roles (Carter, 2026-09-21: "dark mode for /edit,
      let me choose"). This page does not load style.css or app.js — it is
@@ -227,13 +227,13 @@
   <script>
 // ---- the theme, chosen here or anywhere else on the site --------------------
 // The same key and the same attribute app.js uses (THEME_KEY / applyTheme),
-// re-stated because this page does not load app.js. Dark unless the choice
-// says light; the choice is one choice, site-wide.
+// re-stated because this page does not load app.js. Light unless the choice
+// says dark (2026-09-27); the choice is one choice, site-wide.
 (function(){
   var KEY='ch_theme';
   var SUN='<path d="M12 4V2M12 22v-2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4M5.6 18.4l-1.4 1.4M19.8 4.2l-1.4 1.4"/><circle cx="12" cy="12" r="4"/>';
   var MOON='<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>';
-  function current(){ try{ return localStorage.getItem(KEY)==='light' ? 'light' : 'dark'; }catch(e){ return 'dark'; } }
+  function current(){ try{ return localStorage.getItem(KEY)==='dark' ? 'dark' : 'light'; }catch(e){ return 'light'; } }
   function apply(t){
     if(t==='light') document.documentElement.setAttribute('data-theme','light');
     else document.documentElement.removeAttribute('data-theme');

@@ -4732,3 +4732,13 @@ Also fixed: `--up`/`--down` had a `prefers-color-scheme: light` override, but th
 is dark unless `data-theme="light"` is set (style.css has no OS-scheme rule), so a
 phone in light mode got the dark-green/dark-red on a dark page. Only the
 `[data-theme="light"]` override remains.
+
+## Light is the default theme (2026-09-27)
+
+Carter: *"make the site default to light mode when opening for the first time not dark
+mode."* Every page's head snippet now sets `data-theme="light"` unless `ch_theme` is
+"dark"; app.js `readTheme()` and /edit's copy read the same way; the manifest's
+background/theme colour is the light ground. The CSS is untouched (dark under bare
+`:root`, light under `[data-theme="light"]`), so a page is dark only when someone
+chose dark — the toggle has always stored both answers. Riders who never touched the
+toggle move from dark to light.

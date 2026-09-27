@@ -11,7 +11,7 @@
 <meta name="color-scheme" content="dark light">
 <title>Map — Coaster Hub</title>
 <meta name="description" content="Every park on the map with its operating coasters — Coaster Hub.">
-<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260924b">
