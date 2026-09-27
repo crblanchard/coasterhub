@@ -4928,8 +4928,10 @@ don't matter.
 
 Carter, 2026-09-27, /manufacturers: **A–Z** (was biggest first), each row "N operating /
 N defunct" with its model count under the name. A tap opens the maker's numbers in place
-(top three models, years built, coasters/operating/defunct/models, you've ridden, and
-"Manufacturer page →"), one open at a time; the name on an open row goes to the page.
+— revised the same evening (Carter: "a full list of models with a count for each one
+... two columns ... grey 'x/x' ... don't need to specify between operating and defunct
+here"): every model A–Z in two columns (one on a phone), each with a grey ridden/total
+(just the total signed out), then "Manufacturer page →", one open at a time; the name on an open row goes to the page.
 The row handler is in `index()`; clicks inside the open panel are left to
 `openableCoasters` on `#body`, which closes it. On one maker's page the models are **one
 list** (`.panel.mlist`, hairlines between) instead of a card per model.

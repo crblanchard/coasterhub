@@ -77,6 +77,15 @@
   a.crow .two .pk{font-size:.78rem}
   a.crow{align-items:center}
   a.crow.mk .yrs{color:var(--muted)}
+  /* A–Z down the first column, then the second. One column on a phone. */
+  .mmods{columns:2;column-gap:28px;padding-top:6px}
+  .mmods .mm{break-inside:avoid}
+  .mmods .mm{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:.88rem;padding:5px 0}
+  .mmods .mm a{color:var(--accent2);text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mmods .mm a:hover{text-decoration:underline}
+  .mmods .mm span{color:var(--muted)}
+  .mmods .mm i{font-style:normal;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums;flex:none}
+  @media (max-width:560px){ .mmods{columns:1} }
   a.crow.mk.open{background:var(--soft)}
   @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
 </style>
@@ -227,17 +236,22 @@ function index(BY, MINE){
         +'<span class="yrs">'+m.open+' operating / '+(m.n-m.open)+' defunct</span></a>';
     }).join('') || '<div style="padding:16px;color:var(--muted)">No manufacturer by that name.</div>';
   }
+  // The open panel is every model the maker has, two columns, each with a
+  // grey "ridden/total" (Carter, 2026-09-27) — no operating/defunct split
+  // here, the row already says that. Signed out, just the total.
   function facts(m){
-    var E=esc, info=[], nums=[], mine=[];
-    function kv(t,v,l){ t.push('<div class="kv"><span>'+E(l)+'</span><b>'+v+'</b></div>'); }
-    var top=Object.keys(m.models).sort(function(a,b){ return m.models[b]-m.models[a] || a.localeCompare(b); }).slice(0,3);
-    top.forEach(function(mo,i){ kv(info,'<a href="'+E(CoasterHub.makerHref(m.name, mo))+'">'+E(mo)+'</a> <i style="font-style:normal;color:var(--muted);font-size:.85em">'+m.models[mo]+'</i>', i ? '' : 'Top models'); });
-    kv(info, E(years(m.cs)||'—'), 'Years built');
-    kv(nums, m.n, 'Coasters'); kv(nums, m.open, 'Operating'); kv(nums, m.n-m.open, 'Defunct'); kv(nums, m.nm, 'Models');
-    if(m.got!=null) kv(mine, m.got+' of '+m.n, 'You\u2019ve ridden');
-    return '<div class="facts"><div class="fcol">'+info.join('')+'</div><div class="fcol fnum">'+nums.join('')+'</div>'
-      +(mine.length?'<div class="fme">'+mine.join('')+'</div>':'')
-      +'<div class="fgo"><a class="go" href="'+E(CoasterHub.makerHref(m.name))+'">Manufacturer page &rarr;</a></div></div>';
+    var E=esc, got={};
+    if(MINE) m.cs.forEach(function(c){ if(MINE[c.id] && c.model) got[c.model]=(got[c.model]||0)+1; });
+    var ms=Object.keys(m.models).sort(function(a,b){ return a.localeCompare(b, undefined, {sensitivity:'base'}); });
+    var none=m.n-ms.reduce(function(t,mo){ return t+m.models[mo]; },0);
+    var cell=function(label, n, g, href){
+      return '<div class="mm">'+(href ? '<a href="'+E(href)+'">'+E(label)+'</a>' : '<span>'+E(label)+'</span>')
+        +'<i>'+(MINE ? (g||0)+'/' : '')+n+'</i></div>';
+    };
+    var nog=MINE ? m.cs.filter(function(c){ return !c.model && MINE[c.id]; }).length : 0;
+    return '<div class="mmods">'+ms.map(function(mo){ return cell(mo, m.models[mo], got[mo], CoasterHub.makerHref(m.name, mo)); }).join('')
+      +(none ? cell('No model on file', none, nog, null) : '')+'</div>'
+      +'<a class="go" href="'+E(CoasterHub.makerHref(m.name))+'">Manufacturer page &rarr;</a>';
   }
   // Clicks inside an open panel are app.js's (openableCoasters on #body):
   // links go, anywhere else closes it. This handles the rows themselves.
