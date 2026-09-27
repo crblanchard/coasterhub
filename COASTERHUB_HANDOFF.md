@@ -4898,3 +4898,9 @@ ORDER and CATS when Edit is pressed and again after every successful save (Rank 
 saves when its run ends), so Cancel = discard unsaved changes: ORDER and categories go
 back, `buildClone()`, dirty/prefsDirty cleared, edit mode left. It also closes an open
 head-to-head and stops a Rank more batch.
+- Follow-up, same day: dragging works while filtered too (Carter: "every time i start
+  dragging something within a model it populates the entire list" — the build before
+  8327e62 cleared the filter on Edit). `startFilteredDrag` does not reorder live: the
+  shown row under the pointer gets `.over`, and the drop calls `moveFilteredTo(from,
+  over)`, the same bounded head-to-head the arrows use (arrows now go through it too).
+  Category rows and category members still do not move while filtered.

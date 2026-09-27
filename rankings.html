@@ -225,8 +225,10 @@
   button.catpill{font-family:inherit;cursor:pointer;color:var(--fg)}
   /* Filtered and editing: no dragging (the rows in between are hidden); the
      arrows move a ride past the next one shown, then ask about the gap. */
-  #mine.mf:not(.readonly) .rrow .grip{visibility:hidden}
-  #mine.mf:not(.readonly) .rrow.grp .acts{visibility:hidden}
+  /* Filtered and editing: a single ride drags (drop it on another shown ride and
+     it goes past it — moveFilteredTo); a category does not move. */
+  #mine.mf:not(.readonly) .rrow.grp > .grip,#mine.mf:not(.readonly) .rrow.grp .acts,
+  #mine.mf:not(.readonly) .rrow .mrow .grip{visibility:hidden}
   .mfpanel{flex:0 0 100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:2px}
   .mfpanel[hidden]{display:none}
   .mfpanel input{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
@@ -1464,12 +1466,20 @@ function move(i,d){
 function moveFiltered(i, d){
   var bs=blocks(), at=-1, k;
   for(k=0;k<bs.length;k++) if(i>=bs[k].from&&i<=bs[k].to){ at=k; break; }
-  if(at<0 || bs[at].g) return;
+  if(at<0) return;
   var vis=[]; bs.forEach(function(b,x){ if(mfMatch(b)) vis.push(x); });
-  var v=vis.indexOf(at), t=vis[v+d]; if(t==null) return;
+  var t=vis[vis.indexOf(at)+d]; if(t==null) return;
+  moveFilteredTo(at, t);
+}
+// Block `at` goes past shown block `t` (a drop, or one arrow press).
+function moveFilteredTo(at, t){
+  var bs=blocks();
+  if(at===t || !bs[at] || bs[at].g) return;
+  var vis=[]; bs.forEach(function(b,x){ if(mfMatch(b)) vis.push(x); });
+  var d = t>at ? 1 : -1, v=vis.indexOf(t);
   var id=bs[at].ids[0], was=ORDER.indexOf(id);
   var past=bs[t].ids[0];                                  // the ride it moves past
-  var beyond=vis[v+2*d]!=null ? bs[vis[v+2*d]].ids[0] : null;  // the next one shown after that
+  var beyond=vis[v+d]!=null ? bs[vis[v+d]].ids[0] : null;  // the next one shown after that
   ORDER.splice(was,1);
   var B2=blocks(), where=function(x){ for(var q=0;q<B2.length;q++) if(B2[q].ids.indexOf(x)>=0) return q; return -1; };
   var lo, hi;
@@ -1497,7 +1507,31 @@ var edgeT0=0, edgeLast=0, edgeAcc=0;
 // against its neighbours in that category — and if you take it past the card's
 // edge it leaves the category entirely and carries on as a card, which is the
 // gesture people try first.
+// Dragging with the model filter on: nothing reorders under your finger (the
+// rows in between are hidden); the shown row you are over lights up, and the
+// drop moves the ride past it through moveFilteredTo.
+function startFilteredDrag(e){
+  var g=e.currentTarget, from=+g.dataset.grip, over=null;
+  g.setPointerCapture(e.pointerId);
+  var row=$('ranklist').querySelector('.rrow[data-i="'+from+'"]'); if(row) row.classList.add('drag');
+  var at=function(ev){
+    var el=document.elementFromPoint(ev.clientX, ev.clientY), r=el && el.closest && el.closest('#ranklist .rrow[data-i]');
+    return r ? +r.dataset.i : null;
+  };
+  var mv=function(ev){ var t=at(ev);
+    if(over!=null){ var o=$('ranklist').querySelector('.rrow[data-i="'+over+'"]'); if(o) o.classList.remove('over'); }
+    over = (t!=null && t!==from) ? t : null;
+    if(over!=null){ var n=$('ranklist').querySelector('.rrow[data-i="'+over+'"]'); if(n) n.classList.add('over'); } };
+  var up=function(){
+    g.removeEventListener('pointermove',mv); g.removeEventListener('pointerup',up); g.removeEventListener('pointercancel',up);
+    if(row) row.classList.remove('drag');
+    if(over!=null) moveFilteredTo(from, over); else renderRank();
+  };
+  g.addEventListener('pointermove',mv); g.addEventListener('pointerup',up); g.addEventListener('pointercancel',up);
+  e.preventDefault();
+}
 function startDrag(e){
+  if(mfOn() && e.currentTarget.dataset.grip!==undefined) return startFilteredDrag(e);
   var mg=e.currentTarget.dataset.mgrip;
   if(mg!==undefined){ return startMemberDrag(e, +mg); }
   dragMember=0;
