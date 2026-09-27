@@ -596,7 +596,10 @@ function render(s){
     //
     // /log, not /user/<slug>/log: the log page picks its rider from the header
     // picker, and landing on this profile has already set it to this rider.
-    if (mine || (acct && acct.admin)) {
+    // Your own page only (Carter, 2026-09-27: "hide 'log a day' from
+    // everyone's accounts on my profile so i can only see my own like other
+    // people"). An admin still logs for anybody from /log's rider picker.
+    if (mine) {
       var own = document.querySelectorAll('#hero_acts .own');
       for (var i = 0; i < own.length; i++) own[i].hidden = false;
     }
