@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Coaster Hub">
 <base href="/">
-<title>Site map — Coaster Hub</title>
+<title>Sitemap — Coaster Hub</title>
 <meta name="description" content="Every page on Coaster Hub, including the ones that aren't in the menu.">
 <link rel="stylesheet" href="/style.css?v=20260805b">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
@@ -17,7 +17,7 @@
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png?v=20260924b" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260924b">
-<meta property="og:title" content="Coaster Hub — Site map">
+<meta property="og:title" content="Coaster Hub — Sitemap">
 <meta property="og:image" content="https://coasterhub.org/og-image.png?v=4">
 <style>
   .smgroup{margin-bottom:34px}
@@ -52,16 +52,27 @@
 </div></header>
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
-  <span class="badge">Site map</span>
-  <h1 class="wide">Site map.</h1>
+  <h1 class="wide">Sitemap</h1>
   <p>Send feedback if you have trouble with navigation!</p>
 </div></section>
+
+<!-- Same card as the homepage's (Carter, 2026-09-27). -->
+<div class="container" style="margin-top:20px">
+  <div class="fbcard">
+    <div>
+      <h2>Send us feedback!</h2>
+      <p>Can't find something, or found a bug? Let us know.</p>
+    </div>
+    <span class="spacer"></span>
+    <a class="go" id="fb_link" rel="nofollow">Contact us &rarr;</a>
+  </div>
+</div>
 
 <section class="block" style="padding-top:20px"><div class="container" id="map"></div></section>
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a><span data-contrib hidden></span></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
@@ -72,8 +83,11 @@ document.getElementById('y').textContent = new Date().getFullYear();
 // is still findable. `rider` marks paths that also work as /user/<slug>/<page>;
 // the links below resolve to whoever is currently selected in the header.
 var GROUPS = [
-  { h: 'Looking at a count',
-    l: 'Every one of these works for one rider or for everyone combined — use the picker in the header.',
+  // Three groups (Carter, 2026-09-27): site tools, admin tools, and the rest.
+  // The QC pages are left off on purpose. One tag, "signed in", for anything
+  // that needs an account; "admin" for what needs an admin one.
+  { h: 'Site tools',
+    l: 'Most of these work for one rider or for everyone combined \u2014 use the picker in the header.',
     items: [
       { t: 'Home',        p: '/',          d: 'Everyone\u2019s counts next to each other, and what has happened lately.' },
       { t: 'Profile',     p: '/account',   d: 'One rider: records, map, charts and the calendar heatmap. Signed in, it is yours.', rider: 'profile' },
@@ -85,31 +99,25 @@ var GROUPS = [
       // examples are Knott's because its slug shows the apostrophe rule.
       { t: 'One park',    p: '/park/knotts-berry-farm', d: 'Every coaster at one park, who has ridden them, and how much of it each rider has.' },
       { t: 'One coaster', p: '/park/knotts-berry-farm/ghostrider', d: 'One ride: its specs, its former names, and who has been on it. The address is /park/<park>/<coaster>.' },
-      { t: 'Manufacturers', p: '/manufacturers', d: 'Every coaster maker on the site. Open one for its models, how many of each, and which you have ridden \u2014 a coaster page links to its maker.' },
-      { t: 'Rankings',    p: '/rankings',  d: 'Favourites in order — drag to reorder, or compare two at a time.', rider: 'rankings' },
-      { t: 'Categories',  p: '/categories', d: 'The same ride at five parks, ranked once. Pick the ones you use, or write your own.' }
+      { t: 'Manufacturers', p: '/manufacturers', d: 'Every coaster maker on the site. Open one for its models, how many of each, and which you have ridden.' },
+      { t: 'Rankings',    p: '/rankings',  d: 'Favorites in order \u2014 drag to reorder, or compare two at a time.', rider: 'rankings' },
+      { t: 'Categories',  p: '/categories', d: 'The same ride at five parks, ranked once. Pick the ones you use, or write your own.' },
+      { t: 'Log',         p: '/log',    d: 'Coaster rides from a day out, or credits you already have.', tag: 'signed in' },
+      { t: 'Import',      p: '/import', d: 'Paste a whole list, or drop in a spreadsheet.', tag: 'signed in' },
+      { t: 'Add new',     p: '/add',    d: 'Put a park or a coaster on the shared list.', tag: 'signed in' },
+      { t: 'Account',     p: '/account', d: 'Sign in, start your own count, or reset a password. Signed in, it sends you to your profile.' }
     ] },
-  { h: 'Adding to it',
-    l: 'Logging your own rides is separate from adding to the list everyone shares.',
+  { h: 'Admin tools',
+    l: 'For fixing the shared list.',
     items: [
-      { t: 'Log',      p: '/log',    d: 'Coaster rides from a day out, or credits you already have. The button is on your profile.', tag: 'sign in' },
-      { t: 'Import',   p: '/import', d: 'Paste a whole list, or drop in a spreadsheet.', tag: 'password' },
-      { t: 'Add new',  p: '/add',    d: 'Put a park or a coaster on the shared list.', tag: 'password' }
+      { t: 'Edit',        p: '/edit',     d: 'Fix a coaster\u2019s details, merge duplicates, or delete an empty one.', tag: 'admin' }
     ] },
-  { h: 'Your account',
-    l: 'Signing in binds a count to a person: rides and rankings you log go to yours, and nobody else can write to it.',
+  { h: 'Other',
+    l: 'What changed lately, and how to get the app.',
     items: [
-      { t: 'Account', p: '/account', d: 'Sign in, start your own count, reset a password, or claim an invite. Signed in, your profile page is where you edit everything \u2014 this one sends you there.' }
-    ] },
-  { h: 'Keeping it tidy',
-    l: 'Housekeeping pages. Nothing here is linked from the menu.',
-    items: [
-      { t: 'Recent changes', p: '/changes',  d: 'What everyone has been logging, ranking and fixing. The home page carries the last few.' },
-      { t: 'Edit',           p: '/edit',     d: 'Fix a coaster’s details, merge duplicates, or delete an empty one.', tag: 'password' },
-      { t: 'QC',             p: '/qc',       d: 'The whole list as one table, flagging rows missing specs. Was /database, which now means the everyone view of the count.' },
-      { t: 'QC: models',     p: '/qc/models', d: 'Every model, grouped by maker, with how many coasters carry it \u2014 for spotting two spellings of one model.' },
-      { t: 'Get the app',    p: '/install',  d: 'How to put Coaster Hub on your home screen, for iPhone and Android. The link to send a friend.' },
-      { t: 'Site map',       p: '/sitemap',  d: 'This page.' }
+      { t: 'Recent changes', p: '/changes',  d: 'What everyone has been logging, ranking and fixing, plus site updates.' },
+      { t: 'Get the app',    p: '/install',  d: 'How to put Coaster Hub on your home screen, for iPhone and Android.' },
+      { t: 'Sitemap',        p: '/sitemap',  d: 'This page.' }
     ] }
 ];
 
@@ -118,7 +126,7 @@ function esc(s){ return String(s == null ? '' : s)
 
 document.getElementById('map').innerHTML = GROUPS.map(function(g){
   return '<div class="smgroup"><h2>' + esc(g.h) + '</h2>'
-    + '<p class="gl">' + esc(g.l) + '</p><div class="smlist">'
+    + (g.l ? '<p class="gl">' + esc(g.l) + '</p>' : '') + '<div class="smlist">'
     + g.items.map(function(it){
         // Per-rider pages carry data-nav so initNav rewrites them to whoever is
         // selected — following a link from here shouldn't silently drop you back
@@ -134,6 +142,14 @@ document.getElementById('map').innerHTML = GROUPS.map(function(g){
 }).join('');
 
 CoasterHub.initNav('sitemap');
+
+// Address assembled here, not in the markup, as on the homepage.
+(function(){
+  var a=document.getElementById('fb_link');
+  var to=['carter.r.blanchard','gmail.com'].join('@');
+  a.href='mailto:'+to+'?subject='+encodeURIComponent('Coaster Hub feedback')
+    +'&body='+encodeURIComponent('\n\n---\nSent from '+location.href);
+})();
 </script>
 </body>
 </html>

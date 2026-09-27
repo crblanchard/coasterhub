@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-09-27T23:17:29Z",
-   "text": "New riders get a two-minute setup that ends with a head-to-head top ten, and Rank more makes ranking the rest easy. Lists across the site are more compact, the site opens in light mode, and adding or removing a credit from a coaster or park page now asks first."
+   "at": "2026-09-27T23:43:11Z",
+   "text": "New riders get a two-minute setup that ends with a head-to-head top ten, and Rank more makes ranking the rest easy. Rankings can be filtered by model, lists across the site are more compact, and the sitemap is reorganized and linked from every footer."
   },
   {
    "at": "2026-09-27T00:41:44Z",

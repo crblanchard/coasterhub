@@ -4916,3 +4916,12 @@ Carter: "change footer to home / coasters / parks / manufacturers / locations / 
 Every footer already had those; the Add new (signed in) and Edit · QC (admin) links that
 `footerContrib()` appended are off (the call is commented out in initNav). The pages
 still exist at /add, /edit and /qc.
+
+Carter, 2026-09-27, the sitemap: three groups — **Site tools**, **Admin tools** (Edit),
+**Other** (/changes, /install, /sitemap). One tag, "signed in", for Log/Import/Add new;
+"admin" for Edit. The QC pages are left off the list (they still exist). No hero badge;
+the heading is "Sitemap" (one word, everywhere), with the homepage's feedback card
+under the hero. Every footer ends "… · Map · Sitemap".
+Also: **American spelling in anything a rider reads** ("Favorites", not "Favourites").
+A sweep found no other visible British spellings; the comments still have some, which
+don't matter.
