@@ -1,0 +1,38 @@
+{
+ "about": "Site updates shown on /changes. One entry per working session: changes within 2 hours of the previous entry's time are added to it (and its time moves to the latest change); otherwise a new entry goes on top. Plain, short lines a rider would care about. See CLAUDE.md.",
+ "updates": [
+  {
+   "at": "2026-09-27T21:58:52Z",
+   "items": [
+    "New sign-ups get a two-minute setup: pick parks (search, Near me or Locations), check the coasters you've ridden, then rank your ten tallest head to head.",
+    "Add first-ridden dates (per park or per coaster) and rough ride counts while adding credits.",
+    "Add credits now uses the same park-by-park flow, with parks you haven't logged first.",
+    "Rankings: a Rank more button places your next five unranked credits by comparison; cards show park and model.",
+    "Log a day: new coasters you ride become credits automatically, and you're offered to rank them after saving.",
+    "Park and coaster pages: a quiet tap to add a coaster you've ridden.",
+    "New riders see a Getting started checklist on their profile.",
+    "Save Coaster Hub as a web app on your phone: coasterhub.org/install.",
+    "No accidental zooming on phones (except the map); text fields no longer zoom on iPhone.",
+    "Site updates now appear here on /changes."
+   ]
+  },
+  {
+   "at": "2026-09-27T00:41:44Z",
+   "items": [
+    "A day copied to a friend now shows in the feed a minute after the original."
+   ]
+  },
+  {
+   "at": "2026-09-26T20:16:04Z",
+   "items": [
+    "Relocated rides count as one credit and have one page, with a History section and riders at each park.",
+    "Search matches coaster plus park, park initials (like sfdk) and small typos, and shows former names.",
+    "Homepage: search and the database cards at the top; Friend activity for the people you follow.",
+    "Profile: Recent visits at the top and far less empty space.",
+    "Copy a logged day to a friend (admin).",
+    "Fixed rankings sometimes not loading, and /log counting rides twice.",
+    "Removed nine parks with no coasters."
+   ]
+  }
+ ]
+}

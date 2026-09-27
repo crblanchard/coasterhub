@@ -35,7 +35,9 @@
     // Layers: several rides answering as one.
     stack:    '<path d="M12 3 3 8l9 5 9-5-9-5M3 13l9 5 9-5M3 18l9 5 9-5"/>',
     // A person with a tick: somebody is now behind a page that was already here.
-    claimed:  '<path d="M15 20v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M8.5 7a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7M16 11l2 2 4-4"/>'
+    claimed:  '<path d="M15 20v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M8.5 7a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7M16 11l2 2 4-4"/>',
+    // Angle brackets: the site itself changed.
+    site:     '<path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 4l-4 16"/>'
   };
   // Which of the two feeds an event belongs to: something a rider did to their own
   // count, or something that changed the shared list everyone draws from.
@@ -59,6 +61,7 @@
           : kind === 'coaster_deleted' ? 'deleted'
           : kind === 'same_ride_set' ? 'merged'
           : kind === 'same_ride_removed' ? 'edited'
+          : kind === 'site_update' ? 'site'
           : kind;
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
       + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
@@ -127,6 +130,12 @@
   }
   
   function sentence(e){
+    // A site update (site-updates.json): a short summary of one working
+    // session's changes to the site itself, as a list.
+    if (e.kind === 'site_update') {
+      return '<b>Site update</b><ul class="upd">' + (e.items || []).map(function(t){
+        return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+    }
     var who = e.actorName ? riderLink(e.actor, '<b>' + esc(e.actorName) + '</b>') : null;
     var d = e.detail || {};
     var sub = e.subject ? '<span class="sub">' + esc(e.subject) + '</span>' : null;
@@ -368,7 +377,8 @@
         if (WHO && !(e.actor && WHO[e.actor])) return false;
         if (SINCE && atTime(e.at) < SINCE) return false;
         if (FILTER === 'riders')   return !!RIDER_KINDS[e.kind];
-        if (FILTER === 'database') return !RIDER_KINDS[e.kind];
+        if (FILTER === 'site')     return e.kind === 'site_update';
+        if (FILTER === 'database') return !RIDER_KINDS[e.kind] && e.kind !== 'site_update';
         return true;
       }));
       if (limit) list = list.slice(0, limit);
@@ -406,12 +416,23 @@
       // lines, not the 300 /changes reads: ranking saves and credit bursts fold
       // together, so a few rows per line is plenty.
       // A `who` feed is a few riders out of everyone, so it reads the long list.
-      return fetch('/api/activity?limit=' + (limit && !WHO ? Math.max(40, limit * 8) : 300))
-        .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); })
-        .then(function(j){
+      // Site updates (opts.site, /changes only): a static file written with each
+      // working session on the site (Carter, 2026-09-27: "after every session
+      // write a short summary of changes made to the site"). Its failure costs
+      // the updates, never the feed.
+      var site = opts.site
+        ? fetch('/site-updates.json', { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; })
+            .then(function(j){ return ((j && j.updates) || []).map(function(u){
+              return { kind: 'site_update', at: u.at, items: u.items || [] }; }); })
+            .catch(function(){ return []; })
+        : Promise.resolve([]);
+      return Promise.all([fetch('/api/activity?limit=' + (limit && !WHO ? Math.max(40, limit * 8) : 300))
+        .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); }), site])
+        .then(function(both){
+          var j = both[0];
           // Sort here rather than trusting the order back: the two `at` formats are
           // sorted as strings by SQL, which interleaves them. See atTime above.
-          EVENTS = (j.events || []).slice().sort(function(a, b){ return atTime(b.at) - atTime(a.at); });
+          EVENTS = (j.events || []).concat(both[1]).sort(function(a, b){ return atTime(b.at) - atTime(a.at); });
           if (noteEl) {
             // Say plainly where the history starts. Nothing before the feed shipped was
             // timestamped anywhere, so the older entries are reconstructed from the

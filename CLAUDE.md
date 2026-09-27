@@ -16,6 +16,17 @@ propose it and wait. Fixes and small improvements still go straight to `main`.
 And keep replies short: say what changed once,
 and leave out the local test-harness narration (still run the checks; just don't report them).
 
+## Write a site update for /changes, every session
+
+Carter, 2026-09-27: *"after every session write a short summary of changes made to the
+site. say if i'm in here making changes within 2 hrs they're grouped together otherwise
+they're separate entries"*. **`site-updates.json`** feeds the "Site update" rows on
+/changes (and its Site filter). With each push that changes what riders see:
+- If the newest entry's `at` is within 2 hours of now, add your lines to its `items`
+  and move its `at` to now. Otherwise put a new `{at, items}` on top.
+- `at` is UTC ISO (`date -u +%Y-%m-%dT%H:%M:%SZ`). Lines are short and plain — what a
+  rider would notice, not how it was built. Skip handoff/CLAUDE.md-only commits.
+
 ## What this sandbox can and cannot reach
 
 Reachable: GitHub, npm, usually the CDNs.

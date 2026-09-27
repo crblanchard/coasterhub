@@ -4660,3 +4660,14 @@ step (new sign-ups and ?add=1 alike), under the lists:
   phone? Add it to your home screen →" with an ×. Phones only (coarse pointer, ≤820px),
   signed in, not standalone, never again once closed (`ch_nudge_x`) or once `ch_home`
   is set. Carter: *"i don't want it to be too pushy"*.
+
+## Site updates on /changes (2026-09-27)
+
+Carter: *"In /changes after every session write a short summary of changes made to
+the site. say if i'm in here making changes within 2 hrs they're grouped together
+otherwise they're separate entries"*. `site-updates.json` ({updates:[{at, items}]},
+newest first) is read by changes-feed.js when mounted with `site:true` (only
+/changes), merged into the feed by time as "Site update" rows with a bulleted list,
+and has its own **Site** filter (Database excludes them). A failed read costs the
+updates, never the feed. The rule for keeping it is in CLAUDE.md. Backfilled from
+git history for 2026-09-26 18:16 onward (this run of work); earlier history was not.

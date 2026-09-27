@@ -28,6 +28,9 @@
      draws them — /riders shows the same rows. What is left here is this page's
      filter bar and the note above it. */
   .note{color:var(--muted);font-size:.85rem;margin:0 0 22px;max-width:62ch}
+  /* Site updates: the session's changes as a short list under the heading. */
+  .ev .tx ul.upd{margin:4px 0 0;padding-left:18px;color:var(--muted);font-size:.9rem}
+  .ev .tx ul.upd li{margin:2px 0}
 </style>
 </head>
 <body>
@@ -61,6 +64,7 @@
     <button data-f="all" class="on">Everything</button>
     <button data-f="riders">Users</button>
     <button data-f="database">Database</button>
+    <button data-f="site">Site</button>
   </div>
   <p class="note" id="note"></p>
   <div class="feed" id="feed"><div class="empty" data-loading>Loading&hellip;</div></div>
@@ -72,7 +76,7 @@
 </div></footer>
 
 <script src="/app.js?v=20260805b"></script>
-<script src="/changes-feed.js?v=20260926c"></script>
+<script src="/changes-feed.js?v=20260927a"></script>
 <script>
 document.getElementById('y').textContent = new Date().getFullYear();
 CoasterHub.initNav('changes');
@@ -85,6 +89,7 @@ CoasterHubFeed.mount({
   feed:   $('feed'),
   note:   $('note'),
   filter: $('filter'),
+  site:   true,
   poll:   true
 });
 </script>
