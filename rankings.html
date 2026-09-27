@@ -1083,7 +1083,8 @@ function renderRank(){
       // Closed, a tap anywhere opens it — the name and park included. Open,
       // those are links (Carter, 2026-09-25), and the rest of the row closes it.
       if(a){ if(STATOPEN[id]) return; ev.preventDefault(); }
-      STATOPEN[id]=!STATOPEN[id]; renderRank();
+      // One open at a time (Carter, 2026-09-27): opening a row closes the rest.
+      var was=!!STATOPEN[id]; STATOPEN={}; if(!was) STATOPEN[id]=true; renderRank();
     });
   });
   $('gatherbar').style.display = scattered() ? 'flex' : 'none';

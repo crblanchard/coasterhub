@@ -288,11 +288,26 @@ function row(c){
 // first time it opens, and again if the rider list lands while it is open.
 var WHO={};        // coaster id -> [{slug,name,n}], filled by riders()
 var MYR=null;      // coaster id -> {n, first} for the signed-in rider, from ticks()
+var MY=null;       // the signed-in rider's ranking: {rank:{id:pos}, ranked, order:[ids]}
+var BYC={};        // coaster id -> coaster, for the maker/model counts
+CoasterHub.you().then(function(y){
+  if(!y) return;
+  var order=Object.keys(y.rank).map(Number).sort(function(a,b){ return y.rank[a]-y.rank[b]; });
+  MY={rank:y.rank, ranked:y.ranked, order:order};
+}).catch(function(){});
 function body(c){
   // The facts are shared with a ranking's tapped row (CoasterHub.coasterFacts);
   // yours go below every fact about the coaster itself (Carter, 2026-09-25).
-  var mine=MYR && MYR[c.id], extra=[];
-  if(mine){ extra.push([esc(mine.n),'Your rides']); if(mine.first) extra.push([esc(CoasterHub.mdy(mine.first)),'First ridden']); }
+  // Your ranking of it rather than your ride count (Carter, 2026-09-27:
+  // "instead of rides do your ranking"), and where it sits among your ranked
+  // rides by the same maker and model, grey beside those two lines.
+  var mine=MYR && MYR[c.id], extra=[], among=null;
+  if(MY && MY.rank[c.id]){
+    extra.push(['#'+MY.rank[c.id]+' of '+MY.ranked,'Your ranking']);
+    if(!Object.keys(BYC).length) (LIST.coasters||[]).forEach(function(o){ BYC[o.id]=o; });
+    among=CoasterHub.amongIn(MY.order, BYC, c);
+  }
+  if(mine && mine.first) extra.push([esc(CoasterHub.mdy(mine.first)),'First ridden']);
   var was=CoasterHub.formerNames(LIST, c.id, c.name);
   var who=WHO[c.id];
   // A relocated ride (023-same-ride.sql), on the OLD park's row only:
@@ -307,7 +322,7 @@ function body(c){
   }
   return (was.length?'<p class="former">Formerly '+was.map(function(n){ return '<b>'+esc(n)+'</b>'; }).join(', ')+'.</p>':'')
     +(moved?'<p class="former">'+moved+'</p>':'')
-    +CoasterHub.coasterFacts(c, extra)
+    +CoasterHub.coasterFacts(c, extra, null, among)
     +'<div><p class="lbl">Riders</p>'
     +(who===undefined ? '<p class="nobody">Loading&hellip;</p>'
       : who.length ? '<div class="who">'+who.map(function(w){
@@ -319,6 +334,8 @@ function byId(id){ return LIST.coasters.filter(function(c){ return c.id===id; })
 document.addEventListener('toggle', function(e){
   var d=e.target;
   if(!d.classList || !d.classList.contains('citem') || !d.open) return;
+  // One open at a time (2026-09-27).
+  Array.prototype.forEach.call(document.querySelectorAll('details.citem[open]'), function(o){ if(o!==d) o.open=false; });
   var c=byId(Number(d.getAttribute('data-c')));
   if(c) d.querySelector('.cbody').innerHTML=body(c);
 }, true);
@@ -355,6 +372,15 @@ var ME=null;
 function tapTick(el){
   var id=Number(el.getAttribute('data-tick')); if(!ME || !id) return;
   var undo=el.classList.contains('undo');
+  // Adding asks first, with an optional first-ridden date (2026-09-27).
+  if(!undo){
+    CoasterHub.confirmAdd(byId(id)||{id:id,name:'this coaster'}, ME).then(function(ok){
+      if(!ok) return;
+      el.classList.remove('add'); el.classList.add('undo'); el.textContent='\u2713'; el.title='Added — tap again to undo'; el.setAttribute('aria-label','Added. Tap to undo');
+      MYR[id]={n:1, first:ok.d};
+    });
+    return;
+  }
   el.classList.add('busy');
   fetch(undo?'/api/credit':'/api/rides',{method:undo?'DELETE':'POST',credentials:'same-origin',headers:{'content-type':'application/json'},
     body:JSON.stringify(undo?{user:ME, coaster_id:id}:{user:ME, d:null, entries:[{c:id}]})})

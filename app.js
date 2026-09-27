@@ -668,6 +668,106 @@
   // A date as Carter reads one: 7/24/2021 (2026-09-25: "make dates show as
   // m/d/yyyy"). A bare year stays a year; anything else comes back as it was.
   // "Jul 2014" for a date known only to the month (openedPrec 'month').
+  // Where coaster `c` sits among a ranked list's rides by the same maker and
+  // of the same model: { manu: "3 of 12", model: "1 of 4" } for coasterFacts'
+  // grey counts. `order` is coaster ids best-first, `byId` id -> coaster; one
+  // entry per ride (rideKey), so a relocated ride is counted once.
+  function amongIn(order, byId, c) {
+    var mi = 0, mn = 0, di = 0, dn = 0, seen = {}, me = rideKey(byId[c.id] || c);
+    order.forEach(function (id) {
+      var o = byId[id]; if (!o) return;
+      var k = rideKey(o); if (seen[k]) return; seen[k] = 1;
+      if (c.manu && o.manu === c.manu) { mn++; if (k === me) mi = mn; }
+      if (c.model && o.model === c.model && o.manu === c.manu) { dn++; if (k === me) di = dn; }
+    });
+    return { manu: mi ? mi + " of " + mn : "", model: di ? di + " of " + dn : "" };
+  }
+  // "Add <coaster> to your credits?" with an optional first-ridden date
+  // (Carter, 2026-09-27: "can you get a 'are you sure?' popup with the option
+  // to add first ridden date"). Used by the park page's ring and the coaster
+  // page's "+ add". Resolves to the saved answer, or null if cancelled. Built
+  // at the end of <body>, fixed — never inside .hero, which clips (CLAUDE.md).
+  function confirmAdd(c, slug) {
+    return new Promise(function (resolve) {
+      var t = new Date(), today = t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
+      var wrap = document.createElement("div");
+      wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true");
+      wrap.style.cssText = "position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.45)";
+      wrap.innerHTML = '<div style="background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:20px;width:100%;max-width:360px;box-shadow:0 12px 40px var(--shadow)">'
+        + '<b style="display:block;font-size:1.05rem;line-height:1.3">Add ' + searchEsc(c.name) + ' to your credits?</b>'
+        + '<span style="display:block;color:var(--muted);font-size:.86rem;margin-top:2px">' + searchEsc(c.park || "") + '</span>'
+        + '<label for="ca_date" style="display:block;font-size:.78rem;color:var(--muted);margin:16px 0 6px">First ridden <span style="opacity:.8">(optional)</span></label>'
+        + '<input id="ca_date" type="date" max="' + today + '" style="width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px">'
+        + '<p id="ca_msg" style="color:var(--bad);font-size:.84rem;margin:8px 0 0;min-height:1em"></p>'
+        + '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">'
+        + '<button type="button" id="ca_no" style="font:inherit;font-weight:600;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer">Cancel</button>'
+        + '<button type="button" id="ca_yes" style="font:inherit;font-weight:700;background:var(--accentfill);color:var(--onaccent);border:0;border-radius:10px;padding:9px 18px;cursor:pointer">Add</button>'
+        + '</div></div>';
+      document.body.appendChild(wrap);
+      var q = function (id) { return wrap.querySelector("#" + id); };
+      var close = function (v) { document.removeEventListener("keydown", key); wrap.remove(); resolve(v); };
+      var key = function (e) { if (e.key === "Escape") close(null); };
+      document.addEventListener("keydown", key);
+      wrap.addEventListener("click", function (e) { if (e.target === wrap) close(null); });
+      q("ca_no").onclick = function () { close(null); };
+      q("ca_yes").onclick = function () {
+        var d = q("ca_date").value || null;
+        if (d && d > today) { q("ca_msg").textContent = "That date hasn't happened yet."; return; }
+        q("ca_yes").disabled = true; q("ca_msg").textContent = "";
+        fetch("/api/rides", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ user: slug, d: d, entries: [{ c: c.id, n: 1 }] }) })
+          .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || ("error " + r.status)); return j; }); })
+          .then(function (j) { noteWrite(); close({ d: d, result: j }); })
+          .catch(function (e) { q("ca_yes").disabled = false; q("ca_msg").textContent = "Couldn't add it: " + (e.message || e); });
+      };
+      q("ca_yes").focus();
+    });
+  }
+  // "Remove <coaster> from your credits?" (Carter, 2026-09-27: "for removing
+  // coasters you can go here click your ride and a remove popup comes up").
+  // Deletes every ride of that coaster row (DELETE /api/credit) and takes it
+  // out of the rider's ranking too — saving a ranking credits whatever it holds
+  // (creditRanked in worker.js), so leaving it ranked would bring it back.
+  function confirmRemove(c, slug, laps) {
+    return new Promise(function (resolve) {
+      var wrap = document.createElement("div");
+      wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true");
+      wrap.style.cssText = "position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.45)";
+      wrap.innerHTML = '<div style="background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:20px;width:100%;max-width:360px;box-shadow:0 12px 40px var(--shadow)">'
+        + '<b style="display:block;font-size:1.05rem;line-height:1.3">Remove ' + searchEsc(c.name) + ' from your credits?</b>'
+        + '<span style="display:block;color:var(--muted);font-size:.86rem;margin-top:6px">' + searchEsc(c.park || "")
+        + (laps > 1 ? ' &middot; all ' + laps + ' rides, dated ones included' : '') + '. It comes off your ranking too.</span>'
+        + '<p id="cr_msg" style="color:var(--bad);font-size:.84rem;margin:8px 0 0;min-height:1em"></p>'
+        + '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">'
+        + '<button type="button" id="cr_no" style="font:inherit;font-weight:600;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer">Cancel</button>'
+        + '<button type="button" id="cr_yes" style="font:inherit;font-weight:700;background:var(--bad);color:#fff;border:0;border-radius:10px;padding:9px 18px;cursor:pointer">Remove</button>'
+        + '</div></div>';
+      document.body.appendChild(wrap);
+      var q = function (id) { return wrap.querySelector("#" + id); };
+      var close = function (v) { document.removeEventListener("keydown", key); wrap.remove(); resolve(v); };
+      var key = function (e) { if (e.key === "Escape") close(false); };
+      document.addEventListener("keydown", key);
+      wrap.addEventListener("click", function (e) { if (e.target === wrap) close(false); });
+      q("cr_no").onclick = function () { close(false); };
+      var send = function (method, url, body) {
+        return fetch(url, { method: method, credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+          .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || ("error " + r.status)); return j; }); });
+      };
+      q("cr_yes").onclick = function () {
+        q("cr_yes").disabled = true; q("cr_msg").textContent = "";
+        fetch("/api/rankings/" + encodeURIComponent(slug), { cache: "no-store", credentials: "same-origin" })
+          .then(function (r) { return r.ok ? r.json() : { order: [] }; }).catch(function () { return { order: [] }; })
+          .then(function (k) {
+            var order = (k && k.order) || [];
+            var drop = order.indexOf(c.id) >= 0 ? send("PUT", "/api/rankings/" + encodeURIComponent(slug), { order: order.filter(function (x) { return x !== c.id; }) }) : Promise.resolve();
+            return drop.then(function () { return send("DELETE", "/api/credit", { user: slug, coaster_id: c.id }); });
+          })
+          .then(function () { noteWrite(); close(true); })
+          .catch(function (e) { q("cr_yes").disabled = false; q("cr_msg").textContent = "Couldn't remove it: " + (e.message || e); });
+      };
+      q("cr_no").focus();
+    });
+  }
   function monthYear(d) {
     var p = String(d).split("-");
     return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][(+p[1] || 1) - 1] + " " + p[0];
@@ -1457,7 +1557,7 @@
       return String(v).slice(0, 4);
     }
     if (c.type) kv(info, '<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
-    var amg = function (t) { return t ? '<i class="among">' + E(t) + '</i>' : ''; };
+    var amg = function (t) { return t ? '<i class="among" style="font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px">' + E(t) + '</i>' : ''; };
     if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
     if (c.model) kv(info, amg(among && among.model) + (c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model)), "Model");
     if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), "Opened"); else if (c.yr) kv(info, E(c.yr), "Opened");
@@ -1517,6 +1617,12 @@
       }
       e.preventDefault();
       if (isOpen) { nx.parentNode.removeChild(nx); row.classList.remove("open"); return; }
+      // One open at a time (Carter, 2026-09-27: "when you open one the other open
+      // one automatically closes").
+      Array.prototype.forEach.call(root.querySelectorAll(".cx"), function (o) {
+        var pr = o.previousElementSibling; if (pr) pr.classList.remove("open");
+        o.parentNode.removeChild(o);
+      });
       row.classList.add("open");
       var id = Number(row.getAttribute("data-cid"));
       var box, inner;
@@ -1835,7 +1941,7 @@
 
   var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
-              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, CLOSING_SOON: CLOSING_SOON, coasterHref: coasterHref,
+              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, amongIn: amongIn, confirmAdd: confirmAdd, confirmRemove: confirmRemove, CLOSING_SOON: CLOSING_SOON, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,

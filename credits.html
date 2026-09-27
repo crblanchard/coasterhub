@@ -1211,6 +1211,9 @@ var CreditList=(function(){
       if(!phone && !hasDet) return;          // nothing to open: links just work
       var open=tr.classList.contains('open');
       if(a){ if(open) return; e.preventDefault(); }
+      // One open at a time (2026-09-27): opening a row closes whichever was.
+      if(!open) Array.prototype.forEach.call($('c_body').querySelectorAll('tr.open'), function(o){
+        o.classList.remove('open'); var dd=o.nextElementSibling; if(dd && dd.classList.contains('det')) dd.classList.remove('on'); });
       tr.classList.toggle('open');
       if(hasDet && !phone) det.classList.toggle('on');
     });

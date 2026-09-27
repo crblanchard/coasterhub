@@ -4817,3 +4817,23 @@ browser per page load.
 - Carter: park and coaster pages otherwise stay as they are ("not much data ... can
   leave a little bit of open space"); "you rank it higher than most" waits for more users.
 - The Global tab's three figures use the profile's compact card style.
+
+## Wood fix, add/remove popups, one open row (2026-09-27)
+
+- **Migration 025** sets 48 Steel rows to Wood (Carter approved the "confident" list;
+  /edit's type picker defaulted to Steel). Matched on name+park and `type='Steel'`, so
+  reruns are no-ops; checked live: all 48 match. Snapshot dry run showed 41 because
+  coasters.json is stale. After running it, run the Sync static JSON action.
+- **Add asks first.** `CoasterHub.confirmAdd(c, slug)` — "Add X to your credits?" with an
+  optional first-ridden date (not in the future) — is what the park page's ring and the
+  coaster page's "+ add" call. A date makes it a dated ride (POST /api/rides d=date).
+- **Remove from your chip.** On a coaster page your own "You" chip opens
+  `CoasterHub.confirmRemove(row, slug, laps)`: it takes the coaster out of the rider's
+  ranking FIRST (PUT without it — `creditRanked` would otherwise re-credit it on the next
+  save), then DELETE /api/credit, which removes every ride of that row, dated ones too.
+- **One open at a time** in every coaster list: /rankings (STATOPEN reset), /credits'
+  table, park pages' details, and anything using `openableCoasters` (profile top ten,
+  /coasters, manufacturer, location).
+- Park pages' opened coaster: "Your ranking #78 of 236" instead of "Your rides", plus the
+  grey maker/model counts (`CoasterHub.amongIn(order, byId, c)`, now shared; the grey
+  style is inline in coasterFacts so it works on every page).

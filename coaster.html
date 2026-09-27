@@ -351,18 +351,19 @@ function riders(){
     }
     if(!shown.length) return;
     var moved=ROWS.length>1, ranked=false;
-    var chip=function(p, isMe){
+    var chip=function(p, isMe, row){
       var bits=[p.laps+' ride'+(p.laps===1?'':'s')];
       if(p.first) bits.push(String(p.first).slice(0,4));
       if(isMe && rank && !ranked){ bits.push('#'+rank+' in your ranking'); ranked=true; }
       return '<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'"'
+        +(isMe&&row?' data-rm="'+row.id+'" data-laps="'+p.laps+'" title="Tap to remove from your credits"':'')
         +(p.first?' title="First rode it '+esc(fmtDay(p.first))+'"':'')+'>'
         +(isMe?'You':esc(p.name))+'<i>'+esc(bits.join(' · '))+'</i></a>';
     };
     $('who_wrap').innerHTML='<div class="sect">Riders</div><div class="riders">'+shown.map(function(l){
       var r=l.row;
       var chips=(l.notYet?['<span class="chip notyet">You<i>none</i><button type="button" id="addme" title="Add it to your credits">+ add</button></span>']:[])
-        .concat(l.out.map(function(p){ return chip(p, l.mine===p); }));
+        .concat(l.out.map(function(p){ return chip(p, l.mine===p, l.row); }));
       var more=chips.length>CAP ? chips.length-CAP : 0;
       return (moved?'<p class="at">At <a href="'+esc(CoasterHub.parkHref(r.park))+'">'+esc(r.park)+'</a>'
           +(r.name!==C.name?' (as '+esc(r.name)+')':'')+'</p>':'')
@@ -377,12 +378,17 @@ function riders(){
     $('who_wrap').style.display='block';
     // "+ add": an undated credit for the ride's home row, the call /log's list
     // makes; then the chips redraw with you in them.
+    // Your own chip removes the credit, after asking (2026-09-27).
+    $('who_wrap').querySelectorAll('a[data-rm]').forEach(function(a){
+      a.onclick=function(e){
+        e.preventDefault();
+        var id=+a.getAttribute('data-rm'), row=ROWS.filter(function(x){ return x.id===id; })[0]||C;
+        CoasterHub.confirmRemove(row, me.slug, +a.getAttribute('data-laps')).then(function(ok){ if(ok) riders(); });
+      };
+    });
+    // Asks first, with an optional first-ridden date (2026-09-27).
     if($('addme')) $('addme').onclick=function(){
-      var b=this; b.disabled=true;
-      fetch('/api/rides',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},
-        body:JSON.stringify({user:me.slug, d:null, entries:[{c:C.id}]})})
-        .then(function(r){ if(!r.ok) throw new Error(r.status); CoasterHub.noteWrite(); return riders(); })
-        .catch(function(){ b.disabled=false; b.textContent='try again'; });
+      CoasterHub.confirmAdd(C, me.slug).then(function(ok){ if(ok) riders(); });
     };
   });
 }
