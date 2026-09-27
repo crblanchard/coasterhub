@@ -3922,9 +3922,12 @@ Read this before designing anything new. Carter's answers, in his words where he
   starter set (their biggest/most-ridden/most-ranked-by-others, say 10-20), the rest offered
   later in batches.
 
-Suggested order (proposed 2026-09-27, not yet agreed): (1) add to home screen, (2) the new
-five-tab nav with Me and Explore, (3) signed-out home + park-then-coasters onboarding,
-(4) guided head-to-head first ranking.
+Suggested order (proposed 2026-09-27): (1) add to home screen, (2) the new five-tab nav
+with Me and Explore, (3) signed-out home + park-then-coasters onboarding, (4) guided
+head-to-head first ranking. **Not agreed — and Carter's follow-up the same day sets the
+tone:** *"Ask before you do major changes such as bottom bar on mobile. It's pretty good as
+is so just looking for improvements."* Treat the list above as ideas to propose one at a
+time, not a plan to execute; the current nav and layout stay unless he says otherwise.
 
 ## No page zoom on phones, except /map (2026-09-27)
 

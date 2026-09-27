@@ -9,7 +9,11 @@ Static site (HTML/CSS/vanilla JS) on Cloudflare Workers, D1 for data, R2 for ava
 Live at coasterhub.org. **Push to `main` and it deploys** — no PRs, Carter's call.
 Carter, 2026-09-24: *"everything I say please push to main unless you need to clarify
 anything"* — so ship each ask straight to `main` without asking first, even when the
-session was started on a feature branch. And keep replies short: say what changed once,
+session was started on a feature branch. **Except major changes — ask first** (Carter, 2026-09-27: *"Ask before you do major changes
+such as bottom bar on mobile. It's pretty good as is so just looking for improvements"*).
+Navigation, page structure, a redesign of a whole page, anything that moves where things live:
+propose it and wait. Fixes and small improvements still go straight to `main`.
+And keep replies short: say what changed once,
 and leave out the local test-harness narration (still run the checks; just don't report them).
 
 ## What this sandbox can and cannot reach
