@@ -3970,6 +3970,14 @@ Carter picked these over the bigger plan ("1 2 maybe 3 maybe 4 ... both sound al
    not by code — the list is not cut down.
 4. **"See all credits →"** under the profile's Recent visits.
 
+**/install — the link to send people** (Carter: "is it easier to make others able to do
+that? Maybe a link I can provide"). No link can install a web app by itself — iOS only does
+it from the Share menu — so install.html shows the steps for the phone that opened it
+(iPhone/iPad or Android, switchable), Chrome's real one-tap **Install** button when the
+browser fires `beforeinstallprompt`, "You're all set" when it is already opened from the
+home screen, and a Share-link button for coasterhub.org/install. Listed on /sitemap; not in
+the nav (ask before adding it there).
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
