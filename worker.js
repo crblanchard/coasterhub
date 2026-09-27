@@ -740,7 +740,9 @@ const RESERVED_SLUGS = new Set(["api","user","users","admin","new","all","everyo
   "park", "coaster", "ride",
   "home","stats","rides","count","credits","rankings","coasters","parks","log","add","edit","import",
   "changes","database","qc","sitemap","index","account","accounts","login","logout",
-  "signup","signin","profile","riders","me","auth","session","settings"]);
+  "signup","signin","profile","riders","me","auth","session","settings",
+  // Pages at the site root that a rider slug would shadow (2026-09-27).
+  "welcome","install","map","locations","manufacturers"]);
 function slugify(s) {
   return String(s == null ? "" : s).toLowerCase()
     .normalize("NFD").replace(/[̀-ͯ]/g, "")

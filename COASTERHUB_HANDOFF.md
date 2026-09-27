@@ -3978,7 +3978,7 @@ browser fires `beforeinstallprompt`, "You're all set" when it is already opened 
 home screen, and a Share-link button for coasterhub.org/install. Listed on /sitemap; not in
 the nav (ask before adding it there).
 
-## New-user setup: the prototype and Carter's changes to it (2026-09-27, in progress)
+## New-user setup: the prototype and Carter's changes to it (2026-09-27, built as /welcome)
 
 Prototype (a private artifact, trial only, nothing saved):
 https://claude.ai/artifact/YSYJChPKzms2KHswRnwvP2 — account → pick parks → tick coasters
@@ -4001,6 +4001,39 @@ using the prototype as it is and sends changes FOR THE REAL SITE; collect them h
 5. **A live credit counter in the corner** while ticking coasters, bumping as it changes.
 
 Round 3 with 1-5: https://claude.ai/artifact/25ikHbLwC8SqmaSFQpe6fy
+
+### Built: /welcome (2026-09-27)
+
+Carter: *"Good enough for now. Make it say defunct/relocated instead of closed and 'check
+all' instead of 'tick all'. Push it"*. `welcome.html` is round 3 of the prototype on live
+data. What decides what:
+
+- **Signed out:** the first step is the real signup (`POST /api/auth/signup`, same as
+  /account), with a Sign in link to `/account?next=/welcome`. **/account's own signup
+  now lands on /welcome** instead of /log.
+- **Signed in, no credits:** straight to parks. Checks save as undated credits
+  (`POST /api/rides`, `d:null`, no `bulk` so the feed says "added N credits") when they
+  press *See my count* — before ranking, so skipping or closing the tab still leaves a
+  count. The ranking saves as `PUT /api/rankings/:slug`, the new top ten AHEAD of any
+  order already there (the PUT replaces the whole list).
+- **Signed in with credits (Carter, everybody existing):** PREVIEW, nothing saved, a
+  banner says so. `?preview=1` forces it.
+- Coaster rows: operating on top with *Check all*; below, **Defunct/relocated** — a
+  non-home row of a `same_ride` set is tagged *Relocated*, anything else closed
+  *Defunct*. The corner counter and every count use `rideKey`, so a relocated pair is
+  one credit.
+- Popular parks = distinct riders with a ride there (`/api/rides-all`).
+- The done screen links to the rider's profile, credits, rankings, /log and /install.
+- The empty-count startcards on /credits and the profile now say *Start your count* and
+  go to /welcome (the /import link is still beside it).
+- `welcome`, `install`, `map`, `locations`, `manufacturers` joined `RESERVED_SLUGS`:
+  profiles live at `/<slug>`, so a rider with one of those names would shadow the page.
+- Phone: the site's tab bar covers the bottom 74px and its + disc stands 20px above
+  it, so `.sticky` rides at `bottom:74px+safe-area` with 30px of padding.
+- Local testing: the dev server is always signed in (DEV_AS), so the signup step only
+  shows if you route `/api/auth/me` to `{account:null}`; after signing up, `/__be?slug=`
+  the new rider or the rankings PUT 401s (claimed rider, different session) — live, the
+  signup cookie makes that a non-issue.
 
 ## Possible future updates
 

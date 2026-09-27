@@ -273,9 +273,9 @@ wire($('form_up'), $('up_go'), $('up_msg'),
   '/api/auth/signup',
   function(d){
     // A brand new count has nothing on a profile page yet, so send them to the
-    // thing they came to do.
+    // setup: parks, then the coasters at each, then a first ranking (/welcome).
     try { localStorage.setItem('ch_rider', d.slug); } catch (e) {}
-    location.href = '/log';
+    location.href = '/welcome';
   });
 
 // ---- forgotten password ---------------------------------------------------

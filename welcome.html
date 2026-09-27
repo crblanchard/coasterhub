@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coaster Hub">
+<base href="/">
+<title>Welcome — Coaster Hub</title>
+<meta name="description" content="Start your coaster count: pick your parks, check the coasters you've ridden, and rank your favorites.">
+<link rel="stylesheet" href="/style.css?v=20260805b">
+<script>/* theme: set before paint so light mode never flashes dark (see initTheme in app.js) */try{if(localStorage.getItem("ch_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+<link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png?v=20260924b" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260924b">
+<meta property="og:title" content="Start your coaster count">
+<meta property="og:description" content="Pick your parks, check the coasters you've ridden, and rank your favorites.">
+<meta property="og:image" content="https://coasterhub.org/og-image.png?v=4">
+<style>
+  /* /welcome (2026-09-27): the new-user setup, built from round 3 of the
+     prototype Carter trialled (handoff: "New-user setup"). Account, then
+     parks, then the coasters at each park, then the count, then the ten
+     tallest ranked head to head. Everything is scoped under #wel so the
+     site's own .btn/.steps/h1 rules are not fighting it. */
+  #wel{--gone:#e0b04a;max-width:520px;margin:0 auto;padding:18px 0 40px}
+  :root[data-theme="light"] #wel{--gone:#9a6a12}
+  #wel .preview{background:var(--tint2);border-radius:12px;padding:10px 14px;font-size:.88rem;margin:0 0 6px}
+  #wel .preview b{color:var(--fg)}
+  #wel .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:6px 0 22px}
+  #wel .steps div{height:4px;border-radius:4px;background:var(--soft2)}
+  #wel .steps div.on{background:var(--accent2)}
+  #wel .steps div.now{background:var(--accentfill)}
+  #wel .eyebrow{color:var(--accent2);text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700}
+  #wel h1{font-size:2rem;line-height:1.08;font-weight:800;letter-spacing:-.02em;margin:6px 0 10px;text-wrap:balance}
+  #wel .lead{color:var(--muted);margin:0 0 18px}
+  #wel label.f{display:block;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px}
+  #wel input[type=text],#wel input[type=email],#wel input[type=password],#wel input[type=search]{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  #wel .go{display:flex;justify-content:center;align-items:center;width:100%;background:var(--accentfill);color:var(--onaccent);border:0;border-radius:12px;padding:14px 18px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+  #wel .go:disabled{opacity:.45;cursor:default}
+  #wel .go.alt{background:transparent;color:var(--fg);border:1px solid var(--line)}
+  #wel .row2{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+  #wel .small{font-size:.86rem}
+  #wel .muted{color:var(--muted)}
+  #wel .msg{color:var(--bad);font-size:.9rem;margin-top:10px;min-height:1em}
+  #wel .link{background:none;border:0;color:var(--accent2);font:inherit;font-weight:600;cursor:pointer;padding:0;text-decoration:none}
+  #wel .list{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:10px 0}
+  #wel .item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 14px;color:var(--fg);font:inherit;cursor:pointer}
+  #wel .item:last-child{border-bottom:0}
+  #wel .item:hover{background:var(--soft)}
+  #wel .item .tx{flex:1;min-width:0}
+  #wel .item .tx b{display:block;font-weight:600}
+  #wel .item .tx span{display:block;color:var(--muted);font-size:.84rem}
+  #wel .tick{flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center}
+  #wel .item.on .tick{background:var(--accent2);border-color:var(--accent2)}
+  #wel .item.on .tick::after{content:"";width:10px;height:6px;border:solid var(--bg);border-width:0 0 2.5px 2.5px;transform:rotate(-45deg) translate(1px,-1px)}
+  #wel .item.gone .tx b{color:var(--muted)}
+  #wel .tag{flex:none;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gone)}
+  #wel .sechead{display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 4px}
+  #wel .sechead h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0;font-weight:700}
+  #wel .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+  #wel .chip{display:inline-flex;align-items:center;gap:6px;background:var(--tint2);color:var(--fg);border:0;border-radius:999px;padding:6px 12px;font:inherit;font-size:.86rem;cursor:pointer}
+  #wel .chip i{font-style:normal;color:var(--muted)}
+  #wel .sticky{position:sticky;bottom:0;padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 70%,transparent)}
+  /* On a phone the site's tab bar sits at the bottom, and its + disc stands
+     20px above it: the buttons ride above both. */
+  @media (max-width:680px){
+    #wel .sticky{bottom:calc(74px + env(safe-area-inset-bottom,0px));padding-bottom:30px;background:linear-gradient(to top,var(--bg) 80%,transparent)}
+  }
+  #wel .big{font-size:3.4rem;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+  #wel .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+  #wel .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
+  #wel .tile b{display:block;font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums}
+  #wel .tile span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  #wel .vs{display:grid;gap:12px;margin:18px 0}
+  #wel .pick{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:left;font:inherit;color:var(--fg);cursor:pointer;transition:border-color .15s,transform .15s}
+  #wel .pick:hover{border-color:var(--accent2);transform:translateY(-1px)}
+  #wel .pick b{display:block;font-size:1.2rem;font-weight:800}
+  #wel .pick span{color:var(--muted);font-size:.86rem}
+  #wel .or{text-align:center;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.14em}
+  #wel .prog{height:6px;border-radius:6px;background:var(--soft2);overflow:hidden;margin:8px 0 0}
+  #wel .prog div{height:100%;background:var(--accent2);transition:width .25s}
+  #wel .rank{counter-reset:r;list-style:none;margin:10px 0;padding:0}
+  #wel .rank li{counter-increment:r;display:flex;gap:12px;align-items:baseline;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+  #wel .rank li::before{content:counter(r);color:var(--accent2);font-weight:800;min-width:1.4em;font-variant-numeric:tabular-nums}
+  #wel .rank li span{color:var(--muted);font-size:.84rem;margin-left:auto;text-align:right}
+  #wel .next{display:grid;gap:10px;margin-top:14px}
+  #wel a.note{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.92rem;color:var(--fg);text-decoration:none}
+  #wel a.note:hover{border-color:var(--ring)}
+  #wel a.note b{color:var(--accent2)}
+  #wel a.note span{display:block;color:var(--muted);font-size:.86rem;margin-top:2px}
+  #wel .empty{color:var(--muted);padding:16px 14px;font-size:.92rem}
+  #wel .srow{display:flex;gap:8px}
+  #wel .srow input{flex:1;min-width:0}
+  #wel .locbtn{flex:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--fg);font:inherit;font-weight:600;padding:0 14px;cursor:pointer}
+  #wel .locbtn.on{border-color:var(--accent2);color:var(--accent2)}
+  #wel .locpanel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px;max-height:340px;overflow-y:auto}
+  #wel .locpanel[hidden]{display:none}
+  #wel .lhead{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0 8px}
+  #wel .lhead b{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  #wel .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 12px;margin-bottom:10px}
+  #wel .lrow{display:flex;align-items:center;gap:8px;font-size:.92rem;padding:5px 0;cursor:pointer;color:var(--fg);margin:0}
+  #wel .lrow input{flex:none;width:18px;height:18px;margin:0;accent-color:var(--accent2)}
+  #wel .lrow span{min-width:0}
+  #wel .lrow i{font-style:normal;color:var(--muted);font-size:.8rem}
+  /* The running total while you check coasters (round 3): the number you are
+     building, always in view. Below the sticky header, which is 66px. */
+  #live{position:fixed;z-index:9;right:12px;top:calc(env(safe-area-inset-top,0px) + 76px);display:flex;align-items:baseline;gap:5px;
+    background:var(--panel);border:1px solid var(--accent2);border-radius:999px;padding:5px 11px;box-shadow:0 4px 14px var(--shadow)}
+  #live[hidden]{display:none}
+  #live b{font-size:1.05rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums}
+  #live span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  #live.bump{animation:bump .35s ease-out}
+  @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+  @media (prefers-reduced-motion:reduce){#wel *{transition:none!important}#live.bump{animation:none}}
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260924b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="riders">Home</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/log" data-nav="log" class="navlog">+ Log</a>
+    <a href="/credits" data-nav="count">Credits</a>
+    <a href="/account" data-nav="profile">Profile</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<div class="container"><div id="wel">
+  <div class="preview" id="preview" hidden></div>
+  <div class="steps" id="steps" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div></div>
+  <main id="view" aria-live="polite"><p class="muted">Loading&hellip;</p></main>
+</div></div>
+<div id="live" hidden><b id="liven">0</b><span id="livel">credits</span></div>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a><span data-contrib hidden></span></div>
+</div></footer>
+
+<script src="/app.js?v=20260805b"></script>
+<script>
+document.getElementById('y').textContent = new Date().getFullYear();
+var $=function(id){ return document.getElementById(id); };
+function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
+
+// Who is here decides what is real.
+//   signed out           -> the account step creates a real account
+//   signed in, 0 credits -> straight to parks; checks and the ranking SAVE
+//   signed in, credits   -> PREVIEW: the whole flow, nothing saved. A count
+//                           that already exists is not something a setup
+//                           screen should be writing into. ?preview=1 forces it.
+var ME=null, PREVIEW=false, HAD=0, OLD_ORDER=[];
+var PARKS=[], CO=[], BYID={}, POPULAR=[], REGIONS={us:[],rest:[],count:{}};
+
+function regionLabel(r){ return r==='US' ? 'United States (no state)' : /, US$/.test(r) ? r.replace(/, US$/,'') : r; }
+
+var S;
+function fresh(){ S={ regions:{}, regOpen:false, step:'account', parks:[], pi:0, ridden:{}, ranked:[], queue:[], cmp:null, cmps:0, total:0, saved:false }; }
+fresh();
+
+// Credits are RIDES, not rows: a coaster that moved parks is one credit
+// however many of its rows are checked (023-same-ride.sql).
+function checked(){ return CO.filter(function(c){ return S.ridden[c.id]; }); }
+function credits(){ var seen={}; return checked().filter(function(c){ if(seen[c.key]) return false; seen[c.key]=1; return true; }); }
+
+var STEP_ORDER={account:0,parks:1,coasters:2,count:2,rank:3,done:4};
+function go(step){ S.step=step; render(); window.scrollTo({top:0,behavior:'instant'}); }
+
+var lastLive=-1;
+function live(){
+  var on=S.step==='coasters', n=credits().length, el=$('live');
+  el.hidden=!on; if(!on){ lastLive=-1; return; }
+  $('liven').textContent=n; $('livel').textContent=n===1?'credit':'credits';
+  if(lastLive>=0 && n!==lastLive){ el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+  lastLive=n;
+}
+function render(){
+  var n=STEP_ORDER[S.step];
+  Array.prototype.forEach.call($('steps').children,function(d,i){ d.className = i<n ? 'on' : (i===n ? 'now' : ''); });
+  ({account:vAccount, parks:vParks, coasters:vCoasters, count:vCount, rank:vRank, done:vDone})[S.step]();
+  live();
+}
+function send(method, url, body){
+  return fetch(url,{method:method,credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return {ok:r.ok,status:r.status,data:d}; }); });
+}
+
+// ---- 1. account ------------------------------------------------------------
+// The real signup, the same call /account makes. Your name never fills in the
+// username (Carter: "make it not impact the username").
+function vAccount(){
+  $('view').innerHTML =
+    '<div class="eyebrow">Welcome</div><h1>Track your coaster count.</h1>'
+   +'<p class="lead">Rank your credits and log your rides. It takes about two minutes to get your count started.</p>'
+   +'<form id="f"><label class="f" for="a_name">Your name</label><input type="text" id="a_name" autocomplete="name" maxlength="40" placeholder="Werner Stengel" required>'
+   +'<label class="f" for="a_user">Username</label><input type="text" id="a_user" autocomplete="username" maxlength="32" placeholder="username" required>'
+   +'<label class="f" for="a_email">Email</label><input type="email" id="a_email" autocomplete="email" required>'
+   +'<label class="f" for="a_pw">Password</label><input type="password" id="a_pw" autocomplete="new-password" placeholder="At least 8 characters" required>'
+   +'<div style="margin-top:22px"><button class="go" type="submit" id="a_go">Create account</button></div>'
+   +'<div class="msg" id="a_msg"></div>'
+   +'<p class="small muted" style="margin-top:6px">Already have an account? <a class="link" href="/account?next=/welcome">Sign in</a></p></form>';
+  $('f').addEventListener('submit',function(e){
+    e.preventDefault();
+    $('a_go').disabled=true; $('a_msg').textContent='';
+    send('POST','/api/auth/signup',{ name:$('a_name').value, slug:$('a_user').value.trim().toLowerCase(),
+      email:$('a_email').value, password:$('a_pw').value }).then(function(r){
+      $('a_go').disabled=false;
+      if(!r.ok){ $('a_msg').textContent=r.data.error||('Something went wrong ('+r.status+').'); return; }
+      try { localStorage.setItem('ch_rider', r.data.slug); } catch (e) {}
+      ME={slug:r.data.slug, name:r.data.name||r.data.slug};
+      go('parks');
+    }).catch(function(){ $('a_go').disabled=false; $('a_msg').textContent='Could not reach the server — try again.'; });
+  });
+}
+
+// ---- 2. parks --------------------------------------------------------------
+function parkRow(p){
+  var on=S.parks.indexOf(p)>=0;
+  return '<button type="button" class="item'+(on?' on':'')+'" data-p="'+p.i+'"><span class="tick"></span>'
+    +'<span class="tx"><b>'+esc(p.name)+'</b><span>'+esc(p.region?regionLabel(p.region):'')+(p.region?' · ':'')+plural(p.coasters.length,'coaster')+'</span></span></button>';
+}
+function vParks(){
+  $('view').innerHTML =
+    '<div class="eyebrow">Step 1 of 2</div><h1>Which parks have you been to?</h1>'
+   +'<p class="lead">Pick every park you&rsquo;ve ridden a coaster at. Next you&rsquo;ll check the coasters at each one.</p>'
+   +'<div class="srow"><input type="search" id="pq" placeholder="Search '+PARKS.length+' parks" autocomplete="off">'
+   +'<button type="button" class="locbtn" id="locbtn" aria-expanded="false">Locations</button></div>'
+   +'<div class="locpanel" id="locpanel" hidden></div>'
+   +'<div class="chips" id="picked"></div>'
+   +'<div class="sechead"><h2 id="ph"></h2></div>'
+   +'<div class="list" id="plist"></div>'
+   +'<div class="sticky"><button class="go" id="pnext" type="button"></button></div>';
+  // The Locations filter, the way /log has it: check states and countries and
+  // the list is only parks there — every one of them, A-Z, when nothing is typed.
+  function locPanel(){
+    var row=function(r){ return '<label class="lrow"><input type="checkbox" data-r="'+esc(r)+'"'+(S.regions[r]?' checked':'')+'><span>'
+      +esc(regionLabel(r))+' <i>'+REGIONS.count[r]+'</i></span></label>'; };
+    $('locpanel').innerHTML='<div class="lhead"><b>United States</b><button type="button" class="link small" id="locclear">Clear</button></div>'
+      +'<div class="lgrid">'+REGIONS.us.map(row).join('')+'</div>'
+      +'<div class="lhead"><b>Other countries</b></div><div class="lgrid">'+REGIONS.rest.map(row).join('')+'</div>'
+      +'<div style="margin-top:12px"><button type="button" class="go alt" id="locdone">Done</button></div>';
+  }
+  function draw(){
+    var q=$('pq').value.trim().toLowerCase();
+    var regs=Object.keys(S.regions), inReg=function(p){ return !regs.length || S.regions[p.region]; };
+    var rows = q ? PARKS.filter(function(p){ return inReg(p) && (p.name+' '+p.region).toLowerCase().indexOf(q)>=0; }).slice(0,40)
+             : regs.length ? PARKS.filter(inReg)
+             : POPULAR;
+    $('locbtn').textContent = regs.length ? 'Locations · '+regs.length : 'Locations';
+    $('locbtn').classList.toggle('on', regs.length>0);
+    $('ph').textContent = q ? (rows.length?'Matching parks':'')
+      : regs.length ? plural(rows.length,'park')+' in '+(regs.length===1?regionLabel(regs[0]):plural(regs.length,'location'))
+      : 'Popular with Coaster Hub riders';
+    $('plist').innerHTML = rows.map(parkRow).join('') || '<div class="empty">No park called that yet. Try part of the name, or the city.</div>';
+    $('picked').innerHTML = S.parks.map(function(p){ return '<button type="button" class="chip" data-x="'+p.i+'">'+esc(p.name)+' <i>&times;</i></button>'; }).join('');
+    $('pnext').disabled = !S.parks.length;
+    $('pnext').textContent = S.parks.length ? 'Next: check coasters at '+plural(S.parks.length,'park') : 'Pick at least one park';
+  }
+  $('pq').addEventListener('input',draw);
+  $('locbtn').addEventListener('click',function(){
+    S.regOpen=!S.regOpen; $('locpanel').hidden=!S.regOpen; this.setAttribute('aria-expanded',S.regOpen); if(S.regOpen) locPanel();
+  });
+  $('locpanel').addEventListener('change',function(e){
+    var r=e.target.dataset && e.target.dataset.r; if(!r) return;
+    if(e.target.checked) S.regions[r]=1; else delete S.regions[r]; draw();
+  });
+  $('locpanel').addEventListener('click',function(e){
+    if(e.target.id==='locclear'){ S.regions={}; locPanel(); draw(); }
+    if(e.target.id==='locdone'){ S.regOpen=false; $('locpanel').hidden=true; $('locbtn').setAttribute('aria-expanded','false'); }
+  });
+  if(S.regOpen){ $('locpanel').hidden=false; locPanel(); }
+  $('view').onclick=function(e){
+    var r=e.target.closest('[data-p]'), x=e.target.closest('[data-x]');
+    var id = r ? +r.dataset.p : x ? +x.dataset.x : null; if(id==null) return;
+    var p=PARKS[id], at=S.parks.indexOf(p);
+    if(at>=0) S.parks.splice(at,1); else S.parks.push(p);
+    draw();
+  };
+  $('pnext').addEventListener('click',function(){ S.pi=0; go('coasters'); });
+  draw();
+}
+
+// ---- 3. coasters, one park at a time -----------------------------------------
+// "Defunct/relocated" rather than "closed" (Carter, 2026-09-27). A row that is
+// the OLD home of a ride that moved says Relocated; anything else closed says
+// Defunct.
+function vCoasters(){
+  var p=S.parks[S.pi];
+  var open=p.coasters.filter(function(c){ return !c.gone && !c.moved; }), gone=p.coasters.filter(function(c){ return c.gone || c.moved; });
+  var row=function(c){ return '<button type="button" class="item'+(S.ridden[c.id]?' on':'')+(c.gone||c.moved?' gone':'')+'" data-c="'+c.id+'"><span class="tick"></span>'
+      +'<span class="tx"><b>'+esc(c.name)+'</b><span>'+esc([c.model, c.h?c.h+' ft':'', c.yr||''].filter(Boolean).join(' · '))+'</span></span>'
+      +(c.moved?'<span class="tag">Relocated</span>':c.gone?'<span class="tag">Defunct</span>':'')+'</button>'; };
+  var last = S.pi===S.parks.length-1;
+  $('view').innerHTML =
+    '<div class="eyebrow">Park '+(S.pi+1)+' of '+S.parks.length+'</div><h1>'+esc(p.name)+'</h1>'
+   +'<p class="lead">Check the coasters you&rsquo;ve ridden here. You can add dates and re-rides later.</p>'
+   +'<div class="sechead"><h2>Operating</h2>'+(open.length?'<button type="button" class="link small" id="all">Check all</button>':'')+'</div>'
+   +'<div class="list">'+(open.map(row).join('')||'<div class="empty">None operating.</div>')+'</div>'
+   +(gone.length?'<div class="sechead"><h2>Defunct/relocated</h2></div><div class="list">'+gone.map(row).join('')+'</div>':'')
+   +'<div class="sticky"><div class="row2"><button class="go alt" type="button" id="cback">Back</button>'
+   +'<button class="go" type="button" id="cnext">'+(last?'See my count':'Next park')+'</button></div>'
+   +'<p class="small muted" id="ctally" style="text-align:center;margin:8px 0 0"></p></div>';
+  function tally(){ var n=p.coasters.filter(function(c){ return S.ridden[c.id]; }).length;
+    $('ctally').textContent = plural(n,'coaster')+' checked here'; live(); }
+  $('view').onclick=function(e){
+    var r=e.target.closest('[data-c]'); if(!r) return;
+    var id=+r.dataset.c; if(S.ridden[id]) delete S.ridden[id]; else S.ridden[id]=1;
+    r.classList.toggle('on',!!S.ridden[id]); tally();
+  };
+  if($('all')) $('all').onclick=function(e){ e.stopPropagation(); open.forEach(function(c){ S.ridden[c.id]=1; }); vCoasters(); };
+  $('cback').onclick=function(e){ e.stopPropagation(); if(S.pi>0){ S.pi--; vCoasters(); window.scrollTo({top:0,behavior:'instant'}); } else go('parks'); };
+  $('cnext').onclick=function(e){ e.stopPropagation(); if(!last){ S.pi++; vCoasters(); window.scrollTo({top:0,behavior:'instant'}); } else saveCredits(); };
+  tally();
+}
+
+// The checks become credits here, before the ranking, so skipping the ranking
+// (or closing the tab during it) still leaves a count. Undated rows: the same
+// call /log's "Add credits" list makes, which adds nothing for a coaster the
+// rider already has.
+function saveCredits(){
+  var ids=checked().map(function(c){ return c.id; });
+  if(PREVIEW || !ids.length){ go('count'); return; }
+  $('cnext').disabled=true; $('cnext').textContent='Saving…';
+  send('POST','/api/rides',{ user:ME.slug, d:null, entries:ids.map(function(id){ return {c:id}; }) }).then(function(r){
+    if(!r.ok) throw new Error(r.data.error||('error '+r.status));
+    S.saved=true; CoasterHub.noteWrite(); go('count');
+  }).catch(function(e){
+    $('cnext').disabled=false; $('cnext').textContent='Try again';
+    $('ctally').textContent='Could not save your credits: '+(e.message||e);
+  });
+}
+
+// ---- the count ---------------------------------------------------------------
+var STARTN=10;
+// What a starter set costs, typically: binary insertion, median over random
+// orders (10 coasters: 19-25, usually 22).
+function typical(n){ return ({2:1,3:3,4:5,5:7,6:10,7:13,8:16,9:19,10:22})[n] || estimate(n); }
+function tallest(cs){ return cs.slice().sort(function(a,b){ return (b.h||0)-(a.h||0) || a.name.localeCompare(b.name); }); }
+function vCount(){
+  var cs=credits(), parks={}, tall=null;
+  checked().forEach(function(c){ parks[c.park.name]=1; });
+  cs.forEach(function(c){ if(!tall||(c.h||0)>(tall.h||0)) tall=c; });
+  $('view').innerHTML =
+    '<div class="eyebrow">Your count</div><div class="big" id="bign">0</div><h1 style="margin-top:4px">'+(cs.length===1?'coaster.':'coasters.')+'</h1>'
+   +'<div class="tiles"><div class="tile"><b>'+Object.keys(parks).length+'</b><span>Parks</span></div>'
+   +'<div class="tile"><b>'+cs.filter(function(c){ return !c.gone && !c.moved; }).length+'</b><span>Still open</span></div>'
+   +'<div class="tile"><b>'+(tall&&tall.h?tall.h+' ft':'—')+'</b><span>Tallest</span></div></div>'
+   +(cs.length?'<p class="lead">Now rank them. We&rsquo;ll start with your '+(cs.length>STARTN?STARTN+' tallest':(cs.length===1?'one coaster':plural(cs.length,'coaster')))
+       +(cs.length>1?' &mdash; about '+typical(Math.min(STARTN,cs.length))+' quick choices between two. The rest can come later.':'.')+'</p>'
+     +'<button class="go" type="button" id="toRank">'+(cs.length>STARTN?'Rank my top '+STARTN:'Rank them')+'</button><div style="margin-top:10px"><button class="go alt" type="button" id="skip">Skip for now</button></div>'
+     :'<p class="lead">Nothing checked yet. Go back and check the coasters you&rsquo;ve ridden.</p><button class="go" type="button" id="back">Back to parks</button>');
+  var target=cs.length, el=$('bign'), t0=performance.now();
+  (function tick(now){ var k=Math.min(1,Math.max(0,(now-t0)/700)); el.textContent=Math.round(target*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(tick); })(t0);
+  // No picking step (Carter: "don't ask people to choose which rides they
+  // rank - maybe default to 10 tallest"): the ten tallest, straight in.
+  if($('toRank')) $('toRank').onclick=function(){
+    var pick=tallest(cs).slice(0,STARTN);
+    if(pick.length<2){ S.ranked=pick; finish(); return; }
+    for(var i=pick.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=pick[i]; pick[i]=pick[j]; pick[j]=t; }
+    S.ranked=[pick.shift()]; S.queue=pick; S.cmps=0; S.total=estimate(pick.length+1); nextItem(); go('rank');
+  };
+  if($('skip')) $('skip').onclick=function(){ S.ranked=[]; go('done'); };
+  if($('back')) $('back').onclick=function(){ go('parks'); };
+}
+// Binary insertion: each new coaster finds its place in about log2(n) choices.
+function estimate(n){ var t=0; for(var k=1;k<n;k++) t+=Math.ceil(Math.log2(k+1)); return t; }
+function nextItem(){ S.cmp = S.queue.length ? {item:S.queue.shift(), lo:0, hi:S.ranked.length} : null; }
+
+// ---- 4. head to head --------------------------------------------------------
+function vRank(){
+  if(!S.cmp){ finish(); return; }
+  var c=S.cmp, mid=(c.lo+c.hi)>>1, other=S.ranked[mid];
+  var card=function(x,side){ return '<button type="button" class="pick" data-side="'+side+'"><b>'+esc(x.name)+'</b><span>'+esc(x.park.name)+(x.h?' · '+x.h+' ft':'')+'</span></button>'; };
+  var pct=Math.min(100,Math.round(100*S.cmps/Math.max(1,S.total)));
+  $('view').innerHTML =
+    '<div class="eyebrow">Rank your top '+(S.ranked.length+S.queue.length+1)+'</div><h1>Which did you like more?</h1>'
+   +'<div class="prog"><div style="width:'+pct+'%"></div></div>'
+   +'<p class="small muted" style="margin:6px 0 0">'+plural(S.cmps,'choice')+' made · about '+Math.max(0,S.total-S.cmps)+' to go</p>'
+   +'<div class="vs">'+card(c.item,'new')+'<div class="or">or</div>'+card(other,'old')+'</div>'
+   +'<button type="button" class="link small" id="rstop">Stop here and keep what&rsquo;s ranked</button>';
+  $('view').onclick=function(e){
+    var b=e.target.closest('[data-side]'); if(!b) return;
+    S.cmps++;
+    if(b.dataset.side==='new') c.hi=mid; else c.lo=mid+1;
+    if(c.lo>=c.hi){ S.ranked.splice(c.lo,0,c.item); nextItem(); }
+    render();
+  };
+  $('rstop').onclick=function(e){ e.stopPropagation(); S.queue=[]; S.cmp=null; finish(); };
+}
+
+// The ranking is saved as the rider's order, ahead of anything already in it
+// (a PUT replaces the whole list, so an existing order is kept behind).
+function finish(){
+  if(PREVIEW || !S.ranked.length){ go('done'); return; }
+  var top=S.ranked.map(function(c){ return c.id; }), inTop={};
+  top.forEach(function(id){ inTop[id]=1; });
+  var order=top.concat(OLD_ORDER.filter(function(id){ return !inTop[id]; }));
+  $('view').innerHTML='<p class="muted">Saving your ranking&hellip;</p>';
+  send('PUT','/api/rankings/'+encodeURIComponent(ME.slug),{order:order}).then(function(r){
+    S.rankSaved=r.ok; S.rankErr=r.ok?'':(r.data.error||('error '+r.status));
+    if(r.ok) CoasterHub.noteWrite();
+    go('done');
+  }).catch(function(){ S.rankSaved=false; S.rankErr='could not reach the server'; go('done'); });
+}
+
+// ---- 5. done: where to go from here -------------------------------------------
+function vDone(){
+  var cs=credits(), rest=cs.length-S.ranked.length, parks={};
+  checked().forEach(function(c){ parks[c.park.name]=1; });
+  var slug=ME&&ME.slug, H=function(page){ return CoasterHub.userPageHref(slug,page); };
+  var link=function(href,title,sub){ return '<a class="note" href="'+esc(href)+'"><b>'+title+' &rarr;</b><span>'+sub+'</span></a>'; };
+  $('view').innerHTML =
+    '<div class="eyebrow">'+(slug?'@'+esc(slug):'Done')+'</div><h1>'+(PREVIEW?'That&rsquo;s the setup.':'Your count is started.')+'</h1>'
+   +(PREVIEW?'<p class="lead">Preview &mdash; none of that was saved.</p>':'')
+   +(S.rankErr?'<p class="msg">Your ranking did not save ('+esc(S.rankErr)+'). You can redo it on the Rankings page.</p>':'')
+   +'<div class="tiles"><div class="tile"><b>'+cs.length+'</b><span>Coasters</span></div><div class="tile"><b>'+Object.keys(parks).length+'</b><span>Parks</span></div><div class="tile"><b>'+S.ranked.length+'</b><span>Ranked</span></div></div>'
+   +(S.ranked.length?'<div class="sechead"><h2>Your top '+Math.min(10,S.ranked.length)+'</h2></div><ol class="rank">'
+      +S.ranked.slice(0,10).map(function(c){ return '<li><b>'+esc(c.name)+'</b><span>'+esc(c.park.name)+'</span></li>'; }).join('')+'</ol>'
+      +(S.cmps?'<p class="small muted" style="margin:0">'+plural(S.cmps,'choice')+' to rank '+plural(S.ranked.length,'coaster')+'.</p>':''):'')
+   +'<div class="sechead"><h2>What&rsquo;s next</h2></div><div class="next">'
+   +link(H('profile'),'Your profile','Your count, top ten and recent visits &mdash; what friends see.')
+   +link(H('count'),'Your credits','Every coaster you&rsquo;ve ridden, by park, with filters.')
+   +link(H('rankings'),'Rankings',rest>0?'Rank the rest &mdash; '+plural(rest,'credit')+' to go, a few at a time.':'Reorder your list any time.')
+   +link('/log','+ Log','At a park? Record today&rsquo;s rides, re-rides included.')
+   +link('/install','Add it to your home screen','Opens full-screen with its own icon, like an app.')
+   +'</div>'
+   +(PREVIEW?'<div style="margin-top:18px"><button class="go alt" type="button" id="again">Run the preview again</button></div>':'');
+  if($('again')) $('again').onclick=function(){ fresh(); go('parks'); };
+}
+
+// ---- boot ------------------------------------------------------------------
+Promise.all([
+  CoasterHub.fetchCoasters(),
+  CoasterHub.fetchParks().catch(function(){ return {}; }),
+  CoasterHub.fetchAllRides(),
+  CoasterHub.me()
+]).then(function(r){
+  var list=r[0], pmeta=r[1]||{}, riders=r[2]||[], acct=r[3];
+  var byName={};
+  (list.coasters||[]).forEach(function(c){
+    var p=byName[c.park] || (byName[c.park]={name:c.park, region:(pmeta[c.park]&&pmeta[c.park].region)||'', coasters:[], riders:0});
+    var o={ id:c.id, name:c.name, park:p, h:c.h, yr:c.yr, model:c.model, gone:!!c.closed,
+            key:CoasterHub.rideKey(c), moved:!!(c.same && c.same!==c.id) };
+    p.coasters.push(o); CO.push(o); BYID[c.id]=o;
+  });
+  PARKS=Object.keys(byName).map(function(k){ return byName[k]; }).sort(function(a,b){ return a.name.localeCompare(b.name); });
+  PARKS.forEach(function(p,i){ p.i=i; p.coasters.sort(function(a,b){ return a.name.localeCompare(b.name); }); });
+  // Popular = how many riders have ridden something there.
+  riders.forEach(function(u){ var seen={};
+    (u.rides||[]).forEach(function(x){ var c=BYID[x.c]; if(c && !seen[c.park.name]){ seen[c.park.name]=1; c.park.riders++; } }); });
+  POPULAR=PARKS.slice().sort(function(a,b){ return b.riders-a.riders || b.coasters.length-a.coasters.length; }).slice(0,16);
+  var n={}; PARKS.forEach(function(p){ if(p.region) n[p.region]=(n[p.region]||0)+1; });
+  REGIONS={ us:Object.keys(n).filter(function(r){ return /, US$/.test(r); }).sort(),
+            rest:Object.keys(n).filter(function(r){ return !/, US$/.test(r); }).sort(), count:n };
+
+  if(!acct || !acct.slug){ go('account'); return; }
+  ME={slug:acct.slug};
+  return CoasterHub.you().then(function(y){
+    HAD = y ? Object.keys(y.rides).length : 0;
+    PREVIEW = HAD>0 || new URLSearchParams(location.search).get('preview')==='1';
+    if(PREVIEW){
+      $('preview').hidden=false;
+      $('preview').innerHTML='<b>Preview.</b> '+(HAD?'Your count already has '+plural(HAD,'coaster')+', so nothing':'Nothing')
+        +' here is saved &mdash; this is what a new rider sees after signing up.';
+    }
+    return fetch('/api/rankings/'+encodeURIComponent(acct.slug),{cache:'no-store',credentials:'same-origin'})
+      .then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })
+      .then(function(k){ OLD_ORDER=(k&&k.order)||[]; go('parks'); });
+  });
+}).catch(function(e){
+  $('view').innerHTML='<p class="msg">Could not load the coaster list ('+esc(e&&e.message||e)+'). Try reloading.</p>';
+});
+
+CoasterHub.initNav('welcome');
+</script>
+</body>
+</html>
