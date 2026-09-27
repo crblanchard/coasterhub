@@ -225,9 +225,9 @@
   button.catpill{font-family:inherit;cursor:pointer;color:var(--fg)}
   /* Filtered and editing: no dragging (the rows in between are hidden); the
      arrows move a ride past the next one shown, then ask about the gap. */
-  /* Filtered and editing: a single ride drags (drop it on another shown ride and
-     it goes past it — moveFilteredTo); a category does not move. */
-  #mine.mf:not(.readonly) .rrow.grp > .grip,#mine.mf:not(.readonly) .rrow.grp .acts,
+  /* Filtered and editing: a ride or a whole category drags (drop it on another
+     shown row and it goes past it — moveFilteredTo). Reordering INSIDE a
+     category waits for the filter to be cleared. */
   #mine.mf:not(.readonly) .rrow .mrow .grip{visibility:hidden}
   .mfpanel{flex:0 0 100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:2px}
   .mfpanel[hidden]{display:none}
@@ -934,12 +934,12 @@ function wire(){
   // Cancel stops a Rank-more batch too, keeping what it had already placed.
   $('hh_cancel').onclick=function(){
     // A filtered move took the ride out of the list first: put it back.
-    if(hh && hh.restore!=null){ ORDER.splice(hh.restore,0,hh.id); closeHH(); renderRank(); return; }
+    if(hh && hh.restore!=null){ ORDER.splice.apply(ORDER,[hh.restore,0,hh.id].concat(hh.mates||[])); closeHH(); renderRank(); return; }
     var was=!!RQ; RQ=null; closeHH(); if(was && dirty) save(); };
   $('hh_skip').onclick=function(){
     if(!hh || hh.skipAt==null) return;
     var at = hh.skipAt<hh.B.length ? hh.B[hh.skipAt] : ORDER.length;
-    ORDER.splice(at,0,hh.id); closeHH(); markDirty(); renderRank(); };
+    ORDER.splice.apply(ORDER,[at,0,hh.id].concat(hh.mates||[])); closeHH(); markDirty(); renderRank(); };
   // Rotating the phone changes what fits, so re-decide. fitMeta() clears its
   // own state first, which means speed comes back when there's room again.
   var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(fitMeta,120); });
@@ -1462,7 +1462,7 @@ function move(i,d){
 // everything else in that gap?"). ↓ takes it past the next ride SHOWN; that
 // ride and the one shown after it are the bounds, and the head-to-head asks
 // only about the hidden rides between them. "Just put it after …" skips the
-// questions; Cancel puts it back where it was. Categories do not move here.
+// questions; Cancel puts it back where it was. A category moves as one block.
 function moveFiltered(i, d){
   var bs=blocks(), at=-1, k;
   for(k=0;k<bs.length;k++) if(i>=bs[k].from&&i<=bs[k].to){ at=k; break; }
@@ -1474,18 +1474,19 @@ function moveFiltered(i, d){
 // Block `at` goes past shown block `t` (a drop, or one arrow press).
 function moveFilteredTo(at, t){
   var bs=blocks();
-  if(at===t || !bs[at] || bs[at].g) return;
+  if(at===t || !bs[at]) return;
   var vis=[]; bs.forEach(function(b,x){ if(mfMatch(b)) vis.push(x); });
   var d = t>at ? 1 : -1, v=vis.indexOf(t);
-  var id=bs[at].ids[0], was=ORDER.indexOf(id);
+  // A category moves as one block, placed the way Rank more places a family.
+  var ids=bs[at].ids.slice(), id=ids[0], was=bs[at].from;
   var past=bs[t].ids[0];                                  // the ride it moves past
   var beyond=vis[v+d]!=null ? bs[vis[v+d]].ids[0] : null;  // the next one shown after that
-  ORDER.splice(was,1);
+  ORDER.splice(was,ids.length);
   var B2=blocks(), where=function(x){ for(var q=0;q<B2.length;q++) if(B2[q].ids.indexOf(x)>=0) return q; return -1; };
   var lo, hi;
   if(d>0){ lo=where(past)+1; hi= beyond!=null ? where(beyond) : B2.length; }
   else   { hi=where(past);   lo= beyond!=null ? where(beyond)+1 : 0; }
-  hh={id:id, mates:[], g:null, B:B2.map(function(b){ return b.from; }), lo:lo, hi:hi, asked:0, cmp:{},
+  hh={id:id, mates:ids.slice(1), g:bs[at].g||null, B:B2.map(function(b){ return b.from; }), lo:lo, hi:hi, asked:0, cmp:{},
       restore:was, skipAt: d>0 ? lo : hi,
       skipLabel: 'Just put it '+(d>0?'after ':'above ')+((BYID[past]||{}).name||'it')};
   // The bounds are already decided — do not ask about them again.

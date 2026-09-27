@@ -4904,3 +4904,8 @@ head-to-head and stops a Rank more batch.
   shown row under the pointer gets `.over`, and the drop calls `moveFilteredTo(from,
   over)`, the same bounded head-to-head the arrows use (arrows now go through it too).
   Category rows and category members still do not move while filtered.
+- And categories move while filtered too (Carter: "let categories move while filtered
+  too"): `moveFilteredTo` lifts the whole block, and `hh` places it as a family
+  (`mates`, `g` — the card reads "Batman clones · B&M Invert · 8 in your count").
+  Skip and Cancel put back all of its rides. Only reordering INSIDE a category (the
+  member grips) still waits for the filter to be cleared.
