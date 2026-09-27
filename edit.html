@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Editor — Coaster Hub</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="dark light">
@@ -151,7 +151,9 @@
   /* A bare `label` rule above upper-cases every label as a field caption; this one is a sentence, so it reads like the hint beside it. */
   .toolbar .dropRides{display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;color:var(--ink);text-transform:none;letter-spacing:0;font-size:.85rem;font-weight:400}
   .toolbar .dropRides input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--btn-bg)}
-  /* No iOS zoom on focus — the same rule as style.css, which this page does not load. */
+  /* No page zoom on a phone — the same rules as style.css and app.js, which
+     this page does not load. */
+  html,body{touch-action:pan-x pan-y}
   @supports (-webkit-touch-callout:none){
     input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px !important}
   }

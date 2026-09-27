@@ -1776,6 +1776,21 @@
     e.preventDefault(); openSearch();
   });
 
+  // ---- No zooming the page on a phone (Carter, 2026-09-27: "disable zoom
+  // altogether on mobile ... except for map purposes") ------------------------
+  // Three parts, because iOS Safari ignores user-scalable=no on its own: the
+  // viewport meta (maximum-scale=1, every page but /map) stops the zoom-in on a
+  // focused field, html.nozoom's touch-action stops pinch and double-tap zoom,
+  // and gesturestart is Safari's own pinch event. /map is left zoomable
+  // entirely, and a Leaflet map anywhere else (the profile's) keeps its pinch:
+  // Leaflet zooms the MAP with touch events, and the gesture block skips it.
+  if (typeof document !== "undefined" && !/^\/map(\/|$)/.test(location.pathname)) {
+    document.documentElement.classList.add("nozoom");
+    document.addEventListener("gesturestart", function (e) {
+      if (!(e.target && e.target.closest && e.target.closest(".leaflet-container"))) e.preventDefault();
+    }, { passive: false });
+  }
+
   var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, coasterHref: coasterHref,

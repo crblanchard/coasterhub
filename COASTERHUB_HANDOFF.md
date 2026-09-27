@@ -3926,6 +3926,28 @@ Suggested order (proposed 2026-09-27, not yet agreed): (1) add to home screen, (
 five-tab nav with Me and Explore, (3) signed-out home + park-then-coasters onboarding,
 (4) guided head-to-head first ranking.
 
+## No page zoom on phones, except /map (2026-09-27)
+
+Carter: *"every time I click search on mobile it zooms in"*, then *"disable zoom altogether on
+mobile ... except for map purposes"*. Four parts, because iOS Safari ignores
+`user-scalable=no` by itself:
+
+- **Fields are 16px on iOS** (style.css, `@supports (-webkit-touch-callout:none)`): Safari
+  zooms into any focused field under 16px, and nearly every field here was 13-15px. Desktop
+  sizes are untouched. edit.html, which does not load style.css, repeats it.
+- **Viewport** `maximum-scale=1.0, user-scalable=no` on every page but map.html.
+- **`html.nozoom{touch-action:pan-x pan-y}`** (style.css; app.js adds the class everywhere but
+  /map) — no pinch or double-tap zoom, scrolling unchanged.
+- **`gesturestart` preventDefault** (app.js) — Safari's own pinch — skipped inside a
+  `.leaflet-container`, so the profile's map still pinch-zooms (Leaflet zooms the map with
+  touch events and sets its own touch-action). The rankings drag grip sets its own
+  `touch-action:none`, so reordering is unaffected.
+
+**A new page needs the same viewport meta** (copy it from index.html). A new zoomable thing
+(an image viewer, say) needs to be skipped in the gesturestart handler the way Leaflet is.
+None of this can be tested here — Chromium does not match the iOS `@supports` or fire
+`gesturestart` — so check new work on a real iPhone.
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
