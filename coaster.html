@@ -70,6 +70,10 @@
   .chips .chip{display:flex;align-items:baseline;gap:7px;border-radius:999px;padding:7px 13px;
                font-size:.85rem;color:var(--muted);background:transparent;border:1px dashed var(--line)}
   .chips .notyet{font-weight:600;gap:10px}
+  /* The one way to add it from here, kept quiet (Carter, 2026-09-27: "kinda
+     subtle"): a small link inside the "You · none" chip. */
+  .chips .notyet button{background:none;border:0;padding:0;font:inherit;font-size:.8rem;font-weight:600;color:var(--accent2);cursor:pointer}
+  .chips .notyet button:disabled{opacity:.5;cursor:default}
   .chips button.more{cursor:pointer;font:inherit;font-size:.85rem;border-style:solid;color:var(--accent2)}
   .chips button.more:hover{border-color:var(--accent2)}
   /* The folded chips join the row as if they had always been in it. */
@@ -354,7 +358,7 @@ function riders(){
     };
     $('who_wrap').innerHTML='<div class="sect">Riders</div><div class="riders">'+shown.map(function(l){
       var r=l.row;
-      var chips=(l.notYet?['<span class="chip notyet">You<i>none</i></span>']:[])
+      var chips=(l.notYet?['<span class="chip notyet">You<i>none</i><button type="button" id="addme" title="Add it to your credits">+ add</button></span>']:[])
         .concat(l.out.map(function(p){ return chip(p, l.mine===p); }));
       var more=chips.length>CAP ? chips.length-CAP : 0;
       return (moved?'<p class="at">At <a href="'+esc(CoasterHub.parkHref(r.park))+'">'+esc(r.park)+'</a>'
@@ -368,6 +372,15 @@ function riders(){
       b.onclick=function(){ var r=b.previousElementSibling; r.hidden=false; b.remove(); };
     });
     $('who_wrap').style.display='block';
+    // "+ add": an undated credit for the ride's home row, the call /log's list
+    // makes; then the chips redraw with you in them.
+    if($('addme')) $('addme').onclick=function(){
+      var b=this; b.disabled=true;
+      fetch('/api/rides',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},
+        body:JSON.stringify({user:me.slug, d:null, entries:[{c:C.id}]})})
+        .then(function(r){ if(!r.ok) throw new Error(r.status); CoasterHub.noteWrite(); return riders(); })
+        .catch(function(){ b.disabled=false; b.textContent='try again'; });
+    };
   });
 }
 </script>

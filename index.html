@@ -61,6 +61,8 @@
   .hint a{color:var(--accent2)}
   /* Inside #friends the list already carries the gap below it. */
   #friends .hint{margin-bottom:0}
+  /* Under the join pills: what signing up leads to (/welcome). */
+  .hero .herojoin .joinnote{flex-basis:100%;color:var(--muted);font-size:.86rem}
 </style>
 </head>
 <body>
@@ -92,8 +94,9 @@
        by the script below once /api/auth/me has answered, so a signed-in rider
        never sees a "Log in" button flash past. -->
   <p class="herojoin" id="joinrow" hidden>
-    <a class="btn" href="/account?tab=up">Create account</a>
+    <a class="btn" href="/account?tab=up">Start your count</a>
     <a class="btn alt" href="/account">Log in</a>
+    <span class="joinnote">Free. Pick your parks, check off your coasters, rank your favorites &mdash; about two minutes.</span>
   </p>
 </div></section>
 

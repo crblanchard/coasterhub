@@ -4568,3 +4568,21 @@ matched loosely *within* a park; park names cannot be matched loosely at all.
    `UPDATE OR IGNORE credits SET coaster_id=<to> WHERE coaster_id=<from>`, same for `rides`,
    then delete the loser **guarded** by `AND id NOT IN (SELECT coaster_id FROM credits UNION
    SELECT coaster_id FROM rides)`. Afterwards confirm every rider's credit count is unchanged.
+
+
+## Quick adds and the homepage join line (2026-09-27)
+
+From the list of four Carter approved ("yes 1 2 3 4"; he kept /welcome as where
+sign-up lands, and wants the homepage to send people to sign-up itself):
+
+- **Park pages:** signed in, a coaster you have not ridden has a faint ring in the
+  check column. Tap it: an undated credit (`POST /api/rides`, `d:null`). Tap the new
+  check again in the same visit to take it back (`DELETE /api/credit` — safe only
+  because there was no row before). Older checks are not tappable. The tap is caught
+  before `<summary>` toggles the row.
+- **Coaster pages:** the "You · none" chip has a small "+ add" inside it; after it
+  saves, the chips redraw with you in them. Adds the ride's home row.
+- Carter on both: *"keep them kinda subtle because if someone has their account
+  fully set up they won't need to use those regularly"*. No buttons, no banners.
+- **Homepage (signed out):** "Create account" is now "Start your count" (still
+  `/account?tab=up`), with one line under it on what happens next.
