@@ -285,6 +285,8 @@
   .pick:hover{border-color:var(--accent2);background:var(--tint)}
   .pick b{display:block;font-size:.98rem;margin-bottom:4px}
   .pick span{color:var(--muted);font-size:.78rem}
+  /* The model under the park (Carter, 2026-09-27: "below coaster & park do model too"). */
+  .pick span.mdl{display:block;margin-top:2px}
   .vsx{align-self:center;color:var(--muted);font-weight:800;font-size:.85rem}
   .joinrow{display:flex;gap:10px;align-items:center;justify-content:space-between;
            border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
@@ -2008,8 +2010,9 @@ function stepHH(){
   }
   $('hh_sub').textContent='Placing '+aName
     +(hh.g ? ' ('+n+' rides, as one)' : '')+' — every pick narrows it to one exact spot.';
-  $('hh_a').innerHTML='<b>'+esc(aName)+'</b><span>'+esc(aSub)+'</span>';
-  $('hh_b').innerHTML='<b>'+esc(bName)+'</b><span>'+esc(bSub)+'</span>';
+  var aMdl = hh.g ? '' : CoasterHub.maker(a), bMdl = bg ? '' : CoasterHub.maker(b);
+  $('hh_a').innerHTML='<b>'+esc(aName)+'</b><span>'+esc(aSub)+'</span>'+(aMdl?'<span class="mdl">'+esc(aMdl)+'</span>':'');
+  $('hh_b').innerHTML='<b>'+esc(bName)+'</b><span>'+esc(bSub)+'</span>'+(bMdl?'<span class="mdl">'+esc(bMdl)+'</span>':'');
   $('hh_prog').textContent=(RQ?'Coaster '+RQ.done+' of '+RQ.total+' · ':'')+'Pick '+(hh.asked+1)+' · '
     +(confirming?'confirming against your #':'against your #')+(pos+1);
   $('hh_a').onclick=function(){ answerHH(mid,true); };   // candidate is better

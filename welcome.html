@@ -97,6 +97,7 @@
   #wel .pick:hover{border-color:var(--accent2);transform:translateY(-1px)}
   #wel .pick b{display:block;font-size:1.2rem;font-weight:800}
   #wel .pick span{color:var(--muted);font-size:.86rem}
+  #wel .pick span.mdl{display:block;margin-top:2px}
   #wel .or{text-align:center;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.14em}
   #wel .prog{height:6px;border-radius:6px;background:var(--soft2);overflow:hidden;margin:8px 0 0}
   #wel .prog div{height:100%;background:var(--accent2);transition:width .25s}
@@ -500,7 +501,8 @@ function nextItem(){ S.cmp = S.queue.length ? {item:S.queue.shift(), lo:0, hi:S.
 function vRank(){
   if(!S.cmp){ finish(); return; }
   var c=S.cmp, mid=(c.lo+c.hi)>>1, other=S.ranked[mid];
-  var card=function(x,side){ return '<button type="button" class="pick" data-side="'+side+'"><b>'+esc(x.name)+'</b><span>'+esc(x.park.name)+(x.h?' · '+x.h+' ft':'')+'</span></button>'; };
+  var card=function(x,side){ return '<button type="button" class="pick" data-side="'+side+'"><b>'+esc(x.name)+'</b><span>'+esc(x.park.name)+(x.h?' · '+x.h+' ft':'')+'</span>'
+    +(x.model?'<span class="mdl">'+esc(x.model)+'</span>':'')+'</button>'; };
   var pct=Math.min(100,Math.round(100*S.cmps/Math.max(1,S.total)));
   $('view').innerHTML =
     '<div class="eyebrow">Rank your top '+(S.ranked.length+S.queue.length+1)+'</div><h1>Which did you like more?</h1>'
@@ -586,7 +588,7 @@ Promise.all([
   (list.coasters||[]).forEach(function(c){
     var m=pmeta[c.park]||{};
     var p=byName[c.park] || (byName[c.park]={name:c.park, region:m.region||'', lat:typeof m.lat==='number'?m.lat:null, lon:typeof m.lon==='number'?m.lon:null, coasters:[], riders:0});
-    var o={ id:c.id, name:c.name, park:p, h:c.h, yr:c.yr, model:c.model, gone:!!c.closed, closedYr:c.closed?String(c.closed).slice(0,4):'',
+    var o={ id:c.id, name:c.name, park:p, h:c.h, yr:c.yr, model:CoasterHub.maker(c), gone:!!c.closed, closedYr:c.closed?String(c.closed).slice(0,4):'',
             key:CoasterHub.rideKey(c), moved:!!(c.same && c.same!==c.id) };
     p.coasters.push(o); CO.push(o); BYID[c.id]=o;
   });
