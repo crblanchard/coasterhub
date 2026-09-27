@@ -1452,7 +1452,12 @@
   // right after it: the facts, your rides and rank, and "Coaster page →".
   // Other links in the row (a park, a maker) still go where they point, and a
   // modified click (new tab) still follows the coaster link.
-  function openableCoasters(root) {
+  // `opts` (optional): { noRank: true } drops the "Your rank" line, and
+  // among(c) returns coasterFacts' {manu, model} "N of M" strings — the
+  // profile's top ten uses both, since the list on screen is the profile
+  // owner's, not the reader's (2026-09-27).
+  function openableCoasters(root, opts) {
+    opts = opts || {};
     if (!root || root._openable) return;
     root._openable = true;
     root.addEventListener("click", function (e) {
@@ -1506,9 +1511,10 @@
         if (!c) { inner.innerHTML = '<p class="facts none">Not found.</p>'; return; }
         var m = y && y.rides[id];
         if (m) { extra.push([m.n, "Your rides"]); if (m.first) extra.push([mdy(m.first), "First ridden"]); }
-        if (y && y.rank[id]) extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your rank"]);
+        if (y && y.rank[id] && !opts.noRank) extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your rank"]);
         inner.innerHTML = coasterFacts(c, extra,
-          '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>');
+          '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>',
+          opts.among ? opts.among(c) : null);
       });
     });
   }

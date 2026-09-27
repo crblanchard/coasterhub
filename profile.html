@@ -70,6 +70,7 @@
     .trow .n .mk::before{content:none}
   }
   .toplist .cx{padding-left:calc(1.7em + 16px);border-bottom:1px solid var(--line)}
+  .toplist .cx .among{font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px}
   /* The heading IS the link to the whole list. Underlined on hover only, so it
      reads as a heading first. */
   .toplink{color:inherit;text-decoration:none}
@@ -750,7 +751,19 @@ function render(s){
         +(CoasterHub.maker(c)?'<span class="mk">'+esc(CoasterHub.maker(c))+'</span>':'')
         +'</span></span></a>';
     }).join('');
-    CoasterHub.openableCoasters(document.getElementById('toplist'));
+    // Opens to the facts, with where each sits among THIS rider's ranked rides
+    // by the same maker and of the same model — and without "Your rank",
+    // which is the reader's list, not the one on screen (Carter, 2026-09-27).
+    var KEY=function(c){ return CoasterHub.rideKey(c); };
+    CoasterHub.openableCoasters(document.getElementById('toplist'), { noRank:true, among:function(c){
+      var mi=0, mn=0, di=0, dn=0, seen={}, me=KEY(byId[c.id]||c);
+      known.forEach(function(o){
+        var k=KEY(o); if(seen[k]) return; seen[k]=1;
+        if(c.manu && o.manu===c.manu){ mn++; if(k===me) mi=mn; }
+        if(c.model && o.model===c.model && o.manu===c.manu){ dn++; if(k===me) di=dn; }
+      });
+      return { manu: mi ? mi+' of '+mn : '', model: di ? di+' of '+dn : '' };
+    }});
     sec.style.display='';
   }
   // Recent visits: the newest five dated days, one line each — where, how many
