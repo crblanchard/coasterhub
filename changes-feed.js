@@ -133,8 +133,9 @@
     // A site update (site-updates.json): a short summary of one working
     // session's changes to the site itself, as a list.
     if (e.kind === 'site_update') {
-      return '<b>Site update</b><ul class="upd">' + (e.items || []).map(function(t){
-        return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+      // A sentence or two (Carter, 2026-09-27); `items` is the older list form.
+      return '<b>Site update</b>' + (e.text ? '<p class="upd">' + esc(e.text) + '</p>'
+        : '<ul class="upd">' + (e.items || []).map(function(t){ return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>');
     }
     var who = e.actorName ? riderLink(e.actor, '<b>' + esc(e.actorName) + '</b>') : null;
     var d = e.detail || {};
@@ -423,7 +424,7 @@
       var site = opts.site
         ? fetch('/site-updates.json', { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; })
             .then(function(j){ return ((j && j.updates) || []).map(function(u){
-              return { kind: 'site_update', at: u.at, items: u.items || [] }; }); })
+              return { kind: 'site_update', at: u.at, text: u.text || '', items: u.items || [] }; }); })
             .catch(function(){ return []; })
         : Promise.resolve([]);
       return Promise.all([fetch('/api/activity?limit=' + (limit && !WHO ? Math.max(40, limit * 8) : 300))

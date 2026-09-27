@@ -22,10 +22,11 @@ Carter, 2026-09-27: *"after every session write a short summary of changes made 
 site. say if i'm in here making changes within 2 hrs they're grouped together otherwise
 they're separate entries"*. **`site-updates.json`** feeds the "Site update" rows on
 /changes (and its Site filter). With each push that changes what riders see:
-- If the newest entry's `at` is within 2 hours of now, add your lines to its `items`
-  and move its `at` to now. Otherwise put a new `{at, items}` on top.
-- `at` is UTC ISO (`date -u +%Y-%m-%dT%H:%M:%SZ`). Lines are short and plain — what a
-  rider would notice, not how it was built. Skip handoff/CLAUDE.md-only commits.
+- If the newest entry's `at` is within 2 hours of now, fold your change into its `text`
+  and move its `at` to now. Otherwise put a new `{at, text}` on top.
+- `text` is **a sentence or two** (Carter: "it's okay if it doesn't actually capture all
+  the changes") — what a rider would notice, plainly. `at` is UTC ISO
+  (`date -u +%Y-%m-%dT%H:%M:%SZ`). Skip handoff/CLAUDE.md-only commits.
 
 ## What this sandbox can and cannot reach
 
