@@ -4645,3 +4645,18 @@ step (new sign-ups and ?add=1 alike), under the lists:
 - /welcome?add=1: "Popular parks you haven't logged" / "Include parks I've logged"
   (Carter: people add parks they have *been* to but not logged). Park rows count
   OPERATING coasters only ("19 operating coasters").
+
+## Getting started card; the home-screen nudge (2026-09-27)
+
+- **Profile, your own page only:** a "Getting started" card — Add your credits · Rank
+  your top ten · Follow a friend · Add to your home screen — each a link, done ones
+  checked off, "N of 4 done · Hide". Only offered while the count or ranking is small
+  (under 30 credits or under 10 ranked), so set-up riders never see it; gone when all
+  four are done or on Hide (`ch_started_hide_<slug>`). "Home screen" is done when the
+  page is opened standalone, remembered as `ch_home` (index.html sets it too). It
+  replaced the owner's "Start your count" card; somebody else's empty page still says
+  "Nothing on X's count yet."
+- **Homepage:** one muted line above the feedback card, "Using Coaster Hub on your
+  phone? Add it to your home screen →" with an ×. Phones only (coarse pointer, ≤820px),
+  signed in, not standalone, never again once closed (`ch_nudge_x`) or once `ch_home`
+  is set. Carter: *"i don't want it to be too pushy"*.

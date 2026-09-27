@@ -186,6 +186,18 @@
   /* An empty count (see render): where to start. */
   .startcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:24px 0 4px}
   .startcard[hidden]{display:none}
+  /* Getting started (2026-09-27): four steps on a new rider's own page. */
+  .startcard .ckhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .startcard .ckhead span{color:var(--muted);font-size:.86rem}
+  .startcard .ckhead button{background:none;border:0;padding:0;color:var(--muted);font:inherit;font-size:.84rem;cursor:pointer}
+  .startcard .ckhead button:hover{color:var(--fg)}
+  .startcard ul{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:2px}
+  .startcard li a{display:flex;align-items:center;gap:12px;padding:9px 0;color:var(--fg);text-decoration:none;font-weight:600}
+  .startcard li a:hover{color:var(--accent2)}
+  .startcard li i{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.72rem}
+  .startcard li.done a{color:var(--muted);font-weight:500;text-decoration:line-through;text-decoration-color:var(--line)}
+  .startcard li.done i{background:var(--accent2);border-color:var(--accent2);color:var(--bg)}
+  .startcard li a small{display:inline-block;margin-left:auto;color:var(--muted);font-weight:500;font-size:.8rem;text-decoration:none}
   .startcard b{font-size:1.1rem}
   .startcard p{color:var(--muted);margin:6px 0 16px;max-width:52ch}
   .startcard .btn{display:inline-block;margin-right:14px}
@@ -455,6 +467,48 @@ if(CoasterHub.currentUser()){
     location.replace(acct && acct.slug ? CoasterHub.userPageHref(acct.slug,'profile') : '/riders');
   }).catch(function(){ location.replace('/riders'); });
 }
+// ---- getting started ---------------------------------------------------------
+// Four steps, on your OWN page only (Carter approved, 2026-09-27): credits, a
+// top ten, a friend, the home screen. Each links to where it is done; done
+// ones are checked off; the card goes when all four are, or on Hide. A rider
+// who is well set up never sees it: it is only offered while the count or
+// the ranking is still small (under 30 credits, or under ten ranked).
+function gettingStarted(k){
+  var slug=CoasterHub.currentUser(), key='ch_started_hide_'+slug;
+  var standalone=(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;
+  try{ if(standalone) localStorage.setItem('ch_home','1'); }catch(e){}
+  var hidden=false, home=standalone;
+  try{ hidden=localStorage.getItem(key)==='1'; home=home||localStorage.getItem('ch_home')==='1'; }catch(e){}
+  if(hidden) return;
+  CoasterHub.me().then(function(acct){
+    if(!(acct && acct.slug===slug)) return;
+    return Promise.all([
+      CoasterHub.you(),
+      fetch('/api/follows/'+encodeURIComponent(slug),{credentials:'same-origin',cache:'no-store'})
+        .then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })
+    ]).then(function(r){
+      var ranked=(r[0]&&r[0].ranked)||0, following=((r[1]&&r[1].following)||[]).length;
+      if(k.credits>=30 && ranked>=10) return;
+      var want=Math.min(10,k.credits||10);
+      var steps=[
+        [k.credits>0, k.credits?'/welcome?add=1':'/welcome', 'Add your credits', k.credits?nf(k.credits)+' so far':''],
+        [k.credits>0 && ranked>=want, CoasterHub.userPageHref(slug,'rankings'), 'Rank your top ten', ranked?nf(ranked)+' ranked':''],
+        [following>0, '/', 'Follow a friend', following?nf(following)+' following':''],
+        [home, '/install', 'Add to your home screen', '']
+      ];
+      var done=steps.filter(function(x){ return x[0]; }).length;
+      if(done===steps.length) return;
+      var sc=document.getElementById('startcard');
+      sc.innerHTML='<div class="ckhead"><b>Getting started</b><span>'+done+' of '+steps.length+' done &middot; <button type="button" id="ckhide">Hide</button></span></div>'
+        +'<ul>'+steps.map(function(x){
+          return '<li'+(x[0]?' class="done"':'')+'><a href="'+esc(x[1])+'"><i>'+(x[0]?'&#10003;':'')+'</i>'+x[2]
+            +(x[3]?'<small>'+x[3]+'</small>':'')+'</a></li>'; }).join('')+'</ul>';
+      sc.hidden=false;
+      document.getElementById('ckhide').onclick=function(){ try{ localStorage.setItem(key,'1'); }catch(e){} sc.hidden=true; };
+    });
+  });
+}
+
 // ---- following --------------------------------------------------------------
 // Two pieces of one thing: the counts under the bio, and the button with the
 // other actions. Both come from a single GET of /api/follows/<slug>, which also
@@ -747,10 +801,11 @@ function render(s){
       var sc=document.getElementById('startcard');
       if(!(acct && acct.slug===CoasterHub.currentUser())){
         sc.innerHTML='<p style="margin:0">Nothing on '+name+'&rsquo;s count yet.</p>';
+        sc.hidden=false;
       }
-      sc.hidden=false;
     });
   }
+  gettingStarted(k);
 
   // Standing notes about a rider's own data — things known to be unresolved, kept
   // on the page so they aren't forgotten. Delete the entry once it's settled.

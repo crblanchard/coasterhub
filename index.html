@@ -62,6 +62,11 @@
   /* Inside #friends the list already carries the gap below it. */
   #friends .hint{margin-bottom:0}
   /* Under the join pills: what signing up leads to (/welcome). */
+  .homenudge{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:.88rem}
+  .homenudge[hidden]{display:none}
+  .homenudge a{color:var(--muted);text-decoration:none}
+  .homenudge a:hover{color:var(--accent2)}
+  .homenudge button{margin-left:auto;background:none;border:0;color:var(--muted);font-size:1.2rem;line-height:1;cursor:pointer;padding:4px 6px}
   .hero .herojoin .joinnote{flex-basis:100%;color:var(--muted);font-size:.86rem}
 </style>
 </head>
@@ -162,6 +167,13 @@
 <!-- The way to reach a person, at the foot of the hub. The address is
      assembled in script rather than written here: a mailto in the page source is
      the easiest thing in the world for an address harvester to walk off with. -->
+<!-- The home-screen nudge (2026-09-27, Carter: "sure i don't want it to be too
+     pushy"): one quiet line, phones only, signed in, not already on the home
+     screen, and gone for good once closed. -->
+<div class="container"><p class="homenudge" id="homenudge" hidden>
+  <a href="/install">Using Coaster Hub on your phone? Add it to your home screen &rarr;</a>
+  <button type="button" id="homenudge_x" aria-label="Dismiss">&times;</button>
+</p></div>
 <div class="container">
   <div class="fbcard">
     <div>
@@ -194,6 +206,20 @@ CoasterHub.initNav('riders');
   a.href='mailto:'+to
     +'?subject='+encodeURIComponent('Coaster Hub feedback')
     +'&body='+encodeURIComponent('\n\n---\nSent from '+location.href);
+})();
+
+// The home-screen nudge: see the markup.
+(function(){
+  var standalone=(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;
+  var phone=window.matchMedia && window.matchMedia('(pointer: coarse) and (max-width: 820px)').matches;
+  var seen=false;
+  try{ if(standalone) localStorage.setItem('ch_home','1'); seen=localStorage.getItem('ch_home')==='1' || localStorage.getItem('ch_nudge_x')==='1'; }catch(e){}
+  if(standalone || !phone || seen) return;
+  CoasterHub.me().then(function(acct){
+    if(!acct) return;
+    var n=document.getElementById('homenudge'); n.hidden=false;
+    document.getElementById('homenudge_x').onclick=function(){ try{ localStorage.setItem('ch_nudge_x','1'); }catch(e){} n.hidden=true; };
+  }).catch(function(){});
 })();
 
 // The join pills, for whoever is not signed in yet.
