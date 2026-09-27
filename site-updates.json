@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-09-27T22:18:06Z",
-   "text": "New riders get a two-minute setup that ends with a head-to-head top ten, adding credits works park by park with optional dates and ride counts, and Rank more makes ranking the rest easy. Sign-in is now accounts only. Rankings and the profile's top ten are now compact lists instead of cards."
+   "at": "2026-09-27T22:22:31Z",
+   "text": "New riders get a two-minute setup that ends with a head-to-head top ten, adding credits works park by park with optional dates and ride counts, and Rank more makes ranking the rest easy. Sign-in is now accounts only. Rankings and the profile's top ten are now compact lists that open to show each coaster's global ranking."
   },
   {
    "at": "2026-09-27T00:41:44Z",

@@ -4704,3 +4704,17 @@ Rp9PAkoucspTC5r5rx79uY), he picked **B for the profile, A for /rankings**.
   phone two lines, name over park · region · model with an ellipsis. Categories keep
   their tint so a family still reads as one. The overrides sit at the END of
   rankings.html's style block on purpose, one for one against the card rules.
+
+## Global ranking in an opened row (2026-09-27)
+
+Carter: *"when you click on your own rankings want to see something that says 'global
+ranking: ' with the number. eventually want to create some algo that calculates you
+have this x higher than the average but that can be a later thing"*. rankings.html's
+`loadGlobal()` works out the Global tab's master list exactly as rankings-all.html
+does (every rider's list one entry per ride key, rides on 2+ lists only, by average
+placing then list count) once after the page draws, and an opened row shows
+**Global ranking #N of M**, or "Not on 2+ lists yet". `GLOBAL.by[key]` keeps `n` and
+`avg` too — the "you placed it X higher than average" idea can read them directly.
+The profile's top ten opens through app.js's openableCoasters and does not show it.
+Also that day: profile top ten uses the /rankings rows (option A) and opens in place;
+opened facts start under the coaster's name on both pages.

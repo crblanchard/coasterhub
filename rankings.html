@@ -853,7 +853,7 @@ if(!slug){
     document.title=nm+'’s Rankings — Coaster Hub';
 
     $('loading').style.display='none'; $('mine').style.display='block';
-    wire(); renderRank(); renderAdd();
+    wire(); renderRank(); renderAdd(); loadGlobal();
     // And again once everything is drawn: whichever of these two runs last is
     // the one that finds both the categories and the ownership in place.
     maybeOfferJoins();
@@ -912,6 +912,38 @@ function markDirty(){
   $('status').className='status dirty'; $('status').textContent='Unsaved changes';
 }
 
+// ---------------------------------------------------------- global ranking ---
+// The Global tab's master list, worked out the same way rankings-all.html does
+// it: every rider's list one entry per ride, only rides on 2+ lists, ordered by
+// average placing (then by how many lists). Fetched once, after the page draws,
+// and only used when a row is opened. Later (Carter): how far your placing is
+// from that average — the numbers are all here for it.
+var GLOBAL=null;
+function loadGlobal(){
+  CoasterHub.fetchUsers().then(function(){
+    var users=CoasterHub.USERS.slice();
+    return Promise.all(users.map(function(u){
+      return fetch('/api/rankings/'+encodeURIComponent(u.slug))
+        .then(function(r){ return r.ok?r.json():{order:[]}; }).catch(function(){ return {order:[]}; });
+    })).then(function(all){
+      var tally={};
+      all.forEach(function(r){
+        var seen={};
+        (r.order||[]).filter(function(id){
+          if(!BYID[id]) return false; var k=KEY(id); if(seen[k]) return false; seen[k]=1; return true;
+        }).forEach(function(id,pos){
+          var k=KEY(id), t=tally[k]||(tally[k]={n:0,sum:0}); t.n++; t.sum+=pos+1;
+        });
+      });
+      var list=Object.keys(tally).filter(function(k){ return tally[k].n>1; })
+        .sort(function(a,b){ var x=tally[a], y=tally[b]; return (x.sum/x.n)-(y.sum/y.n) || y.n-x.n; });
+      var by={}; list.forEach(function(k,i){ by[k]={pos:i+1, n:tally[k].n, avg:tally[k].sum/tally[k].n}; });
+      GLOBAL={by:by, of:list.length};
+      if(Object.keys(STATOPEN).some(function(k){ return STATOPEN[k]; })) renderRank();
+    });
+  }).catch(function(){ GLOBAL={by:{}, of:0}; });
+}
+
 // ------------------------------------------------------------ ranked list ---
 // Which rows have their stats open. Only drawn for open rows, so a 300-long
 // list costs nothing until you tap one.
@@ -919,8 +951,12 @@ var STATOPEN={};
 function statsFor(id){
   if(!STATOPEN[id]) return '';
   var c=BYID[id]||{};
+  // Where it sits on the Global list (Carter, 2026-09-27: "want to see
+  // something that says 'global ranking: ' with the number").
+  var g=GLOBAL && GLOBAL.by[KEY(id)];
+  var extra=[[ g ? '#'+g.pos+' of '+GLOBAL.of : (GLOBAL ? 'Not on 2+ lists yet' : '&hellip;'), 'Global ranking' ]];
   // The same facts the park page opens to (CoasterHub.coasterFacts).
-  return '<div class="rstats">'+CoasterHub.coasterFacts(c, null,
+  return '<div class="rstats">'+CoasterHub.coasterFacts(c, extra,
     c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>';
 }
 function renderRank(){
