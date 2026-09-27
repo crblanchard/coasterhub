@@ -178,6 +178,13 @@
     <h1>Coaster Hub — Editor</h1>
     <p class="sub" id="gate_sub">Admin only. Sign in with an admin account to continue.</p>
     <div style="margin-top:16px"><a id="go" href="/account?next=/edit" style="display:block;text-align:center;text-decoration:none;font-size:.9rem;font-weight:600;border-radius:8px;background:var(--btn-bg);color:var(--btn-fg);padding:9px 13px">Sign in</a></div>
+    <!-- The way to ask for it (Carter, 2026-09-27), like the homepage's feedback
+         card. The address is put together in script so it is not sitting in
+         the page source for harvesters. -->
+    <div style="margin-top:16px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="flex:1;min-width:160px">Want edit access?</span>
+      <a id="ask_access" rel="nofollow" style="font-weight:600;text-decoration:none;color:var(--link)">Contact us &rarr;</a>
+    </div>
     <div style="margin-top:14px;display:flex;justify-content:flex-end"><button class="themetoggle" type="button" data-el="theme" aria-label="Switch theme" title="Switch theme"></button></div>
   </div>
 
@@ -323,6 +330,12 @@
     if (method !== "GET") { try { localStorage.setItem("ch_wrote", String(Date.now())); } catch(e){} }
     return data;
   }
+
+  (function(){
+    var a=document.getElementById('ask_access'); if(!a) return;
+    var to=['carter.r.blanchard','gmail.com'].join('@');
+    a.href='mailto:'+to+'?subject='+encodeURIComponent('Coaster Hub edit access');
+  })();
 
   // ---------- login ----------
   // Accounts only (2026-09-27): the admin password is gone. Signed in but not
