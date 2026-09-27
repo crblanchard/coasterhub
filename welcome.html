@@ -92,9 +92,9 @@
   #wel a.note b{color:var(--accent2)}
   #wel a.note span{display:block;color:var(--muted);font-size:.86rem;margin-top:2px}
   #wel .empty{color:var(--muted);padding:16px 14px;font-size:.92rem}
-  #wel .srow{display:flex;gap:8px}
-  #wel .srow input{flex:1;min-width:0}
-  #wel .locbtn{flex:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--fg);font:inherit;font-weight:600;padding:0 14px;cursor:pointer}
+  #wel .srow{display:flex;flex-wrap:wrap;gap:8px}
+  #wel .srow input{flex:1 1 100%;min-width:0}
+  #wel .locbtn{flex:1 1 0;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--fg);font:inherit;font-weight:600;cursor:pointer}
   #wel .locbtn.on{border-color:var(--accent2);color:var(--accent2)}
   #wel .locpanel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px;max-height:340px;overflow-y:auto}
   #wel .locpanel[hidden]{display:none}
@@ -164,7 +164,7 @@ var PARKS=[], CO=[], BYID={}, POPULAR=[], REGIONS={us:[],rest:[],count:{}};
 function regionLabel(r){ return r==='US' ? 'United States (no state)' : /, US$/.test(r) ? r.replace(/, US$/,'') : r; }
 
 var S;
-function fresh(){ S={ regions:{}, regOpen:false, step:'account', parks:[], pi:0, ridden:{}, ranked:[], queue:[], cmp:null, cmps:0, total:0, saved:false }; }
+function fresh(){ S={ near:null, regions:{}, regOpen:false, step:'account', parks:[], pi:0, ridden:{}, ranked:[], queue:[], cmp:null, cmps:0, total:0, saved:false }; }
 fresh();
 
 // Credits are RIDES, not rows: a coaster that moved parks is one credit
@@ -226,14 +226,28 @@ function vAccount(){
 function parkRow(p){
   var on=S.parks.indexOf(p)>=0;
   return '<button type="button" class="item'+(on?' on':'')+'" data-p="'+p.i+'"><span class="tick"></span>'
-    +'<span class="tx"><b>'+esc(p.name)+'</b><span>'+esc(p.region?regionLabel(p.region):'')+(p.region?' · ':'')+plural(p.coasters.length,'coaster')+'</span></span></button>';
+    +'<span class="tx"><b>'+esc(p.name)+'</b><span>'+esc(p.region?regionLabel(p.region):'')+(p.region?' · ':'')+plural(p.coasters.length,'coaster')
+    +(S.near&&p.lat!=null?' · '+miles(p)+' mi':'')+'</span></span></button>';
+}
+// Great-circle miles from where Near me found you.
+function miles(p){
+  var R=3958.8, r=Math.PI/180, a=S.near, dl=(p.lat-a.lat)*r, dn=(p.lon-a.lon)*r;
+  var h=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a.lat*r)*Math.cos(p.lat*r)*Math.sin(dn/2)*Math.sin(dn/2);
+  var m=2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+  return m<10 ? m.toFixed(1) : Math.round(m).toLocaleString();
+}
+function nearest(){
+  return PARKS.filter(function(p){ return p.lat!=null; }).map(function(p){ return {p:p, m:+String(miles(p)).replace(/,/g,'')}; })
+    .sort(function(a,b){ return a.m-b.m; }).slice(0,20).map(function(x){ return x.p; });
 }
 function vParks(){
   $('view').innerHTML =
     '<div class="eyebrow">Step 1 of 2</div><h1>Which parks have you been to?</h1>'
    +'<p class="lead">Pick every park you&rsquo;ve ridden a coaster at. Next you&rsquo;ll check the coasters at each one.</p>'
    +'<div class="srow"><input type="search" id="pq" placeholder="Search '+PARKS.length+' parks" autocomplete="off">'
+   +'<button type="button" class="locbtn'+(S.near?' on':'')+'" id="nearbtn">Near me</button>'
    +'<button type="button" class="locbtn" id="locbtn" aria-expanded="false">Locations</button></div>'
+   +'<p class="small muted" id="nearmsg" style="margin:8px 0 0" hidden></p>'
    +'<div class="locpanel" id="locpanel" hidden></div>'
    +'<div class="chips" id="picked"></div>'
    +'<div class="sechead"><h2 id="ph"></h2></div>'
@@ -254,11 +268,13 @@ function vParks(){
     var regs=Object.keys(S.regions), inReg=function(p){ return !regs.length || S.regions[p.region]; };
     var rows = q ? PARKS.filter(function(p){ return inReg(p) && (p.name+' '+p.region).toLowerCase().indexOf(q)>=0; }).slice(0,40)
              : regs.length ? PARKS.filter(inReg)
+             : S.near ? nearest()
              : POPULAR;
     $('locbtn').textContent = regs.length ? 'Locations · '+regs.length : 'Locations';
     $('locbtn').classList.toggle('on', regs.length>0);
     $('ph').textContent = q ? (rows.length?'Matching parks':'')
       : regs.length ? plural(rows.length,'park')+' in '+(regs.length===1?regionLabel(regs[0]):plural(regs.length,'location'))
+      : S.near ? 'Nearest to you'
       : 'Popular with Coaster Hub riders';
     $('plist').innerHTML = rows.map(parkRow).join('') || '<div class="empty">No park called that yet. Try part of the name, or the city.</div>';
     $('picked').innerHTML = S.parks.map(function(p){ return '<button type="button" class="chip" data-x="'+p.i+'">'+esc(p.name)+' <i>&times;</i></button>'; }).join('');
@@ -266,6 +282,24 @@ function vParks(){
     $('pnext').textContent = S.parks.length ? 'Next: check coasters at '+plural(S.parks.length,'park') : 'Pick at least one park';
   }
   $('pq').addEventListener('input',draw);
+  // Near me (Carter, 2026-09-27): the phone's location, once, then the parks
+  // sorted by distance. Asked only when pressed; a refusal says so and the
+  // list stays as it was.
+  $('nearbtn').addEventListener('click',function(){
+    if(S.near){ S.near=null; this.classList.remove('on'); draw(); return; }
+    var btn=this, msg=$('nearmsg');
+    if(!navigator.geolocation){ msg.hidden=false; msg.textContent='This browser can’t share your location.'; return; }
+    btn.textContent='Finding…';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      S.near={lat:pos.coords.latitude, lon:pos.coords.longitude};
+      btn.textContent='Near me'; btn.classList.add('on'); msg.hidden=true;
+      S.regions={}; if(S.regOpen) locPanel();
+      $('pq').value=''; draw();
+    },function(){
+      btn.textContent='Near me'; msg.hidden=false;
+      msg.textContent='Couldn’t get your location — allow it in your browser settings, or use Locations.';
+    },{timeout:10000, maximumAge:600000});
+  });
   $('locbtn').addEventListener('click',function(){
     S.regOpen=!S.regOpen; $('locpanel').hidden=!S.regOpen; this.setAttribute('aria-expanded',S.regOpen); if(S.regOpen) locPanel();
   });
@@ -424,14 +458,11 @@ function vDone(){
    +(S.rankErr?'<p class="msg">Your ranking did not save ('+esc(S.rankErr)+'). You can redo it on the Rankings page.</p>':'')
    +'<div class="tiles"><div class="tile"><b>'+cs.length+'</b><span>Coasters</span></div><div class="tile"><b>'+Object.keys(parks).length+'</b><span>Parks</span></div><div class="tile"><b>'+S.ranked.length+'</b><span>Ranked</span></div></div>'
    +(S.ranked.length?'<div class="sechead"><h2>Your top '+Math.min(10,S.ranked.length)+'</h2></div><ol class="rank">'
-      +S.ranked.slice(0,10).map(function(c){ return '<li><b>'+esc(c.name)+'</b><span>'+esc(c.park.name)+'</span></li>'; }).join('')+'</ol>'
-      +(S.cmps?'<p class="small muted" style="margin:0">'+plural(S.cmps,'choice')+' to rank '+plural(S.ranked.length,'coaster')+'.</p>':''):'')
+      +S.ranked.slice(0,10).map(function(c){ return '<li><b>'+esc(c.name)+'</b><span>'+esc(c.park.name)+'</span></li>'; }).join('')+'</ol>':'')
    +'<div class="sechead"><h2>What&rsquo;s next</h2></div><div class="next">'
    +link(H('profile'),'Your profile','Your count, top ten and recent visits &mdash; what friends see.')
-   +link(H('count'),'Your credits','Every coaster you&rsquo;ve ridden, by park, with filters.')
-   +link(H('rankings'),'Rankings',rest>0?'Rank the rest &mdash; '+plural(rest,'credit')+' to go, a few at a time.':'Reorder your list any time.')
-   +link('/log','+ Log','At a park? Record today&rsquo;s rides, re-rides included.')
-   +link('/install','Add it to your home screen','Opens full-screen with its own icon, like an app.')
+   +link(H('rankings'),'Add to your rankings',rest>0?plural(rest,'credit')+' still to rank, a few at a time.':'Reorder your list any time.')
+   +link('/install','Add to Home Screen','Opens full-screen with its own icon, like an app.')
    +'</div>'
    +(PREVIEW?'<div style="margin-top:18px"><button class="go alt" type="button" id="again">Run the preview again</button></div>':'');
   if($('again')) $('again').onclick=function(){ fresh(); go('parks'); };
@@ -447,7 +478,8 @@ Promise.all([
   var list=r[0], pmeta=r[1]||{}, riders=r[2]||[], acct=r[3];
   var byName={};
   (list.coasters||[]).forEach(function(c){
-    var p=byName[c.park] || (byName[c.park]={name:c.park, region:(pmeta[c.park]&&pmeta[c.park].region)||'', coasters:[], riders:0});
+    var m=pmeta[c.park]||{};
+    var p=byName[c.park] || (byName[c.park]={name:c.park, region:m.region||'', lat:typeof m.lat==='number'?m.lat:null, lon:typeof m.lon==='number'?m.lon:null, coasters:[], riders:0});
     var o={ id:c.id, name:c.name, park:p, h:c.h, yr:c.yr, model:c.model, gone:!!c.closed,
             key:CoasterHub.rideKey(c), moved:!!(c.same && c.same!==c.id) };
     p.coasters.push(o); CO.push(o); BYID[c.id]=o;

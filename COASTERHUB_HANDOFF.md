@@ -4028,6 +4028,11 @@ data. What decides what:
   go to /welcome (the /import link is still beside it).
 - `welcome`, `install`, `map`, `locations`, `manufacturers` joined `RESERVED_SLUGS`:
   profiles live at `/<slug>`, so a rider with one of those names would shadow the page.
+- Round 4 from Carter's cartertest run (2026-09-27): a **Near me** button beside
+  Locations (asks for the location only when pressed; the 20 nearest parks from
+  `parks.json` lat/lon, with miles); the done screen drops "N choices to rank N
+  coasters" and links to three things only — profile, *Add to your rankings*, *Add to
+  Home Screen*. The test account was removed with a pasted DELETE per table.
 - Phone: the site's tab bar covers the bottom 74px and its + disc stands 20px above
   it, so `.sticky` rides at `bottom:74px+safe-area` with 30px of padding.
 - Local testing: the dev server is always signed in (DEV_AS), so the signup step only
