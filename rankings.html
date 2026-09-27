@@ -164,7 +164,6 @@
      and these live here rather than in style.css because this is the only page
      that draws them — style.css is CRLF and not worth opening for two lines. */
   .rrow{--up:#3ddc97; --down:#ff7a7e}
-  @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .rrow{--up:#0a7a4a; --down:#c22127} }
   :root[data-theme="light"] .rrow{--up:#0a7a4a; --down:#c22127}
 
   /* The controls that belong to one category, inside the row it opens. */
@@ -208,6 +207,13 @@
   .rrow .xd{flex:none;font-weight:700;font-variant-numeric:tabular-nums}
   .rrow .xd.up{color:var(--up)}
   .rrow .xd.down{color:var(--down)}
+  /* Pulled out of a category: the category's wash and a note, edit mode only. */
+  #mine:not(.readonly) .rrow.pulled{background:var(--tint)}
+  .rrow.pulled .nm{flex-wrap:wrap}
+  .rrow .pnote{display:block;flex:0 0 100%;font-size:.74rem;font-weight:700;line-height:1.3;margin-top:1px}
+  .rrow .pnote.up{color:var(--up)}
+  .rrow .pnote.down{color:var(--down)}
+  #mine.readonly .rrow .pnote{display:none}
   /* A folded family in the pool wears the same wash and count badge it will
      wear in the list, so what you are about to add looks like what you get. */
   .addsec{padding:9px 2px 5px;color:var(--muted);font-size:.72rem;font-weight:700;
@@ -1037,7 +1043,13 @@ function renderRank(){
           +'<button class="tiny" type="button" data-allback="'+key+'" '
           +'style="margin-top:7px">Pull all back in</button></div>' : '')
       +'</div>' : '';
-    return '<div class="rrow'+(b.g?' grp':' tap')+(b.g&&OPEN[key]?' open':'')
+    // Pulled out of a category and ranked on its own (Carter, 2026-09-27):
+    // in edit mode it wears the category's wash and says how far it sits from
+    // the category's block — green up, red down.
+    var pl = b.g ? null : pulledFrom(b.ids[0], bs);
+    if (pl) head = head.replace(/<\/span>$/, '<span class="pnote '+(pl.up?'up':'down')+'">'
+      +(pl.up?'\u2191 ':'\u2193 ')+pl.d+' rank'+(pl.d===1?'':'s')+' '+(pl.up?'above':'below')+' '+esc(pl.g.name)+'</span></span>');
+    return '<div class="rrow'+(b.g?' grp':' tap')+(pl?' pulled':'')+(b.g&&OPEN[key]?' open':'')
       +(!b.g&&STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'"'
       +' data-rid="'+b.ids[0]+'"'+(b.g?'':' data-stat="'+b.ids[0]+'"')
       +(b.g?' data-open="'+key+'" role="button" tabindex="0" aria-expanded="'
@@ -1236,6 +1248,18 @@ function strays(g, blk){
     out.push({ id:id, up:up, d:d });
   });
   return out.sort(function(a,b){ return (a.up===b.up) ? a.d-b.d : (a.up?-1:1); });
+}
+
+// For a ride pulled out of its category: that category and how far this ride
+// sits from the category's block in the list. Nothing when the category is not
+// folding anywhere in this ranking (switched off, or only one of it ranked).
+function pulledFrom(id, bs){
+  if (!PULLED[id]) return null;
+  var g=ownerOf(id); if (!g) return null;
+  var blk=null; bs.forEach(function(b){ if(!blk && b.g===g) blk=b; });
+  if (!blk) return null;
+  var at=ORDER.indexOf(id), up=at<blk.from;
+  return { g:g, up:up, d: up ? blk.from-at : at-blk.to };
 }
 
 // A ride that stops folding — pulled out, or set aside — moves next to the

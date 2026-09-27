@@ -4718,3 +4718,17 @@ placing then list count) once after the page draws, and an opened row shows
 The profile's top ten opens through app.js's openableCoasters and does not show it.
 Also that day: profile top ten uses the /rankings rows (option A) and opens in place;
 opened facts start under the coaster's name on both pages.
+
+## Pulled-out rides are marked in edit mode (2026-09-27)
+
+Carter: *"highlight coasters that are in a category but pulled out when you're in
+/edit. maybe use the same color with a green/red arrow pointing up or down and small
+text that says 'x ranks above category'"* (he meant /rankings' edit mode). A ride in
+`PULLED` whose category is folding somewhere in the list (`pulledFrom()`) gets the
+category's tint and a line under its name, "↑ 5 ranks above Vekoma SLCs" in green or
+"↓ 3 ranks below …" in red — measured to the nearest edge of the category's block, the
+same sum the category's own "Ranked separately" list uses. Edit mode only.
+Also fixed: `--up`/`--down` had a `prefers-color-scheme: light` override, but the site
+is dark unless `data-theme="light"` is set (style.css has no OS-scheme rule), so a
+phone in light mode got the dark-green/dark-red on a dark page. Only the
+`[data-theme="light"]` override remains.
