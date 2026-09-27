@@ -4865,3 +4865,13 @@ browser per page load.
 - Header: `--hero-t 26px / --hero-b 18px`, `#hero_h1` one line where it fits
   (clamp 1.9–2.8rem, no max-width), `#hero_p` 6px/14px margins. 540px → 245px tall on
   a computer. Other pages keep the big hero until Carter says otherwise.
+
+## Every text header is the compact one (2026-09-27)
+
+Carter: "make them all the same wherever applicable". account, add, categories,
+changes, credits, import, install, log, sitemap and rankings moved from the big hero to
+`.hero.compact` (the database pages' header): `--hero-t:30px;--hero-b:20px`, the h1
+`.wide` (no max-width, one line where it fits), 8px paragraph margins. style.css (CRLF,
+edited in binary) gives `.hero.compact .segsw` and a second paragraph room under the
+line. Rankings' page-local header rules were removed in favour of the shared style.
+Profile (/user/<slug>) and the home page keep their own hero layouts.

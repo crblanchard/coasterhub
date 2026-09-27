@@ -256,6 +256,11 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
 .hero.compact .badge{margin-bottom:10px;padding:4px 11px;font-size:.68rem}
 .hero.compact h1,.hero.compact h1.wide{font-size:clamp(1.75rem,4.4vw,2.6rem);line-height:1.08}
 .hero.compact p{margin:8px 0 0;font-size:1rem}
+/* Compact is every page's header now (Carter, 2026-09-27: "make them all the
+   same"), so it also carries what sits under the line: Rankings' Mine | Global,
+   /credits' buttons. */
+.hero.compact .segsw{margin:12px 0 4px}
+.hero.compact p + p{margin:6px 0 0}
 @media(max-width:680px){ .hero.compact{padding-top:14px} }
 
 /* The riders list (/riders). One row per person, in the same shape as the

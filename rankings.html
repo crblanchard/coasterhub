@@ -233,11 +233,6 @@
   .mflist label span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mflist label i{font-style:normal;color:var(--muted);font-size:.8rem;margin-left:auto;flex:none}
   .mfacts{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
-  /* A shorter header (Carter, 2026-09-27: "way too big ... make the text one
-     line if applicable and cut on dead space above and below my name"). IDs,
-     so they beat style.css's .hero h1 / .hero p without touching other pages. */
-  #hero_h1{max-width:none;font-size:clamp(1.9rem,4.2vw,2.8rem);margin-top:2px}
-  #hero_p{margin:6px 0 14px}
   .mfnote{color:var(--muted);font-size:.86rem;margin:0 0 6px}
   .catpill{display:inline-flex;align-items:center;gap:8px;background:var(--panel);
            border:1px solid var(--line);border-radius:99px;padding:7px 14px;margin:0;
@@ -475,9 +470,9 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero" style="--hero-t:26px;--hero-b:18px"><div class="container">
+<section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
   <span class="badge" id="hero_badge">Rankings</span>
-  <h1 id="hero_h1" data-loading>Loading&hellip;</h1>
+  <h1 class="wide" id="hero_h1" data-loading>Loading&hellip;</h1>
   <p id="hero_p">Not tallest or fastest — best.</p>
   <!-- Mine | Global (2026-09-25). Signed in only; filled below. -->
   <div class="segsw" id="mineglobal" hidden><a id="sw_mine">Mine</a><a id="sw_all" href="/rankings">Global</a></div>
