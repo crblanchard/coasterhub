@@ -340,6 +340,12 @@
        data"). One .muted more specific than the rule above, so it wins. */
     #c_body tr.open td.muted:not([data-k=name]):not([data-k=park]):not([data-k=loc]):not([data-k=status]):not(.cmodel){display:none}
   }
+  /* An empty count, your own: where to start (see emptyCount). */
+  .startcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:6px 0 0}
+  .startcard b{font-size:1.1rem}
+  .startcard p{color:var(--muted);margin:6px 0 16px;max-width:52ch}
+  .startcard .btn{display:inline-block;margin-right:14px}
+  .startcard .alt{color:var(--accent2);font-weight:600;text-decoration:none;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -467,6 +473,7 @@ var view='parks', page=0;
 // Day cards per page, newest first.
 var DAYS=30;   // day cards per page; the park list is not paged at all
 var COMBINED=false;  // true on /count with no rider selected = everyone
+var OWNER=false;     // the signed-in rider is looking at their own count
 // Every coaster the shared list has, grouped by park, and which of them are
 // yours. The park view needs both: a tick means nothing on a list where
 // everything is ticked, and the total behind "11/13" has to be the whole park
@@ -609,6 +616,7 @@ return Promise.all([
     // Neither means the park list still says what a park HAS, just not what
     // anybody has of it.
     var meSlug = slug || (acct && acct.slug) || null;
+    OWNER = !!(slug && acct && acct.slug === slug);
     MINE = null;
     if(meSlug){
       var mi=-1;
@@ -819,6 +827,19 @@ function filtered(){
     return true;
   });
 }
+// An empty count is not "no parks match those filters" — that read like a
+// broken page to somebody who had just signed up (2026-09-27). Their own page
+// says where to start: Log in "Add credits" mode, park by park, which is the
+// onboarding Carter picked ("pick parks, then tick coasters"), or an import.
+function emptyCount(){
+  if(COMBINED) return '<p class="lead">Nothing logged yet.</p>';
+  if(!OWNER) return '<p class="lead">Nothing on this count yet.</p>';
+  return '<div class="startcard"><b>Start your count.</b>'
+    +'<p>Pick a park you&rsquo;ve been to and tick the coasters you rode there. '
+    +'Dates are optional &mdash; add them if you remember.</p>'
+    +'<a class="btn" href="/log?mode=list">Add your credits</a>'
+    +'<a class="alt" href="/import">or import a list &rarr;</a></div>';
+}
 // A US region is "<State>, US" (or a bare "US" on a park nobody gave a state).
 function isUS(l){ return l==='US' || /, US$/.test(l); }
 // The location filter's test: one region exactly, or "*US" for every state.
@@ -908,7 +929,7 @@ function renderDays(rows){
       // counts them rather than being one of them.
       + (nNew ? '<div class="newsum">'+nNew+' new credit'+(nNew===1?'':'s')+'</div>' : '')
       +'</div></details>';
-  }).join('') || '<p class="lead">No rides match those filters.</p>';
+  }).join('') || (LOG.length ? '<p class="lead">No rides match those filters.</p>' : emptyCount());
   pager(total,DAYS);
 }
 // Every park in the count, A to Z, each one opening the way a day does. A day
@@ -1019,7 +1040,7 @@ function renderParks(rows){
       +'</span>'
       +'<span class="n">'+what+'</span>'
       +'</summary><div class="inner"></div></details>';
-  }).join('') || '<p class="lead">No parks match those filters.</p>';
+  }).join('') || (LOG.length ? '<p class="lead">No parks match those filters.</p>' : emptyCount());
   document.getElementById('pager').innerHTML='';
 }
 

@@ -183,6 +183,13 @@
   #loading{color:var(--muted);padding:40px 0}
   #err{display:none;background:var(--panel);border:1px solid var(--bad);border-radius:12px;padding:20px;color:var(--fg)}
   #err code{color:var(--accent2)}
+  /* An empty count (see render): where to start. */
+  .startcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:24px 0 4px}
+  .startcard[hidden]{display:none}
+  .startcard b{font-size:1.1rem}
+  .startcard p{color:var(--muted);margin:6px 0 16px;max-width:52ch}
+  .startcard .btn{display:inline-block;margin-right:14px}
+  .startcard .alt{color:var(--accent2);font-weight:600;text-decoration:none;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -272,6 +279,13 @@
 
 <main id="content" style="display:none">
 <div class="container"><p class="ridernote" id="ridernote" style="display:none"></p></div>
+<!-- An empty count, on your own page: where to start, instead of a column of
+     zeros and an empty map (2026-09-27). Filled in by render(). -->
+<div class="container"><div class="startcard" id="startcard" hidden>
+  <b>Start your count.</b>
+  <p>Pick a park you&rsquo;ve been to and tick the coasters you rode there. Dates are optional &mdash; add them if you remember.</p>
+  <a class="btn" href="/log?mode=list">Add your credits</a><a class="alt" href="/import">or import a list &rarr;</a>
+</div></div>
 <!-- The last five days this rider logged, in the activity feed's form —
      first on the page (Carter, 2026-09-26: "below top ten do latest five
      'recent visits'", then "show recent visits at the top actually").
@@ -713,6 +727,20 @@ function render(s){
     });
     document.getElementById('sec_visits').style.display='';
   })();
+
+  // Nothing counted yet: no zero tiles and no empty map. Your own page gets
+  // the "Start your count" card; somebody else's just says so.
+  if(!k.credits){
+    document.getElementById('sec_kpis').style.display='none';
+    document.getElementById('sec_geo').style.display='none';
+    CoasterHub.me().then(function(acct){
+      var sc=document.getElementById('startcard');
+      if(!(acct && acct.slug===CoasterHub.currentUser())){
+        sc.innerHTML='<p style="margin:0">Nothing on '+name+'&rsquo;s count yet.</p>';
+      }
+      sc.hidden=false;
+    });
+  }
 
   // Standing notes about a rider's own data — things known to be unresolved, kept
   // on the page so they aren't forgotten. Delete the entry once it's settled.
