@@ -3978,6 +3978,22 @@ browser fires `beforeinstallprompt`, "You're all set" when it is already opened 
 home screen, and a Share-link button for coasterhub.org/install. Listed on /sitemap; not in
 the nav (ask before adding it there).
 
+## New-user setup: the prototype and Carter's changes to it (2026-09-27, in progress)
+
+Prototype (a private artifact, trial only, nothing saved):
+https://claude.ai/artifact/YSYJChPKzms2KHswRnwvP2 — account → pick parks → tick coasters
+park by park → your count → pick up to 10 favorites (tallest pre-ticked) → head-to-head
+binary insertion → a profile-like summary. **Not built into the site; wait for Carter's go**
+(it changes how sign-up works — see "ask before major changes" in CLAUDE.md). Carter keeps
+using the prototype as it is and sends changes FOR THE REAL SITE; collect them here:
+
+1. Example name is **Werner Stengel**, not a made-up person. Done on /account already
+   (placeholder only).
+2. **The name never fills in the username.** (The prototype did; the live form never has.)
+3. **The park search gets the Locations checkbox filter** — the same state/country picker
+   /log has (`REGSEL`, readRegions/wireRegions in log.html); reuse it rather than rebuild.
+   The live path for a new user today (/log in Add credits mode) already has it.
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
