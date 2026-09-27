@@ -151,6 +151,10 @@
   /* A bare `label` rule above upper-cases every label as a field caption; this one is a sentence, so it reads like the hint beside it. */
   .toolbar .dropRides{display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;color:var(--ink);text-transform:none;letter-spacing:0;font-size:.85rem;font-weight:400}
   .toolbar .dropRides input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--btn-bg)}
+  /* No iOS zoom on focus — the same rule as style.css, which this page does not load. */
+  @supports (-webkit-touch-callout:none){
+    input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px !important}
+  }
   /* Same ride, relocated: one line per row of the ride, and the finder's hits. */
   .srrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--line)}
   .srrow:last-child{border-bottom:0}
