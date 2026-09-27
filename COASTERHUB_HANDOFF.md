@@ -4752,3 +4752,13 @@ that list's rides by the same maker / of the same model (maker+model must both m
 counted one per ride key in list order. `coasterFacts(c, extra, link, among)` in app.js
 takes it as an optional fourth argument ({manu, model} strings, class `among`); other
 callers pass nothing and are unchanged.
+
+## /credits: day rows like park rows; two-line coaster rows on phones (2026-09-27)
+
+- Rides tab: `#dayview` is `.flat` too, and every `#parkview.flat` rule became
+  `:is(#parkview,#dayview).flat`. A day is the date over the park(s) on the left, and
+  "N coasters" over "N rides" (accent) on the right — the park list's shape.
+- Coasters tab on a phone (≤680px grid): three columns now. Row 1: name, and the MODEL
+  on the right in the accent (Carter: "model is more prominent"); row 2: park · location
+  side by side on the left (location gets its " · " from CSS), status on the right where
+  the location used to be. Two lines instead of three. The chevron still sits top right.

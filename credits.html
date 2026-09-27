@@ -132,36 +132,35 @@
   /* The park list is a LIST, not a stack of cards. 247 of them is a long scroll
      on a phone, and the card chrome — a border, a panel, a gap — was costing
      about half the rows that fit on a screen. Off it comes: one continuous
-     list with a hairline between rows. Only here; the day cards keep theirs,
-     because a day is a thing that happened and a park is an index entry.
-     (Carter, 2026-09-20.) */
-  #parkview.flat .day{border:0;border-bottom:1px solid var(--line);border-radius:0;
+     list with a hairline between rows. (Carter, 2026-09-20.) The day list joined
+     it on 2026-09-27 ("make the 'rides' cards show the same as parks"). */
+  :is(#parkview,#dayview).flat .day{border:0;border-bottom:1px solid var(--line);border-radius:0;
     margin:0;background-color:transparent}
   /* Two columns, each of two lines: the park and where it is on the left, what
      it has and what you have of it on the right. LAID OUT rather than left to
      wrap — the summary is a wrapping flexbox with a 14px gap, so on a phone the
      region and the count wrapped onto a second flex line and that gap became
      14px of dead space in the middle of every single row. */
-  #parkview.flat .day summary{padding:9px 2px;flex-wrap:nowrap;align-items:flex-start;gap:14px}
-  #parkview.flat .pmain{flex:1;min-width:0;display:flex;flex-direction:column}
+  :is(#parkview,#dayview).flat .day summary{padding:9px 2px;flex-wrap:nowrap;align-items:flex-start;gap:14px}
+  :is(#parkview,#dayview).flat .pmain{flex:1;min-width:0;display:flex;flex-direction:column}
   /* Both of these carry sizes meant for the day cards' one-line summary. */
-  #parkview.flat .day .dt{min-width:0;line-height:1.3}
+  :is(#parkview,#dayview).flat .day .dt{min-width:0;line-height:1.3}
   /* The park's name carries the row; where it is and what it holds are the
      supporting facts, so they sit a step down from it rather than level with
      it. Also buys back a few pixels of height across 247 rows. */
-  #parkview.flat .day .pk{flex:none;min-width:0;line-height:1.3;font-size:.8rem}
-  #parkview.flat .day .n{flex:none;display:flex;flex-direction:column;
+  :is(#parkview,#dayview).flat .day .pk{flex:none;min-width:0;line-height:1.3;font-size:.8rem}
+  :is(#parkview,#dayview).flat .day .n{flex:none;display:flex;flex-direction:column;
     align-items:flex-end;text-align:right;line-height:1.3;font-size:.78rem}
   /* Named for what they mean, not which line they landed on — the rule that
      said .herocount h1 span broke the day the numbers became links. */
-  #parkview.flat .day .n .nop{color:var(--muted);font-weight:400;white-space:nowrap}
-  #parkview.flat .day .n .nrid{color:var(--accent2);font-weight:700;white-space:nowrap}
+  :is(#parkview,#dayview).flat .day .n .nop{color:var(--muted);font-weight:400;white-space:nowrap}
+  :is(#parkview,#dayview).flat .day .n .nrid{color:var(--accent2);font-weight:700;white-space:nowrap}
   /* A zero is not an achievement. Left muted so the accent down the list means
      "you have some of this one" — on the everyone view most parks are ones you
      have never been to, and highlighting all of those zeros made the column
      loudest exactly where there was nothing to say. */
-  #parkview.flat .day .n .nrid.none{color:var(--muted);font-weight:400}
-  #parkview.flat .day .inner{border-top:0;padding:0 2px 12px}
+  :is(#parkview,#dayview).flat .day .n .nrid.none{color:var(--muted);font-weight:400}
+  :is(#parkview,#dayview).flat .day .inner{border-top:0;padding:0 2px 12px}
   /* A tick per coaster: what you have of this park. Fixed width so the names
      below it still line up on the ones you have not ridden. Top-aligned now
      that a row is two lines tall. */
@@ -283,7 +282,11 @@
     /* Flat rows, the same as the park list (Carter, 2026-09-20): no card, no
        gap between them, a hairline instead. The card's border, radius, panel
        and 8px margin were costing more height than two of its four lines. */
-    #c_body tr{display:grid;grid-template-columns:1fr auto;gap:1px 10px;
+    /* Two lines (Carter, 2026-09-27): name and, on the right, the model — more
+       prominent than it was on a line of its own; then park · location, with
+       the status where the location used to sit. Three columns so park and
+       location can share the left: park takes what it needs, location the rest. */
+    #c_body tr{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr) auto;gap:1px 0;
                border-bottom:1px solid var(--line);padding:8px 2px;margin:0}
     #c_body tr:hover{background:transparent}
     #c_body td{display:none;border:0;padding:0;white-space:normal}
@@ -294,21 +297,24 @@
        riders line shares row 3 with the numbers instead of taking a row of its
        own. The old row 3 held the status pill alone whenever a coaster had no
        year or height on file, which is a whole line of nothing. */
-    #c_body td[data-k=name]{display:block;grid-column:1;grid-row:1;font-weight:600;
+    #c_body td[data-k=name]{display:block;grid-column:1/3;grid-row:1;font-weight:600;padding-right:10px;
                             font-size:.9rem;line-height:1.3;color:var(--fg)}
     #c_body td[data-k=park]{display:block;grid-column:1;grid-row:2;color:var(--muted);
                             font-size:.76rem;min-width:0;
                             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #c_body td[data-k=loc]{display:block;grid-column:2;grid-row:2;color:var(--muted);
-                           font-size:.76rem;text-align:right;white-space:nowrap}
+                           font-size:.76rem;min-width:0;padding-right:10px;
+                           overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #c_body td[data-k=loc]:not(:empty)::before{content:" \00b7  ";white-space:pre}
     /* What the thing is, under where it is. Spans both columns now that the
        riders line is gone from beside it. */
-    #c_body td.cmodel{display:block;grid-column:1/-1;grid-row:3;color:var(--accent2);
-                      font-size:.74rem;min-width:0;
+    #c_body td.cmodel{display:block;grid-column:3;grid-row:1;color:var(--accent2);
+                      font-size:.76rem;font-weight:600;min-width:0;max-width:46vw;text-align:right;
+                      padding-right:17px;align-self:baseline;
                       overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #c_body td.cmodel:empty{display:none}
     /* Top right, clear of the chevron, and always there — open or closed. */
-    #c_body td[data-k=status]{display:block;grid-column:2;grid-row:1;text-align:right;
+    #c_body td[data-k=status]{display:block;grid-column:3;grid-row:2;text-align:right;
                               padding-right:17px}
     /* The status reads like the park rows' do on a phone: coloured word, no
        border. A bordered pill beside the name made the name the second-loudest
@@ -325,7 +331,6 @@
       width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
       transform:rotate(45deg);transition:transform .15s}
     #c_body tr.open td[data-k=name]::after{transform:rotate(-135deg);top:15px}
-    #c_body tr.open td.cmodel{display:none}
     /* Status is excluded too now: it is pinned top right whether the row is
        open or shut, so repeating it as a labelled line below would be saying
        the same thing twice. */
@@ -406,7 +411,7 @@
       <button id="reset">Reset</button>
     </div>
     <div class="count" id="count"></div>
-    <div id="dayview"></div>
+    <div id="dayview" class="flat"></div>
     <!-- Every park in the count, A-Z, each one opening the way a day does. -->
     <div id="parkview" class="flat" style="display:none"></div>
     <div class="pager" id="pager"></div>
@@ -906,11 +911,19 @@ function renderDays(rows){
     var what=isRides
       ? (list.length+' ride'+(list.length===1?'':'s')+' · '+uniqRows.length+' coaster'+(uniqRows.length===1?'':'s'))
       : (uniqRows.length+' new credit'+(uniqRows.length===1?'':'s'));
+    // The same two-by-two row as the park list (Carter, 2026-09-27: "make the
+    // 'rides' cards show the same as parks"): the date over where, and how many
+    // coasters over how many rides on the right.
+    var nums=isRides
+      ? '<span class="nop">'+uniqRows.length+' coaster'+(uniqRows.length===1?'':'s')+'</span>'
+        +'<span class="nrid">'+list.length+' ride'+(list.length===1?'':'s')+'</span>'
+      : '<span class="nrid">'+what+'</span>';
     return '<details class="day"><summary>'
-      +'<span class="dt">'+esc(fmtDate(d==='—'?null:d))+'</span>'
-      +(COMBINED?'<span class="rd">'+esc(list[0].rider||'')+'</span>':'')
-      +'<span class="pk">'+esc(pk.join(' · '))+'</span>'
-      +'<span class="n">'+what+'</span>'
+      +'<span class="pmain">'
+        +'<span class="dt">'+esc(fmtDate(d==='—'?null:d))+'</span>'
+        +'<span class="pk">'+(COMBINED?esc(list[0].rider||'')+' \u00b7 ':'')+esc(pk.join(' · '))+'</span>'
+      +'</span>'
+      +'<span class="n">'+nums+'</span>'
       +'</summary><div class="inner">'
       // The park is never repeated on every row. On a one-park day it is already
       // in the summary directly above; on a phone that column also stole the
