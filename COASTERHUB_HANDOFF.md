@@ -5213,3 +5213,4 @@ ride-sign yellow, ticket.
 Revised the same day (Carter: "no lights in day mode and take away the fade ... a light
 color where text is still black"): **day = pale teal band #dcf0f4, black text, the track
 in thin teal lines, no lights; no fade in either mode.** Night keeps the lit track.
+Same day: the track keeps to the right ~62% and the lower 55% of the band (phones: a low strip, 26% tall) so it stays clear of titles.

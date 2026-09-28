@@ -110,7 +110,11 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
   color:var(--fg);
   background-color:#060b15;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'%3E%3Cpath d='M0 190 C160 190 200 30 320 30 C440 30 450 170 560 170 C660 170 670 90 770 90 C880 90 900 200 1030 188 C1120 180 1150 110 1200 120' fill='none' stroke='white' stroke-opacity='.22' stroke-width='1.2' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 200 C160 200 200 40 320 40 C440 40 450 180 560 180 C660 180 670 100 770 100 C880 100 900 210 1030 198 C1120 190 1150 120 1200 130' fill='none' stroke='white' stroke-opacity='.12' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 190 C160 190 200 30 320 30 C440 30 450 170 560 170 C660 170 670 90 770 90 C880 90 900 200 1030 188 C1120 180 1150 110 1200 120' fill='none' stroke='%23ffcc1f' stroke-width='3' stroke-dasharray='0.1 16' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right bottom;background-size:100% 78%}
+  background-repeat:no-repeat;background-position:right bottom;background-size:62% 55%}
+/* The track keeps to the right ~2/3 and low in the band, clear of the title
+   (Carter, 2026-09-28). On a phone the text runs full width, so the track
+   is a low strip along the bottom. */
+@media (max-width:640px){ .hero{background-size:66% 26%} }
 /* Day (Carter, 2026-09-28): a light teal band, black text, the track in thin
    teal lines — no lights, no fade. */
 :root[data-theme="light"] .hero{background-color:#dcf0f4;
