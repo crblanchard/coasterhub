@@ -89,6 +89,15 @@
   .mmods .mm i{font-style:normal;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums;flex:none}
   @media (max-width:560px){ .mmods{columns:1} }
   a.crow.mk.open{background:var(--soft)}
+  /* "In your rankings" is one line a ride (Carter, 2026-09-28: "shrink
+     these"): name, then its park in grey beside it. */
+  #ranked a.crow{padding-top:6px;padding-bottom:6px;align-items:baseline}
+  #ranked a.crow .two{flex-direction:row;align-items:baseline;gap:8px}
+  #ranked a.crow .two{flex:1 1 auto}
+  #ranked a.crow .two .cn{flex:0 0 auto;max-width:68%}
+  #ranked a.crow .two .pk{flex:1 1 0}
+  #ranked a.crow .two .pk{font-size:.8rem}
+  #ranked a.crow .rk{font-size:.85rem;min-width:2.9em}
   @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
 </style>
 </head>

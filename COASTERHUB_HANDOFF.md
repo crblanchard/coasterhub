@@ -4939,3 +4939,8 @@ list** (`.panel.mlist`, hairlines between) instead of a card per model.
 Carter, 2026-09-28: a ride pulled out of its category shows the same fact on the
 read-only ranking too — a quiet (not bold) green "↑7" / red "↓3" after the location
 (`.pmini`, tooltip is the edit-mode sentence). Edit mode keeps the bold sentence line.
+
+Carter, 2026-09-28: maker/model pages' "In your rankings" rows are one line each
+(name, park beside it in grey; the name keeps its width, the park truncates).
+Asked about a "global ranking of all B&M Inverts" — proposal pending, see below the
+reply of that date.
