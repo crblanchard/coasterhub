@@ -1703,7 +1703,7 @@
         }
         if (m && m.first) extra.push([mdy(m.first), "First ridden"]);
         inner.innerHTML = coasterFacts(c, extra,
-          '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>', among);
+          '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page</a>', among);
       });
     });
   }
@@ -1902,7 +1902,7 @@
       }).join("");
       var box = document.createElement("div"); box.className = "cx";
       box.innerHTML = '<div class="chips">' + chips + '</div>'
-        + coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>');
+        + coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page</a>');
       row.classList.add("open"); row.parentNode.insertBefore(box, row.nextSibling);
     });
     // Park · place beside each name, as /rankings reads.

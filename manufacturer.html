@@ -54,7 +54,6 @@
 </div></header>
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
-  <span class="badge" id="hero_badge">Manufacturer</span>
   <h1 class="wide" data-loading>Loading&hellip;</h1>
   <p class="wide" id="hero_sub"></p>
 </div></section>
@@ -186,7 +185,7 @@ function index(BY, MINE){
     return '<div class="facts"><div class="fcol">'+left+'</div><div class="fcol fnum">'+right+'</div></div>'
       +'<div class="panel mrows">'+ms.map(function(mo){ return row(mo, byM[mo]||[], got[mo], CoasterHub.makerHref(m.name, mo)); }).join('')
       +(byM[''] ? row('No model on file', byM[''], nog, null) : '')+'</div>'
-      +'<a class="go" href="'+E(CoasterHub.makerHref(m.name))+'">Manufacturer page &rarr;</a>';
+      +'<a class="go" href="'+E(CoasterHub.makerHref(m.name))+'">Manufacturer page</a>';
   }
 
   // Clicks inside an open panel are app.js's (openableCoasters on #body):
@@ -240,7 +239,7 @@ function one(name, cs, MINE){
     return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(mo || 'No model on file')+'</span><span class="msub">'+esc(sub)+'</span></span>'
       +CoasterHub.countsTag(op, list.length-op)+'</summary>'
-      +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">Model page &rarr;</span></a>' : '')
+      +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">Model page</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
   }).join('')+'</div><div id="ranked"></div>';
   // Where these sit in the rankings, Mine / Global (CoasterHub.rankSection,
@@ -260,7 +259,6 @@ function one(name, cs, MINE){
 function model(maker, mo, cs, MINE){
   var canon=CoasterHub.makerHref(maker, mo);
   if(canon!==location.pathname) history.replaceState(null,'',canon+location.search);
-  document.querySelector('#hero_badge').textContent='Model';
   document.querySelector('.hero h1').textContent=mo;
   document.title=mo+' — '+maker+' — Coaster Hub';
   $('hero_sub').innerHTML='A model by <a href="'+esc(CoasterHub.makerHref(maker))+'" style="color:var(--accent2);text-decoration:none">'+esc(maker)+'</a>.';

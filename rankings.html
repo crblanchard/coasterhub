@@ -263,8 +263,8 @@
   .rrow .pmini.down{color:var(--down)}
   /* A folded family in the pool wears the same wash and count badge it will
      wear in the list, so what you are about to add looks like what you get. */
-  .addsec{padding:9px 2px 5px;color:var(--muted);font-size:.72rem;font-weight:700;
-          text-transform:uppercase;letter-spacing:.09em}
+  .addsec{padding:9px 2px 5px;color:var(--muted);font-size:.8rem;font-weight:700;
+          }
   .addrow.grp{background:var(--tint);border-color:var(--accent2)}
   .addrow .cnt{color:var(--accent2);font-weight:800;font-size:.8rem;margin-left:7px}
   /* No `font` shorthand: it would reset the pill's size and weight (CLAUDE.md). */
@@ -387,9 +387,9 @@
   .figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:30px}
   /* The same compact cards as the profile's headline numbers (2026-09-27). */
   .fig{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-  .fig b{display:block;font-size:1.6rem;font-weight:800;color:var(--fg);letter-spacing:-.02em;
+  .fig b{display:block;font-size:2.4rem;font-weight:800;color:var(--fg);letter-spacing:-.02em;
          font-variant-numeric:tabular-nums;line-height:1}
-  .fig span{display:block;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
+  .fig span{display:block;color:var(--muted);font-size:.8rem;margin-top:6px}
   .sechd{margin:0 0 14px}
   .sechd h2{font-size:1.15rem;letter-spacing:-.01em}
   .sechd p{color:var(--muted);font-size:.88rem;margin-top:5px;max-width:62ch}
@@ -814,13 +814,13 @@ if(!slug){
                 :             '';
         return '<a class="card" href="'+href+'"><div class="hd"><b>'+esc(l.user.name)+'</b><em>not started</em></div>'
           +'<div class="none">No favorites ranked yet.'+(why?'<em>'+why+'</em>':'')+'</div>'
-          +'<div class="go">'+((yours||seedable) ? 'Start one &rarr;' : 'See the page &rarr;')+'</div></a>';
+          +'<div class="go">'+((yours||seedable) ? 'Start one' : 'See the page')+'</div></a>';
       }
       var top=l.order.slice(0,3).map(function(id,i){
         var c=BYID[id];
         return '<div class="t"><i>'+(i+1)+'</i><div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+'</span></div></div>';
       }).join('');
-      var more=l.order.length>5?('See all '+nf(l.order.length)+' &rarr;'):'See the list &rarr;';
+      var more=l.order.length>5?('See all '+nf(l.order.length)):'See the list';
       return '<a class="card" href="'+href+'"><div class="hd"><b>'+esc(l.user.name)+'</b><em>'
         +nf(l.order.length)+' ranked</em></div><div class="top">'+top+'</div><div class="go">'+more+'</div></a>';
     }).join('');
@@ -850,7 +850,7 @@ if(!slug){
               +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
           +'</div>'
           +'<div class="who" hidden><div class="chips">'+full+'</div>'
-            +CoasterHub.coasterFacts(c, null, c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>'
+            +CoasterHub.coasterFacts(c, null, c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page</a>':'')+'</div>'
           +'</div>';
       }).join('');
       // One open at a time (Carter, 2026-09-28 — this used to keep each row
@@ -1092,7 +1092,7 @@ function factsFor(id){
   });
   var among={ manu: mi ? mi+' of '+mn : '', model: di ? di+' of '+dn : '' };
   return CoasterHub.coasterFacts(c, extra,
-    c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'', among);
+    c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page</a>':'', among);
 }
 // ---- model filter ------------------------------------------------------------
 // Which models to show (maker() — the model, or the maker when there is none).

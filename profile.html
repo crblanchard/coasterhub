@@ -32,8 +32,8 @@
      they were: less padding, a smaller number, a smaller gap. */
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:4px}
   .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-  .kpi .num{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1}
-  .kpi .lbl{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
+  .kpi .num{font-size:2.4rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+  .kpi .lbl{color:var(--muted);font-size:.8rem;margin-top:6px}
   .kpi .sub{color:var(--accent2);font-size:.76rem;margin-top:4px}
   /* A standing note about a rider's own data — something known to be missing or
      unresolved, kept visible so it doesn't get forgotten. See RIDER_NOTES. */
@@ -85,7 +85,7 @@
   .toplink:hover{color:var(--accent2)}
   .toplink .arw{color:var(--accent2);font-weight:400;margin-left:8px;font-size:.8em}
   .rec{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line);min-width:0}
-  .rec .tag{flex:none;width:9.2em;white-space:nowrap;color:var(--accent2);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+  .rec .tag{flex:none;width:9.2em;white-space:nowrap;color:var(--accent2);font-size:.8rem;font-weight:700}
   .rec .rname{flex:1;min-width:0;font-weight:600;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .rec .rval{flex:none;color:var(--fg);font-weight:800;font-size:.95rem;font-variant-numeric:tabular-nums;white-space:nowrap}
   .rec .rval span{color:var(--muted);font-weight:600;font-size:.78rem}
@@ -312,8 +312,7 @@
      Read off computeStats' day_detail, so it costs nothing extra; hidden for a
      rider with no dated days. -->
 <section class="block" id="sec_visits" style="display:none"><div class="container">
-  <span class="eyebrow">Lately</span>
-  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">every day &rarr;</span></a></h2>
+  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">every day</span></a></h2>
   <div class="mlist vlist" id="visits"></div>
   <!-- The way on to the whole count, where the five end (2026-09-27): "my
        stuff is split up" was the thing Carter found hardest, and this puts the
@@ -328,7 +327,6 @@
      empty top ten is not a fact about somebody, it just means they have not got
      round to it, and then the tiles lead as before. -->
 <section class="block" id="sec_top" style="display:none"><div class="container">
-  <span class="eyebrow">Ranked</span>
   <h2><a class="toplink" id="top_h" href="/rankings">Top ten</a></h2>
   <div class="toplist" id="toplist"></div>
 </div></section>
@@ -349,12 +347,12 @@
 </div></section>
 
 <section class="block" id="sec_records"><div class="container">
-  <span class="eyebrow">Stats</span><h2>Records</h2>
+  <h2>Records</h2>
   <div class="records" id="records"></div>
 </div></section>
 
 <section class="block" id="sec_geo"><div class="container">
-  <span class="eyebrow">Geography</span><h2>Everywhere I've ridden</h2>
+  <h2>Everywhere I've ridden</h2>
   <p class="lead" id="geo_sub"></p>
   <div id="map"></div>
 </div></section>
@@ -368,7 +366,7 @@
 </div></div>
 
 <section class="block" id="sec_activity"><div class="container">
-  <span class="eyebrow">Activity</span><h2>Every riding day</h2>
+  <h2>Every riding day</h2>
   <p class="lead">Each square is a day; darker means more rides. Tap or hover one for the date, parks, and count.</p>
   <div class="hm-wrap" id="heatmap"></div>
   <div class="hm-legend">Less
@@ -380,7 +378,7 @@
 </div></section>
 
 <section class="block" id="sec_overtime"><div class="container">
-  <span class="eyebrow">History</span><h2>Rides over time</h2>
+  <h2>Rides over time</h2>
   <div class="chart-grid">
     <div class="panel wide"><h3>Credits over time</h3><div class="cap" id="cCumCap">Cumulative new coasters ridden by year</div><div class="cwrap"><canvas id="cCum"></canvas></div></div>
     <div class="panel" id="panel_rides_year"><h3>Rides per year</h3><div class="cap">Total rides incl. re-rides</div><div class="cwrap"><canvas id="cRides"></canvas></div></div>
@@ -389,7 +387,7 @@
 </div></section>
 
 <section class="block" id="sec_breakdown"><div class="container">
-  <span class="eyebrow">Stats</span><h2>The breakdown</h2>
+  <h2>The breakdown</h2>
   <div class="chart-grid">
     <div class="panel"><h3 id="parks_title">Top parks by rides</h3><div class="cap">Home turf</div><div class="cwrap" style="height:360px"><canvas id="cParks"></canvas></div></div>
     <div class="panel"><h3>Top manufacturers</h3><div class="cap">By credits ridden</div><div class="cwrap" style="height:360px"><canvas id="cManu"></canvas></div></div>
@@ -747,7 +745,7 @@ function render(s){
     h.href=CoasterHub.userPageHref(slug,'rankings');
     h.innerHTML = (ten.length<10 ? ('Top '+ten.length) : 'Top ten')
       + '<span class="arw">' + (known.length>ten.length
-          ? ('all '+nf(known.length)+' &rarr;') : 'the whole list &rarr;') + '</span>';
+          ? ('all '+nf(known.length)) : 'the whole list') + '</span>';
     document.getElementById('toplist').innerHTML=ten.map(function(c,i){
       return '<a class="trow" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="pos">'+(i+1)+'</span>'
         +'<span class="n"><b>'+esc(c.name)+'</b><span class="sub">'

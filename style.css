@@ -104,7 +104,7 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
   padding-left:0;padding-right:0;
   background:radial-gradient(1000px 500px at 75% -10%,var(--hero1),transparent 60%),
              radial-gradient(800px 460px at 0% 120%,var(--hero2),transparent 55%)}
-.hero .badge{display:inline-block;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
+.hero .badge{display:inline-block;font-size:.8rem;
   color:var(--accent2);border:1px solid var(--ring);border-radius:999px;padding:6px 14px;margin-bottom:22px}
 /* The badge over the headline is the rider switcher on the three per-rider
    pages (2026-09-17). It replaced the "Viewing <name>" pill in the header:
@@ -314,7 +314,7 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
 #friends .riderrow .sub::before{content:none}
 #friends .riderrow .nums{flex-direction:column;align-items:flex-end;gap:0}
 #friends .riderrow .nums b{font-size:1.3rem;font-weight:800;line-height:1.2}
-#friends .riderrow .nums span{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em}
+#friends .riderrow .nums span{font-size:.8rem;}
 @media (max-width:560px){
   .riderrow,#friends .riderrow{gap:12px;padding:11px 14px}
   .riderrow .av,#friends .riderrow .av{width:48px;height:48px;font-size:1.25rem}
@@ -325,13 +325,13 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
   .riderrow .sub::before{content:none}
   .riderrow .nums{flex-direction:column;align-items:flex-end;gap:0}
   .riderrow .nums b{font-size:1.25rem;font-weight:800;line-height:1.2}
-  .riderrow .nums span{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em}
+  .riderrow .nums span{font-size:.8rem;}
 }
 
 /* Activity feed (changes-feed.js) — /changes in full, /riders in short. */
 .feed{display:flex;flex-direction:column;gap:0}
-.feed .day{color:var(--muted);font-size:.78rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:.1em;margin:22px 0 8px}
+.feed .day{color:var(--muted);font-size:.8rem;font-weight:700;
+  margin:22px 0 8px}
 .feed .day:first-child{margin-top:0}
 .ev{display:flex;gap:13px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
 .ev .ic{flex:none;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;
@@ -367,7 +367,8 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
 
 /* Sections */
 section.block{padding:64px 0;border-top:1px solid var(--line)}
-.eyebrow{color:var(--accent2);text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;font-weight:700}
+/* Section headings in plain case (Carter, 2026-09-28: no small spaced capitals). */
+.eyebrow{color:var(--fg);font-size:1.1rem;font-weight:800;letter-spacing:-.01em}
 h2{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.01em;margin:8px 0 6px}
 .lead{color:var(--muted);max-width:60ch;margin-bottom:36px}
 
@@ -376,7 +377,7 @@ h2{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.01em;marg
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;transition:transform .15s,border-color .15s}
 .card:hover{transform:translateY(-3px);border-color:var(--ring)}
 .card h3{font-size:1.2rem;margin-bottom:6px}
-.card .meta{color:var(--accent2);font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.card .meta{color:var(--accent2);font-size:.82rem;font-weight:600;margin-bottom:12px}
 .card p{color:var(--muted);font-size:.95rem}
 .rating{color:var(--accent);font-weight:700;font-size:1.05rem}
 
@@ -437,7 +438,7 @@ html.srchopen{overflow:hidden}
 .srchrow.gone .st b{color:var(--muted)}
 /* "formerly Intimidator", "moved to Himeji Central Park": why this row matched. */
 .srchrow .st .srchtag{font-style:normal;color:var(--accent2);font-weight:600}
-.srchrow .sk{flex:none;color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.srchrow .sk{flex:none;color:var(--muted);font-size:.8rem;font-weight:700;}
 @media (max-width:680px){
   .srch{padding:0;background:var(--bg)}
   .srchbox{max-width:none;max-height:none;height:100%;border:0;border-radius:0;box-shadow:none}
@@ -538,8 +539,8 @@ html.srchopen{overflow:hidden}
    Everything is scoped under .profedit on purpose. A bare `input{}` or
    `label{}` rule here would reach into /log, /add and /edit, which all style
    their own forms. */
-.profedit label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.04em;
-  text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+.profedit label{display:block;font-size:.8rem;font-weight:700;
+  color:var(--muted);margin:0 0 5px}
 .profedit input[type=text],.profedit input[type=password],.profedit textarea{
   background:var(--well);border:1px solid var(--line);color:var(--fg);padding:10px 12px;
   border-radius:10px;font-size:.95rem;font-family:inherit;width:100%;margin:5px 0 13px;
@@ -679,8 +680,8 @@ html.srchopen{overflow:hidden}
   max-width:340px;width:100%}
 .cropbox h2{font-size:1.05rem;margin-bottom:4px}
 .cropbox p.sub{color:var(--muted);font-size:.88rem;margin-bottom:16px}
-.cropbox label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.04em;
-  text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+.cropbox label{display:block;font-size:.8rem;font-weight:700;
+  color:var(--muted);margin:0 0 5px}
 .cropview{position:relative;width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;
   background:var(--well);border:1px solid var(--line);touch-action:none;cursor:grab}
 .cropview:active{cursor:grabbing}
@@ -705,9 +706,10 @@ html.srchopen{overflow:hidden}
 /* A spec sheet: label on the left, value on the right, one per line. */
 .specsheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:10px}
 .specsheet div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
-.specsheet b{display:block;font-size:1.05rem;font-weight:800;font-variant-numeric:tabular-nums}
-.specsheet span{display:block;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.specsheet b{display:block;font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1}
+.specsheet span{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
 .specsheet small{color:var(--muted);font-weight:600;font-size:.78rem}
+@media (max-width:560px){ .specsheet{grid-template-columns:repeat(2,minmax(0,1fr))} .specsheet b{font-size:1.15rem;white-space:nowrap} }
 
 /* ---- The database pages (park, coaster, manufacturer, model, location) ----
    One set of shapes for all five (2026-09-25); they each used to carry their
@@ -720,13 +722,14 @@ html.srchopen{overflow:hidden}
 .crumbs i{font-style:normal;opacity:.6}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;min-width:0}
-.tile b{display:block;font-size:1.5rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.15}
-.tile span{display:block;color:var(--muted);font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
-@media (max-width:680px){ .tiles{grid-template-columns:repeat(2,1fr)} .tile b{font-size:1.25rem} }
+/* The numbers are the point (Carter, 2026-09-28: "need more emphasis!!!"). */
+.tile b{display:block;font-size:2.5rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.05;letter-spacing:-.03em}
+.tile span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}
+@media (max-width:680px){ .tiles{grid-template-columns:repeat(2,1fr)} .tile b{font-size:1.5rem;white-space:nowrap} }
 .youline{margin:0 0 6px;padding:10px 14px;border-radius:12px;background:var(--tint);border:1px solid var(--line);
   color:var(--muted);font-size:.9rem;line-height:1.5}
 .youline b{color:var(--fg);font-variant-numeric:tabular-nums}
-.sect{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:26px 0 8px}
+.sect{color:var(--fg);font-size:1.1rem;font-weight:800;letter-spacing:-.01em;margin:28px 0 10px}
 .missing{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
 .missing p{color:var(--muted);margin:8px 0 0}
 /* Two columns of label/value pairs rather than one long list (Carter,

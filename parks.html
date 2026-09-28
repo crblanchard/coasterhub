@@ -55,7 +55,6 @@
 </div></header>
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
-  <span class="badge" id="hero_badge">Parks</span>
   <h1 class="wide">Parks</h1>
   <p class="wide" id="hero_sub">&nbsp;</p>
 </div></section>
@@ -130,7 +129,7 @@ var BYNAME={};
 // the model in grey, status and years on the right, defunct last.
 function parkBody(name){
   var p=BYNAME[name]; if(!p) return '';
-  return '<a class="crow mlink" href="'+esc(CoasterHub.parkHref(name))+'"><span class="cn">Park page &rarr;</span></a>'
+  return '<a class="crow mlink" href="'+esc(CoasterHub.parkHref(name))+'"><span class="cn">Park page</span></a>'
     + p.cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.name).localeCompare(String(b.name)); })
       .map(function(c){ return CoasterHub.coasterRow(c, { mine:MINE, ctx:'model' }); }).join('');
 }

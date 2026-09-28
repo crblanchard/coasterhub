@@ -48,7 +48,6 @@
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
   <!-- A plain badge, not a rider switcher: this page is about a place. -->
-  <span class="badge" id="hero_badge">Location</span>
   <h1 class="wide" data-loading>Loading&hellip;</h1>
   <p class="wide" id="hero_sub"></p>
 </div></section>
@@ -181,7 +180,7 @@ function place(reg, ps, MINE, R){
     return '<details class="mdl"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(c.p.name)+'</span><span class="msub">'+esc(sub)+'</span></span>'
       +CoasterHub.countsTag(c.open, c.gone)+'</summary>'
-      +'<a class="crow mlink" href="'+esc(CoasterHub.parkHref(c.p.name))+'"><span class="cn">Park page &rarr;</span></a>'
+      +'<a class="crow mlink" href="'+esc(CoasterHub.parkHref(c.p.name))+'"><span class="cn">Park page</span></a>'
       +list.map(function(x){ return crow(x, MINE); }).join('')+'</details>';
   }).join('')+'</div>'
   // Where this place's coasters sit in the rankings, Mine / Global — the same
@@ -203,7 +202,7 @@ function index(R, MINE){
   $('hero_sub').textContent=us.length+' states and '+rest.length+' other countries on the site.';
   // Link rows shaped like /manufacturers' (Carter, 2026-09-28: one look for
   // every list): the place, its parks · operating · defunct in grey, your x/y.
-  $('body').innerHTML='<div class="sect"><a href="/location/us" style="color:inherit">United States &rarr;</a></div>'
+  $('body').innerHTML='<div class="sect"><a href="/location/us" style="color:inherit">United States</a></div>'
     +'<div class="panel">'+us.map(locRow).join('')+'</div>'
     +'<div class="sect">Elsewhere</div><div class="panel">'+rest.map(locRow).join('')+'</div>';
 }

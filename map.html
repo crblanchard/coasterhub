@@ -341,7 +341,7 @@ Promise.all([
   function popup(p){
     var both=p.open.concat(p.closed);
     var ridden=both.filter(function(c){ return MINE[c.id]; }).length;
-    var h='<div class="pp"><h3><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+' →</a></h3>'
+    var h='<div class="pp"><h3><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+'</a></h3>'
       +'<small>'+esc(p.region)+'</small>'
       +'<div class="n">'+(p.open.length ? p.open.length+' operating' : 'No operating coasters');
     if(CMP){

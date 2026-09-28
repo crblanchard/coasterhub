@@ -38,17 +38,17 @@
      grid half full of em-dashes says nothing and reads as broken. */
   .specs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 4px}
   .spec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;min-width:0}
-  .spec b{display:block;font-size:1.25rem;font-weight:800;color:var(--accent2);
-          font-variant-numeric:tabular-nums;line-height:1.2;
+  .spec b{display:block;font-size:2.2rem;font-weight:800;color:var(--accent2);letter-spacing:-.03em;
+          font-variant-numeric:tabular-nums;line-height:1.05;
           overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* A maker's name is prose, not a number, so it is sized like prose and
      allowed to wrap rather than being clipped at one line. */
   .spec.text b{font-size:.95rem;font-weight:700;color:var(--fg);white-space:normal;line-height:1.3}
   .spec.text b a{color:inherit;text-decoration:none}
   .spec.text b a:hover{color:var(--accent2);text-decoration:underline}
-  .spec span{display:block;color:var(--muted);font-size:.74rem;text-transform:uppercase;
-             letter-spacing:.06em;margin-top:4px}
-  @media (max-width:680px){ .specs{grid-template-columns:repeat(2,1fr)} }
+  .spec span{display:block;color:var(--muted);font-size:.8rem;
+             margin-top:4px}
+  @media (max-width:680px){ .specs{grid-template-columns:repeat(2,1fr)} .spec b{font-size:1.8rem} }
 
   /* History is plain lines (Carter, 2026-09-26). */
   .hist p,.riders .at{margin:0 0 4px;font-size:.92rem;line-height:1.5}
@@ -105,7 +105,6 @@
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
   <!-- A plain badge, not CoasterHub.riderBadge(): this page is about a ride,
        not a person, so there is no rider to switch. -->
-  <span class="badge" id="hero_badge">Coaster</span>
   <h1 class="wide" data-loading>Loading&hellip;</h1>
   <p class="wide" id="hero_sub"></p>
 </div></section>

@@ -89,8 +89,8 @@
   .parkpop .pp:hover,.parkpop .pp.hi{background-color:var(--soft)}
   .parkpop .pp.on{color:var(--accent2)}
   .parkpop .pp .m{margin-left:auto;flex:none;color:var(--muted);font-weight:500;font-size:.8rem}
-  .parkpop .ph{color:var(--muted);font-size:.72rem;font-weight:700;letter-spacing:.09em;
-    text-transform:uppercase;padding:10px 12px 4px}
+  .parkpop .ph{color:var(--muted);font-size:.8rem;font-weight:700;
+    padding:10px 12px 4px}
   .parkpop .none{color:var(--muted);font-size:.88rem;padding:10px 12px}
   .parktools{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
   .parktools button{flex:none;padding:9px 12px}
@@ -121,7 +121,7 @@
      max-width:100% on the input resolves against the stretched parent and caps
      nothing. Measured: a date field asked for 900px got all 900. */
   .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
-  .fld label{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+  .fld label{color:var(--muted);font-size:.8rem;}
   /* Said, not shown: the control underneath already names itself. */
   .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
       clip:rect(0 0 0 0);white-space:nowrap;border:0}
@@ -129,7 +129,7 @@
      not go below its content either, which is the same trap one level up. */
   .grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-  .panel h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+  .panel h3{font-size:.8rem;color:var(--muted);margin-bottom:10px}
   .clist{max-height:60vh;overflow-y:auto;margin:-4px -4px 0}
   .crow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--soft)}
   .crow:last-child{border-bottom:0}
@@ -173,8 +173,8 @@
   .basket .brow .x{color:var(--bad);cursor:pointer;padding:0 4px;margin-left:auto;flex:none}
   /* You can stage more than one park before saving, so the basket says which
      park each row came from once there is more than one to tell apart. */
-  .basket .bpark{color:var(--muted);font-size:.72rem;text-transform:uppercase;
-                 letter-spacing:.06em;margin:12px 0 0;padding-top:8px;border-top:1px solid var(--soft)}
+  .basket .bpark{color:var(--muted);font-size:.8rem;
+                 margin:12px 0 0;padding-top:8px;border-top:1px solid var(--soft)}
   .basket .bpark.first{margin-top:0;padding-top:0;border-top:0}
   /* Inline "add a park / add a coaster" forms. Hidden until asked for, so the
      normal logging flow is unchanged. */
@@ -221,7 +221,7 @@
   /* The page styles every input like a text field; a tick box is not one. */
   .regs .tick{width:auto;height:auto;min-height:0;padding:0;margin:0;flex:none}
   .regs .n{color:var(--muted);font-size:.76rem}
-  .regs .sec{grid-column:1/-1;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
+  .regs .sec{grid-column:1/-1;font-size:.8rem;
              color:var(--muted);margin:10px 0 3px}
   .regs .sec.first{margin-top:0}
   .addbar{display:flex;justify-content:flex-end;margin:0 0 10px}
@@ -252,7 +252,6 @@
 </div></header>
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
-  <span class="badge">Log</span>
   <h1 class="wide">Log a day.</h1>
   <p>Where are you today? Tap + once per ride.</p>
 </div></section>

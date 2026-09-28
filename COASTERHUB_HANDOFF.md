@@ -5179,3 +5179,22 @@ kiddie/family coasters at 4–16 (multiple circuits per ride). That split is the
 the standard has to answer.
 
 Carter, 2026-09-28: in an opened visit (Recent visits, /credits Rides) a coaster's ×laps sits right after its model in the grey line (coasterRow opts.beside), not on the far right.
+
+Carter, 2026-09-28, "less AI-feeling" pass:
+1. **No echo badges.** The pill above a page title that repeats it ("COASTERS" over
+   "Coasters") is gone from add, changes, coaster, coasters, import, install, location,
+   log, manufacturer, park, parks. Kept where it does something: the rider switcher
+   (profile, credits, rankings, map), categories ("Carter's rankings") and account
+   (Password reset / Invitation).
+2. **No small spaced capitals.** Every label rule that was uppercase + letter-spaced is
+   plain case now (section heads, tile/spec labels, form labels, feed dates, the rider
+   badge, "ranked"), min .8rem. `.sect` and `.eyebrow` are real headings (1.1rem/800,
+   body colour). Eyebrows that sat on top of an h2 were removed. Kept in caps: status
+   words (OPERATING/DEFUNCT/CLOSING SOON), the NEW tag, /edit and /qc.
+4. **Arrows only on a section's main next step.** Dropped from the repeated in-row links
+   ("Coaster page", "Park page", "Model page", "Manufacturer page"), profile's header links,
+   the map popup, rankings cards, "United States". Kept: See all credits, All activity,
+   Contact us, View them all on the map, log/import prompts, pager.
+8. **Numbers bigger.** Tiles 2.5rem (1.5 phone), coaster specs 2.2rem, spec sheet 1.7rem,
+   profile KPIs and rankings figures 2.4rem.
+Pending: 3 (taglines — asked which), 6/9 (mockups), 7 (fonts — suggested). 10 left as is.
