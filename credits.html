@@ -1011,7 +1011,7 @@ function renderParks(rows){
     // when it is opened.
     return '<details class="mdl" data-park="'+esc(park)+'"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(park)+'</span><span class="msub">'+esc(sub)+'</span></span>'
-      +'<span class="ct">'+(mine!=null ? mine+'/' : '')+all.length+'</span>'+PCHEV+'</summary></details>';
+      +PCHEV+'</summary></details>';
   }).join('') || (LOG.length ? '<p class="lead" style="padding:12px 16px;margin:0">No parks match those filters.</p>' : emptyCount());
   CoasterHub.openableCoasters(document.getElementById('parkview'));
   document.getElementById('pager').innerHTML='';

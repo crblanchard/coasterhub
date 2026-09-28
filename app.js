@@ -1760,6 +1760,12 @@
             x.n++; x.sum += pos + 1; x.who.push({ name: u.name || u.slug, slug: u.slug, pos: pos + 1 });
           });
         });
+        // Each ride's place on the site-wide Global list (/rankings' Global
+        // tab): 2+ lists, by average, more lists first on a tie. The Global
+        // rows show THAT number (Carter, 2026-09-28), as Mine shows yours.
+        Object.keys(t).filter(function (k) { return t[k].n > 1; })
+          .sort(function (a, b) { var x = t[a], y = t[b]; return (x.sum / x.n) - (y.sum / y.n) || y.n - x.n; })
+          .forEach(function (k, i) { t[k].pos = i + 1; });
         return t;
       });
     }).catch(function () { return {}; });
@@ -1799,13 +1805,13 @@
           var k = rideKey(c); if (seen[k]) return; seen[k] = 1;
           var g = st.glob[k]; if (!g) return;
           if (g.n < 2) { one++; return; }
-          rows.push({ c: c, n: g.n, avg: g.sum / g.n, who: g.who });
+          rows.push({ c: c, n: g.n, avg: g.sum / g.n, who: g.who, pos: g.pos });
         });
         rows.sort(function (a, b) { return a.avg - b.avg || b.n - a.n || String(a.c.name).localeCompare(String(b.c.name)); });
         st.rows = {};
         body = (rows.length ? '<div class="panel">' + cut(rows).map(function (r, i) {
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
-          return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + (i + 1) + '</span>'
+          return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + r.pos + '</span>'
             + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(ctx(c)) + '</span></span>'
             // The model too, as /rankings' Global list shows it (2026-09-28).
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '')

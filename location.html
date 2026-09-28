@@ -141,7 +141,7 @@ function locRow(c){
   return '<a class="crow std mk" href="'+esc(CoasterHub.locationHref(c.r))+'">'
     +'<span class="two"><span class="cn">'+esc(shortName(c.r))+'</span><span class="pk">'
       +[c.parks+' park'+(c.parks===1?'':'s'), c.open+' operating'].concat(c.gone ? [c.gone+' defunct'] : []).join(' \u00b7 ')+'</span></span>'
-    +'<span class="yrs">'+(c.gotAll!=null ? c.gotAll+'/' : '')+c.all+'</span></a>';
+    +'</a>';
 }
 
 // One state or country, or the whole US: its numbers, its parks, and (except
@@ -183,7 +183,7 @@ function place(reg, ps, MINE, R){
     var list=c.cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.name).localeCompare(String(b.name)); });
     return '<details class="mdl"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(c.p.name)+'</span><span class="msub">'+esc(sub)+'</span></span>'
-      +'<span class="ct">'+(got!=null ? got+'/' : '')+c.all+'</span>'+chev+'</summary>'
+      +chev+'</summary>'
       +'<a class="crow mlink" href="'+esc(CoasterHub.parkHref(c.p.name))+'"><span class="cn">Park page &rarr;</span></a>'
       +list.map(function(x){ return crow(x, MINE); }).join('')+'</details>';
   }).join('')+'</div>'

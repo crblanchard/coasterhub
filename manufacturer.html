@@ -159,7 +159,7 @@ function index(BY, MINE){
       return '<a class="crow std mk" data-mk="'+esc(m.name)+'" href="'+esc(CoasterHub.makerHref(m.name))+'">'
         +'<span class="two"><span class="cn">'+esc(m.name)+'</span><span class="pk">'
           +[m.nm+' model'+(m.nm===1?'':'s'), m.open+' operating'].concat(m.n-m.open ? [(m.n-m.open)+' defunct'] : []).join(' \u00b7 ')+'</span></span>'
-        +'<span class="yrs">'+(m.got!=null ? m.got+'/' : '')+m.n+'</span></a>';
+        +'</a>';
     }).join('') || '<div style="padding:16px;color:var(--muted)">No manufacturer by that name.</div>';
   }
   // The open panel (Carter, 2026-09-27): four numbers in two columns —
@@ -181,7 +181,7 @@ function index(BY, MINE){
       var op=list.filter(function(c){ return !c.closed; }).length, y=years(list);
       var sub=[op+' operating'].concat(list.length-op ? [(list.length-op)+' defunct'] : []).concat(y ? [y] : []).join(' \u00b7 ');
       return '<a class="crow std mk"'+(href?' href="'+E(href)+'"':'')+'><span class="two"><span class="cn">'+E(label)+'</span><span class="pk">'+E(sub)+'</span></span>'
-        +'<span class="yrs">'+(MINE ? (g||0)+'/' : '')+list.length+'</span></a>';
+        +'</a>';
     };
     var byM={}; m.cs.forEach(function(c){ var k=String(c.model||'').trim(); (byM[k]=byM[k]||[]).push(c); });
     var nog=MINE ? (byM['']||[]).filter(function(c){ return MINE[c.id]; }).length : 0;
@@ -241,7 +241,6 @@ function one(name, cs, MINE){
     var sub=[op+' operating'].concat(list.length-op ? [(list.length-op)+' defunct'] : []).concat(yrs ? [yrs] : []).join(' \u00b7 ');
     return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(mo || 'No model on file')+'</span><span class="msub">'+esc(sub)+'</span></span>'
-      +'<span class="ct">'+(g!=null ? g+'/' : '')+list.length+'</span>'
       +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
       +'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>'
       +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">Model page &rarr;</span></a>' : '')

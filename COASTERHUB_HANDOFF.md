@@ -5099,3 +5099,12 @@ Carter, 2026-09-28 ("the boxes are funky"): the /rankings control bar — tabs, 
 Same day: the Models panel's checkboxes are drawn as plain squares (appearance:none — iPhone rendered native ones as circles), and opening the panel focuses the search only on a mouse/trackpad device ((hover:hover) and (pointer:fine)), so a phone no longer throws up the keyboard.
 
 Carter, 2026-09-28: /parks rows open in place now (group rows, like a location's parks and the /credits Parks tab) — tick if you've been, place · operating · defunct in grey, ridden/all, chevron; open: "Park page →" and the park's coasters (filled on first open). /locations stays link rows: a place holds parks, not coasters, so it goes to its page.
+
+Carter, 2026-09-28: **no ridden x/y on list rows** ("remove that across the board, we can
+fill that space later") — gone from group rows (models, a location's parks, /parks,
+/credits Parks) and link rows (/manufacturers, /locations, States, the /manufacturers
+panel's models). The chevron holds the right edge. (The tick on a coaster/park row and
+the "You've ridden N of M" line in the /manufacturers panel stay.)
+Rankings sections: Mine and Global are one two-line shape on a phone — the ride, then
+park · place under it — and **Global rows show the ride's site-wide Global-list position**
+(globalTally computes `pos`), not 1..N within the section, as Mine shows your own rank.

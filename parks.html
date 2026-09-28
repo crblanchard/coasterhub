@@ -160,7 +160,7 @@ function draw(){
     return '<details class="mdl" data-park="'+esc(p.name)+'"><summary>'
       +(MINE ? '<span class="tick">'+(p.been?'\u2713':'')+'</span>' : '')
       +'<span class="mtwo"><span class="nm">'+esc(p.name)+'</span><span class="msub">'+esc(sub)+'</span></span>'
-      +'<span class="ct">'+(MINE ? p.gotAll+'/' : '')+(p.open+p.gone)+'</span>'+CHEV+'</summary></details>';
+      +CHEV+'</summary></details>';
   }).join('') || '<div class="more">Nothing matches.</div>';
 }
 </script>
