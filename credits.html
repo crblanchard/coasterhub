@@ -56,284 +56,16 @@
   #c_more.on{color:var(--fg);border-color:var(--accent2)}
   .count{color:var(--muted);font-size:.85rem;margin-bottom:12px}
   .count b{color:var(--accent2)}
-  .day{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--panel);overflow:hidden}
-  .day summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .day summary::-webkit-details-marker{display:none}
-  .day summary:hover{background:var(--soft)}
-  .day .dt{font-weight:700;min-width:9.5em}
-  .day summary a.dt{color:inherit;text-decoration:none}
-  .day[open] > summary a.dt{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
-  .day[open] > summary a.dt:hover{color:var(--accent2)}
-  .day .rd{font-weight:700;color:var(--accent2);font-size:.88rem;flex:none}
-  .day .pk{color:var(--muted);font-size:.88rem;flex:1;min-width:12em}
-  .day .n{color:var(--accent2);font-size:.82rem;white-space:nowrap}
-  .day .inner{border-top:1px solid var(--line);padding:6px 16px 12px}
-  .day .row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--soft);font-size:.9rem}
-  .day .row:last-child{border-bottom:0}
-  /* The lap count belongs to the ride, so it sits right after the name. The
-     park is pushed to the far side with margin-left:auto instead of the name
-     growing, which is what used to strand ×4 next to the park. */
-  .day .row .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  /* One heading per park on a day that spans more than one — see renderDays. */
-  .day .pgrp{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:.06em;margin:12px 0 1px}
-  .day .inner > .pgrp:first-child{margin-top:4px}
-  .day .row .cp{color:var(--muted);font-size:.82rem;margin-left:auto;flex:none;
-                white-space:nowrap;padding-left:10px}
-  .lap{color:var(--accent);font-variant-numeric:tabular-nums;font-size:.82rem}
-  /* A new credit, marked on the row where it was picked up. A dot rather than a
-     word because the coaster's name wants that width on a phone, and the grey
-     line at the foot of the card says what the dots mean. Named for what it is
-     rather than where it sits — see the note on .herocount h1 span. */
-  .day .row .nw{color:var(--accent2);font-size:.55rem;line-height:1;flex:none;
-    position:relative;top:1px}
-  /* What the dots add up to. Grey, and set apart from the rows above it,
-     because it counts the card rather than being one of its rides. */
-  .day .inner .newsum{color:var(--muted);font-size:.78rem;padding:9px 0 1px}
-  /* Who built it, beside the name. Shrinks before anything else does and
-     ellipsizes rather than pushing the status off the row. */
-  .day .row .mk{color:var(--muted);font-size:.8rem;flex:0 1 auto;min-width:0;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  /* Status and years, pushed to the far edge of a park row. The status is the
-     coloured part — teal for running, red for gone, the site's own two accents
-     — and the years stay in the body colour, because the years are the fact and
-     the status is only the flag on it. */
-  .day .row .life{margin-left:auto;flex:none;display:flex;align-items:baseline;gap:9px;
-    padding-left:10px;white-space:nowrap}
-  .day .row .life .stat{font-size:.68rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:.06em}
-  .day .row .life .stat.on{color:var(--accent2)}
-  .day .row .life .stat.off{color:var(--accent)}
-  .day .row .life .yrs{color:var(--fg);font-size:.8rem;font-variant-numeric:tabular-nums}
-  /* A phone has no room for a word and a span side by side with the name, so
-     the status becomes a dot and the years carry the meaning. */
-  @media (max-width:560px){
-    .day .row .life{gap:7px}
-    .day .row .life .stat{font-size:0;line-height:0}
-    .day .row .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
-    /* The model no longer competes with the name for width — it is on the line
-       below — so it stays on a phone now. It was hidden here back when the two
-       shared a row and the names were the ones getting clipped. */
-  }
-  /* Every coaster and park named on this page is a way in to its own page.
-     The link inherits the row's colour rather than turning the list into a wall
-     of blue, and only says so on hover. Scoped to the anchor, not to the cell:
-     .cn and the park cell already have rules of their own further up. */
-  .day .row .cn a,.day .pgrp a{color:inherit;text-decoration:none}
-  .day .row .cn a:hover,.day .pgrp a:hover{color:var(--accent2);text-decoration:underline}
-  /* The park's own page, at the top of a park card. Teal, because unlike the
-     rows around it this one is not a coaster. */
-  .day .inner .parklink{margin:4px 0 9px}
-  .day .inner .parklink a{color:var(--accent2);font-size:.82rem;text-decoration:none}
-  .day .inner .parklink a:hover{text-decoration:underline}
-  #c_body td a{color:inherit;text-decoration:none}
-  #c_body td a:hover{color:var(--accent2);text-decoration:underline}
-  /* The shared facts panel keeps its links blue, as on every other page. */
-  #c_body tr.cx a{color:var(--accent2)}
-  /* A relocated ride's other park, under the one the row names. */
-  #c_body .also{display:block;font-size:.78rem;color:var(--muted);white-space:normal}
-  /* The park list is a LIST, not a stack of cards. 247 of them is a long scroll
-     on a phone, and the card chrome — a border, a panel, a gap — was costing
-     about half the rows that fit on a screen. Off it comes: one continuous
-     list with a hairline between rows. (Carter, 2026-09-20.) The day list joined
-     it on 2026-09-27 ("make the 'rides' cards show the same as parks"). */
-  :is(#parkview,#dayview).flat .day{border:0;border-bottom:1px solid var(--line);border-radius:0;
-    margin:0;background-color:transparent}
-  /* Two columns, each of two lines: the park and where it is on the left, what
-     it has and what you have of it on the right. LAID OUT rather than left to
-     wrap — the summary is a wrapping flexbox with a 14px gap, so on a phone the
-     region and the count wrapped onto a second flex line and that gap became
-     14px of dead space in the middle of every single row. */
-  :is(#parkview,#dayview).flat .day summary{padding:9px 2px;flex-wrap:nowrap;align-items:flex-start;gap:14px}
-  :is(#parkview,#dayview).flat .pmain{flex:1;min-width:0;display:flex;flex-direction:column}
-  /* Both of these carry sizes meant for the day cards' one-line summary. */
-  :is(#parkview,#dayview).flat .day .dt{min-width:0;line-height:1.3}
-  /* The park's name carries the row; where it is and what it holds are the
-     supporting facts, so they sit a step down from it rather than level with
-     it. Also buys back a few pixels of height across 247 rows. */
-  :is(#parkview,#dayview).flat .day .pk{flex:none;min-width:0;line-height:1.3;font-size:.8rem}
-  :is(#parkview,#dayview).flat .day .n{flex:none;display:flex;flex-direction:column;
-    align-items:flex-end;text-align:right;line-height:1.3;font-size:.78rem}
-  /* Named for what they mean, not which line they landed on — the rule that
-     said .herocount h1 span broke the day the numbers became links. */
-  :is(#parkview,#dayview).flat .day .n .nop{color:var(--muted);font-weight:400;white-space:nowrap}
-  :is(#parkview,#dayview).flat .day .n .nrid{color:var(--accent2);font-weight:700;white-space:nowrap}
-  /* A zero is not an achievement. Left muted so the accent down the list means
-     "you have some of this one" — on the everyone view most parks are ones you
-     have never been to, and highlighting all of those zeros made the column
-     loudest exactly where there was nothing to say. */
-  :is(#parkview,#dayview).flat .day .n .nrid.none{color:var(--muted);font-weight:400}
-  :is(#parkview,#dayview).flat .day .inner{border-top:0;padding:0 2px 12px}
-  /* A tick per coaster: what you have of this park. Fixed width so the names
-     below it still line up on the ones you have not ridden. Top-aligned now
-     that a row is two lines tall. */
-  .day .row .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);
-    font-size:.82rem;align-self:flex-start;padding-top:1px}
-  /* Name over model. The name is what you scan for; the model is what it is. */
-  .day .row .cmain{flex:1;min-width:0;display:flex;flex-direction:column}
-  .day .row .cmain .mk{font-size:.74rem;line-height:1.25}
-  .day .row{align-items:flex-start}
-  .day .row .life{align-self:flex-start}
-  /* Grey means DEFUNCT, and only that (Carter, 2026-09-24: "make operating
-     but not ridden coasters full, only grey for defunct"). It used to mean
-     "not ridden"; the missing tick already says that, so an operating coaster
-     you still need reads at full strength, and every defunct one is dimmed,
-     ridden or not. */
-  .day .row.gone .cn{color:var(--muted)}
-  .day .row.gone .cn a{color:inherit}
-  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
-  /* Full-list table (came over with the old /coasters page) */
-  .pill{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
-  .pill.steel{color:var(--accent2)}.pill.wood{color:var(--accent)}
-  .pill.op{color:var(--accent2)}.pill.def{color:var(--accent)}
-  .cyear{color:var(--muted);font-size:.78rem;margin-left:5px}
-  table{border-collapse:collapse;width:100%;font-size:.85rem;white-space:nowrap}
-  thead th{position:sticky;top:0;background:var(--well);color:var(--muted);text-align:left;padding:11px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.72rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
-  thead th:hover{color:var(--fg)}
-  thead th.num{text-align:right}
-  thead th .ar{color:var(--accent);margin-left:4px}
-  tbody td{padding:10px 12px;border-bottom:1px solid var(--soft)}
-  tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
-  tbody td.name{font-weight:600;color:var(--fg)}
-  tbody tr:hover{background:var(--tint)}
-  td.muted{color:var(--muted)}
   .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:18px 0 0;color:var(--muted);font-size:.88rem}
   .pager button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:7px 13px;cursor:pointer}
   .pager button:hover:not(:disabled){color:var(--fg)}
   .pager button:disabled{opacity:.35;cursor:default}
   #loading{color:var(--muted);padding:40px 0}
   #err{display:none;background:var(--panel);border:1px solid var(--bad);border-radius:12px;padding:20px}
-  td.cmodel{display:none}
-  /* A row's detail line: the columns the table no longer spends width on.
-     A real <tr> with a colspan rather than a CSS trick, because anything that
-     re-flows one row of a table takes its column alignment with it. */
-  @media (min-width:681px){
-    /* Fourteen columns of nowrap measured 2,315px inside a 1,030px page, so
-       Height, Speed and Rides sat off the right-hand edge and reading one
-       meant scrolling the coaster's name out of view. (Carter, 2026-09-20:
-       "for caosters the table is tough to use ... phone is good".)
-       What is left is what identifies a ride — what, where, what kind, when,
-       how often. The measurements are a click away on the row itself, which
-       is the same bargain the phone has always made, and they stay sortable
-       through the Sort control beside the search box.
-       Keep this list and DESK_HIDE in CreditList in step. */
-    #c_wrap th[data-k=type],  #c_wrap td[data-k=type],
-    #c_wrap th[data-k=manu],  #c_wrap td[data-k=manu],
-    #c_wrap th[data-k=h],     #c_wrap td[data-k=h],
-    #c_wrap th[data-k=s],     #c_wrap td[data-k=s],
-    #c_wrap th[data-k=l],     #c_wrap td[data-k=l],
-    #c_wrap th[data-k=inv],   #c_wrap td[data-k=inv]{display:none}
-    /* Let the words wrap instead of setting the column's width. A park called
-       "St. Louis's Incredible Pizza Company" was holding 300px open on every
-       other row. */
-    #c_body td[data-k=name],#c_body td[data-k=park],
-    #c_body td[data-k=loc],#c_body td[data-k=model]{white-space:normal}
-    #c_body tr:not(.det){cursor:pointer}
-    /* The chevron rides on the last column, the way it rides on the name on a
-       phone: one affordance per row, at the end of it. */
-    #c_body td[data-k=status]{position:relative;padding-right:28px}
-    #c_body td[data-k=status]::after{content:'';position:absolute;right:12px;top:15px;
-      width:6px;height:6px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
-      transform:rotate(45deg);transition:transform .15s}
-    #c_body tr.open td[data-k=status]::after{transform:rotate(-135deg);top:18px}
-  }
   @media (max-width:680px){
-    /* Denser day cards. Three stacked lines at 14px of padding measured 110px
-       a card, so three of them filled a phone screen below the controls.
-       Date and counts share the top line, the park sits under them, and the
-       padding comes in — about 60px a card, which is six or seven.
-       (Carter, 2026-09-20: "make rides cards smaller so you can fit more per
-       screen".)
-
-       Scoped to #dayview: the park list is built from the same .day markup,
-       and it has its own phone layout a few rules up. A bare `.day summary`
-       here would turn those rows into grids too. */
-    #dayview .day{margin-bottom:6px;border-radius:12px}
-    #dayview .day summary{display:grid;grid-template-columns:1fr auto;
-                          gap:1px 10px;padding:8px 12px}
-    #dayview .day .dt{grid-column:1;grid-row:1;min-width:0;font-size:.92rem}
-    #dayview .day .n{grid-column:2;grid-row:1;text-align:right;font-size:.76rem}
-    /* One line, clipped: a day at three parks used to wrap into a third and a
-       fourth line, which is the whole saving gone on the one card that has the
-       most to say. */
-    #dayview .day .pk{grid-column:1/-1;grid-row:2;min-width:0;font-size:.78rem;
-                      overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    #dayview .day .rd{grid-column:2;grid-row:2;text-align:right;font-size:.76rem}
     #c_more{display:inline-block}
     #c_filters.closed{display:none}
     #c_filters select{flex:1;max-width:none;min-width:44%}
-
-    /* The full list stops being a table on a phone. At 390px the Name column
-       alone measured 419px, so Park began 100px past the right edge and you
-       had to scroll sideways to find out which park a coaster was at. Each row
-       becomes a card instead: name, then park and location, then the numbers.
-       Same shape as the Rankings add-panel, which already works at 320px. */
-    #c_wrap{overflow-x:visible;border:0;border-radius:0;background:none}
-    #c_wrap table{white-space:normal;font-size:1rem}
-    #c_head{display:none}
-    /* Flat rows, the same as the park list (Carter, 2026-09-20): no card, no
-       gap between them, a hairline instead. The card's border, radius, panel
-       and 8px margin were costing more height than two of its four lines. */
-    /* Two lines (Carter, 2026-09-27): name and, on the right, the model — more
-       prominent than it was on a line of its own; then park · location, with
-       the status where the location used to sit. Three columns so park and
-       location can share the left: park takes what it needs, location the rest. */
-    #c_body tr{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr) auto;gap:1px 0;
-               border-bottom:1px solid var(--line);padding:8px 2px;margin:0}
-    #c_body tr:hover{background:transparent}
-    #c_body td{display:none;border:0;padding:0;white-space:normal}
-    /* Explicit rows, because the status cell comes before the meta cell in the
-       source and sparse auto-placement would push meta onto a fourth row,
-       leaving a hole next to the pill. */
-    /* Three lines, not four: the status moves up beside the name, and the
-       riders line shares row 3 with the numbers instead of taking a row of its
-       own. The old row 3 held the status pill alone whenever a coaster had no
-       year or height on file, which is a whole line of nothing. */
-    #c_body td[data-k=name]{display:block;grid-column:1/3;grid-row:1;font-weight:600;padding-right:10px;
-                            font-size:.9rem;line-height:1.3;color:var(--fg)}
-    #c_body td[data-k=park]{display:block;grid-column:1;grid-row:2;color:var(--muted);
-                            font-size:.76rem;min-width:0;
-                            overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    #c_body td[data-k=loc]{display:block;grid-column:2;grid-row:2;color:var(--muted);
-                           font-size:.76rem;min-width:0;padding-right:10px;
-                           overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    #c_body td[data-k=loc]:not(:empty)::before{content:" \00b7  ";white-space:pre}
-    /* What the thing is, under where it is. Spans both columns now that the
-       riders line is gone from beside it. */
-    #c_body td.cmodel{display:block;grid-column:3;grid-row:1;color:var(--accent2);
-                      font-size:.76rem;font-weight:600;min-width:0;max-width:46vw;text-align:right;
-                      padding-right:17px;align-self:baseline;
-                      overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    #c_body td.cmodel:empty{display:none}
-    /* Top right, clear of the chevron, and always there — open or closed. */
-    #c_body td[data-k=status]{display:block;grid-column:3;grid-row:2;text-align:right;
-                              padding-right:17px}
-    /* The status reads like the park rows' do on a phone: coloured word, no
-       border. A bordered pill beside the name made the name the second-loudest
-       thing on its own row. */
-    #c_body td[data-k=status] .pill{border:0;padding:0;font-size:.68rem;font-weight:700;
-                                    text-transform:uppercase;letter-spacing:.06em}
-    #c_body td[data-k=status] .cyear{font-size:.74rem;margin-left:4px}
-
-    /* Tap a card to see the columns the phone layout hides. The chevron is the
-       affordance; :not() keeps the four summary cells out of the generic rule
-       so they stay in their explicit grid slots. */
-    #c_body tr{cursor:pointer;position:relative}
-    #c_body td[data-k=name]::after{content:'';position:absolute;right:2px;top:12px;
-      width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
-      transform:rotate(45deg);transition:transform .15s}
-    #c_body tr.open td[data-k=name]::after{transform:rotate(-135deg);top:15px}
-    /* Status is excluded too now: it is pinned top right whether the row is
-       open or shut, so repeating it as a labelled line below would be saying
-       the same thing twice. */
-    /* An opened row shows the shared facts panel (a tr.cx after it). */
-    #c_body tr.cx{display:block;padding:0 2px 10px;border-bottom:1px solid var(--line)}
-    #c_body tr.cx > td{display:block;padding:4px 0 0}
-    #c_body tr.cx .cxin{width:auto !important}
-    #c_body td.muted[data-k=park],#c_body td.muted[data-k=loc]{color:var(--muted)}
-    /* An opened card leaves out the lines with nothing on file rather than
-       listing em-dashes (Carter, 2026-09-25: "hide rows that don't have
-       data"). One .muted more specific than the rule above, so it wins. */
   }
   /* An empty count, your own: where to start (see emptyCount). */
   .startcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:6px 0 0}
@@ -757,13 +489,6 @@ function wire(){
   // Day and park cards follow the card rule too: closed, a tap on the park's
   // name just opens it; open, the name is a link and a tap on the body (not on
   // a link) closes the card.
-  document.addEventListener('click', function(e){
-    var d=e.target.closest && e.target.closest('details.day'); if(!d) return;
-    var a=e.target.closest('a');
-    if(a && a.closest('summary')){ if(d.open) return; e.preventDefault(); d.open=true; return; }
-    if(!a && !e.target.closest('summary') && !e.target.closest('button, input, select, label')
-       && e.target.closest('.inner')) d.open=false;
-  });
   document.getElementById('parkview').addEventListener('toggle', function(e){
     var d=e.target;
     if(!d || d.tagName!=='DETAILS' || !d.open) return;
@@ -916,25 +641,6 @@ function renderDays(rows){
 //
 // Undated credits belong here, unlike in the day view: a credit with no date
 // still happened at a park.
-// Is it still standing, and how long has it been there? Two facts a park card
-// can carry that the coaster's name cannot, and the ones you actually wonder
-// about looking down a list: "is that still open" and "how old is it".
-//
-// A coaster is defunct when it has a closing date. Running: the opening year on
-// its own. Closed: the span it existed for, 1980–2013, which says more than
-// either year alone. The status carries the colour (teal for running, red for
-// gone — the site's two accents) and the years stay in the body colour, because
-// the years are the fact and the status is the flag on it.
-function life(r){
-  var gone=!!r.cl;
-  if(!r.op && !r.cl) return '';          // nothing known; say nothing
-  var years = gone
-    ? (r.op ? esc(r.op)+'–'+esc(r.cl) : 'closed '+esc(r.cl))
-    : esc(r.op);
-  return '<span class="life">'
-    + (r.soon ? CoasterHub.CLOSING_SOON : '<span class="stat'+(gone?' off':' on')+'">'+(gone?'Defunct':'Operating')+'</span>')
-    + '<span class="yrs">'+years+'</span></span>';
-}
 
 // What each park card needs to build its body, kept aside so the bodies can be
 // built later — see the toggle handler in wire().
@@ -1059,9 +765,6 @@ function pager(total,per){
 var CreditList=(function(){
   var DATA=[], COLS=[], sortKey='name', sortDir=1,   // A–Z by default (2026-09-28)
       ready=false, loading=false;
-  // The columns a desktop row keeps behind its chevron. The stylesheet hides
-  // the same six by name — keep the two in step.
-  var DESK_HIDE=['type','manu','h','s','l','inv'];
   var FILTS=['c_q','c_f_status','c_f_type','c_f_manu','c_f_model','c_f_park','c_f_loc'];
   var $=function(id){return document.getElementById(id);};
   var ALLCOLS=[

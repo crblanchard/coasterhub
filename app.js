@@ -1636,21 +1636,8 @@
       });
       row.classList.add("open");
       var id = Number(row.getAttribute("data-cid"));
-      var box, inner;
-      if (row.tagName === "TR") {
-        box = document.createElement("tr");
-        var td = document.createElement("td");
-        td.colSpan = row.children.length;
-        box.appendChild(td);
-        // A wide table scrolls sideways on a phone, and a cell spanning it is
-        // as wide as the table — the values sat off-screen to the right. The
-        // panel is pinned to the visible width of whatever scrolls it.
-        inner = document.createElement("div");
-        inner.className = "cxin";
-        var sc = row.closest(".dtable-wrap") || row.closest("table").parentNode;
-        if (sc && sc.clientWidth) inner.style.width = Math.max(200, sc.clientWidth - 28) + "px";
-        td.appendChild(inner);
-      } else { box = inner = document.createElement("div"); }
+      // Every list is rows now, no tables (2026-09-28), so the panel is a plain div.
+      var box = document.createElement("div"), inner = box;
       box.className = "cx";
       inner.innerHTML = '<p class="facts none">Loading&hellip;</p>';
       row.parentNode.insertBefore(box, row.nextSibling);
@@ -1716,7 +1703,8 @@
       + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
     return '<details class="mdl visit"><summary>'
       + '<span class="mtwo"><span class="nm">' + E(o.title) + '</span><span class="msub">' + E(o.date) + '</span></span>'
-      + '<span class="ct">' + E(o.right) + '</span>' + chev + '</summary>'
+      // "15 rides · 13 coasters": one line here, stacked on a phone so the park keeps its width.
+      + '<span class="ct vct">' + String(o.right || "").split(" \u00b7 ").map(function (x) { return '<span>' + E(x) + '</span>'; }).join('<i> \u00b7 </i>') + '</span>' + chev + '</summary>'
       + (o.rows || []).map(function (r) {
         return coasterRow(r.c, { ctx: r.ctx, end: (r.fresh ? '<span class="nw" title="New credit — first time on this one">New</span>' : '')
           + (r.n > 1 ? '<span class="lap">×' + r.n + '</span>' : '') });

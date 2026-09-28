@@ -5116,3 +5116,16 @@ tab and Rides tab, profile Recent visits, /rankings Add coasters. Grey-only-for-
 still applies everywhere.
 
 Carter, 2026-09-28: /rankings Add coasters defaults to **Tallest first** again (his own coasters). Ticking **Search all coasters** switches to a **Most ridden** sort (riders who have ridden it, one per rider, via /api/rides-all, loaded on first use; shown as "N riders" on the right) and turns off the category rows; unticking goes back to Tallest first.
+
+Carter, 2026-09-28, cleanup pass:
+- **Cache question answered:** _headers already sends `Cache-Control: no-cache` for
+  everything but images, so browsers revalidate app.js/style.css on every load — the
+  `?v=` strings don't need bumping. (The "Tallest first" screenshot was his own sort.)
+- **Dark mode** checked on every list changed that day — fine.
+- **Home rider cards** → one boxed list of slim rows (small avatar, name, @username ·
+  credits in grey, "N ranked" on the right). style.css .riderlist/.riderrow rewritten.
+- **Dead code removed:** .dtable (+ .ph/.dsk/.stack) and tr.cx/.cxin in style.css;
+  credits.html's .day card CSS, the old table CSS and phone table-as-cards CSS, its
+  details.day click handler, life() and DESK_HIDE; openableCoasters' <tr> branch;
+  duplicate .rk/.mtwo rules in lists.css. ~20KB less, no visual change.
+- Visit rows on a phone stack "15 rides" over "13 coasters" so the park keeps its width.

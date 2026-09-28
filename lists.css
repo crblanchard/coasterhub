@@ -19,7 +19,6 @@ details.mdl:target{border-color:var(--accent2)}
 .mlist details.mdl:last-child{border-bottom:0}
 .mlist details.mdl summary{padding:10px 16px;align-items:center}
 .mlist details.mdl summary:hover{background:var(--soft)}
-.mlist .mtwo{display:flex;flex-direction:column;min-width:0}
 .mlist .mtwo .nm{font-weight:600;font-size:.95rem}
 .mlist .msub{color:var(--muted);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mlist details.mdl summary .ct{font-size:.84rem}
@@ -64,7 +63,6 @@ a.crow{align-items:center}
 .ranksec a.crow .two .cn{flex:0 0 auto;max-width:68%}
 .ranksec a.crow .two .pk{flex:1 1 0}
 .ranksec a.crow .two .pk{font-size:.8rem}
-.ranksec a.crow .rk{font-size:.85rem;min-width:2.9em}
 /* Mine / Global: the /rankings switch (.hero .segsw), section-sized. */
 .sect.rhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .rsw{display:inline-flex;padding:2px;border:1px solid var(--line);border-radius:999px;background:var(--soft);
@@ -77,7 +75,6 @@ a.crow{align-items:center}
 .ranksec a.crow.g{align-items:center;padding-top:9px;padding-bottom:9px}
 /* The /rankings row (Carter, 2026-09-28): a bare number, the coaster over
    its park, and "avg #N" over "N lists" on the right. */
-.ranksec a.crow.g .rk{font-size:1.05rem;min-width:1.9em}
 .ranksec a.crow.g .two .cn{font-size:.93rem}
 /* Name and park · place side by side, as /rankings' Global list; stacked on a phone. */
 @media (max-width:560px){
@@ -132,7 +129,7 @@ a.crow .life .yrs{margin:0;padding:0;color:var(--fg);font-size:.8rem;font-varian
 /* ---- One group row: a model on a maker's page, a park on a place's page.
    The same shape as the coaster row — name, grey detail beside it (under it
    on a phone), your ridden/total and a chevron on the right. */
-.mlist .mtwo{flex:1 1 auto;flex-direction:row;align-items:baseline;gap:10px}
+.mlist .mtwo{display:flex;flex:1 1 auto;flex-direction:row;align-items:baseline;gap:10px;min-width:0}
 .mlist .mtwo .nm{flex:0 1 auto;font-size:.93rem}
 .mlist .msub{flex:0 1 auto;min-width:0;font-size:.8rem}
 @media (max-width:560px){
@@ -161,7 +158,6 @@ a.crow .nw{color:var(--accent2);font-size:.66rem;font-weight:700;letter-spacing:
 .ranksec .panel{border:0;border-radius:0;background:none;box-shadow:none;overflow:visible}
 .ranksec a.crow{padding-left:4px;padding-right:4px;border-bottom:1px solid var(--line)}
 .ranksec a.crow:last-child{border-bottom:1px solid var(--line)}
-.ranksec a.crow .rk{font-size:1.05rem;min-width:1.9em}
 /* An open row and its stats read as one grey block: no line between them. */
 a.crow.open{background:var(--soft);border-bottom-color:transparent}
 /* A tick in a group row (/parks: you have been there) sits in the coaster
@@ -179,5 +175,9 @@ a.crow.open{background:var(--soft);border-bottom-color:transparent}
   /* flex:none — the desktop rule's flex:1 1 0 collapses it to 0px tall in a column. */
   .ranksec a.crow .two .pk{flex:none;max-width:100%;font-size:.78rem}
 }
-.ranksec a.crow .rk{min-width:2.4em}
+.ranksec a.crow .rk{font-size:1.05rem;min-width:2.4em}
 .ranksec a.crow{align-items:center}
+@media (max-width:560px){
+  .mlist .vct{display:flex;flex-direction:column;align-items:flex-end;line-height:1.3}
+  .mlist .vct i{display:none}
+}
