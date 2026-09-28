@@ -161,3 +161,5 @@ a.crow .nw{color:var(--accent2);font-size:.66rem;font-weight:700;letter-spacing:
 .ranksec a.crow{padding-left:4px;padding-right:4px;border-bottom:1px solid var(--line)}
 .ranksec a.crow:last-child{border-bottom:1px solid var(--line)}
 .ranksec a.crow .rk{font-size:1.05rem;min-width:1.9em}
+/* An open row and its stats read as one grey block: no line between them. */
+a.crow.open{background:var(--soft);border-bottom-color:transparent}
