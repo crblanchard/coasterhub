@@ -32,6 +32,29 @@
     #mine > .bar:first-child #rankmore{margin-left:auto}
     #mine > .bar:first-child .ghost{padding-left:12px;padding-right:12px}
   }
+  /* One height for every control in the bar (Carter, 2026-09-28: "the boxes
+     are funky" — the tabs, the pills and the buttons were three heights). */
+  #mine > .bar:first-child .seg button,
+  #mine > .bar:first-child > .catpill,
+  #mine > .bar:first-child > button.ghost,
+  #mine > .bar:first-child > button.primary{box-sizing:border-box;height:40px;display:inline-flex;align-items:center;
+    padding-top:0;padding-bottom:0}
+  #mine > .bar:first-child .seg{height:40px;box-sizing:border-box}
+  #mine > .bar:first-child .seg button{height:38px}
+  /* A phone, editing: the tabs, then the two filters, then Rank more · Cancel ·
+     Save together on the right — never a Save stranded on a line of its own. */
+  @media (max-width:560px){
+    #mine:not(.readonly) > .bar:first-child .seg{order:1;flex:1 1 100%}
+    #mine:not(.readonly) > .bar:first-child .seg button{flex:1;justify-content:center}
+    #mine:not(.readonly) > .bar:first-child #mfbtn{order:2}
+    #mine:not(.readonly) > .bar:first-child #catpill{order:3}
+    #mine:not(.readonly) > .bar:first-child .spacer{order:4;display:block;flex:1 1 100%;height:0}
+    #mine:not(.readonly) > .bar:first-child #rankmore{order:5;margin-left:auto}
+    #mine:not(.readonly) > .bar:first-child #cancel{order:6}
+    #mine:not(.readonly) > .bar:first-child #save{order:7}
+    #mine:not(.readonly) > .bar:first-child .status{order:8}
+    #mine:not(.readonly) > .bar:first-child .mfpanel{order:9}
+  }
   .status{color:var(--muted);font-size:.84rem}
   .status.dirty{color:var(--accent)}
   .status.ok{color:var(--accent2)}
@@ -563,13 +586,15 @@
       <span class="status" id="status"></span>
       <button class="ghost" id="rankmore" hidden>Rank more</button>
       <button class="ghost" id="edit" hidden>Edit</button>
+      <button class="ghost" id="cancel" type="button">Cancel</button>
+      <button class="primary" id="save">Save</button>
+      <!-- After Cancel / Save, so opening it never splits the buttons in two
+           (Carter, 2026-09-28: "the boxes are funky"). -->
       <div class="mfpanel" id="mfpanel" hidden>
         <input type="search" id="mfq" placeholder="Search models&hellip;" autocomplete="off" aria-label="Search models">
         <div class="mflist" id="mflist"></div>
         <div class="mfacts"><button type="button" class="ghost" id="mfclear">Clear</button><button type="button" class="ghost" id="mfdone">Done</button></div>
       </div>
-      <button class="ghost" id="cancel" type="button">Cancel</button>
-      <button class="primary" id="save">Save</button>
     </div>
 
     <div id="pane_rank">

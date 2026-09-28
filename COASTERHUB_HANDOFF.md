@@ -5093,3 +5093,5 @@ element out of the page makes WebKit drop the pointer, so no more moves and no
 pointerup. Now the other rows move around it (the dragged row never leaves the page)
 and the move/up listeners are on window, filtered by pointerId. Lesson: in a drag,
 never re-parent or re-insert the element holding the pointer.
+
+Carter, 2026-09-28 ("the boxes are funky"): the /rankings control bar — tabs, the Models/Categories pills, Rank more / Edit / Cancel / Save — is one 40px height now, the Models panel sits after Cancel/Save (it used to open between them and split them), and on a phone while editing it lays out as: tabs full width; Models · Categories; Rank more · Cancel · Save on the right.
