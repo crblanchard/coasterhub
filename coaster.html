@@ -288,7 +288,7 @@ function fullDate(d,prec,fallbackYear){
   var p=String(d).split('-'); if(p.length!==3) return fallbackYear;
   var dt=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));
   if(isNaN(dt)) return fallbackYear;
-  return CoasterHub.mdy(d);            // 7/24/2021 (Carter, 2026-09-25)
+  return CoasterHub.mdy(d);            // Jul 24, 2021 (Carter, 2026-09-28; was 7/24/2021)
 }
 function fmtDay(d){
   var p=String(d).split('-'); if(p.length!==3) return d;

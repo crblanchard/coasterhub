@@ -772,9 +772,13 @@
     var p = String(d).split("-");
     return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][(+p[1] || 1) - 1] + " " + p[0];
   }
+  // One date format across the site (Carter, 2026-09-28): "Sep 27, 2026" —
+  // the visits', the activity feed's and /changes' — not 9/27/2026. The name
+  // stays mdy (month, day, year) so every caller follows without a change.
   function mdy(d) {
     var m = String(d == null ? "" : d).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    return m ? (+m[2]) + "/" + (+m[3]) + "/" + m[1] : String(d == null ? "" : d);
+    return m ? ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m[2] - 1] + " " + (+m[3]) + ", " + m[1]
+             : String(d == null ? "" : d);
   }
   // Takes a coaster row, or a name and a park.
   function coasterHref(c, park) {

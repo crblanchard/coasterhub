@@ -157,8 +157,9 @@ function index(BY, MINE){
     var q=$('find').value.trim().toLowerCase();
     $('mlist').innerHTML=list.filter(function(m){ return !q || m.name.toLowerCase().indexOf(q)>=0; }).map(function(m){
       return '<a class="crow std mk" data-mk="'+esc(m.name)+'" href="'+esc(CoasterHub.makerHref(m.name))+'">'
-        +'<span class="two"><span class="cn">'+esc(m.name)+'</span><span class="pk">'+m.nm+' model'+(m.nm===1?'':'s')+'</span></span>'
-        +'<span class="yrs">'+m.open+' operating / '+(m.n-m.open)+' defunct</span></a>';
+        +'<span class="two"><span class="cn">'+esc(m.name)+'</span><span class="pk">'
+          +[m.nm+' model'+(m.nm===1?'':'s'), m.open+' operating'].concat(m.n-m.open ? [(m.n-m.open)+' defunct'] : []).join(' \u00b7 ')+'</span></span>'
+        +'<span class="yrs">'+(m.got!=null ? m.got+'/' : '')+m.n+'</span></a>';
     }).join('') || '<div style="padding:16px;color:var(--muted)">No manufacturer by that name.</div>';
   }
   // The open panel (Carter, 2026-09-27): four numbers in two columns —
@@ -223,7 +224,8 @@ function one(name, cs, MINE){
   var open=cs.filter(function(c){ return !c.closed; }).length;
   var byModel={};
   cs.forEach(function(c){ var k=String(c.model||'').trim(); (byModel[k]=byModel[k]||[]).push(c); });
-  var models=Object.keys(byModel).filter(Boolean).sort(function(a,b){ return byModel[b].length-byModel[a].length || a.localeCompare(b); });
+  // A–Z, like every list with no sort menu (Carter, 2026-09-28); no model last.
+  var models=Object.keys(byModel).filter(Boolean).sort(function(a,b){ return a.localeCompare(b, undefined, {sensitivity:'base'}); });
   if(byModel['']) models.push('');
   $('hero_sub').textContent=cs.length+' coaster'+(cs.length===1?'':'s')+' on the site.';
   $('tiles').innerHTML=tile(cs.length,'Coasters')+tile(open,'Operating')+tile(cs.length-open,'Defunct')

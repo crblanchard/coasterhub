@@ -422,8 +422,8 @@
              that now live behind a row's detail line (height, speed, length).
              Shown at every width. -->
         <select id="c_sort" class="sortpick">
-          <option value="park|1">Sort: Park A&ndash;Z</option>
           <option value="name|1">Sort: Name A&ndash;Z</option>
+          <option value="park|1">Sort: Park A&ndash;Z</option>
           <option value="h|-1">Sort: Tallest first</option>
           <option value="s|-1">Sort: Fastest first</option>
           <option value="l|-1">Sort: Longest first</option>
@@ -1057,7 +1057,8 @@ function pager(total,per){
 // Loading is deferred until the view is first opened, so the log stays fast.
 // ---------------------------------------------------------------------------
 var CreditList=(function(){
-  var DATA=[], COLS=[], sortKey='park', sortDir=1, ready=false, loading=false;
+  var DATA=[], COLS=[], sortKey='name', sortDir=1,   // A–Z by default (2026-09-28)
+      ready=false, loading=false;
   // The columns a desktop row keeps behind its chevron. The stylesheet hides
   // the same six by name — keep the two in step.
   var DESK_HIDE=['type','manu','h','s','l','inv'];
@@ -1154,7 +1155,7 @@ var CreditList=(function(){
     });
     $('c_reset').onclick=function(){
       FILTS.forEach(function(id){$(id).value='';});
-      sortKey='park'; sortDir=1; $('c_sort').value='park|1'; draw(); more();
+      sortKey='name'; sortDir=1; $('c_sort').value='name|1'; draw(); more();
     };
     $('c_loading').style.display='none';
     $('c_wrap').style.display='block';

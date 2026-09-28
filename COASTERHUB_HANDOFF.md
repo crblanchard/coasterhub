@@ -5064,3 +5064,19 @@ stays black (the empty tick slot says you haven't). Applied: /coasters, /credits
 already did). Exceptions by nature: ranked lists keep rank order. Carter also said the
 pickers (/log, /welcome, Rank more's Add coasters) are one-time flows and may keep their
 own UI.
+
+Carter, 2026-09-28, the consistency list:
+1. "Closed" (a coaster's stats date label, profile's "Closed on this day") vs "Defunct"
+   (the status): **left as is for now — come back to it.**
+2. **One date format: "Sep 27, 2026"** everywhere. `CoasterHub.mdy()` now returns that
+   (name kept so callers follow); it was 9/27/2026 in stats panels and first-ridden.
+3. "Ridden" against operating only vs all: left as is. In practice nothing on screen
+   uses operating-only any more — the 09-24 "x of x operating" line came out 09-25;
+   every x/y includes defunct. (location.html counts().got is operating-only but unused.)
+4. Counts written "6 operating · 4 defunct" everywhere (the link rows said "/").
+5. Link rows (/manufacturers, /locations + US states, /parks) show **your ridden / all**
+   on the right like group rows; the counts moved into the grey line.
+6. **A–Z by default** everywhere: /locations, US states, a location's parks, a maker's
+   models, /credits Coasters (was Park A–Z; Park A–Z stays an option). Lists with a
+   sort menu keep their other options.
+7. The ✓ means "ridden" on a coaster, "been there" on /parks — kept.

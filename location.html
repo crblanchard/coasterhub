@@ -130,13 +130,18 @@ function counts(ps, MINE){
   // "you have ridden x of x operating, not total"): the defunct ones are a
   // count you can no longer add to.
   return { parks:ps.length, all:cs.length, open:open, gone:cs.length-open, cs:cs,
-           got: MINE ? cs.filter(function(c){ return !c.closed && MINE[c.id]; }).length : null };
+           got: MINE ? cs.filter(function(c){ return !c.closed && MINE[c.id]; }).length : null,
+           // Ridden out of ALL of them, defunct included — the x/y every list row shows.
+           gotAll: MINE ? cs.filter(function(c){ return MINE[c.id]; }).length : null };
 }
 // A state or a country as a link row (lists.css), the /manufacturers shape.
+// Carter, 2026-09-28: the counts in the grey line with "·", your ridden / all
+// of its coasters on the right — the same as a group row.
 function locRow(c){
   return '<a class="crow std mk" href="'+esc(CoasterHub.locationHref(c.r))+'">'
-    +'<span class="two"><span class="cn">'+esc(shortName(c.r))+'</span><span class="pk">'+c.parks+' park'+(c.parks===1?'':'s')+'</span></span>'
-    +'<span class="yrs">'+c.open+' operating / '+c.gone+' defunct</span></a>';
+    +'<span class="two"><span class="cn">'+esc(shortName(c.r))+'</span><span class="pk">'
+      +[c.parks+' park'+(c.parks===1?'':'s'), c.open+' operating'].concat(c.gone ? [c.gone+' defunct'] : []).join(' \u00b7 ')+'</span></span>'
+    +'<span class="yrs">'+(c.gotAll!=null ? c.gotAll+'/' : '')+c.all+'</span></a>';
 }
 
 // One state or country, or the whole US: its numbers, its parks, and (except
@@ -160,11 +165,11 @@ function place(reg, ps, MINE, R){
   if(us){
     // The states, most operating coasters first.
     var st=Object.keys(R).filter(isUS).map(function(r){ var c=counts(R[r], MINE); c.r=r; return c; })
-      .sort(function(a,b){ return b.open-a.open || a.r.localeCompare(b.r); });
+      .sort(function(a,b){ return shortName(a.r).localeCompare(shortName(b.r)); });   // A–Z (2026-09-28)
     h+='<div class="sect">States</div><div class="panel">'+st.map(locRow).join('')+'</div>';
   }
   var pk=ps.map(function(p){ var c=counts([p], MINE); c.p=p; return c; })
-    .sort(function(a,b){ return b.open-a.open || b.all-a.all || a.p.name.localeCompare(b.p.name); });
+    .sort(function(a,b){ return a.p.name.localeCompare(b.p.name); });   // A–Z (Carter, 2026-09-28)
   // Parks as the model list reads on a maker's page (Carter, 2026-09-28:
   // "same with these park lists ... make parks / coasters collapsible"): the
   // park over how many run and how many are gone (and its state, on the US
@@ -196,11 +201,11 @@ function index(R, MINE){
   document.title='Locations — Coaster Hub';
   $('tiles').style.display='none';
   var regs=Object.keys(R).map(function(r){ var c=counts(R[r], MINE); c.r=r; return c; });
-  var by=function(a,b){ return b.open-a.open || a.r.localeCompare(b.r); };
+  var by=function(a,b){ return shortName(a.r).localeCompare(shortName(b.r)); };   // A–Z (2026-09-28)
   var us=regs.filter(function(c){ return isUS(c.r); }).sort(by), rest=regs.filter(function(c){ return !isUS(c.r); }).sort(by);
   $('hero_sub').textContent=us.length+' states and '+rest.length+' other countries on the site.';
   // Link rows shaped like /manufacturers' (Carter, 2026-09-28: one look for
-  // every list): the place, its park count in grey, operating / defunct.
+  // every list): the place, its parks · operating · defunct in grey, your x/y.
   $('body').innerHTML='<div class="sect"><a href="/location/us" style="color:inherit">United States &rarr;</a></div>'
     +'<div class="panel">'+us.map(locRow).join('')+'</div>'
     +'<div class="sect">Elsewhere</div><div class="panel">'+rest.map(locRow).join('')+'</div>';

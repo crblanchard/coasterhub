@@ -92,10 +92,10 @@ function short(r){ return r==='US' ? 'United States' : String(r||'').replace(/, 
 Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.you()]).then(function(r){
   var cs=r[0].coasters||[], parks=r[1]||{}; MINE=r[2] ? r[2].rides : null;
   var by={};
-  Object.keys(parks).forEach(function(n){ var g=parks[n]||{}; by[n]={ name:n, region:g.region||'', lat:g.lat, lon:g.lon, open:0, gone:0, got:0 }; });
+  Object.keys(parks).forEach(function(n){ var g=parks[n]||{}; by[n]={ name:n, region:g.region||'', lat:g.lat, lon:g.lon, open:0, gone:0, got:0, gotAll:0 }; });
   cs.forEach(function(c){ var p=by[c.park]; if(!p) return;
     if(c.closed) p.gone++; else { p.open++; if(MINE && MINE[c.id]) p.got++; }
-    if(MINE && MINE[c.id]) p.been=true; });
+    if(MINE && MINE[c.id]){ p.been=true; p.gotAll++; } });
   P=Object.keys(by).map(function(k){ return by[k]; });
   $('hero_sub').textContent=P.length.toLocaleString()+' parks on the site.';
   var locs={}; P.forEach(function(p){ if(p.region) locs[p.region]=1; });
@@ -135,13 +135,14 @@ function draw(){
     +(MINE ? ' · you have been to <b>'+list.filter(function(p){ return p.been; }).length.toLocaleString()+'</b>' : '');
   var near = so==='near' && HERE;
   // The link row /manufacturers and /locations use: a tick if you have been,
-  // the park, its place (and distance) in grey, operating / defunct.
+  // the park, its place (and distance) and operating · defunct in grey, your
+  // ridden / all its coasters on the right.
   $('rows').innerHTML=list.map(function(p){
     var mi = near && p.mi!=null ? (p.mi<10?p.mi.toFixed(1):Math.round(p.mi).toLocaleString())+' mi' : '';
     return '<a class="crow std mk" href="'+esc(CoasterHub.parkHref(p.name))+'">'
       +(MINE ? '<span class="tick">'+(p.been?'\u2713':'')+'</span>' : '')
-      +'<span class="two"><span class="cn">'+esc(p.name)+'</span><span class="pk">'+esc([p.region?short(p.region):'', mi].filter(Boolean).join(' \u00b7 '))+'</span></span>'
-      +'<span class="yrs">'+p.open+' operating / '+p.gone+' defunct</span></a>';
+      +'<span class="two"><span class="cn">'+esc(p.name)+'</span><span class="pk">'+esc([p.region?short(p.region):'', mi].concat((p.open+p.gone) ? [p.open+' operating', p.gone?p.gone+' defunct':''] : ['No coasters on file']).filter(Boolean).join(' \u00b7 '))+'</span></span>'
+      +'<span class="yrs">'+(MINE ? p.gotAll+'/' : '')+(p.open+p.gone)+'</span></a>';
   }).join('') || '<div class="more">Nothing matches.</div>';
 }
 </script>
