@@ -4957,3 +4957,9 @@ Carter, 2026-09-28: a model page's Installations table on a phone (≤640px) is 
 stacked columns — name over park, status over years ("Closed" / "1997–2024") — because
 the Opened and Status columns ran off the right edge. `.mtable`, with `.dsk` cells for
 the wide layout and `.ph` lines for the phone. Desktop unchanged.
+Then (Carter, 2026-09-28: "show how everyone has them ranked ... same style as
+/rankings"): Global rows use the master list's look — "N lists" over "avg #X" on the
+right, a chevron — and open in place (one at a time) to a chip per rider with their
+position (links to that rider's rankings), then the coaster's facts and "Coaster page →".
+Global rows carry `data-gid`, not `data-cid`, so openableCoasters leaves them alone;
+`gClick` in manufacturer.html opens them.
