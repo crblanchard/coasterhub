@@ -5036,3 +5036,5 @@ instead on a two-park day), "×2" laps and a "NEW" tag for a first-ever ride on 
 right, and "N new credits" under them. Each coaster opens its stats (openableCoasters).
 The old feed-row (profile) and .day-card (credits) markup for days is gone; credits'
 Parks tab still uses the .day cards (not yet converted — asked about).
+
+Carter, 2026-09-28 (item 5): the Global rows in the Rankings section on maker/model/location pages now match /rankings' Global list — model shown, name and park · place side by side on a computer (stacked on a phone).

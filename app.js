@@ -1803,6 +1803,8 @@
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
           return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + (i + 1) + '</span>'
             + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(ctx(c)) + '</span></span>'
+            // The model too, as /rankings' Global list shows it (2026-09-28).
+            + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '')
             + (me ? '<span class="gyou">you #' + me + '</span>' : '')
             + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + r.n + ' lists</span>' + chev + '</a>';
         }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
