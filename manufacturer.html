@@ -98,6 +98,18 @@
   #ranked a.crow .two .pk{flex:1 1 0}
   #ranked a.crow .two .pk{font-size:.8rem}
   #ranked a.crow .rk{font-size:.85rem;min-width:2.9em}
+  /* Mine / Global: the /rankings switch (.hero .segsw), section-sized. */
+  .sect.rhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .rsw{display:inline-flex;padding:2px;border:1px solid var(--line);border-radius:999px;background:var(--soft);
+       text-transform:none;letter-spacing:0}
+  .rsw a{padding:3px 12px;border-radius:999px;color:var(--muted);font-weight:600;font-size:.78rem;cursor:pointer;text-decoration:none}
+  .rsw a:hover{color:var(--fg)}
+  .rsw a.on{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+  .rnone{color:var(--muted);font-size:.86rem;margin:4px 2px 0}
+  #ranked a.crow .gavg{margin-left:auto;flex:none;padding-left:10px;color:var(--muted);font-size:.78rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+  #ranked a.crow .gavg i{font-style:normal;margin-right:10px}
+  /* A phone keeps the name and the numbers; the park goes. */
+  @media (max-width:560px){ #ranked a.crow .gavg i,#ranked a.crow.g .pk{display:none} #ranked a.crow.g .two .cn{max-width:none;flex:0 1 auto} }
   @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
 </style>
 </head>
@@ -166,32 +178,83 @@ var MSLUG=decodeURIComponent(PM[2]||'').toLowerCase();
 // Whose ticks: the signed-in rider, as on /count's park view. Signed out, no
 // ticks and no "you have ridden".
 var mine=CoasterHub.me().then(function(a){
-  if(!(a && a.slug)) return null;
+  if(!(a && a.slug)){ RANK_READY(); return null; }
   // Your ranking too (Carter, 2026-09-25: "where your B&Ms or B&M inverts
   // fall in your rankings"). Never fatal: no list, no panel.
-  CoasterHub.you().then(function(y){ if(y){ RANK=y.rank; RANKN=y.ranked; } RANK_READY(); });
+  CoasterHub.you().then(function(y){ if(y){ RANK=y.rank; RANKN=y.ranked; } RANK_READY(); }).catch(RANK_READY);
   return CoasterHub.fetchRides(a.slug).then(function(l){
     var m={}; (l.rides||[]).forEach(function(r){ m[r.c]=1; }); return m;
   }).catch(function(){ return null; });
-}).catch(function(){ return null; });
+}).catch(function(){ RANK_READY(); return null; });
 
-// Where this maker's (or model's) coasters sit in your ranking, best first.
-// Drawn into #ranked whenever both the page and the ranking have arrived,
-// whichever lands second.
-var RANK=null, RANKN=0, RANK_CS=null, RANK_MODEL=false;
-function RANK_READY(){ drawRanked(); }
+// Where this maker's (or model's) coasters sit in the rankings, with the
+// same Mine / Global switch as /rankings (Carter, 2026-09-28: "make it read
+// mine / global like the rankings page"). Mine is your list; Global orders
+// every one of them on 2+ riders' lists by average position — the /rankings
+// master list's arithmetic, with your own rank beside it in grey. Drawn into
+// #ranked whenever the page, your ranking or the global tally arrives.
+var RANK=null, RANKN=0, RANK_CS=null, RANK_MODEL=false, BYID={}, GLOB=null, RVIEW=null, RANK_KNOWN=false;
+function RANK_READY(){ RANK_KNOWN=true; drawRanked(); }
+function loadGlob(){
+  if(GLOB) return;
+  GLOB='loading';
+  CoasterHub.fetchUsers().then(function(users){
+    return Promise.all((users||[]).map(function(u){
+      return fetch('/api/rankings/'+encodeURIComponent(u.slug))
+        .then(function(r){ return r.ok?r.json():{order:[]}; }).catch(function(){ return {order:[]}; });
+    }));
+  }).then(function(all){
+    var t={};
+    all.forEach(function(r){
+      var seen={};
+      (r.order||[]).filter(function(id){
+        var c=BYID[id]; if(!c) return false; var k=CoasterHub.rideKey(c); if(seen[k]) return false; seen[k]=1; return true;
+      }).forEach(function(id,pos){ var k=CoasterHub.rideKey(BYID[id]); var x=t[k]||(t[k]={n:0,sum:0}); x.n++; x.sum+=pos+1; });
+    });
+    GLOB=t; drawRanked();
+  }).catch(function(){ GLOB={}; drawRanked(); });
+}
 function drawRanked(){
-  var el=$('ranked'); if(!el || !RANK || !RANK_CS) return;
-  var r=RANK_CS.filter(function(c){ return RANK[c.id]; }).sort(function(a,b){ return RANK[a.id]-RANK[b.id]; });
-  if(!r.length){ el.innerHTML=''; return; }
-  // The count and the best sit in the "you" line (CoasterHub.youStrip); this
-  // is the list itself.
-  el.innerHTML='<div class="sect">In your rankings</div>'
-    +'<div class="panel">'+r.map(function(c){
+  // Not until we know whether you have a ranking: it picks the default view.
+  var el=$('ranked'); if(!el || !RANK_CS || !RANK_KNOWN) return;
+  var mine=RANK ? RANK_CS.filter(function(c){ return RANK[c.id]; }).sort(function(a,b){ return RANK[a.id]-RANK[b.id]; }) : [];
+  if(!RVIEW) RVIEW=mine.length ? 'mine' : 'global';
+  if(RVIEW==='global') loadGlob();
+  var sw='<span class="rsw"><a data-rv="mine"'+(RVIEW==='mine'?' class="on"':'')+'>Mine</a>'
+    +'<a data-rv="global"'+(RVIEW==='global'?' class="on"':'')+'>Global</a></span>';
+  var side=function(c){ return !RANK_MODEL && c.model ? '<span class="md">'+esc(c.model)+'</span>' : ''; };
+  var body;
+  if(RVIEW==='mine'){
+    body=mine.length ? '<div class="panel">'+mine.map(function(c){
       return '<a class="crow" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="rk">#'+RANK[c.id]+'</span>'
+        +'<span class="two"><span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(c.park||'')+'</span></span>'+side(c)+'</a>';
+    }).join('')+'</div>'
+      : '<p class="rnone">'+(RANK ? 'You haven\u2019t ranked any of these yet.' : 'Sign in to see where these sit in your rankings.')+'</p>';
+  } else if(!GLOB || GLOB==='loading'){
+    body='<p class="rnone">Loading&hellip;</p>';
+  } else {
+    // One row per ride (a relocated ride's rows are one), on 2+ lists.
+    var seen={}, rows=[], one=0;
+    RANK_CS.forEach(function(c){
+      var k=CoasterHub.rideKey(c); if(seen[k]) return; seen[k]=1;
+      var g=GLOB[k]; if(!g) return;
+      if(g.n<2){ one++; return; }
+      rows.push({c:c, n:g.n, avg:g.sum/g.n});
+    });
+    rows.sort(function(a,b){ return a.avg-b.avg || b.n-a.n || a.c.name.localeCompare(b.c.name); });
+    var avg=function(x){ return '#'+(Math.round(x*10)/10); };
+    body=(rows.length ? '<div class="panel">'+rows.map(function(r,i){
+      var c=r.c, me=RANK && RANK[c.id];
+      return '<a class="crow g" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="rk">#'+(i+1)+'</span>'
         +'<span class="two"><span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(c.park||'')+'</span></span>'
-        +(!RANK_MODEL && c.model ? '<span class="md">'+esc(c.model)+'</span>' : '')+'</a>';
-    }).join('')+'</div>';
+        +'<span class="gavg">'+(me?'<i>you #'+me+'</i>':'')+'avg '+avg(r.avg)+' \u00b7 '+r.n+' lists</span></a>';
+    }).join('')+'</div>' : '<p class="rnone">None of these are on 2+ riders\u2019 lists yet.</p>')
+      +(one ? '<p class="rnone">'+one+' more on only one list.</p>' : '');
+  }
+  el.innerHTML='<div class="sect rhead"><span>Rankings</span>'+sw+'</div>'+body;
+  Array.prototype.forEach.call(el.querySelectorAll('[data-rv]'), function(a){
+    a.onclick=function(e){ e.preventDefault(); RVIEW=a.getAttribute('data-rv'); drawRanked(); };
+  });
 }
 
 var PARKS={};
@@ -199,6 +262,7 @@ var PARKS={};
 CoasterHub.openableCoasters(document.getElementById('body'));
 Promise.all([CoasterHub.fetchCoasters(), mine, CoasterHub.fetchParks().catch(function(){ return {}; })]).then(function(res){
   var coasters=res[0].coasters, MINE=res[1]; PARKS=res[2]||{};
+  coasters.forEach(function(c){ BYID[c.id]=c; });
   var BY={};
   coasters.forEach(function(c){
     var m=String(c.manu||'').trim(); if(!m) return;

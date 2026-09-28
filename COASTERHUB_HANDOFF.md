@@ -4942,8 +4942,16 @@ read-only ranking too — a quiet (not bold) green "↑7" / red "↓3" after the
 
 Carter, 2026-09-28: maker/model pages' "In your rankings" rows are one line each
 (name, park beside it in grey; the name keeps its width, the park truncates).
-Asked about a "global ranking of all B&M Inverts" — proposal pending, see below the
-reply of that date.
+The section is now **Rankings** with a **Mine / Global** switch (same words as the
+/rankings hero switch — Carter: keep language consistent wherever a UI element is
+reused). Mine is your list; Global is every one of the maker's/model's coasters on 2+
+riders' lists, by average position (the /rankings master-list arithmetic, rideKey-
+deduped), "avg #11 · 2 lists" with "you #20" in grey, plus "N more on only one list."
+Default is Mine if you've ranked any of them, else Global (signed-out included).
+The tally fetches every rider's ranking, only when Global is first shown.
+Same day: coaster tables stack on phones site-wide via `.dtable.stack` in style.css
+(`.dsk` wide-only cells, `.ph` phone-only lines) — model pages, a location's coasters,
+/coasters.
 
 Carter, 2026-09-28: a model page's Installations table on a phone (≤640px) is two
 stacked columns — name over park, status over years ("Closed" / "1997–2024") — because
