@@ -804,7 +804,8 @@ if(!slug){
           +'<div class="stog" role="button" tabindex="0" aria-expanded="false">'
             +'<span class="pos">'+(i+1)+'</span>'
             +srowName(c, mk)
-            +'<span class="meta"><b>'+t.n+' lists</b>avg #'+(Math.round(avg*10)/10)+'</span>'
+            // Avg on top, everywhere (Carter, 2026-09-28).
+            +'<span class="meta"><b>avg #'+(Math.round(avg*10)/10)+'</b>'+t.n+' lists</span>'
             +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" '
               +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
               +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
@@ -813,8 +814,8 @@ if(!slug){
             +CoasterHub.coasterFacts(c, null, c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>'
           +'</div>';
       }).join('');
-      // Independent toggles: closing the row you opened this one to compare
-      // against is the one thing you never want.
+      // One open at a time (Carter, 2026-09-28 — this used to keep each row
+      // independent, for comparing two side by side).
       srowToggles($('shared'));
     } else {
       $('shared_sub').textContent='';
@@ -2519,8 +2520,13 @@ function headLinks(c, name){
 function srowToggles(root){
   Array.prototype.forEach.call(root.querySelectorAll('.srow'), function(row){
     var tog=row.querySelector('.stog'), who=row.querySelector('.who');
+    // One open at a time (Carter, 2026-09-28), like every other coaster list.
     var flip=function(){ var open=tog.getAttribute('aria-expanded')==='true';
-      tog.setAttribute('aria-expanded', open?'false':'true'); who.hidden=open; };
+      if(!open) Array.prototype.forEach.call(root.querySelectorAll('.stog[aria-expanded="true"]'), function(t){
+        t.setAttribute('aria-expanded','false'); var w=t.closest('.srow').querySelector('.who'); if(w) w.hidden=true; });
+      tog.setAttribute('aria-expanded', open?'false':'true'); who.hidden=open;
+      // Closing a long one above can pull this row up past the header.
+      if(!open){ var t=tog.getBoundingClientRect().top; if(t<70) window.scrollBy({top:t-80,behavior:'instant'}); } };
     // Closed, any tap opens it (links included); open, the links go.
     row.addEventListener('click', function(e){
       var a=e.target.closest('a');

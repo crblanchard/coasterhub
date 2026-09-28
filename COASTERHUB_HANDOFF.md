@@ -4996,3 +4996,4 @@ per page, 10 rows then "Show all N", Global rows open to rider chips). A page us
 needs openableCoasters on an ancestor for the Mine rows.
 
 Carter, 2026-09-28: /rankings Global tab's "Master list" is now **"Global list"**, with more room between the model and the lists/avg column.
+Same day: "avg #N" goes on top of "N lists" everywhere (Carter: "always avg on top"), and the Global list opens one row at a time on every screen (srowToggles closes the others; scrolls the opened row back under the header if closing one above pulled it up).
