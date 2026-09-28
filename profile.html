@@ -791,7 +791,7 @@ function render(s){
     Object.keys(s.byCoaster||{}).forEach(function(id){ var ds=(s.byCoaster[id].dates||[]).slice().sort(); if(ds.length) first[id]=ds[0]; });
     document.getElementById('visits').innerHTML=days.map(function(d){
       var x=DD[d], rows=byDay[d].filter(function(r){ return r.c; })
-        .sort(function(a,b){ return (!!a.c.closed-!!b.c.closed) || String(a.c.name).localeCompare(String(b.c.name)); });   // defunct last
+        .sort(function(a,b){ return String(a.c.name).localeCompare(String(b.c.name)); });   // A–Z; no defunct-last on your own lists
       var many=x.p.length>1;
       return CoasterHub.visitRow({
         title: x.p.map(function(pp){ return pp[0]; }).join(' & '), date: fmt(d),

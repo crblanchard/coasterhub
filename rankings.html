@@ -2025,8 +2025,7 @@ function pool(){
              .toLowerCase().indexOf(q)>=0; });
   var s=$('sort').value;
   list.sort(function(a,b){
-    // Defunct at the bottom whatever the sort (Carter, 2026-09-28).
-    var gd=(!!a.closed-!!b.closed); if(gd) return gd;
+    // No defunct-last: these are your own coasters (Carter, 2026-09-28).
     if(s==='name') return String(a.name).localeCompare(String(b.name));
     if(s==='park') return String(a.park||'').localeCompare(String(b.park||''))
                      || String(a.name).localeCompare(String(b.name));

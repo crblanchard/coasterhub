@@ -5108,3 +5108,9 @@ the "You've ridden N of M" line in the /manufacturers panel stay.)
 Rankings sections: Mine and Global are one two-line shape on a phone — the ride, then
 park · place under it — and **Global rows show the ride's site-wide Global-list position**
 (globalTally computes `pos`), not 1..N within the section, as Mine shows your own rank.
+
+**Amended, Carter 2026-09-28:** defunct-last applies to **site-wide / database lists only**
+(/coasters, /parks, park, model, maker and location pages, and a park's full lineup opened
+on /credits' Parks tab). **Your own lists keep their plain order** — /credits Coasters
+tab and Rides tab, profile Recent visits, /rankings Add coasters. Grey-only-for-defunct
+still applies everywhere.

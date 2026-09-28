@@ -881,7 +881,7 @@ function renderDays(rows){
     // rows were saved, which is coaster-id order — roughly when each coaster
     // was added to the site, which means nothing to someone reading the day.
     // The parks keep the order they were ridden in; the sort is inside each.
-    uniqRows.sort(function(a,b){ return (!!a.cl-!!b.cl) || String(a.name).localeCompare(String(b.name)); });   // defunct last
+    uniqRows.sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });   // your day, A–Z (no defunct-last on your own lists)
     var pk=[...new Set(list.map(function(r){return r.park;}))];
     // Without a re-ride anywhere in their log, "8 rides · 8 coasters" would be
     // saying the same thing twice — these are 8 credits picked up that day.
@@ -1184,8 +1184,8 @@ var CreditList=(function(){
       return true;
     });
     out.sort(function(a,b){
-      // Defunct at the bottom whatever the sort (Carter, 2026-09-28).
-      var g=(!!a.closed-!!b.closed); if(g) return g;
+      // No defunct-last here: this is YOUR list, in the order you asked for
+      // (Carter, 2026-09-28 — defunct-last is for the site-wide lists).
       var x=a[sortKey], y=b[sortKey], c;
       if(x==null&&y==null)c=0; else if(x==null)c=1; else if(y==null)c=-1;
       else if(typeof x==='string')c=x.localeCompare(y)*sortDir; else c=(x-y)*sortDir;
