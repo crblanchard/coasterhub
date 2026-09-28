@@ -217,7 +217,7 @@
   #mine.readonly .rrow .pnote{display:none}
   .rrow .pmini{display:none;margin-left:14px;font-weight:700;font-variant-numeric:tabular-nums}
   #mine.readonly .rrow .pmini{display:inline}
-  .rrow .pmini i{font-style:normal;font-size:1.3em;line-height:1;margin-right:.35em}
+  .rrow .pmini .parr{display:inline-block;width:.7em;height:.8em;margin-right:.35em;vertical-align:-.02em}
   .rrow .pmini.up{color:var(--up)}
   .rrow .pmini.down{color:var(--down)}
   /* A folded family in the pool wears the same wash and count badge it will
@@ -1141,7 +1141,7 @@ function renderRank(){
     // Read-only, the same fact as a bold "↑ 7" after the location (Carter,
     // 2026-09-28); the sentence is its tooltip.
     if (pl) head = head.replace(/(<span class="pl">[\s\S]*?)<\/span>/, '$1<span class="pmini '+(pl.up?'up':'down')+'" title="'
-      +pl.d+' rank'+(pl.d===1?'':'s')+' '+(pl.up?'above':'below')+' '+esc(pl.g.name)+'">'+'<i>'+(pl.up?'\u2191':'\u2193')+'</i>'+pl.d+'</span></span>');
+      +pl.d+' rank'+(pl.d===1?'':'s')+' '+(pl.up?'above':'below')+' '+esc(pl.g.name)+'">'+PARROW.replace('%', pl.up?'':' style="transform:rotate(180deg)"')+pl.d+'</span></span>');
     return '<div class="rrow'+(b.g?' grp':' tap')+(pl?' pulled':'')+(b.g&&OPEN[key]?' open':'')
       +(!b.g&&STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'"'
       +' data-rid="'+b.ids[0]+'"'+(b.g?'':' data-stat="'+b.ids[0]+'"')
@@ -1348,6 +1348,9 @@ function strays(g, blk){
 // For a ride pulled out of its category: that category and how far this ride
 // sits from the category's block in the list. Nothing when the category is not
 // folding anywhere in this ranking (switched off, or only one of it ranked).
+// A drawn arrow, not the ↑ character: the glyph's head is a hairline at text
+// size and could barely be seen (Carter, 2026-09-28). Cap-height, chunky head.
+var PARROW='<svg class="parr" viewBox="0 0 10 12" aria-hidden="true"%><path d="M5 0 L10 6 H6.6 V12 H3.4 V6 H0 Z" fill="currentColor"/></svg>';
 function pulledFrom(id, bs){
   if (!PULLED[id]) return null;
   var g=ownerOf(id); if (!g) return null;
