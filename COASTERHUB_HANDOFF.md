@@ -5214,3 +5214,13 @@ Revised the same day (Carter: "no lights in day mode and take away the fade ... 
 color where text is still black"): **day = pale teal band #dcf0f4, black text, the track
 in thin teal lines, no lights; no fade in either mode.** Night keeps the lit track.
 Same day: the track keeps to the right ~62% and the lower 55% of the band (phones: a low strip, 26% tall) so it stays clear of titles.
+
+Carter, 2026-09-28 ("the overlap looks bad ... make it feel like a park skyline"): the
+track is replaced by a **park skyline** — a wooden coaster with lattice, a B&M hyper, a
+drop tower and a SkyScreamer — standing on the band's floor at the right, clear of the
+title. Files: **skyline-day.svg** (teal line art) and **skyline-night.svg** (white lines,
+yellow light strings on the tracks, red aircraft lights on the towers), drawn by
+`tools/make-skyline.py`. Sized auto × min(150px,80%) on compact heroes, 190px on home
+(whose subtitle wraps at 28em to stay clear); a 58px strip under the text on phones
+(band gets +50px bottom padding there); none on the profile (its band has a right
+column). Bump `?v=` in style.css when the SVGs change (svg is cached a week).
