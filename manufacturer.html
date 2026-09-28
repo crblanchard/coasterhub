@@ -44,9 +44,17 @@
   details.mdl:target{border-color:var(--accent2)}
   /* One list, not a card per model (Carter, 2026-09-27): the models share a
      panel and a hairline between them. */
-  .mlist details.mdl{border:0;border-radius:0;margin:0;border-bottom:1px solid var(--soft);background:none}
+  .mlist details.mdl{border:0;border-radius:0;margin:0;border-bottom:1px solid var(--line);background:none}
   .mlist details.mdl:last-child{border-bottom:0}
-  .mlist details.mdl summary{padding:10px 16px}
+  .mlist details.mdl summary{padding:10px 16px;align-items:center}
+  .mlist details.mdl summary:hover{background:var(--soft)}
+  .mlist .mtwo{display:flex;flex-direction:column;min-width:0}
+  .mlist .mtwo .nm{font-weight:600;font-size:.95rem}
+  .mlist .msub{color:var(--muted);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mlist details.mdl summary .ct{font-size:.84rem}
+  .mlist .chev{flex:none;color:var(--muted);transition:transform .15s ease}
+  .mlist details.mdl[open] > summary .chev{transform:rotate(180deg)}
+  .mlist details.mdl[open] > summary{background:var(--soft)}
   .mlist details.mdl:target > summary{background:var(--soft)}
   .mlist details.mdl[open] > summary .nm{color:var(--accent2)}
   /* Opened from a #model link: clear of the sticky header. */
@@ -429,12 +437,18 @@ function one(name, cs, MINE){
   $('body').innerHTML='<div id="ranked"></div><div class="sect">Models</div><div class="panel mlist">'+models.map(function(mo){
     var list=byModel[mo].slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
     var g=MINE ? list.filter(function(c){ return MINE[c.id]; }).length : null;
+    // Carter, 2026-09-28 ("don't like how the model list looks"): each model
+    // reads like the rows around it — its name over what it is (how many still
+    // run, the years built), your ridden/total in grey the way the
+    // /manufacturers panel shows it, and a chevron that says it opens.
+    var op=list.filter(function(c){ return !c.closed; }).length, yrs=years(list);
+    var sub=[op+' operating'].concat(list.length-op ? [(list.length-op)+' defunct'] : []).concat(yrs ? [yrs] : []).join(' \u00b7 ');
     return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
-      +'<span class="nm">'+esc(mo || 'No model on file')+'</span>'
-      // Just the size of the model. The "9 of 10" you had ridden came out
-      // (Carter, 2026-09-25) — parked in the handoff's "Possible future updates".
-      +'<span class="ct">'+list.length+'</span></summary>'
-      +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">The '+esc(mo)+' page, with its specs &rarr;</span></a>' : '')
+      +'<span class="mtwo"><span class="nm">'+esc(mo || 'No model on file')+'</span><span class="msub">'+esc(sub)+'</span></span>'
+      +'<span class="ct">'+(g!=null ? g+'/' : '')+list.length+'</span>'
+      +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
+      +'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>'
+      +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">Model page &rarr;</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
   }).join('')+'</div>';
   drawRanked();

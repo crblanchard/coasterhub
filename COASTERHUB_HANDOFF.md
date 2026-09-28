@@ -4975,3 +4975,10 @@ under its own name (`racingStats`). Inside an open category the rides are full-s
 names with the parks lined up in a column (`--tw`, the longest name in ch) and each opens
 for its stats like a list row (`MSTAT`, one open at a time with `STATOPEN`); the card's
 open/close ignores taps inside `.members`.
+
+Carter, 2026-09-28 ("don't like how the model list looks", no specific fix): one maker's
+model rows are now name over a grey line ("5 operating · 1 defunct · 1999–2016"), your
+ridden/total in grey on the right (as the /manufacturers panel shows it — this brings
+back the "x of y" that came out 09-25, now in the x/y form he asked for on 09-27), and a
+chevron; hairlines are --line, open row tinted. The link inside reads "Model page →",
+matching "Coaster page →" / "Manufacturer page →".
