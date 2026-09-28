@@ -1607,16 +1607,33 @@ function startFilteredDrag(e){
     while(n<mids.length && mids[n]<y) n++;
     if(n===k) return;
     k=n;
-    if(k<others.length) list.insertBefore(row, others[k]); else others[others.length-1].after(row);
+    // The OTHER rows move around the dragged one; the dragged row itself never
+    // leaves the page. Taking it out and putting it back (insertBefore on it)
+    // made iPhone Safari drop the gesture after one step — it froze, and the
+    // drop that asks the questions never came (Carter, 2026-09-28).
+    others.forEach(function(o,j){
+      var before=!!(o.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_FOLLOWING);
+      if(j<k && !before) list.insertBefore(o, row);
+    });
+    for(var j=others.length-1;j>=k;j--){
+      var o=others[j], isBefore=!!(o.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_FOLLOWING);
+      if(isBefore) row.after(o);
+    }
   };
+  // On the window, filtered by pointer: a touch that wanders off the grip
+  // still belongs to this drag.
+  var pid=e.pointerId;
+  var mvw=function(ev){ if(ev.pointerId===pid){ ev.preventDefault(); mv(ev); } };
+  var upw=function(ev){ if(ev.pointerId===pid) up(); };
   var up=function(){
-    g.removeEventListener('pointermove',mv); g.removeEventListener('pointerup',up); g.removeEventListener('pointercancel',up);
+    window.removeEventListener('pointermove',mvw); window.removeEventListener('pointerup',upw); window.removeEventListener('pointercancel',upw);
     row.classList.remove('drag');
+    dragEnded=Date.now();
     if(k===mine) return renderRank();
     // Down: past the shown row now above it. Up: past the one now below it.
     moveFilteredTo(from, +(k>mine ? others[k-1] : others[k]).dataset.i);
   };
-  g.addEventListener('pointermove',mv); g.addEventListener('pointerup',up); g.addEventListener('pointercancel',up);
+  window.addEventListener('pointermove',mvw,{passive:false}); window.addEventListener('pointerup',upw); window.addEventListener('pointercancel',upw);
   e.preventDefault();
 }
 function startDrag(e){

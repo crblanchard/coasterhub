@@ -5085,3 +5085,11 @@ place in grey beside it (under on a phone), the model on the right (or height / 
 when that's the sort), then Rank / Add; categories keep the tint. Default sort is Name
 A–Z (was Tallest first); defunct last. Carter: /welcome and /log are one-time or
 task flows and may stay a little different — "not a huge deal".
+
+Carter, 2026-09-28: dragging with the Models filter on "froze — moved one spot" and no
+comparison prompt. Cause (by elimination — Chromium can't reproduce it): the new
+startFilteredDrag moved the DRAGGED row with insertBefore, and taking a captured
+element out of the page makes WebKit drop the pointer, so no more moves and no
+pointerup. Now the other rows move around it (the dragged row never leaves the page)
+and the move/up listeners are on window, filtered by pointerId. Lesson: in a drag,
+never re-parent or re-insert the element holding the pointer.
