@@ -5080,3 +5080,8 @@ Carter, 2026-09-28, the consistency list:
    models, /credits Coasters (was Park A–Z; Park A–Z stays an option). Lists with a
    sort menu keep their other options.
 7. The ✓ means "ridden" on a coaster, "been there" on /parks — kept.
+Same day: /rankings **Add coasters** list now reads like the ranked rows — name, park ·
+place in grey beside it (under on a phone), the model on the right (or height / speed
+when that's the sort), then Rank / Add; categories keep the tint. Default sort is Name
+A–Z (was Tallest first); defunct last. Carter: /welcome and /log are one-time or
+task flows and may stay a little different — "not a huge deal".

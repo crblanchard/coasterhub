@@ -280,22 +280,26 @@
      are different coasters and truncating them makes the list unusable.
      The park shares the second line with the buttons and is the one thing
      allowed to clip, since it's the least load-bearing part of the row. */
-  .addrow{display:grid;grid-template-columns:1fr auto;gap:1px 10px;align-items:center;
-          padding:8px 4px;border-bottom:1px solid var(--soft)}
+  .addrow{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line)}
   .addrow:last-child{border-bottom:0}
-  .addrow .nm{grid-column:1/-1;min-width:0;font-weight:600;font-size:.9rem;line-height:1.25}
-  .addrow .meta{grid-column:1;min-width:0;display:flex;align-items:baseline;gap:8px;overflow:hidden}
-  .addrow .meta .pk{color:var(--muted);font-size:.77rem;min-width:0;
-                    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .addrow .meta .st{color:var(--accent2);font-size:.77rem;font-variant-numeric:tabular-nums;
-                    white-space:nowrap;flex:none}
-  /* Set per row by fitMeta() when the park would otherwise be clipped. */
-  .addrow.tight .meta .st .s{display:none}
-  /* A ride that joins a category already in the list. Accented like the
-     category rows it belongs to, because it is the same kind of easy win. */
-  .addrow .meta .jn{color:var(--accent2);font-size:.77rem;white-space:nowrap;flex:none}
-  .addrow .acts{grid-column:2;display:flex;gap:6px}
+  .addrow .two{flex:1 1 auto;min-width:0;display:flex;align-items:baseline;gap:9px}
+  .addrow .cn{flex:0 1 auto;min-width:0;font-weight:600;font-size:.9rem;line-height:1.3;
+              overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .addrow.gone .cn{color:var(--muted)}
+  .addrow .pk{flex:0 1 auto;min-width:0;color:var(--muted);font-size:.8rem;line-height:1.3;
+              overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* A ride that joins a category already in the list: the category rows' accent. */
+  .addrow .pk .jn{color:var(--accent2)}
+  .addrow .val{flex:none;color:var(--muted);font-size:.8rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .addrow .acts{flex:none;display:flex;gap:6px}
   .addrow .acts button{padding:7px 13px;font-size:.83rem}
+  .addrow.grp{padding-left:10px;padding-right:10px;border-radius:8px;border-bottom-color:transparent;margin:2px 0}
+  @media (max-width:560px){
+    .addrow .two{flex-direction:column;align-items:flex-start;gap:1px}
+    .addrow .cn{white-space:normal;max-width:100%}
+    .addrow .pk{max-width:100%}
+    .addrow .val{display:none}
+  }
   .list{max-height:62vh;overflow-y:auto}
   .hint{color:var(--muted);padding:22px 4px;font-size:.9rem}
 
@@ -583,9 +587,9 @@
       <div class="bar">
         <input id="q" type="search" placeholder="Search coaster, park or maker&hellip;">
         <select id="sort">
+          <option value="name">Name (A–Z)</option>
           <option value="h">Tallest first</option>
           <option value="s">Fastest first</option>
-          <option value="name">Name (A–Z)</option>
           <option value="park">Park</option>
         </select>
         <select id="f_addpark"><option value="">All parks</option></select>
@@ -1967,6 +1971,8 @@ function pool(){
              .toLowerCase().indexOf(q)>=0; });
   var s=$('sort').value;
   list.sort(function(a,b){
+    // Defunct at the bottom whatever the sort (Carter, 2026-09-28).
+    var gd=(!!a.closed-!!b.closed); if(gd) return gd;
     if(s==='name') return String(a.name).localeCompare(String(b.name));
     if(s==='park') return String(a.park||'').localeCompare(String(b.park||''))
                      || String(a.name).localeCompare(String(b.name));
@@ -2054,9 +2060,8 @@ function renderAdd(){
     if(row.g){
       var g=row.g, n=row.ids.length, have=g.ids.length;
       return head+'<div class="addrow grp">'
-        +'<span class="nm">'+esc(g.name)+'<span class="cnt">\u00d7'+n+'</span></span>'
-        +'<span class="meta"><span class="pk">'
-        +(n<have ? n+' of '+have+' left' : 'the same ride at '+n+' parks')
+        +'<span class="two"><span class="cn">'+esc(g.name)+'<span class="cnt">\u00d7'+n+'</span></span>'
+        +'<span class="pk">'+(n<have ? n+' of '+have+' left' : 'the same ride at '+n+' parks')
         +(g.note?' \u00b7 '+esc(g.note):'')+'</span></span>'
         +'<span class="acts"><button class="ghost" data-hhg="'+g.key+'">Rank</button>'
         +'<button class="ghost" data-addg="'+g.key+'">Add '+n+'</button></span>'
@@ -2064,19 +2069,21 @@ function renderAdd(){
     }
     var c=row.c;
     var pre=head;
-    // Height and speed are separate so speed can be dropped on its own — it's
-    // the first thing to give up when the park needs the room.
-    var h=c.h!=null?Math.round(c.h)+' ft':'', s=c.s!=null?Math.round(c.s)+' mph':'';
-    var stat=(h||s)
-      ? '<span class="st">'+(h?'<span class="h">'+h+'</span>':'')
-        +(s?'<span class="s">'+(h?' · ':'')+s+'</span>':'')+'</span>'
-      : '';
+    // The ranked list's row (Carter, 2026-09-28: the add list "should be more
+    // consistent ... especially rankings"): the name, park · place in grey
+    // beside it (under it on a phone), and on the right the model — or the
+    // height or speed, when that is the sort — then Rank and Add.
+    var so=$('sort').value;
+    var val = so==='h' ? (c.h!=null?Math.round(c.h)+' ft':'')
+            : so==='s' ? (c.s!=null?Math.round(c.s)+' mph':'')
+            : (CoasterHub.maker(c)||'');
     var joinbit = row.joins
-      ? '<span class="jn">joins '+esc(row.joins.name)+' \u00b7 '+row.jn+' ranked</span>'
+      ? '<span class="jn"> \u00b7 joins '+esc(row.joins.name)+' ('+row.jn+' ranked)</span>'
       : '';
-    return pre+'<div class="addrow">'
-      +'<span class="nm">'+esc(c.name)+'</span>'
-      +'<span class="meta"><span class="pk">'+esc(c.park||'—')+'</span>'+joinbit+stat+'</span>'
+    return pre+'<div class="addrow'+(c.closed?' gone':'')+'">'
+      +'<span class="two"><span class="cn">'+esc(c.name)+'</span>'
+      +'<span class="pk">'+esc([c.park||'\u2014', c.loc].filter(Boolean).join(' \u00b7 '))+joinbit+'</span></span>'
+      +(val?'<span class="val">'+esc(val)+'</span>':'')
       +'<span class="acts"><button class="ghost" data-hh="'+c.id+'">Rank</button>'
       +'<button class="ghost" data-add="'+c.id+'">Add</button></span>'
       +'</div>';
