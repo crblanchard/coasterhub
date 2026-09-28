@@ -307,7 +307,7 @@ function years(cs){
 // with where it is in grey beside the name — park · place, as /rankings reads.
 function crow(c, MINE){
   var reg=(PARKS[c.park]||{}).region||'';
-  return CoasterHub.coasterRow(c, { mine:MINE, ctx:[c.park, reg].filter(Boolean).join(' \u00b7 ') });
+  return CoasterHub.coasterRow(c, { mine:MINE, ctx:'place' });
 }
 </script>
 </body>

@@ -181,3 +181,8 @@ a.crow.open{background:var(--soft);border-bottom-color:transparent}
   .mlist .vct{display:flex;flex-direction:column;align-items:flex-end;line-height:1.3}
   .mlist .vct i{display:none}
 }
+/* The grey line's park / place / model: links once the row is open (spans
+   with data-href — a row is an <a>, so no <a> inside). Underlined like the
+   name when open. */
+a.crow.open .pk .lnk{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer}
+a.crow.open .pk .lnk:hover{color:var(--accent2);text-decoration-color:currentColor}

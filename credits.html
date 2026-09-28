@@ -626,7 +626,7 @@ function renderDays(rows){
       rows: uniqRows.map(function(r){
         return { c:{ id:r.c, name:r.name, park:r.park, manu:r.manu, model:r.model, opened:r.op, closed:r.cl, closing:r.soon },
                  n:laps[r.c], fresh: isRides && isNew(r),
-                 ctx: pk.length>1 ? r.park : (r.model||r.manu||'') };
+                 ctx: pk.length>1 ? 'park' : 'model' };
       }),
       foot: nNew ? nNew+' new credit'+(nNew===1?'':'s') : ''
     });
@@ -739,7 +739,7 @@ function parkBody(park){
     // 2026-09-28: "very important to keep things consistent").
     + card.all.slice().sort(function(a,b){ return (!!a.cl-!!b.cl) || String(a.name).localeCompare(String(b.name)); }).map(function(r){
         var c={ id:r.c, name:r.name, park:r.park, manu:r.manu, model:r.model, opened:r.op, closed:r.cl, closing:r.soon };
-        return CoasterHub.coasterRow(c, { mine:ticks, ctx:CoasterHub.maker(r)||'',
+        return CoasterHub.coasterRow(c, { mine:ticks, ctx:'model',
           end: ((laps[r.c]>1 && !COMBINED)?'<span class="lap">\u00d7'+laps[r.c]+'</span>':'')+CoasterHub.lifeTag(c) });
       }).join('');
 }
@@ -911,9 +911,8 @@ var CreditList=(function(){
       else if(sortKey==='s') val=c.s!=null?Math.round(c.s)+' mph':'\u2014';
       else if(sortKey==='l') val=c.l!=null?Math.round(c.l).toLocaleString()+' ft':'\u2014';
       else if(sortKey==='first') val=c.first?CoasterHub.mdy(c.first):'\u2014';
-      var ctx=[c.park, c.loc].filter(Boolean).join(' \u00b7 ')
-        +((c.alsoAt&&c.alsoAt.length)?' \u00b7 also '+c.alsoAt.join(', '):'');
-      return CoasterHub.coasterRow(c, { ctx:ctx,
+      return CoasterHub.coasterRow(c, { ctx:'place',
+        more:(c.alsoAt&&c.alsoAt.length)?' \u00b7 also '+c.alsoAt.join(', '):'',
         end:(c.rides>1?'<span class="lap">\u00d7'+c.rides+'</span>':'')+CoasterHub.lifeTag(c, val) });
     }).join('') || '<p class="lead" style="padding:12px 16px;margin:0">No coasters match those filters.</p>';
   }

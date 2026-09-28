@@ -141,7 +141,7 @@ function draw(){
   $('rows').innerHTML=list.slice(0,CAP).map(function(c){
     var val = so==='h' ? (c.h!=null?Math.round(c.h)+' ft':'\u2014') : so==='s' ? (c.s!=null?Math.round(c.s)+' mph':'\u2014') : null;
     var reg=(PARKS[c.park]||{}).region||'';
-    return CoasterHub.coasterRow(c, { mine:MINE, ctx:[c.park, reg].filter(Boolean).join(' \u00b7 '), val:val });
+    return CoasterHub.coasterRow(c, { mine:MINE, ctx:'place', val:val });
   }).join('') || '<div class="more">Nothing matches.</div>';
   $('more').hidden = list.length<=CAP;
   $('more').textContent='Showing the first '+CAP+' — search or filter to narrow it.';

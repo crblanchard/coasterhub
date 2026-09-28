@@ -801,7 +801,7 @@ function render(s){
         title: x.p.map(function(pp){ return pp[0]; }).join(' & '), date: fmt(d),
         right: nf(x.t)+' ride'+(x.t===1?'':'s')+(rows.length?' \u00b7 '+nf(rows.length)+' coaster'+(rows.length===1?'':'s'):''),
         rows: rows.map(function(r){ return { c:r.c, n:r.n, fresh: first[r.c.id]===d,
-          ctx: many ? r.c.park : (CoasterHub.maker(r.c)||'') }; })
+          ctx: many ? 'park' : 'model' }; })
       });
     }).join('');
     CoasterHub.openableCoasters(document.getElementById('visits'));

@@ -5151,3 +5151,11 @@ Carter, 2026-09-28: home rider rows — **Friends** on a computer are the old ca
 **Amended again, Carter 2026-09-28:** defunct-last is ONLY for the coaster lists inside a
 maker, model, park or location page (and a park opened on /parks or /credits Parks).
 /coasters keeps defunct mixed in, in whatever order the sort says.
+
+Carter, 2026-09-28: the rule "a closed row opens on any tap; once open, its name, park and
+place go to their pages" now holds on the shared coaster rows too. The grey line's park,
+place or model are `<span class="lnk" data-href>` (a row is an `<a>`, nested anchors are
+invalid) built by `ctxLinks(c, kind)` — coasterRow takes `ctx:'place'|'park'|'model'`
+(or plain text) and `more:` for extra text; openableCoasters and the Global rows follow a
+data-href only when the row is open. app.js remembers the parks answer (PARKS_SEEN) for
+the region.

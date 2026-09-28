@@ -442,7 +442,9 @@
       .then(function (j) { return (j && j.riders) || null; })
       .catch(function () { return null; });
   }
-  function fetchParks() { return shared("parks", "/api/parks", "/parks.json"); }
+  // Kept where coasterRow can reach it: a row's "park · place" needs the region.
+  var PARKS_SEEN = {};
+  function fetchParks() { return shared("parks", "/api/parks", "/parks.json").then(function (p) { PARKS_SEEN = p || {}; return p; }); }
   function fetchUser(slug) { return fetchJSON("/api/user/" + slug, "/" + slug + ".json", LIVE); }
 
   // Ride log for one rider: { user, mode, rides:[{i?, c, d, num?, n?}] }.
@@ -1660,6 +1662,9 @@
       if (isOpen) {
         if (a && a !== row) return;
         if (a === row && e.target.closest(".cn")) return;
+        // Park, place or model in the grey line: go there.
+        var go = e.target.closest("[data-href]");
+        if (go && row.contains(go)) { e.preventDefault(); location.href = go.getAttribute("data-href"); return; }
       }
       e.preventDefault();
       if (isOpen) { nx.parentNode.removeChild(nx); row.classList.remove("open"); return; }
@@ -1717,12 +1722,31 @@
   // The one coaster row (lists.css a.crow.std): opts.mine (id -> truthy, or
   // null signed out) gives the tick slot; opts.ctx is the grey detail beside
   // the name (plain text); opts.end replaces the status and years.
+  // The grey detail beside a name, as LINKS (Carter, 2026-09-28: "click on row
+  // to open stats then click on park/location to open that page"). A row is
+  // itself an <a>, and an <a> inside one is not allowed, so these are spans
+  // with data-href; openableCoasters follows them once the row is open.
+  // kind: "place" (park · region), "park", or "model" (the model, or maker).
+  function ctxLinks(c, kind) {
+    var E = searchEsc, parts = [];
+    if (kind === "place" || kind === "park") {
+      if (c.park && c.park !== "\u2014") parts.push([c.park, parkHref(c.park)]);
+      var reg = kind === "place" ? (PARKS_SEEN[c.park] || {}).region : null;
+      if (reg) parts.push([reg, locationHref(reg)]);
+    } else if (kind === "model") {
+      var mk = maker(c);
+      if (mk) parts.push([mk, c.manu ? makerHref(c.manu, c.model || null) : null]);
+    }
+    return parts.map(function (x) {
+      return x[1] ? '<span class="lnk" data-href="' + E(x[1]) + '">' + E(x[0]) + '</span>' : E(x[0]);
+    }).join(" \u00b7 ");
+  }
   function coasterRow(c, opts) {
     opts = opts || {};
     var E = searchEsc, got = opts.mine && opts.mine[c.id];
     return '<a class="crow std' + (c.closed ? ' gone' : '') + (opts.mine ? (got ? ' got' : ' miss') : '') + '" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '">'
       + (opts.mine ? '<span class="tick">' + (got ? '✓' : '') + '</span>' : '')
-      + '<span class="two"><span class="cn">' + E(c.name) + '</span>' + (opts.ctx ? '<span class="pk">' + E(opts.ctx) + '</span>' : '') + '</span>'
+      + '<span class="two"><span class="cn">' + E(c.name) + '</span>' + (opts.ctx ? '<span class="pk">' + (opts.ctx === "place" || opts.ctx === "park" || opts.ctx === "model" ? ctxLinks(c, opts.ctx) : E(opts.ctx)) + (opts.more ? E(opts.more) : '') + '</span>' : '') + '</span>'
       + '<span class="end">' + (opts.end != null ? opts.end : lifeTag(c, opts.val)) + '</span></a>';
   }
 
@@ -1813,7 +1837,7 @@
       if (st.view === "mine") {
         body = mine.length ? '<div class="panel">' + cut(mine).map(function (c) {
           return '<a class="crow" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + R[c.id] + '</span>'
-            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(ctx(c)) + '</span></span>'
+            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + '</span></span>'
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '') + '</a>';
         }).join("") + '</div>' + more(mine.length)
           : '<p class="rnone">' + (R ? "You haven’t ranked any of these yet." : "Sign in to see where these sit in your rankings.") + '</p>';
@@ -1832,7 +1856,7 @@
         body = (rows.length ? '<div class="panel">' + cut(rows).map(function (r, i) {
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
           return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + r.pos + '</span>'
-            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(ctx(c)) + '</span></span>'
+            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + '</span></span>'
             // The model too, as /rankings' Global list shows it (2026-09-28).
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '')
             + (me ? '<span class="gyou">you #' + me + '</span>' : '')
@@ -1856,6 +1880,8 @@
       var nx = row.nextElementSibling, isOpen = !!(nx && nx.classList.contains("cx"));
       if (isOpen && e.target.closest(".cn")) return;
       e.preventDefault();
+      var go = isOpen && e.target.closest("[data-href]");
+      if (go) { location.href = go.getAttribute("data-href"); return; }
       Array.prototype.forEach.call(el.querySelectorAll(".cx"), function (o) {
         var pr = o.previousElementSibling; if (pr) pr.classList.remove("open"); o.parentNode.removeChild(o);
       });
