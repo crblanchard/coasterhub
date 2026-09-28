@@ -490,8 +490,7 @@ function gettingStarted(k){
     if(!(acct && acct.slug===slug)) return;
     return Promise.all([
       CoasterHub.you(),
-      fetch('/api/follows/'+encodeURIComponent(slug),{credentials:'same-origin',cache:'no-store'})
-        .then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })
+      followsOnce(slug)
     ]).then(function(r){
       var ranked=(r[0]&&r[0].ranked)||0, following=((r[1]&&r[1].following)||[]).length;
       if(k.credits>=30 && ranked>=10) return;
@@ -618,12 +617,17 @@ function mountFollows(host, slug){
   }
   if(btn) btn.onclick=act;
 
-  fetch('/api/follows/'+encodeURIComponent(slug), { credentials:'same-origin' })
-    .then(function(r){ return r.ok ? r.json() : null; })
+  followsOnce(slug)
     .then(function(d){ if(!d) return; D=d; draw(); })
     .catch(function(){ /* not switched on, or offline: the page is fine without it */ });
 }
 
+// This rider's follows, fetched once for the page (two parts of it read them).
+var FOLLOWS_P={};
+function followsOnce(slug){
+  return FOLLOWS_P[slug] || (FOLLOWS_P[slug]=fetch('/api/follows/'+encodeURIComponent(slug),{credentials:'same-origin',cache:'no-store'})
+    .then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }));
+}
 function render(s){
   document.getElementById('loading').style.display='none';
   document.getElementById('content').style.display='block';

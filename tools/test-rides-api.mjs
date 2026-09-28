@@ -2675,6 +2675,19 @@ async function main() {
     check("park-riders: who rode each coaster at the park, with ride counts",
       r.data.riders && r.data.riders[901][0].slug === "ann" && r.data.riders[901][0].n === 2
       && r.data.riders[902].length === 1 && !r.data.riders[903], JSON.stringify(r.data));
+    // 2026-09-28: the two one-request replacements for per-rider loops.
+    r = await call(db, "GET", "/api/coaster-riders?ids=901,903");
+    check("coaster-riders: who rode each id, how often, first date",
+      r.data.riders && r.data.riders[901][0].slug === "ann" && r.data.riders[901][0].n === 2
+      && r.data.riders[901][0].first === "2024-01-01" && r.data.riders[903][0].slug === "bo"
+      && r.data.riders[903][0].first === null && !r.data.riders[902], JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/coaster-riders");
+    check("coaster-riders: no ids is a 400", r.status === 400, JSON.stringify(r));
+    db.exec("INSERT INTO rankings (user_slug,coaster_id,pos) VALUES ('ann',902,1),('ann',901,2),('bo',903,1)");
+    r = await call(db, "GET", "/api/rankings-all");
+    const ra = (r.data.rankings || []).find(x => x.slug === "ann"), rb = (r.data.rankings || []).find(x => x.slug === "bo");
+    check("rankings-all: every rider's order in one answer, by position",
+      ra && ra.user === "Ann" && ra.order.join() === "902,901" && rb && rb.order.join() === "903", JSON.stringify(r.data));
     r = await call(db, "GET", "/api/coasters");
     const g = (r.data.coasters || []).find(c => c.id === 903);
     check("/api/coasters leaves empty fields out", g && !("h" in g) && !("closed" in g) && g.name === "Gamma", JSON.stringify(g));

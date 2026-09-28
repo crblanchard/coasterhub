@@ -744,14 +744,14 @@ if(!slug){
   // Who is reading matters here: the cards say what YOU can do with each list,
   // so the account rides along with the data rather than arriving after it and
   // rewriting the page.
+  // Every list in one request (/api/rankings-all, 2026-09-28), laid out in
+  // USERS order for the code below.
   return Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(),
-    CoasterHub.me().catch(function(){return null;})].concat(
-    CoasterHub.USERS.map(function(u){
-      return fetch('/api/rankings/'+u.slug).then(function(r){return r.ok?r.json():{order:[]};})
-        .catch(function(){return {order:[]};});
-    })
-  )).then(function(res){
-    var coasters=res[0].coasters, parks=res[1], ME=res[2], all=res.slice(3);
+    CoasterHub.me().catch(function(){return null;}), CoasterHub.fetchAllRankings()
+  ]).then(function(res){
+    var coasters=res[0].coasters, parks=res[1], ME=res[2], bySlug={};
+    (res[3]||[]).forEach(function(r){ bySlug[r.slug]=r; });
+    var all=CoasterHub.USERS.map(function(u){ return bySlug[u.slug]||{order:[]}; });
     coasters.forEach(function(c){ var pk=parks[c.park];
       BYID[c.id]=Object.assign({},c,{loc:(pk&&pk.region)?pk.region:''}); });
 
@@ -1039,11 +1039,7 @@ function markDirty(){
 var GLOBAL=null;
 function loadGlobal(){
   CoasterHub.fetchUsers().then(function(){
-    var users=CoasterHub.USERS.slice();
-    return Promise.all(users.map(function(u){
-      return fetch('/api/rankings/'+encodeURIComponent(u.slug))
-        .then(function(r){ return r.ok?r.json():{order:[]}; }).catch(function(){ return {order:[]}; });
-    })).then(function(all){
+    return CoasterHub.fetchAllRankings().then(function(all){
       var tally={};
       all.forEach(function(r){
         var seen={};

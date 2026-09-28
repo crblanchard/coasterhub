@@ -384,7 +384,12 @@
   // the D1 bill the cache exists to avoid (see EDGE_CACHED in worker.js).
   // Other readers get the change within the five minutes, as before.
   var WROTE_KEY = "ch_wrote", WROTE_FOR = 10 * 60 * 1000;
-  function noteWrite() { try { window.localStorage.setItem(WROTE_KEY, String(Date.now())); } catch (e) {} }
+  function noteWrite() {
+    try { window.localStorage.setItem(WROTE_KEY, String(Date.now())); } catch (e) {}
+    // A write makes this page's remembered answers old: forget them, so the
+    // next read goes to the network (no-store, per wroteLately).
+    inFlight = {}; ridesMemo = {}; allRankP = null; globalTallyP = null;
+  }
   function wroteLately() {
     try { return Date.now() - (+window.localStorage.getItem(WROTE_KEY) || 0) < WROTE_FOR; }
     catch (e) { return false; }
@@ -393,8 +398,10 @@
     if (inFlight[key]) return inFlight[key];
     var p = fetchJSON(apiPath, staticPath, wroteLately() ? LIVE : undefined);
     inFlight[key] = p;
-    var done = function () { delete inFlight[key]; };
-    p.then(done, done);
+    // Kept for the page's life (2026-09-28): /api/coasters and /api/parks were
+    // fetched two or three times a page as its parts started one after another.
+    // A failure is forgotten, and noteWrite() clears the lot.
+    p.catch(function () { if (inFlight[key] === p) delete inFlight[key]; });
     return p;
   }
   // A closing date still ahead is not closed (Carter, 2026-09-27: "If a ride has
@@ -441,7 +448,35 @@
   // Ride log for one rider: { user, mode, rides:[{i?, c, d, num?, n?}] }.
   // The API returns that shape directly; the static fallback file is the older
   // per-rider shape, so normalise it here and both paths render identically.
+  // One rider's log, once per page load per rider (same rules as shared()).
+  var ridesMemo = {};
   function fetchRides(slug) {
+    if (ridesMemo[slug]) return ridesMemo[slug];
+    var p = ridesMemo[slug] = fetchRidesNow(slug);
+    p.catch(function () { if (ridesMemo[slug] === p) delete ridesMemo[slug]; });
+    return p;
+  }
+  // Every rider's ranking in one request (/api/rankings-all, 2026-09-28) — it
+  // was one request per rider. [{slug, user, order}]. Falls back to the old
+  // way if the endpoint is not there.
+  var allRankP = null;
+  function fetchAllRankings() {
+    if (allRankP) return allRankP;
+    allRankP = fetch("/api/rankings-all", wroteLately() ? LIVE : undefined)
+      .then(function (r) { if (!r.ok) throw new Error("api " + r.status); return r.json(); })
+      .then(function (j) { return j.rankings || []; })
+      .catch(function () {
+        return fetchUsers().then(function (users) {
+          return Promise.all((users || []).map(function (u) {
+            return fetch("/api/rankings/" + encodeURIComponent(u.slug))
+              .then(function (r) { return r.ok ? r.json() : { order: [] }; }).catch(function () { return { order: [] }; })
+              .then(function (j) { return { slug: u.slug, user: u.name, order: j.order || [] }; });
+          }));
+        });
+      });
+    return allRankP;
+  }
+  function fetchRidesNow(slug) {
     return fetch("/api/rides/" + slug, LIVE)
       .then(function (r) { if (!r.ok) throw new Error("api " + r.status); return r.json(); })
       .catch(function () {
@@ -1731,16 +1766,13 @@
   // ancestor) opens them; Global rows carry data-gid and open here.
   var globalTallyP = null;
   function globalTally() {
-    if (!globalTallyP) globalTallyP = Promise.all([fetchCoasters(), fetchUsers()]).then(function (r) {
-      var byId = {}, users = r[1] || [];
+    if (!globalTallyP) globalTallyP = Promise.all([fetchCoasters(), fetchAllRankings()]).then(function (r) {
+      var byId = {};
       (r[0].coasters || []).forEach(function (c) { byId[c.id] = c; });
-      return Promise.all(users.map(function (u) {
-        return fetch("/api/rankings/" + encodeURIComponent(u.slug))
-          .then(function (x) { return x.ok ? x.json() : { order: [] }; }).catch(function () { return { order: [] }; });
-      })).then(function (all) {
+      return (function (all) {
         var t = {};
-        all.forEach(function (rk, ui) {
-          var seen = {}, u = users[ui] || {};
+        all.forEach(function (rk) {
+          var seen = {}, u = { slug: rk.slug, name: rk.user };
           (rk.order || []).filter(function (id) {
             var c = byId[id]; if (!c) return false; var k = rideKey(c); if (seen[k]) return false; seen[k] = 1; return true;
           }).forEach(function (id, pos) {
@@ -1755,7 +1787,7 @@
           .sort(function (a, b) { var x = t[a], y = t[b]; return (x.sum / x.n) - (y.sum / y.n) || y.n - x.n; })
           .forEach(function (k, i) { t[k].pos = i + 1; });
         return t;
-      });
+      })(r[1] || []);
     }).catch(function () { return {}; });
     return globalTallyP;
   }
@@ -2132,7 +2164,7 @@
               slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, amongIn: amongIn, confirmAdd: confirmAdd, confirmRemove: confirmRemove, CLOSING_SOON: CLOSING_SOON, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
-              fetchRides: fetchRides, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
+              fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,

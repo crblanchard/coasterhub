@@ -5129,3 +5129,19 @@ Carter, 2026-09-28, cleanup pass:
   details.day click handler, life() and DESK_HIDE; openableCoasters' <tr> branch;
   duplicate .rk/.mtwo rules in lists.css. ~20KB less, no visual change.
 - Visit rows on a phone stack "15 rides" over "13 coasters" so the park keeps its width.
+
+Carter, 2026-09-28, "make it run faster": measured every page's requests (Playwright,
+counting /api calls) and cut the repeats.
+- **Two new worker endpoints**, each replacing a per-rider loop:
+  `/api/rankings-all` (every rider's order; edge-cached 60s like /api/rides-all, dropped
+  on writes) — /rankings went 13 ranking requests → 1, a rider's /rankings 14 → 2;
+  `/api/coaster-riders?ids=` (who rode, how often, first date) — a coaster page went 14
+  rides requests → 1. Both tested in test-rides-api.
+- **app.js memoizes for the page's life**: shared() (/api/coasters, /api/parks) keeps the
+  resolved answer, not just the in-flight one; fetchRides() per slug; fetchAllRankings().
+  Failures aren't kept; **noteWrite() clears all of them** (and globalTally), so a page
+  that writes then re-reads still gets fresh data. Parks/rides were loaded twice on maker,
+  location and park pages.
+- profile.html: /api/follows fetched once (followsOnce), was twice.
+- Left: the home page's two activity requests (limit 40 for the site feed, 300 for Friend
+  activity) — different questions; could share one later.

@@ -83,7 +83,7 @@ const LIST_CACHE = { "cache-control": "public, max-age=300" };
 // and inert on a workers.dev hostname, so every call is guarded: a cache that
 // is not there must cost correctness nothing.
 const EDGE_CACHED = { "/api/coasters": 1, "/api/parks": 1, "/api/clones": 1,
-                      "/api/summary": 1, "/api/rides-all": 1 };
+                      "/api/summary": 1, "/api/rides-all": 1, "/api/rankings-all": 1 };
 // The two summaries change on every ride logged, so they keep a minute, not
 // five. A write purges them with the rest (edgeDrop).
 const SUMMARY_CACHE = { "cache-control": "public, max-age=60" };
@@ -1479,6 +1479,31 @@ async function parkLabel(env, ids) {
 // need its unlock UI back, which is in git history at c27b43b.
 const RANKINGS_NEED_TOKEN = false;
 
+// Every rider's order in one answer (2026-09-28): the Global list and every
+// Rankings section used to fetch /api/rankings/<slug> once per rider — 13
+// requests on /rankings. { rankings: [{ slug, user, order: [ids] }] }.
+async function getAllRankings(env) {
+  const { results: us } = await env.DB.prepare("SELECT slug, name FROM users ORDER BY name").all();
+  const { results } = await env.DB.prepare(
+    "SELECT user_slug, coaster_id FROM rankings ORDER BY user_slug, pos").all();
+  const by = {};
+  results.forEach((x) => { (by[x.user_slug] = by[x.user_slug] || []).push(x.coaster_id); });
+  return us.map((u) => ({ slug: u.slug, user: u.name, order: by[u.slug] || [] }));
+}
+// Who has ridden a set of coasters (one ride, or a relocated ride's rows),
+// how many times and first when — the coaster page used to read every
+// rider's whole log for this. { riders: { <coasterId>: [{slug,name,n,first}] } }.
+async function getCoasterRiders(env, ids) {
+  if (!ids.length) return {};
+  const q = ids.map(() => "?").join(",");
+  const { results } = await env.DB.prepare(
+    "SELECT r.coaster_id AS c, r.user_slug AS slug, u.name AS name, COUNT(*) AS n, MIN(r.d) AS first " +
+    "FROM rides r JOIN users u ON u.slug = r.user_slug " +
+    "WHERE r.coaster_id IN (" + q + ") GROUP BY r.coaster_id, r.user_slug").bind(...ids).all();
+  const out = {};
+  results.forEach((x) => { (out[x.c] = out[x.c] || []).push({ slug: x.slug, name: x.name || x.slug, n: x.n, first: x.first || null }); });
+  return out;
+}
 async function getRankings(env, slug) {
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
   if (!u) return null;
@@ -1797,6 +1822,14 @@ export default {
       }
       // /api/park-riders?park=<name>: for one park, who has ridden each coaster
       // and how many times. { riders: { <coasterId>: [{slug,name,n}] } }.
+      if (request.method === "GET" && path === "/api/rankings-all") {
+        return edgePut(ctx, request, json({ rankings: await getAllRankings(env) }, 200, SUMMARY_CACHE));
+      }
+      if (request.method === "GET" && path === "/api/coaster-riders") {
+        const ids = (url.searchParams.get("ids") || "").split(",").map(Number).filter((n) => n > 0).slice(0, 50);
+        if (!ids.length) return err(400, "need ?ids=");
+        return json({ riders: await getCoasterRiders(env, ids) });
+      }
       if (request.method === "GET" && path === "/api/park-riders") {
         const park = url.searchParams.get("park") || "";
         if (!park) return err(400, "need ?park=");

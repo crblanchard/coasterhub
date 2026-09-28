@@ -309,12 +309,11 @@ function fmtDay(d){
 var CAP=12;
 function riders(){
   return Promise.all([
-    CoasterHub.fetchUsers().then(function(){
-      return Promise.all(CoasterHub.USERS.map(function(u){
-        return CoasterHub.fetchRides(u.slug).then(function(log){ return {u:u, log:log}; })
-                         .catch(function(){ return null; });
-      }));
-    }),
+    // Who has ridden these rows, in one request (2026-09-28) — it used to
+    // read every rider's whole log, one request each.
+    fetch('/api/coaster-riders?ids='+ROWS.map(function(x){ return x.id; }).join(','))
+      .then(function(r){ return r.ok ? r.json() : {riders:{}}; })
+      .then(function(j){ return j.riders||{}; }).catch(function(){ return {}; }),
     CoasterHub.you().catch(function(){ return null; })
   ]).then(function(res){
     var all=res[0], me=res[1];
@@ -322,16 +321,8 @@ function riders(){
     var rank=0;
     if(me) ROWS.forEach(function(x){ var k=me.rank[x.id]; if(k && (!rank || k<rank)) rank=k; });
     var lists=ROWS.map(function(row){
-      var out=[];
-      all.forEach(function(x){
-        if(!x) return;
-        var laps=0, first=null;
-        x.log.rides.forEach(function(r){
-          if(r.c!==row.id) return;
-          laps++;
-          if(r.d && (!first || r.d<first)) first=r.d;
-        });
-        if(laps) out.push({slug:x.u.slug, name:x.u.name||x.u.slug, laps:laps, first:first});
+      var out=(all[row.id]||[]).map(function(x){
+        return {slug:x.slug, name:x.name||x.slug, laps:x.n, first:x.first||null};
       });
       out.sort(function(a,b){
         if(!!a.first!==!!b.first) return a.first?-1:1;
