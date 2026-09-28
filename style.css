@@ -293,31 +293,31 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
   border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
   font-weight:800;font-size:1rem;color:var(--accent2);flex:none;
   background-size:cover;background-position:center;background-origin:border-box}
-/* Slim (Top users on a computer): name, @username · credits in grey, "N ranked". */
+/* Base row; .riderlist rows below are the full-size shape (Friends and Top users alike, Carter 2026-09-28). */
 .riderrow .who{display:flex;align-items:baseline;gap:9px;min-width:0;flex:1 1 auto}
 .riderrow .nm{font-weight:600;font-size:.93rem;line-height:1.3;white-space:nowrap}
 .riderrow .un,.riderrow .sub{color:var(--muted);font-size:.8rem;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .riderrow .un{flex:none}
 .riderrow .sub{margin-left:-5px}
 .riderrow .sub::before{content:"\00b7  ";white-space:pre}
-#friends .riderrow .sub{margin-left:0}
+.riderlist .riderrow .sub{margin-left:0}
 .riderrow .nums{flex:none;display:flex;align-items:baseline;gap:5px;color:var(--muted);font-size:.8rem;white-space:nowrap;font-variant-numeric:tabular-nums}
 .riderrow .nums b{color:var(--fg);font-weight:700}
 /* Big (Friends on a computer, and every row on a phone — Carter, 2026-09-28):
    the old card's size in the one list — a bigger picture, name over @username
    over credits, and the ranked count large with its label under it. */
-#friends .riderrow{gap:16px;padding:14px 18px}
-#friends .riderrow .av{width:54px;height:54px;font-size:1.4rem}
-#friends .riderrow .who{flex-direction:column;align-items:flex-start;gap:0}
-#friends .riderrow .nm{font-weight:800;font-size:1.15rem;line-height:1.25}
-#friends .riderrow .un{color:var(--accent2);font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem}
-#friends .riderrow .sub::before{content:none}
-#friends .riderrow .nums{flex-direction:column;align-items:flex-end;gap:0}
-#friends .riderrow .nums b{font-size:1.3rem;font-weight:800;line-height:1.2}
-#friends .riderrow .nums span{font-size:.8rem;}
+.riderlist .riderrow{gap:16px;padding:14px 18px}
+.riderlist .riderrow .av{width:54px;height:54px;font-size:1.4rem}
+.riderlist .riderrow .who{flex-direction:column;align-items:flex-start;gap:0}
+.riderlist .riderrow .nm{font-weight:800;font-size:1.15rem;line-height:1.25}
+.riderlist .riderrow .un{color:var(--accent2);font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem}
+.riderlist .riderrow .sub::before{content:none}
+.riderlist .riderrow .nums{flex-direction:column;align-items:flex-end;gap:0}
+.riderlist .riderrow .nums b{font-size:1.3rem;font-weight:800;line-height:1.2}
+.riderlist .riderrow .nums span{font-size:.8rem;}
 @media (max-width:560px){
-  .riderrow,#friends .riderrow{gap:12px;padding:11px 14px}
-  .riderrow .av,#friends .riderrow .av{width:48px;height:48px;font-size:1.25rem}
+  .riderrow,.riderlist .riderrow{gap:12px;padding:11px 14px}
+  .riderrow .av,.riderlist .riderrow .av{width:48px;height:48px;font-size:1.25rem}
   .riderrow .who{flex-direction:column;align-items:flex-start;gap:0}
   .riderrow .nm{font-weight:700;font-size:1.02rem}
   .riderrow .un{color:var(--accent2);font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem}
