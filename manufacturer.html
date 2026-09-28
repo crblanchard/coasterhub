@@ -98,6 +98,15 @@
   #ranked a.crow .two .pk{flex:1 1 0}
   #ranked a.crow .two .pk{font-size:.8rem}
   #ranked a.crow .rk{font-size:.85rem;min-width:2.9em}
+  .mtable .ph{display:none}
+  @media (max-width:640px){
+    .mtable .dsk{display:none}
+    .mtable .ph{display:block}
+    .mtable td{vertical-align:top}
+    .mtable .stc{text-align:right}
+    .mtable td.nm .pk2 a{font-weight:400;color:var(--muted);font-size:.8rem}
+    .mtable .yr2{margin-top:3px;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+  }
   @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
 </style>
 </head>
@@ -359,17 +368,22 @@ function model(maker, mo, cs, MINE){
   $('body').innerHTML=(specs.length ? '<div class="sect">Statistics</div><div class="specsheet">'
       +specs.map(function(x){ return '<div><b>'+x[1]+'</b><span>'+esc(x[0])+'</span></div>'; }).join('')+'</div>' : '')
     +'<div id="ranked"></div>'
-    +'<div class="sect">Installations</div><div class="dtable-wrap"><table class="dtable"><thead><tr>'
-    +(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th>Park</th><th class="opt">Location</th><th class="num">Opened</th><th>Status</th></tr></thead><tbody>'
+    +'<div class="sect">Installations</div><div class="dtable-wrap"><table class="dtable mtable"><thead><tr>'
+    +(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th class="dsk">Park</th><th class="opt">Location</th><th class="num dsk">Opened</th><th class="stc">Status</th></tr></thead><tbody>'
     +rows.map(function(c){
       var reg=(PARKS[c.park]||{}).region||'', op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):''), cl=c.closed?String(c.closed).slice(0,4):'';
       return '<tr data-cid="'+c.id+'"'+(cl?' class="gone"':'')+'>'
         +(MINE?'<td class="tick">'+(MINE[c.id]?'\u2713':'')+'</td>':'')
-        +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></td>'
-        +'<td><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park||'')+'</a></td>'
+        // A phone stacks it (Carter, 2026-09-28: the year column ran off the
+        // edge): name over park on the left, status over the years on the
+        // right. .dsk cells are the wide layout's; .ph lines are the phone's.
+        +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'
+          +(c.park?'<span class="ph pk2"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park)+'</a></span>':'')+'</td>'
+        +'<td class="dsk"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park||'')+'</a></td>'
         +'<td class="sub opt">'+(reg?'<a href="'+esc(CoasterHub.locationHref(reg))+'">'+esc(reg)+'</a>':'')+'</td>'
-        +'<td class="num">'+esc(op)+'</td>'
-        +'<td><span class="st '+(cl?'off">Closed '+esc(cl):c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span></td></tr>';
+        +'<td class="num dsk">'+esc(op)+'</td>'
+        +'<td class="stc"><span class="st '+(cl?'off">Closed<span class="dsk"> '+esc(cl)+'</span>':c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span>'
+          +((op||cl)?'<span class="ph yr2">'+esc(op+(cl?(op?'\u2013':'closed ')+cl:''))+'</span>':'')+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   RANK_CS=cs; RANK_MODEL=true; drawRanked();
 }

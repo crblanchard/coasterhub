@@ -4944,3 +4944,8 @@ Carter, 2026-09-28: maker/model pages' "In your rankings" rows are one line each
 (name, park beside it in grey; the name keeps its width, the park truncates).
 Asked about a "global ranking of all B&M Inverts" — proposal pending, see below the
 reply of that date.
+
+Carter, 2026-09-28: a model page's Installations table on a phone (≤640px) is two
+stacked columns — name over park, status over years ("Closed" / "1997–2024") — because
+the Opened and Status columns ran off the right edge. `.mtable`, with `.dsk` cells for
+the wide layout and `.ph` lines for the phone. Desktop unchanged.
