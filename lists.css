@@ -141,3 +141,6 @@ a.crow .life .yrs{margin:0;padding:0;color:var(--fg);font-size:.8rem;font-varian
 /* A link row for a maker or a place (/manufacturers, /locations): its count
    of models or parks in grey, operating / defunct on the right. */
 a.crow.mk .yrs{color:var(--muted)}
+/* A phone wraps a long name rather than cutting it — the right-hand column
+   ("2 operating / 1 defunct") is wide and a name is the one thing you read. */
+@media (max-width:560px){ a.crow.std .two .cn{white-space:normal;overflow:visible} }

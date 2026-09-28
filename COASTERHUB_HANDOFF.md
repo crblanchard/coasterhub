@@ -5018,3 +5018,12 @@ to rankings". Done as ONE coaster row and ONE group row:
   'toggle' listener in app.js for details.mdl; park.html for its details.citem).
 Deliberately still tables: /coasters and /parks — they are the sortable, filterable
 "browse everything" pages with a changeable number column; rows would lose the sort.
+Follow-up the same day (Carter: "some variation is okay but tell me why ... if no good
+reason make them all consistent"): the reason given for keeping /coasters and /parks as
+tables didn't hold — their sort was already a dropdown, not column headers — so they are
+the same rows now (coasters: park · place in grey, status + years, or height/speed when
+that's the sort; parks: the /locations link row with a been-there tick and place ·
+distance). No page uses .dtable any more. Variation that stays is content, not format:
+/rankings leads with the rank and shows the model on the right (the question there is
+"where does it rank"), Global rows show avg / lists, and park rows add a riders count
+and a tap-to-add tick. On a phone a long name wraps instead of being cut.

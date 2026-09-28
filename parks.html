@@ -11,6 +11,7 @@
 <title>Parks — Coaster Hub</title>
 <meta name="description" content="Every amusement park on Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20260805b">
+<link rel="stylesheet" href="/lists.css?v=20260928a">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -22,7 +23,9 @@
   /* The site's own lists (2026-09-25): every coaster (/coasters) and every
      park (/parks) as reference tables, the way /locations is. They took over
      the everyone view of /credits, which is now only ever a rider's own.
-     Tables are .dtable, banner .hero.compact, rows open in place — all shared. */
+     Rows are lists.css's (2026-09-28: the same rows as every other list —
+     the sort is a dropdown, so a table's headers bought nothing), banner
+     .hero.compact, coaster rows open in place — all shared. */
   .filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
   .filters input[type=search]{flex:1 1 220px;min-width:0}
   .filters select{flex:0 1 auto;min-width:0;max-width:100%;cursor:pointer}
@@ -68,7 +71,7 @@
       <select id="f_sort"><option value="name">A–Z</option><option value="most">Most coasters</option><option value="near">Nearest to me</option></select>
     </div>
     <p class="shown" id="shown"></p>
-    <div class="dtable-wrap"><table class="dtable"><thead id="thead"></thead><tbody id="rows"></tbody></table></div>
+    <div class="panel" id="rows"></div>
   </div>
 </div></section>
 
@@ -131,14 +134,15 @@ function draw(){
   $('shown').innerHTML='<b>'+list.length.toLocaleString()+'</b> park'+(list.length===1?'':'s')
     +(MINE ? ' · you have been to <b>'+list.filter(function(p){ return p.been; }).length.toLocaleString()+'</b>' : '');
   var near = so==='near' && HERE;
-  $('thead').innerHTML='<tr><th>Park</th><th class="opt">Location</th>'+(near?'<th class="num">Distance</th>':'')
-    +'<th class="num">Operating</th><th class="num opt">Defunct</th></tr>';
+  // The link row /manufacturers and /locations use: a tick if you have been,
+  // the park, its place (and distance) in grey, operating / defunct.
   $('rows').innerHTML=list.map(function(p){
-    return '<tr><td class="nm"><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+'</a></td>'
-      +'<td class="sub opt">'+(p.region?'<a href="'+esc(CoasterHub.locationHref(p.region))+'">'+esc(short(p.region))+'</a>':'')+'</td>'
-      +(near?'<td class="num">'+(p.mi==null?'':(p.mi<10?p.mi.toFixed(1):Math.round(p.mi).toLocaleString())+' mi')+'</td>':'')
-      +'<td class="num">'+p.open+'</td><td class="num opt">'+p.gone+'</td>'+'</tr>';
-  }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Nothing matches.</td></tr>';
+    var mi = near && p.mi!=null ? (p.mi<10?p.mi.toFixed(1):Math.round(p.mi).toLocaleString())+' mi' : '';
+    return '<a class="crow std mk" href="'+esc(CoasterHub.parkHref(p.name))+'">'
+      +(MINE ? '<span class="tick">'+(p.been?'\u2713':'')+'</span>' : '')
+      +'<span class="two"><span class="cn">'+esc(p.name)+'</span><span class="pk">'+esc([p.region?short(p.region):'', mi].filter(Boolean).join(' \u00b7 '))+'</span></span>'
+      +'<span class="yrs">'+p.open+' operating / '+p.gone+' defunct</span></a>';
+  }).join('') || '<div class="more">Nothing matches.</div>';
 }
 </script>
 </body>

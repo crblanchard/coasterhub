@@ -11,6 +11,7 @@
 <title>Coasters — Coaster Hub</title>
 <meta name="description" content="Every roller coaster on Coaster Hub, operating and defunct.">
 <link rel="stylesheet" href="/style.css?v=20260805b">
+<link rel="stylesheet" href="/lists.css?v=20260928a">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -22,7 +23,9 @@
   /* The site's own lists (2026-09-25): every coaster (/coasters) and every
      park (/parks) as reference tables, the way /locations is. They took over
      the everyone view of /credits, which is now only ever a rider's own.
-     Tables are .dtable, banner .hero.compact, rows open in place — all shared. */
+     Rows are lists.css's (2026-09-28: the same rows as every other list —
+     the sort is a dropdown, so a table's headers bought nothing), banner
+     .hero.compact, coaster rows open in place — all shared. */
   .filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
   .filters input[type=search]{flex:1 1 220px;min-width:0}
   .filters select{flex:0 1 auto;min-width:0;max-width:100%;cursor:pointer}
@@ -71,7 +74,7 @@
       <select id="f_sort"><option value="name">A–Z</option><option value="new">Newest</option><option value="old">Oldest</option><option value="h">Tallest</option><option value="s">Fastest</option></select>
     </div>
     <p class="shown" id="shown"></p>
-    <div class="dtable-wrap"><table class="dtable stack"><thead id="thead"></thead><tbody id="rows"></tbody></table></div>
+    <div class="panel" id="rows"></div>
     <div class="more" id="more" hidden></div>
   </div>
 </div></section>
@@ -131,21 +134,13 @@ function draw(){
   list.sort(by[so]||by.name);
   $('shown').innerHTML='<b>'+list.length.toLocaleString()+'</b> coaster'+(list.length===1?'':'s')
     +(MINE ? ' · you have ridden <b>'+list.filter(function(c){ return MINE[c.id]; }).length.toLocaleString()+'</b>' : '');
-  var metric = so==='h' ? 'Height' : so==='s' ? 'Speed' : 'Opened';
-  $('thead').innerHTML='<tr>'+(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th class="dsk">Park</th><th class="opt">Model</th><th class="num">'+metric+'</th><th class="opt">Status</th></tr>';
+  // The one coaster row: park · place beside the name, and on the right the
+  // status with the years — or the height or speed when that is the sort.
   $('rows').innerHTML=list.slice(0,CAP).map(function(c){
-    var cl=c.closed?String(c.closed).slice(0,4):'';
-    var val = so==='h' ? (c.h!=null?Math.round(c.h)+' ft':'') : so==='s' ? (c.s!=null?Math.round(c.s)+' mph':'') : (yr(c)||'');
-    var mk=c.manu ? '<a href="'+esc(CoasterHub.makerHref(c.manu, c.model||null))+'">'+esc(c.model||c.manu)+'</a>' : esc(c.model||'');
-    return '<tr data-cid="'+c.id+'"'+(cl?' class="gone"':'')+'>'
-      +(MINE?'<td class="tick">'+(MINE[c.id]?'\u2713':'')+'</td>':'')
-      // A phone stacks the park under the name (.dsk / .ph, style.css).
-      +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'
-        +(c.park?'<span class="ph pk2"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park)+'</a></span>':'')+'</td>'
-      +'<td class="dsk"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park||'')+'</a></td>'
-      +'<td class="sub opt">'+mk+'</td><td class="num">'+esc(val)+'</td>'
-      +'<td class="opt"><span class="st '+(cl?'off">Closed '+esc(cl):c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span></td></tr>';
-  }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Nothing matches.</td></tr>';
+    var val = so==='h' ? (c.h!=null?Math.round(c.h)+' ft':'\u2014') : so==='s' ? (c.s!=null?Math.round(c.s)+' mph':'\u2014') : null;
+    var reg=(PARKS[c.park]||{}).region||'';
+    return CoasterHub.coasterRow(c, { mine:MINE, ctx:[c.park, reg].filter(Boolean).join(' \u00b7 '), val:val });
+  }).join('') || '<div class="more">Nothing matches.</div>';
   $('more').hidden = list.length<=CAP;
   $('more').textContent='Showing the first '+CAP+' — search or filter to narrow it.';
 }

@@ -1678,12 +1678,13 @@
   // Status and years, the right-hand end of a coaster row: the status carries
   // the colour (teal running, orange gone, red closing soon), the years stay
   // body-coloured. The park page's, shared (2026-09-28).
-  function lifeTag(c) {
+  // val, when given, takes the years' place (a height or a speed on /coasters).
+  function lifeTag(c, val) {
     var E = searchEsc;
     var op = c.opened ? String(c.opened).slice(0, 4) : (c.yr ? String(c.yr) : "");
     var cl = c.closed ? String(c.closed).slice(0, 4) : "";
-    if (!op && !cl) return "";
-    var years = cl ? (op ? E(op) + "–" + E(cl) : "closed " + E(cl)) : E(op);
+    if (!op && !cl && val == null) return "";
+    var years = val != null ? E(val) : cl ? (op ? E(op) + "–" + E(cl) : "closed " + E(cl)) : E(op);
     return '<span class="life">' + (c.closing ? CLOSING_SOON : '<span class="stat' + (cl ? ' off' : ' on') + '">' + (cl ? "Defunct" : "Operating") + '</span>')
       + '<span class="yrs">' + years + '</span></span>';
   }
@@ -1696,7 +1697,7 @@
     return '<a class="crow std' + (c.closed ? ' gone' : '') + (opts.mine ? (got ? ' got' : ' miss') : '') + '" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '">'
       + (opts.mine ? '<span class="tick">' + (got ? '✓' : '') + '</span>' : '')
       + '<span class="two"><span class="cn">' + E(c.name) + '</span>' + (opts.ctx ? '<span class="pk">' + E(opts.ctx) + '</span>' : '') + '</span>'
-      + '<span class="end">' + (opts.end != null ? opts.end : lifeTag(c)) + '</span></a>';
+      + '<span class="end">' + (opts.end != null ? opts.end : lifeTag(c, opts.val)) + '</span></a>';
   }
 
   // A model or park group (lists.css details.mdl) opens one at a time, like
