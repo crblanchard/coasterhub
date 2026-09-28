@@ -403,7 +403,7 @@
     <div class="count" id="count"></div>
     <div id="dayview" class="mlist vlist"></div>
     <!-- Every park in the count, A-Z, each one opening the way a day does. -->
-    <div id="parkview" class="flat" style="display:none"></div>
+    <div id="parkview" class="mlist vlist" style="display:none"></div>
     <div class="pager" id="pager"></div>
 
     <!-- Full list: every coaster in the count, once. Was its own /coasters
@@ -442,7 +442,7 @@
       </div>
       <div class="count" id="c_count"></div>
       <div id="c_loading" style="color:var(--muted);padding:30px 0">Loading the full list&hellip;</div>
-      <div class="tbl-wrap" id="c_wrap" style="display:none"><table><thead><tr id="c_head"></tr></thead><tbody id="c_body"></tbody></table></div>
+      <div id="c_wrap" style="display:none"><div class="panel" id="c_body"></div></div>
     </div>
   </div>
 </div></section>
@@ -767,10 +767,9 @@ function wire(){
   document.getElementById('parkview').addEventListener('toggle', function(e){
     var d=e.target;
     if(!d || d.tagName!=='DETAILS' || !d.open) return;
-    var inner=d.querySelector('.inner');
-    if(!inner || inner.dataset.filled) return;
-    inner.dataset.filled='1';
-    inner.innerHTML=parkBody(d.getAttribute('data-park'));
+    if(d.dataset.filled) return;
+    d.dataset.filled='1';
+    d.insertAdjacentHTML('beforeend', parkBody(d.getAttribute('data-park')));
   }, true);
 }
 function setView(v){
@@ -1002,51 +1001,38 @@ function renderParks(rows){
     // still a credit — and it is why the pair is two facts rather than a
     // fraction. Eighteen of Carter's parks read this way and three read
     // "0 operating", which is a closed park he has been to.
-    var opN = all.filter(function(r){ return !r.cl; }).length;
-    var what = '<span class="nl nop">'+opN+' operating</span>'
-      + (mine!=null ? '<span class="nl nrid'+(mine?'':' none')+'">'+mine+' ridden</span>' : '');
-    // The body is deliberately EMPTY here. Every park at once means 247 cards,
-    // and filling each one costs its whole coaster list — about 1,360 rows of
-    // DOM on the page whose entire point is being quick to scroll, nearly all
-    // of which nobody will ever open. parkBody() fills one when it is opened.
-    return '<details class="day" data-park="'+esc(park)+'"><summary>'
-      +'<span class="pmain">'
-        +'<a class="dt" href="'+esc(CoasterHub.parkHref(park))+'">'+esc(park)+'</a>'
-        +'<span class="pk">'+esc((all[0]&&all[0].loc)||list[0].loc||'')
-          +((days.length && !COMBINED)?' <span style="opacity:.75">\u00b7 '+days.length+' visit'+(days.length===1?'':'s')+'</span>':'')
-        +'</span>'
-      +'</span>'
-      +'<span class="n">'+what+'</span>'
-      +'</summary><div class="inner"></div></details>';
-  }).join('') || (LOG.length ? '<p class="lead">No parks match those filters.</p>' : emptyCount());
+    // The group row every park list on the site uses (Carter, 2026-09-28:
+    // "make everything more consistent"): the park, where it is and how many
+    // visits in grey, your ridden / its coasters (defunct ones included — a
+    // credit on a torn-down ride is still a credit), a chevron.
+    var sub=[(all[0]&&all[0].loc)||list[0].loc||''].concat((days.length && !COMBINED) ? [days.length+' visit'+(days.length===1?'':'s')] : []).filter(Boolean).join(' \u00b7 ');
+    // The body is deliberately EMPTY here. Every park at once means 247 rows,
+    // and filling each one costs its whole coaster list — parkBody() fills one
+    // when it is opened.
+    return '<details class="mdl" data-park="'+esc(park)+'"><summary>'
+      +'<span class="mtwo"><span class="nm">'+esc(park)+'</span><span class="msub">'+esc(sub)+'</span></span>'
+      +'<span class="ct">'+(mine!=null ? mine+'/' : '')+all.length+'</span>'+PCHEV+'</summary></details>';
+  }).join('') || (LOG.length ? '<p class="lead" style="padding:12px 16px;margin:0">No parks match those filters.</p>' : emptyCount());
+  CoasterHub.openableCoasters(document.getElementById('parkview'));
   document.getElementById('pager').innerHTML='';
 }
 
 // One park's coasters, built the first time that park is opened.
+var PCHEV='<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+// An opened park: "Park page →", then every coaster it has as the site's one
+// coaster row — the model in grey, your laps and the status and years on the
+// right. Ticks are yours signed in, the log's otherwise.
 function parkBody(park){
   var card=PARKCARD[park];
   if(!card) return '';
-  var laps=card.laps;
+  var laps=card.laps, ticks=MINE || laps;
   return (known(park)
-      ? '<div class="parklink"><a href="'+esc(CoasterHub.parkHref(park))+'">'
-        +'Everything at '+esc(park)+' &rarr;</a></div>'
+      ? '<a class="crow mlink" href="'+esc(CoasterHub.parkHref(park))+'"><span class="cn">Park page &rarr;</span></a>'
       : '')
     + card.all.map(function(r){
-        var mk=CoasterHub.maker(r);
-        var got = MINE ? !!MINE[r.c] : !!laps[r.c];
-        // The model goes UNDER the name rather than beside it (Carter,
-        // 2026-09-20). Beside it, it competed with the name for a phone's
-        // width and the names were the ones that got clipped, which is why it
-        // was hidden on a phone at all.
-        return '<div class="row'+(MINE?(got?' got':' miss'):'')+(r.cl?' gone':'')+'">'
-          +(MINE?'<span class="tick">'+(got?'\u2713':'')+'</span>':'')
-          +'<span class="cmain">'
-            +'<span class="cn">'+clink(r)+'</span>'
-            +(mk?'<span class="mk">'+esc(mk)+'</span>':'')
-          +'</span>'
-          +((laps[r.c]>1 && !COMBINED)?'<span class="lap">\u00d7'+laps[r.c]+'</span>':'')
-          +life(r)
-          +'</div>';
+        var c={ id:r.c, name:r.name, park:r.park, manu:r.manu, model:r.model, opened:r.op, closed:r.cl, closing:r.soon };
+        return CoasterHub.coasterRow(c, { mine:ticks, ctx:CoasterHub.maker(r)||'',
+          end: ((laps[r.c]>1 && !COMBINED)?'<span class="lap">\u00d7'+laps[r.c]+'</span>':'')+CoasterHub.lifeTag(c) });
       }).join('');
 }
 function pager(total,per){
@@ -1144,13 +1130,10 @@ var CreditList=(function(){
       var sel=$(id);
       vals.forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
     });
-    var head=$('c_head');
-    COLS.forEach(function(c){
-      var th=document.createElement('th'); th.textContent=c.t; if(c.num)th.className='num';
-      th.dataset.k=c.k;
-      th.onclick=function(){ if(sortKey===c.k)sortDir*=-1; else {sortKey=c.k;sortDir=c.num?-1:1;} draw(); };
-      head.appendChild(th);
-    });
+    // Your own facts get sorts of their own (the table's column headers used
+    // to be how you sorted by them).
+    if(COLS.some(function(c){ return c.k==='rides'; })) $('c_sort').insertAdjacentHTML('beforeend','<option value="rides|-1">Sort: Most rides</option>');
+    if(COLS.some(function(c){ return c.k==='first'; })) $('c_sort').insertAdjacentHTML('beforeend','<option value="first|-1">Sort: Newest credits</option><option value="first|1">Sort: Oldest credits</option>');
     FILTS.forEach(function(id){$(id).addEventListener('input',function(){ draw(); more(); });});
     $('c_filters').classList.add('closed');
     $('c_more').onclick=function(){
@@ -1208,47 +1191,23 @@ var CreditList=(function(){
   function draw(){
     var r=rows();
     $('c_count').innerHTML='Showing <b>'+r.length.toLocaleString()+'</b> of '+DATA.length.toLocaleString()+' coasters';
-    $('c_head').querySelectorAll('th').forEach(function(th){
-      var a=th.querySelector('.ar'); if(a)a.remove();
-      if(th.dataset.k===sortKey){var sp=document.createElement('span');sp.className='ar';
-        sp.textContent=sortDir<0?'▼':'▲';th.appendChild(sp);}
-    });
+    // The site's one coaster row (Carter, 2026-09-28: "make everything more
+    // consistent" — this was the last table with column headers; the sort is
+    // the dropdown now): park · place in grey, and on the right your laps and
+    // the status and years — or the height, speed or length, or the day you
+    // first rode it, when that is the sort. Everything else is in the opened
+    // stats, the same panel as every other list.
     $('c_body').innerHTML=r.map(function(c){
-      // Every cell carries data-k so the phone layout can pick out the few it
-      // shows without depending on column position — COLS varies per rider.
-      var cells=COLS.map(function(col){
-        // data-label feeds the expanded card view via CSS content:attr()
-        var v=c[col.k], k=' data-k="'+col.k+'" data-label="'+esc(col.t)+'"';
-        if(col.k==='type')return '<td'+k+'>'+(v?'<span class="pill '+(v==='Wood'?'wood':'steel')+'">'+v+'</span>':'<span class="muted">—</span>')+'</td>';
-        if(col.k==='status')return c.closed
-          ? '<td'+k+'><span class="pill def">Defunct</span><span class="cyear">'+String(c.closed).slice(0,4)+'</span></td>'
-          : c.closing ? '<td'+k+'><span class="pill soon" style="color:var(--bad);border-color:var(--bad)">Closing soon</span></td>'
-          : '<td'+k+'><span class="pill op">Operating</span></td>';
-        if(v==null||v==='')return '<td class="muted"'+k+'>—</td>';
-        // The two columns that are also pages of their own. Checked after the
-        // empty test above, so a row with no park still gets its em-dash rather
-        // than a link to /park/.
-        if(col.k==='name')return '<td class="'+(col.cls||'')+'"'+k+'>'+clink(c)+'</td>';
-        if(col.k==='first')return '<td'+k+'>'+esc(CoasterHub.mdy(v))+'</td>';
-        if(col.k==='park')return '<td'+k+'>'+plink(v)
-          +((c.alsoAt&&c.alsoAt.length)?'<span class="also">also ridden at '
-            +c.alsoAt.map(plink).join(', ')+'</span>':'')+'</td>';
-        // The maker and the model link to the maker's page (2026-09-24).
-        if(col.k==='manu')return '<td'+k+'><a href="'+esc(CoasterHub.makerHref(v))+'">'+esc(v)+'</a></td>';
-        if(col.k==='model'&&c.manu)return '<td'+k+'><a href="'+esc(CoasterHub.makerHref(c.manu,v))+'">'+esc(v)+'</a></td>';
-        return '<td class="'+(col.num?'num':'')+' '+(col.cls||'')+'"'+k+'>'+esc(v)+'</td>';
-      }).join('');
-      // One extra cell, phone-only (display:none on desktop, where the real
-      // Model column is on screen). It used to carry year · height · speed,
-      // and a count of how many riders had the coaster; Carter's call
-      // 2026-09-20 is that under a name and a park the useful third line is
-      // what the thing IS. maker() is the model, falling back to the
-      // manufacturer for a row that has no model on file.
-      // Opens to the same facts panel as every other coaster list
-      // (CoasterHub.openableCoasters, 2026-09-27) — not a table of its own.
-      return '<tr data-cid="'+c.id+'">'+cells
-        +'<td class="cmodel" data-k="_model">'+esc(CoasterHub.maker(c))+'</td></tr>';
-    }).join('');
+      var val=null;
+      if(sortKey==='h') val=c.h!=null?Math.round(c.h)+' ft':'\u2014';
+      else if(sortKey==='s') val=c.s!=null?Math.round(c.s)+' mph':'\u2014';
+      else if(sortKey==='l') val=c.l!=null?Math.round(c.l).toLocaleString()+' ft':'\u2014';
+      else if(sortKey==='first') val=c.first?CoasterHub.mdy(c.first):'\u2014';
+      var ctx=[c.park, c.loc].filter(Boolean).join(' \u00b7 ')
+        +((c.alsoAt&&c.alsoAt.length)?' \u00b7 also '+c.alsoAt.join(', '):'');
+      return CoasterHub.coasterRow(c, { ctx:ctx,
+        end:(c.rides>1?'<span class="lap">\u00d7'+c.rides+'</span>':'')+CoasterHub.lifeTag(c, val) });
+    }).join('') || '<p class="lead" style="padding:12px 16px;margin:0">No coasters match those filters.</p>';
   }
   return {open:open};
 })();

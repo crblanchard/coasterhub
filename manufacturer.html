@@ -32,18 +32,9 @@
   /* Tiles, crumbs, the "you" line, .sect and .missing: shared, style.css. */
   .find{width:100%;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);color:var(--fg);
         padding:10px 12px;border-radius:10px;font-size:.9rem;margin:0 0 12px}
-  /* A–Z down the first column, then the second. One column on a phone. */
-  .mmods{columns:2;column-gap:28px;padding-top:6px}
-  .mmods .mm{break-inside:avoid}
-  .mmods.mstats{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
-  .mmods .mm b{font-weight:500;font-variant-numeric:tabular-nums}
-  .mmods .mm{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:.88rem;padding:5px 0}
-  .mmods .mm a{color:var(--accent2);text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .mmods .mm a:hover{text-decoration:underline}
-  .mmods .mm span{color:var(--muted)}
-  .mmods .mm i{font-style:normal;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums;flex:none}
   a.crow.mk.open{background:var(--soft)}
-  @media (max-width:560px){ .mmods{columns:1} }
+  .cx .mrows{margin:12px 0 4px}
+  .cx .mrows a.crow{padding-left:14px}
 </style>
 </head>
 <body>
@@ -174,23 +165,31 @@ function index(BY, MINE){
   // operating, defunct, years built, you've ridden — then, after a gap, every
   // model the maker has, each with a grey "ridden/total" (just the total
   // signed out).
+  // Opened (Carter, 2026-09-28: the two-column mini list "is that applied
+  // anywhere else? can we fix it?"): the maker's numbers in the same
+  // label/value rows a coaster's stats use, then its models as the site's link
+  // rows — the model, how many run and the years in grey, your ridden/total.
   function facts(m){
     var E=esc, got={};
     if(MINE) m.cs.forEach(function(c){ if(MINE[c.id] && c.model) got[c.model]=(got[c.model]||0)+1; });
     var ms=Object.keys(m.models).sort(function(a,b){ return a.localeCompare(b, undefined, {sensitivity:'base'}); });
-    var none=m.n-ms.reduce(function(t,mo){ return t+m.models[mo]; },0);
-    var cell=function(label, n, g, href){
-      return '<div class="mm">'+(href ? '<a href="'+E(href)+'">'+E(label)+'</a>' : '<span>'+E(label)+'</span>')
-        +'<i>'+(MINE ? (g||0)+'/' : '')+n+'</i></div>';
+    var kv=function(l,v){ return '<div class="kv"><span>'+E(l)+'</span><b>'+E(v)+'</b></div>'; };
+    var left=kv('Operating', m.open)+kv('Defunct', m.n-m.open);
+    var right=kv('Years built', years(m.cs)||'\u2014')+(m.got!=null ? kv('You\u2019ve ridden', m.got+' of '+m.n) : '');
+    var row=function(label, list, g, href){
+      var op=list.filter(function(c){ return !c.closed; }).length, y=years(list);
+      var sub=[op+' operating'].concat(list.length-op ? [(list.length-op)+' defunct'] : []).concat(y ? [y] : []).join(' \u00b7 ');
+      return '<a class="crow std mk"'+(href?' href="'+E(href)+'"':'')+'><span class="two"><span class="cn">'+E(label)+'</span><span class="pk">'+E(sub)+'</span></span>'
+        +'<span class="yrs">'+(MINE ? (g||0)+'/' : '')+list.length+'</span></a>';
     };
-    var nog=MINE ? m.cs.filter(function(c){ return !c.model && MINE[c.id]; }).length : 0;
-    var st=function(l,v){ return '<div class="mm"><span>'+E(l)+'</span><b>'+E(v)+'</b></div>'; };
-    var stats=st('Operating', m.open)+st('Defunct', m.n-m.open)+st('Years built', years(m.cs)||'\u2014')
-      +(m.got!=null ? st('You\u2019ve ridden', m.got+' of '+m.n) : '');
-    return '<div class="mmods mstats">'+stats+'</div><div class="mmods">'+ms.map(function(mo){ return cell(mo, m.models[mo], got[mo], CoasterHub.makerHref(m.name, mo)); }).join('')
-      +(none ? cell('No model on file', none, nog, null) : '')+'</div>'
+    var byM={}; m.cs.forEach(function(c){ var k=String(c.model||'').trim(); (byM[k]=byM[k]||[]).push(c); });
+    var nog=MINE ? (byM['']||[]).filter(function(c){ return MINE[c.id]; }).length : 0;
+    return '<div class="facts"><div class="fcol">'+left+'</div><div class="fcol fnum">'+right+'</div></div>'
+      +'<div class="panel mrows">'+ms.map(function(mo){ return row(mo, byM[mo]||[], got[mo], CoasterHub.makerHref(m.name, mo)); }).join('')
+      +(byM[''] ? row('No model on file', byM[''], nog, null) : '')+'</div>'
       +'<a class="go" href="'+E(CoasterHub.makerHref(m.name))+'">Manufacturer page &rarr;</a>';
   }
+
   // Clicks inside an open panel are app.js's (openableCoasters on #body):
   // links go, anywhere else closes it. This handles the rows themselves.
   $('mlist').addEventListener('click', function(e){

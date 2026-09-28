@@ -5038,3 +5038,19 @@ The old feed-row (profile) and .day-card (credits) markup for days is gone; cred
 Parks tab still uses the .day cards (not yet converted — asked about).
 
 Carter, 2026-09-28 (item 5): the Global rows in the Rankings section on maker/model/location pages now match /rankings' Global list — model shown, name and park · place side by side on a computer (stacked on a phone).
+
+Carter, 2026-09-28 ("456 sure please make everything more consistent"; 11 "can we fix it?";
+6 "no box for now"):
+- /credits **Parks** tab → group rows (park; place · visits in grey; ridden/coasters,
+  defunct included; chevron), opening lazily to "Park page →" and coaster rows (model
+  grey, ×laps, status + years). This replaces the "N operating / N ridden" two-line pair
+  from 09-20 with one x/y, the same as every other park list.
+- /credits **Coasters** tab → the coaster row, no table. Sorting is the existing dropdown
+  (+ "Most rides", "Newest/Oldest credits" when the log has them); the right side shows
+  ×rides and status + years, or the sorted value (height/speed/length/first ridden).
+  Everything else is in the opened stats.
+- **Ranked rows** (the Rankings section on maker/model/location pages): no box, hairlines,
+  bare number (no "#"), like /rankings and profile Top ten.
+- **/manufacturers opened panel**: the maker's numbers in the coaster-stats label/value
+  rows, then its models as link rows (model, operating · defunct · years in grey,
+  ridden/total) — the two-column mini list is gone (it was used nowhere else).

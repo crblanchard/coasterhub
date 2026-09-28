@@ -1782,7 +1782,7 @@
       var body;
       if (st.view === "mine") {
         body = mine.length ? '<div class="panel">' + cut(mine).map(function (c) {
-          return '<a class="crow" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">#' + R[c.id] + '</span>'
+          return '<a class="crow" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + R[c.id] + '</span>'
             + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(ctx(c)) + '</span></span>'
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '') + '</a>';
         }).join("") + '</div>' + more(mine.length)
