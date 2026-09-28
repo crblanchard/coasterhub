@@ -5054,3 +5054,13 @@ Carter, 2026-09-28 ("456 sure please make everything more consistent"; 11 "can w
 - **/manufacturers opened panel**: the maker's numbers in the coaster-stats label/value
   rows, then its models as link rows (model, operating · defunct · years in grey,
   ridden/total) — the two-column mini list is gone (it was used nowhere else).
+
+**Standing rule, Carter 2026-09-28 ("very important to keep things consistent"):**
+wherever a list of coasters appears, **defunct ones sort to the bottom** (then the list's
+own order — A–Z, or the chosen sort on /coasters and the /credits Coasters tab), and a
+coaster's name is **grey only when it's defunct** — an operating ride you haven't ridden
+stays black (the empty tick slot says you haven't). Applied: /coasters, /credits Coasters
+/ Parks / Rides tabs, profile Recent visits (maker, model, location and park pages
+already did). Exceptions by nature: ranked lists keep rank order. Carter also said the
+pickers (/log, /welcome, Rank more's Add coasters) are one-time flows and may keep their
+own UI.

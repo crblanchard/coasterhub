@@ -881,7 +881,7 @@ function renderDays(rows){
     // rows were saved, which is coaster-id order — roughly when each coaster
     // was added to the site, which means nothing to someone reading the day.
     // The parks keep the order they were ridden in; the sort is inside each.
-    uniqRows.sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
+    uniqRows.sort(function(a,b){ return (!!a.cl-!!b.cl) || String(a.name).localeCompare(String(b.name)); });   // defunct last
     var pk=[...new Set(list.map(function(r){return r.park;}))];
     // Without a re-ride anywhere in their log, "8 rides · 8 coasters" would be
     // saying the same thing twice — these are 8 credits picked up that day.
@@ -1029,7 +1029,9 @@ function parkBody(park){
   return (known(park)
       ? '<a class="crow mlink" href="'+esc(CoasterHub.parkHref(park))+'"><span class="cn">Park page &rarr;</span></a>'
       : '')
-    + card.all.map(function(r){
+    // Defunct at the bottom, everywhere a list of coasters appears (Carter,
+    // 2026-09-28: "very important to keep things consistent").
+    + card.all.slice().sort(function(a,b){ return (!!a.cl-!!b.cl) || String(a.name).localeCompare(String(b.name)); }).map(function(r){
         var c={ id:r.c, name:r.name, park:r.park, manu:r.manu, model:r.model, opened:r.op, closed:r.cl, closing:r.soon };
         return CoasterHub.coasterRow(c, { mine:ticks, ctx:CoasterHub.maker(r)||'',
           end: ((laps[r.c]>1 && !COMBINED)?'<span class="lap">\u00d7'+laps[r.c]+'</span>':'')+CoasterHub.lifeTag(c) });
@@ -1181,6 +1183,8 @@ var CreditList=(function(){
       return true;
     });
     out.sort(function(a,b){
+      // Defunct at the bottom whatever the sort (Carter, 2026-09-28).
+      var g=(!!a.closed-!!b.closed); if(g) return g;
       var x=a[sortKey], y=b[sortKey], c;
       if(x==null&&y==null)c=0; else if(x==null)c=1; else if(y==null)c=-1;
       else if(typeof x==='string')c=x.localeCompare(y)*sortDir; else c=(x-y)*sortDir;

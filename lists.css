@@ -38,7 +38,8 @@ a.crow{display:flex;align-items:baseline;gap:10px;padding:9px 16px;font-size:.9r
 a.crow:last-child{border-bottom:0}
 a.crow:hover{background:var(--soft)}
 a.crow .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
-a.crow.miss .cn{color:var(--muted)}
+/* Grey means defunct, nothing else (Carter, 2026-09-28): an operating ride you
+   haven't ridden stays black — the empty tick slot already says so. */
 a.crow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 a.crow:hover .cn{color:var(--accent2)}
 a.crow .pk{color:var(--muted);font-size:.8rem;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
