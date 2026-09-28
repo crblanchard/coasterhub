@@ -1530,25 +1530,43 @@ var edgeT0=0, edgeLast=0, edgeAcc=0;
 // against its neighbours in that category — and if you take it past the card's
 // edge it leaves the category entirely and carries on as a card, which is the
 // gesture people try first.
-// Dragging with the model filter on: nothing reorders under your finger (the
-// rows in between are hidden); the shown row you are over lights up, and the
-// drop moves the ride past it through moveFilteredTo.
+// Dragging with the model filter on: the ride slides between the rows that
+// are shown, gaps opening as it passes, like the unfiltered drag (Carter,
+// 2026-09-28: it used to light up the row under your finger, which read as
+// "pick a coaster", not "drop it in a gap"). Only the page moves while you
+// drag; the drop then moves the ride past the shown row it passed, through
+// moveFilteredTo, which asks about the hidden rows in between.
 function startFilteredDrag(e){
-  var g=e.currentTarget, from=+g.dataset.grip, over=null;
+  var g=e.currentTarget, from=+g.dataset.grip, list=$('ranklist');
+  var row=list.querySelector('.rrow[data-i="'+from+'"]'); if(!row) return;
   g.setPointerCapture(e.pointerId);
-  var row=$('ranklist').querySelector('.rrow[data-i="'+from+'"]'); if(row) row.classList.add('drag');
-  var at=function(ev){
-    var el=document.elementFromPoint(ev.clientX, ev.clientY), r=el && el.closest && el.closest('#ranklist .rrow[data-i]');
-    return r ? +r.dataset.i : null;
+  row.classList.add('drag');
+  var rows=Array.prototype.slice.call(list.querySelectorAll('.rrow[data-i]'));
+  var mine=rows.indexOf(row), others=rows.filter(function(r){ return r!==row; });
+  // Where each other row's middle would be with the dragged one lifted out,
+  // in page coordinates: fixed for the whole gesture, so nothing jitters as
+  // rows shift under the finger.
+  var r0=row.getBoundingClientRect(), nx=rows[mine+1];
+  var h=nx ? nx.getBoundingClientRect().top-r0.top : r0.height;
+  var mids=others.map(function(r,j){ var b=r.getBoundingClientRect();
+    return b.top+window.pageYOffset+b.height/2-(j>=mine?h:0); });
+  var off=e.clientY-r0.top, k=mine;
+  var mv=function(ev){
+    // Near an edge, nudge the page (instant: smooth scrolling would crawl).
+    if(ev.clientY<90) window.scrollBy({top:-14,behavior:'instant'});
+    else if(ev.clientY>window.innerHeight-110) window.scrollBy({top:14,behavior:'instant'});
+    var y=ev.clientY+window.pageYOffset-off+h/2, n=0;
+    while(n<mids.length && mids[n]<y) n++;
+    if(n===k) return;
+    k=n;
+    if(k<others.length) list.insertBefore(row, others[k]); else others[others.length-1].after(row);
   };
-  var mv=function(ev){ var t=at(ev);
-    if(over!=null){ var o=$('ranklist').querySelector('.rrow[data-i="'+over+'"]'); if(o) o.classList.remove('over'); }
-    over = (t!=null && t!==from) ? t : null;
-    if(over!=null){ var n=$('ranklist').querySelector('.rrow[data-i="'+over+'"]'); if(n) n.classList.add('over'); } };
   var up=function(){
     g.removeEventListener('pointermove',mv); g.removeEventListener('pointerup',up); g.removeEventListener('pointercancel',up);
-    if(row) row.classList.remove('drag');
-    if(over!=null) moveFilteredTo(from, over); else renderRank();
+    row.classList.remove('drag');
+    if(k===mine) return renderRank();
+    // Down: past the shown row now above it. Up: past the one now below it.
+    moveFilteredTo(from, +(k>mine ? others[k-1] : others[k]).dataset.i);
   };
   g.addEventListener('pointermove',mv); g.addEventListener('pointerup',up); g.addEventListener('pointercancel',up);
   e.preventDefault();

@@ -4963,3 +4963,9 @@ right, a chevron — and open in place (one at a time) to a chip per rider with 
 position (links to that rider's rankings), then the coaster's facts and "Coaster page →".
 Global rows carry `data-gid`, not `data-cid`, so openableCoasters leaves them alone;
 `gClick` in manufacturer.html opens them.
+
+Carter, 2026-09-28: dragging with the Models filter on used to light up the row under
+your finger (read as "pick a coaster"). `startFilteredDrag` now slides the row between
+the shown rows, gaps opening like the unfiltered drag (DOM only; midpoints fixed at
+drag start so it doesn't jitter; edge-nudges the page). The drop still goes through
+`moveFilteredTo(from, t)`, t = the shown row it passed.
