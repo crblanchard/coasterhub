@@ -5210,3 +5210,6 @@ body very faintly (body background radial gradients from --hero1/--hero2, lowere
 The hero redefines --fg/--muted/--accent2/--line/--panel/... so every child reads on it.
 Font unchanged (Carter: "the font's okay"). Rejected along the way: flat, plain teal band,
 ride-sign yellow, ticket.
+Revised the same day (Carter: "no lights in day mode and take away the fade ... a light
+color where text is still black"): **day = pale teal band #dcf0f4, black text, the track
+in thin teal lines, no lights; no fade in either mode.** Night keeps the lit track.
