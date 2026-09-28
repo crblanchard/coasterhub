@@ -814,13 +814,13 @@ if(!slug){
                 :             '';
         return '<a class="card" href="'+href+'"><div class="hd"><b>'+esc(l.user.name)+'</b><em>not started</em></div>'
           +'<div class="none">No favorites ranked yet.'+(why?'<em>'+why+'</em>':'')+'</div>'
-          +'<div class="go">'+((yours||seedable) ? 'Start one' : 'See the page')+'</div></a>';
+          +'<div class="go">'+((yours||seedable) ? 'Start one &rarr;' : 'See the page &rarr;')+'</div></a>';
       }
       var top=l.order.slice(0,3).map(function(id,i){
         var c=BYID[id];
         return '<div class="t"><i>'+(i+1)+'</i><div class="n"><b>'+esc(c.name)+'</b><span>'+esc(c.park)+'</span></div></div>';
       }).join('');
-      var more=l.order.length>5?('See all '+nf(l.order.length)):'See the list';
+      var more=l.order.length>5?('See all '+nf(l.order.length)+' &rarr;'):'See the list &rarr;';
       return '<a class="card" href="'+href+'"><div class="hd"><b>'+esc(l.user.name)+'</b><em>'
         +nf(l.order.length)+' ranked</em></div><div class="top">'+top+'</div><div class="go">'+more+'</div></a>';
     }).join('');
@@ -850,7 +850,7 @@ if(!slug){
               +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
           +'</div>'
           +'<div class="who" hidden><div class="chips">'+full+'</div>'
-            +CoasterHub.coasterFacts(c, null, c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page</a>':'')+'</div>'
+            +CoasterHub.coasterFacts(c, null, c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>'
           +'</div>';
       }).join('');
       // One open at a time (Carter, 2026-09-28 — this used to keep each row
@@ -1092,7 +1092,7 @@ function factsFor(id){
   });
   var among={ manu: mi ? mi+' of '+mn : '', model: di ? di+' of '+dn : '' };
   return CoasterHub.coasterFacts(c, extra,
-    c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page</a>':'', among);
+    c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'', among);
 }
 // ---- model filter ------------------------------------------------------------
 // Which models to show (maker() — the model, or the maker when there is none).

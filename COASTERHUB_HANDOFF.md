@@ -5191,7 +5191,7 @@ Carter, 2026-09-28, "less AI-feeling" pass:
    badge, "ranked"), min .8rem. `.sect` and `.eyebrow` are real headings (1.1rem/800,
    body colour). Eyebrows that sat on top of an h2 were removed. Kept in caps: status
    words (OPERATING/DEFUNCT/CLOSING SOON), the NEW tag, /edit and /qc.
-4. **Arrows only on a section's main next step.** Dropped from the repeated in-row links
+4. (Reverted the same day — Carter: "put the arrows back". The list below is what was removed and is now back.) Arrows only on a section's main next step. Dropped from the repeated in-row links
    ("Coaster page", "Park page", "Model page", "Manufacturer page"), profile's header links,
    the map popup, rankings cards, "United States". Kept: See all credits, All activity,
    Contact us, View them all on the map, log/import prompts, pager.

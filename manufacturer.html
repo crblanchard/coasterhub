@@ -185,7 +185,7 @@ function index(BY, MINE){
     return '<div class="facts"><div class="fcol">'+left+'</div><div class="fcol fnum">'+right+'</div></div>'
       +'<div class="panel mrows">'+ms.map(function(mo){ return row(mo, byM[mo]||[], got[mo], CoasterHub.makerHref(m.name, mo)); }).join('')
       +(byM[''] ? row('No model on file', byM[''], nog, null) : '')+'</div>'
-      +'<a class="go" href="'+E(CoasterHub.makerHref(m.name))+'">Manufacturer page</a>';
+      +'<a class="go" href="'+E(CoasterHub.makerHref(m.name))+'">Manufacturer page &rarr;</a>';
   }
 
   // Clicks inside an open panel are app.js's (openableCoasters on #body):
@@ -239,7 +239,7 @@ function one(name, cs, MINE){
     return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(mo || 'No model on file')+'</span><span class="msub">'+esc(sub)+'</span></span>'
       +CoasterHub.countsTag(op, list.length-op)+'</summary>'
-      +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">Model page</span></a>' : '')
+      +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">Model page &rarr;</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
   }).join('')+'</div><div id="ranked"></div>';
   // Where these sit in the rankings, Mine / Global (CoasterHub.rankSection,

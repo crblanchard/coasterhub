@@ -129,7 +129,7 @@ var BYNAME={};
 // the model in grey, status and years on the right, defunct last.
 function parkBody(name){
   var p=BYNAME[name]; if(!p) return '';
-  return '<a class="crow mlink" href="'+esc(CoasterHub.parkHref(name))+'"><span class="cn">Park page</span></a>'
+  return '<a class="crow mlink" href="'+esc(CoasterHub.parkHref(name))+'"><span class="cn">Park page &rarr;</span></a>'
     + p.cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.name).localeCompare(String(b.name)); })
       .map(function(c){ return CoasterHub.coasterRow(c, { mine:MINE, ctx:'model' }); }).join('');
 }

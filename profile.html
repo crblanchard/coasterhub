@@ -312,7 +312,7 @@
      Read off computeStats' day_detail, so it costs nothing extra; hidden for a
      rider with no dated days. -->
 <section class="block" id="sec_visits" style="display:none"><div class="container">
-  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">every day</span></a></h2>
+  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">every day &rarr;</span></a></h2>
   <div class="mlist vlist" id="visits"></div>
   <!-- The way on to the whole count, where the five end (2026-09-27): "my
        stuff is split up" was the thing Carter found hardest, and this puts the
@@ -745,7 +745,7 @@ function render(s){
     h.href=CoasterHub.userPageHref(slug,'rankings');
     h.innerHTML = (ten.length<10 ? ('Top '+ten.length) : 'Top ten')
       + '<span class="arw">' + (known.length>ten.length
-          ? ('all '+nf(known.length)) : 'the whole list') + '</span>';
+          ? ('all '+nf(known.length)+' &rarr;') : 'the whole list &rarr;') + '</span>';
     document.getElementById('toplist').innerHTML=ten.map(function(c,i){
       return '<a class="trow" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="pos">'+(i+1)+'</span>'
         +'<span class="n"><b>'+esc(c.name)+'</b><span class="sub">'
