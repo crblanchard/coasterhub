@@ -98,15 +98,6 @@
   #ranked a.crow .two .pk{flex:1 1 0}
   #ranked a.crow .two .pk{font-size:.8rem}
   #ranked a.crow .rk{font-size:.85rem;min-width:2.9em}
-  .mtable .ph{display:none}
-  @media (max-width:640px){
-    .mtable .dsk{display:none}
-    .mtable .ph{display:block}
-    .mtable td{vertical-align:top}
-    .mtable .stc{text-align:right}
-    .mtable td.nm .pk2 a{font-weight:400;color:var(--muted);font-size:.8rem}
-    .mtable .yr2{margin-top:3px;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
-  }
   @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
 </style>
 </head>
@@ -368,7 +359,7 @@ function model(maker, mo, cs, MINE){
   $('body').innerHTML=(specs.length ? '<div class="sect">Statistics</div><div class="specsheet">'
       +specs.map(function(x){ return '<div><b>'+x[1]+'</b><span>'+esc(x[0])+'</span></div>'; }).join('')+'</div>' : '')
     +'<div id="ranked"></div>'
-    +'<div class="sect">Installations</div><div class="dtable-wrap"><table class="dtable mtable"><thead><tr>'
+    +'<div class="sect">Installations</div><div class="dtable-wrap"><table class="dtable stack"><thead><tr>'
     +(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th class="dsk">Park</th><th class="opt">Location</th><th class="num dsk">Opened</th><th class="stc">Status</th></tr></thead><tbody>'
     +rows.map(function(c){
       var reg=(PARKS[c.park]||{}).region||'', op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):''), cl=c.closed?String(c.closed).slice(0,4):'';

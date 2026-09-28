@@ -707,6 +707,18 @@ html.srchopen{overflow:hidden}
 .dtable .st{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .dtable .st.on{color:var(--accent2)} .dtable .st.off{color:var(--accent)}
 @media (max-width:640px){ .dtable .opt{display:none} .dtable th,.dtable td{padding:8px 10px} }
+/* A phone stacks a coaster table (Carter, 2026-09-28: the year ran off the edge):
+   name over park on the left, status over years (or the number) on the right.
+   .dsk cells are the wide layout's; .ph lines are the phone's. */
+.dtable .ph{display:none}
+@media (max-width:640px){
+  .dtable .dsk{display:none}
+  .dtable .ph{display:block}
+  .dtable.stack td{vertical-align:top}
+  .dtable .stc{text-align:right}
+  .dtable td.nm .pk2 a{font-weight:400;color:var(--muted);font-size:.8rem}
+  .dtable .yr2{margin-top:3px;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+}
 /* A spec sheet: label on the left, value on the right, one per line. */
 .specsheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:10px}
 .specsheet div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px}

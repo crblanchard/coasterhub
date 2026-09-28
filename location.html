@@ -131,8 +131,8 @@ function counts(ps, MINE){
   return { parks:ps.length, all:cs.length, open:open, gone:cs.length-open, cs:cs,
            got: MINE ? cs.filter(function(c){ return !c.closed && MINE[c.id]; }).length : null };
 }
-function table(head, rows){
-  return '<div class="dtable-wrap"><table class="dtable"><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+function table(head, rows, cls){
+  return '<div class="dtable-wrap"><table class="dtable'+(cls?' '+cls:'')+'"><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 
 // One state or country, or the whole US: its numbers, its parks, and (except
@@ -172,17 +172,20 @@ function place(reg, ps, MINE, R){
   if(!us){
     var rows=k.cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
     h+='<div class="sect">Coasters</div>'+table(
-      (MINE?'<th class="tick"></th>':'')+'<th>Name</th><th>Park</th><th class="opt">Make / model</th><th class="num">Opened</th><th>Status</th>',
+      (MINE?'<th class="tick"></th>':'')+'<th>Name</th><th class="dsk">Park</th><th class="opt">Make / model</th><th class="num dsk">Opened</th><th class="stc">Status</th>',
       rows.map(function(c){
         var op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):''), cl=c.closed?String(c.closed).slice(0,4):'';
         var mk=c.manu ? '<a href="'+esc(CoasterHub.makerHref(c.manu, c.model||null))+'">'+esc(c.model||c.manu)+'</a>' : esc(c.model||'');
         return '<tr data-cid="'+c.id+'"'+(cl?' class="gone"':'')+'>'
           +(MINE?'<td class="tick">'+(MINE[c.id]?'✓':'')+'</td>':'')
-          +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></td>'
-          +'<td><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park)+'</a></td>'
-          +'<td class="sub opt">'+mk+'</td><td class="num">'+esc(op)+'</td>'
-          +'<td><span class="st '+(cl?'off">Closed '+esc(cl):c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span></td></tr>';
-      }).join(''));
+          // Stacked on a phone, as on a model page (.dsk / .ph, style.css).
+          +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'
+            +'<span class="ph pk2"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park)+'</a></span></td>'
+          +'<td class="dsk"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park)+'</a></td>'
+          +'<td class="sub opt">'+mk+'</td><td class="num dsk">'+esc(op)+'</td>'
+          +'<td class="stc"><span class="st '+(cl?'off">Closed<span class="dsk"> '+esc(cl)+'</span>':c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span>'
+            +((op||cl)?'<span class="ph yr2">'+esc(op+(cl?(op?'\u2013':'closed ')+cl:''))+'</span>':'')+'</td></tr>';
+      }).join(''), 'stack');
   }
   $('body').innerHTML=h;
 }

@@ -71,7 +71,7 @@
       <select id="f_sort"><option value="name">A–Z</option><option value="new">Newest</option><option value="old">Oldest</option><option value="h">Tallest</option><option value="s">Fastest</option></select>
     </div>
     <p class="shown" id="shown"></p>
-    <div class="dtable-wrap"><table class="dtable"><thead id="thead"></thead><tbody id="rows"></tbody></table></div>
+    <div class="dtable-wrap"><table class="dtable stack"><thead id="thead"></thead><tbody id="rows"></tbody></table></div>
     <div class="more" id="more" hidden></div>
   </div>
 </div></section>
@@ -132,15 +132,17 @@ function draw(){
   $('shown').innerHTML='<b>'+list.length.toLocaleString()+'</b> coaster'+(list.length===1?'':'s')
     +(MINE ? ' · you have ridden <b>'+list.filter(function(c){ return MINE[c.id]; }).length.toLocaleString()+'</b>' : '');
   var metric = so==='h' ? 'Height' : so==='s' ? 'Speed' : 'Opened';
-  $('thead').innerHTML='<tr>'+(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th>Park</th><th class="opt">Model</th><th class="num">'+metric+'</th><th class="opt">Status</th></tr>';
+  $('thead').innerHTML='<tr>'+(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th class="dsk">Park</th><th class="opt">Model</th><th class="num">'+metric+'</th><th class="opt">Status</th></tr>';
   $('rows').innerHTML=list.slice(0,CAP).map(function(c){
     var cl=c.closed?String(c.closed).slice(0,4):'';
     var val = so==='h' ? (c.h!=null?Math.round(c.h)+' ft':'') : so==='s' ? (c.s!=null?Math.round(c.s)+' mph':'') : (yr(c)||'');
     var mk=c.manu ? '<a href="'+esc(CoasterHub.makerHref(c.manu, c.model||null))+'">'+esc(c.model||c.manu)+'</a>' : esc(c.model||'');
     return '<tr data-cid="'+c.id+'"'+(cl?' class="gone"':'')+'>'
       +(MINE?'<td class="tick">'+(MINE[c.id]?'\u2713':'')+'</td>':'')
-      +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></td>'
-      +'<td><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park||'')+'</a></td>'
+      // A phone stacks the park under the name (.dsk / .ph, style.css).
+      +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'
+        +(c.park?'<span class="ph pk2"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park)+'</a></span>':'')+'</td>'
+      +'<td class="dsk"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park||'')+'</a></td>'
       +'<td class="sub opt">'+mk+'</td><td class="num">'+esc(val)+'</td>'
       +'<td class="opt"><span class="st '+(cl?'off">Closed '+esc(cl):c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span></td></tr>';
   }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Nothing matches.</td></tr>';
