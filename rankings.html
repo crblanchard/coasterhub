@@ -277,12 +277,14 @@
   #mine.mf:not(.readonly) .rrow .mrow .grip{visibility:hidden}
   .mfpanel{flex:0 0 100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:2px}
   .mfpanel[hidden]{display:none}
-  .mfpanel input{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
+  /* The search box only: this rule used to reach the checkboxes too, and its
+     padding stretched them into rectangles (2026-09-28). */
+  .mfpanel input[type=search]{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
   .mflist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 14px;max-height:280px;overflow-y:auto;margin-top:8px}
   .mflist label{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.9rem;cursor:pointer;min-width:0}
   /* Plain square boxes everywhere — iPhone draws native ones as circles
      (Carter, 2026-09-28: "regular squares instead of this square/circle blob"). */
-  .mflist label input{-webkit-appearance:none;appearance:none;margin:0;width:18px;height:18px;flex:none;
+  .mflist label input{-webkit-appearance:none;appearance:none;margin:0;padding:0;box-sizing:border-box;width:18px;height:18px;flex:none;
     border:1.5px solid var(--line);border-radius:4px;background-color:var(--panel);display:grid;place-content:center;cursor:pointer}
   .mflist label input:checked{background-color:var(--accent2);border-color:var(--accent2)}
   .mflist label input:checked::after{content:"";width:5px;height:9px;border:solid var(--well);border-width:0 2px 2px 0;
