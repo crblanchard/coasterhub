@@ -79,7 +79,7 @@ a.crow{align-items:center}
 .ranksec a.crow.g .rk{font-size:1.05rem;min-width:1.9em}
 .ranksec a.crow.g .two{flex-direction:column;align-items:flex-start;gap:1px}
 .ranksec a.crow.g .two .cn{max-width:100%;font-size:.93rem}
-.ranksec a.crow.g .two .pk{flex:none;max-width:100%;font-size:.78rem;white-space:normal}
+.ranksec a.crow.g .two .pk{flex:none;max-width:100%;font-size:.78rem;}
 .ranksec a.crow .gyou{flex:none;padding-left:10px;color:var(--muted);font-size:.78rem;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ranksec a.crow .gmeta{flex:none;padding-left:14px;color:var(--muted);font-size:.8rem;text-align:right;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ranksec a.crow .gmeta b{display:block;color:var(--accent2);font-weight:700}
@@ -98,3 +98,46 @@ a.crow{align-items:center}
 .ranksec .rmore{color:var(--accent2);font-weight:600;text-decoration:none}
 /* A phone has no room for the model beside a ranked coaster. */
 @media (max-width:560px){ .ranksec a.crow .md{display:none} }
+
+/* ---- One coaster row, everywhere (Carter, 2026-09-28: "we have so many
+   different types of tables ... make it similar to rankings"). The park
+   page's row, which already reads like /rankings: a tick (or a rank) in a
+   fixed slot, the name, what the page doesn't already say in grey beside it
+   (park · place on a maker's page, the model on a park or a place), and on
+   the right the status and years. A phone puts the grey part under the name
+   and turns the status word into a dot. Built by CoasterHub.coasterRow. */
+a.crow.std{align-items:center;padding:10px 16px}
+a.crow.std .two{flex:1 1 auto;flex-direction:row;align-items:baseline;gap:9px}
+a.crow.std .two .cn{flex:0 1 auto}
+a.crow.std .two .pk{flex:0 1 auto;font-size:.8rem}
+a.crow.std.gone .cn{color:var(--muted)}
+a.crow .end{margin-left:auto;flex:none;display:flex;align-items:baseline;gap:12px;padding-left:10px;white-space:nowrap}
+a.crow .life{flex:none;display:flex;align-items:baseline;gap:9px;white-space:nowrap}
+a.crow .life .stat{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+a.crow .life .stat.on{color:var(--accent2)}
+a.crow .life .stat.off{color:var(--accent)}
+a.crow .life .yrs{margin:0;padding:0;color:var(--fg);font-size:.8rem;font-variant-numeric:tabular-nums}
+@media (max-width:560px){
+  a.crow.std{gap:7px;padding:9px 13px}
+  a.crow.std .two{flex-direction:column;align-items:flex-start;gap:1px}
+  a.crow.std .two .cn,a.crow.std .two .pk{max-width:100%}
+  a.crow .life{gap:7px}
+  a.crow .life .stat{font-size:0;line-height:0}
+  a.crow .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
+}
+/* ---- One group row: a model on a maker's page, a park on a place's page.
+   The same shape as the coaster row — name, grey detail beside it (under it
+   on a phone), your ridden/total and a chevron on the right. */
+.mlist .mtwo{flex:1 1 auto;flex-direction:row;align-items:baseline;gap:10px}
+.mlist .mtwo .nm{flex:0 1 auto;font-size:.93rem}
+.mlist .msub{flex:0 1 auto;min-width:0;font-size:.8rem}
+@media (max-width:560px){
+  .mlist .mtwo{flex-direction:column;align-items:flex-start;gap:1px}
+  .mlist .mtwo .nm,.mlist .msub{max-width:100%}
+}
+/* The coasters inside an open group sit a step in, so they read as its. */
+.mlist details.mdl[open] > a.crow{padding-left:28px}
+@media (max-width:560px){ .mlist details.mdl[open] > a.crow{padding-left:22px} }
+/* A link row for a maker or a place (/manufacturers, /locations): its count
+   of models or parks in grey, operating / defunct on the right. */
+a.crow.mk .yrs{color:var(--muted)}

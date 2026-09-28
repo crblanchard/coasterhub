@@ -1675,6 +1675,38 @@
     });
   }
 
+  // Status and years, the right-hand end of a coaster row: the status carries
+  // the colour (teal running, orange gone, red closing soon), the years stay
+  // body-coloured. The park page's, shared (2026-09-28).
+  function lifeTag(c) {
+    var E = searchEsc;
+    var op = c.opened ? String(c.opened).slice(0, 4) : (c.yr ? String(c.yr) : "");
+    var cl = c.closed ? String(c.closed).slice(0, 4) : "";
+    if (!op && !cl) return "";
+    var years = cl ? (op ? E(op) + "–" + E(cl) : "closed " + E(cl)) : E(op);
+    return '<span class="life">' + (c.closing ? CLOSING_SOON : '<span class="stat' + (cl ? ' off' : ' on') + '">' + (cl ? "Defunct" : "Operating") + '</span>')
+      + '<span class="yrs">' + years + '</span></span>';
+  }
+  // The one coaster row (lists.css a.crow.std): opts.mine (id -> truthy, or
+  // null signed out) gives the tick slot; opts.ctx is the grey detail beside
+  // the name (plain text); opts.end replaces the status and years.
+  function coasterRow(c, opts) {
+    opts = opts || {};
+    var E = searchEsc, got = opts.mine && opts.mine[c.id];
+    return '<a class="crow std' + (c.closed ? ' gone' : '') + (opts.mine ? (got ? ' got' : ' miss') : '') + '" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '">'
+      + (opts.mine ? '<span class="tick">' + (got ? '✓' : '') + '</span>' : '')
+      + '<span class="two"><span class="cn">' + E(c.name) + '</span>' + (opts.ctx ? '<span class="pk">' + E(opts.ctx) + '</span>' : '') + '</span>'
+      + '<span class="end">' + (opts.end != null ? opts.end : lifeTag(c)) + '</span></a>';
+  }
+
+  // A model or park group (lists.css details.mdl) opens one at a time, like
+  // the coaster rows inside it (Carter, 2026-09-28). 'toggle' does not
+  // bubble, hence the capture.
+  if (typeof document !== "undefined") document.addEventListener("toggle", function (e) {
+    var d = e.target; if (!d.matches || !d.matches("details.mdl") || !d.open) return;
+    Array.prototype.forEach.call(document.querySelectorAll("details.mdl[open]"), function (o) { if (o !== d) o.open = false; });
+  }, true);
+
   // A "Rankings" section for any set of coasters — a maker, a model, a state
   // (Carter, 2026-09-28) — with the /rankings Mine / Global switch. Mine is
   // the viewer's list; Global is every one of them on 2+ riders' lists by
@@ -1729,7 +1761,7 @@
       if (st.view === "mine") {
         body = mine.length ? '<div class="panel">' + cut(mine).map(function (c) {
           return '<a class="crow" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">#' + R[c.id] + '</span>'
-            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(c.park || "") + '</span></span>'
+            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(ctx(c)) + '</span></span>'
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '') + '</a>';
         }).join("") + '</div>' + more(mine.length)
           : '<p class="rnone">' + (R ? "You haven’t ranked any of these yet." : "Sign in to see where these sit in your rankings.") + '</p>';
@@ -1748,7 +1780,7 @@
         body = (rows.length ? '<div class="panel">' + cut(rows).map(function (r, i) {
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
           return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + (i + 1) + '</span>'
-            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(c.park || "") + '</span></span>'
+            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(ctx(c)) + '</span></span>'
             + (me ? '<span class="gyou">you #' + me + '</span>' : '')
             + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + r.n + ' lists</span>' + chev + '</a>';
         }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
@@ -1783,8 +1815,12 @@
         + coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>');
       row.classList.add("open"); row.parentNode.insertBefore(box, row.nextSibling);
     });
-    you().then(function (y) { st.rank = y ? y.rank : null; }).catch(function () {})
-      .then(function () { st.known = true; draw(); });
+    // Park · place beside each name, as /rankings reads.
+    var parks = {};
+    function ctx(c) { var r = (parks[c.park] || {}).region; return [c.park, r].filter(Boolean).join(" \u00b7 "); }
+    Promise.all([you().catch(function () { return null; }), fetchParks().catch(function () { return {}; })]).then(function (r) {
+      st.rank = r[0] ? r[0].rank : null; parks = r[1] || {};
+    }).then(function () { st.known = true; draw(); });
   }
 
   // The footer's contributor links: Add new for anyone signed in (adding a
@@ -2078,7 +2114,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, rankSection: rankSection };
+              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

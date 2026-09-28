@@ -92,9 +92,13 @@
   #list.ticks .crow .tick.busy{opacity:.4;pointer-events:none}
   /* Grey means defunct, as on /count and /map (Carter, 2026-09-25). */
   .crow.gone .cn{color:var(--muted)}
+  /* Name and model share one box: side by side here, stacked on a phone —
+     the /rankings row (Carter, 2026-09-28), which used to drop the model. */
+  .crow .two{display:flex;align-items:baseline;gap:10px;min-width:0;flex:0 1 auto}
   @media (max-width:560px){
     .crow{gap:7px;padding:10px 13px}
-    .crow .mk{display:none}
+    .crow .two{flex-direction:column;align-items:flex-start;gap:1px}
+    .crow .two .cn,.crow .two .mk{max-width:100%}
     .crow .life{gap:7px}
     .crow .life .stat{font-size:0;line-height:0}
     .crow .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
@@ -261,6 +265,12 @@ var CHEV='<svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="non
 // Same as the ranking cards (Carter, 2026-09-25): a closed row opens on any
 // tap, its name and model included; open, those two are links, and a tap
 // anywhere else on the row — body included — closes it.
+// One open at a time, like every other coaster list (Carter, 2026-09-28).
+// 'toggle' does not bubble, hence the capture.
+document.addEventListener('toggle', function(e){
+  var d=e.target; if(!d.matches || !d.matches('details.citem') || !d.open) return;
+  Array.prototype.forEach.call(document.querySelectorAll('details.citem[open]'), function(o){ if(o!==d) o.open=false; });
+}, true);
 document.addEventListener('click', function(e){
   var t=e.target.closest && e.target.closest('.tick.add, .tick.undo');
   if(t){ e.preventDefault(); tapTick(t); return; }
@@ -278,8 +288,8 @@ function row(c){
   return '<details class="citem" data-c="'+c.id+'"><summary class="crow'+(c.closed?' gone':'')+'">'
     +'<span class="tick" data-tick="'+c.id+'"></span>'
     // A relocated ride's old row goes straight to the ride's one page.
-    +'<a class="cn" href="'+esc(CoasterHub.coasterHref(CoasterHub.rideHome(LIST.coasters, c)))+'">'+esc(c.name)+'</a>'
-    +(mk?(c.manu?'<a class="mk" href="'+esc(CoasterHub.makerHref(c.manu, c.model||null))+'">'+esc(mk)+'</a>':'<span class="mk">'+esc(mk)+'</span>'):'')
+    +'<span class="two"><a class="cn" href="'+esc(CoasterHub.coasterHref(CoasterHub.rideHome(LIST.coasters, c)))+'">'+esc(c.name)+'</a>'
+    +(mk?(c.manu?'<a class="mk" href="'+esc(CoasterHub.makerHref(c.manu, c.model||null))+'">'+esc(mk)+'</a>':'<span class="mk">'+esc(mk)+'</span>'):'')+'</span>'
     +'<span class="end">'+life(c)+'<span class="rid" data-rid="'+c.id+'"></span>'+CHEV+'</span>'
     +'</summary><div class="cbody"></div></details>';
 }

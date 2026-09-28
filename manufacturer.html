@@ -32,7 +32,6 @@
   /* Tiles, crumbs, the "you" line, .sect and .missing: shared, style.css. */
   .find{width:100%;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);color:var(--fg);
         padding:10px 12px;border-radius:10px;font-size:.9rem;margin:0 0 12px}
-  a.crow.mk .yrs{color:var(--muted)}
   /* A–Z down the first column, then the second. One column on a phone. */
   .mmods{columns:2;column-gap:28px;padding-top:6px}
   .mmods .mm{break-inside:avoid}
@@ -166,7 +165,7 @@ function index(BY, MINE){
   function draw(){
     var q=$('find').value.trim().toLowerCase();
     $('mlist').innerHTML=list.filter(function(m){ return !q || m.name.toLowerCase().indexOf(q)>=0; }).map(function(m){
-      return '<a class="crow mk" data-mk="'+esc(m.name)+'" href="'+esc(CoasterHub.makerHref(m.name))+'">'
+      return '<a class="crow std mk" data-mk="'+esc(m.name)+'" href="'+esc(CoasterHub.makerHref(m.name))+'">'
         +'<span class="two"><span class="cn">'+esc(m.name)+'</span><span class="pk">'+m.nm+' model'+(m.nm===1?'':'s')+'</span></span>'
         +'<span class="yrs">'+m.open+' operating / '+(m.n-m.open)+' defunct</span></a>';
     }).join('') || '<div style="padding:16px;color:var(--muted)">No manufacturer by that name.</div>';
@@ -230,7 +229,7 @@ function one(name, cs, MINE){
   $('hero_sub').textContent=cs.length+' coaster'+(cs.length===1?'':'s')+' on the site.';
   $('tiles').innerHTML=tile(cs.length,'Coasters')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
     +tile(models.filter(Boolean).length,'Models');
-  $('body').innerHTML='<div id="ranked"></div><div class="sect">Models</div><div class="panel mlist">'+models.map(function(mo){
+  $('body').innerHTML='<div class="sect">Models</div><div class="panel mlist">'+models.map(function(mo){
     var list=byModel[mo].slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
     var g=MINE ? list.filter(function(c){ return MINE[c.id]; }).length : null;
     // Carter, 2026-09-28 ("don't like how the model list looks"): each model
@@ -246,7 +245,7 @@ function one(name, cs, MINE){
       +'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>'
       +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">Model page &rarr;</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
-  }).join('')+'</div>';
+  }).join('')+'</div><div id="ranked"></div>';
   // Where these sit in the rankings, Mine / Global (CoasterHub.rankSection,
   // shared with a location's page).
   CoasterHub.rankSection($('ranked'), cs, {model:true});
@@ -289,24 +288,10 @@ function model(maker, mo, cs, MINE){
   var rows=cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
   $('body').innerHTML=(specs.length ? '<div class="sect">Statistics</div><div class="specsheet">'
       +specs.map(function(x){ return '<div><b>'+x[1]+'</b><span>'+esc(x[0])+'</span></div>'; }).join('')+'</div>' : '')
-    +'<div id="ranked"></div>'
-    +'<div class="sect">Installations</div><div class="dtable-wrap"><table class="dtable stack"><thead><tr>'
-    +(MINE?'<th class="tick"></th>':'')+'<th>Name</th><th class="dsk">Park</th><th class="opt">Location</th><th class="num dsk">Opened</th><th class="stc">Status</th></tr></thead><tbody>'
-    +rows.map(function(c){
-      var reg=(PARKS[c.park]||{}).region||'', op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):''), cl=c.closed?String(c.closed).slice(0,4):'';
-      return '<tr data-cid="'+c.id+'"'+(cl?' class="gone"':'')+'>'
-        +(MINE?'<td class="tick">'+(MINE[c.id]?'\u2713':'')+'</td>':'')
-        // A phone stacks it (Carter, 2026-09-28: the year column ran off the
-        // edge): name over park on the left, status over the years on the
-        // right. .dsk cells are the wide layout's; .ph lines are the phone's.
-        +'<td class="nm"><a data-cname href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'
-          +(c.park?'<span class="ph pk2"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park)+'</a></span>':'')+'</td>'
-        +'<td class="dsk"><a href="'+esc(CoasterHub.parkHref(c.park))+'">'+esc(c.park||'')+'</a></td>'
-        +'<td class="sub opt">'+(reg?'<a href="'+esc(CoasterHub.locationHref(reg))+'">'+esc(reg)+'</a>':'')+'</td>'
-        +'<td class="num dsk">'+esc(op)+'</td>'
-        +'<td class="stc"><span class="st '+(cl?'off">Closed<span class="dsk"> '+esc(cl)+'</span>':c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span>'
-          +((op||cl)?'<span class="ph yr2">'+esc(op+(cl?(op?'\u2013':'closed ')+cl:''))+'</span>':'')+'</td></tr>';
-    }).join('')+'</tbody></table></div>';
+    // The same rows as everywhere else (Carter, 2026-09-28), operating first;
+    // the rankings under them, as on every list page.
+    +'<div class="sect">Installations</div><div class="panel">'+rows.map(function(c){ return crow(c, MINE); }).join('')+'</div>'
+    +'<div id="ranked"></div>';
   CoasterHub.rankSection($('ranked'), cs, {model:false});
 }
 function years(cs){
@@ -318,15 +303,11 @@ function years(cs){
   if(hi>=new Date().getFullYear()-3) return lo+'–';
   return lo===hi ? String(lo) : lo+'–'+hi;
 }
+// A coaster on a maker's or a model's page: the one row (CoasterHub.coasterRow),
+// with where it is in grey beside the name — park · place, as /rankings reads.
 function crow(c, MINE){
-  var got=MINE && MINE[c.id];
-  var op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):'');
-  var cl=c.closed?String(c.closed).slice(0,4):'';
-  var yrs=cl ? (op?op+'–'+cl:'closed '+cl) : op;
-  return '<a class="crow'+(MINE?(got?' got':' miss'):'')+'" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'">'
-    +(MINE ? '<span class="tick">'+(got?'✓':'')+'</span>' : '')
-    +'<span class="two"><span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(c.park||'')+'</span></span>'
-    +(yrs ? '<span class="yrs'+(cl?' off':'')+'">'+esc(yrs)+'</span>' : '')+'</a>';
+  var reg=(PARKS[c.park]||{}).region||'';
+  return CoasterHub.coasterRow(c, { mine:MINE, ctx:[c.park, reg].filter(Boolean).join(' \u00b7 ') });
 }
 </script>
 </body>

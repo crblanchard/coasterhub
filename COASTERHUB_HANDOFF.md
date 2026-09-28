@@ -4997,3 +4997,24 @@ needs openableCoasters on an ancestor for the Mine rows.
 
 Carter, 2026-09-28: /rankings Global tab's "Master list" is now **"Global list"**, with more room between the model and the lists/avg column.
 Same day: "avg #N" goes on top of "N lists" everywhere (Carter: "always avg on top"), and the Global list opens one row at a time on every screen (srowToggles closes the others; scrolls the opened row back under the header if closing one above pulled it up).
+
+Carter, 2026-09-28: "we have so many different types of tables please make all
+manufacturer/model/location/park pages have basically the same formatting ... similar
+to rankings". Done as ONE coaster row and ONE group row:
+- **Coaster row** = the park page's row, which already read like /rankings: tick slot,
+  bold name, grey context beside it (park · place on maker/model pages and in rankings
+  sections; the model on park/location pages), status + years on the right (status word
+  becomes a dot on a phone), context drops under the name on a phone. Shared as
+  `CoasterHub.coasterRow(c,{mine,ctx,end})` + `lifeTag(c)` in app.js, `a.crow.std` in
+  lists.css. park.html keeps its own <details> row (ticks you can tap, riders count,
+  riders inside) but now wraps name+model in `.two` so a phone shows the model under the
+  name instead of dropping it.
+- **Group row** (a model on a maker's page, a park on a place's page): name, grey detail
+  beside it, ridden/total, chevron; coasters inside indented.
+- **Link rows** for /manufacturers, /locations and the US page's States: name, grey count,
+  "N operating / N defunct" — the tables there are gone.
+- The model page's Installations table is now those rows. Rankings (Mine/Global) sits at
+  the bottom of every one of these pages. Everything opens one at a time (a capture
+  'toggle' listener in app.js for details.mdl; park.html for its details.citem).
+Deliberately still tables: /coasters and /parks — they are the sortable, filterable
+"browse everything" pages with a changeable number column; rows would lose the sort.

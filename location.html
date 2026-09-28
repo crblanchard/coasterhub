@@ -132,8 +132,11 @@ function counts(ps, MINE){
   return { parks:ps.length, all:cs.length, open:open, gone:cs.length-open, cs:cs,
            got: MINE ? cs.filter(function(c){ return !c.closed && MINE[c.id]; }).length : null };
 }
-function table(head, rows, cls){
-  return '<div class="dtable-wrap"><table class="dtable'+(cls?' '+cls:'')+'"><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+// A state or a country as a link row (lists.css), the /manufacturers shape.
+function locRow(c){
+  return '<a class="crow std mk" href="'+esc(CoasterHub.locationHref(c.r))+'">'
+    +'<span class="two"><span class="cn">'+esc(shortName(c.r))+'</span><span class="pk">'+c.parks+' park'+(c.parks===1?'':'s')+'</span></span>'
+    +'<span class="yrs">'+c.open+' operating / '+c.gone+' defunct</span></a>';
 }
 
 // One state or country, or the whole US: its numbers, its parks, and (except
@@ -158,10 +161,7 @@ function place(reg, ps, MINE, R){
     // The states, most operating coasters first.
     var st=Object.keys(R).filter(isUS).map(function(r){ var c=counts(R[r], MINE); c.r=r; return c; })
       .sort(function(a,b){ return b.open-a.open || a.r.localeCompare(b.r); });
-    h+='<div class="sect">States</div>'+table(
-      '<th>State</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>',
-      st.map(function(c){ return '<tr><td class="nm"><a href="'+esc(CoasterHub.locationHref(c.r))+'">'+esc(shortName(c.r))+'</a></td>'
-        +'<td class="num">'+c.parks+'</td><td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'+'</tr>'; }).join(''));
+    h+='<div class="sect">States</div><div class="panel">'+st.map(locRow).join('')+'</div>';
   }
   var pk=ps.map(function(p){ var c=counts([p], MINE); c.p=p; return c; })
     .sort(function(a,b){ return b.open-a.open || b.all-a.all || a.p.name.localeCompare(b.p.name); });
@@ -199,23 +199,16 @@ function index(R, MINE){
   var by=function(a,b){ return b.open-a.open || a.r.localeCompare(b.r); };
   var us=regs.filter(function(c){ return isUS(c.r); }).sort(by), rest=regs.filter(function(c){ return !isUS(c.r); }).sort(by);
   $('hero_sub').textContent=us.length+' states and '+rest.length+' other countries on the site.';
-  var head='<th>Location</th><th class="num">Parks</th><th class="num">Operating</th><th class="num opt">Defunct</th>';
-  function row(c){ return '<tr><td class="nm"><a href="'+esc(CoasterHub.locationHref(c.r))+'">'+esc(shortName(c.r))+'</a></td>'
-    +'<td class="num">'+c.parks+'</td><td class="num">'+c.open+'</td><td class="num opt">'+c.gone+'</td>'+'</tr>'; }
-  $('body').innerHTML='<div class="sect"><a href="/location/us" style="color:inherit">United States &rarr;</a></div>'+table(head, us.map(row).join(''))
-    +'<div class="sect">Elsewhere</div>'+table(head, rest.map(row).join(''));
+  // Link rows shaped like /manufacturers' (Carter, 2026-09-28: one look for
+  // every list): the place, its park count in grey, operating / defunct.
+  $('body').innerHTML='<div class="sect"><a href="/location/us" style="color:inherit">United States &rarr;</a></div>'
+    +'<div class="panel">'+us.map(locRow).join('')+'</div>'
+    +'<div class="sect">Elsewhere</div><div class="panel">'+rest.map(locRow).join('')+'</div>';
 }
-// A coaster inside a park's row: its name over its model (the park is the
-// row it sits in), the years on the right, a tick if you have ridden it.
+// A coaster inside a park's row: the one row (CoasterHub.coasterRow), its
+// model in grey beside the name — the park is the row it sits in.
 function crow(c, MINE){
-  var got=MINE && MINE[c.id];
-  var op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):'');
-  var cl=c.closed?String(c.closed).slice(0,4):'';
-  var yrs=cl ? (op?op+'\u2013'+cl:'closed '+cl) : op;
-  return '<a class="crow'+(MINE?(got?' got':' miss'):'')+'" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'">'
-    +(MINE ? '<span class="tick">'+(got?'\u2713':'')+'</span>' : '')
-    +'<span class="two"><span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(CoasterHub.maker(c)||'')+'</span></span>'
-    +(yrs ? '<span class="yrs'+(cl?' off':'')+'">'+esc(yrs)+'</span>' : '')+'</a>';
+  return CoasterHub.coasterRow(c, { mine:MINE, ctx:CoasterHub.maker(c)||'' });
 }
 </script>
 </body>
