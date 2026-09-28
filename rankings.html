@@ -280,7 +280,14 @@
   .mfpanel input{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
   .mflist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 14px;max-height:280px;overflow-y:auto;margin-top:8px}
   .mflist label{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.9rem;cursor:pointer;min-width:0}
-  .mflist label input{width:17px;height:17px;flex:none;accent-color:var(--accent2)}
+  /* Plain square boxes everywhere — iPhone draws native ones as circles
+     (Carter, 2026-09-28: "regular squares instead of this square/circle blob"). */
+  .mflist label input{-webkit-appearance:none;appearance:none;margin:0;width:18px;height:18px;flex:none;
+    border:1.5px solid var(--line);border-radius:4px;background-color:var(--panel);display:grid;place-content:center;cursor:pointer}
+  .mflist label input:checked{background-color:var(--accent2);border-color:var(--accent2)}
+  .mflist label input:checked::after{content:"";width:5px;height:9px;border:solid var(--well);border-width:0 2px 2px 0;
+    transform:translateY(-1px) rotate(45deg)}
+  .mflist label input:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
   .mflist label span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mflist label i{font-style:normal;color:var(--muted);font-size:.8rem;margin-left:auto;flex:none}
   .mfacts{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
@@ -1100,7 +1107,10 @@ function mfDraw(){
   $('mfn').textContent = k ? String(k) : '';
 }
 function mfWire(){
-  $('mfbtn').onclick=function(){ var p=$('mfpanel'); p.hidden=!p.hidden; this.setAttribute('aria-expanded',String(!p.hidden)); if(!p.hidden){ mfDraw(); $('mfq').focus(); } };
+  $('mfbtn').onclick=function(){ var p=$('mfpanel'); p.hidden=!p.hidden; this.setAttribute('aria-expanded',String(!p.hidden)); if(!p.hidden){ mfDraw();
+    // Straight into the search on a computer; not on a phone, where focusing it
+    // throws the keyboard over the list (Carter, 2026-09-28).
+    if(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches) $('mfq').focus(); } };
   $('mfq').addEventListener('input', mfDraw);
   $('mflist').addEventListener('change', function(e){ var m=e.target.getAttribute('data-m'); if(m==null) return;
     if(e.target.checked) MSEL[m]=1; else delete MSEL[m]; mfDraw(); renderRank(); });
