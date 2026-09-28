@@ -4994,3 +4994,5 @@ at the bottom. To share it: the list/row/rankings CSS moved from manufacturer.ht
 **`CoasterHub.rankSection(el, coasters, {model})`** in app.js (global tally fetched once
 per page, 10 rows then "Show all N", Global rows open to rider chips). A page using it
 needs openableCoasters on an ancestor for the Mine rows.
+
+Carter, 2026-09-28: /rankings Global tab's "Master list" is now **"Global list"**, with more room between the model and the lists/avg column.
