@@ -1675,6 +1675,113 @@
     });
   }
 
+  // A "Rankings" section for any set of coasters — a maker, a model, a state
+  // (Carter, 2026-09-28) — with the /rankings Mine / Global switch. Mine is
+  // the viewer's list; Global is every one of them on 2+ riders' lists by
+  // average position (the /rankings master list's arithmetic, one row per
+  // ride), "avg #N" over "N lists", opening to a chip per rider and the
+  // coaster's facts. opts.model: false to show each coaster's model beside it.
+  // Mine rows are data-cid rows, so the page's openableCoasters (on an
+  // ancestor) opens them; Global rows carry data-gid and open here.
+  var globalTallyP = null;
+  function globalTally() {
+    if (!globalTallyP) globalTallyP = Promise.all([fetchCoasters(), fetchUsers()]).then(function (r) {
+      var byId = {}, users = r[1] || [];
+      (r[0].coasters || []).forEach(function (c) { byId[c.id] = c; });
+      return Promise.all(users.map(function (u) {
+        return fetch("/api/rankings/" + encodeURIComponent(u.slug))
+          .then(function (x) { return x.ok ? x.json() : { order: [] }; }).catch(function () { return { order: [] }; });
+      })).then(function (all) {
+        var t = {};
+        all.forEach(function (rk, ui) {
+          var seen = {}, u = users[ui] || {};
+          (rk.order || []).filter(function (id) {
+            var c = byId[id]; if (!c) return false; var k = rideKey(c); if (seen[k]) return false; seen[k] = 1; return true;
+          }).forEach(function (id, pos) {
+            var k = rideKey(byId[id]), x = t[k] || (t[k] = { n: 0, sum: 0, who: [] });
+            x.n++; x.sum += pos + 1; x.who.push({ name: u.name || u.slug, slug: u.slug, pos: pos + 1 });
+          });
+        });
+        return t;
+      });
+    }).catch(function () { return {}; });
+    return globalTallyP;
+  }
+  function rankSection(el, cs, opts) {
+    if (!el) return;
+    opts = opts || {};
+    var E = searchEsc, st = { view: null, rank: null, known: false, glob: null, rows: {} };
+    var chev = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
+      + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    el.classList.add("ranksec");
+    function draw() {
+      if (!st.known) return;
+      var R = st.rank;
+      var mine = R ? cs.filter(function (c) { return R[c.id]; }).sort(function (a, b) { return R[a.id] - R[b.id]; }) : [];
+      if (!st.view) st.view = mine.length ? "mine" : "global";
+      if (st.view === "global" && !st.glob) { st.glob = "loading"; globalTally().then(function (t) { st.glob = t; draw(); }); }
+      var sw = '<span class="rsw"><a data-rv="mine"' + (st.view === "mine" ? ' class="on"' : '') + '>Mine</a>'
+        + '<a data-rv="global"' + (st.view === "global" ? ' class="on"' : '') + '>Global</a></span>';
+      var body;
+      if (st.view === "mine") {
+        body = mine.length ? '<div class="panel">' + mine.map(function (c) {
+          return '<a class="crow" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">#' + R[c.id] + '</span>'
+            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(c.park || "") + '</span></span>'
+            + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '') + '</a>';
+        }).join("") + '</div>'
+          : '<p class="rnone">' + (R ? "You haven’t ranked any of these yet." : "Sign in to see where these sit in your rankings.") + '</p>';
+      } else if (st.glob === "loading") {
+        body = '<p class="rnone">Loading&hellip;</p>';
+      } else {
+        var seen = {}, rows = [], one = 0;
+        cs.forEach(function (c) {
+          var k = rideKey(c); if (seen[k]) return; seen[k] = 1;
+          var g = st.glob[k]; if (!g) return;
+          if (g.n < 2) { one++; return; }
+          rows.push({ c: c, n: g.n, avg: g.sum / g.n, who: g.who });
+        });
+        rows.sort(function (a, b) { return a.avg - b.avg || b.n - a.n || String(a.c.name).localeCompare(String(b.c.name)); });
+        st.rows = {};
+        body = (rows.length ? '<div class="panel">' + rows.map(function (r, i) {
+          var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
+          return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + (i + 1) + '</span>'
+            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(c.park || "") + '</span></span>'
+            + (me ? '<span class="gyou">you #' + me + '</span>' : '')
+            + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + r.n + ' lists</span>' + chev + '</a>';
+        }).join("") + '</div>' : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
+          + (one ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');
+      }
+      el.innerHTML = '<div class="sect rhead"><span>Rankings</span>' + sw + '</div>' + body;
+      Array.prototype.forEach.call(el.querySelectorAll("[data-rv]"), function (a) {
+        a.onclick = function (e) { e.preventDefault(); st.view = a.getAttribute("data-rv"); draw(); };
+      });
+    }
+    // A Global row opens in place like every other coaster row, one at a time;
+    // taps inside the open panel are openableCoasters' (links go, else close).
+    el.addEventListener("click", function (e) {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+      if (e.target.closest(".cx")) return;
+      var row = e.target.closest("a.crow.g"); if (!row) return;
+      var nx = row.nextElementSibling, isOpen = !!(nx && nx.classList.contains("cx"));
+      if (isOpen && e.target.closest(".cn")) return;
+      e.preventDefault();
+      Array.prototype.forEach.call(el.querySelectorAll(".cx"), function (o) {
+        var pr = o.previousElementSibling; if (pr) pr.classList.remove("open"); o.parentNode.removeChild(o);
+      });
+      if (isOpen) return;
+      var r = st.rows[row.getAttribute("data-gid")]; if (!r) return;
+      var chips = r.who.slice().sort(function (a, b) { return a.pos - b.pos; }).map(function (w) {
+        return '<a class="wrow" href="' + E(userPageHref(w.slug, "rankings")) + '"><span class="wn">' + E(w.name) + '</span><span class="wp">#' + w.pos + '</span></a>';
+      }).join("");
+      var box = document.createElement("div"); box.className = "cx";
+      box.innerHTML = '<div class="chips">' + chips + '</div>'
+        + coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>');
+      row.classList.add("open"); row.parentNode.insertBefore(box, row.nextSibling);
+    });
+    you().then(function (y) { st.rank = y ? y.rank : null; }).catch(function () {})
+      .then(function () { st.known = true; draw(); });
+  }
+
   // The footer's contributor links: Add new for anyone signed in (adding a
   // coaster is open to riders), Edit and QC for admins only. Everyone else's
   // footer is just the ways around the site.
@@ -1966,7 +2073,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters };
+              openableCoasters: openableCoasters, rankSection: rankSection };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

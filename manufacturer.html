@@ -15,6 +15,7 @@
 <title>Manufacturers — Coaster Hub</title>
 <meta name="description" content="Every coaster maker on the site, their models, and how many of each — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20260805b">
+<link rel="stylesheet" href="/lists.css?v=20260928a">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -31,59 +32,6 @@
   /* Tiles, crumbs, the "you" line, .sect and .missing: shared, style.css. */
   .find{width:100%;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);color:var(--fg);
         padding:10px 12px;border-radius:10px;font-size:.9rem;margin:0 0 12px}
-
-  /* A model is a <details>: the summary is its name and how many, the body
-     its coasters. */
-  details.mdl{border:1px solid var(--line);border-radius:14px;background:var(--panel);margin:0 0 8px;overflow:hidden}
-  details.mdl summary{display:flex;align-items:baseline;gap:10px;padding:12px 16px;cursor:pointer;list-style:none}
-  details.mdl summary::-webkit-details-marker{display:none}
-  details.mdl summary .nm{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  details.mdl summary .ct{margin-left:auto;flex:none;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums;white-space:nowrap}
-  details.mdl summary .ct b{color:var(--accent2)}
-  details.mdl[open] summary{border-bottom:1px solid var(--soft)}
-  details.mdl:target{border-color:var(--accent2)}
-  /* One list, not a card per model (Carter, 2026-09-27): the models share a
-     panel and a hairline between them. */
-  .mlist details.mdl{border:0;border-radius:0;margin:0;border-bottom:1px solid var(--line);background:none}
-  .mlist details.mdl:last-child{border-bottom:0}
-  .mlist details.mdl summary{padding:10px 16px;align-items:center}
-  .mlist details.mdl summary:hover{background:var(--soft)}
-  .mlist .mtwo{display:flex;flex-direction:column;min-width:0}
-  .mlist .mtwo .nm{font-weight:600;font-size:.95rem}
-  .mlist .msub{color:var(--muted);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mlist details.mdl summary .ct{font-size:.84rem}
-  .mlist .chev{flex:none;color:var(--muted);transition:transform .15s ease}
-  .mlist details.mdl[open] > summary .chev{transform:rotate(180deg)}
-  .mlist details.mdl[open] > summary{background:var(--soft)}
-  .mlist details.mdl:target > summary{background:var(--soft)}
-  .mlist details.mdl[open] > summary .nm{color:var(--accent2)}
-  /* Opened from a #model link: clear of the sticky header. */
-  details.mdl{scroll-margin-top:84px}
-
-  /* A coaster row inside a model, and a maker row on the index: the whole
-     strip is the link. */
-  a.crow{display:flex;align-items:baseline;gap:10px;padding:9px 16px;font-size:.9rem;color:var(--fg);
-         text-decoration:none;border-bottom:1px solid var(--soft)}
-  a.crow:last-child{border-bottom:0}
-  a.crow:hover{background:var(--soft)}
-  a.crow .tick{flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
-  a.crow.miss .cn{color:var(--muted)}
-  a.crow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  a.crow:hover .cn{color:var(--accent2)}
-  a.crow .pk{color:var(--muted);font-size:.8rem;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  a.crow .yrs{margin-left:auto;flex:none;padding-left:10px;font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
-  a.crow .yrs.off{color:var(--accent)}
-  a.crow.mlink .cn{color:var(--accent2);font-weight:600}
-  /* Your ranking of this maker / model (#ranked). */
-  a.crow .rk{flex:none;min-width:2.6em;color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums}
-  a.crow .md{margin-left:auto;flex:none;padding-left:10px;color:var(--muted);font-size:.8rem;white-space:nowrap}
-  .panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
-  /* The park rides under the name rather than beside it (Carter, 2026-09-25:
-     "want to see park for each coaster"): on a phone there was no room for it
-     beside, so it was hidden, and every Batman read the same. */
-  a.crow .two{display:flex;flex-direction:column;min-width:0}
-  a.crow .two .pk{font-size:.78rem}
-  a.crow{align-items:center}
   a.crow.mk .yrs{color:var(--muted)}
   /* A–Z down the first column, then the second. One column on a phone. */
   .mmods{columns:2;column-gap:28px;padding-top:6px}
@@ -95,48 +43,8 @@
   .mmods .mm a:hover{text-decoration:underline}
   .mmods .mm span{color:var(--muted)}
   .mmods .mm i{font-style:normal;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums;flex:none}
-  @media (max-width:560px){ .mmods{columns:1} }
   a.crow.mk.open{background:var(--soft)}
-  /* "In your rankings" is one line a ride (Carter, 2026-09-28: "shrink
-     these"): name, then its park in grey beside it. */
-  #ranked a.crow{padding-top:6px;padding-bottom:6px;align-items:baseline}
-  #ranked a.crow .two{flex-direction:row;align-items:baseline;gap:8px}
-  #ranked a.crow .two{flex:1 1 auto}
-  #ranked a.crow .two .cn{flex:0 0 auto;max-width:68%}
-  #ranked a.crow .two .pk{flex:1 1 0}
-  #ranked a.crow .two .pk{font-size:.8rem}
-  #ranked a.crow .rk{font-size:.85rem;min-width:2.9em}
-  /* Mine / Global: the /rankings switch (.hero .segsw), section-sized. */
-  .sect.rhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .rsw{display:inline-flex;padding:2px;border:1px solid var(--line);border-radius:999px;background:var(--soft);
-       text-transform:none;letter-spacing:0}
-  .rsw a{padding:3px 12px;border-radius:999px;color:var(--muted);font-weight:600;font-size:.78rem;cursor:pointer;text-decoration:none}
-  .rsw a:hover{color:var(--fg)}
-  .rsw a.on{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.18)}
-  .rnone{color:var(--muted);font-size:.86rem;margin:4px 2px 0}
-  /* Global rows: /rankings' master-list look (.srow .meta, .chev, .wrow). */
-  #ranked a.crow.g{align-items:center;padding-top:9px;padding-bottom:9px}
-  /* The /rankings row (Carter, 2026-09-28): a bare number, the coaster over
-     its park, and "avg #N" over "N lists" on the right. */
-  #ranked a.crow.g .rk{font-size:1.05rem;min-width:1.9em}
-  #ranked a.crow.g .two{flex-direction:column;align-items:flex-start;gap:1px}
-  #ranked a.crow.g .two .cn{max-width:100%;font-size:.93rem}
-  #ranked a.crow.g .two .pk{flex:none;max-width:100%;font-size:.78rem;white-space:normal}
-  #ranked a.crow .gyou{flex:none;padding-left:10px;color:var(--muted);font-size:.78rem;white-space:nowrap;font-variant-numeric:tabular-nums}
-  #ranked a.crow .gmeta{flex:none;padding-left:14px;color:var(--muted);font-size:.8rem;text-align:right;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap}
-  #ranked a.crow .gmeta b{display:block;color:var(--accent2);font-weight:700}
-  #ranked a.crow .chev{flex:none;margin-left:10px;color:var(--muted);transition:transform .15s ease}
-  #ranked a.crow.g.open .chev{transform:rotate(180deg)}
-  #ranked a.crow.g.open{background:var(--soft)}
-  #ranked .cx .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
-  #ranked .cx .wrow{display:inline-flex;align-items:baseline;gap:6px;padding:5px 11px;border:1px solid var(--line);
-    border-radius:999px;background-color:var(--panel);text-decoration:none;color:var(--fg)}
-  #ranked .cx .wrow:hover{border-color:var(--accent2)}
-  #ranked .cx .wn{font-size:.84rem}
-  #ranked .cx .wp{color:var(--accent2);font-weight:700;font-size:.84rem;font-variant-numeric:tabular-nums}
-  /* A phone drops "you #N": your chip is in the open row. */
-  @media (max-width:560px){ #ranked a.crow .gyou{display:none} }
-  @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
+  @media (max-width:560px){ .mmods{columns:1} }
 </style>
 </head>
 <body>
@@ -204,128 +112,17 @@ var MSLUG=decodeURIComponent(PM[2]||'').toLowerCase();
 // Whose ticks: the signed-in rider, as on /count's park view. Signed out, no
 // ticks and no "you have ridden".
 var mine=CoasterHub.me().then(function(a){
-  if(!(a && a.slug)){ RANK_READY(); return null; }
-  // Your ranking too (Carter, 2026-09-25: "where your B&Ms or B&M inverts
-  // fall in your rankings"). Never fatal: no list, no panel.
-  CoasterHub.you().then(function(y){ if(y){ RANK=y.rank; RANKN=y.ranked; } RANK_READY(); }).catch(RANK_READY);
+  if(!(a && a.slug)) return null;
   return CoasterHub.fetchRides(a.slug).then(function(l){
     var m={}; (l.rides||[]).forEach(function(r){ m[r.c]=1; }); return m;
   }).catch(function(){ return null; });
-}).catch(function(){ RANK_READY(); return null; });
-
-// Where this maker's (or model's) coasters sit in the rankings, with the
-// same Mine / Global switch as /rankings (Carter, 2026-09-28: "make it read
-// mine / global like the rankings page"). Mine is your list; Global orders
-// every one of them on 2+ riders' lists by average position — the /rankings
-// master list's arithmetic, with your own rank beside it in grey. Drawn into
-// #ranked whenever the page, your ranking or the global tally arrives.
-var GROWS={}, RANK=null, RANKN=0, RANK_CS=null, RANK_MODEL=false, BYID={}, GLOB=null, RVIEW=null, RANK_KNOWN=false;
-function RANK_READY(){ RANK_KNOWN=true; drawRanked(); }
-function loadGlob(){
-  if(GLOB) return;
-  GLOB='loading';
-  var US=[];
-  CoasterHub.fetchUsers().then(function(users){
-    US=users||[];
-    return Promise.all(US.map(function(u){
-      return fetch('/api/rankings/'+encodeURIComponent(u.slug))
-        .then(function(r){ return r.ok?r.json():{order:[]}; }).catch(function(){ return {order:[]}; });
-    }));
-  }).then(function(all){
-    var t={};
-    all.forEach(function(r,ui){
-      var seen={}, u=US[ui]||{};
-      (r.order||[]).filter(function(id){
-        var c=BYID[id]; if(!c) return false; var k=CoasterHub.rideKey(c); if(seen[k]) return false; seen[k]=1; return true;
-      }).forEach(function(id,pos){
-        var k=CoasterHub.rideKey(BYID[id]); var x=t[k]||(t[k]={n:0,sum:0,who:[]}); x.n++; x.sum+=pos+1;
-        x.who.push({ name:u.name||u.slug, slug:u.slug, pos:pos+1 });
-      });
-    });
-    GLOB=t; drawRanked();
-  }).catch(function(){ GLOB={}; drawRanked(); });
-}
-function drawRanked(){
-  // Not until we know whether you have a ranking: it picks the default view.
-  var el=$('ranked'); if(!el || !RANK_CS || !RANK_KNOWN) return;
-  var mine=RANK ? RANK_CS.filter(function(c){ return RANK[c.id]; }).sort(function(a,b){ return RANK[a.id]-RANK[b.id]; }) : [];
-  if(!RVIEW) RVIEW=mine.length ? 'mine' : 'global';
-  if(RVIEW==='global') loadGlob();
-  var sw='<span class="rsw"><a data-rv="mine"'+(RVIEW==='mine'?' class="on"':'')+'>Mine</a>'
-    +'<a data-rv="global"'+(RVIEW==='global'?' class="on"':'')+'>Global</a></span>';
-  var side=function(c){ return !RANK_MODEL && c.model ? '<span class="md">'+esc(c.model)+'</span>' : ''; };
-  var body;
-  if(RVIEW==='mine'){
-    body=mine.length ? '<div class="panel">'+mine.map(function(c){
-      return '<a class="crow" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="rk">#'+RANK[c.id]+'</span>'
-        +'<span class="two"><span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(c.park||'')+'</span></span>'+side(c)+'</a>';
-    }).join('')+'</div>'
-      : '<p class="rnone">'+(RANK ? 'You haven\u2019t ranked any of these yet.' : 'Sign in to see where these sit in your rankings.')+'</p>';
-  } else if(!GLOB || GLOB==='loading'){
-    body='<p class="rnone">Loading&hellip;</p>';
-  } else {
-    // One row per ride (a relocated ride's rows are one), on 2+ lists.
-    var seen={}, rows=[], one=0;
-    RANK_CS.forEach(function(c){
-      var k=CoasterHub.rideKey(c); if(seen[k]) return; seen[k]=1;
-      var g=GLOB[k]; if(!g) return;
-      if(g.n<2){ one++; return; }
-      rows.push({c:c, n:g.n, avg:g.sum/g.n, who:g.who});
-    });
-    rows.sort(function(a,b){ return a.avg-b.avg || b.n-a.n || a.c.name.localeCompare(b.c.name); });
-    var avg=function(x){ return '#'+(Math.round(x*10)/10); };
-    body=(rows.length ? '<div class="panel">'+rows.map(function(r,i){
-      var c=r.c, me=RANK && RANK[c.id];
-      // The /rankings master-list row (Carter, 2026-09-28: "show how
-      // everyone has them ranked ... same style as /rankings"): lists over
-      // the average on the right, a chevron, and opened, a chip per rider
-      // with their position, then the coaster's stats.
-      GROWS[c.id]=r;
-      return '<a class="crow g" data-gid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="rk">'+(i+1)+'</span>'
-        +'<span class="two"><span class="cn">'+esc(c.name)+'</span><span class="pk">'+esc(c.park||'')+'</span></span>'
-        +(me?'<span class="gyou">you #'+me+'</span>':'')
-        +'<span class="gmeta"><b>avg '+avg(r.avg)+'</b>'+r.n+' lists</span>'
-        +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
-        +'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>';
-    }).join('')+'</div>' : '<p class="rnone">None of these are on 2+ riders\u2019 lists yet.</p>')
-      +(one ? '<p class="rnone">'+one+' more on only one list.</p>' : '');
-  }
-  el.innerHTML='<div class="sect rhead"><span>Rankings</span>'+sw+'</div>'+body;
-  Array.prototype.forEach.call(el.querySelectorAll('[data-rv]'), function(a){
-    a.onclick=function(e){ e.preventDefault(); RVIEW=a.getAttribute('data-rv'); drawRanked(); };
-  });
-  if(!el._gwired){ el._gwired=true; el.addEventListener('click', gClick); }
-}
-// A Global row opens in place like every other coaster row: one at a time,
-// the name a link once it is open. Taps inside the panel are app.js's
-// openableCoasters (on #body): links go, anywhere else closes it.
-function gClick(e){
-  if(e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
-  if(e.target.closest('.cx')) return;
-  var row=e.target.closest('a.crow.g'); if(!row) return;
-  var nx=row.nextElementSibling, isOpen=!!(nx && nx.classList.contains('cx'));
-  if(isOpen && e.target.closest('.cn')) return;
-  e.preventDefault();
-  Array.prototype.forEach.call($('ranked').querySelectorAll('.cx'), function(o){
-    var pr=o.previousElementSibling; if(pr) pr.classList.remove('open'); o.parentNode.removeChild(o);
-  });
-  if(isOpen) return;
-  var r=GROWS[row.getAttribute('data-gid')]; if(!r) return;
-  var c=r.c, chips=r.who.slice().sort(function(a,b){ return a.pos-b.pos; }).map(function(w){
-    return '<a class="wrow" href="'+esc(CoasterHub.userPageHref(w.slug,'rankings'))+'"><span class="wn">'+esc(w.name)+'</span><span class="wp">#'+w.pos+'</span></a>';
-  }).join('');
-  var box=document.createElement('div'); box.className='cx';
-  box.innerHTML='<div class="chips">'+chips+'</div>'
-    +CoasterHub.coasterFacts(c, null, '<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>');
-  row.classList.add('open'); row.parentNode.insertBefore(box, row.nextSibling);
-}
+}).catch(function(){ return null; });
 
 var PARKS={};
 // Every coaster row on the page opens in place (CoasterHub.openableCoasters).
 CoasterHub.openableCoasters(document.getElementById('body'));
 Promise.all([CoasterHub.fetchCoasters(), mine, CoasterHub.fetchParks().catch(function(){ return {}; })]).then(function(res){
   var coasters=res[0].coasters, MINE=res[1]; PARKS=res[2]||{};
-  coasters.forEach(function(c){ BYID[c.id]=c; });
   var BY={};
   coasters.forEach(function(c){
     var m=String(c.manu||'').trim(); if(!m) return;
@@ -433,7 +230,6 @@ function one(name, cs, MINE){
   $('hero_sub').textContent=cs.length+' coaster'+(cs.length===1?'':'s')+' on the site.';
   $('tiles').innerHTML=tile(cs.length,'Coasters')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
     +tile(models.filter(Boolean).length,'Models');
-  RANK_CS=cs; RANK_MODEL=false;
   $('body').innerHTML='<div id="ranked"></div><div class="sect">Models</div><div class="panel mlist">'+models.map(function(mo){
     var list=byModel[mo].slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
     var g=MINE ? list.filter(function(c){ return MINE[c.id]; }).length : null;
@@ -451,7 +247,9 @@ function one(name, cs, MINE){
       +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">Model page &rarr;</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
   }).join('')+'</div>';
-  drawRanked();
+  // Where these sit in the rankings, Mine / Global (CoasterHub.rankSection,
+  // shared with a location's page).
+  CoasterHub.rankSection($('ranked'), cs, {model:true});
   // A link to one model (/manufacturer/intamin#accelerator-coaster) opens it.
   if(location.hash){
     var d=document.getElementById(decodeURIComponent(location.hash.slice(1)));
@@ -509,7 +307,7 @@ function model(maker, mo, cs, MINE){
         +'<td class="stc"><span class="st '+(cl?'off">Closed<span class="dsk"> '+esc(cl)+'</span>':c.closing?'soon" style="color:var(--bad)">Closing soon':'on">Operating')+'</span>'
           +((op||cl)?'<span class="ph yr2">'+esc(op+(cl?(op?'\u2013':'closed ')+cl:''))+'</span>':'')+'</td></tr>';
     }).join('')+'</tbody></table></div>';
-  RANK_CS=cs; RANK_MODEL=true; drawRanked();
+  CoasterHub.rankSection($('ranked'), cs, {model:false});
 }
 function years(cs){
   var y=cs.map(function(c){ return c.opened?Number(String(c.opened).slice(0,4)):(c.yr?Number(c.yr):null); }).filter(Boolean);
