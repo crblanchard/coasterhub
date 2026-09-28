@@ -4969,3 +4969,9 @@ your finger (read as "pick a coaster"). `startFilteredDrag` now slides the row b
 the shown rows, gaps opening like the unfiltered drag (DOM only; midpoints fixed at
 drag start so it doesn't jitter; edge-nudges the page). The drop still goes through
 `moveFilteredTo(from, t)`, t = the shown row it passed.
+
+Carter, 2026-09-28, /rankings read-only: a racing pair opens to BOTH sides' stats, each
+under its own name (`racingStats`). Inside an open category the rides are full-size dark
+names with the parks lined up in a column (`--tw`, the longest name in ch) and each opens
+for its stats like a list row (`MSTAT`, one open at a time with `STATOPEN`); the card's
+open/close ignores taps inside `.members`.

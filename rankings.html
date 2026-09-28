@@ -188,6 +188,20 @@
         font-family:inherit;font-size:.75rem;line-height:1.4}
   .rrow .tiny:hover{color:var(--fg);border-color:var(--accent2)}
   .rrow .mrow .mp.tilde{color:var(--muted);font-weight:600}
+  /* Category members read like the list's own rows (Carter, 2026-09-28):
+     full-size dark names, parks lined up in a column, and read-only a tap
+     opens one's stats. */
+  .rrow .mrow .mn .t{font-size:.9rem;font-weight:600;color:var(--fg)}
+  .rrow .mrow .mn span{font-size:.8rem}
+  @media (min-width:561px){
+    .rrow .mrow .mn .t{flex:0 0 auto;width:var(--tw,auto);max-width:55%;min-width:0}
+    .rrow .mrow .mn span{margin-left:10px}
+  }
+  #mine.readonly .rrow .mrow{cursor:pointer;border-radius:6px}
+  #mine.readonly .rrow .mrow.open{background:var(--soft)}
+  .rrow .rstats.mst{margin:2px 0 6px;padding:6px 0 4px calc(2.2em + 9px);border-top:0}
+  .rrow .rstats .rname{font-weight:700;font-size:.86rem;margin:10px 0 2px;padding-top:10px;border-top:1px dashed var(--line)}
+  .rrow .rstats .rname:first-child{margin-top:2px;padding-top:0;border-top:0}
   .rrow .mrow .macts{display:flex;gap:4px;flex:none;margin-left:auto}
   .rrow .mrow .macts button{flex:none;width:24px;height:24px;border-radius:7px;
         border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;
@@ -1005,8 +1019,20 @@ function loadGlobal(){
 // Which rows have their stats open. Only drawn for open rows, so a 300-long
 // list costs nothing until you tap one.
 var STATOPEN={};
+// A ride inside an open category, opened for its stats (read-only), by id.
+var MSTAT=0;
 function statsFor(id){
   if(!STATOPEN[id]) return '';
+  return '<div class="rstats">'+factsFor(id)+'</div>';
+}
+// A racing pair (Carter, 2026-09-28): both sides' stats, each under its name.
+function racingStats(b){
+  if(!STATOPEN[b.ids[0]]) return '';
+  return '<div class="rstats">'+b.ids.map(function(id){
+    return '<div class="rname">'+esc((BYID[id]||{}).name||'')+'</div>'+factsFor(id);
+  }).join('')+'</div>';
+}
+function factsFor(id){
   var c=BYID[id]||{};
   // Where it sits on the Global list (Carter, 2026-09-27: "want to see
   // something that says 'global ranking: ' with the number").
@@ -1022,8 +1048,8 @@ function statsFor(id){
     if(c.model && o.model===c.model && o.manu===c.manu){ dn++; if(k===KEY(id)) di=dn; }
   });
   var among={ manu: mi ? mi+' of '+mn : '', model: di ? di+' of '+dn : '' };
-  return '<div class="rstats">'+CoasterHub.coasterFacts(c, extra,
-    c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'', among)+'</div>';
+  return CoasterHub.coasterFacts(c, extra,
+    c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'', among);
 }
 // ---- model filter ------------------------------------------------------------
 // Which models to show (maker() — the model, or the maker when there is none).
@@ -1078,7 +1104,7 @@ function renderRank(){
       +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
       +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
       +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
-      +'</span>'+statsFor(b.ids[0])+'</div>';
+      +'</span>'+racingStats(b)+'</div>';
     // A run of the same ride is one row: "Batman: The Ride x5", numbered with
     // the span it occupies. It still holds five positions — the list saved is
     // unchanged — you just answer for it once.
@@ -1093,7 +1119,10 @@ function renderRank(){
     var key = b.g ? catKey(b.g) : '';
     var numbered = b.g ? !!NUMS[key] : false;
     var gone = b.g ? strays(b.g, b) : [];
-    var members = b.g ? '<div class="members"'+(OPEN[key]?'':' hidden')+'>'
+    // Parks line up in a column (Carter, 2026-09-28): the name column is as
+    // wide as the longest name here, in ch of the name's own font.
+    var tw = b.g ? Math.max.apply(null, b.ids.map(function(id){ return ((BYID[id]||{}).name||'').length; })) : 0;
+    var members = b.g ? '<div class="members" style="--tw:'+(tw+1)+'ch"'+(OPEN[key]?'':' hidden')+'>'
       // Whether the rides inside carry their real positions or all read ~ is a
       // fact about THIS category, so the switch lives in it rather than in a
       // setting somewhere else. Default off: the point of a category is that
@@ -1106,7 +1135,7 @@ function renderRank(){
         +'<button class="tiny" type="button" data-reset="'+key+'" '
           +'title="Back to alphabetical, by park">Reset order</button></div>'
       +b.ids.map(function(id,k){ var c=BYID[id]||{};
-        return '<div class="mrow" data-mid="'+id+'">'
+        return '<div class="mrow'+(MSTAT===id?' open':'')+'" data-mid="'+id+'">'
           +'<span class="grip" data-mgrip="'+id+'" aria-hidden="true">\u283f</span>'
           +'<span class="mp'+(numbered?'':' tilde')+'">'
           +(numbered?(b.from+k+1):'~')+'</span>'
@@ -1122,7 +1151,9 @@ function renderRank(){
             +'aria-label="Move down inside this group"'
             +(k===b.ids.length-1?' disabled':'')+'>\u2193</button>'
           +'<button class="del" data-dropone="'+id+'" title="Remove this one" '
-            +'aria-label="Remove this one">\u00d7</button></span></div>'; }).join('')
+            +'aria-label="Remove this one">\u00d7</button></span></div>'
+          // Read-only, a ride in a category opens like any other row.
+          +(MSTAT===id ? '<div class="rstats mst">'+factsFor(id)+'</div>' : ''); }).join('')
       +(gone.length ? '<div class="excl"><b>Ranked separately:</b>'
           +gone.map(function(x){ var c=BYID[x.id]||{};
             // The ride, then where it is — the same black-then-grey every other
@@ -1179,7 +1210,7 @@ function renderRank(){
       // those are links (Carter, 2026-09-25), and the rest of the row closes it.
       if(a){ if(STATOPEN[id]) return; ev.preventDefault(); }
       // One open at a time (Carter, 2026-09-27): opening a row closes the rest.
-      var was=!!STATOPEN[id]; STATOPEN={}; if(!was) STATOPEN[id]=true; renderRank();
+      var was=!!STATOPEN[id]; STATOPEN={}; MSTAT=0; if(!was) STATOPEN[id]=true; renderRank();
     });
   });
   $('gatherbar').style.display = scattered() ? 'flex' : 'none';
@@ -1191,9 +1222,21 @@ function renderRank(){
   // The whole card is the way in. Every control sitting on it stops the click,
   // or moving a category up the list would also open it — and the grips are
   // controls too, or a drag that ends on the card toggles it.
+  // Read-only: a ride inside an open category opens for its stats; a tap in
+  // the open stats closes them (links still go). One open at a time, with
+  // the list's own rows.
+  el.querySelectorAll('.members').forEach(function(m){
+    m.addEventListener('click', function(ev){
+      if(!$('mine').classList.contains('readonly')) return;
+      var st=ev.target.closest('.rstats');
+      if(st){ if(ev.target.closest('a')) return; MSTAT=0; renderRank(); return; }
+      var mr=ev.target.closest('.mrow'); if(!mr) return;
+      var id=+mr.dataset.mid; MSTAT = MSTAT===id ? 0 : id; STATOPEN={}; renderRank();
+    });
+  });
   el.querySelectorAll('[data-open]').forEach(function(r){
     var toggle=function(ev){
-      if(ev.target.closest('button, input, select, textarea, .grip')) return;
+      if(ev.target.closest('button, input, select, textarea, .grip, .members')) return;
       if(Date.now()-dragEnded < 300) return;
       var k=r.dataset.open; OPEN[k]=!OPEN[k]; renderRank();
     };
