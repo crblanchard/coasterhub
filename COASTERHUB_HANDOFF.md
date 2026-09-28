@@ -5195,8 +5195,7 @@ Carter, 2026-09-28, "less AI-feeling" pass:
    ("Coaster page", "Park page", "Model page", "Manufacturer page"), profile's header links,
    the map popup, rankings cards, "United States". Kept: See all credits, All activity,
    Contact us, View them all on the map, log/import prompts, pager.
-8. **Numbers bigger.** Tiles 2.5rem (1.5 phone), coaster specs 2.2rem, spec sheet 1.7rem,
-   profile KPIs and rankings figures 2.4rem.
+8. Numbers bigger — tried, then **reverted** the same day (Carter: "not necessary").
 Pending: 3 (taglines — asked which), 6/9 (mockups), 7 (fonts — suggested). 10 left as is.
 
 Carter, 2026-09-28: Top users on a computer now match Friends (full-size rows) — the big rider-row rules are scoped to .riderlist, not #friends.

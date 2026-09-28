@@ -706,10 +706,9 @@ html.srchopen{overflow:hidden}
 /* A spec sheet: label on the left, value on the right, one per line. */
 .specsheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:10px}
 .specsheet div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
-.specsheet b{display:block;font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1}
+.specsheet b{display:block;font-size:1.05rem;font-weight:800;font-variant-numeric:tabular-nums}
 .specsheet span{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
 .specsheet small{color:var(--muted);font-weight:600;font-size:.78rem}
-@media (max-width:560px){ .specsheet{grid-template-columns:repeat(2,minmax(0,1fr))} .specsheet b{font-size:1.15rem;white-space:nowrap} }
 
 /* ---- The database pages (park, coaster, manufacturer, model, location) ----
    One set of shapes for all five (2026-09-25); they each used to carry their
@@ -722,10 +721,9 @@ html.srchopen{overflow:hidden}
 .crumbs i{font-style:normal;opacity:.6}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;min-width:0}
-/* The numbers are the point (Carter, 2026-09-28: "need more emphasis!!!"). */
-.tile b{display:block;font-size:2.5rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.05;letter-spacing:-.03em}
+.tile b{display:block;font-size:1.5rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.15}
 .tile span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}
-@media (max-width:680px){ .tiles{grid-template-columns:repeat(2,1fr)} .tile b{font-size:1.5rem;white-space:nowrap} }
+@media (max-width:680px){ .tiles{grid-template-columns:repeat(2,1fr)} .tile b{font-size:1.25rem} }
 .youline{margin:0 0 6px;padding:10px 14px;border-radius:12px;background:var(--tint);border:1px solid var(--line);
   color:var(--muted);font-size:.9rem;line-height:1.5}
 .youline b{color:var(--fg);font-variant-numeric:tabular-nums}

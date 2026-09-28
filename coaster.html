@@ -38,8 +38,8 @@
      grid half full of em-dashes says nothing and reads as broken. */
   .specs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 4px}
   .spec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;min-width:0}
-  .spec b{display:block;font-size:2.2rem;font-weight:800;color:var(--accent2);letter-spacing:-.03em;
-          font-variant-numeric:tabular-nums;line-height:1.05;
+  .spec b{display:block;font-size:1.25rem;font-weight:800;color:var(--accent2);
+          font-variant-numeric:tabular-nums;line-height:1.2;
           overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* A maker's name is prose, not a number, so it is sized like prose and
      allowed to wrap rather than being clipped at one line. */
@@ -48,7 +48,7 @@
   .spec.text b a:hover{color:var(--accent2);text-decoration:underline}
   .spec span{display:block;color:var(--muted);font-size:.8rem;
              margin-top:4px}
-  @media (max-width:680px){ .specs{grid-template-columns:repeat(2,1fr)} .spec b{font-size:1.8rem} }
+  @media (max-width:680px){ .specs{grid-template-columns:repeat(2,1fr)} }
 
   /* History is plain lines (Carter, 2026-09-26). */
   .hist p,.riders .at{margin:0 0 4px;font-size:.92rem;line-height:1.5}
