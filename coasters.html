@@ -131,9 +131,9 @@ function draw(){
            h:num('h',1), s:num('s',1),
            'new':function(a,b){ var x=yr(a), y=yr(b); if(x==null) return 1; if(y==null) return -1; return y-x || a.name.localeCompare(b.name); },
            old:function(a,b){ var x=yr(a), y=yr(b); if(x==null) return 1; if(y==null) return -1; return x-y || a.name.localeCompare(b.name); } };
-  // Defunct at the bottom whatever the sort (Carter, 2026-09-28).
-  var cmp=by[so]||by.name;
-  list.sort(function(a,b){ return (!!a.closed-!!b.closed) || cmp(a,b); });
+  // Defunct mixed in here (Carter, 2026-09-28): a sorted browse list. Defunct
+  // last is only for the lists inside a maker, model, park or location page.
+  list.sort(by[so]||by.name);
   $('shown').innerHTML='<b>'+list.length.toLocaleString()+'</b> coaster'+(list.length===1?'':'s')
     +(MINE ? ' · you have ridden <b>'+list.filter(function(c){ return MINE[c.id]; }).length.toLocaleString()+'</b>' : '');
   // The one coaster row: park · place beside the name, and on the right the

@@ -5147,3 +5147,7 @@ counting /api calls) and cut the repeats.
   activity) — different questions; could share one later.
 
 Carter, 2026-09-28: home rider rows — **Friends** on a computer are the old card size inside the one list (54px picture, name / @username / credits stacked, ranked count large over a RANKED label); **Top users** stay slim on a computer; on a phone every row is the big stacked shape (48px picture).
+
+**Amended again, Carter 2026-09-28:** defunct-last is ONLY for the coaster lists inside a
+maker, model, park or location page (and a park opened on /parks or /credits Parks).
+/coasters keeps defunct mixed in, in whatever order the sort says.
