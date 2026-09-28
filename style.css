@@ -12,7 +12,7 @@
      palettes): graphite, a warm yellow and sky blue. It replaced "Midnight"
      (navy #0b1020, coral #ff5a5f, teal #37d0c8). Yellow and blue are
      opposites, so the loud accent and the link colour never compete. */
-  --bg:#111315; --panel:#1b1e22; --fg:#f3f4f6; --muted:#9aa3ad;
+  --bg:#0a0f1a; --panel:#131b29; --fg:#f3f4f6; --muted:#9aa3ad;
   --accent:#ffcc1f; --accent2:#4cc3ff; --line:rgba(255,255,255,.10);
   /* The accent as a FILL (the .btn), and the text on it. A separate token
      from --accent because on light the text accent has to darken to be read
@@ -24,17 +24,17 @@
   --bad:#ff5a5f;
   --soft:rgba(255,255,255,.05);     /* faint fill lifted off the page */
   --soft2:rgba(255,255,255,.07);    /* one step up: inputs, hovered rows */
-  --well:#15171a;                   /* recessed: sits *under* --panel */
+  --well:#0d1422;                   /* recessed: sits *under* --panel */
   --tint:rgba(76,195,255,.07);      /* accent wash */
   --tint2:rgba(76,195,255,.14);
   --ring:rgba(76,195,255,.35);      /* focus / hover border */
-  --veil:rgba(17,19,21,.78);        /* sticky header over scrolling content */
-  --veil2:rgba(17,19,21,.94);       /* mobile tab bar */
+  --veil:rgba(10,15,26,.78);        /* sticky header over scrolling content */
+  --veil2:rgba(10,15,26,.94);       /* mobile tab bar */
   --shadow:rgba(0,0,0,.5);
-  --hero1:rgba(76,195,255,.15); --hero2:rgba(255,204,31,.11);
+  --hero1:rgba(76,195,255,.06); --hero2:rgba(255,204,31,.04);
   /* Heatmap ramp, least -> most. Light mode inverts the direction: on a dark
      page "more" is brighter, on a light page "more" is darker. */
-  --hm0:#20242a; --hm1:#1b4d6b; --hm2:#2a7fb0; --hm3:#4cc3ff; --hm4:#a9e3ff;
+  --hm0:#172133; --hm1:#1b4d6b; --hm2:#2a7fb0; --hm3:#4cc3ff; --hm4:#a9e3ff;
   --hmline:rgba(0,0,0,.15); --hmhover:#fff;
 }
 :root[data-theme="light"]{
@@ -55,7 +55,7 @@
   --veil:rgba(245,245,243,.82);
   --veil2:rgba(245,245,243,.94);
   --shadow:rgba(22,24,27,.16);
-  --hero1:rgba(10,106,160,.12); --hero2:rgba(255,204,31,.16);
+  --hero1:rgba(10,106,160,.07); --hero2:rgba(255,204,31,.10);
   --hm0:#e8eaec; --hm1:#b5d9ee; --hm2:#5fa9d6; --hm3:#1f78b4; --hm4:#0a4f7a;
   --hmline:rgba(22,24,27,.10); --hmhover:#16181b;
 }
@@ -100,10 +100,30 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
    the padding declaration lives HERE, where the phone rule below can reach
    it — an inline padding beats any stylesheet rule, media query or not. */
 .hero{position:relative;overflow:hidden;
-  padding-top:var(--hero-t,96px);padding-bottom:var(--hero-b,84px);
+  padding-top:var(--hero-t,96px);padding-bottom:calc(var(--hero-b,84px) + 30px);
   padding-left:0;padding-right:0;
-  background:radial-gradient(1000px 500px at 75% -10%,var(--hero1),transparent 60%),
-             radial-gradient(800px 460px at 0% 120%,var(--hero2),transparent 55%)}
+  /* A band with a coaster track across it, its train of lights running along
+     the rail (Carter, 2026-09-28). Night: near-black blue. Day: a lighter
+     teal. The tokens are redefined inside it so every child reads on it. */
+  --fg:#fff; --muted:rgba(255,255,255,.80); --accent2:#bfe7ff; --line:rgba(255,255,255,.30);
+  --panel:rgba(255,255,255,.12); --soft:rgba(255,255,255,.10); --tint:rgba(255,255,255,.12); --tint2:rgba(255,255,255,.20);
+  color:var(--fg);
+  background-color:#060b15;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'%3E%3Cpath d='M0 190 C160 190 200 30 320 30 C440 30 450 170 560 170 C660 170 670 90 770 90 C880 90 900 200 1030 188 C1120 180 1150 110 1200 120' fill='none' stroke='white' stroke-opacity='.22' stroke-width='1.2' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 200 C160 200 200 40 320 40 C440 40 450 180 560 180 C660 180 670 100 770 100 C880 100 900 210 1030 198 C1120 190 1150 120 1200 130' fill='none' stroke='white' stroke-opacity='.12' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M0 190 C160 190 200 30 320 30 C440 30 450 170 560 170 C660 170 670 90 770 90 C880 90 900 200 1030 188 C1120 180 1150 110 1200 120' fill='none' stroke='%23ffcc1f' stroke-width='3' stroke-dasharray='0.1 16' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right calc(100% - 26px);background-size:100% 78%}
+/* The band's last 30px fade into the page. */
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30px;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(6,11,21,0),var(--bg))}
+:root[data-theme="light"] .hero{background-color:#3d9fc0;--accent2:#fff}
+:root[data-theme="light"] .hero::after{background:linear-gradient(to bottom,rgba(61,159,192,0),var(--bg))}
+.hero h1{color:#fff}
+.hero svg.track{display:none}
+.hero .segsw a.on{background:#fff;color:#0b3f5a}
+/* Under the band, the old hero colours, very faint, washing the page. */
+body{background-image:
+  radial-gradient(900px 600px at 100% 380px,var(--hero1),transparent 70%),
+  radial-gradient(800px 600px at 0% 900px,var(--hero2),transparent 70%);
+  background-repeat:no-repeat}
 .hero .badge{display:inline-block;font-size:.8rem;
   color:var(--accent2);border:1px solid var(--ring);border-radius:999px;padding:6px 14px;margin-bottom:22px}
 /* The badge over the headline is the rider switcher on the three per-rider

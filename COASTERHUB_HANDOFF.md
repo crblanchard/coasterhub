@@ -5199,3 +5199,14 @@ Carter, 2026-09-28, "less AI-feeling" pass:
 Pending: 3 (taglines — asked which), 6/9 (mockups), 7 (fonts — suggested). 10 left as is.
 
 Carter, 2026-09-28: Top users on a computer now match Friends (full-size rows) — the big rider-row rules are scoped to .riderlist, not #friends.
+
+Carter, 2026-09-28, #6 settled after mockups: every page's hero is a **band with a coaster
+track and a train of yellow lights along the rail** (inline SVG data-URI in style.css
+`.hero`). **Dark mode = near-black blue** (#060b15 band; the whole dark theme moved from
+graphite to navy: --bg #0a0f1a, --panel #131b29, --well/--veil/--hm0 to match). **Light mode
+= a lighter teal band** (#3d9fc0). Both fade into the page over their last 30px
+(`.hero::after`, hero bottom padding +30px), and the old hero colours wash the page
+body very faintly (body background radial gradients from --hero1/--hero2, lowered).
+The hero redefines --fg/--muted/--accent2/--line/--panel/... so every child reads on it.
+Font unchanged (Carter: "the font's okay"). Rejected along the way: flat, plain teal band,
+ride-sign yellow, ticket.
