@@ -1754,7 +1754,7 @@
     var E = searchEsc, got = opts.mine && opts.mine[c.id];
     return '<a class="crow std' + (c.closed ? ' gone' : '') + (opts.mine ? (got ? ' got' : ' miss') : '') + '" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '">'
       + (opts.mine ? '<span class="tick">' + (got ? '✓' : '') + '</span>' : '')
-      + '<span class="two"><span class="cn">' + E(c.name) + '</span>' + (opts.ctx ? '<span class="pk">' + (opts.ctx === "place" || opts.ctx === "park" || opts.ctx === "model" ? ctxLinks(c, opts.ctx) : E(opts.ctx)) + (opts.more ? E(opts.more) : '') + '</span>' : '') + '</span>'
+      + '<span class="two"><span class="cn">' + E(c.name) + '</span>' + (opts.ctx ? '<span class="pk">' + (opts.ctx === "place" || opts.ctx === "park" || opts.ctx === "model" ? ctxLinks(c, opts.ctx) : E(opts.ctx)) + (opts.more ? E(opts.more) : '') + (opts.beside ? ' ' + opts.beside : '') + '</span>' : '') + '</span>'
       + '<span class="end">' + (opts.end != null ? opts.end : lifeTag(c, opts.val)) + '</span></a>';
   }
 
@@ -1773,8 +1773,10 @@
       // "15 rides · 13 coasters": one line here, stacked on a phone so the park keeps its width.
       + '<span class="ct vct">' + String(o.right || "").split(" \u00b7 ").map(function (x) { return '<span>' + E(x) + '</span>'; }).join('<i> \u00b7 </i>') + '</span>' + chev + '</summary>'
       + (o.rows || []).map(function (r) {
-        return coasterRow(r.c, { ctx: r.ctx, end: (r.fresh ? '<span class="nw" title="New credit — first time on this one">New</span>' : '')
-          + (r.n > 1 ? '<span class="lap">×' + r.n + '</span>' : '') });
+        // The day's laps sit right after the model (Carter, 2026-09-28), not
+        // out on the far edge.
+        return coasterRow(r.c, { ctx: r.ctx, end: r.fresh ? '<span class="nw" title="New credit — first time on this one">New</span>' : '',
+          beside: r.n > 1 ? '<span class="lap">×' + r.n + '</span>' : '' });
       }).join("")
       + (o.foot ? '<div class="vfoot">' + E(o.foot) + '</div>' : '')
       + '</details>';

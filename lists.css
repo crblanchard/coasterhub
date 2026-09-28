@@ -199,3 +199,4 @@ a.crow.open .pk .lnk:hover{color:var(--accent2);text-decoration-color:currentCol
    fraction of a pixel of rounding was shaving the last digit — "Sep 12, 2026" missing half its 6.
    A hair of room on the right. Same for the coaster rows' grey line. */
 .mlist .msub,a.crow .pk{padding-right:.2em}
+a.crow .pk .lap{margin-left:6px}

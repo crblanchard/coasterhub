@@ -5177,3 +5177,5 @@ untouched. Snapshot: 116 coasters carry laps > 1 — 86 at 2 (mostly shuttles: B
 Impulses, Accelerator-style launches counted there-and-back), 11 at 3, and a tail of
 kiddie/family coasters at 4–16 (multiple circuits per ride). That split is the question
 the standard has to answer.
+
+Carter, 2026-09-28: in an opened visit (Recent visits, /credits Rides) a coaster's ×laps sits right after its model in the grey line (coasterRow opts.beside), not on the far right.
