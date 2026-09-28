@@ -621,9 +621,10 @@
       <div class="bar">
         <input id="q" type="search" placeholder="Search coaster, park or maker&hellip;">
         <select id="sort">
-          <option value="name">Name (A–Z)</option>
           <option value="h">Tallest first</option>
           <option value="s">Fastest first</option>
+          <option value="name">Name (A–Z)</option>
+          <option value="ridden" hidden>Most ridden</option>
           <option value="park">Park</option>
         </select>
         <select id="f_addpark"><option value="">All parks</option></select>
@@ -970,7 +971,14 @@ function wire(){
   $('q').addEventListener('input',renderAdd);
   $('sort').addEventListener('change',renderAdd);
   $('f_addpark').addEventListener('change',renderAdd);
-  $('all_coasters').addEventListener('change',function(){ buildAddParks(); renderAdd(); });
+  // Searching every coaster on the site (Carter, 2026-09-28): most ridden
+  // first by default, and no category rows — those are for YOUR coasters.
+  // Back to your own, back to Tallest first.
+  $('all_coasters').addEventListener('change',function(){
+    var all=$('all_coasters').checked, o=$('sort').querySelector('option[value=ridden]');
+    o.hidden=!all; $('sort').value = all ? 'ridden' : 'h';
+    if(all) loadRiddenBy();
+    buildAddParks(); renderAdd(); });
   // One panel at a time: two of them open push the list off the screen, and
   // the button keeps its highlight while its ticks are set, so closing one
   // never hides that it is still filtering.
@@ -2006,6 +2014,19 @@ function renderFacet(f){
   });
 }
 
+// How many riders have ridden each coaster (one per rider, relocated rides
+// counted once): the "Most ridden" sort. Fetched once, the first time it's needed.
+var RIDDEN=null, riddenP=null;
+function loadRiddenBy(){
+  if(riddenP) return riddenP;
+  riddenP=CoasterHub.fetchAllRides().then(function(all){
+    var n={};
+    (all||[]).forEach(function(u){ var seen={};
+      (u.rides||[]).forEach(function(r){ var k=KEY(r.c); if(seen[k]) return; seen[k]=1; n[k]=(n[k]||0)+1; }); });
+    RIDDEN=n; renderAdd();
+  });
+  return riddenP;
+}
 function pool(){
   var ranked={}; ORDER.forEach(function(id){ranked[id]=1;});
   var q=$('q').value.trim().toLowerCase();
@@ -2027,6 +2048,8 @@ function pool(){
   list.sort(function(a,b){
     // No defunct-last: these are your own coasters (Carter, 2026-09-28).
     if(s==='name') return String(a.name).localeCompare(String(b.name));
+    if(s==='ridden') return ((RIDDEN&&RIDDEN[KEY(b.id)])||0)-((RIDDEN&&RIDDEN[KEY(a.id)])||0)
+                     || String(a.name).localeCompare(String(b.name));
     if(s==='park') return String(a.park||'').localeCompare(String(b.park||''))
                      || String(a.name).localeCompare(String(b.name));
     // tallest / fastest first, unknowns last so the big ones lead
@@ -2065,7 +2088,7 @@ function renderAdd(){
     // Racing sides are listed one by one (Carter, 2026-09-25: "show them
     // separately in the list"); Rank asks whether to take them together —
     // see askRacing().
-    if(!g || g.racing){ rows.push({c:c}); return; }
+    if(!g || g.racing || $('all_coasters').checked){ rows.push({c:c}); return; }
     if(seenG[g.key]) return;
     var mates=list.filter(function(x){ return CLONE[x.id]===g; });
     // One left of a category you already rank is not a family row, but it is
@@ -2129,6 +2152,7 @@ function renderAdd(){
     var so=$('sort').value;
     var val = so==='h' ? (c.h!=null?Math.round(c.h)+' ft':'')
             : so==='s' ? (c.s!=null?Math.round(c.s)+' mph':'')
+            : so==='ridden' ? (RIDDEN ? (RIDDEN[KEY(c.id)]||0)+' rider'+((RIDDEN[KEY(c.id)]||0)===1?'':'s') : '')
             : (CoasterHub.maker(c)||'');
     var joinbit = row.joins
       ? '<span class="jn"> \u00b7 joins '+esc(row.joins.name)+' ('+row.jn+' ranked)</span>'

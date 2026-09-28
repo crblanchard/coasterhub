@@ -5114,3 +5114,5 @@ park · place under it — and **Global rows show the ride's site-wide Global-li
 on /credits' Parks tab). **Your own lists keep their plain order** — /credits Coasters
 tab and Rides tab, profile Recent visits, /rankings Add coasters. Grey-only-for-defunct
 still applies everywhere.
+
+Carter, 2026-09-28: /rankings Add coasters defaults to **Tallest first** again (his own coasters). Ticking **Search all coasters** switches to a **Most ridden** sort (riders who have ridden it, one per rider, via /api/rides-all, loaded on first use; shown as "N riders" on the right) and turns off the category rows; unticking goes back to Tallest first.
