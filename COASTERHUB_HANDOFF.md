@@ -5224,3 +5224,10 @@ yellow light strings on the tracks, red aircraft lights on the towers), drawn by
 (whose subtitle wraps at 28em to stay clear); a 58px strip under the text on phones
 (band gets +50px bottom padding there); none on the profile (its band has a right
 column). Bump `?v=` in style.css when the SVGs change (svg is cached a week).
+Revised the same day to Carter's references: the skyline is now an **RMC-style hybrid**
+(straight lift, beyond-vertical drop, big stall hill, dense bent-and-ledger wood
+structure — Zadra / Steel Vengeance), a **B&M hyper in side profile** (Diamondback:
+straight lift, long steep drop, shrinking camelbacks on splayed legs), an **S&S triple
+tower** (three lattice masts, rings, pointed cap and spire) and the **SkyScreamer**.
+No other coasters, no single drop tower. Same 150px height everywhere now (home too).
+Regenerate with `python3 tools/make-skyline.py .` and bump `?v=` (now 2).
