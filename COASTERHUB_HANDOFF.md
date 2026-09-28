@@ -4982,3 +4982,15 @@ ridden/total in grey on the right (as the /manufacturers panel shows it — this
 back the "x of y" that came out 09-25, now in the x/y form he asked for on 09-27), and a
 chevron; hairlines are --line, open row tinted. The link inside reads "Model page →",
 matching "Coaster page →" / "Manufacturer page →".
+
+Carter, 2026-09-28, a location's page ("same with these park lists ... make parks /
+coasters collapsible with a rankings thing added to the bottom for now like you can do
+for models"): the Parks table is now the maker page's model list — park over "N
+operating · N defunct" (· state on /location/us), your ridden/total in grey, a chevron —
+and each opens to "Park page →" and its coasters (name over model, years, tick). The
+separate flat Coasters table is gone (same rides). A Rankings section (Mine / Global) sits
+at the bottom. To share it: the list/row/rankings CSS moved from manufacturer.html to
+**lists.css** (linked by manufacturer.html and location.html), and the rankings logic to
+**`CoasterHub.rankSection(el, coasters, {model})`** in app.js (global tally fetched once
+per page, 10 rows then "Show all N", Global rows open to rider chips). A page using it
+needs openableCoasters on an ancestor for the Mine rows.

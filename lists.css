@@ -95,3 +95,6 @@ a.crow{align-items:center}
 /* A phone drops "you #N": your chip is in the open row. */
 @media (max-width:560px){ .ranksec a.crow .gyou{display:none} }
 @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }
+.ranksec .rmore{color:var(--accent2);font-weight:600;text-decoration:none}
+/* A phone has no room for the model beside a ranked coaster. */
+@media (max-width:560px){ .ranksec a.crow .md{display:none} }

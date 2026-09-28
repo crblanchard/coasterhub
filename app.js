@@ -1714,6 +1714,9 @@
     var chev = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
       + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
     el.classList.add("ranksec");
+    // Ten, then "Show all N" — a state can have a hundred ranked rides.
+    function cut(a) { return st.all ? a : a.slice(0, 10); }
+    function more(n) { return n > 10 ? '<p class="rnone"><a class="rmore" href="#">' + (st.all ? "Show fewer" : "Show all " + n) + '</a></p>' : ''; }
     function draw() {
       if (!st.known) return;
       var R = st.rank;
@@ -1724,11 +1727,11 @@
         + '<a data-rv="global"' + (st.view === "global" ? ' class="on"' : '') + '>Global</a></span>';
       var body;
       if (st.view === "mine") {
-        body = mine.length ? '<div class="panel">' + mine.map(function (c) {
+        body = mine.length ? '<div class="panel">' + cut(mine).map(function (c) {
           return '<a class="crow" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">#' + R[c.id] + '</span>'
             + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(c.park || "") + '</span></span>'
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '') + '</a>';
-        }).join("") + '</div>'
+        }).join("") + '</div>' + more(mine.length)
           : '<p class="rnone">' + (R ? "You haven’t ranked any of these yet." : "Sign in to see where these sit in your rankings.") + '</p>';
       } else if (st.glob === "loading") {
         body = '<p class="rnone">Loading&hellip;</p>';
@@ -1742,19 +1745,21 @@
         });
         rows.sort(function (a, b) { return a.avg - b.avg || b.n - a.n || String(a.c.name).localeCompare(String(b.c.name)); });
         st.rows = {};
-        body = (rows.length ? '<div class="panel">' + rows.map(function (r, i) {
+        body = (rows.length ? '<div class="panel">' + cut(rows).map(function (r, i) {
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
           return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + (i + 1) + '</span>'
             + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + E(c.park || "") + '</span></span>'
             + (me ? '<span class="gyou">you #' + me + '</span>' : '')
             + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + r.n + ' lists</span>' + chev + '</a>';
-        }).join("") + '</div>' : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
+        }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
           + (one ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');
       }
       el.innerHTML = '<div class="sect rhead"><span>Rankings</span>' + sw + '</div>' + body;
       Array.prototype.forEach.call(el.querySelectorAll("[data-rv]"), function (a) {
-        a.onclick = function (e) { e.preventDefault(); st.view = a.getAttribute("data-rv"); draw(); };
+        a.onclick = function (e) { e.preventDefault(); st.view = a.getAttribute("data-rv"); st.all = false; draw(); };
       });
+      var mo = el.querySelector(".rmore");
+      if (mo) mo.onclick = function (e) { e.preventDefault(); st.all = !st.all; draw(); };
     }
     // A Global row opens in place like every other coaster row, one at a time;
     // taps inside the open panel are openableCoasters' (links go, else close).

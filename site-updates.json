@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-09-28T17:53:11Z",
-   "text": "Manufacturer and model pages now have a Mine / Global ranking of their coasters, and coaster tables fit on a phone. Rides pulled out of a category show how far above or below it they sit."
+   "at": "2026-09-28T18:27:23Z",
+   "text": "Manufacturer, model and location pages now have a Mine / Global ranking of their coasters, and a state's parks open to their coasters like models do. Rides pulled out of a category show how far above or below it they sit, and coaster tables fit on a phone."
   },
   {
    "at": "2026-09-27T23:47:02Z",
