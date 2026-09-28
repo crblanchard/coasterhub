@@ -216,7 +216,11 @@
   .rrow .pnote.down{color:var(--down)}
   #mine.readonly .rrow .pnote{display:none}
   .rrow .pmini{display:none;margin-left:14px;font-weight:700;font-variant-numeric:tabular-nums}
-  #mine.readonly .rrow .pmini{display:inline}
+  #mine.readonly .rrow .pmini.pd{display:inline}
+  @media (max-width:560px){
+    #mine.readonly .rrow .pmini.pd{display:none}
+    #mine.readonly .rrow .pmini.pm{display:inline;margin-left:10px}
+  }
   .rrow .pmini .parr{display:inline-block;width:.7em;height:.8em;margin-right:.35em;vertical-align:-.02em}
   .rrow .pmini.up{color:var(--up)}
   .rrow .pmini.down{color:var(--down)}
@@ -1140,8 +1144,14 @@ function renderRank(){
       +(pl.up?'\u2191 ':'\u2193 ')+pl.d+' rank'+(pl.d===1?'':'s')+' '+(pl.up?'above':'below')+' '+esc(pl.g.name)+'</span></span>');
     // Read-only, the same fact as a bold "↑ 7" after the location (Carter,
     // 2026-09-28); the sentence is its tooltip.
-    if (pl) head = head.replace(/(<span class="pl">[\s\S]*?)<\/span>/, '$1<span class="pmini '+(pl.up?'up':'down')+'" title="'
-      +pl.d+' rank'+(pl.d===1?'':'s')+' '+(pl.up?'above':'below')+' '+esc(pl.g.name)+'">'+PARROW.replace('%', pl.up?'':' style="transform:rotate(180deg)"')+pl.d+'</span></span>');
+    // On a phone it sits beside the name instead (Carter, 2026-09-28): the
+    // second line is park, place and model, and ran out of room for it.
+    if (pl) {
+      var pmi=function(where){ return '<span class="pmini '+where+' '+(pl.up?'up':'down')+'" title="'
+        +pl.d+' rank'+(pl.d===1?'':'s')+' '+(pl.up?'above':'below')+' '+esc(pl.g.name)+'">'+PARROW.replace('%', pl.up?'':' style="transform:rotate(180deg)"')+pl.d+'</span>'; };
+      head = head.replace(/(<span class="pl">[\s\S]*?)<\/span>/, '$1'+pmi('pd')+'</span>');
+      head = head.replace('</b>', pmi('pm')+'</b>');
+    }
     return '<div class="rrow'+(b.g?' grp':' tap')+(pl?' pulled':'')+(b.g&&OPEN[key]?' open':'')
       +(!b.g&&STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'"'
       +' data-rid="'+b.ids[0]+'"'+(b.g?'':' data-stat="'+b.ids[0]+'"')
