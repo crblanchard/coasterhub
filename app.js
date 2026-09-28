@@ -1700,6 +1700,27 @@
       + '<span class="end">' + (opts.end != null ? opts.end : lifeTag(c, opts.val)) + '</span></a>';
   }
 
+  // A day out — the park, the date, how much was ridden — as a group row that
+  // opens to that day's coasters (Carter, 2026-09-28: profile's Recent visits
+  // and /credits' Rides tab "should be the same"). o.title: the park(s), plain
+  // text; o.date; o.right: "9 rides · 3 coasters"; o.rows: [{c, ctx, n, fresh}]
+  // — c a coaster (id, name, park, …), n its laps that day, fresh a first-ever
+  // ride on it; o.foot: a grey line under the rows.
+  function visitRow(o) {
+    var E = searchEsc;
+    var chev = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
+      + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    return '<details class="mdl visit"><summary>'
+      + '<span class="mtwo"><span class="nm">' + E(o.title) + '</span><span class="msub">' + E(o.date) + '</span></span>'
+      + '<span class="ct">' + E(o.right) + '</span>' + chev + '</summary>'
+      + (o.rows || []).map(function (r) {
+        return coasterRow(r.c, { ctx: r.ctx, end: (r.fresh ? '<span class="nw" title="New credit — first time on this one">New</span>' : '')
+          + (r.n > 1 ? '<span class="lap">×' + r.n + '</span>' : '') });
+      }).join("")
+      + (o.foot ? '<div class="vfoot">' + E(o.foot) + '</div>' : '')
+      + '</details>';
+  }
+
   // A model or park group (lists.css details.mdl) opens one at a time, like
   // the coaster rows inside it (Carter, 2026-09-28). 'toggle' does not
   // bubble, hence the capture.
@@ -2115,7 +2136,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow };
+              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

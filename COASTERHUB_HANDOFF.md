@@ -5027,3 +5027,12 @@ distance). No page uses .dtable any more. Variation that stays is content, not f
 /rankings leads with the rank and shows the model on the right (the question there is
 "where does it rank"), Global rows show avg / lists, and park rows add a riders count
 and a tap-to-add tick. On a phone a long name wraps instead of being cut.
+
+Carter, 2026-09-28: profile's Recent visits and /credits' Rides tab "should be the same".
+Both are now `CoasterHub.visitRow(...)` rows in a `.mlist.vlist` box: the park(s) bold,
+the date in grey beside (under on a phone), "N rides · N coasters" on the right, a
+chevron; open, that day's coasters as the site's one coaster row (model in grey — park
+instead on a two-park day), "×2" laps and a "NEW" tag for a first-ever ride on the
+right, and "N new credits" under them. Each coaster opens its stats (openableCoasters).
+The old feed-row (profile) and .day-card (credits) markup for days is gone; credits'
+Parks tab still uses the .day cards (not yet converted — asked about).
