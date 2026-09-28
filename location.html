@@ -139,9 +139,8 @@ function counts(ps, MINE){
 // of its coasters on the right — the same as a group row.
 function locRow(c){
   return '<a class="crow std mk" href="'+esc(CoasterHub.locationHref(c.r))+'">'
-    +'<span class="two"><span class="cn">'+esc(shortName(c.r))+'</span><span class="pk">'
-      +[c.parks+' park'+(c.parks===1?'':'s'), c.open+' operating'].concat(c.gone ? [c.gone+' defunct'] : []).join(' \u00b7 ')+'</span></span>'
-    +'</a>';
+    +'<span class="two"><span class="cn">'+esc(shortName(c.r))+'</span><span class="pk">'+c.parks+' park'+(c.parks===1?'':'s')+'</span></span>'
+    +CoasterHub.countsTag(c.open, c.gone)+'</a>';
 }
 
 // One state or country, or the whole US: its numbers, its parks, and (except
@@ -175,15 +174,13 @@ function place(reg, ps, MINE, R){
   // park over how many run and how many are gone (and its state, on the US
   // page), your ridden/total in grey, a chevron; open, its coasters. That
   // replaces the separate flat Coasters table, which listed the same rides.
-  var chev='<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
-    +'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
   h+='<div class="sect">Parks</div><div class="panel mlist">'+pk.map(function(c){
-    var sub=(c.all ? [c.open+' operating'] : ['No coasters on file']).concat(c.gone ? [c.gone+' defunct'] : []).concat(us && c.p.region ? [shortName(c.p.region)] : []).join(' \u00b7 ');
+    var sub=us && c.p.region ? shortName(c.p.region) : '';
     var got=MINE ? c.cs.filter(function(x){ return MINE[x.id]; }).length : null;
     var list=c.cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.name).localeCompare(String(b.name)); });
     return '<details class="mdl"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(c.p.name)+'</span><span class="msub">'+esc(sub)+'</span></span>'
-      +chev+'</summary>'
+      +CoasterHub.countsTag(c.open, c.gone)+'</summary>'
       +'<a class="crow mlink" href="'+esc(CoasterHub.parkHref(c.p.name))+'"><span class="cn">Park page &rarr;</span></a>'
       +list.map(function(x){ return crow(x, MINE); }).join('')+'</details>';
   }).join('')+'</div>'

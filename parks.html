@@ -103,7 +103,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.you
     var d=e.target; if(!d || d.tagName!=='DETAILS' || !d.open || d.dataset.filled) return;
     d.dataset.filled='1'; d.insertAdjacentHTML('beforeend', parkBody(d.getAttribute('data-park')));
   }, true);
-  $('hero_sub').textContent=P.length.toLocaleString()+' parks on the site.';
+  // A way to the map from here (Carter, 2026-09-28).
+  $('hero_sub').innerHTML=P.length.toLocaleString()+' parks on the site. <a href="/map" style="color:var(--accent2);text-decoration:none;font-weight:600">View them all on the map &rarr;</a>';
   var locs={}; P.forEach(function(p){ if(p.region) locs[p.region]=1; });
   $('f_loc').innerHTML+=Object.keys(locs).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return '<option value="'+esc(m)+'">'+esc(m)+'</option>'; }).join('');
   if(MINE) $('f_mine').hidden=false;
@@ -124,7 +125,6 @@ function miles(p){
   var h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(HERE.lat*k)*Math.cos(p.lat*k)*Math.sin(dLon/2)*Math.sin(dLon/2);
   return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
 }
-var CHEV='<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
 var BYNAME={};
 // An opened park: "Park page →", then its coasters as the site's one row —
 // the model in grey, status and years on the right, defunct last.
@@ -156,11 +156,11 @@ function draw(){
   // ridden / all its coasters, a chevron. Filled when opened (parkBody).
   $('rows').innerHTML=list.map(function(p){
     var mi = near && p.mi!=null ? (p.mi<10?p.mi.toFixed(1):Math.round(p.mi).toLocaleString())+' mi' : '';
-    var sub=[p.region?short(p.region):'', mi].concat((p.open+p.gone) ? [p.open+' operating', p.gone?p.gone+' defunct':''] : ['No coasters on file']).filter(Boolean).join(' \u00b7 ');
+    var sub=[p.region?short(p.region):'', mi].filter(Boolean).join(' \u00b7 ');
     return '<details class="mdl" data-park="'+esc(p.name)+'"><summary>'
       +(MINE ? '<span class="tick">'+(p.been?'\u2713':'')+'</span>' : '')
       +'<span class="mtwo"><span class="nm">'+esc(p.name)+'</span><span class="msub">'+esc(sub)+'</span></span>'
-      +CHEV+'</summary></details>';
+      +CoasterHub.countsTag(p.open, p.gone)+'</summary></details>';
   }).join('') || '<div class="more">Nothing matches.</div>';
 }
 </script>

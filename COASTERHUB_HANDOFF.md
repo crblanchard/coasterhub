@@ -5159,3 +5159,11 @@ invalid) built by `ctxLinks(c, kind)` — coasterRow takes `ctx:'place'|'park'|'
 (or plain text) and `more:` for extra text; openableCoasters and the Global rows follow a
 data-href only when the row is open. app.js remembers the parks answer (PARKS_SEEN) for
 the region.
+
+Carter, 2026-09-28 ("remove these arrows ... move operating/defunct to the right ... it
+feels incomplete"): group rows (models, a place's parks, /parks, /credits Parks) and link
+rows (/manufacturers, /locations, States, the /manufacturers panel's models) have **no
+chevron**; the grey line keeps only what the thing is (place, years, N models/parks), and
+**"N operating · N defunct" sits on the right** (`CoasterHub.countsTag`, stacked on a
+phone). Visit rows keep "N rides · N coasters" on the right, also without a chevron.
+/parks' hero: "N parks on the site. View them all on the map →".

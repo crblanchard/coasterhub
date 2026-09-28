@@ -1719,6 +1719,12 @@
     return '<span class="life">' + (c.closing ? CLOSING_SOON : '<span class="stat' + (cl ? ' off' : ' on') + '">' + (cl ? "Defunct" : "Operating") + '</span>')
       + '<span class="yrs">' + years + '</span></span>';
   }
+  // "2 operating · 1 defunct" on the right of a group or link row (Carter,
+  // 2026-09-28: the counts moved out of the grey line; no chevrons).
+  function countsTag(open, gone) {
+    // Stacked on a phone (vct), so the name keeps the width.
+    return '<span class="ct vct">' + (open + gone ? '<span>' + open + ' operating</span>' + (gone ? '<i> \u00b7 </i><span>' + gone + ' defunct</span>' : '') : '<span>No coasters</span>') + '</span>';
+  }
   // The one coaster row (lists.css a.crow.std): opts.mine (id -> truthy, or
   // null signed out) gives the tick slot; opts.ctx is the grey detail beside
   // the name (plain text); opts.end replaces the status and years.
@@ -2194,7 +2200,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow };
+              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);
