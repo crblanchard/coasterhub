@@ -4935,3 +4935,7 @@ here"): four stats on top (operating, defunct, years built, you've ridden), a ru
 The row handler is in `index()`; clicks inside the open panel are left to
 `openableCoasters` on `#body`, which closes it. On one maker's page the models are **one
 list** (`.panel.mlist`, hairlines between) instead of a card per model.
+
+Carter, 2026-09-28: a ride pulled out of its category shows the same fact on the
+read-only ranking too — a quiet (not bold) green "↑7" / red "↓3" after the location
+(`.pmini`, tooltip is the edit-mode sentence). Edit mode keeps the bold sentence line.
