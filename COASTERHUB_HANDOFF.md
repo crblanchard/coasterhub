@@ -5145,3 +5145,5 @@ counting /api calls) and cut the repeats.
 - profile.html: /api/follows fetched once (followsOnce), was twice.
 - Left: the home page's two activity requests (limit 40 for the site feed, 300 for Friend
   activity) — different questions; could share one later.
+
+Carter, 2026-09-28: home rider rows — **Friends** on a computer are the old card size inside the one list (54px picture, name / @username / credits stacked, ranked count large over a RANKED label); **Top users** stay slim on a computer; on a phone every row is the big stacked shape (48px picture).

@@ -257,8 +257,8 @@ function row(u, st, ranked){
   return '<a class="riderrow" href="' + CoasterHub.userPageHref(u.slug, 'profile') + '">'
     + pic
     + '<span class="who"><b class="nm">' + esc(u.name) + '</b>'
-    +   '<span class="un">@' + esc(u.slug) + ' \u00b7 ' + line + '</span></span>'
-    + '<span class="nums"><b>' + nf(ranked) + '</b> ranked</span></a>';
+    +   '<span class="un">@' + esc(u.slug) + '</span><span class="sub">' + line + '</span></span>'
+    + '<span class="nums"><b>' + nf(ranked) + '</b><span>ranked</span></span></a>';
 }
 
 // Who you follow, for the top section. Signed out, not a rider, or a database
