@@ -5097,3 +5097,5 @@ never re-parent or re-insert the element holding the pointer.
 Carter, 2026-09-28 ("the boxes are funky"): the /rankings control bar — tabs, the Models/Categories pills, Rank more / Edit / Cancel / Save — is one 40px height now, the Models panel sits after Cancel/Save (it used to open between them and split them), and on a phone while editing it lays out as: tabs full width; Models · Categories; Rank more · Cancel · Save on the right.
 
 Same day: the Models panel's checkboxes are drawn as plain squares (appearance:none — iPhone rendered native ones as circles), and opening the panel focuses the search only on a mouse/trackpad device ((hover:hover) and (pointer:fine)), so a phone no longer throws up the keyboard.
+
+Carter, 2026-09-28: /parks rows open in place now (group rows, like a location's parks and the /credits Parks tab) — tick if you've been, place · operating · defunct in grey, ridden/all, chevron; open: "Park page →" and the park's coasters (filled on first open). /locations stays link rows: a place holds parks, not coasters, so it goes to its page.

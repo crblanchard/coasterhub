@@ -71,7 +71,7 @@
       <select id="f_sort"><option value="name">A–Z</option><option value="most">Most coasters</option><option value="near">Nearest to me</option></select>
     </div>
     <p class="shown" id="shown"></p>
-    <div class="panel" id="rows"></div>
+    <div class="panel mlist" id="rows"></div>
   </div>
 </div></section>
 
@@ -92,11 +92,17 @@ function short(r){ return r==='US' ? 'United States' : String(r||'').replace(/, 
 Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.you()]).then(function(r){
   var cs=r[0].coasters||[], parks=r[1]||{}; MINE=r[2] ? r[2].rides : null;
   var by={};
-  Object.keys(parks).forEach(function(n){ var g=parks[n]||{}; by[n]={ name:n, region:g.region||'', lat:g.lat, lon:g.lon, open:0, gone:0, got:0, gotAll:0 }; });
-  cs.forEach(function(c){ var p=by[c.park]; if(!p) return;
+  Object.keys(parks).forEach(function(n){ var g=parks[n]||{}; by[n]={ name:n, region:g.region||'', lat:g.lat, lon:g.lon, open:0, gone:0, got:0, gotAll:0, cs:[] }; });
+  cs.forEach(function(c){ var p=by[c.park]; if(!p) return; p.cs.push(c);
     if(c.closed) p.gone++; else { p.open++; if(MINE && MINE[c.id]) p.got++; }
     if(MINE && MINE[c.id]){ p.been=true; p.gotAll++; } });
   P=Object.keys(by).map(function(k){ return by[k]; });
+  P.forEach(function(p){ BYNAME[p.name]=p; });
+  CoasterHub.openableCoasters($('rows'));
+  $('rows').addEventListener('toggle', function(e){
+    var d=e.target; if(!d || d.tagName!=='DETAILS' || !d.open || d.dataset.filled) return;
+    d.dataset.filled='1'; d.insertAdjacentHTML('beforeend', parkBody(d.getAttribute('data-park')));
+  }, true);
   $('hero_sub').textContent=P.length.toLocaleString()+' parks on the site.';
   var locs={}; P.forEach(function(p){ if(p.region) locs[p.region]=1; });
   $('f_loc').innerHTML+=Object.keys(locs).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return '<option value="'+esc(m)+'">'+esc(m)+'</option>'; }).join('');
@@ -118,6 +124,16 @@ function miles(p){
   var h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(HERE.lat*k)*Math.cos(p.lat*k)*Math.sin(dLon/2)*Math.sin(dLon/2);
   return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
 }
+var CHEV='<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+var BYNAME={};
+// An opened park: "Park page →", then its coasters as the site's one row —
+// the model in grey, status and years on the right, defunct last.
+function parkBody(name){
+  var p=BYNAME[name]; if(!p) return '';
+  return '<a class="crow mlink" href="'+esc(CoasterHub.parkHref(name))+'"><span class="cn">Park page &rarr;</span></a>'
+    + p.cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.name).localeCompare(String(b.name)); })
+      .map(function(c){ return CoasterHub.coasterRow(c, { mine:MINE, ctx:CoasterHub.maker(c)||'' }); }).join('');
+}
 function draw(){
   var q=$('q').value.trim().toLowerCase(), lc=$('f_loc').value, mn=$('f_mine').value, so=$('f_sort').value;
   var list=P.filter(function(p){
@@ -134,15 +150,17 @@ function draw(){
   $('shown').innerHTML='<b>'+list.length.toLocaleString()+'</b> park'+(list.length===1?'':'s')
     +(MINE ? ' · you have been to <b>'+list.filter(function(p){ return p.been; }).length.toLocaleString()+'</b>' : '');
   var near = so==='near' && HERE;
-  // The link row /manufacturers and /locations use: a tick if you have been,
+  // A park opens in place to its coasters (Carter, 2026-09-28), the group row
+  // a location's parks and /credits' Parks tab use: a tick if you have been,
   // the park, its place (and distance) and operating · defunct in grey, your
-  // ridden / all its coasters on the right.
+  // ridden / all its coasters, a chevron. Filled when opened (parkBody).
   $('rows').innerHTML=list.map(function(p){
     var mi = near && p.mi!=null ? (p.mi<10?p.mi.toFixed(1):Math.round(p.mi).toLocaleString())+' mi' : '';
-    return '<a class="crow std mk" href="'+esc(CoasterHub.parkHref(p.name))+'">'
+    var sub=[p.region?short(p.region):'', mi].concat((p.open+p.gone) ? [p.open+' operating', p.gone?p.gone+' defunct':''] : ['No coasters on file']).filter(Boolean).join(' \u00b7 ');
+    return '<details class="mdl" data-park="'+esc(p.name)+'"><summary>'
       +(MINE ? '<span class="tick">'+(p.been?'\u2713':'')+'</span>' : '')
-      +'<span class="two"><span class="cn">'+esc(p.name)+'</span><span class="pk">'+esc([p.region?short(p.region):'', mi].concat((p.open+p.gone) ? [p.open+' operating', p.gone?p.gone+' defunct':''] : ['No coasters on file']).filter(Boolean).join(' \u00b7 '))+'</span></span>'
-      +'<span class="yrs">'+(MINE ? p.gotAll+'/' : '')+(p.open+p.gone)+'</span></a>';
+      +'<span class="mtwo"><span class="nm">'+esc(p.name)+'</span><span class="msub">'+esc(sub)+'</span></span>'
+      +'<span class="ct">'+(MINE ? p.gotAll+'/' : '')+(p.open+p.gone)+'</span>'+CHEV+'</summary></details>';
   }).join('') || '<div class="more">Nothing matches.</div>';
 }
 </script>
