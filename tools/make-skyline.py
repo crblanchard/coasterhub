@@ -49,15 +49,18 @@ def build(col,op,light=None):
     # ---- B&M hyper: straight lift, rounded crest, long steep drop, camelbacks
     bp,bd=track([((244,G),(330,20)),
                  ((330,20),(336,12),(348,12),(354,22)),
-                 ((354,22),(372,G-12)),
-                 ((372,G-12),(378,G),(388,G),(394,G-16)),
-                 ((394,G-16),(402,84),(416,72),(426,84)),
-                 ((426,84),(434,96),(436,G-14),(446,G-14)),
-                 ((446,G-14),(454,G-14),(456,118),(466,118)),
-                 ((466,118),(476,118),(478,G-12),(488,G-10)),
-                 ((488,G-10),(494,G-8),(500,G),(506,G))])
+                 ((354,22),(376,G-12)),
+                 ((376,G-12),(382,G),(394,G),(402,G-18)),
+                 # one big airtime hill
+                 ((402,G-18),(414,60),(438,44),(452,62)),
+                 ((452,62),(464,80),(462,G-14),(476,G-12)),
+                 # and a turnaround seen side on: rising, banking round, coming back
+                 ((476,G-12),(494,G-10),(506,G-40),(502,G-62)),
+                 ((502,G-62),(498,G-80),(482,G-80),(478,G-66)),
+                 # heading back, behind the hill
+                 ((478,G-66),(474,G-54),(470,G-40),(462,G-30))])
     # splayed tubular legs, B&M style
-    for x in list(range(262,332,16))+[344,360]+list(range(400,500,12)):
+    for x in list(range(262,332,16))+[344,362]+list(range(410,470,13))+[490,500]:
         y=ymin(bp,x)
         if y is None or y>G-8: continue
         spread=max(3,(G-y)*.06)

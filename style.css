@@ -109,7 +109,7 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
   --panel:rgba(255,255,255,.12); --soft:rgba(255,255,255,.10); --tint:rgba(255,255,255,.12); --tint2:rgba(255,255,255,.20);
   color:var(--fg);
   background-color:#060b15;
-  background-image:url(/skyline-night.svg?v=2);
+  background-image:url(/skyline-night.svg?v=3);
   background-repeat:no-repeat;background-position:right max(16px,calc((100% - 1100px)/2)) bottom 0;background-size:auto min(150px,80%)}
 /* A little park skyline — a wooden coaster, a B&M hyper, a drop tower and a
    SkyScreamer (Carter, 2026-09-28) — standing on the band's floor at the right,
@@ -127,7 +127,7 @@ section.hero:not(.compact) p.wide{max-width:28em}
 :root[data-theme="light"] .hero{background-color:#dcf0f4;
   --fg:#16181b; --muted:#43505a; --accent2:#0a6aa0; --line:rgba(10,80,110,.22);
   --panel:rgba(255,255,255,.55); --soft:rgba(10,106,160,.06); --tint:rgba(10,106,160,.08); --tint2:rgba(10,106,160,.14);
-  background-image:url(/skyline-day.svg?v=2)}
+  background-image:url(/skyline-day.svg?v=3)}
 :root[data-theme="light"] .hero h1{color:var(--fg)}
 :root[data-theme="light"] .hero .segsw a.on{background:#fff;color:#0b3f5a}
 :root:not([data-theme="light"]) .hero h1{color:#fff}

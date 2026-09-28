@@ -5230,4 +5230,7 @@ structure — Zadra / Steel Vengeance), a **B&M hyper in side profile** (Diamond
 straight lift, long steep drop, shrinking camelbacks on splayed legs), an **S&S triple
 tower** (three lattice masts, rings, pointed cap and spire) and the **SkyScreamer**.
 No other coasters, no single drop tower. Same 150px height everywhere now (home too).
-Regenerate with `python3 tools/make-skyline.py .` and bump `?v=` (now 2).
+Regenerate with `python3 tools/make-skyline.py .` and bump `?v=` (now 3).
+Then (Carter: "a drop, one airtime hill, maybe a turnaround") the hyper lost its three
+camelbacks: lift, drop, **one big airtime hill**, then a side-on turnaround that climbs,
+banks round and heads back behind the hill.
