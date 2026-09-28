@@ -164,6 +164,8 @@
         <div class="fld small"><label for="c_s">Speed (mph)</label><input id="c_s" type="number" step="0.1" min="0"></div>
         <div class="fld small"><label for="c_l">Length (ft)</label><input id="c_l" type="number" step="1" min="0"></div>
         <div class="fld small"><label for="c_inv">Inversions</label><input id="c_inv" type="number" step="1" min="0"></div>
+        <!-- Ride time (Carter, 2026-09-28): minutes:seconds or just seconds. -->
+        <div class="fld small"><label for="c_dur">Duration</label><input id="c_dur" type="text" inputmode="numeric" placeholder="1:55" autocomplete="off"></div>
       </div>
       <!-- The two dates on their own row, wide enough for a date picker: at
            the 104px of the number boxes the date was clipped to "/dd/yyy".
@@ -381,7 +383,7 @@ function boot(){
   $('c_save').onclick=saveCoaster;
   $('p_save').onclick=savePark;
   $('c_clear').onclick=function(){
-    ['c_name','c_manu','c_model','c_h','c_s','c_l','c_inv','c_opened','c_closed'].forEach(function(k){ $(k).value=''; });
+    ['c_name','c_manu','c_model','c_h','c_s','c_l','c_inv','c_dur','c_opened','c_closed'].forEach(function(k){ $(k).value=''; });
     checkCoaster(); $('c_msg').textContent='';
   };
   $('p_clear').onclick=function(){ $('p_name').value=''; $('p_region').value=''; checkPark(); $('p_msg').textContent=''; };
@@ -486,9 +488,15 @@ function saveCoaster(){
   var byYear = o.prec==='year' || cz.prec==='year';
   if(opened && closed && (byYear ? closed.slice(0,4)<opened.slice(0,4) : closed<opened)) return void($('c_msg').className='msg bad',
     $('c_msg').textContent='It closed before it opened — check the two dates.');
+  // "1:55" or "115" -> seconds; anything else is a mistake worth saying.
+  var dv=$('c_dur').value.trim(), dm=dv.match(/^(\d{1,2}):([0-5]\d)$/), dur=null;
+  if(dv){
+    if(dm) dur=(+dm[1])*60+(+dm[2]); else if(/^\d{1,4}$/.test(dv)) dur=+dv;
+    else return void($('c_msg').className='msg bad', $('c_msg').textContent='Duration is minutes:seconds (1:55) or seconds (115).');
+  }
   var body={name:name,park:park,type:type,
             manu:$('c_manu').value.trim()||null, model:$('c_model').value.trim()||null,
-            h:num('c_h'), s:num('c_s'), l:num('c_l'), inv:num('c_inv'),
+            h:num('c_h'), s:num('c_s'), l:num('c_l'), inv:num('c_inv'), dur:dur,
             opened:opened, openedPrec:o.prec,
             yr:opened?Number(opened.slice(0,4)):null,
             closed:closed, closedPrec:cz.prec};
@@ -506,7 +514,7 @@ function saveCoaster(){
   api('POST','/api/coaster',body).then(function(r){
     COASTERS.push({id:r.id,name:name,park:park,type:type});
     PCOUNT[park]=(PCOUNT[park]||0)+1; fillParks(park);
-    $('c_name').value=''; ['c_manu','c_model','c_h','c_s','c_l','c_inv','c_opened','c_closed'].forEach(function(k){ $(k).value=''; });
+    $('c_name').value=''; ['c_manu','c_model','c_h','c_s','c_l','c_inv','c_dur','c_opened','c_closed'].forEach(function(k){ $(k).value=''; });
     checkCoaster();
     $('c_msg').className='msg ok';
     $('c_msg').innerHTML='Added <b>'+esc(name)+'</b> to '+esc(park)+'. '

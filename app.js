@@ -175,8 +175,9 @@
       Object.keys(placeCount).forEach(function (id) {
         var c = byId[id], n = placeCount[id];
         totalRides += n;
-        distFt += (c.l || 0) * (c.laps || 1) * n;
-        invExp += (c.inv || 0) * (c.laps || 1) * n;
+        // Laps left out until they have a standard (2026-09-28).
+        distFt += (c.l || 0) * n;
+        invExp += (c.inv || 0) * n;
         rideSec += (c.dur || 0) * n;
       });
     }
@@ -1616,7 +1617,8 @@
     if (c.l != null) kv(nums, Math.round(c.l).toLocaleString(), "Length (ft)");
     if (c.inv != null) kv(nums, E(c.inv), "Inversions");
     if (c.dur != null) { var d = Math.round(c.dur), mm = Math.floor(d / 60), r = d % 60; kv(nums, mm ? (mm + ":" + (r < 10 ? "0" : "") + r) : (d + "s"), "Ride time"); }
-    if (c.laps != null && c.laps > 1) kv(nums, E(c.laps), "Laps");
+    // No "Laps" (Carter, 2026-09-28): the numbers were inconsistent; hidden
+    // sitewide until there is a standard for what one counts.
     (extra || []).forEach(function (x) { kv(mine, x[0], x[1]); });
     if (!info.length && !nums.length && !mine.length) return '<p class="facts none">No stats on file yet.</p>' + (link ? '<div class="fgo">' + link + '</div>' : '');
     // Yours (rides, first ridden, rank) under the left column on a wide

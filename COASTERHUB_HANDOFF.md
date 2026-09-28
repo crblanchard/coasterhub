@@ -5167,3 +5167,13 @@ chevron**; the grey line keeps only what the thing is (place, years, N models/pa
 **"N operating · N defunct" sits on the right** (`CoasterHub.countsTag`, stacked on a
 phone). Visit rows keep "N rides · N coasters" on the right, also without a chevron.
 /parks' hero: "N parks on the site. View them all on the map →".
+
+Carter, 2026-09-28: **Duration on /add** (minutes:seconds like 1:55, or seconds; saved to
+`dur` in seconds; anything else is refused with a message). **Laps hidden sitewide until
+there's a standard**: no "Laps" in a coaster's stats panel or its page's spec sheet, no
+Laps box on /edit (unsent fields aren't touched, so the stored values stay), and profile
+distance/inversion totals no longer multiply by laps. The `laps` column and its data are
+untouched. Snapshot: 116 coasters carry laps > 1 — 86 at 2 (mostly shuttles: Boomerangs,
+Impulses, Accelerator-style launches counted there-and-back), 11 at 3, and a tail of
+kiddie/family coasters at 4–16 (multiple circuits per ride). That split is the question
+the standard has to answer.

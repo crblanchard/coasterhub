@@ -256,7 +256,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   if(S.l!=null) specs.push(num(Math.round(S.l).toLocaleString()+' ft','Length'));
   if(S.inv!=null) specs.push(num(String(S.inv),S.inv===1?'Inversion':'Inversions'));
   if(S.dur!=null) specs.push(num(dur(S.dur),'Ride time'));
-  if(S.laps!=null&&S.laps>1) specs.push(num(String(S.laps),'Laps'));
+  // No Laps until there is a standard for them (Carter, 2026-09-28).
   $('specs').innerHTML=specs.join('');
 
   $('loading').style.display='none';
