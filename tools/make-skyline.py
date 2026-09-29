@@ -6,14 +6,14 @@
 #     on a gridded wooden structure (bents, ledgers, cross-braces);
 #   - a B&M hyper drawn from Shambhala: lift, crest, drop, then three parabolic
 #     hills each lower than the last, on white tubular columns;
-#   - Cedar Point's Power Tower (masts under a rounded crown), Wicked Twister
+#   - Cedar Point's Giant Wheel, Power Tower (masts under a rounded crown), Wicked Twister
 #     (two twisted spikes on lattice supports, the U of track between them) and
 #     WindSeeker (the tallest: a pole with a flared canopy, swings flung out).
 # Heights are roughly to scale with each other. A low treeline hides where the
 # tracks run off. The lift starts at the far left and low down, so the upper
 # left of the picture stays empty for the page title.
 import math, sys
-W,H,G=834,200,198
+W,H,G=868,200,198
 
 def bez(p0,p1,p2,p3,n=40):
     return [tuple((1-t)**3*a+3*(1-t)**2*t*b+3*(1-t)*t*t*c+t**3*d for a,b,c,d in zip(p0,p1,p2,p3))
@@ -130,8 +130,28 @@ def build(col,op,light=None,trees=None):
     S(hd,2.4)
     if light: L(hd); beacons.append((hills[0][0],ytop(hp,hills[0][0])-5))
 
+    # ---------- Ferris wheel (Cedar Point's Giant Wheel, set back a little) ----------
+    fx,fr=689,34; fy=G-10-fr
+    S('M%d %d L%d %d L%d %d'%(fx-17,G,fx,fy,fx+17,G),1.0)          # A-frame legs
+    S('M%.1f %.1f A%d %d 0 1 0 %.1f %.1f A%d %d 0 1 0 %.1f %.1f'%(fx-fr,fy,fr,fr,fx+fr,fy,fr,fr,fx-fr,fy),1.3)
+    S('M%.1f %.1f A%d %d 0 1 0 %.1f %.1f A%d %d 0 1 0 %.1f %.1f'%(fx-fr*.8,fy,fr*.8,fr*.8,fx+fr*.8,fy,fr*.8,fr*.8,fx-fr*.8,fy),.5,.6)
+    spokes=[]; cars=[]
+    for i in range(16):
+        a=2*math.pi*i/16
+        rx,ry=fx+fr*math.cos(a),fy+fr*math.sin(a)
+        spokes.append('M%d %d L%.1f %.1f'%(fx,fy,rx,ry))
+        cars.append('M%.1f %.1f h3 v3.2 h-3 Z'%(rx-1.5,ry+.8))   # gondolas hang below the rim
+    S(' '.join(spokes),.4,.6)
+    S(' '.join(cars),.8)
+    S('M%.1f %.1f A2 2 0 1 0 %.1f %.1f A2 2 0 1 0 %.1f %.1f'%(fx-2,fy,fx+2,fy,fx-2,fy),1.0)
+    if light:
+        L('M%.1f %.1f A%d %d 0 1 0 %.1f %.1f A%d %d 0 1 0 %.1f %.1f'%(fx-fr,fy,fr,fr,fx+fr,fy,fr,fr,fx-fr,fy),5,2)
+        for i in range(0,16,2):
+            a=2*math.pi*i/16
+            L('M%d %d L%.1f %.1f'%(fx,fy,fx+fr*math.cos(a),fy+fr*math.sin(a)),6,1.6)
+
     # ---------- Power Tower ----------
-    px,pt=708,G-172          # centre, top of the masts
+    px,pt=742,G-172          # centre, top of the masts
     for mx in (px-7,px+7):
         S('M%.1f %d L%.1f %d M%.1f %d L%.1f %d'%(mx-2.5,G,mx-2.5,pt,mx+2.5,G,mx+2.5,pt),.8)
         z='M%.1f %d'%(mx-2.5,G); y=G; f=1
@@ -170,7 +190,7 @@ def build(col,op,light=None,trees=None):
         o.append("<path d='M%s L%s Z' fill='%s' fill-opacity='%.2f' stroke='%s' stroke-opacity='%.2f' stroke-width='.5'/>"
                  %(' L'.join(lft),' L'.join(reversed(rgt)),col,op*.55,col,op))
         return sx+lean*5
-    tl,tr=742,778
+    tl,tr=776,812
     a=spike(tl,G-150,-1); b=spike(tr,G-150,1)
     # the U between them: low launch track and station
     u='M%d %d C%d %d %d %d %d %d L%d %d C%d %d %d %d %d %d'%(tl,G-14,tl,G-5,tl+4,G-4,tl+10,G-4,tr-10,G-4,tr-4,G-4,tr,G-5,tr,G-14)
@@ -180,7 +200,7 @@ def build(col,op,light=None,trees=None):
         beacons+= [(a,G-152),(b,G-152)]
 
     # ---------- WindSeeker ----------
-    wx=806
+    wx=840
     S('M%d %d L%d %d'%(wx-1.2,G,wx-1.2,14),.8); S('M%d %d L%d %d'%(wx+1.2,G,wx+1.2,14),.8)
     S('M%d 14 L%d 8 L%d 14 Z'%(wx-3,wx,wx+3),.9)
     cy=26   # the carriage, near the top, flung swings below it

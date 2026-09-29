@@ -5253,3 +5253,9 @@ space, which is why the old rule hugged the viewport edge instead), and its heig
 home subtitle. Compact heroes cap the h1 at `calc(100% - 380px)` from 900px up so a long
 park name wraps before the rides (`.hero.compact h1.wide` too — `.hero h1.wide{max-width:none}`
 otherwise wins). `?v=4`.
+Then Carter: "add Ferris wheel if there's space" — the Giant Wheel sits between the hyper's
+last hill and Power Tower (16 spokes, hanging gondolas, A-frame legs; lit rim and spokes at
+night). The picture got wider (868x200, ~4.34:1), so the height rule became
+`min(132px,80%,max(58px,calc(28.6vw - 174px)))` to keep the wooden crest clear of the home
+subtitle. If the picture's width changes again, redo that sum: the wooden crest sits ~19%
+in from the left and must land right of the subtitle's end. `?v=5`.
