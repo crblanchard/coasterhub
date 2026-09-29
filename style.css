@@ -126,7 +126,7 @@ section.hero br.ph{display:none}
 section.hero:not(.compact) h1.wide{font-size:clamp(2.2rem,4.4vw,3rem)}
 @media (max-width:640px){
   section.hero br.ph{display:inline}
-  section.hero:not(.compact){padding-bottom:calc(var(--hero-b,84px) + 14px);background-size:auto 72px!important}
+  section.hero:not(.compact):not(:has(.herotop)){padding-bottom:calc(var(--hero-b,84px) + 14px);background-size:auto 72px!important}
 }
 /* and a long park or coaster name wraps before it reaches the rides */
 @media (min-width:900px){ .hero.compact h1,.hero.compact h1.wide{max-width:calc(100% - 300px)} }
