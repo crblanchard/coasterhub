@@ -369,7 +369,9 @@ Promise.all([
   // them" amber; amber sat too close to the new yellow.)
   var MAX=placed.reduce(function(m,p){ return Math.max(m,p.open.length); },1);
   var RAMPS={
-    red:   {stops:[[255,190,178],[255,90,95],[140,10,30]],  ink:'#3a0810'},
+    // The pale end is pink, not peach: a one-coaster "only them" park read as
+    // yellow beside the neither-of-you ones (Carter, 2026-09-29).
+    red:   {stops:[[255,158,170],[255,90,95],[140,10,30]],  ink:'#3a0810'},
     // The site's yellow (Launch Yellow, 2026-09-24). White digits cannot be
     // read on it until it is deep, so it keeps dark digits much longer (dark).
     yellow:{stops:[[255,238,168],[255,204,31],[168,112,0]],  ink:'#2e2200', dark:.8},
