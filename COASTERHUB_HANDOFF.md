@@ -5273,3 +5273,11 @@ darker. The wooden coaster, Shambhala hyper and Wicked Twister are gone from the
 (commit 5554345 has them). Picture is 650x200 (3.25:1); height rule
 `min(150px,80%,max(58px,calc(30.7vw - 167px)))`, compact h1 cap `calc(100% - 300px)`.
 `?v=6`.
+Then (v7) Carter on the drop: "make it straighten out to that steepness 1/4 of the way
+down then go straight. The bottom 1/3 should be the pullout so it's almost flat but not
+quite coming up to the Ferris wheel." The drop is now built from its SLOPE, span by span:
+an ease from flat to 66 degrees (starting at the crest's own curvature, ending with none)
+that loses a quarter of the coaster's height; a straight run; a smoothstep pullout over
+the bottom third down to a slope of 0.07; a short run-out that tucks into a clump of trees
+short of the wheel. The drop-side towers are placed from those span ends (X1..X3), and
+cap beams follow the track column to column.

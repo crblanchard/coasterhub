@@ -3,8 +3,9 @@
 # Carter, 2026-09-29: "just do this from a side view (basically this photo
 # exactly) with the Ferris wheel then drop tower/swings to the right" — the photo
 # is Magnum XL-200 at sunset. So, left to right:
-#   - the coaster: a straight lift at 33 degrees laid tangent onto a parabola,
-#     whose far side is the drop (about 65 degrees where it meets the trees), with
+#   - the coaster: a straight lift at 33 degrees laid tangent onto a parabola
+#     for the crest; the drop is full steepness (about 66 degrees) a quarter of
+#     the way down, straight, then a pullout over the bottom third, with
 #     a railed platform and a mast on top and a train just over the crest. It
 #     stands on seven steel box towers (columns, ledgers, an X in every panel)
 #     with open sky between them, measured off the photo;
@@ -26,8 +27,38 @@ VX,VY=px(1215),G-182          # top of the parabola
 A=0.00205/S_                  # its curvature (photo: 0.00205 per pixel)
 M=0.65                        # lift slope, about 33 degrees
 TX=VX-M/(2*A); TY=VY+A*(TX-VX)**2   # where the lift meets the parabola, tangent
+# The drop (Carter, 2026-09-29): it reaches its full steepness a quarter of the
+# way down, runs straight, and the bottom third is the pullout, nearly flat by the
+# time it reaches the Ferris wheel. Built from its slope, span by span, so every
+# join is smooth:
+MD=2.21                       # steepest, about 66 degrees
+HT=G-VY                       # the coaster's height
+def _ease_in(A,m,D):
+    """Slope from 0 up to m with the crest's curvature at the start and none at the
+    end, losing height D: returns the span's length and its slope as a function."""
+    Lh=(-m/2+math.sqrt(m*m/4+4*(A/6)*D))/(2*A/6)
+    a=2*A*Lh/m; b=3-2*a; c=a-2
+    return Lh,lambda u: m*(a*u+b*u*u+c*u**3)
+L1,s1=_ease_in(A,MD,HT/4)
+L2=(HT*(1-1/4-1/3))/MD                      # the straight part
+SE=.07                                       # the pullout's last, shallow slope
+L3=2*(HT/3-8)/(MD+SE)                        # the pullout, ending 8 above the floor
+X1,X2,X3=VX+L1,VX+L1+L2,VX+L1+L2+L3
+X4=X3+26                                     # the run out towards the wheel
+def _slope(x):
+    if x<X1: return s1((x-VX)/L1)
+    if x<X2: return MD
+    if x<X3:
+        u=(x-X2)/L3; return MD-(MD-SE)*(3*u*u-2*u**3)
+    return SE+max(0,x-X4)*.05                # and into the trees
+_dx=.1; _drop=[VY]
+for i in range(1,int((X4+20-VX)/_dx)+2):
+    x=VX+(i-.5)*_dx; _drop.append(_drop[-1]+_slope(x)*_dx)
 def track_y(x):
-    return TY+(TX-x)*M if x<TX else VY+A*(x-VX)**2
+    if x<TX: return TY+(TX-x)*M
+    if x<VX: return VY+A*(x-VX)**2
+    i=min(len(_drop)-1,int((x-VX)/_dx)); return _drop[i]
+X_END=X4+20
 
 def build(col,op,light=None,trees=None):
     o=[]; groups={}
@@ -44,16 +75,17 @@ def build(col,op,light=None,trees=None):
     circ=lambda cx,cy,r: 'M%.1f %.1f A%.1f %.1f 0 1 0 %.1f %.1f A%.1f %.1f 0 1 0 %.1f %.1f'%(cx-r,cy,r,r,cx+r,cy,r,r,cx-r,cy)
 
     # ---------- the coaster ----------
-    x_end=VX+math.sqrt((G+4-VY)/A)
-    xs=[-2+i*1.0 for i in range(int(x_end+2)+1)]
+    xs=[-2+i*1.0 for i in range(int(X_END+2)+1)]
     pts=[(x,track_y(x)) for x in xs]
     d='M'+' L'.join('%.1f %.1f'%p for p in pts)
     # the towers: columns (photo x positions), each tower its own group
-    towers=[(300,340,385,425),(478,525,575,622),(670,718,768,815),(868,918,968,1015),
-            (1090,1135,1195,1240,1300,1345),(1410,1450,1495,1540),(1570,1610,1650,1690)]
+    towers=[[px(x) for x in t] for t in
+            [(300,340,385,425),(478,525,575,622),(670,718,768,815),(868,918,968,1015),(1090,1135,1195,1240,1300,1345)]]
+    # down the drop and along the pullout the towers shorten with the track
+    towers+=[[X1+12,X1+22,X1+32],[X2+9,X2+20,X2+31],[X3-3,X3+9]]
     levels=[G-12-34*k for k in range(6)]          # ledgers, every 34 units up
     for t in towers:
-        cols=[(px(x),track_y(px(x))+1.6) for x in t]
+        cols=[(x,track_y(x)+1.6) for x in t]
         for x,top in cols: S('M%.1f %.1f L%.1f %d'%(x,top,x,G),.75)
         for (x0,t0),(x1,t1) in zip(cols,cols[1:]):
             below=[G]+[y for y in levels if y>max(t0,t1)+3]
@@ -65,8 +97,8 @@ def build(col,op,light=None,trees=None):
         for y in levels:
             run=[x for x,top in cols if top<y-1]
             if len(run)>1: S('M%.1f %d L%.1f %d'%(run[0],y,run[-1],y),.5,.7)
-        # a cap beam under the track where the tower meets it
-        S('M%.1f %.1f L%.1f %.1f'%(cols[0][0]-1,cols[0][1]+.5,cols[-1][0]+1,cols[-1][1]+.5),.6,.7)
+        # a cap beam under the track where the tower meets it, column to column
+        S('M'+' L'.join('%.1f %.1f'%(x,top+.5) for x,top in cols),.6,.7)
     # the lift's walkway, a thin rail just under the chain
     S('M%.1f %.1f L%.1f %.1f'%(0,track_y(0)+2.6,TX-4,track_y(TX-4)+2.6),.5,.8)
     S(d,2.4)
@@ -146,9 +178,10 @@ def build(col,op,light=None,trees=None):
     if light:
         L('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),4,2); beacons.append((wx,6))
 
-    # ---------- treeline: low along the floor, a wooded hill under the drop ----------
+    # ---------- treeline: low along the floor, a low wooded rise under the drop ----------
     def env(x):
-        return 5+20*math.exp(-((x-px(1650))/34)**2)+5*math.exp(-((x-px(700))/60)**2)
+        return (5+9*math.exp(-((x-392)/30)**2)+5*math.exp(-((x-px(700))/60)**2)   # low enough to show the pullout
+                +9*math.exp(-((x-(X4+14))/9)**2))                                   # a clump the run-out disappears into
     t=[]; x=-4; k=0
     while x<W+8:
         r=2.8+((k*37)%7)*.5; k+=1
