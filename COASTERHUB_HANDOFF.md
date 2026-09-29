@@ -5298,3 +5298,13 @@ that do. And the lateral braces go the entire way." So the seven separate towers
 one truss of columns every 15 units along the whole ride, ledgers every 17 units running
 the full length, X-braces in every other bay counted outward from the crest column, and
 both bays either side of the crest braced. Pullout lengthened 72 -> 88 ("a little bigger").
+
+**Day band is a sky now (2026-09-29, Carter picked option D of four).** A vertical
+gradient #bfdcf6 -> #e4f1fc (fallback colour #d3e8f9), replacing the flat teal #dcf0f4 —
+"the fade" he rejected before was a fade to WHITE below the band; this stays inside it.
+It is a second background layer under the skyline, so the light rules give two values
+for background-size/position (and the phone rule its own two, !important, to beat the
+generic phone one). The profile band has no skyline, so it gets the gradient alone with
+its own !important size/position — without that the phone rule's "auto 72px" sized the
+gradient to a strip. The skyline's solid parts are pre-blended against #d8eafa (make-skyline.py
+`bg=`); change that if the sky changes.
