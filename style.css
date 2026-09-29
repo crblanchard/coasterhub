@@ -121,6 +121,9 @@ section.hero:not(.compact) p.wide{max-width:28em}
    sentence on a phone, where the short last lines leave room for the skyline to
    sit beside them instead of below (Carter, 2026-09-29). */
 section.hero br.ph{display:none}
+/* "Welcome to Coaster Hub" is the home heading now; a touch smaller than the
+   other heroes' so it ends before the coaster's crest. */
+section.hero:not(.compact) h1.wide{font-size:clamp(2.2rem,4.4vw,3rem)}
 @media (max-width:640px){
   section.hero br.ph{display:inline}
   section.hero:not(.compact){padding-bottom:calc(var(--hero-b,84px) + 14px);background-size:auto 72px!important}
