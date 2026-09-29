@@ -126,13 +126,13 @@ section.hero br.ph{display:none}
 section.hero:not(.compact) h1.wide{font-size:clamp(2.2rem,4.4vw,3rem)}
 @media (max-width:640px){
   section.hero br.ph{display:inline}
-  section.hero:not(.compact):not(:has(.herotop)){padding-bottom:calc(var(--hero-b,84px) + 14px);background-size:auto 72px!important}
+  section.hero:not(.compact):not(:has(.herotop)){padding-bottom:calc(var(--hero-b,84px) + 14px)}
 }
 /* and a long park or coaster name wraps before it reaches the rides */
 @media (min-width:900px){ .hero.compact h1,.hero.compact h1.wide{max-width:calc(100% - 300px)} }
 .hero:has(.herotop){background-image:none!important}
 @media (max-width:640px){
-  .hero{padding-bottom:calc(var(--hero-b,84px) + 50px);background-size:auto 58px!important;background-position:right 12px bottom 0}
+  .hero{padding-bottom:calc(var(--hero-b,84px) + 62px);background-size:auto 72px!important;background-position:right 12px bottom 0}
   .hero:has(.herotop){padding-bottom:var(--hero-b,84px)}
 }
 /* Day (Carter, 2026-09-28): a light teal band, black text, the track in thin
@@ -710,6 +710,23 @@ html.srchopen{overflow:hidden}
 /* Owner-only, and quiet: these are housekeeping, not the point of the page. */
 .profedit .ownrow{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 0}
 .profedit .ownrow button{flex:1 1 auto}
+/* Phone profile (Carter, 2026-09-29): the password / sign-out pair stacked beside
+   the numbers, and the four actions two by two — Log a day and Update your
+   rankings on the left, the map and the count on the right. */
+.ownslot{max-width:none}
+.ownslot:empty{display:none}
+@media (max-width:640px){
+  .statrow{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .ownslot .ownrow{flex-direction:column;margin:0;gap:8px}
+  .ownslot .ownrow button{flex:none;padding:7px 12px;font-size:.82rem;white-space:nowrap}
+  .heroacts .btn{padding:10px 8px;font-size:.84rem;display:flex;align-items:center;justify-content:center}
+  .statrow h1{white-space:nowrap;font-size:1.5rem!important}
+  .heroacts{display:grid;grid-template-columns:1fr 1fr}
+  .heroacts .btn{order:2}
+  .heroacts a[href="/log"]{order:1}
+  .heroacts a[data-nav="rankings"]{order:3}
+  .heroacts a[data-nav="count"]{order:4}
+}
 .profedit .rowlinks{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 6px}
 .profedit .rowlinks a{flex:1 1 auto;text-align:center;border:1px solid var(--line);
   border-radius:10px;padding:10px 12px;font-size:.9rem;font-weight:600;color:var(--fg)}

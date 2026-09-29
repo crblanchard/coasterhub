@@ -183,6 +183,22 @@
     var panel = {};
     root.querySelectorAll("[data-panel]").forEach(function (n) { panel[n.getAttribute("data-panel")] = n; });
 
+    // On a phone the two housekeeping buttons sit beside the numbers in the hero
+    // instead of taking a row of their own. Moved, not copied, so their click
+    // handlers come along; a marker remembers where they go back to.
+    var row = root.querySelector(".ownrow"), slot = document.getElementById("ownslot");
+    if (row && slot && window.matchMedia) {
+      var mark = document.createComment("ownrow");
+      row.parentNode.insertBefore(mark, row);
+      var mq = window.matchMedia("(max-width:640px)");
+      var place = function () {
+        if (mq.matches) slot.appendChild(row);
+        else if (mark.parentNode) mark.parentNode.insertBefore(row, mark.nextSibling);
+      };
+      place();
+      if (mq.addEventListener) mq.addEventListener("change", place); else mq.addListener(place);
+    }
+
     function say(box, text, ok) {
       box.textContent = text || "";
       box.className = "msg " + (ok ? "ok" : "bad");
