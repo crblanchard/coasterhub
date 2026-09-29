@@ -138,6 +138,13 @@ a.crow .life .yrs{margin:0;padding:0;color:var(--fg);font-size:.8rem;font-varian
   .mlist .mtwo{flex-direction:column;align-items:flex-start;gap:1px}
   .mlist .mtwo .nm,.mlist .msub{max-width:100%}
 }
+/* Phone rows, tighter (Carter, 2026-09-29: "narrow these"): the name and its
+   grey line sit close, and the row loses a little padding. */
+@media (max-width:560px){
+  .mlist details.mdl summary,a.crow.std{padding-top:7px;padding-bottom:7px}
+  .mlist .mtwo,a.crow .two,.mlist .ct.vct{line-height:1.25}
+  .ranksec a.crow{padding-top:7px;padding-bottom:7px;align-items:center}
+}
 /* The coasters inside an open group sit a step in, so they read as its. */
 .mlist details.mdl[open] > a.crow{padding-left:28px}
 @media (max-width:560px){ .mlist details.mdl[open] > a.crow{padding-left:22px} }
