@@ -151,7 +151,10 @@ function place(reg, ps, MINE, R){
   var name = us ? reg : shortName(reg);
   document.querySelector('.hero h1').textContent=name;
   document.title=name+' — Coaster Hub';
-  $('hero_sub').style.display = 'none';
+  // A state says which country it is in, under its name (Carter, 2026-09-29).
+  var sub=$('hero_sub');
+  if(!us && isUS(reg)){ sub.textContent='United States'; sub.style.display=''; }
+  else sub.style.display='none';
   CoasterHub.crumbs($('crumb'), [['Locations','/locations'],
     (!us && isUS(reg)) ? ['United States','/location/us'] : null, [name]]);
   var k=counts(ps, MINE);

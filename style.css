@@ -129,7 +129,7 @@ section.hero br.ph{display:none}
 @media (min-width:900px){ .hero.compact h1,.hero.compact h1.wide{max-width:calc(100% - 300px)} }
 .hero:has(.herotop){background-image:none!important}
 @media (max-width:640px){
-  .hero{padding-bottom:calc(var(--hero-b,84px) + 62px);background-size:auto 72px!important;background-position:right 12px bottom 0}
+  .hero{padding-bottom:calc(var(--hero-b,84px) + 48px);background-size:auto 72px!important;background-position:right 12px bottom 0}
   .hero:has(.herotop){padding-bottom:var(--hero-b,84px)}
 }
 /* Day (Carter, 2026-09-29, option D): a sky — deeper blue at the top, paler down
@@ -139,10 +139,10 @@ section.hero br.ph{display:none}
 :root[data-theme="light"] .hero{background-color:#d3e8f9;
   --fg:#16181b; --muted:#43505a; --accent2:#0a6aa0; --line:rgba(10,80,110,.22);
   --panel:rgba(255,255,255,.55); --soft:rgba(10,106,160,.06); --tint:rgba(10,106,160,.08); --tint2:rgba(10,106,160,.14);
-  background-image:url(/skyline-day.svg?v=13),linear-gradient(180deg,#bfdcf6,#e4f1fc);
+  background-image:url(/skyline-day.svg?v=13),linear-gradient(180deg,#cfe5f9,#e6f2fc);
   background-size:auto min(150px,80%,max(58px,calc(30.7vw - 167px))),100% 100%;
   background-position:right max(24px,calc(50vw - 516px)) bottom 0,0 0}
-:root[data-theme="light"] .hero:has(.herotop){background-image:linear-gradient(180deg,#bfdcf6,#e4f1fc)!important;background-size:100% 100%!important;background-position:0 0!important}
+:root[data-theme="light"] .hero:has(.herotop){background-image:linear-gradient(180deg,#cfe5f9,#e6f2fc)!important;background-size:100% 100%!important;background-position:0 0!important}
 @media (max-width:640px){
   :root[data-theme="light"] .hero{background-size:auto 72px,100% 100%!important;background-position:right 12px bottom 0,0 0}
 }
