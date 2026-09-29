@@ -267,22 +267,9 @@ function model(maker, mo, cs, MINE){
   var open=cs.filter(function(c){ return !c.closed; }).length;
   $('tiles').innerHTML=tile(cs.length,cs.length===1?'Built':'Installations')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
     +tile(years(cs)||'—','Years built');
-  // The spread of each spec across the installations that have it: one
-  // number when they all agree (a clone), a range when they do not.
-  function spread(key, unit, round){
-    var v=cs.map(function(c){ return c[key]; }).filter(function(x){ return x!=null && x!==''; }).map(Number);
-    if(!v.length) return null;
-    var lo=Math.min.apply(null,v), hi=Math.max.apply(null,v), f=function(x){ return round ? Math.round(x).toLocaleString() : String(x); };
-    // No "(5 of 9 known)" (Carter, 2026-09-27: "hide amount known").
-    return (lo===hi ? f(lo) : f(lo)+'–'+f(hi))+(unit?' '+unit:'');
-  }
-  var types={}; cs.forEach(function(c){ if(c.type) types[c.type]=1; });
-  var specs=[['Height',spread('h','ft',true)],['Speed',spread('s','mph',true)],['Length',spread('l','ft',true)],
-             ['Inversions',spread('inv','',false)],['Type',Object.keys(types).sort().join(' / ')||null],['Years built',years(cs)]]
-    .filter(function(x){ return x[1]; });
+  // No Statistics block (Carter, 2026-09-29: "remove stats from model pages").
   var rows=cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
-  $('body').innerHTML=(specs.length ? '<div class="sect">Statistics</div><div class="specsheet">'
-      +specs.map(function(x){ return '<div><b>'+x[1]+'</b><span>'+esc(x[0])+'</span></div>'; }).join('')+'</div>' : '')
+  $('body').innerHTML=''
     // The same rows as everywhere else (Carter, 2026-09-28), operating first;
     // the rankings under them, as on every list page.
     +'<div class="sect">Installations</div><div class="panel">'+rows.map(function(c){ return crow(c, MINE); }).join('')+'</div>'
