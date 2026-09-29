@@ -456,6 +456,9 @@
   .srow .who{border-top:1px solid var(--line);padding:7px 12px 9px}
   .srow .who .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
   /* The coaster's stats under who ranked it (Carter, 2026-09-25). */
+  /* A phone's global list drops the state or country: park and model are
+     enough there, and the line ran off the edge (Carter, 2026-09-29). */
+  @media (max-width:560px){ .srow .n .sub .lc{display:none} }
   .srow .who .go{color:var(--accent2);font-size:.86rem;font-weight:600;text-decoration:none}
   .srow .who[hidden]{display:none}
   .srow .wrow{display:inline-flex;align-items:baseline;gap:6px;padding:3px 10px;border:1px solid var(--line);
@@ -2586,7 +2589,7 @@ function srowName(c, mk){
   var L=function(t,h){ return h ? '<a href="'+esc(h)+'">'+esc(t)+'</a>' : esc(t); };
   return '<span class="n"><b>'+L(c.name, c.park ? CoasterHub.coasterHref(c) : '')+'</b><span class="sub">'
     +'<span class="pl">'+L(c.park, c.park ? CoasterHub.parkHref(c.park) : '')
-    +(c.loc?' \u00b7 '+L(c.loc.replace(/, US$/,''), CoasterHub.locationHref(c.loc)):'')+'</span>'
+    +(c.loc?'<span class="lc"> \u00b7 '+L(c.loc.replace(/, US$/,''), CoasterHub.locationHref(c.loc))+'</span>':'')+'</span>'
     +(mk?'<span class="mk">'+L(mk, c.manu ? CoasterHub.makerHref(c.manu, c.model||null) : '')+'</span>':'')+'</span></span>';
 }
 // A ranked row's head: the coaster, park, location and maker, each a link to
