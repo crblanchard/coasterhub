@@ -9,8 +9,9 @@
 #     a railed platform and a mast on top and a train just over the crest. It
 #     stands on seven steel box towers (columns, ledgers, an X in every panel)
 #     with open sky between them, measured off the photo;
-#   - a Ferris wheel, Power Tower (masts under a rounded crown), and WindSeeker
-#     (a pole with a flared canopy, swings flung out).
+#   - a Ferris wheel, Power Tower (masts under a rounded crown, solid cars), and
+#     WindSeeker (a thick solid tower with a flared canopy, swings flung out).
+# The band colours are passed in (bg) so solid parts can be one opaque colour.
 # A treeline, rising into a hill under the drop as in the photo, hides the feet.
 # The lift starts at the far left and low down, so the upper left of the picture
 # stays empty for the page title.
@@ -60,8 +61,18 @@ def track_y(x):
     i=min(len(_drop)-1,int((x-VX)/_dx)); return _drop[i]
 X_END=X4+20
 
-def build(col,op,light=None,trees=None):
+def build(col,op,light=None,trees=None,bg=None):
     o=[]; groups={}
+    # the line colour at its opacity, laid over the band, as one opaque colour:
+    # what a filled part is painted with, so it hides whatever is behind it
+    h=lambda c:[int(c[i:i+2],16) for i in (1,3,5)]
+    solid='#%02x%02x%02x'%tuple(round(b+(f-b)*op) for f,b in zip(h(col),h(bg)))
+    def F(d):
+        # a filled, opaque part, painted now, over everything drawn before it
+        o.append("<path d='%s' fill='%s' stroke='%s' stroke-width='.6' stroke-linejoin='round'/>"%(d,solid,solid))
+    def P(d,w=1.0,a=1.0):
+        # a line painted now, rather than with its weight group
+        o.append("<path d='%s' fill='none' stroke='%s' stroke-opacity='%.2f' stroke-width='%.2f' stroke-linecap='round' stroke-linejoin='round'/>"%(d,col,op*a,w))
     def S(d,w=1.0,a=1.0):
         # strokes of the same weight share one <path>, which keeps the file small
         k=(w,a)
@@ -153,8 +164,9 @@ def build(col,op,light=None,trees=None):
             y-=5; z+=' L%.1f %d'%(mX+2.5*f,y); f=-f
         S(z,.4,.55)
     # seats: one ring parked low, one shot to the top
-    S('M%.1f %d h9 v5 h-9 Z'%(pX-11.5,G-40),1.1)
-    S('M%.1f %d h9 v5 h-9 Z'%(pX+2.5,pt+8),1.1)
+    # opaque, so the masts do not show through them (Carter, 2026-09-29)
+    F('M%.1f %d h9 v5 h-9 Z'%(pX-11.5,G-40))
+    F('M%.1f %d h9 v5 h-9 Z'%(pX+2.5,pt+8))
     # the crown: a band across the masts and a rounded top with ribs
     crown='M%d %d C%d %d %d %d %d %d C%d %d %d %d %d %d'%(pX-11,pt,pX-11,pt-10,pX-5,pt-14,pX,pt-14,pX+5,pt-14,pX+11,pt-10,pX+11,pt)
     S('M%d %d L%d %d'%(pX-11,pt,pX+11,pt),1.2)
@@ -165,16 +177,18 @@ def build(col,op,light=None,trees=None):
 
     # ---------- WindSeeker ----------
     wx=618
-    S('M%.1f %d L%.1f %d'%(wx-1.2,G,wx-1.2,14),.8); S('M%.1f %d L%.1f %d'%(wx+1.2,G,wx+1.2,14),.8)
-    S('M%d 14 L%d 8 L%d 14 Z'%(wx-3,wx,wx+3),.9)
+    # a thick tower, solid all the way through (Carter, 2026-09-29), tapering a
+    # little, with a solid cap; the carriage and swings are painted over it
+    F('M%.1f %d L%.1f 15 L%.1f 15 L%.1f %d Z'%(wx-3,G,wx-2.2,wx+2.2,wx+3,G))
+    F('M%.1f 15 L%d 7 L%.1f 15 Z'%(wx-3.4,wx,wx+3.4))
     cy=26   # the carriage, near the top, flung swings below it
-    S('M%d %d C%d %d %d %d %d %d C%d %d %d %d %d %d'%(wx-16,cy+6,wx-10,cy+1,wx-5,cy-2,wx,cy-2,wx+5,cy-2,wx+10,cy+1,wx+16,cy+6),1.3)
-    S('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),.7,.8)
+    P('M%d %d C%d %d %d %d %d %d C%d %d %d %d %d %d'%(wx-16,cy+6,wx-10,cy+1,wx-5,cy-2,wx,cy-2,wx+5,cy-2,wx+10,cy+1,wx+16,cy+6),1.3)
+    P('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),.7,.8)
     for dx in (-16,-11,-6,6,11,16):
         sg=1 if dx>0 else -1
         ex=wx+dx+sg*9; ey=cy+6+15
-        S('M%d %d L%d %d'%(wx+dx,cy+6,ex,ey),.45,.75)
-        S('M%.1f %d L%.1f %d'%(ex-1.6,ey,ex+1.6,ey),1.6)
+        P('M%d %d L%d %d'%(wx+dx,cy+6,ex,ey),.45,.75)
+        P('M%.1f %d L%.1f %d'%(ex-1.6,ey,ex+1.6,ey),1.6)
     if light:
         L('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),4,2); beacons.append((wx,6))
 
@@ -198,5 +212,5 @@ def build(col,op,light=None,trees=None):
             %(W,H,''.join(o),''.join(lights),beac,tree))
 
 out=sys.argv[1] if len(sys.argv)>1 else '.'
-open(out+'/skyline-day.svg','w').write(build('#0a6aa0',.55,trees=('#0a6aa0',.16)))
-open(out+'/skyline-night.svg','w').write(build('#ffffff',.36,'#ffcc1f',trees=('#000000',.45)))
+open(out+'/skyline-day.svg','w').write(build('#0a6aa0',.55,trees=('#0a6aa0',.16),bg='#dcf0f4'))
+open(out+'/skyline-night.svg','w').write(build('#ffffff',.36,'#ffcc1f',trees=('#000000',.45),bg='#060b15'))

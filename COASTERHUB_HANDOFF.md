@@ -5281,3 +5281,7 @@ that loses a quarter of the coaster's height; a straight run; a smoothstep pullo
 the bottom third down to a slope of 0.07; a short run-out that tucks into a clump of trees
 short of the wheel. The drop-side towers are placed from those span ends (X1..X3), and
 cap beams follow the track column to column.
+Then: the swing tower is thick and solid, and the drop tower's cars are opaque. Solid parts
+use ONE opaque colour — the line colour at its opacity pre-blended over the band (`bg` is
+passed into build()) — because a translucent fill lets the lines behind show through, which
+is exactly what Carter did not want. They are painted in place (`F`), not with a weight group.
