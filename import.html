@@ -471,7 +471,9 @@ function fillRiders(){
   // write to anyone else, so offering the list would only be a way to get a
   // 401. Admins keep the full list, and so does the shared password, which
   // knows no name at all until one is picked.
-  if(ME && !ME.admin){
+  // An admin imports like any rider: to their own count (Carter, 2026-09-29:
+  // standard view everywhere but /log).
+  if(ME){
     sel.innerHTML='<option value="'+esc(ME.slug)+'">'+esc(ME.name||ME.slug)+'</option>';
     sel.value=ME.slug;
     sel.disabled=true;
@@ -489,7 +491,7 @@ function fillRiders(){
 // Adding a RIDER is still admin only — hide the button rather than let someone
 // fill a form that can only 401.
 function applyAccountLimits(){
-  if(!ME || ME.admin) return;
+  if(!ME) return;
   var el=$('newrider'); if(el) el.style.display='none';
 }
 

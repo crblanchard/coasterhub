@@ -238,11 +238,11 @@ function fail(e){console.error(e);document.getElementById('loading').style.displ
 // this page used to quietly fall back to Carter, which contradicted the picker.
 var slug=CoasterHub.currentUser();
 // Your own count gets an "Add to your count" button in the hero, the same rule
-// as the buttons on your profile: its owner, or Carter for a rider who has not
-// claimed their page yet. A visitor would only get a 401 out of it.
+// as the buttons on your profile: its owner only — an admin sees the same page
+// a rider does (Carter, 2026-09-29: standard view everywhere but /log).
 if(slug){
   CoasterHub.me().then(function(acct){
-    if(acct && (acct.slug===slug || acct.admin)) document.getElementById('rides_act').hidden=false;
+    if(acct && acct.slug===slug) document.getElementById('rides_act').hidden=false;
   }).catch(function(){ /* signed out: leave it hidden */ });
 }
 COMBINED = !slug;

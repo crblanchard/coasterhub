@@ -817,7 +817,7 @@ if(!slug){
         // person to tell a visitor about a rule they were not up against;
         // an empty card reads the same for everyone now (Carter, 2026-09-20).
         var yours = ME && ME.slug === l.user.slug;
-        var seedable = !yours && ME && ME.admin && !l.claimed;
+        var seedable = false; // an admin sees what a rider sees (Carter, 2026-09-29)
         var why = yours     ? 'Judgment-free zone'
                 : seedable  ? 'Not claimed yet — you can start it for them.'
                 :             '';
