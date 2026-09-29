@@ -1,43 +1,33 @@
 # Draws skyline-day.svg / skyline-night.svg (the hero skyline):
 #   python3 tools/make-skyline.py <outdir>
-# Left to right (Carter's references, 2026-09-28):
-#   - a wooden coaster with Texas Giant's lift and drop: a long straight lift at
-#     about 35 degrees, a tight rounded crest, a curved drop near 70 degrees, all
-#     on a gridded wooden structure (bents, ledgers, cross-braces);
-#   - a B&M hyper drawn from Shambhala: lift, crest, drop, then three parabolic
-#     hills each lower than the last, on white tubular columns;
-#   - Cedar Point's Giant Wheel, Power Tower (masts under a rounded crown), Wicked Twister
-#     (two twisted spikes on lattice supports, the U of track between them) and
-#     WindSeeker (the tallest: a pole with a flared canopy, swings flung out).
-# Heights are roughly to scale with each other. A low treeline hides where the
-# tracks run off. The lift starts at the far left and low down, so the upper
-# left of the picture stays empty for the page title.
+# Carter, 2026-09-29: "just do this from a side view (basically this photo
+# exactly) with the Ferris wheel then drop tower/swings to the right" — the photo
+# is Magnum XL-200 at sunset. So, left to right:
+#   - the coaster: a straight lift at 33 degrees laid tangent onto a parabola,
+#     whose far side is the drop (about 65 degrees where it meets the trees), with
+#     a railed platform and a mast on top and a train just over the crest. It
+#     stands on seven steel box towers (columns, ledgers, an X in every panel)
+#     with open sky between them, measured off the photo;
+#   - a Ferris wheel, Power Tower (masts under a rounded crown), and WindSeeker
+#     (a pole with a flared canopy, swings flung out).
+# A treeline, rising into a hill under the drop as in the photo, hides the feet.
+# The lift starts at the far left and low down, so the upper left of the picture
+# stays empty for the page title.
+# (The busier version with a wooden coaster, a Shambhala hyper and Wicked Twister
+# is in git history, commit 5554345.)
 import math, sys
-W,H,G=868,200,198
+W,H,G=650,200,198
 
-def bez(p0,p1,p2,p3,n=40):
-    return [tuple((1-t)**3*a+3*(1-t)**2*t*b+3*(1-t)*t*t*c+t**3*d for a,b,c,d in zip(p0,p1,p2,p3))
-            for t in [i/n for i in range(n+1)]]
-
-def spline(knots):
-    """Knots are (x, y, heading in degrees, up positive). Each span is a cubic whose
-    handles run along the headings, so the track has no kinks."""
-    pts=[];d='M%.1f %.1f'%knots[0][:2]
-    for (x0,y0,a0),(x1,y1,a1) in zip(knots,knots[1:]):
-        L=math.hypot(x1-x0,y1-y0)/3
-        c0=(x0+L*math.cos(math.radians(a0)),y0-L*math.sin(math.radians(a0)))
-        c1=(x1-L*math.cos(math.radians(a1)),y1+L*math.sin(math.radians(a1)))
-        pts+=bez((x0,y0),c0,c1,(x1,y1))
-        d+=' C%.1f %.1f %.1f %.1f %.1f %.1f'%(c0+c1+(x1,y1))
-    return pts,d
-
-def ytop(pts,x):
-    """The highest point of the track above x (None if the track is not there)."""
-    best=None
-    for (a,b),(c,e) in zip(pts,pts[1:]):
-        if min(a,c)<=x<=max(a,c) and c!=a:
-            y=b+(e-b)*(x-a)/(c-a); best=y if best is None else min(best,y)
-    return best
+# The coaster, in picture units. The photo was measured in its own pixels and
+# scaled by S_ so the crest sits 182 units above the ground.
+S_=0.298
+def px(x): return 4+(x-215)*S_
+VX,VY=px(1215),G-182          # top of the parabola
+A=0.00205/S_                  # its curvature (photo: 0.00205 per pixel)
+M=0.65                        # lift slope, about 33 degrees
+TX=VX-M/(2*A); TY=VY+A*(TX-VX)**2   # where the lift meets the parabola, tangent
+def track_y(x):
+    return TY+(TX-x)*M if x<TX else VY+A*(x-VX)**2
 
 def build(col,op,light=None,trees=None):
     o=[]; groups={}
@@ -51,179 +41,121 @@ def build(col,op,light=None,trees=None):
         lights.append("<path d='%s' fill='none' stroke='%s' stroke-width='%.1f' stroke-dasharray='0.1 %g' "
                       "stroke-linecap='round'/>"%(d,light,w,gap))
     beacons=[]
+    circ=lambda cx,cy,r: 'M%.1f %.1f A%.1f %.1f 0 1 0 %.1f %.1f A%.1f %.1f 0 1 0 %.1f %.1f'%(cx-r,cy,r,r,cx+r,cy,r,r,cx-r,cy)
 
-    # Both coasters are height functions of x: a straight lift laid tangent onto a
-    # cos^2 bump, whose far side is the drop, then more bumps for hills. cos^2 has
-    # a parabolic top and flattens at its feet, which is how a real hill and a
-    # pullout look, and nothing overshoots the way hand-set curve handles did.
-    def bump(x,c,h,hw):
-        u=(x-c)/hw
-        return h*math.cos(math.pi/2*u)**2 if abs(u)<1 else 0
-    def lift_onto(c,h,hw,deg):
-        """Where a lift at deg meets the bump centred at c tangentially, and where
-        it leaves the ground."""
-        k=math.pi/(2*hw); m=math.tan(math.radians(deg))
-        dx=math.asin(min(1,m/(h*k)))/(2*k); xt=c-dx; ht=bump(xt,c,h,hw)
-        return xt,ht,xt-ht/m,m
-    def profile(x0,x1,f,base,sig):
-        """Samples f, then blurs it with a Gaussian whose width sig(x) varies, so a
-        crest can be rounded more than the hills, and the ends sink into the trees."""
-        xs=[x0-30+i*.5 for i in range(int((x1-x0+60)*2)+1)]
-        raw=[f(x) for x in xs]
-        pts=[]
-        for i,x in enumerate(xs):
-            if not x0<=x<=x1: continue
-            sg=sig(x); n=int(sg*2.5/.5); acc=wt=0
-            for j in range(max(0,i-n),min(len(xs),i+n+1)):
-                w=math.exp(-((xs[j]-x)/sg)**2/2); acc+=w*raw[j]; wt+=w
-            pts.append((x,base-acc/wt))
-        return pts,'M'+' L'.join('%.1f %.1f'%p for p in pts[::4]+[pts[-1]])
-    def sink(x,a,b):
-        """Drops the track below the treeline before x=a and after x=b."""
-        return -max(0,a-x)*.5-max(0,x-b)*.5
+    # ---------- the coaster ----------
+    x_end=VX+math.sqrt((G+4-VY)/A)
+    xs=[-2+i*1.0 for i in range(int(x_end+2)+1)]
+    pts=[(x,track_y(x)) for x in xs]
+    d='M'+' L'.join('%.1f %.1f'%p for p in pts)
+    # the towers: columns (photo x positions), each tower its own group
+    towers=[(300,340,385,425),(478,525,575,622),(670,718,768,815),(868,918,968,1015),
+            (1090,1135,1195,1240,1300,1345),(1410,1450,1495,1540),(1570,1610,1650,1690)]
+    levels=[G-12-34*k for k in range(6)]          # ledgers, every 34 units up
+    for t in towers:
+        cols=[(px(x),track_y(px(x))+1.6) for x in t]
+        for x,top in cols: S('M%.1f %.1f L%.1f %d'%(x,top,x,G),.75)
+        for (x0,t0),(x1,t1) in zip(cols,cols[1:]):
+            below=[G]+[y for y in levels if y>max(t0,t1)+3]
+            for yb,yt in zip(below,below[1:]):
+                S('M%.1f %d L%.1f %d M%.1f %d L%.1f %d'%(x0,yb,x1,yt,x0,yt,x1,yb),.3,.55)
+            # the panel under the track: braced up to the lower of the two columns
+            yb=below[-1]; yt=max(t0,t1)
+            if yb-yt>6: S('M%.1f %.1f L%.1f %.1f M%.1f %.1f L%.1f %.1f'%(x0,yb,x1,yt,x0,yt,x1,yb),.3,.55)
+        for y in levels:
+            run=[x for x,top in cols if top<y-1]
+            if len(run)>1: S('M%.1f %d L%.1f %d'%(run[0],y,run[-1],y),.5,.7)
+        # a cap beam under the track where the tower meets it
+        S('M%.1f %.1f L%.1f %.1f'%(cols[0][0]-1,cols[0][1]+.5,cols[-1][0]+1,cols[-1][1]+.5),.6,.7)
+    # the lift's walkway, a thin rail just under the chain
+    S('M%.1f %.1f L%.1f %.1f'%(0,track_y(0)+2.6,TX-4,track_y(TX-4)+2.6),.5,.8)
+    S(d,2.4)
+    # the platform on top: a railing along the crest, and the mast
+    p0,p1=px(1140),px(1255)
+    rail='M%.1f %.1f'%(p0,track_y(p0)-3.5)
+    for i in range(1,21):
+        x=p0+(p1-p0)*i/20; rail+=' L%.1f %.1f'%(x,track_y(x)-3.5)
+    posts=''.join(' M%.1f %.1f L%.1f %.1f'%(x,track_y(x)-1,x,track_y(x)-3.5) for x in [p0+(p1-p0)*i/8 for i in range(9)])
+    S(rail+posts,.5,.8)
+    mx=px(1195); S('M%.1f %.1f L%.1f %.1f'%(mx,track_y(mx)-1,mx,VY-10),.6)
+    # the train, just over the crest: cars laid along the track, sitting on it
+    s=px(1300); cars=[]
+    for i in range(8):
+        a=s; b=a
+        while math.hypot(b-a,track_y(b)-track_y(a))<7.2: b+=.2
+        ax,ay,bx,by=a,track_y(a),b,track_y(b)
+        nx,ny=(by-ay),(ax-bx); n=math.hypot(nx,ny); nx,ny=nx/n*2.8,ny/n*2.8   # the upward normal
+        cars.append('M%.1f %.1f L%.1f %.1f'%(ax+nx,ay+ny,bx+nx,by+ny))
+        s=b
+        while math.hypot(s-b,track_y(s)-track_y(b))<1.4: s+=.2
+    o.append("<path d='%s' fill='none' stroke='%s' stroke-opacity='%.2f' stroke-width='3.4'/>"%(' '.join(cars),col,min(1,op*1.3)))
+    if light:
+        L(d,8); beacons.append((mx,VY-11))
 
-    # ---------- wooden coaster (Texas Giant's angles) ----------
-    wc,wh,ww=168,116,44
-    wxt,wht,wx0,wm=lift_onto(wc,wh,ww,35)
-    wf=lambda x: ((x-wx0)*wm if x<wxt else bump(x,wc,wh,ww))+sink(x,-99,wc+ww+2)
-    wp,wd=profile(max(-4,wx0),wc+ww+22,wf,G-4,lambda x:2.5+4*math.exp(-((x-wc)/14)**2))
-    posts=list(range(2,wc+ww-4,7))
-    tops={x:ytop(wp,x) for x in posts}
-    # bents: straight posts from the ground to the track
-    for x in posts:
-        y=tops[x]
-        if y is not None and y<G-5: S('M%d %.1f L%d %d'%(x,y+1.4,x,G),.55,.75)
-    # ledgers every 13 units, run between neighbouring posts that reach them
-    levels=list(range(G-13,G-120,-13))
-    for yy in levels:
-        run=[x for x in posts if tops[x] is not None and tops[x]<yy-1.5]
-        seg=[]
-        for x in run+[None]:
-            if seg and (x is None or x-seg[-1]>7):
-                if len(seg)>1: S('M%d %d L%d %d'%(seg[0],yy,seg[-1],yy),.45,.6)
-                seg=[]
-            if x is not None: seg.append(x)
-    # one diagonal per bay, alternating, where the bay is closed on all sides
-    for i,(x0,x1) in enumerate(zip(posts,posts[1:])):
-        for j,(yb,yt) in enumerate(zip([G]+levels,levels)):
-            if tops[x0] is None or tops[x1] is None or max(tops[x0],tops[x1])>yt-1.5: continue
-            if (i+j)%2: S('M%d %d L%d %d'%(x0,yb,x1,yt),.35,.45)
-            else: S('M%d %d L%d %d'%(x0,yt,x1,yb),.35,.45)
-    S(wd,2.0)
-    if light: L(wd)
-
-    # ---------- B&M hyper, Shambhala's profile ----------
-    # first drop, then three hills, each lower and narrower than the one before
-    hills=[(352,186,62),(462,134,44),(550,100,38),(624,72,32)]
-    hxt,hht,hx0,hm=lift_onto(*hills[0],40)
-    hf=lambda x: ((x-hx0)*hm if x<hxt else sum(bump(x,*b) for b in hills))+sink(x,hx0+6,676)
-    hp,hd=profile(hx0-8,700,hf,G-6,lambda x:2.5+8*math.exp(-((x-hills[0][0])/18)**2))
-    def column(x,spread=0):
-        y=ytop(hp,x)
-        if y is None or y>G-8: return
-        if spread: S('M%.1f %.1f L%.1f %d M%.1f %.1f L%.1f %d'%(x,y+2,x-spread,G,x,y+2,x+spread,G),.8,.85)
-        else: S('M%.1f %.1f L%.1f %d'%(x,y+2,x,G),.9,.85)
-    for x in range(int(hx0)+22,int(hxt)-4,17): column(x)
-    for f in (-9,9): column(hills[0][0]+f)
-    for c,h,hw in hills[1:]:
-        for f in (-.45,0,.45): column(c+f*hw)
-    S(hd,2.4)
-    if light: L(hd); beacons.append((hills[0][0],ytop(hp,hills[0][0])-5))
-
-    # ---------- Ferris wheel (Cedar Point's Giant Wheel, set back a little) ----------
-    fx,fr=689,34; fy=G-10-fr
-    S('M%d %d L%d %d L%d %d'%(fx-17,G,fx,fy,fx+17,G),1.0)          # A-frame legs
-    S('M%.1f %.1f A%d %d 0 1 0 %.1f %.1f A%d %d 0 1 0 %.1f %.1f'%(fx-fr,fy,fr,fr,fx+fr,fy,fr,fr,fx-fr,fy),1.3)
-    S('M%.1f %.1f A%d %d 0 1 0 %.1f %.1f A%d %d 0 1 0 %.1f %.1f'%(fx-fr*.8,fy,fr*.8,fr*.8,fx+fr*.8,fy,fr*.8,fr*.8,fx-fr*.8,fy),.5,.6)
-    spokes=[]; cars=[]
-    for i in range(16):
-        a=2*math.pi*i/16
+    # ---------- Ferris wheel ----------
+    fx,fr=504,42; fy=G-10-fr
+    S('M%d %d L%d %d L%d %d'%(fx-20,G,fx,fy,fx+20,G),1.0)          # A-frame legs
+    S(circ(fx,fy,fr),1.3)
+    S(circ(fx,fy,fr*.8),.5,.6)
+    spokes=[]; gond=[]
+    for i in range(18):
+        a=2*math.pi*i/18
         rx,ry=fx+fr*math.cos(a),fy+fr*math.sin(a)
         spokes.append('M%d %d L%.1f %.1f'%(fx,fy,rx,ry))
-        cars.append('M%.1f %.1f h3 v3.2 h-3 Z'%(rx-1.5,ry+.8))   # gondolas hang below the rim
+        gond.append('M%.1f %.1f h3.4 v3.6 h-3.4 Z'%(rx-1.7,ry+.8))   # gondolas hang below the rim
     S(' '.join(spokes),.4,.6)
-    S(' '.join(cars),.8)
-    S('M%.1f %.1f A2 2 0 1 0 %.1f %.1f A2 2 0 1 0 %.1f %.1f'%(fx-2,fy,fx+2,fy,fx-2,fy),1.0)
+    S(' '.join(gond),.8)
+    S(circ(fx,fy,2.2),1.0)
     if light:
-        L('M%.1f %.1f A%d %d 0 1 0 %.1f %.1f A%d %d 0 1 0 %.1f %.1f'%(fx-fr,fy,fr,fr,fx+fr,fy,fr,fr,fx-fr,fy),5,2)
-        for i in range(0,16,2):
-            a=2*math.pi*i/16
+        L(circ(fx,fy,fr),5,2)
+        for i in range(0,18,2):
+            a=2*math.pi*i/18
             L('M%d %d L%.1f %.1f'%(fx,fy,fx+fr*math.cos(a),fy+fr*math.sin(a)),6,1.6)
 
     # ---------- Power Tower ----------
-    px,pt=742,G-172          # centre, top of the masts
-    for mx in (px-7,px+7):
-        S('M%.1f %d L%.1f %d M%.1f %d L%.1f %d'%(mx-2.5,G,mx-2.5,pt,mx+2.5,G,mx+2.5,pt),.8)
-        z='M%.1f %d'%(mx-2.5,G); y=G; f=1
+    pX,pt=571,G-172          # centre, top of the masts
+    for mX in (pX-7,pX+7):
+        S('M%.1f %d L%.1f %d M%.1f %d L%.1f %d'%(mX-2.5,G,mX-2.5,pt,mX+2.5,G,mX+2.5,pt),.8)
+        z='M%.1f %d'%(mX-2.5,G); y=G; f=1
         while y>pt+5:
-            y-=5; z+=' L%.1f %d'%(mx+2.5*f,y); f=-f
+            y-=5; z+=' L%.1f %d'%(mX+2.5*f,y); f=-f
         S(z,.4,.55)
     # seats: one ring parked low, one shot to the top
-    S('M%.1f %d h9 v5 h-9 Z'%(px-11.5,G-40),1.1)
-    S('M%.1f %d h9 v5 h-9 Z'%(px+2.5,pt+8),1.1)
+    S('M%.1f %d h9 v5 h-9 Z'%(pX-11.5,G-40),1.1)
+    S('M%.1f %d h9 v5 h-9 Z'%(pX+2.5,pt+8),1.1)
     # the crown: a band across the masts and a rounded top with ribs
-    S('M%d %d L%d %d'%(px-11,pt,px+11,pt),1.2)
-    S('M%d %d C%d %d %d %d %d %d C%d %d %d %d %d %d'%(px-11,pt,px-11,pt-10,px-5,pt-14,px,pt-14,px+5,pt-14,px+11,pt-10,px+11,pt),1.2)
-    S('M%d %d L%d %d M%d %d L%d %d M%d %d L%d %d'%(px-5,pt,px-5,pt-11,px,pt,px,pt-14,px+5,pt,px+5,pt-11),.5,.7)
+    crown='M%d %d C%d %d %d %d %d %d C%d %d %d %d %d %d'%(pX-11,pt,pX-11,pt-10,pX-5,pt-14,pX,pt-14,pX+5,pt-14,pX+11,pt-10,pX+11,pt)
+    S('M%d %d L%d %d'%(pX-11,pt,pX+11,pt),1.2)
+    S(crown,1.2)
+    S('M%d %d L%d %d M%d %d L%d %d M%d %d L%d %d'%(pX-5,pt,pX-5,pt-11,pX,pt,pX,pt-14,pX+5,pt,pX+5,pt-11),.5,.7)
     if light:
-        L('M%d %d C%d %d %d %d %d %d C%d %d %d %d %d %d'%(px-11,pt,px-11,pt-10,px-5,pt-14,px,pt-14,px+5,pt-14,px+11,pt-10,px+11,pt),4.5,2)
-        beacons.append((px,pt-16))
-
-    # ---------- Wicked Twister ----------
-    def spike(sx,top,lean):
-        # lattice support standing beside the spike, up to about two thirds
-        st=G-int((G-top)*.62); bx=sx-lean*9
-        S('M%.1f %d L%.1f %d M%.1f %d L%.1f %d'%(bx-2,G,bx-2,st,bx+2,G,bx+2,st),.7,.8)
-        z='M%.1f %d'%(bx-2,G); y=G; f=1
-        while y>st+4:
-            y-=5; z+=' L%.1f %d'%(bx+2*f,y); f=-f
-        S(z,.35,.5)
-        S('M%.1f %d L%.1f %d'%(bx,st+4,sx,st+4),.7,.8)
-        # the track: a flat ribbon turning over as it climbs (it is twice as wide
-        # face-on as it is edge-on), the tip curling outwards
-        lft=[];rgt=[]
-        for i in range(81):
-            t=i/80; y=G-14-(G-14-top)*t
-            x=sx+lean*5*t**3
-            hw=.5+2.1*abs(math.cos(t*2.5*math.pi))*(1-t*.35)
-            lft.append('%.1f %.1f'%(x-hw,y)); rgt.append('%.1f %.1f'%(x+hw,y))
-        o.append("<path d='M%s L%s Z' fill='%s' fill-opacity='%.2f' stroke='%s' stroke-opacity='%.2f' stroke-width='.5'/>"
-                 %(' L'.join(lft),' L'.join(reversed(rgt)),col,op*.55,col,op))
-        return sx+lean*5
-    tl,tr=776,812
-    a=spike(tl,G-150,-1); b=spike(tr,G-150,1)
-    # the U between them: low launch track and station
-    u='M%d %d C%d %d %d %d %d %d L%d %d C%d %d %d %d %d %d'%(tl,G-14,tl,G-5,tl+4,G-4,tl+10,G-4,tr-10,G-4,tr-4,G-4,tr,G-5,tr,G-14)
-    S(u,1.2)
-    if light:
-        L('M%d %d L%d %d'%(tl,G-14,tl,G-148),7,2); L('M%d %d L%d %d'%(tr,G-14,tr,G-148),7,2)
-        beacons+= [(a,G-152),(b,G-152)]
+        L(crown,4.5,2); beacons.append((pX,pt-16))
 
     # ---------- WindSeeker ----------
-    wx=840
-    S('M%d %d L%d %d'%(wx-1.2,G,wx-1.2,14),.8); S('M%d %d L%d %d'%(wx+1.2,G,wx+1.2,14),.8)
+    wx=618
+    S('M%.1f %d L%.1f %d'%(wx-1.2,G,wx-1.2,14),.8); S('M%.1f %d L%.1f %d'%(wx+1.2,G,wx+1.2,14),.8)
     S('M%d 14 L%d 8 L%d 14 Z'%(wx-3,wx,wx+3),.9)
     cy=26   # the carriage, near the top, flung swings below it
     S('M%d %d C%d %d %d %d %d %d C%d %d %d %d %d %d'%(wx-16,cy+6,wx-10,cy+1,wx-5,cy-2,wx,cy-2,wx+5,cy-2,wx+10,cy+1,wx+16,cy+6),1.3)
     S('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),.7,.8)
     for dx in (-16,-11,-6,6,11,16):
-        s=1 if dx>0 else -1
-        ex=wx+dx+s*9; ey=cy+6+15
+        sg=1 if dx>0 else -1
+        ex=wx+dx+sg*9; ey=cy+6+15
         S('M%d %d L%d %d'%(wx+dx,cy+6,ex,ey),.45,.75)
         S('M%.1f %d L%.1f %d'%(ex-1.6,ey,ex+1.6,ey),1.6)
     if light:
-        L('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),4,2)
-        beacons.append((wx,6))
+        L('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),4,2); beacons.append((wx,6))
 
-    # ---------- treeline along the floor ----------
-    t=[]
-    x=-4; k=0
+    # ---------- treeline: low along the floor, a wooded hill under the drop ----------
+    def env(x):
+        return 5+20*math.exp(-((x-px(1650))/34)**2)+5*math.exp(-((x-px(700))/60)**2)
+    t=[]; x=-4; k=0
     while x<W+8:
-        r=2.6+((k*37)%7)*.45; k+=1
-        if True:
-            t.append("<circle cx='%.1f' cy='%.1f' r='%.1f'/>"%(x,G+2-r*.35,r))
-        x+=r*1.1
-    tree="<g fill='%s' fill-opacity='%.2f'>%s</g>"%(trees[0],trees[1],''.join(t)) if trees else ''
+        r=2.8+((k*37)%7)*.5; k+=1
+        t.append("<circle cx='%.1f' cy='%.1f' r='%.1f'/>"%(x,G+2-env(x)+r,r))
+        x+=r*1.05
+    body='M-4 %d'%(H)+''.join(' L%.1f %.1f'%(x,G+3-env(x)+4) for x in range(-4,W+6,4))+' L%d %d Z'%(W+6,H)
+    tree=("<g fill='%s' opacity='%.2f'><path d='%s'/>%s</g>"%(trees[0],trees[1],body,''.join(t))) if trees else ''
 
     beac=''.join("<circle cx='%.1f' cy='%.1f' r='1.9' fill='#ff5a5f'/>"%b for b in beacons) if light else ''
     o=[x if isinstance(x,str) else

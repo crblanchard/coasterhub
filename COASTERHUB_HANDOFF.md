@@ -5259,3 +5259,17 @@ night). The picture got wider (868x200, ~4.34:1), so the height rule became
 `min(132px,80%,max(58px,calc(28.6vw - 174px)))` to keep the wooden crest clear of the home
 subtitle. If the picture's width changes again, redo that sum: the wooden crest sits ~19%
 in from the left and must land right of the subtitle's end. `?v=5`.
+
+**v6, 2026-09-29 — pared back to one photo, still a WIP.** Carter: the versions "still
+just look okay"; "for now just do this from a side view (basically this photo exactly) with
+the Ferris wheel then drop tower/swings to the right". The photo is Magnum XL-200 at sunset.
+Now: that coaster alone — a 33-degree lift laid tangent onto a parabola (measured off the
+photo: 0.00205/px curvature) whose far side is the drop, seven steel box towers at the
+photo's column positions with open sky between (ledgers every 34 units, an X in every
+panel), a railed platform and mast on top, a train just over the crest — then a Ferris
+wheel, Power Tower and WindSeeker. The treeline rises into a wooded hill under the drop,
+as in the photo; it is one group with group `opacity`, so overlapping crowns do not stack
+darker. The wooden coaster, Shambhala hyper and Wicked Twister are gone from the picture
+(commit 5554345 has them). Picture is 650x200 (3.25:1); height rule
+`min(150px,80%,max(58px,calc(30.7vw - 167px)))`, compact h1 cap `calc(100% - 300px)`.
+`?v=6`.
