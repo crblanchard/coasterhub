@@ -24,8 +24,6 @@
   /* Everyone, A–Z by username, the same rows as home (Carter, 2026-09-29).
      The rows are style.css's .riderlist; the tiles are style.css's .tiles. */
   #list{margin-top:6px}
-  /* The biggest-count tile holds a name, not a number: a size a name fits at. */
-  .tile.nm b{font-size:1.05rem;line-height:1.25;padding-top:4px}
 </style>
 </head>
 <body>
@@ -78,22 +76,20 @@ Promise.all([CoasterHub.fetchUsers(), CoasterHub.fetchSummary(), CoasterHub.fetc
   // A–Z by username (Carter, 2026-09-29).
   users.sort(function(a,b){ return String(a.slug).localeCompare(String(b.slug)); });
   var distinct={}; ranks.forEach(function(x){ (x.order||[]).forEach(function(id){ distinct[id]=1; }); });
-  var started=0, credits=0, rides=0, top=null;
+  var started=0, credits=0, rides=0;
   users.forEach(function(u){
     var x=by[u.slug]||{};
     if(x.ranked) started++;
     credits+=x.credits||0;
     rides+=(x.rides==null ? x.credits : x.rides)||0;
-    if(!top || (x.credits||0)>(by[top.slug]||{}).credits) top=u;
   });
   // What the site adds up to: who is here, how much of it is ranked, how much
-  // has been logged, and whose count is biggest.
+  // has been logged.
   $('tiles').innerHTML=tile(nf(users.length),'Users')
     +tile(nf(started),'Lists started')
     +tile(nf(Object.keys(distinct).length),'Coasters ranked')
     +tile(nf(credits),'Credits logged')
-    +tile(nf(rides),'Rides logged')
-    +(top ? tile(top.name,'Biggest count · '+nf((by[top.slug]||{}).credits)).replace('class="tile"','class="tile nm"') : '');
+    +tile(nf(rides),'Rides logged');
   $('list').innerHTML=users.map(function(u){ var x=by[u.slug]||{};
     return CoasterHub.riderRow(u, x.credits||0, x.rides==null?null:x.rides, x.ranked||0); }).join('');
   $('hero_sub').textContent='Everyone on Coaster Hub, A–Z by username.';
