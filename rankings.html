@@ -2549,6 +2549,9 @@ function save(then){
       return j; }); })
     .then(function(j){
       dirty=false;
+      // A write: home's Friends list, the profile and the count read fresh now,
+      // and one left open in another tab reloads (app.js noteWrite).
+      CoasterHub.noteWrite();
       // The order and what you did with your categories are two writes, and
       // the order is the one that matters: preferences are how the same list is
       // DRAWN, so a failure here is worth a line and never worth losing the

@@ -1245,6 +1245,16 @@
       document.addEventListener("visibilitychange", function () {
         if (stale && document.visibilityState === "visible") location.reload();
       });
+      // Going Back to a page restores it from the browser's back/forward cache,
+      // frozen as it was — Safari does this all the time — so home still said
+      // 285 ranked after 20 more were saved (Carter, 2026-09-29). If a write
+      // happened after this copy was drawn, draw it again.
+      var drawnAt = Date.now();
+      window.addEventListener("pageshow", function (e) {
+        var w = 0;
+        try { w = +window.localStorage.getItem(WROTE_KEY) || 0; } catch (x) {}
+        if (e.persisted && w > drawnAt) location.reload();
+      });
     }
 
     // Active rider persists between pages: the URL wins (/user/<slug>/...),
