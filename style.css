@@ -109,7 +109,7 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
   --panel:rgba(255,255,255,.12); --soft:rgba(255,255,255,.10); --tint:rgba(255,255,255,.12); --tint2:rgba(255,255,255,.20);
   color:var(--fg);
   background-color:#060b15;
-  background-image:url(/skyline-night.svg?v=10);
+  background-image:url(/skyline-night.svg?v=11);
   background-repeat:no-repeat;background-position:right max(24px,calc(50vw - 516px)) bottom 0;background-size:auto min(150px,80%,max(58px,calc(30.7vw - 167px)))}
 /* A little park skyline — a Magnum-style coaster in side view, a Ferris wheel, a
    drop tower and swings (Carter, 2026-09-29; tools/make-skyline.py) — standing on the band's floor at the right,
@@ -129,7 +129,7 @@ section.hero:not(.compact) p.wide{max-width:28em}
 :root[data-theme="light"] .hero{background-color:#dcf0f4;
   --fg:#16181b; --muted:#43505a; --accent2:#0a6aa0; --line:rgba(10,80,110,.22);
   --panel:rgba(255,255,255,.55); --soft:rgba(10,106,160,.06); --tint:rgba(10,106,160,.08); --tint2:rgba(10,106,160,.14);
-  background-image:url(/skyline-day.svg?v=10)}
+  background-image:url(/skyline-day.svg?v=11)}
 :root[data-theme="light"] .hero h1{color:var(--fg)}
 :root[data-theme="light"] .hero .segsw a.on{background:#fff;color:#0b3f5a}
 :root:not([data-theme="light"]) .hero h1{color:#fff}

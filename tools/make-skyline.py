@@ -81,9 +81,22 @@ def build(col,op,light=None,trees=None,bg=None):
         if k not in groups: groups[k]=[]; o.append(k)
         groups[k].append(d)
     lights=[]
-    def L(d,gap=8,w=2.2):
-        lights.append("<path d='%s' fill='none' stroke='%s' stroke-width='%.1f' stroke-dasharray='0.1 %g' "
-                      "stroke-linecap='round'/>"%(d,light,w,gap))
+    def L(d,gap=8,w=2.2,length=None):
+        # A run of lights: a dash of 0.1 and a gap. Given the run's length, the gap is
+        # evened out so a light lands on both ends — pulled a hair short, because a
+        # dash starting exactly at the end of a path is dropped (the far light on
+        # WindSeeker's ring went missing that way; Carter spotted it, 2026-09-29).
+        if length:
+            n=max(1,round(length/gap)); gap=length/n-.002
+        lights.append("<path d='%s' fill='none' stroke='%s' stroke-width='%.1f' stroke-dasharray='0.1 %.3f' "
+                      "stroke-linecap='round'/>"%(d,light,w,gap-.1))
+    def clen(*segs):
+        """Length of a run of cubic Bezier segments, each (p0,p1,p2,p3)."""
+        n=0
+        for p0,p1,p2,p3 in segs:
+            q=[tuple((1-t)**3*a+3*(1-t)**2*t*b+3*(1-t)*t*t*c+t**3*e for a,b,c,e in zip(p0,p1,p2,p3)) for t in [i/200 for i in range(201)]]
+            n+=sum(math.dist(u,v) for u,v in zip(q,q[1:]))
+        return n
     beacons=[]
     circ=lambda cx,cy,r: 'M%.1f %.1f A%.1f %.1f 0 1 0 %.1f %.1f A%.1f %.1f 0 1 0 %.1f %.1f'%(cx-r,cy,r,r,cx+r,cy,r,r,cx-r,cy)
 
@@ -181,7 +194,8 @@ def build(col,op,light=None,trees=None,bg=None):
     S(crown,1.2)
     S('M%d %d L%d %d M%d %d L%d %d M%d %d L%d %d'%(pX-5,pt,pX-5,pt-11,pX,pt,pX,pt-14,pX+5,pt,pX+5,pt-11),.5,.7)
     if light:
-        L(crown,4.5,2); beacons.append((pX,pt-16))
+        L(crown,4.5,2,clen(((pX-11,pt),(pX-11,pt-10),(pX-5,pt-14),(pX,pt-14)),((pX,pt-14),(pX+5,pt-14),(pX+11,pt-10),(pX+11,pt))))
+        beacons.append((pX,pt-16))
 
     # ---------- WindSeeker ----------
     wx=618
@@ -198,7 +212,7 @@ def build(col,op,light=None,trees=None,bg=None):
         P('M%d %d L%d %d'%(wx+dx,cy+6,ex,ey),.45,.75)
         P('M%.1f %d L%.1f %d'%(ex-1.6,ey,ex+1.6,ey),1.6)
     if light:
-        L('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),4,2); beacons.append((wx,6))
+        L('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),4,2,32); beacons.append((wx,6))
 
     # ---------- treeline: low along the floor, a low wooded rise under the drop ----------
     def env(x):
