@@ -278,7 +278,7 @@
              count button: the rider whose page this is, worded for whose it is. -->
         <a class="btn alt" data-nav="map" id="hero_map" href="/map">View your map</a>
         <a class="btn alt" data-nav="count" id="hero_view" href="/credits">View your count</a>
-        <a class="btn alt own" data-nav="rankings" href="/rankings" hidden>Update your rankings</a>
+        <a class="btn alt" data-nav="rankings" id="hero_rank" href="/rankings">Update your rankings</a>
       </div>
     </div>
   </div>
@@ -676,6 +676,9 @@ function render(s){
       mine ? 'View your count' : ('View ' + (s.userName || 'this') + '’s count');
     document.getElementById('hero_map').textContent =
       mine ? 'View your map' : ('View ' + (s.userName || 'this') + '’s map');
+    // Everyone gets the rankings, as the count and the map (Carter, 2026-09-29).
+    document.getElementById('hero_rank').textContent =
+      mine ? 'Update your rankings' : ('View ' + (s.userName || 'this') + '’s rankings');
     CoasterHubProfile.mount(host,
       mine ? acct : { name:s.userName, slug:CoasterHub.currentUser(), bio:s.bio, avatar:s.avatar },
       { editable: !!mine,
