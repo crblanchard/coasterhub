@@ -142,8 +142,16 @@ function edgeKey(url, path) {
 // that ASKS to be: fetch(..., {cache:"no-store"}) sends Cache-Control: no-cache,
 // which is what /edit sends on every read and what app.js sends for ten
 // minutes after a write (noteWrite). So an editor still sees their own change.
+// The three per-rider summaries are the exception for signed-in readers
+// (2026-09-29): home kept showing "285 ranked" after twenty more were saved,
+// because the purge on a write only reaches one colo and the browser held its
+// own minute-long copy on top. The people who look at those numbers right after
+// changing them are signed in, and they are few, so they read them live; the
+// anonymous traffic the cache exists for still gets the cached copy.
+const PER_RIDER = { "/api/summary": 1, "/api/rides-all": 1, "/api/rankings-all": 1 };
 function edgeUsable(request) {
   if (typeof caches === "undefined" || !caches.default) return false;
+  if (PER_RIDER[new URL(request.url).pathname] && request.headers.get("cookie")) return false;
   const cc = (request.headers.get("cache-control") || "") + " " + (request.headers.get("pragma") || "");
   return !/no-cache|no-store/i.test(cc);
 }
@@ -1813,17 +1821,17 @@ export default {
       // rides (null unless a re-ride is on record — computeStats' rideCounts
       // rule) and ranked.
       if (request.method === "GET" && path === "/api/summary") {
-        return edgePut(ctx, request, json({ users: await getSummary(env) }, 200, SUMMARY_CACHE));
+        return edgePut(ctx, request, json({ users: await getSummary(env) }, 200, request.headers.get("cookie") ? {} : SUMMARY_CACHE));
       }
       // /api/rides-all: every rider's log in one answer, same row shape as
       // /api/rides/:slug. For the everyone view of /count.
       if (request.method === "GET" && path === "/api/rides-all") {
-        return edgePut(ctx, request, json({ riders: await getAllRides(env) }, 200, SUMMARY_CACHE));
+        return edgePut(ctx, request, json({ riders: await getAllRides(env) }, 200, request.headers.get("cookie") ? {} : SUMMARY_CACHE));
       }
       // /api/park-riders?park=<name>: for one park, who has ridden each coaster
       // and how many times. { riders: { <coasterId>: [{slug,name,n}] } }.
       if (request.method === "GET" && path === "/api/rankings-all") {
-        return edgePut(ctx, request, json({ rankings: await getAllRankings(env) }, 200, SUMMARY_CACHE));
+        return edgePut(ctx, request, json({ rankings: await getAllRankings(env) }, 200, request.headers.get("cookie") ? {} : SUMMARY_CACHE));
       }
       if (request.method === "GET" && path === "/api/coaster-riders") {
         const ids = (url.searchParams.get("ids") || "").split(",").map(Number).filter((n) => n > 0).slice(0, 50);
