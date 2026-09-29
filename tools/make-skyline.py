@@ -18,7 +18,7 @@
 # (The busier version with a wooden coaster, a Shambhala hyper and Wicked Twister
 # is in git history, commit 5554345.)
 import math, sys
-W,H,G=650,200,198
+W,H,G=662,200,198
 
 # The coaster, in picture units. The photo was measured in its own pixels and
 # scaled by S_ so the crest sits 182 units above the ground.
@@ -177,7 +177,7 @@ def build(col,op,light=None,trees=None,bg=None):
             L('M%d %d L%.1f %.1f'%(fx,fy,fx+fr*math.cos(a),fy+fr*math.sin(a)),6,1.6)
 
     # ---------- Power Tower ----------
-    pX,pt=571,G-172          # centre, top of the masts
+    pX,pt=577,G-172          # centre, top of the masts
     for mX in (pX-7,pX+7):
         S('M%.1f %d L%.1f %d M%.1f %d L%.1f %d'%(mX-2.5,G,mX-2.5,pt,mX+2.5,G,mX+2.5,pt),.8)
         z='M%.1f %d'%(mX-2.5,G); y=G; f=1
@@ -198,7 +198,7 @@ def build(col,op,light=None,trees=None,bg=None):
         beacons.append((pX,pt-16))
 
     # ---------- WindSeeker ----------
-    wx=618
+    wx=630
     # a thick tower, solid all the way through (Carter, 2026-09-29), tapering a
     # little, with a solid cap; the carriage and swings are painted over it
     F('M%.1f %d L%.1f 15 L%.1f 15 L%.1f %d Z'%(wx-3,G,wx-2.2,wx+2.2,wx+3,G))
