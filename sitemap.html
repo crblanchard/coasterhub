@@ -30,6 +30,19 @@
   .sm .t{font-weight:700;font-size:1rem}
   .sm .p{color:var(--accent2);font-size:.8rem;font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
   .sm .d{color:var(--muted);font-size:.88rem;margin-top:5px}
+  /* Condensed on a phone (Carter, 2026-09-29): one column of short rows, the
+     address beside the name, the description one clipped line. */
+  @media (max-width:560px){
+    .smgroup{margin-bottom:22px}
+    .smgroup .gl{font-size:.82rem;margin-bottom:8px}
+    .smlist{grid-template-columns:minmax(0,1fr);gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+    .sm{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:8px 13px;background:none;min-width:0}
+    .sm:last-child{border-bottom:0}
+    .sm:hover{transform:none;background:var(--soft)}
+    .sm .t{display:flex;align-items:baseline;gap:8px;font-size:.93rem}
+    .sm .p{display:none}
+    .sm .d{margin-top:1px;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  }
   .tagpill{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;
     letter-spacing:.08em;border:1px solid var(--line);border-radius:999px;padding:2px 8px;
     margin-left:7px;color:var(--muted);vertical-align:2px}
@@ -89,9 +102,11 @@ var GROUPS = [
   { h: 'Site tools',
     l: 'Most of these work for one rider or for everyone combined \u2014 use the picker in the header.',
     items: [
-      { t: 'Home',        p: '/',          d: 'Everyone\u2019s counts next to each other, and what has happened lately.' },
-      { t: 'Profile',     p: '/account',   d: 'One rider: records, map, charts and the calendar heatmap. Signed in, it is yours.', rider: 'profile' },
-      { t: 'Credits',     p: '/credits',     d: 'The log, by park day or as one flat list.', rider: 'count' },
+      { t: 'Home',        p: '/',          d: 'Search, your friends and their activity, and the top ten users.' },
+      { t: 'Users',       p: '/users',     d: 'Everyone on the site A\u2013Z, with site-wide totals.' },
+      { t: 'Profile',     p: '/account',   d: 'One rider: their numbers, recent visits and who they follow. Signed in, it is yours.', rider: 'profile' },
+      { t: 'Credits',     p: '/credits',     d: 'The log by park day, by park, or as one flat list.', rider: 'count' },
+      { t: 'Map',         p: '/map',         d: 'Every park on a map, coloured by who has been. Compare with a friend.', rider: 'map' },
       { t: 'Coasters',    p: '/coasters',    d: 'Every coaster on the site, searchable and filterable.' },
       { t: 'Parks',       p: '/parks',       d: 'Every park on the site, A\u2013Z, by size, or nearest to you.' },
       // Linked to a real park and a real ride rather than a /park/<park> shape,
@@ -100,7 +115,8 @@ var GROUPS = [
       { t: 'One park',    p: '/park/knotts-berry-farm', d: 'Every coaster at one park, who has ridden them, and how much of it each rider has.' },
       { t: 'One coaster', p: '/park/knotts-berry-farm/ghostrider', d: 'One ride: its specs, its former names, and who has been on it. The address is /park/<park>/<coaster>.' },
       { t: 'Manufacturers', p: '/manufacturers', d: 'Every coaster maker on the site. Open one for its models, how many of each, and which you have ridden.' },
-      { t: 'Rankings',    p: '/rankings',  d: 'Favorites in order \u2014 drag to reorder, or compare two at a time.', rider: 'rankings' },
+      { t: 'Locations',   p: '/locations', d: 'Every state and country, with its parks and coasters.' },
+      { t: 'Rankings',    p: '/rankings',  d: 'Your favorites in order, or everyone\u2019s combined \u2014 drag to reorder, or Rank more.', rider: 'rankings' },
       { t: 'Categories',  p: '/categories', d: 'The same ride at five parks, ranked once. Pick the ones you use, or write your own.' },
       { t: 'Log',         p: '/log',    d: 'Coaster rides from a day out, or credits you already have.', tag: 'signed in' },
       { t: 'Import',      p: '/import', d: 'Paste a whole list, or drop in a spreadsheet.', tag: 'signed in' },
