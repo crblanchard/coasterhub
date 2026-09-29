@@ -483,7 +483,12 @@
   @media (max-width:680px){
     .vs{grid-template-columns:1fr;gap:8px}
     .vsx{padding:2px 0}
-    .figs{grid-template-columns:1fr 1fr}
+    /* Skinny full-width cards on a phone (Carter, 2026-09-29): the number and
+       its label on one line, one card per row. */
+    .figs{grid-template-columns:1fr;gap:6px;margin-bottom:22px}
+    .fig{display:flex;align-items:baseline;gap:10px;padding:8px 14px}
+    .fig b{font-size:1.15rem}
+    .fig span{margin-top:0}
     .rrow{gap:8px;padding:7px 9px}
     .rrow .nm{flex:1 1 6em}
     .rrow .acts button{width:26px;height:26px}
