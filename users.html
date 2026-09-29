@@ -44,7 +44,6 @@
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
   <h1 class="wide">Users</h1>
-  <p class="wide" id="hero_sub">Everyone on Coaster Hub.</p>
 </div></section>
 
 <section class="block" style="padding-top:20px"><div class="container">
@@ -92,7 +91,6 @@ Promise.all([CoasterHub.fetchUsers(), CoasterHub.fetchSummary(), CoasterHub.fetc
     +tile(nf(rides),'Rides logged');
   $('list').innerHTML=users.map(function(u){ var x=by[u.slug]||{};
     return CoasterHub.riderRow(u, x.credits||0, x.rides==null?null:x.rides, x.ranked||0); }).join('');
-  $('hero_sub').textContent='Everyone on Coaster Hub, A–Z by username.';
   $('loading').style.display='none'; $('ui').style.display='';
 }).catch(function(e){
   console.error(e);
