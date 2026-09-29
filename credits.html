@@ -717,7 +717,9 @@ function renderParks(rows){
     // when it is opened.
     return '<details class="mdl" data-park="'+esc(park)+'"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(park)+'</span><span class="msub">'+esc(sub)+'</span></span>'
-      +CoasterHub.countsTag(all.filter(function(r){ return !r.cl; }).length, all.filter(function(r){ return r.cl; }).length)+'</summary></details>';
+      // How many credits this count has here (Carter, 2026-09-29), not what
+      // the park operates — that is the park page's number.
+      +'<span class="ct">'+uniq.length+' credit'+(uniq.length===1?'':'s')+'</span></summary></details>';
   }).join('') || (LOG.length ? '<p class="lead" style="padding:12px 16px;margin:0">No parks match those filters.</p>' : emptyCount());
   CoasterHub.openableCoasters(document.getElementById('parkview'));
   document.getElementById('pager').innerHTML='';
