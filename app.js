@@ -1733,6 +1733,20 @@
   }
   // "2 operating · 1 defunct" on the right of a group or link row (Carter,
   // 2026-09-28: the counts moved out of the grey line; no chevrons).
+  // A rider's row on home and /users (moved here 2026-09-29 so the two lists are
+  // one thing): picture or initial, name over @username over credits (rides only
+  // once they have claimed their page), their ranked count on the right.
+  function riderRow(u, credits, rides, ranked) {
+    var E = searchEsc, nf = function (n) { return n == null ? "\u2014" : Number(n).toLocaleString(); };
+    var pic = u.avatar
+      ? '<span class="av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
+      : '<span class="av">' + E((u.name || "?").charAt(0).toUpperCase()) + '</span>';
+    var line = nf(credits) + " credits" + (!u.claimed || rides == null ? "" : " / " + nf(rides) + " rides");
+    return '<a class="riderrow" href="' + userPageHref(u.slug, "profile") + '">' + pic
+      + '<span class="who"><b class="nm">' + E(u.name) + '</b>'
+      + '<span class="un">@' + E(u.slug) + '</span><span class="sub">' + line + '</span></span>'
+      + '<span class="nums"><b>' + nf(ranked) + '</b><span>ranked</span></span></a>';
+  }
   function countsTag(open, gone) {
     // Stacked on a phone (vct), so the name keeps the width.
     return '<span class="ct vct">' + (open + gone ? '<span>' + open + ' operating</span>' + (gone ? '<i> \u00b7 </i><span>' + gone + ' defunct</span>' : '') : '<span>No coasters</span>') + '</span>';
@@ -2218,7 +2232,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag };
+              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

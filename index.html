@@ -57,6 +57,9 @@
   .xgrid span{color:var(--muted);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   @media (max-width:760px){ .xgrid{grid-template-columns:repeat(2,1fr)} .xgrid .wide2{grid-column:1 / -1} }
   #friends{margin-bottom:34px}
+  #list{margin-bottom:12px}
+  #allusers{margin:0 0 56px;font-size:.9rem}
+  #allusers a{color:var(--accent2);font-weight:600;text-decoration:none}
   .hint{color:var(--muted);font-size:.9rem;margin:0 0 34px}
   .hint a{color:var(--accent2)}
   /* Inside #friends the list already carries the gap below it. */
@@ -153,6 +156,7 @@
   </div>
   <span class="eyebrow lh" id="top_h" hidden>Top users</span>
   <div class="riderlist" id="list"></div>
+  <p class="more" id="allusers" hidden><a href="/users">See all users &rarr;</a></p>
 </div>
 
 <!-- What everyone has been up to, under who everyone is. The same feed /changes
@@ -230,36 +234,8 @@ CoasterHub.me().then(function(acct){
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const nf=n=>(n==null?'—':n.toLocaleString());
 
-// A rider's row. `avatar` is an R2 object key the Worker serves at /avatars/<key>
-// (migration 008); without one we draw the same initial-in-a-circle the rest of
-// the site draws, rather than a broken image.
-function row(u, st, ranked){
-  var k = st.kpi;
-  var pic = u.avatar
-    ? '<span class="av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
-    : '<span class="av">' + esc((u.name || '?').charAt(0).toUpperCase()) + '</span>';
-  // The count reads as a line under the name, where a bio sits on a profile,
-  // rather than as a row of tiles: four numbers of equal weight made every rider
-  // look like a spreadsheet row. One number earns the right-hand slot — how much
-  // of their count they have actually put in order. Rides are unknown for some
-  // riders (k.rides is null there), and "— rides" reads as a fault, so that half
-  // of the line is simply absent.
-  // The ride total is only shown for a rider who has CLAIMED their page. An
-  // unclaimed rider's rides came in from a spreadsheet import, mostly one row
-  // per credit, so the number is an artifact of how the data arrived rather
-  // than something anybody counted. Nothing is deleted — the real counts that
-  // were entered by hand are still there, and the number appears the day they
-  // claim the page. (Carter's call, 2026-09-17.)
-  var line = nf(k.credits) + ' credits'
-    + (!u.claimed || k.rides == null ? '' : ' / ' + nf(k.rides) + ' rides');
-  // Every number is a link's worth of information, so the whole row is the link
-  // rather than a "View →" at the end of it.
-  return '<a class="riderrow" href="' + CoasterHub.userPageHref(u.slug, 'profile') + '">'
-    + pic
-    + '<span class="who"><b class="nm">' + esc(u.name) + '</b>'
-    +   '<span class="un">@' + esc(u.slug) + '</span><span class="sub">' + line + '</span></span>'
-    + '<span class="nums"><b>' + nf(ranked) + '</b><span>ranked</span></span></a>';
-}
+// A rider's row: CoasterHub.riderRow, shared with /users.
+function row(u, st, ranked){ return CoasterHub.riderRow(u, st.kpi.credits, st.kpi.rides, ranked); }
 
 // Who you follow, for the top section. Signed out, not a rider, or a database
 // that has not run migrations/010-follows.sql yet (a 503): nobody, and the page
@@ -348,7 +324,9 @@ CoasterHub.fetchUsers().then(function(){
       }
       document.getElementById('top_h').hidden = false;
     }
-    document.getElementById('list').innerHTML = html(rows);
+    // The top ten, then everyone on /users (Carter, 2026-09-29).
+    document.getElementById('list').innerHTML = html(rows.slice(0, 10));
+    if (rows.length > 10) document.getElementById('allusers').hidden = false;
   });
 }).catch(function(e){
   console.error(e);

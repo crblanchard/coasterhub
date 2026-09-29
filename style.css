@@ -358,8 +358,8 @@ body{background-image:
 /* Big (Friends on a computer, and every row on a phone — Carter, 2026-09-28):
    the old card's size in the one list — a bigger picture, name over @username
    over credits, and the ranked count large with its label under it. */
-.riderlist .riderrow{gap:16px;padding:14px 18px}
-.riderlist .riderrow .av{width:54px;height:54px;font-size:1.4rem}
+.riderlist .riderrow{gap:14px;padding:10px 16px}
+.riderlist .riderrow .av{width:50px;height:50px;font-size:1.35rem}
 .riderlist .riderrow .who{flex-direction:column;align-items:flex-start;gap:0}
 .riderlist .riderrow .nm{font-weight:800;font-size:1.15rem;line-height:1.25}
 .riderlist .riderrow .un{color:var(--accent2);font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem}
@@ -368,8 +368,8 @@ body{background-image:
 .riderlist .riderrow .nums b{font-size:1.3rem;font-weight:800;line-height:1.2}
 .riderlist .riderrow .nums span{font-size:.8rem;}
 @media (max-width:560px){
-  .riderrow,.riderlist .riderrow{gap:12px;padding:11px 14px}
-  .riderrow .av,.riderlist .riderrow .av{width:48px;height:48px;font-size:1.25rem}
+  .riderrow,.riderlist .riderrow{gap:12px;padding:8px 14px}
+  .riderrow .av,.riderlist .riderrow .av{width:46px;height:46px;font-size:1.2rem}
   .riderrow .who{flex-direction:column;align-items:flex-start;gap:0}
   .riderrow .nm{font-weight:700;font-size:1.02rem}
   .riderrow .un{color:var(--accent2);font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem}

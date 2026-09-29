@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-09-29T05:20:11Z",
+   "text": "New /users page lists everyone A–Z with site-wide totals, and the home page now shows the top ten with a link to it. Phone lists and opened rows are tighter, and profiles have a rankings button for everyone."
+  },
+  {
    "at": "2026-09-29T00:36:02Z",
    "text": "Page headers now carry a little park skyline — a Magnum-style coaster in side view with its train cresting the hill, a Ferris wheel, a drop tower and swings — lit up at night on a deep navy, and on a sky-blue gradient by day. Dark mode is navy instead of grey throughout."
   },
