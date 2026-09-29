@@ -117,6 +117,14 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
    (count and buttons), so no skyline there. On a phone the band grows a strip
    at the bottom for it rather than putting it behind the words. */
 section.hero:not(.compact) p.wide{max-width:28em}
+/* The home line breaks at sentence ends: after "count." everywhere, and after every
+   sentence on a phone, where the short last lines leave room for the skyline to
+   sit beside them instead of below (Carter, 2026-09-29). */
+section.hero br.ph{display:none}
+@media (max-width:640px){
+  section.hero br.ph{display:inline}
+  section.hero:not(.compact){padding-bottom:calc(var(--hero-b,84px) + 14px);background-size:auto 72px!important}
+}
 /* and a long park or coaster name wraps before it reaches the rides */
 @media (min-width:900px){ .hero.compact h1,.hero.compact h1.wide{max-width:calc(100% - 300px)} }
 .hero:has(.herotop){background-image:none!important}
