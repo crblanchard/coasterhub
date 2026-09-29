@@ -456,9 +456,10 @@
   .srow .who{border-top:1px solid var(--line);padding:7px 12px 9px}
   .srow .who .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
   /* The coaster's stats under who ranked it (Carter, 2026-09-25). */
-  /* A phone's global list drops the state or country: park and model are
-     enough there, and the line ran off the edge (Carter, 2026-09-29). */
-  @media (max-width:560px){ .srow .n .sub .lc{display:none} }
+  /* A phone's global list is the name and the park: the average and the list
+     count take the right-hand side, and the state and model ran off the edge
+     (Carter, 2026-09-29). Opening the row still shows both. */
+  @media (max-width:560px){ .srow .n .sub .lc,.srow .n .sub .mk{display:none} }
   .srow .who .go{color:var(--accent2);font-size:.86rem;font-weight:600;text-decoration:none}
   .srow .who[hidden]{display:none}
   .srow .wrow{display:inline-flex;align-items:baseline;gap:6px;padding:3px 10px;border:1px solid var(--line);
