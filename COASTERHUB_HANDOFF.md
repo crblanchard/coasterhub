@@ -5285,3 +5285,10 @@ Then: the swing tower is thick and solid, and the drop tower's cars are opaque. 
 use ONE opaque colour — the line colour at its opacity pre-blended over the band (`bg` is
 passed into build()) — because a translucent fill lets the lines behind show through, which
 is exactly what Carter did not want. They are painted in place (`F`), not with a weight group.
+Then (v9) Carter: "make the top of the drop wider angle and the bottom of the drop also
+wider. And don't flatten then go down again — just a gradual recovery to say -5 degrees,
+not quite zero, where it disappears off the bottom of the page." So: the curve off the crest
+now takes 36% of the height (radius about 18 units, was 12), a short straight, then a 72-unit
+smoothstep pullout from 66 degrees to 5 degrees that ends exactly at the picture's bottom edge
+(y=H), short of the wheel. No run-out and no tree clump. A second low tree rise sits under
+the lift ("hill in the back is good, maybe a second under the lift").

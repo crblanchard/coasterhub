@@ -4,15 +4,15 @@
 # exactly) with the Ferris wheel then drop tower/swings to the right" — the photo
 # is Magnum XL-200 at sunset. So, left to right:
 #   - the coaster: a straight lift at 33 degrees laid tangent onto a parabola
-#     for the crest; the drop is full steepness (about 66 degrees) a quarter of
-#     the way down, straight, then a pullout over the bottom third, with
+#     for the crest; the drop curves wide into full steepness (about 66
+#     degrees), runs straight, then pulls out wide, leaving the bottom at 5, with
 #     a railed platform and a mast on top and a train just over the crest. It
 #     stands on seven steel box towers (columns, ledgers, an X in every panel)
 #     with open sky between them, measured off the photo;
 #   - a Ferris wheel, Power Tower (masts under a rounded crown, solid cars), and
 #     WindSeeker (a thick solid tower with a flared canopy, swings flung out).
 # The band colours are passed in (bg) so solid parts can be one opaque colour.
-# A treeline, rising into a hill under the drop as in the photo, hides the feet.
+# A treeline, rising into low hills under the lift and the drop, hides the feet.
 # The lift starts at the far left and low down, so the upper left of the picture
 # stays empty for the page title.
 # (The busier version with a wooden coaster, a Shambhala hyper and Wicked Twister
@@ -28,10 +28,11 @@ VX,VY=px(1215),G-182          # top of the parabola
 A=0.00205/S_                  # its curvature (photo: 0.00205 per pixel)
 M=0.65                        # lift slope, about 33 degrees
 TX=VX-M/(2*A); TY=VY+A*(TX-VX)**2   # where the lift meets the parabola, tangent
-# The drop (Carter, 2026-09-29): it reaches its full steepness a quarter of the
-# way down, runs straight, and the bottom third is the pullout, nearly flat by the
-# time it reaches the Ferris wheel. Built from its slope, span by span, so every
-# join is smooth:
+# The drop (Carter, 2026-09-29): full steepness on a wide curve off the crest, a
+# short straight, then a long, wide pullout that is still going down gently (about
+# 5 degrees) where it leaves the bottom of the picture, short of the Ferris wheel.
+# No flat run and no second dip. Built from its slope, span by span, so every join
+# is smooth:
 MD=2.21                       # steepest, about 66 degrees
 HT=G-VY                       # the coaster's height
 def _ease_in(A,m,D):
@@ -40,26 +41,27 @@ def _ease_in(A,m,D):
     Lh=(-m/2+math.sqrt(m*m/4+4*(A/6)*D))/(2*A/6)
     a=2*A*Lh/m; b=3-2*a; c=a-2
     return Lh,lambda u: m*(a*u+b*u*u+c*u**3)
-L1,s1=_ease_in(A,MD,HT/4)
-L2=(HT*(1-1/4-1/3))/MD                      # the straight part
-SE=.07                                       # the pullout's last, shallow slope
-L3=2*(HT/3-8)/(MD+SE)                        # the pullout, ending 8 above the floor
+L1,s1=_ease_in(A,MD,HT*.36)                  # the curve off the top: 36% of the height
+SE=math.tan(math.radians(5))                 # the slope it is left with at the bottom
+L3=72                                        # the pullout's length; wider is gentler
+Y3=H                                         # it ends at the bottom edge of the picture
+L2=(Y3-L3*(MD+SE)/2-(VY+HT*.36))/MD          # the straight between them
 X1,X2,X3=VX+L1,VX+L1+L2,VX+L1+L2+L3
-X4=X3+26                                     # the run out towards the wheel
 def _slope(x):
     if x<X1: return s1((x-VX)/L1)
     if x<X2: return MD
     if x<X3:
         u=(x-X2)/L3; return MD-(MD-SE)*(3*u*u-2*u**3)
-    return SE+max(0,x-X4)*.05                # and into the trees
+    return SE
 _dx=.1; _drop=[VY]
-for i in range(1,int((X4+20-VX)/_dx)+2):
+for i in range(1,int((X3+6-VX)/_dx)+2):
     x=VX+(i-.5)*_dx; _drop.append(_drop[-1]+_slope(x)*_dx)
 def track_y(x):
     if x<TX: return TY+(TX-x)*M
     if x<VX: return VY+A*(x-VX)**2
     i=min(len(_drop)-1,int((x-VX)/_dx)); return _drop[i]
-X_END=X4+20
+X_END=X3+4
+
 
 def build(col,op,light=None,trees=None,bg=None):
     o=[]; groups={}
@@ -93,7 +95,7 @@ def build(col,op,light=None,trees=None,bg=None):
     towers=[[px(x) for x in t] for t in
             [(300,340,385,425),(478,525,575,622),(670,718,768,815),(868,918,968,1015),(1090,1135,1195,1240,1300,1345)]]
     # down the drop and along the pullout the towers shorten with the track
-    towers+=[[X1+12,X1+22,X1+32],[X2+9,X2+20,X2+31],[X3-3,X3+9]]
+    towers+=[[X1-2,X1+8,X1+18],[X2+14,X2+25,X2+36],[X2+50,X2+60]]
     levels=[G-12-34*k for k in range(6)]          # ledgers, every 34 units up
     for t in towers:
         cols=[(x,track_y(x)+1.6) for x in t]
@@ -194,8 +196,8 @@ def build(col,op,light=None,trees=None,bg=None):
 
     # ---------- treeline: low along the floor, a low wooded rise under the drop ----------
     def env(x):
-        return (5+9*math.exp(-((x-392)/30)**2)+5*math.exp(-((x-px(700))/60)**2)   # low enough to show the pullout
-                +9*math.exp(-((x-(X4+14))/9)**2))                                   # a clump the run-out disappears into
+        return (5+9*math.exp(-((x-392)/30)**2)       # a low rise behind the drop
+                +11*math.exp(-((x-118)/40)**2))     # and another under the lift
     t=[]; x=-4; k=0
     while x<W+8:
         r=2.8+((k*37)%7)*.5; k+=1
