@@ -5234,3 +5234,22 @@ Regenerate with `python3 tools/make-skyline.py .` and bump `?v=` (now 3).
 Then (Carter: "a drop, one airtime hill, maybe a turnaround") the hyper lost its three
 camelbacks: lift, drop, **one big airtime hill**, then a side-on turnaround that climbs,
 banks round and heads back behind the hill.
+
+**Redrawn again the same night (v4), from Carter's photos** — "the first two versions are
+rough". Now, left to right: a wooden coaster with **Texas Giant's lift and drop** (straight
+35-degree lift, tight rounded crest, ~75-degree curved drop, gridded bents/ledgers/braces);
+a B&M hyper with **Shambhala's three hills** after the drop (40-degree lift); and Cedar
+Point's **Power Tower** (masts under a rounded crown), **Wicked Twister** (two twisted
+ribbon spikes on lattice supports, the U between) and **WindSeeker** (tallest, flared
+canopy). Heights roughly to scale. A low treeline hides where the tracks run off.
+How it is drawn, so it stays smooth: each coaster is a height FUNCTION of x — a lift line
+laid tangent onto a cos^2 bump (whose far side is the drop), plus a bump per hill — then
+blurred with a Gaussian whose width grows at the crests. Hand-placed bezier handles were
+what made v2/v3 wobble and overshoot; don't go back to them.
+Sizing (style.css): the image is ~4.2:1, pinned to the CONTENT column's right edge
+(`right max(24px,calc(50vw - 516px))` — a percentage there is a share of the leftover
+space, which is why the old rule hugged the viewport edge instead), and its height is
+`min(138px,80%,max(58px,calc(30vw - 182px)))` so the wooden crest always lands right of the
+home subtitle. Compact heroes cap the h1 at `calc(100% - 380px)` from 900px up so a long
+park name wraps before the rides (`.hero.compact h1.wide` too — `.hero h1.wide{max-width:none}`
+otherwise wins). `?v=4`.
