@@ -93,6 +93,8 @@ a.crow{align-items:center}
 .ranksec .cx .wrow:hover{border-color:var(--accent2)}
 .ranksec .cx .wn{font-size:.84rem}
 .ranksec .cx .wp{color:var(--accent2);font-weight:700;font-size:.84rem;font-variant-numeric:tabular-nums}
+/* and the state or country, which ran into the average (Carter, 2026-09-29). */
+@media (max-width:560px){ .ranksec a.crow.g .pk .lc{display:none} }
 /* A phone drops "you #N": your chip is in the open row. */
 @media (max-width:560px){ .ranksec a.crow .gyou{display:none} }
 @media (max-width:560px){ details.mdl summary,a.crow{padding-left:13px;padding-right:13px} }

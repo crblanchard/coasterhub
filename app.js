@@ -1755,9 +1755,13 @@
       var mk = maker(c);
       if (mk) parts.push([mk, c.manu ? makerHref(c.manu, c.model || null) : null]);
     }
-    return parts.map(function (x) {
+    var out = parts.map(function (x) {
       return x[1] ? '<span class="lnk" data-href="' + E(x[1]) + '">' + E(x[0]) + '</span>' : E(x[0]);
-    }).join(" \u00b7 ");
+    });
+    // The region in its own span, so a crowded row can drop it on a phone
+    // (the Global rankings rows, lists.css).
+    if (reg && out.length === 2) return out[0] + '<span class="lc"> \u00b7 ' + out[1] + '</span>';
+    return out.join(" \u00b7 ");
   }
   function coasterRow(c, opts) {
     opts = opts || {};
