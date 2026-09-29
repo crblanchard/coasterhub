@@ -809,12 +809,12 @@ html.srchopen{overflow:hidden}
 .facts .fme{grid-column:1;grid-row:2;min-width:0}
 .facts .fgo{grid-column:1;grid-row:3;padding-top:6px}
 .facts.none{display:block}
-.facts .kv{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:.88rem;padding:5px 0}
+.facts .kv{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:.88rem;padding:2px 0;line-height:1.35}
 .facts .kv > span{color:var(--muted);flex:none}
 .facts .kv > b{font-weight:500;text-align:right;min-width:0;font-variant-numeric:tabular-nums}
 .facts a{color:var(--accent2);text-decoration:none}
 .facts a:hover{text-decoration:underline}
-.facts .pill{display:inline-block;font-size:.78rem;padding:2px 10px;border-radius:999px;border:1px solid var(--line)}
+.facts .pill{display:inline-block;font-size:.78rem;padding:0 9px;border-radius:999px;border:1px solid var(--line)}
 .facts .pill.wood{color:var(--accent)} .facts .pill.steel{color:var(--accent2)}
 .facts.none{color:var(--muted);font-size:.88rem;margin:0}
 /* A phone keeps the one column, label left and value right (Carter,
