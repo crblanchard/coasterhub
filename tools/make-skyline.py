@@ -7,8 +7,8 @@
 #     for the crest; the drop curves wide into full steepness (about 66
 #     degrees), runs straight, then pulls out wide, leaving the bottom at 5, with
 #     a railed platform and a mast on top and a train just over the crest. It
-#     stands on seven steel box towers (columns, ledgers, an X in every panel)
-#     with open sky between them, measured off the photo;
+#     stands on one continuous steel truss: ledgers the whole way along, X-braces
+#     in every other bay and in both bays at the crest;
 #   - a Ferris wheel, Power Tower (masts under a rounded crown, solid cars), and
 #     WindSeeker (a thick solid tower with a flared canopy, swings flung out).
 # The band colours are passed in (bg) so solid parts can be one opaque colour.
@@ -43,7 +43,7 @@ def _ease_in(A,m,D):
     return Lh,lambda u: m*(a*u+b*u*u+c*u**3)
 L1,s1=_ease_in(A,MD,HT*.36)                  # the curve off the top: 36% of the height
 SE=math.tan(math.radians(5))                 # the slope it is left with at the bottom
-L3=72                                        # the pullout's length; wider is gentler
+L3=88                                        # the pullout's length; wider is gentler
 Y3=H                                         # it ends at the bottom edge of the picture
 L2=(Y3-L3*(MD+SE)/2-(VY+HT*.36))/MD          # the straight between them
 X1,X2,X3=VX+L1,VX+L1+L2,VX+L1+L2+L3
@@ -91,27 +91,33 @@ def build(col,op,light=None,trees=None,bg=None):
     xs=[-2+i*1.0 for i in range(int(X_END+2)+1)]
     pts=[(x,track_y(x)) for x in xs]
     d='M'+' L'.join('%.1f %.1f'%p for p in pts)
-    # the towers: columns (photo x positions), each tower its own group
-    towers=[[px(x) for x in t] for t in
-            [(300,340,385,425),(478,525,575,622),(670,718,768,815),(868,918,968,1015),(1090,1135,1195,1240,1300,1345)]]
-    # down the drop and along the pullout the towers shorten with the track
-    towers+=[[X1-2,X1+8,X1+18],[X2+14,X2+25,X2+36],[X2+50,X2+60]]
-    levels=[G-12-34*k for k in range(6)]          # ledgers, every 34 units up
-    for t in towers:
-        cols=[(x,track_y(x)+1.6) for x in t]
-        for x,top in cols: S('M%.1f %.1f L%.1f %d'%(x,top,x,G),.75)
-        for (x0,t0),(x1,t1) in zip(cols,cols[1:]):
-            below=[G]+[y for y in levels if y>max(t0,t1)+3]
-            for yb,yt in zip(below,below[1:]):
-                S('M%.1f %d L%.1f %d M%.1f %d L%.1f %d'%(x0,yb,x1,yt,x0,yt,x1,yb),.3,.55)
-            # the panel under the track: braced up to the lower of the two columns
-            yb=below[-1]; yt=max(t0,t1)
-            if yb-yt>6: S('M%.1f %.1f L%.1f %.1f M%.1f %.1f L%.1f %.1f'%(x0,yb,x1,yt,x0,yt,x1,yb),.3,.55)
-        for y in levels:
-            run=[x for x,top in cols if top<y-1]
-            if len(run)>1: S('M%.1f %d L%.1f %d'%(run[0],y,run[-1],y),.5,.7)
-        # a cap beam under the track where the tower meets it, column to column
-        S('M'+' L'.join('%.1f %.1f'%(x,top+.5) for x,top in cols),.6,.7)
+    # The structure (Carter, 2026-09-29, from a close-up of Magnum): one continuous
+    # truss of evenly spaced columns, the ledgers (lateral braces) running the whole
+    # way along it, and cross-braces only in every other bay — except at the top of
+    # the hill, where the two bays either side of the crest column are both braced.
+    SP=15                                         # column spacing
+    cols=[VX+k*SP for k in range(-int(VX/SP),int((X_END-VX)/SP)+1)]
+    cols=[(x,track_y(x)+1.6) for x in cols if 4<x<X_END and track_y(x)<G-7]
+    levels=[G-12-17*k for k in range(11)]         # ledgers, every 17 units up
+    for x,top in cols: S('M%.1f %.1f L%.1f %d'%(x,top,x,G),.75)
+    for (x0,t0),(x1,t1) in zip(cols,cols[1:]):
+        k=round((x0-VX)/SP)                       # this bay is [VX+k*SP, VX+(k+1)*SP]
+        if not (k in (-1,0) or k%2==0): continue  # braced: the two at the crest, then every other
+        below=[G]+[y for y in levels if y>max(t0,t1)+3]
+        for yb,yt in zip(below,below[1:]):
+            S('M%.1f %d L%.1f %d M%.1f %d L%.1f %d'%(x0,yb,x1,yt,x0,yt,x1,yb),.35,.65)
+        # the panel under the track: braced up to the lower of the two columns
+        yb=below[-1]; yt=max(t0,t1)
+        if yb-yt>5: S('M%.1f %.1f L%.1f %.1f M%.1f %.1f L%.1f %.1f'%(x0,yb,x1,yt,x0,yt,x1,yb),.35,.65)
+    # ledgers: each runs the whole way, across every column tall enough to carry it
+    for y in levels:
+        seg=[]
+        for x,top in cols+[(None,None)]:
+            if x is not None and top<y-1: seg.append(x); continue
+            if len(seg)>1: S('M%.1f %d L%.1f %d'%(seg[0],y,seg[-1],y),.5,.7)
+            seg=[]
+    # a cap beam just under the track, column to column
+    S('M'+' L'.join('%.1f %.1f'%(x,top+.5) for x,top in cols),.6,.7)
     # the lift's walkway, a thin rail just under the chain
     S('M%.1f %.1f L%.1f %.1f'%(0,track_y(0)+2.6,TX-4,track_y(TX-4)+2.6),.5,.8)
     S(d,2.4)

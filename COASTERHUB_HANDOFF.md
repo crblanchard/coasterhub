@@ -5292,3 +5292,9 @@ now takes 36% of the height (radius about 18 units, was 12), a short straight, t
 smoothstep pullout from 66 degrees to 5 degrees that ends exactly at the picture's bottom edge
 (y=H), short of the wheel. No run-out and no tree clump. A second low tree rise sits under
 the lift ("hill in the back is good, maybe a second under the lift").
+Then (v10), from a close-up of Magnum's structure: "make the truss continuous but typically
+only every other column has the cross beams. And at the top of the hill there's two together
+that do. And the lateral braces go the entire way." So the seven separate towers are gone:
+one truss of columns every 15 units along the whole ride, ledgers every 17 units running
+the full length, X-braces in every other bay counted outward from the crest column, and
+both bays either side of the crest braced. Pullout lengthened 72 -> 88 ("a little bigger").
