@@ -14,7 +14,7 @@
 <base href="/">
 <title>Park — Coaster Hub</title>
 <meta name="description" content="Every coaster at one park, and who has ridden them — Coaster Hub.">
-<link rel="stylesheet" href="/style.css?v=20261001c">
+<link rel="stylesheet" href="/style.css?v=20261001d">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -114,7 +114,7 @@
   .who a i{font-style:normal;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
 
   /* Three cards (operating, defunct, riders here) stay on one row on a phone. */
-  @media (max-width:680px){ #tiles{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:680px){ #tiles{grid-template-columns:repeat(3,1fr)} #tiles .tile:last-child:nth-child(odd){grid-column:auto} }
 </style>
 </head>
 <body>

@@ -5322,3 +5322,15 @@ Score 24/40; snapshot in `.impeccable/critique/` (untracked). Done:
 Left alone on purpose: pinch-zoom is disabled deliberately (app.js nozoom); Top users still repeats
 friends (it is a leaderboard); the header search and the hub search both stay.
 
+**Coaster page reworked (2026-10-01, Carter: "these are so plain", picked ideas 1-4).**
+- Type · maker · model as one line under the status (`#kind`), linked.
+- Numbers as one strip (`.stats`/`.stat1`): height, speed, length, inversions, ride time. A yellow flag
+  ("#4 tallest") ONLY when the coaster is top 10 among operating coasters on the site for that number;
+  Carter said no "taller than x%". Defunct coasters get no flags.
+- Rankings section: on how many lists, average place, yours, and a chip per rider (#pos of N).
+- Riders chips carry the rider's picture (or initial), most rides first.
+- "More <model>" (5) and "More at <park>" (6), operating first, with links to the model and park pages.
+  ("More at <park>" had been removed 2026-09-26; Carter asked for it back.)
+- Same look elsewhere: the shared `.tiles` (park, maker, model, location, /users) are now one joined
+  strip too, numbers still in the accent blue. welcome.html keeps its separate cards.
+

@@ -10,7 +10,7 @@
 <base href="/">
 <title>Welcome — Coaster Hub</title>
 <meta name="description" content="Start your coaster count: pick your parks, check the coasters you've ridden, and rank your favorites.">
-<link rel="stylesheet" href="/style.css?v=20261001c">
+<link rel="stylesheet" href="/style.css?v=20261001d">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -88,7 +88,8 @@
   #wel .per.split .pr b{flex-basis:100%}
   #wel .per .pr i{font-style:normal;color:var(--muted);font-size:.8rem}
   #wel .big{font-size:3.4rem;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
-  #wel .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+  #wel .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;background:none;border:0;border-radius:0;overflow:visible}
+  #wel .tiles .tile:last-child:nth-child(odd){grid-column:auto}
   #wel .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
   #wel .tile b{display:block;font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums}
   #wel .tile span{font-size:.8rem;color:var(--muted);}
