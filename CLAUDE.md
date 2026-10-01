@@ -117,6 +117,13 @@ those files are the fallback, and the sync overwrites them.
 
 ## Traps that have each cost a deploy
 
+- **No home-screen "web app" tags** (`apple-mobile-web-app-capable`, the manifest
+  link). Added 2026-09-27, removed 2026-10-01 at Carter's call: they make the
+  home-screen icon open as a standalone app, and there iOS fixes the status-bar
+  colour at launch, so flipping light/dark left the strip the wrong colour. The
+  plain Safari bookmark follows the theme live. `site.webmanifest` stays in the
+  repo, unlinked.
+
 - **Bump the `?v=` on `style.css`, `lists.css` and `app.js` when you change them**
   (every `.html` links them; one `sed` over `*.html`). `_headers` says no-cache,
   but a home-screen web app kept serving a weeks-old `style.css` anyway — the
