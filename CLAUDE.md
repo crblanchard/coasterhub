@@ -117,6 +117,12 @@ those files are the fallback, and the sync overwrites them.
 
 ## Traps that have each cost a deploy
 
+- **Bump the `?v=` on `style.css`, `lists.css` and `app.js` when you change them**
+  (every `.html` links them; one `sed` over `*.html`). `_headers` says no-cache,
+  but a home-screen web app kept serving a weeks-old `style.css` anyway — the
+  dark-blue palette shipped and Carter's phone still showed the old one
+  (2026-10-01). A new `?v=` is a new address, and nothing can serve a stale copy of it.
+
 - **CRLF files:** `README.md`, `style.css`. Edit them
   in binary mode; a text-mode write flattens the line endings and the diff
   becomes the entire file. (Checked 2026-09-18: `index.html` is LF and has been
