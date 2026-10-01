@@ -1745,11 +1745,16 @@
     var pic = u.avatar
       ? '<span class="av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
       : '<span class="av">' + E((u.name || "?").charAt(0).toUpperCase()) + '</span>';
-    var line = nf(credits) + " credits" + (!u.claimed || rides == null ? "" : " / " + nf(rides) + " rides");
+    var showRides = u.claimed && rides != null;
+    // Nothing ranked: the big number is their credits rather than a "0 ranked"
+    // that makes an active rider look idle (Carter, 2026-10-01).
+    var big = ranked ? [ranked, "ranked"] : [credits, credits === 1 ? "credit" : "credits"];
+    var line = ranked ? nf(credits) + " credits" + (showRides ? " / " + nf(rides) + " rides" : "")
+                      : (showRides ? nf(rides) + " rides" : "");
     return '<a class="riderrow" href="' + userPageHref(u.slug, "profile") + '">' + pic
       + '<span class="who"><b class="nm">' + E(u.name) + '</b>'
-      + '<span class="un">@' + E(u.slug) + '</span><span class="sub">' + line + '</span></span>'
-      + '<span class="nums"><b>' + nf(ranked) + '</b><span>ranked</span></span></a>';
+      + '<span class="un">@' + E(u.slug) + '</span>' + (line ? '<span class="sub">' + line + '</span>' : '') + '</span>'
+      + '<span class="nums"><b>' + nf(big[0]) + '</b><span>' + big[1] + '</span></span></a>';
   }
   function countsTag(open, gone) {
     // Stacked on a phone (vct), so the name keeps the width.

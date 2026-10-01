@@ -5308,3 +5308,17 @@ generic phone one). The profile band has no skyline, so it gets the gradient alo
 its own !important size/position — without that the phone rule's "auto 72px" sized the
 gradient to a strip. The skyline's solid parts are pre-blended against #d8eafa (make-skyline.py
 `bg=`); change that if the sky changes.
+
+**Home page after the impeccable critique (2026-10-01, Carter: "All issues", "1 could be good").**
+Score 24/40; snapshot in `.impeccable/critique/` (untracked). Done:
+- Signed in, the hero is YOUR count (`#heroyou`): "562 credits." big, rides · ranked, "Last: <park> ·
+  <date>" from your log, and Log a day / Rank more. The slogan stays for visitors.
+- Rider rows (CoasterHub.riderRow, home and /users): a rider with 0 ranked shows CREDITS as the big
+  number instead of "0 ranked". Top users is still sorted by ranked (Carter kept his Sep 24 call).
+- One heading style on home ("Recent changes" is an eyebrow like the rest); links read "All activity →",
+  "All users →", "All changes →". Top users has its heading signed out too.
+- Empty Friend activity hides itself (changes-feed.js `onEmpty`). Feed day headings use "Sep 28, 2026".
+- Rider-facing error copy; shorter search placeholder; tab-bar labels .7rem (were 10.9px).
+Left alone on purpose: pinch-zoom is disabled deliberately (app.js nozoom); Top users still repeats
+friends (it is a leaderboard); the header search and the hub search both stay.
+

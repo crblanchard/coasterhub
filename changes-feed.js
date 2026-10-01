@@ -286,8 +286,9 @@
   // bare ones as LOCAL midnight, then sort on the parsed value here.
   function isDayOnly(iso){ return /^\d{4}-\d{2}-\d{2}$/.test(String(iso || '')); }
   function atTime(iso){ return new Date(isDayOnly(iso) ? (iso + 'T00:00') : iso).getTime(); }
-  function dayKey(iso){ return new Date(atTime(iso)).toLocaleDateString(undefined,
-    { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }); }
+  // The site's date format, "Sep 28, 2026" (2026-10-01), not the long weekday one.
+  function dayKey(iso){ return new Date(atTime(iso)).toLocaleDateString('en-US',
+    { month: 'short', day: 'numeric', year: 'numeric' }); }
   // A backfilled row has no time to show, and inventing midnight for it would be
   // a fact this feed does not have.
   function clock(iso){ return isDayOnly(iso) ? '' : new Date(atTime(iso)).toLocaleTimeString(undefined,
@@ -385,6 +386,7 @@
       if (limit) list = list.slice(0, limit);
       if (!list.length){
         feedEl.innerHTML = '<div class="empty">' + esc(opts.empty || 'Nothing here yet.') + '</div>';
+        if (opts.onEmpty) opts.onEmpty();
         return;
       }
       var html = '', lastDay = null;
