@@ -12,7 +12,7 @@
      palettes): graphite, a warm yellow and sky blue. It replaced "Midnight"
      (navy #0b1020, coral #ff5a5f, teal #37d0c8). Yellow and blue are
      opposites, so the loud accent and the link colour never compete. */
-  --bg:#0b1328; --panel:#15203a; --fg:#f3f4f6; --muted:#9ca8bb;
+  --bg:#080e20; --panel:#15203a; --fg:#f3f4f6; --muted:#9ca8bb;
   --accent:#ffcc1f; --accent2:#4cc3ff; --line:rgba(255,255,255,.10);
   /* The accent as a FILL (the .btn), and the text on it. A separate token
      from --accent because on light the text accent has to darken to be read
@@ -24,12 +24,12 @@
   --bad:#ff5a5f;
   --soft:rgba(255,255,255,.05);     /* faint fill lifted off the page */
   --soft2:rgba(255,255,255,.07);    /* one step up: inputs, hovered rows */
-  --well:#0e1730;                   /* recessed: sits *under* --panel */
+  --well:#0b1228;                   /* recessed: sits *under* --panel */
   --tint:rgba(76,195,255,.07);      /* accent wash */
   --tint2:rgba(76,195,255,.14);
   --ring:rgba(76,195,255,.35);      /* focus / hover border */
-  --veil:rgba(11,19,40,.78);        /* sticky header over scrolling content */
-  --veil2:rgba(11,19,40,.94);       /* mobile tab bar */
+  --veil:rgba(8,14,32,.78);        /* sticky header over scrolling content */
+  --veil2:rgba(8,14,32,.94);       /* mobile tab bar */
   --shadow:rgba(0,0,0,.5);
   --hero1:rgba(76,195,255,.06); --hero2:rgba(255,204,31,.04);
   /* Heatmap ramp, least -> most. Light mode inverts the direction: on a dark
@@ -108,8 +108,8 @@ nav.links a.navlog:hover,nav.links a.navlog.active{color:var(--onaccent);filter:
   --fg:#fff; --muted:rgba(255,255,255,.80); --accent2:#bfe7ff; --line:rgba(255,255,255,.30);
   --panel:rgba(255,255,255,.12); --soft:rgba(255,255,255,.10); --tint:rgba(255,255,255,.12); --tint2:rgba(255,255,255,.20);
   color:var(--fg);
-  background-color:#070f24;
-  background-image:url(/skyline-night.svg?v=14);
+  background-color:#050b1b;
+  background-image:url(/skyline-night.svg?v=15);
   background-repeat:no-repeat;background-position:right max(24px,calc(50vw - 516px)) bottom 0;background-size:auto min(150px,80%,max(58px,calc(30.7vw - 167px)))}
 /* A little park skyline — a Magnum-style coaster in side view, a Ferris wheel, a
    drop tower and swings (Carter, 2026-09-29; tools/make-skyline.py) — standing on the band's floor at the right,
@@ -139,7 +139,7 @@ section.hero br.ph{display:none}
 :root[data-theme="light"] .hero{background-color:#d3e8f9;
   --fg:#16181b; --muted:#43505a; --accent2:#0a6aa0; --line:rgba(10,80,110,.22);
   --panel:rgba(255,255,255,.55); --soft:rgba(10,106,160,.06); --tint:rgba(10,106,160,.08); --tint2:rgba(10,106,160,.14);
-  background-image:url(/skyline-day.svg?v=14),linear-gradient(180deg,#cfe5f9,#e6f2fc);
+  background-image:url(/skyline-day.svg?v=15),linear-gradient(180deg,#cfe5f9,#e6f2fc);
   background-size:auto min(150px,80%,max(58px,calc(30.7vw - 167px))),100% 100%;
   background-position:right max(24px,calc(50vw - 516px)) bottom 0,0 0}
 :root[data-theme="light"] .hero:has(.herotop){background-image:linear-gradient(180deg,#cfe5f9,#e6f2fc)!important;background-size:100% 100%!important;background-position:0 0!important}

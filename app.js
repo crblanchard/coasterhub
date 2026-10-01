@@ -967,13 +967,15 @@
     else el.removeAttribute("data-theme");
     // Colour the browser's own chrome (iOS status bar, Android address bar) to
     // match, or a light page keeps a dark notch above it.
-    var m = document.querySelector('meta[name="theme-color"]');
-    if (!m) {
-      m = document.createElement("meta");
-      m.setAttribute("name", "theme-color");
-      document.head.appendChild(m);
-    }
-    m.setAttribute("content", t === "light" ? "#f5f5f3" : "#111315");
+    // A NEW element each time: iOS reads the tag when it appears and ignores a
+    // changed content, so flipping the theme left the status bar in the old
+    // colour (Carter, 2026-10-01). The dark one is the page's night blue.
+    var old = document.querySelector('meta[name="theme-color"]');
+    if (old) old.parentNode.removeChild(old);
+    var m = document.createElement("meta");
+    m.setAttribute("name", "theme-color");
+    m.setAttribute("content", t === "light" ? "#f5f5f3" : "#080e20");
+    document.head.appendChild(m);
 
     // Anything painted with JS rather than CSS — Chart.js canvases, Leaflet
     // markers — has to be told, or it keeps the palette it was built with.
