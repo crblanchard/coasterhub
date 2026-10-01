@@ -462,7 +462,7 @@ function riders(){
     var chip=function(p, isMe, row){
       var bits=[p.laps+' ride'+(p.laps===1?'':'s')];
       if(p.first) bits.push(String(p.first).slice(0,4));
-      if(isMe && rank && !ranked){ bits.push('#'+rank+' in your ranking'); ranked=true; }
+      // Your place in your ranking is in the Rankings section now, not here (Carter, 2026-10-01).
       return '<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'"'
         +(isMe&&row?' data-rm="'+row.id+'" data-laps="'+p.laps+'" title="Tap to remove from your credits"':'')
         +(p.first?' title="First rode it '+esc(fmtDay(p.first))+'"':'')+'>'
