@@ -965,10 +965,19 @@
     var el = document.documentElement;
     if (t === "light") el.setAttribute("data-theme", "light");
     else el.removeAttribute("data-theme");
-    // No theme-color tag (removed 2026-10-01): without one, Safari colours the
-    // status bar and toolbar from the page itself, live, so a theme flip
-    // carries over at once. With one, this iPhone kept the colour it loaded
-    // with and the strip stayed light over a dark page. Added 2026-09-24.
+    // Colour the browser's own chrome (iOS status bar, Android address bar) to
+    // match, or a light page keeps a dark notch above it. Since 2026-08-03.
+    // On Carter's iPhone (2026-10-01) the strip only picks up a change when a
+    // page loads, not on the flip itself; that looks like iOS, not this code,
+    // which is unchanged from when it flipped live. Without the tag the
+    // home-screen app had nothing to go on and never changed at all.
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (!m) {
+      m = document.createElement("meta");
+      m.setAttribute("name", "theme-color");
+      document.head.appendChild(m);
+    }
+    m.setAttribute("content", t === "light" ? "#f5f5f3" : "#080e20");
 
     // Anything painted with JS rather than CSS — Chart.js canvases, Leaflet
     // markers — has to be told, or it keeps the palette it was built with.

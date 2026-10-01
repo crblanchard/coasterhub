@@ -117,15 +117,15 @@ those files are the fallback, and the sync overwrites them.
 
 ## Traps that have each cost a deploy
 
-- **No `theme-color`, anywhere** (no meta tag, none in `site.webmanifest`).
-  app.js set one from 2026-09-24; with it, Safari kept the status-bar colour the
-  page loaded with, so flipping light/dark left the strip and the toolbar the
-  wrong colour. Without it Safari reads the colour from the page — but only when
-  a page loads, so after a flip the strip catches up on the next reload or page
-  (confirmed on Carter's iPhone, 2026-10-01). Making it flip instantly meant
-  reloading on every flip, which he did not want. Removed 2026-10-01. The
-  home-screen tags (added 2026-09-27) were taken out the same day while chasing
-  this, and put back once the theme-color was found to be the cause.
+- **The iPhone status-bar strip follows a light/dark flip only on the next page
+  load** (2026-10-01, Carter's phone, both Safari and the home-screen app). The
+  theme-color code in applyTheme (since 2026-08-03) is unchanged from when it
+  flipped live, so this looks like iOS 26. A whole afternoon went on it: removing
+  the theme-color tag left the home-screen app with no colour at all, removing
+  the home-screen tags changed nothing, and reloading on every flip worked but
+  Carter did not want the delay. Leave it unless iOS changes again. Also: this
+  clone was SHALLOW (history from 2026-09-24 only) and that misled the diagnosis —
+  run `git fetch --unshallow` before blaming a commit on a date.
 
 - **Bump the `?v=` on `style.css`, `lists.css` and `app.js` when you change them**
   (every `.html` links them; one `sed` over `*.html`). `_headers` says no-cache,
