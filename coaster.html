@@ -394,18 +394,18 @@ function rankings(){
     var mine=me ? who.filter(function(x){ return x.slug===me.slug; })[0] : null;
     youLine(me, mine);
     if(!who.length) return;
-    // Only yours and no Global place: your line at the top already says it.
-    if(who.length===1 && mine && !gpos) return;
     var others=who.filter(function(x){ return x!==mine; }).sort(function(a,b){ return a.pos-b.pos || a.name.localeCompare(b.name); });
     var avg=who.reduce(function(t,x){ return t+x.pos; },0)/who.length;
     $('rank_wrap').innerHTML='<div class="sect">Rankings</div><p class="rsum">'
       +(gpos?'<a href="/rankings" style="color:inherit;text-decoration:none">Global <b>#'+gpos+'</b> of '+glob.length+'</a> · ':'')
       +(gpos?'on':'On')+' <b>'+who.length+'</b> list'+(who.length===1?'':'s')
       +(who.length>1?' · average <b>#'+(Math.round(avg*10)/10)+'</b>':'')+'</p>'
-      +(others.length?'<div class="chips">'+others.map(function(x){
-        return '<a href="'+esc(CoasterHub.userPageHref(x.slug,'rankings'))+'">'
-          +face(x.slug,x.name)+esc(x.name)+'<i>#'+x.pos+' of '+x.of+'</i></a>';
-      }).join('')+'</div>':'');
+      // You first and in the accent (Carter, 2026-10-01: "put me in there too bolder").
+      +'<div class="chips">'+(mine?[mine]:[]).concat(others).map(function(x){
+        var isMe=x===mine;
+        return '<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(x.slug,'rankings'))+'">'
+          +face(x.slug,x.name)+(isMe?'You':esc(x.name))+'<i>#'+x.pos+' of '+x.of+'</i></a>';
+      }).join('')+'</div>';
     $('rank_wrap').hidden=false;
   });
 }
@@ -418,7 +418,8 @@ function youLine(me, mine){
   ROWS.forEach(function(x){ var m=me.rides[x.id]; if(m){ r+=m.n; if(m.first && (!first || m.first<first)) first=m.first; } });
   var el=$('youline');
   if(r){
-    el.innerHTML='<span>'+(mine?'Your <b>#'+mine.pos+'</b> · ':'')+'<b>'+r+'</b> ride'+(r===1?'':'s')
+    // Your place is your chip under Rankings (Carter, 2026-10-01).
+    el.innerHTML='<span><b>'+r+'</b> ride'+(r===1?'':'s')
       +(first?' since '+String(first).slice(0,4):'')+'</span>';
   } else {
     el.innerHTML='<span>Not ridden yet</span><button type="button" class="btn alt" id="addme2">+ Add to your credits</button>';
