@@ -967,15 +967,14 @@
     else el.removeAttribute("data-theme");
     // Colour the browser's own chrome (iOS status bar, Android address bar) to
     // match, or a light page keeps a dark notch above it.
-    // A NEW element each time: iOS reads the tag when it appears and ignores a
-    // changed content, so flipping the theme left the status bar in the old
-    // colour (Carter, 2026-10-01). The dark one is the page's night blue.
-    var old = document.querySelector('meta[name="theme-color"]');
-    if (old) old.parentNode.removeChild(old);
-    var m = document.createElement("meta");
-    m.setAttribute("name", "theme-color");
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (!m) {
+      m = document.createElement("meta");
+      m.setAttribute("name", "theme-color");
+      document.head.appendChild(m);
+    }
+    // The dark one is the page's night blue (2026-10-01).
     m.setAttribute("content", t === "light" ? "#f5f5f3" : "#080e20");
-    document.head.appendChild(m);
 
     // Anything painted with JS rather than CSS — Chart.js canvases, Leaflet
     // markers — has to be told, or it keeps the palette it was built with.
@@ -1061,12 +1060,6 @@
       try { window.localStorage.setItem(THEME_KEY, next); } catch (e) {}
       applyTheme(next);
       label();
-      // On the home-screen app the iPhone status bar keeps the colour it had at
-      // launch whatever the page does after (Carter, 2026-10-01), so the app
-      // reloads — quick, and the theme is already saved — and the new
-      // theme-color tag is there from the first line. A browser tab needs none.
-      if (window.navigator.standalone || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches))
-        setTimeout(function () { location.reload(); }, 60);
     });
     if (atStart) wrap.insertBefore(b, wrap.firstChild);
     else wrap.appendChild(b);
