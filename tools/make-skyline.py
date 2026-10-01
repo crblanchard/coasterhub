@@ -235,4 +235,4 @@ def build(col,op,light=None,trees=None,bg=None):
 
 out=sys.argv[1] if len(sys.argv)>1 else '.'
 open(out+'/skyline-day.svg','w').write(build('#0a6aa0',.55,trees=('#0a6aa0',.16),bg='#d8eafa'))
-open(out+'/skyline-night.svg','w').write(build('#ffffff',.36,'#ffcc1f',trees=('#000000',.45),bg='#060b15'))
+open(out+'/skyline-night.svg','w').write(build('#ffffff',.36,'#ffcc1f',trees=('#000000',.45),bg='#070f24'))
