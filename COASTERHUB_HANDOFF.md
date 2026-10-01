@@ -5334,3 +5334,15 @@ friends (it is a leaderboard); the header search and the hub search both stay.
 - Same look elsewhere: the shared `.tiles` (park, maker, model, location, /users) are now one joined
   strip too, numbers still in the accent blue. welcome.html keeps its separate cards.
 
+**Coaster page, second pass from its critique (25/40; Carter: "All issues", Global rank first, chip behind ⋯).**
+- `#youline` under the type line: "Your #2 · 5 rides since 2023", or "Not ridden yet" + a real
+  "+ Add to your credits" button (the dashed "You · none" chip is gone).
+- Rankings leads with "Global #N of M" (same tally as /rankings: by ride, 2+ lists, best average),
+  then list count and average; your own chip left out (it is in your line). Hidden when you are the
+  only list and it has no Global place.
+- Your rider chip opens your count like anyone's; "⋯" on it opens "+1 ride" and "Remove from my
+  credits". Tap-to-remove (Carter, 2026-09-27) is gone at his call.
+- More lists: operating first, then the ones you have not ridden, then A–Z; headers show the total.
+- Defunct coasters: stat numbers grey, no top-10 flags. Model shown without the maker repeated
+  ("Intamin · Giga"). List-row status word .7rem (was 10.9px). Old .spec CSS and helpers removed.
+

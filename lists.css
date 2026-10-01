@@ -116,7 +116,7 @@ a.crow.std .two .pk{flex:0 1 auto;font-size:.8rem}
 a.crow.std.gone .cn{color:var(--muted)}
 a.crow .end{margin-left:auto;flex:none;display:flex;align-items:baseline;gap:12px;padding-left:10px;white-space:nowrap}
 a.crow .life{flex:none;display:flex;align-items:baseline;gap:9px;white-space:nowrap}
-a.crow .life .stat{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+a.crow .life .stat{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 a.crow .life .stat.on{color:var(--accent2)}
 a.crow .life .stat.off{color:var(--accent)}
 a.crow .life .yrs{margin:0;padding:0;color:var(--fg);font-size:.8rem;font-variant-numeric:tabular-nums}

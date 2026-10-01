@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-01T22:23:55Z",
-   "text": "Signed in, the home page opens on your own count and latest park day, and coaster pages now show their numbers in one strip with top-10 flags, where they sit in everyone's rankings, riders with their pictures, and more of the same model and park. Park, manufacturer, model and location pages use the same number strip, and dark mode is a deeper night blue."
+   "at": "2026-10-01T22:43:27Z",
+   "text": "Signed in, the home page opens on your own count and latest park day, and coaster pages now lead with your verdict, a number strip with top-10 flags, the ride's Global rank, riders with their pictures, and more of the same model and park with the ones you still need first. Park, manufacturer, model and location pages use the same number strip, and dark mode is a deeper night blue."
   },
   {
    "at": "2026-09-29T05:20:11Z",

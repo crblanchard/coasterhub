@@ -15,7 +15,7 @@
 <title>Coaster — Coaster Hub</title>
 <meta name="description" content="One coaster: its specs, its park, and who has ridden it — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20261001d">
-<link rel="stylesheet" href="/lists.css?v=20261001a">
+<link rel="stylesheet" href="/lists.css?v=20261001b">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -35,21 +35,6 @@
   .status .stat.off{color:var(--accent)}
   .status .yrs{color:var(--fg);font-size:.9rem;font-variant-numeric:tabular-nums}
 
-  /* Specs. Only the ones this coaster actually has a value for are drawn — a
-     grid half full of em-dashes says nothing and reads as broken. */
-  .specs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 4px}
-  .spec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;min-width:0}
-  .spec b{display:block;font-size:1.25rem;font-weight:800;color:var(--accent2);
-          font-variant-numeric:tabular-nums;line-height:1.2;
-          overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  /* A maker's name is prose, not a number, so it is sized like prose and
-     allowed to wrap rather than being clipped at one line. */
-  .spec.text b{font-size:.95rem;font-weight:700;color:var(--fg);white-space:normal;line-height:1.3}
-  .spec.text b a{color:inherit;text-decoration:none}
-  .spec.text b a:hover{color:var(--accent2);text-decoration:underline}
-  .spec span{display:block;color:var(--muted);font-size:.8rem;
-             margin-top:4px}
-  @media (max-width:680px){ .specs{grid-template-columns:repeat(2,1fr)} }
 
   /* The page reworked (Carter, 2026-10-01, "these are so plain"): what kind of
      ride it is as one line, the numbers as one strip, a top-10 flag only where
@@ -59,7 +44,16 @@
   .kind[hidden]{display:none}
   .kind a{color:var(--fg);font-weight:600;text-decoration:none}
   .kind a:hover{color:var(--accent2);text-decoration:underline}
-  .kind span + span::before,.kind a + a::before,.kind span + a::before,.kind a + span::before{content:" \00b7  ";white-space:pre;color:var(--muted)}
+  /* The dot rides on the end of each part, so a wrap never starts a line with one. */
+  .kind > :not(:last-child)::after{content:"\00a0\00b7";color:var(--muted);font-weight:400}
+  /* Your verdict, right under the facts (critique, 2026-10-01). */
+  .youline{margin:-4px 0 14px;font-size:1rem;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+  .youline[hidden]{display:none}
+  .youline b{color:var(--fg)}
+  .youline .btn{padding:6px 14px;font-size:.88rem}
+  /* A closed coaster's numbers are grey: grey means defunct, sitewide. */
+  .gone .stat1 b{color:var(--muted)}
+  .gone .stat1 em{display:none}
   .stats{display:flex;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:0 0 6px;overflow:hidden}
   .stats:empty{display:none}
   .stat1{flex:1 1 0;min-width:110px;padding:14px 18px;border-left:1px solid var(--line)}
@@ -82,6 +76,7 @@
              background-color:var(--soft);background-size:cover;background-position:center;background-origin:border-box;
              display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--accent2)}
   .morehd{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .morehd span{min-width:0}
   .morehd a{color:var(--accent2);font-size:.88rem;font-weight:600;text-decoration:none;white-space:nowrap}
 
   /* History is plain lines (Carter, 2026-09-26). */
@@ -101,6 +96,16 @@
   .chips i{font-style:normal;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
   /* Yours: first, and in the accent. "Not yet" is the same chip, dashed. */
   .chips a.me{border-color:var(--accent2);background:var(--soft);font-weight:600}
+  /* Your chip opens your count like anyone's; remove and +1 ride sit behind ⋯. */
+  .chips .mine{display:inline-flex;align-items:stretch;border:1px solid var(--accent2);border-radius:999px;background:var(--soft)}
+  .chips .mine a.me{border:0;background:none}
+  .chips .mine button.dots{background:none;border:0;border-left:1px solid var(--line);color:var(--accent2);font:inherit;font-weight:700;
+     padding:0 13px;cursor:pointer;border-radius:0 999px 999px 0;min-width:40px}
+  .mymenu{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+  .mymenu[hidden]{display:none}
+  .mymenu button{font:inherit;font-size:.86rem;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;
+     background:var(--panel);border:1px solid var(--line);color:var(--fg)}
+  .mymenu button.rm{color:var(--bad)}
   .chips .chip{display:flex;align-items:baseline;gap:7px;border-radius:999px;padding:7px 13px;
                font-size:.85rem;color:var(--muted);background:transparent;border:1px dashed var(--line)}
   .chips .notyet{font-weight:600;gap:10px}
@@ -151,6 +156,7 @@
     <p class="former" id="former" style="display:none"></p>
     <div class="status" id="status"></div>
     <p class="kind" id="kind" hidden></p>
+    <p class="youline" id="youline" hidden></p>
     <div class="stats" id="specs"></div>
     <div id="reloc_wrap" style="display:none">
       <div class="sect">History</div>
@@ -285,8 +291,10 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   var kind=[];
   if(S.type) kind.push('<span>'+esc(S.type)+'</span>');
   if(S.manu) kind.push('<a href="'+esc(CoasterHub.makerHref(S.manu))+'">'+esc(S.manu)+'</a>');
-  if(S.model) kind.push(S.manu ? '<a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">'+esc(S.model)+'</a>' : '<span>'+esc(S.model)+'</span>');
-  if(kind.length){ $('kind').innerHTML=kind.join(''); $('kind').hidden=false; }
+  // "Intamin · Giga", not "Intamin · Intamin Giga".
+  var mshow=S.model && S.manu && S.model.indexOf(S.manu+' ')===0 ? S.model.slice(S.manu.length+1) : S.model;
+  if(S.model) kind.push(S.manu ? '<a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">'+esc(mshow)+'</a>' : '<span>'+esc(S.model)+'</span>');
+  if(kind.length){ $('kind').innerHTML=kind.join(' '); $('kind').hidden=false; }
   // The numbers as one strip. A flag only when it is in the top 10 of the
   // operating coasters on the site for that number (Carter, 2026-10-01: no
   // "taller than x%").
@@ -295,7 +303,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
     if(gone || S[f]==null) return '';
     var v=+S[f], above=0;
     live.forEach(function(x){ if(x[f]!=null && +x[f]>v) above++; });
-    return above<10 ? '<em>#'+(above+1)+' '+word+'</em>' : '';
+    return above<10 ? '<em title="Among operating coasters on Coaster Hub">#'+(above+1)+' '+word+'</em>' : '';
   }
   var stats=[];
   if(S.h!=null) stats.push(stat(Math.round(S.h)+' ft','Height',top('h','tallest')));
@@ -305,12 +313,12 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   if(S.dur!=null) stats.push(stat(dur(S.dur),'Ride time',''));
   // No Laps until there is a standard for them (Carter, 2026-09-28).
   $('specs').innerHTML=stats.join('');
+  if(gone) $('specs').classList.add('gone');
 
   $('loading').style.display='none';
   $('ui').style.display='block';
 
-  // "More at <park>" went (Carter, 2026-09-26): the park is one link away in
-  // the hero and the crumbs.
+  // "More at <park>" came back 2026-10-01 (see more() below).
 
   // Who has ridden it, filled in afterwards: the specs are the page and the
   // riders are the extra, so a rider list that cannot be read leaves this page
@@ -321,9 +329,6 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 }).catch(fail);
 
 function stat(v,label,flag){ return '<div class="stat1"><b>'+esc(v)+'</b><span>'+esc(label)+'</span>'+(flag||'')+'</div>'; }
-function num(v,label){ return '<div class="spec"><b>'+esc(v)+'</b><span>'+esc(label)+'</span></div>'; }
-function txt(v,label){ return '<div class="spec text"><b>'+esc(v)+'</b><span>'+esc(label)+'</span></div>'; }
-function lnk(v,label,href){ return '<div class="spec text"><b><a href="'+esc(href)+'">'+esc(v)+'</a></b><span>'+esc(label)+'</span></div>'; }
 function dur(s){
   s=Math.round(s);
   var m=Math.floor(s/60), r=s%60;
@@ -367,29 +372,59 @@ function face(slug,name){
 function rankings(){
   return Promise.all([CoasterHub.fetchAllRankings(), CoasterHub.fetchUsers().catch(function(){ return null; }),
                       CoasterHub.you().catch(function(){ return null; })]).then(function(r){
-    var lists=r[0]||[], me=r[2], ids={};
+    var lists=r[0]||[], me=r[2], ids={}, byId={};
     ROWS.forEach(function(x){ ids[x.id]=1; });
-    var who=[];
+    LIST.coasters.forEach(function(x){ byId[x.id]=x; });
+    var K=function(id){ return CoasterHub.rideKey(byId[id]) || id; }, myKey=CoasterHub.rideKey(C);
+    // Global: the same tally /rankings draws — by ride, each list counted once
+    // per ride, and only rides on 2+ lists, best average first.
+    var tally={}, who=[];
     lists.forEach(function(l){
-      var o=l.order||[], best=0;
-      for(var i=0;i<o.length;i++) if(ids[o[i]]){ best=i+1; break; }
-      if(best) who.push({slug:l.slug, name:l.user||l.slug, pos:best, of:o.length});
+      var o=l.order||[], seen={}, pos=0;
+      o.forEach(function(id){
+        var k=K(id); if(seen[k]) return; seen[k]=1; pos++;
+        var t=tally[k]||(tally[k]={n:0,sum:0}); t.n++; t.sum+=pos;
+        if(k===myKey) who.push({slug:l.slug, name:l.user||l.slug, pos:pos, of:0});
+      });
+      who.forEach(function(w){ if(w.slug===l.slug && !w.of) w.of=Object.keys(seen).length; });
     });
-    if(!who.length) return;
-    who.sort(function(a,b){ return a.pos-b.pos || a.name.localeCompare(b.name); });
-    var avg=who.reduce(function(t,x){ return t+x.pos; },0)/who.length;
+    var glob=Object.keys(tally).filter(function(k){ return tally[k].n>1; })
+      .sort(function(a,b){ return (tally[a].sum/tally[a].n - tally[b].sum/tally[b].n) || tally[b].n-tally[a].n; });
+    var gpos=glob.indexOf(String(myKey))+1;
     var mine=me ? who.filter(function(x){ return x.slug===me.slug; })[0] : null;
-    if(mine) who=[mine].concat(who.filter(function(x){ return x!==mine; }));
-    $('rank_wrap').innerHTML='<div class="sect">Rankings</div><p class="rsum">On <b>'+who.length+'</b> list'+(who.length===1?'':'s')
-      +(who.length>1?' · average <b>#'+(Math.round(avg*10)/10)+'</b>':'')
-      +(mine?' · yours <b>#'+mine.pos+'</b>':'')+'</p>'
-      +'<div class="chips">'+who.map(function(x){
-        var isMe=mine===x;
-        return '<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(x.slug,'rankings'))+'">'
-          +face(x.slug,x.name)+(isMe?'You':esc(x.name))+'<i>#'+x.pos+' of '+x.of+'</i></a>';
-      }).join('')+'</div>';
+    youLine(me, mine);
+    if(!who.length) return;
+    // Only yours and no Global place: your line at the top already says it.
+    if(who.length===1 && mine && !gpos) return;
+    var others=who.filter(function(x){ return x!==mine; }).sort(function(a,b){ return a.pos-b.pos || a.name.localeCompare(b.name); });
+    var avg=who.reduce(function(t,x){ return t+x.pos; },0)/who.length;
+    $('rank_wrap').innerHTML='<div class="sect">Rankings</div><p class="rsum">'
+      +(gpos?'<a href="/rankings" style="color:inherit;text-decoration:none">Global <b>#'+gpos+'</b> of '+glob.length+'</a> · ':'')
+      +(gpos?'on':'On')+' <b>'+who.length+'</b> list'+(who.length===1?'':'s')
+      +(who.length>1?' · average <b>#'+(Math.round(avg*10)/10)+'</b>':'')+'</p>'
+      +(others.length?'<div class="chips">'+others.map(function(x){
+        return '<a href="'+esc(CoasterHub.userPageHref(x.slug,'rankings'))+'">'
+          +face(x.slug,x.name)+esc(x.name)+'<i>#'+x.pos+' of '+x.of+'</i></a>';
+      }).join('')+'</div>':'');
     $('rank_wrap').hidden=false;
   });
+}
+
+// Your verdict on this ride, under the facts: your place in your ranking and
+// your rides, or "Not ridden yet" with a real button to add it.
+function youLine(me, mine){
+  if(!me) return;
+  var r=0, first=null;
+  ROWS.forEach(function(x){ var m=me.rides[x.id]; if(m){ r+=m.n; if(m.first && (!first || m.first<first)) first=m.first; } });
+  var el=$('youline');
+  if(r){
+    el.innerHTML='<span>'+(mine?'Your <b>#'+mine.pos+'</b> · ':'')+'<b>'+r+'</b> ride'+(r===1?'':'s')
+      +(first?' since '+String(first).slice(0,4):'')+'</span>';
+  } else {
+    el.innerHTML='<span>Not ridden yet</span><button type="button" class="btn alt" id="addme2">+ Add to your credits</button>';
+    $('addme2').onclick=function(){ CoasterHub.confirmAdd(C, me.slug).then(function(ok){ if(ok) location.reload(); }); };
+  }
+  el.hidden=false;
 }
 
 // More of the same model, and more at the same park, as the site's one row,
@@ -403,18 +438,20 @@ function more(S){
       return cs.filter(function(x){
         if(skip[x.id] || !test(x)) return false;
         var k=key(x); if(seen[k]) return false; seen[k]=1; return true;
-      }).sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.name).localeCompare(String(b.name)); });
+      // Operating first; signed in, the ones you still need before the ones you
+      // have; then A–Z.
+      }).sort(function(a,b){ return (!!a.closed-!!b.closed) || (mine ? (!!mine[a.id]-!!mine[b.id]) : 0) || String(a.name).localeCompare(String(b.name)); });
     }
     var html='';
     if(S.manu && S.model){
       seen={};
       var mo=pick(function(x){ return x.manu===S.manu && x.model===S.model; });
-      if(mo.length) html+='<div class="sect morehd"><span>More '+esc(S.model)+'</span><a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">Model page &rarr;</a></div>'
+      if(mo.length) html+='<div class="sect morehd"><span>More '+esc(S.model)+' · '+mo.length+'</span><a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">Model page &rarr;</a></div>'
         +'<div class="panel">'+mo.slice(0,5).map(function(x){ return CoasterHub.coasterRow(x,{mine:mine, ctx:'place'}); }).join('')+'</div>';
     }
     seen={};
     var at=pick(function(x){ return x.park===C.park; });
-    if(at.length) html+='<div class="sect morehd"><span>More at '+esc(C.park)+'</span><a href="'+esc(CoasterHub.parkHref(C.park))+'">Park page &rarr;</a></div>'
+    if(at.length) html+='<div class="sect morehd"><span>More at '+esc(C.park)+' · '+at.length+'</span><a href="'+esc(CoasterHub.parkHref(C.park))+'">Park page &rarr;</a></div>'
       +'<div class="panel">'+at.slice(0,6).map(function(x){ return CoasterHub.coasterRow(x,{mine:mine, ctx:'model'}); }).join('')+'</div>';
     if(html){ $('more_wrap').innerHTML=html; $('more_wrap').hidden=false; }
   });
@@ -453,20 +490,20 @@ function riders(){
     var shown=lists.filter(function(l){ return l.out.length; });
     // Signed in and never on it: the "You · none" chip is the whole section if
     // nobody else has ridden it either.
-    if(me && !rode){
-      if(shown.length) shown[0].notYet=true;
-      else shown=[{row:C, out:[], notYet:true}];
-    }
+    // Not ridden: the "+ Add" under the title says so now (2026-10-01), so no
+    // "You · none" chip here as well.
     if(!shown.length) return;
     var moved=ROWS.length>1, ranked=false;
     var chip=function(p, isMe, row){
       var bits=[p.laps+' ride'+(p.laps===1?'':'s')];
       if(p.first) bits.push(String(p.first).slice(0,4));
       // Your place in your ranking is in the Rankings section now, not here (Carter, 2026-10-01).
-      return '<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'"'
-        +(isMe&&row?' data-rm="'+row.id+'" data-laps="'+p.laps+'" title="Tap to remove from your credits"':'')
+      var a='<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'"'
         +(p.first?' title="First rode it '+esc(fmtDay(p.first))+'"':'')+'>'
         +face(p.slug,p.name)+(isMe?'You':esc(p.name))+'<i>'+esc(bits.join(' · '))+'</i></a>';
+      // Yours opens your count like anyone's; ⋯ holds +1 ride and remove
+      // (critique, 2026-10-01 — it used to remove on tap).
+      return isMe&&row ? '<span class="mine">'+a+'<button type="button" class="dots" data-row="'+row.id+'" data-laps="'+p.laps+'" aria-label="Your ride options">&middot;&middot;&middot;</button></span>' : a;
     };
     $('who_wrap').innerHTML='<div class="sect">Riders</div><div class="riders">'+shown.map(function(l){
       var r=l.row;
@@ -487,11 +524,15 @@ function riders(){
     // "+ add": an undated credit for the ride's home row, the call /log's list
     // makes; then the chips redraw with you in them.
     // Your own chip removes the credit, after asking (2026-09-27).
-    $('who_wrap').querySelectorAll('a[data-rm]').forEach(function(a){
-      a.onclick=function(e){
-        e.preventDefault();
-        var id=+a.getAttribute('data-rm'), row=ROWS.filter(function(x){ return x.id===id; })[0]||C;
-        CoasterHub.confirmRemove(row, me.slug, +a.getAttribute('data-laps')).then(function(ok){ if(ok) riders(); });
+    $('who_wrap').querySelectorAll('button.dots').forEach(function(b){
+      var id=+b.getAttribute('data-row'), row=ROWS.filter(function(x){ return x.id===id; })[0]||C;
+      var menu=document.createElement('div'); menu.className='mymenu'; menu.hidden=true;
+      menu.innerHTML='<button type="button" class="plus">+1 ride</button><button type="button" class="rm">Remove from my credits</button>';
+      b.closest('.chips').insertAdjacentElement('afterend', menu);
+      b.onclick=function(){ menu.hidden=!menu.hidden; };
+      menu.querySelector('.plus').onclick=function(){ CoasterHub.confirmAdd(row, me.slug).then(function(ok){ if(ok) riders(); }); };
+      menu.querySelector('.rm').onclick=function(){
+        CoasterHub.confirmRemove(row, me.slug, +b.getAttribute('data-laps')).then(function(ok){ if(ok) riders(); });
       };
     });
     // Asks first, with an optional first-ridden date (2026-09-27).
