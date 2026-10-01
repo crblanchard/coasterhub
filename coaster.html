@@ -77,6 +77,9 @@
              display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--accent2)}
   .morehd{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
   .morehd span{min-width:0}
+  #more_wrap .rest[hidden]{display:none}
+  #more_wrap .rnone{margin:10px 0 0;font-size:.9rem}
+  #more_wrap .rmore{color:var(--accent2);font-weight:600;text-decoration:none}
   .morehd a{color:var(--accent2);font-size:.88rem;font-weight:600;text-decoration:none;white-space:nowrap}
 
   /* History is plain lines (Carter, 2026-09-26). */
@@ -435,6 +438,15 @@ function youLine(me, mine){
   el.hidden=false;
 }
 
+// A list that shows the first few and opens to the rest in place
+// (Carter, 2026-10-01: "make these lists expandable").
+function fold(list, n, row){
+  var more=list.length-n;
+  return '<div class="panel">'+list.slice(0,n).map(row).join('')
+    +(more>0?'<div class="rest" hidden>'+list.slice(n).map(row).join('')+'</div>':'')+'</div>'
+    +(more>0?'<p class="rnone"><a class="rmore" href="#" data-all="Show all '+list.length+'">Show all '+list.length+'</a></p>':'');
+}
+
 // More of the same model, and more at the same park, as the site's one row,
 // operating first (the standing rule for lists inside a park or model page).
 function more(S){
@@ -455,13 +467,22 @@ function more(S){
       seen={};
       var mo=pick(function(x){ return x.manu===S.manu && x.model===S.model; });
       if(mo.length) html+='<div class="sect morehd"><span>More '+esc(S.model)+' · '+mo.length+'</span><a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">Model page &rarr;</a></div>'
-        +'<div class="panel">'+mo.slice(0,5).map(function(x){ return CoasterHub.coasterRow(x,{mine:mine, ctx:'place'}); }).join('')+'</div>';
+        +fold(mo, 5, function(x){ return CoasterHub.coasterRow(x,{mine:mine, ctx:'place'}); });
     }
     seen={};
     var at=pick(function(x){ return x.park===C.park; });
     if(at.length) html+='<div class="sect morehd"><span>More at '+esc(C.park)+' · '+at.length+'</span><a href="'+esc(CoasterHub.parkHref(C.park))+'">Park page &rarr;</a></div>'
-      +'<div class="panel">'+at.slice(0,6).map(function(x){ return CoasterHub.coasterRow(x,{mine:mine, ctx:'model'}); }).join('')+'</div>';
-    if(html){ $('more_wrap').innerHTML=html; $('more_wrap').hidden=false; }
+      +fold(at, 6, function(x){ return CoasterHub.coasterRow(x,{mine:mine, ctx:'model'}); });
+    if(html){
+      $('more_wrap').innerHTML=html; $('more_wrap').hidden=false;
+      $('more_wrap').querySelectorAll('a.rmore').forEach(function(a){
+        a.onclick=function(e){
+          e.preventDefault();
+          var rest=a.parentNode.previousElementSibling.querySelector('.rest'), open=rest.hidden;
+          rest.hidden=!open; a.textContent=open ? 'Show fewer' : a.getAttribute('data-all');
+        };
+      });
+    }
   });
 }
 
