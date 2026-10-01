@@ -22,3 +22,6 @@ max-import-*.xlsx
 
 # Generated staging seed (regenerate with tools/staging-seed.mjs)
 staging-seed.sql
+
+# impeccable live-server runtime state (critique runs); not source
+.impeccable/live/
