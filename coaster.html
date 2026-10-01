@@ -101,6 +101,13 @@
   .chips .mine a.me{border:0;background:none}
   .chips .mine button.dots{background:none;border:0;border-left:1px solid var(--line);color:var(--accent2);font:inherit;font-weight:700;
      padding:0 13px;cursor:pointer;border-radius:0 999px 999px 0;min-width:40px}
+  /* On a phone your chips look like everyone's: same border and fill, still
+     first and still "You" (Carter, 2026-10-01). */
+  @media (max-width:560px){
+    .chips a.me{border-color:var(--line);background-color:var(--panel)}
+    .chips .mine{border-color:var(--line);background-color:var(--panel)}
+    .chips .mine button.dots{color:var(--muted)}
+  }
   .mymenu{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
   .mymenu[hidden]{display:none}
   .mymenu button{font:inherit;font-size:.86rem;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;
