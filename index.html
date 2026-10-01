@@ -40,7 +40,7 @@
      the Database view of /count uses as its subheader, linking there. */
   /* The hub: a search field that opens the header search, then the database's
      front door as five cards. Two across on a phone, one row on a desktop. */
-  .hub{margin:0 0 34px}
+  .hub{margin:0 0 24px}
   .hubsearch{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
     background-color:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
     color:var(--muted);font-size:.95rem;font-weight:400}
@@ -58,9 +58,9 @@
   /* A phone lets a card's line wrap rather than cut off "states & countr…". */
   @media (max-width:420px){ .xgrid span{white-space:normal} }
   @media (max-width:760px){ .xgrid{grid-template-columns:repeat(2,1fr)} .xgrid .wide2{grid-column:1 / -1} }
-  #friends{margin-bottom:34px}
+  #friends{margin-bottom:26px}
   #list{margin-bottom:12px}
-  #allusers{margin:0 0 56px;font-size:.9rem}
+  #allusers{margin:0 0 28px;font-size:.9rem}
   #allusers a{color:var(--accent2);font-weight:600;text-decoration:none}
   .hint{color:var(--muted);font-size:.9rem;margin:0 0 34px}
   .hint a{color:var(--accent2)}
@@ -88,7 +88,8 @@
   .heroyou .hy_acts .btn.alt{background:transparent;border:1px solid var(--line);color:var(--fg)}
   .heroyou .hy_acts .btn.alt:hover{border-color:var(--accent2);color:var(--accent2)}
   @media (max-width:640px){ .heroyou .hy_acts{margin-bottom:50px} .heroyou .hy_acts .btn{padding:10px 16px;font-size:.92rem} }
-  .recent{padding-top:8px}
+  /* Less air above Recent changes (Carter, 2026-10-01). */
+  section.block.recent{padding-top:28px}
   .recent .more,#factivity_wrap .more,#allusers{font-size:.9rem}
   .recent .more{margin:12px 0 0}
   .recent .more a{color:var(--accent2);font-weight:600;text-decoration:none}
@@ -111,7 +112,7 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero" style="--hero-t:60px;--hero-b:4px"><div class="container">
+<section class="hero" style="--hero-t:36px;--hero-b:4px"><div class="container">
   <svg class="track" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <path d="M-50 500 C 250 500, 300 120, 520 120 S 780 560, 1000 380 S 1300 90, 1500 300"
           fill="none" stroke="var(--line)" stroke-width="4"/>
