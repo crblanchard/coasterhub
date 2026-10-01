@@ -5359,3 +5359,16 @@ Shared in app.js: `riderFace(slug,name)` (picture or initial, `.rface` in lists.
   states). A maker page opened at a model (#hash) does not fold.
 - Your chip: accent outline on a computer, plain white like everyone's on a phone.
 
+**Park page after its critique (25/40; Carter: do 2 and 3, NOT the "of 20 operating" totals; keep
+defunct at the bottom; "all issues" otherwise).**
+- Each ride's Global place ("#12 Global") beside its model (CoasterHub.globalTally, now exported).
+  Signed out, the list sorts by Global place (operating first) so the headline rides lead; signed in
+  it stays operating → ones you need → A–Z. Signed out also gets "Keep your own count of this park —
+  Start your count →".
+- Phone: names wrap instead of "Cedar Creek Mi…"; rider counts grey (orange is defunct only); add
+  ring's tap area wider; a failed add shows a red "!" instead of only a tooltip.
+- "Show N more" is a full-width button now, everywhere foldList is used (and the coaster page's More lists).
+- No "0 Defunct" box; the Riders-here box is drawn from the start (no reflow). Status word .7rem.
+  Duplicate toggle listener removed. Opened-row facts capped at 760px wide.
+- Left as is: "OPERATING" on every desktop row and region in both hero and crumbs (site-wide conventions).
+

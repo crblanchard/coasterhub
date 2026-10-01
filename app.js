@@ -1787,12 +1787,13 @@
     kids.slice(n).forEach(function (k) { k.classList.add("folded"); });
     el.classList.add("isfolded");
     var p = document.createElement("p"); p.className = "rnone foldp";
-    p.innerHTML = '<a class="rmore" href="#">Show all ' + kids.length + '</a>';
+    var more = kids.length - n;
+    p.innerHTML = '<a class="rmore" href="#">Show ' + more + ' more</a>';
     el.parentNode.insertBefore(p, el.nextSibling);
     p.firstChild.onclick = function (e) {
       e.preventDefault();
       var shut = el.classList.toggle("isfolded");
-      p.firstChild.textContent = shut ? "Show all " + kids.length : "Show fewer";
+      p.firstChild.textContent = shut ? "Show " + more + " more" : "Show fewer";
     };
   }
   function countsTag(open, gone) {
@@ -2287,7 +2288,7 @@
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow,
-              riderFace: riderFace, needFirst: needFirst, foldList: foldList };
+              riderFace: riderFace, needFirst: needFirst, foldList: foldList, globalTally: globalTally };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

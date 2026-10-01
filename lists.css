@@ -226,4 +226,7 @@ a.crow .pk .lap{margin-left:6px}
 @media (max-width:560px){ .ranksec a.crow .gmeta .gyou2{display:block} }
 .isfolded > .folded{display:none}
 .foldp{margin:10px 0 0;font-size:.9rem}
-.foldp .rmore{color:var(--accent2);font-weight:600;text-decoration:none}
+/* A real button, easy to hit with a thumb (park critique, 2026-10-01). */
+.foldp .rmore{display:block;text-align:center;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background-color:var(--panel);
+  color:var(--accent2);font-weight:600;text-decoration:none}
+.foldp .rmore:hover{border-color:var(--accent2)}
