@@ -117,16 +117,13 @@ those files are the fallback, and the sync overwrites them.
 
 ## Traps that have each cost a deploy
 
-- **No home-screen "web app" tags** (`apple-mobile-web-app-capable`, the manifest
-  link). Added 2026-09-27, removed 2026-10-01 at Carter's call: they make the
-  home-screen icon open as a standalone app, and there iOS fixes the status-bar
-  colour at launch, so flipping light/dark left the strip the wrong colour. The
-  plain Safari bookmark follows the theme live. `site.webmanifest` stays in the
-  repo, unlinked.
-  Same day: **no `theme-color` meta either** (it was set by app.js from
-  2026-09-24). With it, Safari kept the strip colour the page loaded with;
-  without it Safari reads the page and follows a theme flip. Carter's
-  screenshots from 2026-09-20, before both, flipped correctly.
+- **No `theme-color`, anywhere** (no meta tag, none in `site.webmanifest`).
+  app.js set one from 2026-09-24; with it, Safari kept the status-bar colour the
+  page loaded with, so flipping light/dark left the strip and the toolbar the
+  wrong colour. Without it Safari reads the page and follows a flip (Carter's
+  2026-09-20 screenshots, from before it, flipped fine). Removed 2026-10-01. The
+  home-screen tags (added 2026-09-27) were taken out the same day while chasing
+  this, and put back once the theme-color was found to be the cause.
 
 - **Bump the `?v=` on `style.css`, `lists.css` and `app.js` when you change them**
   (every `.html` links them; one `sed` over `*.html`). `_headers` says no-cache,
