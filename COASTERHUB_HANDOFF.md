@@ -5346,3 +5346,16 @@ friends (it is a leaderboard); the header search and the hub search both stay.
 - Defunct coasters: stat numbers grey, no top-10 flags. Model shown without the maker repeated
   ("Intamin · Giga"). List-row status word .7rem (was 10.9px). Old .spec CSS and helpers removed.
 
+**Coaster-page touches carried to park, maker, model and location pages (2026-10-01, Carter: "yes on all").**
+Shared in app.js: `riderFace(slug,name)` (picture or initial, `.rface` in lists.css), `needFirst(mine)`
+(operating, then ones you have not ridden, then A–Z), `foldList(el,n)` ("Show all N" / "Show fewer").
+- youStrip (the grey "you" bar): "You've ridden 19 of 23 · best ranked #2 of 236", or "Not been yet".
+- rankSection: Global tab first and the default; "you #N" in the accent, also on phones (under the
+  average); opened Global rows' chips have pictures and put You first.
+- Park: riders chips (opened coaster and "Riders who have been here") with pictures and You first;
+  the coaster list re-sorts need-first once your ticks load, then folds at 12. park.html now loads
+  lists.css.
+- Location parks/states, maker models, model installations: need-first inside, fold at 10 (12 for
+  states). A maker page opened at a model (#hash) does not fold.
+- Your chip: accent outline on a computer, plain white like everyone's on a phone.
+

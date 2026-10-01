@@ -15,7 +15,7 @@
 <title>Locations — Coaster Hub</title>
 <meta name="description" content="Every park and coaster in one state or country — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20261001d">
-<link rel="stylesheet" href="/lists.css?v=20261001b">
+<link rel="stylesheet" href="/lists.css?v=20261001c">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -74,7 +74,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261001h"></script>
+<script src="/app.js?v=20261001i"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('location');
@@ -167,7 +167,7 @@ function place(reg, ps, MINE, R){
     // The states, most operating coasters first.
     var st=Object.keys(R).filter(isUS).map(function(r){ var c=counts(R[r], MINE); c.r=r; return c; })
       .sort(function(a,b){ return shortName(a.r).localeCompare(shortName(b.r)); });   // A–Z (2026-09-28)
-    h+='<div class="sect">States</div><div class="panel">'+st.map(locRow).join('')+'</div>';
+    h+='<div class="sect">States</div><div class="panel" id="statelist">'+st.map(locRow).join('')+'</div>';
   }
   var pk=ps.map(function(p){ var c=counts([p], MINE); c.p=p; return c; })
     .sort(function(a,b){ return a.p.name.localeCompare(b.p.name); });   // A–Z (Carter, 2026-09-28)
@@ -176,10 +176,10 @@ function place(reg, ps, MINE, R){
   // park over how many run and how many are gone (and its state, on the US
   // page), your ridden/total in grey, a chevron; open, its coasters. That
   // replaces the separate flat Coasters table, which listed the same rides.
-  h+='<div class="sect">Parks</div><div class="panel mlist">'+pk.map(function(c){
+  h+='<div class="sect">Parks</div><div class="panel mlist" id="parklist">'+pk.map(function(c){
     var sub=us && c.p.region ? shortName(c.p.region) : '';
     var got=MINE ? c.cs.filter(function(x){ return MINE[x.id]; }).length : null;
-    var list=c.cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.name).localeCompare(String(b.name)); });
+    var list=c.cs.slice().sort(CoasterHub.needFirst(MINE));   // ones you need first (2026-10-01)
     return '<details class="mdl"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(c.p.name)+'</span><span class="msub">'+esc(sub)+'</span></span>'
       +CoasterHub.countsTag(c.open, c.gone)+'</summary>'
@@ -190,6 +190,7 @@ function place(reg, ps, MINE, R){
   // section a maker's page has (CoasterHub.rankSection).
     +'<div id="ranked"></div>';
   $('body').innerHTML=h;
+  CoasterHub.foldList($('statelist'), 12); CoasterHub.foldList($('parklist'), 10);
   CoasterHub.rankSection($('ranked'), k.cs, {model:true});
 }
 

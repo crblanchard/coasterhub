@@ -15,6 +15,7 @@
 <title>Park — Coaster Hub</title>
 <meta name="description" content="Every coaster at one park, and who has ridden them — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20261001d">
+<link rel="stylesheet" href="/lists.css?v=20261001c">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -111,6 +112,7 @@
          background:var(--panel);border:1px solid var(--line);border-radius:999px;
          padding:7px 13px;font-size:.85rem;color:var(--fg)}
   .who a:hover{border-color:var(--accent2)}
+  .who a{align-items:center}
   .who a i{font-style:normal;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
 
   /* Three cards (operating, defunct, riders here) stay on one row on a phone. */
@@ -165,7 +167,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261001h"></script>
+<script src="/app.js?v=20261001i"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('park');
@@ -244,7 +246,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   // leaves the park page complete rather than taking it down — the coasters are
   // the page, the riders are the extra.
   riders(mine).catch(function(e){ console.error(e); });
-  ticks(mine).catch(function(e){ console.error(e); });
+  ticks(mine).catch(function(){}).then(function(){ CoasterHub.foldList($('list'), 12); });
 }).catch(fail);
 
 function tile(n,label){ return '<div class="tile"><b>'+esc(n)+'</b><span>'+esc(label)+'</span></div>'; }
@@ -331,8 +333,8 @@ function body(c){
     +CoasterHub.coasterFacts(c, extra, null, among)
     +'<div><p class="lbl">Riders</p>'
     +(who===undefined ? '<p class="nobody">Loading&hellip;</p>'
-      : who.length ? '<div class="who">'+who.map(function(w){
-          return '<a href="'+esc(CoasterHub.userPageHref(w.slug,'count'))+'">'+esc(w.name)+'<i>'+w.n+' ride'+(w.n===1?'':'s')+'</i></a>'; }).join('')+'</div>'
+      : who.length ? '<div class="who">'+youFirst(who).map(function(w){
+          return '<a class="'+(w.slug===ME?'me':'')+'" href="'+esc(CoasterHub.userPageHref(w.slug,'count'))+'">'+CoasterHub.riderFace(w.slug,w.name)+(w.slug===ME?'You':esc(w.name))+'<i>'+w.n+' ride'+(w.n===1?'':'s')+'</i></a>'; }).join('')+'</div>'
       : '<p class="nobody">Nobody on the site has ridden it yet.</p>')
     +'</div>';
 }
@@ -366,6 +368,12 @@ function ticks(mine){
         else { el.classList.add('add'); el.title='Ridden it? Tap to add it to your credits'; el.setAttribute('role','button'); el.setAttribute('aria-label','Add to your credits'); }
       });
       $('list').classList.add('ticks');
+      // The ones you still need first, among the operating ones (2026-10-01).
+      var cmp=CoasterHub.needFirst(got), L=$('list');
+      Array.prototype.slice.call(L.querySelectorAll(':scope > details.citem'))
+        .sort(function(a,b){ return cmp(byId(+a.getAttribute('data-c')), byId(+b.getAttribute('data-c'))); })
+        .forEach(function(d){ L.appendChild(d); });
+      drawWho();
     });
   });
 }
@@ -399,10 +407,23 @@ function tapTick(el){
 
 // Every rider's log, the same way the everyone view of /count reads them: a
 // rider whose log cannot be read contributes nothing rather than failing.
+// Who has been here, as chips with pictures, you first (2026-10-01). Drawn
+// again once we know who you are, whichever lands first.
+var WHOLIST=null, WHOMAX=0;
+function youFirst(list){ return ME ? list.filter(function(w){ return w.slug===ME; }).concat(list.filter(function(w){ return w.slug!==ME; })) : list; }
+function drawWho(){
+  if(!WHOLIST) return;
+  $('who').innerHTML=youFirst(WHOLIST).map(function(p){
+    var isMe=p.slug===ME;
+    return '<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'">'+CoasterHub.riderFace(p.slug,p.name)
+      +(isMe?'You':esc(p.name))+'<i>'+p.n+' of '+WHOMAX+'</i></a>';
+  }).join('');
+}
 function riders(mine){
   var here={}; mine.forEach(function(c){ here[c.id]=1; });
   // Who rode what here, in ONE request (/api/park-riders, 2026-09-25); if that
   // cannot answer, every rider's log as before.
+  CoasterHub.fetchUsers().then(drawWho).catch(function(){});
   return fetch('/api/park-riders?park='+encodeURIComponent(PARK)).then(function(r){ return r.ok ? r.json() : null; })
     .catch(function(){ return null; }).then(function(j){
       if(!j || !j.riders) return ridersSlow(mine, here);
@@ -463,10 +484,7 @@ function showRiders(mine, perCoaster){
     var list=Object.keys(per).map(function(k){ return per[k]; })
       .sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); });
     if(!list.length) return;
-    $('who').innerHTML=list.map(function(p){
-      return '<a href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'">'+esc(p.name)
-        +'<i>'+p.n+' of '+mine.length+'</i></a>';
-    }).join('');
+    WHOLIST=list; WHOMAX=mine.length; drawWho();
     $('who_wrap').style.display='block';
 }
 </script>

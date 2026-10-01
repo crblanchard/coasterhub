@@ -1593,8 +1593,9 @@
           .map(function (c) { return y.rank[c.id]; }).sort(function (a, b) { return a - b; });
         // Led by how many you have ridden (Carter, 2026-09-27: "make the first one
         // say 'you've ridden'"), then your best-placed one.
+        // "of N" back, and "Not been yet" when it is none (Carter, 2026-10-01).
         var rode = cs.filter(function (c) { return y.rides[c.id]; }).length;
-        if (rode) bits.push("You&rsquo;ve ridden <b>" + rode + "</b>");
+        bits.push(rode ? "You&rsquo;ve ridden <b>" + rode + "</b> of " + cs.length : "Not been yet");
         if (rk.length) bits.push("best ranked <b>#" + rk[0] + "</b> of " + y.ranked);
       }
       if (!bits.length) { el.hidden = true; return; }
@@ -1759,6 +1760,41 @@
       + '<span class="un">@' + E(u.slug) + '</span>' + (line ? '<span class="sub">' + line + '</span>' : '') + '</span>'
       + '<span class="nums"><b>' + nf(big[0]) + '</b><span>' + big[1] + '</span></span></a>';
   }
+  // A rider's picture as a small circle, or their initial (chips on coaster,
+  // park and ranking rows; 2026-10-01). Needs fetchUsers() to have landed for
+  // the picture; the initial works either way.
+  function riderFace(slug, name) {
+    var u = null;
+    for (var i = 0; i < USERS.length; i++) if (USERS[i].slug === slug) { u = USERS[i]; break; }
+    return u && u.avatar
+      ? '<span class="rface" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
+      : '<span class="rface">' + searchEsc(String(name || slug || "?").charAt(0).toUpperCase()) + '</span>';
+  }
+  // Operating first, then — given your rides — the ones you still need, then
+  // A–Z (Carter, 2026-10-01: same rule as the coaster page's More lists).
+  function needFirst(mine) {
+    return function (a, b) {
+      return (!!a.closed - !!b.closed) || (mine ? (!!mine[a.id] - !!mine[b.id]) : 0)
+        || String(a.name).localeCompare(String(b.name));
+    };
+  }
+  // A long list shows its first n and opens to the rest in place ("Show all N"
+  // / "Show fewer"). Leaves short lists alone.
+  function foldList(el, n) {
+    if (!el) return;
+    var kids = Array.prototype.slice.call(el.children);
+    if (kids.length <= n + 2) return;
+    kids.slice(n).forEach(function (k) { k.classList.add("folded"); });
+    el.classList.add("isfolded");
+    var p = document.createElement("p"); p.className = "rnone foldp";
+    p.innerHTML = '<a class="rmore" href="#">Show all ' + kids.length + '</a>';
+    el.parentNode.insertBefore(p, el.nextSibling);
+    p.firstChild.onclick = function (e) {
+      e.preventDefault();
+      var shut = el.classList.toggle("isfolded");
+      p.firstChild.textContent = shut ? "Show all " + kids.length : "Show fewer";
+    };
+  }
   function countsTag(open, gone) {
     // Stacked on a phone (vct), so the name keeps the width.
     return '<span class="ct vct">' + (open + gone ? '<span>' + open + ' operating</span>' + (gone ? '<i> \u00b7 </i><span>' + gone + ' defunct</span>' : '') : '<span>No coasters</span>') + '</span>';
@@ -1879,10 +1915,11 @@
       if (!st.known) return;
       var R = st.rank;
       var mine = R ? cs.filter(function (c) { return R[c.id]; }).sort(function (a, b) { return R[a.id] - R[b.id]; }) : [];
-      if (!st.view) st.view = mine.length ? "mine" : "global";
+      // Global first (Carter, 2026-10-01: "is it good?" before "where's mine").
+      if (!st.view) st.view = "global";
       if (st.view === "global" && !st.glob) { st.glob = "loading"; globalTally().then(function (t) { st.glob = t; draw(); }); }
-      var sw = '<span class="rsw"><a data-rv="mine"' + (st.view === "mine" ? ' class="on"' : '') + '>Mine</a>'
-        + '<a data-rv="global"' + (st.view === "global" ? ' class="on"' : '') + '>Global</a></span>';
+      var sw = '<span class="rsw"><a data-rv="global"' + (st.view === "global" ? ' class="on"' : '') + '>Global</a>'
+        + '<a data-rv="mine"' + (st.view === "mine" ? ' class="on"' : '') + '>Mine</a></span>';
       var body;
       if (st.view === "mine") {
         body = mine.length ? '<div class="panel">' + cut(mine).map(function (c) {
@@ -1910,7 +1947,8 @@
             // The model too, as /rankings' Global list shows it (2026-09-28).
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '')
             + (me ? '<span class="gyou">you #' + me + '</span>' : '')
-            + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + r.n + ' lists</span>' + chev + '</a>';
+            + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + r.n + ' lists'
+            + (me ? '<em class="gyou2">you #' + me + '</em>' : '') + '</span>' + chev + '</a>';
         }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
           + (one ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');
       }
@@ -1937,8 +1975,11 @@
       });
       if (isOpen) return;
       var r = st.rows[row.getAttribute("data-gid")]; if (!r) return;
-      var chips = r.who.slice().sort(function (a, b) { return a.pos - b.pos; }).map(function (w) {
-        return '<a class="wrow" href="' + E(userPageHref(w.slug, "rankings")) + '"><span class="wn">' + E(w.name) + '</span><span class="wp">#' + w.pos + '</span></a>';
+      var meS = st.me, chips = r.who.slice().sort(function (a, b) {
+        return (b.slug === meS) - (a.slug === meS) || a.pos - b.pos; }).map(function (w) {
+        var isMe = w.slug === meS;
+        return '<a class="wrow' + (isMe ? ' me' : '') + '" href="' + E(userPageHref(w.slug, "rankings")) + '">' + riderFace(w.slug, w.name)
+          + '<span class="wn">' + (isMe ? "You" : E(w.name)) + '</span><span class="wp">#' + w.pos + '</span></a>';
       }).join("");
       var box = document.createElement("div"); box.className = "cx";
       box.innerHTML = '<div class="chips">' + chips + '</div>'
@@ -1948,8 +1989,9 @@
     // Park · place beside each name, as /rankings reads.
     var parks = {};
     function ctx(c) { var r = (parks[c.park] || {}).region; return [c.park, r].filter(Boolean).join(" \u00b7 "); }
-    Promise.all([you().catch(function () { return null; }), fetchParks().catch(function () { return {}; })]).then(function (r) {
-      st.rank = r[0] ? r[0].rank : null; parks = r[1] || {};
+    Promise.all([you().catch(function () { return null; }), fetchParks().catch(function () { return {}; }),
+                 fetchUsers().catch(function () { return null; })]).then(function (r) {
+      st.rank = r[0] ? r[0].rank : null; st.me = r[0] ? r[0].slug : null; parks = r[1] || {};
     }).then(function () { st.known = true; draw(); });
   }
 
@@ -2244,7 +2286,8 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow };
+              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow,
+              riderFace: riderFace, needFirst: needFirst, foldList: foldList };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

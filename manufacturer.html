@@ -15,7 +15,7 @@
 <title>Manufacturers — Coaster Hub</title>
 <meta name="description" content="Every coaster maker on the site, their models, and how many of each — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20261001d">
-<link rel="stylesheet" href="/lists.css?v=20261001b">
+<link rel="stylesheet" href="/lists.css?v=20261001c">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -80,7 +80,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261001h"></script>
+<script src="/app.js?v=20261001i"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('manufacturer');
@@ -227,8 +227,8 @@ function one(name, cs, MINE){
   $('hero_sub').textContent=cs.length+' coaster'+(cs.length===1?'':'s')+' on the site.';
   $('tiles').innerHTML=tile(cs.length,'Coasters')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
     +tile(models.filter(Boolean).length,'Models');
-  $('body').innerHTML='<div class="sect">Models</div><div class="panel mlist">'+models.map(function(mo){
-    var list=byModel[mo].slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
+  $('body').innerHTML='<div class="sect">Models</div><div class="panel mlist" id="modellist">'+models.map(function(mo){
+    var list=byModel[mo].slice().sort(CoasterHub.needFirst(MINE));   // ones you need first (2026-10-01)
     var g=MINE ? list.filter(function(c){ return MINE[c.id]; }).length : null;
     // Carter, 2026-09-28 ("don't like how the model list looks"): each model
     // reads like the rows around it — its name over what it is (how many still
@@ -244,6 +244,8 @@ function one(name, cs, MINE){
   }).join('')+'</div><div id="ranked"></div>';
   // Where these sit in the rankings, Mine / Global (CoasterHub.rankSection,
   // shared with a location's page).
+  // Folded, except when a link points at one model (it would be hidden).
+  if(!location.hash) CoasterHub.foldList($('modellist'), 10);
   CoasterHub.rankSection($('ranked'), cs, {model:true});
   // A link to one model (/manufacturer/intamin#accelerator-coaster) opens it.
   if(location.hash){
@@ -268,12 +270,13 @@ function model(maker, mo, cs, MINE){
   $('tiles').innerHTML=tile(cs.length,cs.length===1?'Built':'Installations')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
     +tile(years(cs)||'—','Years built');
   // No Statistics block (Carter, 2026-09-29: "remove stats from model pages").
-  var rows=cs.slice().sort(function(a,b){ return (!!a.closed-!!b.closed) || String(a.park).localeCompare(String(b.park)) || String(a.name).localeCompare(String(b.name)); });
+  var rows=cs.slice().sort(CoasterHub.needFirst(MINE));   // ones you need first (2026-10-01)
   $('body').innerHTML=''
     // The same rows as everywhere else (Carter, 2026-09-28), operating first;
     // the rankings under them, as on every list page.
-    +'<div class="sect">Installations</div><div class="panel">'+rows.map(function(c){ return crow(c, MINE); }).join('')+'</div>'
+    +'<div class="sect">Installations</div><div class="panel" id="instlist">'+rows.map(function(c){ return crow(c, MINE); }).join('')+'</div>'
     +'<div id="ranked"></div>';
+  CoasterHub.foldList($('instlist'), 10);
   CoasterHub.rankSection($('ranked'), cs, {model:false});
 }
 function years(cs){
