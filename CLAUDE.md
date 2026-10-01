@@ -120,8 +120,10 @@ those files are the fallback, and the sync overwrites them.
 - **No `theme-color`, anywhere** (no meta tag, none in `site.webmanifest`).
   app.js set one from 2026-09-24; with it, Safari kept the status-bar colour the
   page loaded with, so flipping light/dark left the strip and the toolbar the
-  wrong colour. Without it Safari reads the page and follows a flip (Carter's
-  2026-09-20 screenshots, from before it, flipped fine). Removed 2026-10-01. The
+  wrong colour. Without it Safari reads the colour from the page — but only when
+  a page loads, so after a flip the strip catches up on the next reload or page
+  (confirmed on Carter's iPhone, 2026-10-01). Making it flip instantly meant
+  reloading on every flip, which he did not want. Removed 2026-10-01. The
   home-screen tags (added 2026-09-27) were taken out the same day while chasing
   this, and put back once the theme-color was found to be the cause.
 
