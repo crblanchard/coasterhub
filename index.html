@@ -280,7 +280,7 @@ CoasterHub.me().then(function(acct){
       if (last) log.forEach(function(x){ if (x.d === last && byId[x.c]) parks[byId[x.c].park] = 1; });
       var names = Object.keys(parks);
       if (last && names.length) {
-        $('hy_last').innerHTML = 'Last: ' + names.map(function(p){
+        $('hy_last').innerHTML = 'Latest: ' + names.map(function(p){
           return '<a href="' + CoasterHub.parkHref(p) + '">' + esc(p) + '</a>'; }).join(', ')
           + ' &middot; ' + CoasterHub.mdy(last);
         $('hy_last').hidden = false;
