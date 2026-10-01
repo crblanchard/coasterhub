@@ -725,21 +725,24 @@
   // to add first ridden date"). Used by the park page's ring and the coaster
   // page's "+ add". Resolves to the saved answer, or null if cancelled. Built
   // at the end of <body>, fixed — never inside .hero, which clips (CLAUDE.md).
-  function confirmAdd(c, slug) {
+  // opts.again: another ride on a coaster you already have — worded as a ride,
+  // not a credit (Carter, 2026-10-01).
+  function confirmAdd(c, slug, opts) {
+    var again = !!(opts && opts.again);
     return new Promise(function (resolve) {
       var t = new Date(), today = t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
       var wrap = document.createElement("div");
       wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true");
       wrap.style.cssText = "position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.45)";
       wrap.innerHTML = '<div style="background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:20px;width:100%;max-width:360px;box-shadow:0 12px 40px var(--shadow)">'
-        + '<b style="display:block;font-size:1.05rem;line-height:1.3">Add ' + searchEsc(c.name) + ' to your credits?</b>'
+        + '<b style="display:block;font-size:1.05rem;line-height:1.3">' + (again ? 'Add a ride on ' + searchEsc(c.name) + '?' : 'Add ' + searchEsc(c.name) + ' to your credits?') + '</b>'
         + '<span style="display:block;color:var(--muted);font-size:.86rem;margin-top:2px">' + searchEsc(c.park || "") + '</span>'
-        + '<label for="ca_date" style="display:block;font-size:.78rem;color:var(--muted);margin:16px 0 6px">First ridden <span style="opacity:.8">(optional)</span></label>'
+        + '<label for="ca_date" style="display:block;font-size:.78rem;color:var(--muted);margin:16px 0 6px">' + (again ? 'Ride date' : 'First ridden') + ' <span style="opacity:.8">(optional)</span></label>'
         + '<input id="ca_date" type="date" max="' + today + '" style="width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px">'
         + '<p id="ca_msg" style="color:var(--bad);font-size:.84rem;margin:8px 0 0;min-height:1em"></p>'
         + '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">'
         + '<button type="button" id="ca_no" style="font:inherit;font-weight:600;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer">Cancel</button>'
-        + '<button type="button" id="ca_yes" style="font:inherit;font-weight:700;background:var(--accentfill);color:var(--onaccent);border:0;border-radius:10px;padding:9px 18px;cursor:pointer">Add</button>'
+        + '<button type="button" id="ca_yes" style="font:inherit;font-weight:700;background:var(--accentfill);color:var(--onaccent);border:0;border-radius:10px;padding:9px 18px;cursor:pointer">' + (again ? 'Add ride' : 'Add') + '</button>'
         + '</div></div>';
       document.body.appendChild(wrap);
       var q = function (id) { return wrap.querySelector("#" + id); };

@@ -181,7 +181,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261001g"></script>
+<script src="/app.js?v=20261001h"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('coaster');
@@ -527,10 +527,10 @@ function riders(){
     $('who_wrap').querySelectorAll('button.dots').forEach(function(b){
       var id=+b.getAttribute('data-row'), row=ROWS.filter(function(x){ return x.id===id; })[0]||C;
       var menu=document.createElement('div'); menu.className='mymenu'; menu.hidden=true;
-      menu.innerHTML='<button type="button" class="plus">+1 ride</button><button type="button" class="rm">Remove from my credits</button>';
+      menu.innerHTML='<button type="button" class="plus">Add ride</button><button type="button" class="rm">Remove from my credits</button>';
       b.closest('.chips').insertAdjacentElement('afterend', menu);
       b.onclick=function(){ menu.hidden=!menu.hidden; };
-      menu.querySelector('.plus').onclick=function(){ CoasterHub.confirmAdd(row, me.slug).then(function(ok){ if(ok) riders(); }); };
+      menu.querySelector('.plus').onclick=function(){ CoasterHub.confirmAdd(row, me.slug, {again:true}).then(function(ok){ if(ok) riders(); }); };
       menu.querySelector('.rm').onclick=function(){
         CoasterHub.confirmRemove(row, me.slug, +b.getAttribute('data-laps')).then(function(ok){ if(ok) riders(); });
       };
