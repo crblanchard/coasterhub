@@ -12,7 +12,7 @@
 <title>Editor — Coaster Hub</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="dark light">
-<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light");document.write('<meta name="theme-color" content="'+(chT==="dark"?"#080e20":"#f5f5f3")+'">')</script>
 <style>
   /* Two palettes, one set of roles (Carter, 2026-09-21: "dark mode for /edit,
      let me choose"). This page does not load style.css or app.js — it is

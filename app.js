@@ -1061,6 +1061,12 @@
       try { window.localStorage.setItem(THEME_KEY, next); } catch (e) {}
       applyTheme(next);
       label();
+      // On the home-screen app the iPhone status bar keeps the colour it had at
+      // launch whatever the page does after (Carter, 2026-10-01), so the app
+      // reloads — quick, and the theme is already saved — and the new
+      // theme-color tag is there from the first line. A browser tab needs none.
+      if (window.navigator.standalone || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches))
+        setTimeout(function () { location.reload(); }, 60);
     });
     if (atStart) wrap.insertBefore(b, wrap.firstChild);
     else wrap.appendChild(b);
