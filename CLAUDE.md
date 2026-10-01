@@ -123,6 +123,10 @@ those files are the fallback, and the sync overwrites them.
   colour at launch, so flipping light/dark left the strip the wrong colour. The
   plain Safari bookmark follows the theme live. `site.webmanifest` stays in the
   repo, unlinked.
+  Same day: **no `theme-color` meta either** (it was set by app.js from
+  2026-09-24). With it, Safari kept the strip colour the page loaded with;
+  without it Safari reads the page and follows a theme flip. Carter's
+  screenshots from 2026-09-20, before both, flipped correctly.
 
 - **Bump the `?v=` on `style.css`, `lists.css` and `app.js` when you change them**
   (every `.html` links them; one `sed` over `*.html`). `_headers` says no-cache,
