@@ -132,20 +132,24 @@
   #sec_visits{padding-top:22px !important}
   @media (max-width:680px){ #content section.block{padding:24px 0} }
   #morewrap{padding:6px 0 30px}
+  .hero .vsline{margin:6px 0 0;color:var(--muted);font-size:.95rem}
+  .hero .vsline b{color:var(--fg);font-variant-numeric:tabular-nums}
   body.moreclosed #sec_activity,body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
   @media (max-width:680px){
     #content{display:flex;flex-direction:column}
     #sec_visits{order:1}     /* first, then the top ten: same order, source breaks the tie */
     #sec_top{order:1}
     #sec_kpis{order:2}
-    #sec_geo{order:3}
-    #morewrap{order:4;display:block;padding:2px 0 22px}
-    #sec_otd{order:5}
-    #sec_records{order:6}
+    /* Records before the map on a phone, and not behind More stats: they are
+       what you show a friend (critique, 2026-10-02). */
+    #sec_otd{order:3}
+    #sec_records{order:3}
+    #sec_geo{order:4}
+    #morewrap{order:5;display:block;padding:2px 0 22px}
     #sec_activity{order:7}
     #sec_overtime{order:8}
     #sec_breakdown{order:9}
-    body.moreclosed #sec_otd,body.moreclosed #sec_records,body.moreclosed #sec_activity,
+    body.moreclosed #sec_activity,
     body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
     /* Two up, not "as many as fit": at 320px auto-fit drops to one column and
        five tiles become five screens. */
@@ -263,6 +267,7 @@
            adding a missing coaster is a job on the shared list rather than on
            yours — both were things you CAN do rather than things you come here
            to do, and a column of six reads as a menu. -->
+      <p class="vsline" id="vsline" hidden></p>
       <div class="heroacts" id="hero_acts">
         <a class="btn own" href="/log" hidden>Log a day</a>
         <!-- Someone else's page, and you are signed in. Red like "Log a day"
@@ -281,9 +286,12 @@
 </div></section>
 
 
+<!-- Rider copy (critique, 2026-10-02). It used to explain running a local web
+     server; opening this file straight off disk still lands here, and the
+     answer to that is `node tools/dev-server.mjs`. -->
 <div class="container"><div id="err">
-  <strong>Couldn't load the data.</strong> This page reads external data files, so it needs to be served over the web — opening the file directly won't work.
-  View it on the live site, or run a local server from this folder: <code>python -m http.server</code> then open <code>localhost:8000/profile.html</code>.
+  <strong>Couldn&rsquo;t load this count.</strong> Check your connection and try again.
+  <p style="margin:12px 0 0"><a class="go" href="" onclick="location.reload();return false">Try again &rarr;</a></p>
 </div></div>
 
 <!-- A rider who is not there. Separate from #err on purpose: that one is about
@@ -313,7 +321,7 @@
      Read off computeStats' day_detail, so it costs nothing extra; hidden for a
      rider with no dated days. -->
 <section class="block" id="sec_visits" style="display:none"><div class="container">
-  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">every day &rarr;</span></a></h2>
+  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">all &rarr;</span></a></h2>
   <div class="mlist vlist" id="visits"></div>
   <!-- The way on to the whole count, where the five end (2026-09-27): "my
        stuff is split up" was the thing Carter found hardest, and this puts the
@@ -337,8 +345,8 @@
     <div class="kpi"><div class="num" id="k_credits"></div><div class="lbl">Credits</div><div class="sub" id="k_split"></div></div>
     <div class="kpi" id="kpi_rides"><div class="num" id="k_rides"></div><div class="lbl">Total Rides</div></div>
     <div class="kpi"><div class="num" id="k_parks"></div><div class="lbl">Parks</div></div>
-    <div class="kpi"><div class="num" id="k_geo"></div><div class="lbl">States / Countries</div></div>
-    <div class="kpi"><div class="num" id="k_miles"></div><div class="lbl" id="k_miles_lbl">Total Distance Ridden</div><div class="sub" id="k_inv"></div></div>
+    <div class="kpi"><div class="num" id="k_geo"></div><div class="lbl">States · countries</div></div>
+    <div class="kpi"><div class="num" id="k_miles"></div><div class="lbl" id="k_miles_lbl">Distance ridden</div><div class="sub" id="k_inv"></div></div>
   </div>
 </div></section>
 
@@ -353,7 +361,7 @@
 </div></section>
 
 <section class="block" id="sec_geo"><div class="container">
-  <h2>Everywhere I've ridden</h2>
+  <h2 id="geo_h">Everywhere they&rsquo;ve ridden</h2>
   <p class="lead" id="geo_sub"></p>
   <div id="map"></div>
 </div></section>
@@ -669,8 +677,20 @@ function render(s){
     // Whose count you are about to look at. s.userName raw, not the escaped
     // copy: this is textContent, and an escaped one would print the entities.
     // Everyone gets the rankings, as the count and the map (Carter, 2026-09-29).
+    // Nothing logged yet, there is nothing to rank (critique, 2026-10-02).
     document.getElementById('hero_rank').textContent =
       mine ? 'Update your rankings' : ('View ' + (s.userName || 'this') + '’s rankings');
+    if (mine && !k.credits) document.getElementById('hero_rank').hidden = true;
+    document.getElementById('geo_h').textContent = mine ? 'Everywhere you’ve ridden' : 'Everywhere ' + (s.userName || 'they') + ' has ridden';
+    // Friends side by side, in one line (critique, 2026-10-02): on someone
+    // else's page, what you share and what they have that you don't.
+    if (!mine && acct && acct.slug) CoasterHub.you().then(function(y){
+      var theirs = Object.keys(s.byCoaster || {}); if (!y || !theirs.length) return;
+      var both = 0; theirs.forEach(function(id){ if (y.rides[id]) both++; });
+      var el = document.getElementById('vsline');
+      el.innerHTML = 'You&rsquo;ve both ridden <b>' + nf(both) + '</b> &middot; <b>' + nf(theirs.length - both) + '</b> of theirs you haven&rsquo;t';
+      el.hidden = false;
+    });
     CoasterHubProfile.mount(host,
       mine ? acct : { name:s.userName, slug:CoasterHub.currentUser(), bio:s.bio, avatar:s.avatar },
       { editable: !!mine,
@@ -829,7 +849,7 @@ function render(s){
   document.getElementById('k_credits').textContent=nf(k.credits);
   document.getElementById('k_split').textContent=k.steel+' steel · '+k.wood+' wood';
   document.getElementById('k_parks').textContent=k.parks;
-  document.getElementById('k_geo').textContent=k.states+' / '+k.countries;
+  document.getElementById('k_geo').textContent=k.states+' · '+k.countries;
 
   // Total Rides tile only when ride counts are known AND mean something.
   if(showRides){
@@ -843,11 +863,11 @@ function render(s){
   // Distance tile: total (with re-rides) when counts exist, else unique track.
   if(has.rideCounts){
     document.getElementById('k_miles').textContent=nf(k.miles)+' mi';
-    document.getElementById('k_miles_lbl').textContent='Total Distance Ridden';
+    document.getElementById('k_miles_lbl').textContent='Distance ridden';
     document.getElementById('k_inv').textContent=nf(k.miles_unique)+' mi unique track · '+nf(k.inversions)+' inversions';
   } else {
     document.getElementById('k_miles').textContent=nf(k.miles_unique)+' mi';
-    document.getElementById('k_miles_lbl').textContent='Unique Track Ridden';
+    document.getElementById('k_miles_lbl').textContent='Unique track ridden';
     document.getElementById('k_inv').textContent=nf(k.inversions_unique)+' inversions';
   }
 
@@ -859,7 +879,7 @@ function render(s){
   document.getElementById('geo_sub').textContent=k.parks+' parks across '+k.states+' U.S. states and '+k.countries+' countries. Circle size = '+circleMetric+'.';
   document.getElementById('parks_title').textContent=has.activity?'Top parks by rides':'Top parks by credits';
   const R=s.records;
-  const order=[['tallest','Tallest'],['fastest','Fastest'],['longest','Longest'],['oldest','Oldest'],['most_ridden','Most Ridden'],['most_visited_park','Most Visited']];
+  const order=[['tallest','Tallest'],['fastest','Fastest'],['longest','Longest'],['oldest','Oldest'],['most_ridden','Most ridden'],['most_visited_park','Most visited']];
   const fmt=v=>typeof v==='number'?(Number.isInteger(v)?v.toLocaleString():v.toLocaleString(undefined,{maximumFractionDigits:1})):v;
   const recs=order.filter(([key])=>R[key]);
   document.getElementById('records').style.setProperty('--rows', Math.ceil(recs.length/2));
@@ -906,6 +926,10 @@ function render(s){
     document.getElementById('otd').innerHTML=html;
   })();
 
+  // No Leaflet (a CDN hiccup on park data, a content blocker): no map, and
+  // the rest of the page still draws (critique, 2026-10-02 — it used to throw
+  // here and put the developer's error box under a page that had loaded).
+  if(window.L){
   const map=L.map('map',{scrollWheelZoom:false,worldCopyJump:true}).setView([30,-40],2);
   // The basemap. This was CARTO's dark_all until 2026-09-15, when CARTO started
   // stamping "API KEY REQUIRED" across every tile of their free endpoint. Esri's
@@ -970,6 +994,7 @@ function render(s){
     paintMarkers();
     if(!fellBack) setBase(TILES[mapTheme()]);
   });
+  } else document.getElementById('sec_geo').style.display='none';
   const DAY=s.day_detail, tip=document.getElementById('hm-tip');
   // Level, not colour: the ramp lives in CSS (--hm0..--hm4) because it inverts
   // between themes — on a dark page "more" is brighter, on a light one it is
@@ -1059,8 +1084,12 @@ function render(s){
   CH.push(new Chart(cManu,{type:'bar',data:{labels:s.top_manufacturers.map(m=>m.name),datasets:[{data:s.top_manufacturers.map(m=>m.credits),backgroundColor:ACC2,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}}));
   CH.push(new Chart(cType,{type:'doughnut',data:{labels:['Steel','Wood'],datasets:[{data:[k.steel,k.wood],backgroundColor:[ACC2,ACC],borderColor:PANEL,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}}));
   }
-  drawCharts();
-  document.documentElement.addEventListener('ch:themechange',drawCharts);
+  // Same for the charts: without Chart.js the More stats charts are missing,
+  // not the page.
+  if(window.Chart){
+    drawCharts();
+    document.documentElement.addEventListener('ch:themechange',drawCharts);
+  }
 }
 </script>
 </body>
