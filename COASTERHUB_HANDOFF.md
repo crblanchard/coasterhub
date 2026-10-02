@@ -4062,8 +4062,8 @@ cards, not the mockup's — and keep the feed's own formatting for activity and 
   The profile's own "View … map/count" buttons are still there.
 - **Home**: hero → Friend activity → Friends → Top users → **Global top 10**
   (`rankSection` over every coaster, Global | Mine, with new opts `title(view)` and
-  `moreHref` = "Full rankings →") → Recent changes, now mounted with `site:true` so site
-  updates appear in it the way /changes draws them.
+  `moreHref` = "Full rankings →") → Recent changes. Site updates appeared there for a few hours (`site:true`); Carter:
+  *"Don't show the site updates in recent changes only on /changes like before"*.
 
 ## Possible future updates
 

@@ -45,10 +45,6 @@
   /* The Global top ten: a panel like every other list here. */
   #globaltop{margin:0 0 8px}
   #globaltop .rfull{color:var(--accent2);font-weight:600;text-decoration:none}
-  /* Site updates in the feed, as /changes draws them. */
-  .ev .tx ul.upd{margin:4px 0 0;padding-left:18px;color:var(--muted);font-size:.9rem}
-  .ev .tx p.upd{margin:3px 0 0;color:var(--muted);font-size:.9rem}
-  .ev .tx ul.upd li{margin:2px 0}
   #friends{margin-bottom:26px}
   #list{margin-bottom:12px}
   #allusers{margin:0 0 28px;font-size:.9rem}
@@ -202,7 +198,7 @@
 </div></footer>
 
 <script src="/app.js?v=20261002b"></script>
-<script src="/changes-feed.js?v=20261002a"></script>
+<script src="/changes-feed.js?v=20261002b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('riders');
@@ -377,7 +373,7 @@ CoasterHub.fetchUsers().then(function(){
 // past, and /changes is the page you open when you want to read it.
 // Five lines, not twelve (Carter, 2026-09-25: "remove clutter"); History ->
 // is the whole feed.
-CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 5, site: true });
+CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 5 });
 </script>
 </body>
 </html>
