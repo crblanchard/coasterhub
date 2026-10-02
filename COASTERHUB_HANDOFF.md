@@ -4090,7 +4090,8 @@ filters, a "you #N" chip, and "Everyone's lists" as a sidebar instead of cards. 
 Carter's go before building.** Carter's revisions to the mockup: no podium, no "Up next", no
 big yellow top 5 (plain rows), "Edit" not "Reorder", global rank as plain text.
 **Built already** (same day, from his phone screenshot "I haven't been able to see global"):
-each of your rows on /rankings shows "Global #N" over "avg #X · N lists" (`globCell` in
+each of your rows on /rankings shows "Global #N" (accent blue, like the position) over
+"avg #X" (list count dropped later the same day) (`globCell` in
 rankings.html; "Only your list" when nobody else ranked it), hidden in edit mode;
 `loadGlobal` now always redraws the list when it lands. On a phone the row's second line is park · model
 (the region is `.lc` in headLinks, hidden ≤560px) so the model shows beside the Global column.
