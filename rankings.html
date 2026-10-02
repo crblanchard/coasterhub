@@ -122,6 +122,19 @@
   .rrow .glob b{font-size:.82rem;font-weight:700;white-space:nowrap}
   .rrow .glob i{font-style:normal;font-size:.7rem;color:var(--muted);white-space:nowrap}
   #mine:not(.readonly) .rrow .glob{display:none}
+  /* The hero's progress line and buttons (your own list). */
+  .hero .rprog{display:flex;flex-direction:column;gap:6px;max-width:420px;margin:2px 0 0}
+  .hero .rprog[hidden],.hero #racts[hidden],.hero #racts .btn[hidden]{display:none}
+  .hero .rprog span{font-size:.95rem;color:var(--muted)}
+  .hero .rprog span b{color:var(--fg)}
+  .hero .rprog i{display:block;height:7px;border-radius:999px;background:var(--tint2);overflow:hidden}
+  .hero .rprog i b{display:block;height:100%;border-radius:999px;background:var(--accent2)}
+  .hero #racts{margin-top:14px}
+  .hero #racts button.btn{font-family:inherit;cursor:pointer;border-style:none}
+  .hero #racts button.btn.alt{border-style:solid;border-width:1px}
+  /* Editing, the bar has its own Rank more · Cancel · Save; the hero's pair goes. */
+  body:has(#mine:not(.readonly)) #racts{display:none}
+  #mine.readonly > .bar:first-child #rankmore,#mine.readonly > .bar:first-child #edit{display:none}
   .rrow .acts{display:flex;gap:4px;flex:none}
   .rrow .acts button{width:27px;height:27px;border-radius:8px;border:1px solid var(--line);background:transparent;
                      color:var(--muted);cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center}
@@ -535,6 +548,14 @@
        only, so the state or country goes (Carter, 2026-10-02: "put model
        somewhere ... and keep them relatively shrunk"). */
     .rrow .nm .lc{display:none}
+    /* Bigger type and a little more air on a phone (Carter, 2026-10-02:
+       "manage spacing text size better to fill it"). */
+    .rrow .nm b{font-size:1rem}
+    .rrow .nm .sub{font-size:.78rem}
+    .rrow .pos{font-size:1.05rem}
+    #mine.readonly .rrow{padding-top:9px;padding-bottom:9px}
+    .rrow .glob b{font-size:.84rem}
+    .rrow .glob i{font-size:.72rem}
   }
 </style>
 </head>
@@ -558,6 +579,12 @@
   <span class="badge" id="hero_badge">Rankings</span>
   <h1 class="wide" id="hero_h1" data-loading>Loading&hellip;</h1>
   <p id="hero_p">Not tallest or fastest — best.</p>
+  <!-- Your own list (Carter, 2026-10-02, from the rankings mockup): how much
+       of your count is ranked, and the two things you do here — Rank 5 more
+       and Edit — up top. They press the bar's own buttons, which stay where
+       they were for edit mode. -->
+  <div class="rprog" id="rprog" hidden><span id="rprog_t"></span><i><b id="rprog_b"></b></i></div>
+  <p class="heroact" id="racts" hidden><button type="button" class="btn" id="h_rank" hidden>Rank 5 more</button><button type="button" class="btn alt" id="h_edit">Edit</button></p>
   <!-- Mine | Global (2026-09-25). Signed in only; filled below. -->
   <div class="segsw" id="mineglobal" hidden><a id="sw_mine">Mine</a><a id="sw_all" href="/rankings">Global</a></div>
 </div></section>
@@ -937,6 +964,9 @@ if(!slug){
       // starts a new count (2026-09-27).
       $('rank_start').onclick = function(){ rankMore(10); };
       $('rankmore').onclick = function(){ rankMore(5); };
+      $('h_rank').onclick = function(){ rankMore(5); };
+      $('h_edit').onclick = function(){ edit.onclick(); };
+      $('racts').hidden = false;
       moreButton();
       var ask=(new URLSearchParams(location.search).get('rank')||'').split(',').map(Number).filter(Boolean);
       if(ask.length){
@@ -2495,6 +2525,15 @@ function moreButton(){
   var n=CANEDIT ? unranked().length : 0;
   b.hidden = !n || !ORDER.length;
   b.textContent = 'Rank more';
+  // The hero's copy of it, and how much of the count is ranked.
+  var h=$('h_rank');
+  if(h){ h.hidden=b.hidden; h.textContent='Rank '+Math.min(5,n)+' more'; }
+  var all=MINE.length, done=all-unranked().length;
+  if(CANEDIT && all && $('rprog')){
+    $('rprog_t').innerHTML='<b>'+done.toLocaleString()+'</b> of <b>'+all.toLocaleString()+'</b> credits ranked';
+    $('rprog_b').style.width=Math.round(done/all*100)+'%';
+    $('rprog').hidden=false;
+  }
   b.title = 'Place your next '+Math.min(5,n)+' unranked credits, two at a time ('+n+' left)';
 }
 function rankMore(n, only){

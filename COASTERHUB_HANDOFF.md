@@ -4093,6 +4093,12 @@ each of your rows on /rankings shows "Global #N" over "avg #X · N lists" (`glob
 rankings.html; "Only your list" when nobody else ranked it), hidden in edit mode;
 `loadGlobal` now always redraws the list when it lands. On a phone the row's second line is park · model
 (the region is `.lc` in headLinks, hidden ≤560px) so the model shows beside the Global column.
+Then "push" (Carter, same day): your own list's hero has "N of M credits ranked" with a bar
+(`#rprog`, from MINE and unranked() in moreButton) and **Rank 5 more** + **Edit** (`#racts`),
+which press the bar's #rankmore/#edit; those two are hidden in the bar while read-only and the
+hero pair hides in edit mode (`body:has(#mine:not(.readonly))`). Phone rows got bigger type.
+Not built from the mockup: Add coasters in the hero (Carter said no), find-in-list search,
+Global's All/ranked/unranked filters and the "Everyone's lists" sidebar.
 
 ## Possible future updates
 
