@@ -531,6 +531,10 @@
     .rrow .nm .sub,.srow .n .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .rrow .nm .pl,.rrow .nm .mk,.srow .n .pl,.srow .n .mk{display:inline}
     .rrow .nm .mk::before,.srow .n .mk::before{content:" · "}
+    /* With the Global place on the right there is room for park and model
+       only, so the state or country goes (Carter, 2026-10-02: "put model
+       somewhere ... and keep them relatively shrunk"). */
+    .rrow .nm .lc{display:none}
   }
 </style>
 </head>
@@ -2622,7 +2626,7 @@ function headLinks(c, name){
   var mk=CoasterHub.maker(c);
   return '<span class="nm"><b>'+L(name||c.name||'', c.park ? CoasterHub.coasterHref(c) : '')+'</b><span class="sub">'
     +'<span class="pl">'+L(c.park||'', c.park ? CoasterHub.parkHref(c.park) : '')
-    +(c.loc?' \u00b7 '+L(c.loc, CoasterHub.locationHref(c.loc)):'')+'</span>'
+    +(c.loc?'<span class="lc"> \u00b7 '+L(c.loc, CoasterHub.locationHref(c.loc))+'</span>':'')+'</span>'
     +(mk?'<span class="mk">'+L(mk, c.manu ? CoasterHub.makerHref(c.manu, c.model||null) : '')+'</span>':'')
     +'</span></span>';
 }
