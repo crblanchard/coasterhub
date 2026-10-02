@@ -167,6 +167,26 @@
     .profedit .who{margin-bottom:6px}
     .profedit .rowlinks{margin-bottom:0}
   }
+  /* A phone (Carter, 2026-10-02, from a screenshot: "move account to the top
+     right and put the two buttons next to the stats to save space"): the
+     Account menu sits opposite the rider switcher and opens as a small
+     dropdown; the numbers on the left, Log a day and the rankings stacked to
+     their right. */
+  @media (max-width:640px){
+    .herotop{position:relative}
+    .profedit .acctmenu{position:absolute;top:0;right:0;margin:0;z-index:6}
+    .profedit .acctmenu summary{margin:0;min-height:29px;padding:0 2px}
+    .profedit .acctmenu .ownrow{position:absolute;right:0;top:calc(100% + 4px);flex-direction:column;gap:8px;margin:0;
+      min-width:180px;padding:10px;border-radius:12px;background:var(--panel);border:1px solid var(--line);
+      box-shadow:0 12px 30px rgba(0,0,0,.18)}
+    .profedit .acctmenu .ownrow button{flex:none}
+    .herotop.split .herocount{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:center}
+    .herotop.split .herocount .statrow{grid-column:1;grid-row:1;min-width:0}
+    .herotop.split .herocount .statrow h1{font-size:1.35rem!important}
+    .herotop.split .herocount .vsline{grid-column:1/-1;grid-row:2}
+    .herotop.split .herocount .heroacts{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:stretch;gap:8px;margin:0}
+    .herotop.split .herocount .heroacts .btn{width:auto;max-width:160px;padding:10px 12px;font-size:.84rem;white-space:normal;line-height:1.2}
+  }
   .morebtn{width:100%;background-color:transparent;border:1px solid var(--line);
     color:var(--fg);font-family:inherit;font-size:.95rem;font-weight:600;
     padding:14px 18px;border-radius:12px;cursor:pointer}
