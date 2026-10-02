@@ -13,6 +13,13 @@
  * days (today counts as one), applied with `limit` so whichever is shorter
  * wins, and `empty` is what an empty feed says instead of "Nothing here yet."
  *
+ * `compact` (the home page) drops a logged day's date when it is the day the
+ * line sits under anyway — "logged 5 rides at Cedar Point on Oct 2, 2026"
+ * under an Oct 2 heading wrapped to two lines on a phone for nothing.
+ * The handle `mount` returns has `exclude(slugs)`: leave those riders out, for
+ * the home page's Recent changes, which sits under Friend activity and was
+ * showing the same lines twice (Carter, 2026-10-02).
+ *
  * `feed` is the only required one. Every mount keeps its own events, filter and
  * park lookup, so two on a page would not tread on each other.
  */
@@ -129,6 +136,8 @@
     return (name && park && ch && ch.coasterHref) ? anchor(ch.coasterHref(name, park), html) : html;
   }
   
+  var COMPACT = false;   // set per render by the mount drawing; see mount()
+  function ymd(t){ var x = new Date(t); return x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2) + '-' + ('0' + x.getDate()).slice(-2); }
   function sentence(e){
     // A site update (site-updates.json): a short summary of one working
     // session's changes to the site itself, as a list.
@@ -146,7 +155,7 @@
     if (e.kind === 'rides') {
       var s = (who || 'Someone') + ' logged ' + plural(d.rides || e.n || 0, 'ride');
       if (sub) s += ' at ' + parkLink(e.subject, sub);
-      if (d.date) s += ' on ' + niceDate(d.date);
+      if (d.date && !(COMPACT && d.date === ymd(atTime(e.at)))) s += ' on ' + niceDate(d.date);
       if (d.newCredits) s += ' &mdash; ' + plural(d.newCredits, 'new credit');
       return s;
     }
@@ -368,7 +377,7 @@
     var noteEl = opts.note || null, filterEl = opts.filter || null;
     var limit = opts.limit || 0;
     var EVENTS = [], FILTER = 'all';
-    var WHO = null;
+    var WHO = null, NOT = null;
     // Local midnight at the start of the oldest day still in the window.
     var SINCE = 0;
     if (opts.days) { var d0 = new Date(); d0.setHours(0, 0, 0, 0); d0.setDate(d0.getDate() - (opts.days - 1)); SINCE = d0.getTime(); }
@@ -377,6 +386,7 @@
     function render(){
       var list = groupRuns(EVENTS.filter(function(e){
         if (WHO && !(e.actor && WHO[e.actor])) return false;
+        if (NOT && e.actor && NOT[e.actor]) return false;
         if (SINCE && atTime(e.at) < SINCE) return false;
         if (FILTER === 'riders')   return !!RIDER_KINDS[e.kind];
         if (FILTER === 'site')     return e.kind === 'site_update';
@@ -390,6 +400,7 @@
         return;
       }
       var html = '', lastDay = null;
+      COMPACT = !!opts.compact;
       list.forEach(function(e){
         var k = dayKey(e.at);
         if (k !== lastDay){ html += '<div class="day">' + esc(k) + '</div>'; lastDay = k; }
@@ -399,6 +410,7 @@
           + '<span class="when">' + esc(clock(e.at)) + '</span>'
           + '</div>';
       });
+      COMPACT = false;
       feedEl.innerHTML = html;
     }
 
@@ -429,7 +441,7 @@
               return { kind: 'site_update', at: u.at, text: u.text || '', items: u.items || [] }; }); })
             .catch(function(){ return []; })
         : Promise.resolve([]);
-      return Promise.all([fetch('/api/activity?limit=' + (limit && !WHO ? Math.max(40, limit * 8) : 300))
+      return Promise.all([fetch('/api/activity?limit=' + (limit && !WHO && !NOT ? Math.max(40, limit * 8) : 300))
         .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); }), site])
         .then(function(both){
           var j = both[0];
@@ -490,7 +502,12 @@
         if (document.visibilityState === 'visible') load(true);
       });
     }
-    return { reload: load, render: render };
+    // Leaving riders out can empty a short read, so it reads the long one again.
+    function exclude(slugs){
+      NOT = {}; (slugs || []).forEach(function(s){ NOT[s] = 1; });
+      return load(true);
+    }
+    return { reload: load, render: render, exclude: exclude };
   }
 
   global.CoasterHubFeed = { mount: mount };

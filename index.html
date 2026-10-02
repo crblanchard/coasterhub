@@ -200,7 +200,7 @@
 </div></footer>
 
 <script src="/app.js?v=20261002e"></script>
-<script src="/changes-feed.js?v=20261002b"></script>
+<script src="/changes-feed.js?v=20261002c"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('riders');
@@ -339,12 +339,12 @@ CoasterHub.fetchUsers().then(function(){
     function html(list){ return list.map(function(x){ return row(x.u, x.st, x.ranked); }).join(''); }
     document.getElementById('loading').style.display = 'none';
     if (fol) {
-      // You first, then the people you follow, in the same order as below.
+      // The people you follow, in the same order as below. Not you: the hero
+      // right above already says your count (Carter, 2026-10-02).
       var inF = {}; fol.slugs.forEach(function(s){ inF[s] = 1; });
-      var mine = rows.filter(function(x){ return x.u.slug === fol.me; })
-        .concat(rows.filter(function(x){ return inF[x.u.slug] && x.u.slug !== fol.me; }));
-      document.getElementById('friends').innerHTML = html(mine)
-        + (fol.slugs.length ? '' : '<p class="hint">You&rsquo;re not following anyone yet. Find people on <a href="/explore">Explore</a> or in the list below.</p>');
+      var mine = rows.filter(function(x){ return inF[x.u.slug] && x.u.slug !== fol.me; });
+      document.getElementById('friends').innerHTML = mine.length ? html(mine)
+        : '<p class="hint">You&rsquo;re not following anyone yet. Find people on <a href="/explore">Explore</a> or in Top users below.</p>';
       document.getElementById('friends_wrap').hidden = false;
       // You and the people you follow (Carter, 2026-09-26: "also show my own
       // changes in there too") — so it shows whenever you are signed in.
@@ -355,9 +355,14 @@ CoasterHub.fetchUsers().then(function(){
       // you or the people you follow did, however old — the three-day cutoff
       // (2026-09-26) is what emptied it, and an empty one was hidden.
       if (fol.me) {
-        CoasterHubFeed.mount({ feed: document.getElementById('factivity'), limit: 5, who: others,
+        // Three, and short (Carter, 2026-10-02): five two-line entries were a
+        // long scroll on a phone before you reached anything else.
+        CoasterHubFeed.mount({ feed: document.getElementById('factivity'), limit: 3, who: others, compact: true,
                                empty: 'Nothing from you or your friends yet. Log a day or rank a few coasters and it shows up here.' });
         document.getElementById('factivity_wrap').hidden = false;
+        // Recent changes is everyone else: what you and your friends did is
+        // right above it.
+        if (recent) recent.exclude(others);
       }
     }
     // The top ten, then everyone on /users (Carter, 2026-09-29).
@@ -374,7 +379,7 @@ CoasterHub.fetchUsers().then(function(){
 // past, and /changes is the page you open when you want to read it.
 // Five lines, not twelve (Carter, 2026-09-25: "remove clutter"); History ->
 // is the whole feed.
-CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 5 });
+var recent = CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 5, compact: true });
 </script>
 </body>
 </html>
