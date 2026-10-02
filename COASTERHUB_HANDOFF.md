@@ -4063,7 +4063,8 @@ cards, not the mockup's — and keep the feed's own formatting for activity and 
   each with a Follow/Following button that POSTs/DELETEs `/api/follow/<slug>` in place.
 - **Me = profile + Credits**: `meTabs()` in app.js puts Overview · Credits · Map (`.metabs`,
   style.css) under the hero of a named rider's profile and count. Not on /map (full screen).
-  The profile's own "View … map/count" buttons are still there.
+  The profile's "View … map/count" buttons went the same day; its hero keeps Log a day
+  (yours) / Follow (theirs) and the rankings button.
 - **Home**: hero → Friend activity → Friends → **Global top 10** (moved above Top users
   the same day) → Top users → Recent changes. The Global top 10 is `rankSection` over
   every coaster, Global | Mine, with new opts `title(view)` and `moreHref` = "Full

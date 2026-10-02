@@ -270,14 +270,10 @@
              is always the thing you have not done yet. mountFollows() decides
              whether it appears at all. -->
         <button class="btn" id="hero_follow" type="button" hidden>Follow</button>
-        <!-- Always here, for whoever is reading: the numbers above are the
-             summary and this is the page behind them. data-nav, so initNav
-             points it at the rider whose page this is. -->
-        <!-- The map before the count (Carter, 2026-09-21: "log a day - view your
-             map - view your count - update your rankings"). Same rule as the
-             count button: the rider whose page this is, worded for whose it is. -->
-        <a class="btn alt" data-nav="map" id="hero_map" href="/map">View your map</a>
-        <a class="btn alt" data-nav="count" id="hero_view" href="/credits">View your count</a>
+        <!-- The map and count buttons went when Overview · Credits · Map tabs
+             arrived under the hero (Carter, 2026-10-02): Log a day and the
+             rankings are what is left. data-nav, so initNav points it at the
+             rider whose page this is. -->
         <a class="btn alt" data-nav="rankings" id="hero_rank" href="/rankings">Update your rankings</a>
       </div>
     </div>
@@ -672,10 +668,6 @@ function render(s){
     }
     // Whose count you are about to look at. s.userName raw, not the escaped
     // copy: this is textContent, and an escaped one would print the entities.
-    document.getElementById('hero_view').textContent =
-      mine ? 'View your count' : ('View ' + (s.userName || 'this') + '’s count');
-    document.getElementById('hero_map').textContent =
-      mine ? 'View your map' : ('View ' + (s.userName || 'this') + '’s map');
     // Everyone gets the rankings, as the count and the map (Carter, 2026-09-29).
     document.getElementById('hero_rank').textContent =
       mine ? 'Update your rankings' : ('View ' + (s.userName || 'this') + '’s rankings');
