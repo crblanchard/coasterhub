@@ -197,7 +197,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002c"></script>
+<script src="/app.js?v=20261002d"></script>
 <script src="/changes-feed.js?v=20261002b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -296,7 +296,7 @@ var following = CoasterHub.me().then(function(acct){
 CoasterHub.openableCoasters(document.getElementById('globaltop'));
 CoasterHub.fetchCoasters().then(function(r){
   CoasterHub.rankSection(document.getElementById('globaltop'), r.coasters || [], {
-    model: false, moreHref: '/rankings',
+    model: false, lists: false, moreHref: '/rankings',
     title: function(v){ return v === 'mine' ? 'Your top 10' : 'Global top 10'; } });
 }).catch(function(){ /* no card rather than a broken one */ });
 

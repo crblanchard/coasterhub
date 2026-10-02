@@ -4070,7 +4070,8 @@ cards, not the mockup's — and keep the feed's own formatting for activity and 
 - **Home**: hero → Friend activity → Friends → **Global top 10** (moved above Top users
   the same day) → Top users → Recent changes. The Global top 10 is `rankSection` over
   every coaster, Global | Mine, with new opts `title(view)` and `moreHref` = "Full
-  rankings →". Site updates appeared there for a few hours (`site:true`); Carter:
+  rankings →". Home passes `lists: false` too, so its rows show avg (and "you #N") without
+  the list count — two lines, never three. Site updates appeared there for a few hours (`site:true`); Carter:
   *"Don't show the site updates in recent changes only on /changes like before"*.
 - **Friend activity** is always shown signed in, your own actions included, last five
   however old — the 2026-09-26 three-day cutoff emptied it (nobody had done anything in

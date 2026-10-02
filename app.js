@@ -2000,7 +2000,9 @@
             // The model too, as /rankings' Global list shows it (2026-09-28).
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '')
             + (me ? '<span class="gyou">you #' + me + '</span>' : '')
-            + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + r.n + ' lists'
+            // Home's card drops the list count (opts.lists: false, Carter
+            // 2026-10-02: "always two rows never three").
+            + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + (opts.lists === false ? '' : r.n + ' lists')
             + (me ? '<em class="gyou2">you #' + me + '</em>' : '') + '</span>' + chev + '</a>';
         }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
           + (one && !opts.moreHref ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');

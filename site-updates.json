@@ -2,7 +2,7 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-02T19:05:48Z",
+   "at": "2026-10-02T19:08:03Z",
    "text": "The tab bar is now Home · Explore · Log · Rankings · Me: Explore holds search, every coaster, park, manufacturer, location and user, and riders to follow in one tap, and Credits moved inside Me as an Overview · Credits · Map tab on your profile. Your rankings show how much of your count is ranked, Rank 5 more and Edit up top, and each ride's Global place; Home now runs Friend activity (your own included, always there), Friends, a live Global top 10, Top users and Recent changes."
   },
   {
