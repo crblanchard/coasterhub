@@ -5372,3 +5372,12 @@ defunct at the bottom; "all issues" otherwise).**
   Duplicate toggle listener removed. Opened-row facts capped at 760px wide.
 - Left as is: "OPERATING" on every desktop row and region in both hero and crumbs (site-wide conventions).
 
+**Park list: Global column and sortable headers (2026-10-02, Carter: "1 and 2 where you can click column
+headers"; keep OPERATING/DEFUNCT words).** On a computer, Global (#N, "–" when none), Status, Opened and
+Riders sit in fixed-width slots under small header buttons (`#colhead`); a phone keeps the stacked row
+with "#N Global" under the model and gets one "Sort" row. Sorts: Coaster A–Z, Global best first, Status
+operating first, Opened newest first, Riders most first; a second click reverses. Defunct stays at the
+bottom for every sort but Status. The choice is remembered (localStorage `ch_parksort`); with none,
+signed in keeps operating → need → A–Z and signed out starts on Global. After a sort the first 12 show
+(`refold`).
+
