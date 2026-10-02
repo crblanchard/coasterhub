@@ -586,6 +586,8 @@ button,input,select,textarea{font-family:inherit}
   .tabbar a.plus:active .plusdisc{transform:scale(.94)}
   .tabbar a.plus.on{color:var(--muted)}
   .tabbar a.plus.on span{color:var(--accent)}
+  /* On the light bar that amber was 3.3:1 at 11px; this one reads (critique, 2026-10-02). */
+  :root[data-theme="light"] .tabbar a.plus.on span{color:#93600f}
 }
 
 /* No panel, no border: this sits in the hero and should read as part of it —
