@@ -4046,9 +4046,24 @@ Carter picked the interview's order after all: *"i like explore second a lot it 
 social media"*, Rankings 4th, **Credits absorbed into Me** (5th). Home stays its own
 "one spot to see everything important" (following activity, top riders, top global
 coasters, site updates); Explore is search + browse, a separate job (*"home and exploring
-are opposites"*). **Not built: he asked for a mockup before anything is pushed.**
-Mockup (5 linked phone screens; Rankings has Mine/Global, Me has Overview/Credits/Map):
+are opposites"*). Mockup (5 linked phone screens):
 https://claude.ai/artifact/E3eRSePjRHHHxvrGUju3Py
+
+**Built the same day** (Carter: *"push it but keep using these cards"* — the live riderRow
+cards, not the mockup's — and keep the feed's own formatting for activity and site updates):
+- `TABS` in app.js and all 21 headers: Home · Explore · [+] Log · Rankings · Me. `navKey(page)`
+  decides the lit tab: database pages (coasters, coaster, parks, park, manufacturer,
+  location, users, the everyone /map) → Explore; count, account, /user/<slug>/map → Me;
+  categories → Rankings.
+- **`/explore`** (explore.html): the search button and the cards Home used to carry (now
+  six: + Users), then every user by credits. `explore` is in RESERVED_SLUGS.
+- **Me = profile + Credits**: `meTabs()` in app.js puts Overview · Credits · Map (`.metabs`,
+  style.css) under the hero of a named rider's profile and count. Not on /map (full screen).
+  The profile's own "View … map/count" buttons are still there.
+- **Home**: hero → Friend activity → Friends → Top users → **Global top 10**
+  (`rankSection` over every coaster, Global | Mine, with new opts `title(view)` and
+  `moreHref` = "Full rankings →") → Recent changes, now mounted with `site:true` so site
+  updates appear in it the way /changes draws them.
 
 ## Possible future updates
 

@@ -845,3 +845,11 @@ html.srchopen{overflow:hidden}
 /* No pinch or double-tap zoom on the page (app.js adds .nozoom everywhere
    but /map). A Leaflet map sets its own touch-action and zooms itself. */
 html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
+/* Overview · Credits · Map under a rider's hero (app.js meTabs, 2026-10-02). */
+.metabs{border-bottom:1px solid var(--line)}
+.metabs .container{display:flex;gap:4px}
+.metabs a{padding:12px 16px;color:var(--muted);font-weight:600;font-size:.95rem;text-decoration:none;
+  border-bottom:3px solid transparent;margin-bottom:-1px}
+.metabs a:hover{color:var(--fg)}
+.metabs a.on{color:var(--fg);border-bottom-color:var(--accent2)}
+@media (max-width:640px){ .metabs .container{display:grid;grid-template-columns:repeat(3,1fr);gap:0} .metabs a{text-align:center;padding:12px 4px} }

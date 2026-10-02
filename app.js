@@ -1328,7 +1328,7 @@
 
     var links = document.querySelectorAll('nav.links a[data-nav]');
     for (var i = 0; i < links.length; i++) {
-      links[i].classList.toggle("active", links[i].getAttribute("data-nav") === page);
+      links[i].classList.toggle("active", links[i].getAttribute("data-nav") === navKey(page));
     }
 
     // No rider picker in the header any more (2026-09-17). Whose page this is
@@ -1367,6 +1367,7 @@
     accountCorner(themeHost);
 
     buildTabBar(page, slug);
+    meTabs(page, urlSlug);
     applyRiderLinks(slug);
     // Footer is the six ways around the site and nothing else (Carter,
     // 2026-09-27: "change footer to home / coasters / parks / manufacturers /
@@ -1409,13 +1410,28 @@
   // middle (`plus`). Home is the everyone hub; Rankings, Credits (/count) and
   // Profile are YOURS once we know who you are — see applyRiderLinks. The
   // desktop header lists the same five in the same order.
+  // 2026-10-02, Carter (from the interview's plan, after a mockup): Home ·
+  // Explore · [+] · Rankings · Me. Explore is search and the database's front
+  // door (/explore, which took Home's hub); Credits went inside Me — the
+  // profile's Overview · Credits · Map tabs — so the bar no longer duplicates
+  // them (the worry that parked profile tabs on 2026-09-27).
   var TABS = [
     { k: "riders",   label: "Home",     path: "/",         fixed: true },
-    { k: "rankings", label: "Rankings", path: "/rankings" },
+    { k: "explore",  label: "Explore",  path: "/explore",  fixed: true },
     { k: "log",      label: "Log",      path: "/log",      fixed: true, plus: true },
-    { k: "count",    label: "Credits",  path: "/credits" },
-    { k: "profile",  label: "Profile",  path: "/account" }
+    { k: "rankings", label: "Rankings", path: "/rankings" },
+    { k: "profile",  label: "Me",       path: "/account" }
   ];
+  // Which tab a page lights up. The database pages are Explore's; your count,
+  // a profile and the account page are Me's. /map is both: the everyone map
+  // is Explore, a rider's own (/user/<slug>/map) is Me.
+  function navKey(page) {
+    if (page === "count" || page === "account") return "profile";
+    if (page === "categories") return "rankings";
+    if (page === "map") return (typeof location !== "undefined" && /^\/user\//.test(location.pathname)) ? "profile" : "explore";
+    if (/^(coasters|coaster|parks|park|manufacturer|location|users)$/.test(page)) return "explore";
+    return page;
+  }
   // Five is the ceiling, and this is five: measured at 320px (the narrowest
   // phone) the widest label, "Rankings", fills 58 of its 64px slot. A sixth tab
   // would need shorter labels or icons only.
@@ -1424,25 +1440,42 @@
   // and this outline of a person is the same placeholder /riders uses.
   var TAB_ICONS = {
     riders:   '<path d="M4 10.5 12 4l8 6.5V20h-5v-6h-6v6H4z"/>',
+    explore:  '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
     rankings: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>',
     profile:  '<path d="M19 20v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>',
-    count:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
     log:      '<path d="M12 5v14M5 12h14"/>'
   };
+  // Overview · Credits · Map under a rider's hero (2026-10-02): Credits left
+  // the tab bar for Me, so a profile and its count are two tabs of one place.
+  // Only for a named rider — /credits with nobody is the everyone view. /map is
+  // a full-screen page and keeps no strip; Me (or Back) is the way out of it.
+  function meTabs(page, slug) {
+    if (!slug || (page !== "profile" && page !== "count")) return;
+    var hero = document.querySelector("section.hero");
+    if (!hero || document.querySelector(".metabs")) return;
+    var nav = document.createElement("nav");
+    nav.className = "metabs";
+    nav.setAttribute("aria-label", "This rider");
+    nav.innerHTML = '<div class="container">' + [["profile", "Overview"], ["count", "Credits"], ["map", "Map"]].map(function (t) {
+      return '<a href="' + userPageHref(slug, t[0]) + '"' + (t[0] === page ? ' class="on" aria-current="page"' : '') + '>' + t[1] + '</a>';
+    }).join("") + '</div>';
+    hero.parentNode.insertBefore(nav, hero.nextSibling);
+  }
   function buildTabBar(page, slug) {
     if (typeof document === "undefined" || document.querySelector(".tabbar")) return;
     var nav = document.createElement("nav");
     nav.className = "tabbar";
     nav.setAttribute("aria-label", "Primary");
+    var on = navKey(page);
     nav.innerHTML = TABS.map(function (t) {
       var href = (t.fixed || !slug) ? t.path : userPageHref(slug, t.k);
-      var cls = (t.plus ? "plus" : "") + (t.k === page ? " on" : "");
+      var cls = (t.plus ? "plus" : "") + (t.k === on ? " on" : "");
       var svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'
         + (t.plus ? "2.4" : "1.8") + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
         + TAB_ICONS[t.k] + '</svg>';
       return '<a href="' + href + '" data-nav="' + t.k + '"'
         + (cls.trim() ? ' class="' + cls.trim() + '"' : '')
-        + (t.k === page ? ' aria-current="page"' : '') + '>'
+        + (t.k === on ? ' aria-current="page"' : '') + '>'
         + (t.plus ? '<i class="plusdisc">' + svg + '</i>' : svg)
         + '<span>' + t.label + '</span></a>';
     }).join("");
@@ -1911,7 +1944,12 @@
     el.classList.add("ranksec");
     // Ten, then "Show all N" — a state can have a hundred ranked rides.
     function cut(a) { return st.all ? a : a.slice(0, 10); }
-    function more(n) { return n > 10 ? '<p class="rnone"><a class="rmore" href="#">' + (st.all ? "Show fewer" : "Show all " + n) + '</a></p>' : ''; }
+    // opts.moreHref (Home's Global top ten, 2026-10-02): the rest is a page
+    // of its own, so link there rather than unfolding hundreds in place.
+    function more(n) {
+      if (opts.moreHref) return '<p class="rnone"><a class="rfull" href="' + E(opts.moreHref) + '">Full rankings &rarr;</a></p>';
+      return n > 10 ? '<p class="rnone"><a class="rmore" href="#">' + (st.all ? "Show fewer" : "Show all " + n) + '</a></p>' : '';
+    }
     function draw() {
       if (!st.known) return;
       var R = st.rank;
@@ -1951,9 +1989,9 @@
             + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + r.n + ' lists'
             + (me ? '<em class="gyou2">you #' + me + '</em>' : '') + '</span>' + chev + '</a>';
         }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
-          + (one ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');
+          + (one && !opts.moreHref ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');
       }
-      el.innerHTML = '<div class="sect rhead"><span>Rankings</span>' + sw + '</div>' + body;
+      el.innerHTML = '<div class="sect rhead"><span>' + E(opts.title ? opts.title(st.view) : "Rankings") + '</span>' + sw + '</div>' + body;
       Array.prototype.forEach.call(el.querySelectorAll("[data-rv]"), function (a) {
         a.onclick = function (e) { e.preventDefault(); st.view = a.getAttribute("data-rv"); st.all = false; draw(); };
       });
