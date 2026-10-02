@@ -115,6 +115,13 @@
                                 text-overflow:ellipsis;white-space:nowrap}
     .rrow .nm .mk::before{content:none}
   }
+  /* Where each of your rides sits on the Global list (Carter, 2026-10-02:
+     "I haven't been able to see global"). Plain text, right-aligned; gone in
+     edit mode, where the move buttons have the space. */
+  .rrow .glob{flex:none;display:flex;flex-direction:column;align-items:flex-end;text-align:right;line-height:1.25;margin-left:6px}
+  .rrow .glob b{font-size:.82rem;font-weight:700;white-space:nowrap}
+  .rrow .glob i{font-style:normal;font-size:.7rem;color:var(--muted);white-space:nowrap}
+  #mine:not(.readonly) .rrow .glob{display:none}
   .rrow .acts{display:flex;gap:4px;flex:none}
   .rrow .acts button{width:27px;height:27px;border-radius:8px;border:1px solid var(--line);background:transparent;
                      color:var(--muted);cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center}
@@ -1046,6 +1053,15 @@ function markDirty(){
 // and only used when a row is opened. Later (Carter): how far your placing is
 // from that average — the numbers are all here for it.
 var GLOBAL=null;
+// The Global place beside one of your rows: "Global #5" over "avg #7.5 · 2
+// lists", or "Only your list" while nobody else has ranked it. Nothing until
+// loadGlobal has landed (it redraws the list when it does).
+function globCell(id){
+  if(!GLOBAL) return '';
+  var g=GLOBAL.by[KEY(id)];
+  if(!g) return '<span class="glob"><i>Only your list</i></span>';
+  return '<span class="glob"><b>Global #'+g.pos+'</b><i>avg #'+(Math.round(g.avg*10)/10)+' \u00b7 '+g.n+' lists</i></span>';
+}
 function loadGlobal(){
   CoasterHub.fetchUsers().then(function(){
     return CoasterHub.fetchAllRankings().then(function(all){
@@ -1062,7 +1078,7 @@ function loadGlobal(){
         .sort(function(a,b){ var x=tally[a], y=tally[b]; return (x.sum/x.n)-(y.sum/y.n) || y.n-x.n; });
       var by={}; list.forEach(function(k,i){ by[k]={pos:i+1, n:tally[k].n, avg:tally[k].sum/tally[k].n}; });
       GLOBAL={by:by, of:list.length};
-      if(Object.keys(STATOPEN).some(function(k){ return STATOPEN[k]; })) renderRank();
+      renderRank();
     });
   }).catch(function(){ GLOBAL={by:{}, of:0}; });
 }
@@ -1245,6 +1261,7 @@ function renderRank(){
             +(OPEN[key]?'true':'false')+'"':'')+'>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
       +head
+      +(b.g?'':globCell(b.ids[0]))
       +'<span class="acts">'
 
         +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'

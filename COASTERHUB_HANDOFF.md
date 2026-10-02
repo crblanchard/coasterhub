@@ -4086,7 +4086,12 @@ credits ranked" progress in the hero; Rank 5 more + Add coasters as hero buttons
 cards; a Global #/avg chip on each of your rows; desktop sidebar "Up next" (the five tallest
 unranked, what Rank more takes); Global gets All / Ones I've ranked / Ones I haven't
 filters, a "you #N" chip, and "Everyone's lists" as a sidebar instead of cards. **Wait for
-Carter's go before building.**
+Carter's go before building.** Carter's revisions to the mockup: no podium, no "Up next", no
+big yellow top 5 (plain rows), "Edit" not "Reorder", global rank as plain text.
+**Built already** (same day, from his phone screenshot "I haven't been able to see global"):
+each of your rows on /rankings shows "Global #N" over "avg #X · N lists" (`globCell` in
+rankings.html; "Only your list" when nobody else ranked it), hidden in edit mode;
+`loadGlobal` now always redraws the list when it lands.
 
 ## Possible future updates
 
