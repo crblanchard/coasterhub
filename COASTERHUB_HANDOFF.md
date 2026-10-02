@@ -4064,6 +4064,10 @@ cards, not the mockup's — and keep the feed's own formatting for activity and 
   (`rankSection` over every coaster, Global | Mine, with new opts `title(view)` and
   `moreHref` = "Full rankings →") → Recent changes. Site updates appeared there for a few hours (`site:true`); Carter:
   *"Don't show the site updates in recent changes only on /changes like before"*.
+- **Friend activity** is always shown signed in, your own actions included, last five
+  however old — the 2026-09-26 three-day cutoff emptied it (nobody had done anything in
+  three days) and an empty one hid itself, so it looked gone. Note: /edit's database
+  changes are recorded with no actor, so they never count as "yours" here.
 
 ## Possible future updates
 

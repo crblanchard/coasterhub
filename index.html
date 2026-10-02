@@ -140,9 +140,9 @@
   <!-- Signed in: the riders you follow first, then everyone, most credits at
        the top. Signed out there are no friends to show, so it is just the one
        list. -->
-  <!-- What you and the people you follow did: at most five things, none older
-       than three days (Carter, 2026-09-26). Hidden signed out and until you
-       follow somebody. -->
+  <!-- What you and the people you follow did: the last five things, your own
+       included (Carter, 2026-10-02 — the three-day cutoff is gone). Hidden
+       signed out. -->
   <div id="factivity_wrap" hidden>
     <span class="eyebrow lh">Friend activity</span>
     <div class="feed" id="factivity"></div>
@@ -347,15 +347,14 @@ CoasterHub.fetchUsers().then(function(){
       // You and the people you follow (Carter, 2026-09-26: "also show my own
       // changes in there too") — so it shows whenever you are signed in.
       var others = [fol.me].concat(fol.slugs.filter(function(s){ return s !== fol.me; }));
-      // Only once you follow somebody: with nobody to follow it would be a
-      // "Friend activity" of just you (Carter, 2026-09-26).
-      if (fol.me && others.length > 1) {
-        // Five at most, and nothing older than three days — whichever cuts
-        // first (Carter, 2026-09-26: "last five things or last three days so
-        // they both govern").
-        CoasterHubFeed.mount({ feed: document.getElementById('factivity'), limit: 5, days: 3, who: others,
-                               empty: 'Nothing from you or your friends in the last three days.',
-                               onEmpty: function(){ document.getElementById('factivity_wrap').hidden = true; } });
+      // Always there, signed in, and always with your own actions in it
+      // (Carter, 2026-10-02: "I don't see friend activity at the top anymore
+      // bring it back and put my own actions in there"). The last five things
+      // you or the people you follow did, however old — the three-day cutoff
+      // (2026-09-26) is what emptied it, and an empty one was hidden.
+      if (fol.me) {
+        CoasterHubFeed.mount({ feed: document.getElementById('factivity'), limit: 5, who: others,
+                               empty: 'Nothing from you or your friends yet. Log a day or rank a few coasters and it shows up here.' });
         document.getElementById('factivity_wrap').hidden = false;
       }
     }
