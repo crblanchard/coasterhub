@@ -4057,6 +4057,9 @@ cards, not the mockup's — and keep the feed's own formatting for activity and 
   categories → Rankings.
 - **`/explore`** (explore.html): the search button and the cards Home used to carry (now
   six: + Users), then every user by credits. `explore` is in RESERVED_SLUGS.
+  **Suggested for you** (signed in): five claimed riders you don't follow — the ones your
+  friends follow first ("Followed by Sean and 1 more"), then most ranked, then credits —
+  each with a Follow/Following button that POSTs/DELETEs `/api/follow/<slug>` in place.
 - **Me = profile + Credits**: `meTabs()` in app.js puts Overview · Credits · Map (`.metabs`,
   style.css) under the hero of a named rider's profile and count. Not on /map (full screen).
   The profile's own "View … map/count" buttons are still there.

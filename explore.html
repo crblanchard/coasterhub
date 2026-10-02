@@ -39,6 +39,20 @@
   @media (max-width:760px){ .xgrid{grid-template-columns:repeat(2,1fr)} }
   .lh{display:block;margin:0 0 10px}
   #list{margin-bottom:12px}
+  /* Suggested (Carter, 2026-10-02: "a suggested or recommended ... with
+     buttons to follow people directly from there"). The rows are .riderrow,
+     with a real <button> beside the link rather than inside it. */
+  #sug_wrap[hidden]{display:none}
+  #sug{margin-bottom:30px}
+  #sug .sugrow{display:flex;align-items:center;border-bottom:1px solid var(--line)}
+  #sug .sugrow:last-child{border-bottom-style:none}
+  #sug .sugrow .riderrow{flex:1 1 auto;min-width:0;border-bottom-style:none}
+  #sug .sugrow .riderrow .sub{white-space:normal}
+  .sugf{flex:none;margin-right:14px;min-width:96px;padding:9px 14px;border-radius:999px;cursor:pointer;
+    font-family:inherit;font-size:.9rem;font-weight:700;border:1px solid transparent;
+    background-color:var(--accentfill);color:var(--onaccent)}
+  .sugf.on{background-color:transparent;border-color:var(--line);color:var(--fg);font-weight:600}
+  .sugf:disabled{opacity:.55;cursor:default}
 </style>
 </head>
 <body>
@@ -76,6 +90,10 @@
       <a href="/map"><b>Map</b><span>Find your nearest ride</span></a>
       <a href="/users"><b>Users</b><span id="x_users">&nbsp;</span></a>
     </div>
+  </div>
+  <div id="sug_wrap" hidden>
+    <span class="eyebrow lh">Suggested for you</span>
+    <div class="riderlist" id="sug"></div>
   </div>
   <span class="eyebrow lh">Users</span>
   <div id="loading">Loading&hellip;</div>
@@ -117,6 +135,55 @@ Promise.all([CoasterHub.fetchUsers(), CoasterHub.fetchSummary()]).then(function(
     return CoasterHub.riderRow(u, x.credits||0, x.rides==null?null:x.rides, x.ranked||0); }).join('');
   $('loading').style.display='none';
 }).catch(function(e){ console.error(e); $('loading').textContent='Couldn’t load users.'; });
+// Suggested for you: riders you don't follow yet, the ones your friends follow
+// first, then whoever has ranked and logged the most. Five, each with a Follow
+// button that works in place. Signed in only — following needs an account —
+// and only claimed riders, the only ones with somebody on the other end.
+function followsOf(slug){
+  return fetch('/api/follows/'+encodeURIComponent(slug),{credentials:'same-origin',cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+}
+Promise.all([CoasterHub.me().catch(function(){ return null; }), CoasterHub.fetchUsers(), CoasterHub.fetchSummary()]).then(function(r){
+  var me=r[0]; if(!me || !me.slug) return;
+  var by={}; (r[2]||[]).forEach(function(x){ by[x.slug]=x; });
+  return followsOf(me.slug).then(function(mine){
+    if(!mine) return;
+    var fol={}; (mine.following||[]).forEach(function(f){ fol[f.slug]=f.name||f.slug; });
+    return Promise.all(Object.keys(fol).map(followsOf)).then(function(theirs){
+      var fof={}, via={};
+      theirs.forEach(function(t, i){ if(!t) return; var friend=fol[Object.keys(fol)[i]];
+        (t.following||[]).forEach(function(f){ fof[f.slug]=(fof[f.slug]||0)+1; if(!via[f.slug]) via[f.slug]=friend; }); });
+      var cands=(CoasterHub.USERS||[]).filter(function(u){ return u.claimed && u.slug!==me.slug && !fol[u.slug]; });
+      var x=function(u){ return by[u.slug]||{}; };
+      cands.sort(function(a,b){ return (fof[b.slug]||0)-(fof[a.slug]||0) || (x(b).ranked||0)-(x(a).ranked||0)
+        || (x(b).credits||0)-(x(a).credits||0) || a.name.localeCompare(b.name); });
+      cands=cands.slice(0,5);
+      if(!cands.length) return;
+      var E=function(t){ return String(t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+      $('sug').innerHTML=cands.map(function(u){
+        var n=fof[u.slug]||0, k=x(u);
+        var why = n ? 'Followed by '+E(via[u.slug])+(n>1?' and '+(n-1)+' more':'')
+                : (k.ranked ? nf(k.ranked)+' ranked &middot; ' : '')+nf(k.credits)+' credits';
+        var pic = u.avatar ? '<span class="av" style="background-image:url(/avatars/'+encodeURIComponent(u.avatar)+')"></span>'
+                           : '<span class="av">'+E((u.name||'?').charAt(0).toUpperCase())+'</span>';
+        return '<div class="sugrow"><a class="riderrow" href="'+CoasterHub.userPageHref(u.slug,'profile')+'">'+pic
+          +'<span class="who"><b class="nm">'+E(u.name)+'</b><span class="un">@'+E(u.slug)+'</span><span class="sub">'+why+'</span></span></a>'
+          +'<button type="button" class="sugf" data-slug="'+E(u.slug)+'">Follow</button></div>';
+      }).join('');
+      $('sug_wrap').hidden=false;
+      Array.prototype.forEach.call($('sug').querySelectorAll('.sugf'), function(b){
+        b.onclick=function(){
+          var on=b.classList.contains('on'); b.disabled=true;
+          fetch('/api/follow/'+encodeURIComponent(b.getAttribute('data-slug')),{method:on?'DELETE':'POST',credentials:'same-origin'})
+            .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+            .then(function(j){ b.classList.toggle('on', !!j.you); b.textContent=j.you?'Following':'Follow'; })
+            .catch(function(e){ console.error(e); })
+            .then(function(){ b.disabled=false; });
+        };
+      });
+    });
+  });
+}).catch(function(){ /* no suggestions rather than a broken section */ });
 </script>
 </body>
 </html>
