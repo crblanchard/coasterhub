@@ -1887,7 +1887,8 @@
   // and /credits' Rides tab "should be the same"). o.title: the park(s), plain
   // text; o.date; o.right: "9 rides · 3 coasters"; o.rows: [{c, ctx, n, fresh}]
   // — c a coaster (id, name, park, …), n its laps that day, fresh a first-ever
-  // ride on it; o.foot: a grey line under the rows.
+  // ride on it; o.foot: a grey line under the rows; o.edit: where to change
+  // the day, for its owner (a link at the end of that line).
   function visitRow(o) {
     var E = searchEsc;
     var chev = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
@@ -1902,7 +1903,8 @@
         return coasterRow(r.c, { ctx: r.ctx, end: r.fresh ? '<span class="nw" title="New credit — first time on this one">New</span>' : '',
           beside: r.n > 1 ? '<span class="lap">×' + r.n + '</span>' : '' });
       }).join("")
-      + (o.foot ? '<div class="vfoot">' + E(o.foot) + '</div>' : '')
+      + (o.foot || o.edit ? '<div class="vfoot"><span>' + E(o.foot || '') + '</span>'
+        + (o.edit ? '<a class="vedit" href="' + E(o.edit) + '">Edit day</a>' : '') + '</div>' : '')
       + '</details>';
   }
 

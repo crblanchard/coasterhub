@@ -499,7 +499,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002d"></script>
+<script src="/app.js?v=20261002e"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 // Runs before the gate: the nav has to work whether or not you unlock.
@@ -574,6 +574,8 @@ function boot(){
   $('date').value=TODAY;
 
   fillRiders();
+  // An edit link is always about your own count, whoever an admin last logged for.
+  if(EDIT_ASK && ME && ME.slug){ try{ localStorage.setItem('ch_rider',ME.slug); }catch(e){} $('rider').value=ME.slug; showRider(); }
   applyAccountLimits();
   // Riders live in D1; USERS is the offline fallback. Someone added on /import
   // (or with the + beside the picker) can be logged for straight away.
@@ -610,6 +612,7 @@ function boot(){
     // reconciled here instead of waiting to be told about it.
     syncPark(); setTimeout(syncPark,0);
     window.addEventListener('pageshow',syncPark);
+    editFromLink();
   });
 
   $('save').onclick=save;
@@ -657,13 +660,29 @@ function loadOwned(){
     // the first load, and never over a mode somebody picked or linked to.
     if(!FIRST_LOAD_DONE){
       FIRST_LOAD_DONE=true;
-      if(!(log.rides||[]).length && MODE==='day' && !new URLSearchParams(location.search).get('mode') && !basketCount()){
+      if(!(log.rides||[]).length && MODE==='day' && !new URLSearchParams(location.search).get('mode') && !EDIT_ASK && !basketCount()){
         toAddCredits(function(){ setMode('list'); });
         $('modehint').textContent='New here? Pick a park you’ve been to and tick the coasters you rode.';
       }
     }
-    renderList(); offerDay();
+    renderList(); offerDay(); OWNED_READY=true; editFromLink();
   }).catch(function(){ renderList(); });
+}
+// /log?edit=2026-09-12 — the "Edit day" link on a day in your credits. Opens
+// with that day in the basket and its park picked, once both the day's rides
+// and the coaster list have arrived (whichever lands second runs it). Your own
+// count only: that is the only one the link is shown on.
+var EDIT_ASK=(function(){ var d=new URLSearchParams(location.search).get('edit'); return /^\d{4}-\d{2}-\d{2}$/.test(d||'')?d:null; })();
+var OWNED_READY=false;
+function editFromLink(){
+  if(!EDIT_ASK || !OWNED_READY || !COASTERS.length) return;
+  var d=EDIT_ASK; EDIT_ASK=null;
+  if(!DAYS[d]){ $('msg').className='msg bad'; $('msg').textContent='Nothing logged on '+niceDay(d)+' to change.'; showResult(); return; }
+  var first=BYID[Object.keys(DAYS[d])[0]];
+  if(first && first.park && PCOUNT[first.park]!=null) choosePark(first.park);
+  beginEdit(d);
+  $('basketpanel').scrollIntoView({behavior:'instant',block:'start'});
+  window.scrollBy({top:-76,behavior:'instant'});
 }
 
 function niceDay(d){
@@ -1547,7 +1566,8 @@ function renderSaveBar(ids,rides){
     : c+' coaster'+(c===1?'':'s');
   $('sb_sub').textContent = EDITING ? 'Changing '+niceDay(EDITING)
     : (MODE==='day' ? (d===TODAY ? 'Today' : (d ? niceDay(d) : 'No date yet'))+(DAYS[d]?' \u00b7 adds to '+Object.keys(DAYS[d]).reduce(function(a,k){return a+DAYS[d][k];},0)+' saved':'') : 'To your count');
-  $('sb_save').textContent=$('save').textContent;
+  // "Save changes" is too wide beside the summary; the line under it already says so.
+  $('sb_save').textContent = EDITING && basketCount() ? 'Save' : $('save').textContent;
   $('sb_save').disabled=$('save').disabled;
 }
 function wireSaveBar(){
