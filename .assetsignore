@@ -22,3 +22,8 @@ README.md
 STAGING.md
 wrangler.staging.jsonc
 .gitignore
+
+# Claude Code's project settings (the impeccable design plugin, Carter
+# 2026-10-02) and that plugin's saved critiques: tooling, not site content.
+.claude/
+.impeccable/

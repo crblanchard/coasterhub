@@ -30,6 +30,13 @@ they're separate entries"*. **`site-updates.json`** feeds the "Site update" rows
   append a third. `at` is UTC ISO
   (`date -u +%Y-%m-%dT%H:%M:%SZ`). Skip handoff/CLAUDE.md-only commits.
 
+## The impeccable plugin
+
+`.claude/settings.json` enables Paul Bakaus's **impeccable** design plugin
+(marketplace `pbakaus/impeccable`, Carter 2026-10-02), so a new session here has its
+`/impeccable` commands (critique, audit, polish …). Its critiques land in `.impeccable/`.
+Both folders are in `.assetsignore` — never served from coasterhub.org.
+
 ## What this sandbox can and cannot reach
 
 Reachable: GitHub, npm, usually the CDNs.
