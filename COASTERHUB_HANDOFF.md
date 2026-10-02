@@ -4077,6 +4077,17 @@ cards, not the mockup's — and keep the feed's own formatting for activity and 
   three days) and an empty one hid itself, so it looked gone. Note: /edit's database
   changes are recorded with no actor, so they never count as "yours" here.
 
+## Rankings redesign: mockup, not built (2026-10-02)
+
+Next after the nav. Mockup on real data (desktop Mine / Rank more / Global, phone Mine-Global /
+Rank more): https://claude.ai/artifact/XszRsxDA6MD5uxeF9BMFTJ. Proposals in it: "N of M
+credits ranked" progress in the hero; Rank 5 more + Add coasters as hero buttons; the tools
+(find, Models, Categories, Reorder) always visible instead of behind Edit; top 3 as podium
+cards; a Global #/avg chip on each of your rows; desktop sidebar "Up next" (the five tallest
+unranked, what Rank more takes); Global gets All / Ones I've ranked / Ones I haven't
+filters, a "you #N" chip, and "Everyone's lists" as a sidebar instead of cards. **Wait for
+Carter's go before building.**
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
