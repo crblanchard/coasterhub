@@ -1770,12 +1770,12 @@
       ? '<span class="rface" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
       : '<span class="rface">' + searchEsc(String(name || slug || "?").charAt(0).toUpperCase()) + '</span>';
   }
-  // Operating first, then — given your rides — the ones you still need, then
-  // A–Z (Carter, 2026-10-01: same rule as the coaster page's More lists).
+  // Operating first, then A–Z. It used to put the ones you still need first
+  // (2026-10-01); Carter took that back the next day ("dont show not ridden at
+  // the top"), so `mine` is accepted and ignored.
   function needFirst(mine) {
     return function (a, b) {
-      return (!!a.closed - !!b.closed) || (mine ? (!!mine[a.id] - !!mine[b.id]) : 0)
-        || String(a.name).localeCompare(String(b.name));
+      return (!!a.closed - !!b.closed) || String(a.name).localeCompare(String(b.name));
     };
   }
   // A long list shows its first n and opens to the rest in place ("Show all N"

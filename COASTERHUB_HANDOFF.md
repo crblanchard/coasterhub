@@ -5380,4 +5380,7 @@ operating first, Opened newest first, Riders most first; a second click reverses
 bottom for every sort but Status. The choice is remembered (localStorage `ch_parksort`); with none,
 signed in keeps operating → need → A–Z and signed out starts on Global. After a sort the first 12 show
 (`refold`).
+Same day, later: **no "ones you need first" anywhere** (Carter: "dont show not ridden at the top sort
+all operating by name by default"). Park list defaults to Coaster A–Z for everyone (a saved column
+sort still wins); needFirst() now just means operating → A–Z; the coaster page's More lists too.
 
