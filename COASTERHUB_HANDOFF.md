@@ -5383,4 +5383,7 @@ signed in keeps operating → need → A–Z and signed out starts on Global. Af
 Same day, later: **no "ones you need first" anywhere** (Carter: "dont show not ridden at the top sort
 all operating by name by default"). Park list defaults to Coaster A–Z for everyone (a saved column
 sort still wins); needFirst() now just means operating → A–Z; the coaster page's More lists too.
+Then taken back: **no Global column or sort headers on the park page** (Carter, 2026-10-02: "makes it
+too complicated"). The list is operating A–Z, defunct last; each ride's Global place sits beside its
+model as "#12" in the accent with "Global" in grey.
 
