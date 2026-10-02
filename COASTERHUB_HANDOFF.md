@@ -4056,7 +4056,8 @@ cards, not the mockup's — and keep the feed's own formatting for activity and 
   location, users, the everyone /map) → Explore; count, account, /user/<slug>/map → Me;
   categories → Rankings.
 - **`/explore`** (explore.html): the search button and the cards Home used to carry (now
-  six: + Users), then every user by credits. `explore` is in RESERVED_SLUGS.
+  six: + Users), then Suggested for you with "All users →" (/users) beside it — the full
+  user list that sat below was taken out the same day. `explore` is in RESERVED_SLUGS.
   **Suggested for you** (signed in): five claimed riders you don't follow — the ones your
   friends follow first ("Followed by Sean and 1 more"), then most ranked, then credits —
   each with a Follow/Following button that POSTs/DELETEs `/api/follow/<slug>` in place.
