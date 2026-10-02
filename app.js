@@ -1320,16 +1320,18 @@
     // screen. Re-apply rather than patch one selector: the mobile tab bar is
     // built further down this function and has to be pointed home too, and a
     // later applyRiderLinks (the rider list landing) must not undo this.
+    // Which tab is lit. Me only on YOUR pages (Carter, 2026-10-02): somebody
+    // else's profile, count or map lights nothing, so it waits for
+    // /api/auth/me to say whose page this is before lighting Me.
+    var lit = navKey(page), meWait = lit === "profile" && !!urlSlug;
+    if (meWait) lit = "";
     me().then(function (acct) {
       if (!acct || !acct.slug) return;
       myOwn = acct.slug;
       applyRiderLinks(slug);
+      if (meWait && acct.slug === urlSlug) lightNav("profile");
     }).catch(function () { /* signed out, or the API is down: leave it alone */ });
-
-    var links = document.querySelectorAll('nav.links a[data-nav]');
-    for (var i = 0; i < links.length; i++) {
-      links[i].classList.toggle("active", links[i].getAttribute("data-nav") === navKey(page));
-    }
+    lightNav(lit);
 
     // No rider picker in the header any more (2026-09-17). Whose page this is
     // is now asked and answered by the hero badge, next to the headline it
@@ -1366,7 +1368,7 @@
     }
     accountCorner(themeHost);
 
-    buildTabBar(page, slug);
+    buildTabBar(lit, slug);
     meTabs(page, urlSlug);
     applyRiderLinks(slug);
     // Footer is the six ways around the site and nothing else (Carter,
@@ -1461,12 +1463,24 @@
     }).join("") + '</div>';
     hero.parentNode.insertBefore(nav, hero.nextSibling);
   }
-  function buildTabBar(page, slug) {
+  // Light one tab, in the header and the tab bar alike ("" = none).
+  function lightNav(key) {
+    if (typeof document === "undefined") return;
+    var hs = document.querySelectorAll('nav.links a[data-nav]');
+    for (var i = 0; i < hs.length; i++) hs[i].classList.toggle("active", hs[i].getAttribute("data-nav") === key);
+    var ts = document.querySelectorAll('.tabbar a[data-nav]');
+    for (var j = 0; j < ts.length; j++) {
+      var is = ts[j].getAttribute("data-nav") === key;
+      ts[j].classList.toggle("on", is);
+      if (is) ts[j].setAttribute("aria-current", "page"); else ts[j].removeAttribute("aria-current");
+    }
+  }
+  // `on` is the tab to light, already through navKey (initNav decides).
+  function buildTabBar(on, slug) {
     if (typeof document === "undefined" || document.querySelector(".tabbar")) return;
     var nav = document.createElement("nav");
     nav.className = "tabbar";
     nav.setAttribute("aria-label", "Primary");
-    var on = navKey(page);
     nav.innerHTML = TABS.map(function (t) {
       var href = (t.fixed || !slug) ? t.path : userPageHref(slug, t.k);
       var cls = (t.plus ? "plus" : "") + (t.k === on ? " on" : "");

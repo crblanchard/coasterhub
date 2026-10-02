@@ -4054,7 +4054,9 @@ cards, not the mockup's — and keep the feed's own formatting for activity and 
 - `TABS` in app.js and all 21 headers: Home · Explore · [+] Log · Rankings · Me. `navKey(page)`
   decides the lit tab: database pages (coasters, coaster, parks, park, manufacturer,
   location, users, the everyone /map) → Explore; count, account, /user/<slug>/map → Me;
-  categories → Rankings.
+  categories → Rankings. **Me lights only on your own** profile/count/map: initNav starts
+  those unlit and `lightNav("profile")` once /api/auth/me matches the URL's rider;
+  somebody else's lights no tab (Carter, same day).
 - **`/explore`** (explore.html): the search button and the cards Home used to carry (now
   six: + Users), then Suggested for you with "All users →" (/users) beside it — the full
   user list that sat below was taken out the same day. `explore` is in RESERVED_SLUGS.
