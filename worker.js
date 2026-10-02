@@ -1428,10 +1428,22 @@ async function getActivity(env, limit) {
 // day now holds, and a day that no longer exists drops its line. Capped rather
 // than replaced, because two separate logs of one day are two lines that each
 // said their own part, and neither should swell to the whole day.
+//
+// The same goes for a day's "changed" lines: a day logged and then removed
+// leaves no trace in the feed at all (Carter, 2026-10-02: "if i created and
+// removed a day hide it from changes altogether"). A changed line is about
+// the day where it ended up — `to` when it was moved — so it goes when that
+// day is gone, and the "Remove this day" line itself goes with it.
+function dayOf(e) {
+  if (!e.actor || !e.detail || !e.detail.date) return null;
+  if (e.kind === "rides") return e.detail.date;
+  if (e.kind === "day_edited") return e.detail.to || e.detail.date;
+  return null;
+}
 async function trimLoggedDays(env, events) {
-  const want = events.filter((e) => e.kind === "rides" && e.actor && e.detail && e.detail.date);
+  const want = events.filter(dayOf);
   if (!want.length) return;
-  const dates = [...new Set(want.map((e) => e.detail.date))];
+  const dates = [...new Set(want.map(dayOf))];
   const now = {};
   for (let i = 0; i < dates.length; i += SQL_VARS) {
     const part = dates.slice(i, i + SQL_VARS);
@@ -1442,10 +1454,11 @@ async function trimLoggedDays(env, events) {
     for (const r of results) now[r.s + "|" + r.d] = r;
   }
   for (let i = events.length - 1; i >= 0; i--) {
-    const e = events[i];
-    if (!(e.kind === "rides" && e.actor && e.detail && e.detail.date)) continue;
-    const day = now[e.actor + "|" + e.detail.date];
+    const e = events[i], at = dayOf(e);
+    if (!at) continue;
+    const day = now[e.actor + "|" + at];
     if (!day) { events.splice(i, 1); continue; }
+    if (e.kind !== "rides") continue;
     if (e.detail.rides != null && e.detail.rides > day.n) e.detail.rides = day.n;
     if (e.n != null && e.n > day.n) e.n = day.n;
     if (e.detail.coasters != null && e.detail.coasters > day.c) e.detail.coasters = day.c;

@@ -2788,6 +2788,27 @@ async function main() {
     check("feed: a day that no longer exists drops its line", !e, JSON.stringify(e));
   }
 
+  // ---- a day logged and then removed leaves nothing in the feed (2026-10-02)
+  {
+    const db = freshDb();
+    db.exec("INSERT OR IGNORE INTO users (slug,name,mode) VALUES ('kim','Kim','rides')");
+    db.exec("INSERT INTO coasters (id,name,park,type) VALUES (975,'A','Gone Park','Steel'),(976,'B','Gone Park','Steel')");
+    const mine = async () => ((await call(db, "GET", "/api/activity")).data.events || []).filter(e => e.actor === "kim");
+    await call(db, "POST", "/api/rides", { token: PW, body: { user: "kim", d: "2026-09-20", entries: [{ c: 975, n: 2 }, { c: 976, n: 1 }] } });
+    let r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "kim", d: "2026-09-20", entries: [{ c: 975, n: 2 }] } });
+    let ev = await mine();
+    check("feed: an edited day shows both lines while it exists",
+      r.status === 200 && ev.some(e => e.kind === "rides") && ev.some(e => e.kind === "day_edited"), JSON.stringify(ev));
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "kim", d: "2026-09-20", entries: [] } });
+    ev = await mine();
+    check("feed: a removed day leaves no line at all", r.status === 200 && !ev.length, JSON.stringify(ev));
+    // A day moved elsewhere keeps its change line; the line is about where it went.
+    await call(db, "POST", "/api/rides", { token: PW, body: { user: "kim", d: "2026-09-21", entries: [{ c: 975, n: 1 }] } });
+    r = await call(db, "PUT", "/api/day", { token: PW, body: { user: "kim", d: "2026-09-21", to: "2026-09-22", entries: [{ c: 975, n: 1 }] } });
+    ev = await mine();
+    check("feed: a moved day keeps its change line", r.status === 200 && ev.some(e => e.kind === "day_edited" && e.detail.to === "2026-09-22"), JSON.stringify(ev));
+  }
+
   // ---- a copied day sits a minute after the original in the feed ----------
   {
     const db = freshDb();
