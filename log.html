@@ -22,7 +22,13 @@
   .gate{max-width:380px;margin:8px auto 80px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
   .gate h2{font-size:1.1rem;margin-bottom:6px}
   .gate p{color:var(--muted);font-size:.88rem;margin-bottom:14px}
-  input,select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:.9rem;font-family:inherit}
+  /* Two text sizes on this page and no more (critique 2026-10-02 counted ten,
+     every rule picking its own rem between .76 and .95, which is most of why
+     it read as messy): --fs for anything you read or press, --fs-s for the
+     line under it. Titles are --fs at weight 700. */
+  #app,.drop,.gate{--fs:.94rem;--fs-s:.8rem}
+  input,select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:var(--fs);font-family:inherit}
+  #app input:focus,#app select:focus{outline:2px solid var(--ring);outline-offset:0;border-color:var(--accent2)}
   /* A date field must not grow past its card. iOS sizes the NATIVE date
      control to its own content and will not shrink it, so on a narrow phone it
      pushed out through the right edge of the panel — in Chromium the same
@@ -37,10 +43,14 @@
   input[type=date]{-webkit-appearance:none;appearance:none;text-align:left;
     width:100%;max-width:100%;min-width:0}
   .gate input{width:100%;margin-bottom:10px}
-  button.primary{background:var(--accent2);border:0;color:var(--well);font-weight:700;border-radius:10px;padding:11px 18px;cursor:pointer;font-size:.92rem}
+  /* Two button styles, one height. font-family:inherit because a <button>
+     does not inherit it, and these were rendering in Arial beside system-ui. */
+  button.primary,button.ghost{font-family:inherit;font-size:var(--fs);border-radius:10px;
+    min-height:40px;padding:0 16px;cursor:pointer;line-height:1.2}
+  button.primary{background:var(--accent2);border:0;color:var(--well);font-weight:700}
   button.primary:disabled{opacity:.4;cursor:default}
-  button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem}
-  button.ghost:hover{color:var(--fg)}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg);font-weight:500}
+  button.ghost:hover{border-color:var(--ring)}
   /* A filter that is ON has to look it. This one is remembered between visits,
      so "why can't I find Cedar Point" has to be answerable from the screen.
      border-color, not the `border` shorthand — CLAUDE.md, five bugs' worth. */
@@ -57,20 +67,25 @@
   /* Beside the switch, not under it, and quiet: a third way in, not a third
      mode. It used to carry class="ghost", which is a BUTTON selector on this
      page, so it had no styling at all. */
-  #importlink{color:var(--accent2);font-size:.88rem;font-weight:600;margin-left:14px;
+  #importlink{color:var(--accent2);font-weight:600;margin-left:14px;
     white-space:nowrap}
   #importlink:hover{text-decoration:underline}
-  .loglinks{margin:0 0 6px;display:flex;gap:18px;flex-wrap:wrap}
-  .loglinks a{color:var(--accent2);font-size:.88rem;font-weight:600;text-decoration:none}
+  /* The other two ways in, under the panels rather than over them: they were
+     two of the four lines you read before reaching the park box. */
+  .loglinks{margin:22px 0 0;display:flex;gap:0 14px;flex-wrap:wrap;align-items:baseline;
+    color:var(--muted);font-size:var(--fs-s)}
+  .loglinks a{color:var(--accent2);font-weight:600;text-decoration:none;padding:6px 0}
   .loglinks a:hover{text-decoration:underline}
   .loglinks #importlink{margin-left:0}
-  .modehint{color:var(--muted);font-size:.83rem;margin:0 0 16px;max-width:74ch}
+  .modehint{color:var(--muted);font-size:var(--fs-s);margin:0 0 14px;max-width:74ch}
+  .modehint:empty{display:none}
   /* Whose count, as a sentence. A second pill beside the header's rider picker
      was the thing that made this page confusing; a line of text is not. */
-  .riderline{color:var(--muted);font-size:.84rem;margin:0 0 14px}
+  .riderline{color:var(--muted);font-size:var(--fs-s);margin:0 0 12px}
   .riderline b{color:var(--fg);font-weight:600}
-  .riderline a{color:var(--accent2);cursor:pointer}
-  .geonote{color:var(--muted);font-size:.76rem;margin:6px 0 0;min-height:1em}
+  .riderline a{color:var(--accent2);cursor:pointer;padding:8px 2px}
+  .geonote{color:var(--muted);font-size:var(--fs-s);margin:6px 0 0}
+  .geonote:empty{display:none}
   .geonote a{color:var(--accent2);cursor:pointer}
   /* The nearest parks, as things you can press. A line that only NAMED the
      closest park still left you to go and find it in a 247-long dropdown. */
@@ -85,19 +100,19 @@
   .parkpop.on{display:block}
   .parkpop .pp{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;
     background-color:transparent;border:0;border-radius:10px;padding:10px 12px;color:var(--fg);
-    font-weight:600;font-size:.95rem;cursor:pointer}
+    font-weight:600;font-size:var(--fs);font-family:inherit;cursor:pointer}
   .parkpop .pp:hover,.parkpop .pp.hi{background-color:var(--soft)}
   .parkpop .pp.on{color:var(--accent2)}
-  .parkpop .pp .m{margin-left:auto;flex:none;color:var(--muted);font-weight:500;font-size:.8rem}
-  .parkpop .ph{color:var(--muted);font-size:.8rem;font-weight:700;
+  .parkpop .pp .m{margin-left:auto;flex:none;color:var(--muted);font-weight:500;font-size:var(--fs-s)}
+  .parkpop .ph{color:var(--muted);font-size:var(--fs-s);font-weight:700;
     padding:10px 12px 4px}
-  .parkpop .none{color:var(--muted);font-size:.88rem;padding:10px 12px}
+  .parkpop .none{color:var(--muted);font-size:var(--fs);padding:10px 12px}
   .parktools{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-  .parktools button{flex:none;padding:9px 12px}
+  .parktools button{flex:none}
   .nearrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 0}
-  .nearrow .lbl{color:var(--muted);font-size:.76rem}
+  .nearrow .lbl{color:var(--muted);font-size:var(--fs-s)}
   .nearpick{background-color:transparent;border:1px solid var(--line);color:var(--fg);
-    font-family:inherit;font-size:.78rem;padding:5px 10px;border-radius:999px;cursor:pointer;
+    font-family:inherit;font-size:var(--fs-s);padding:7px 12px;border-radius:999px;cursor:pointer;
     white-space:nowrap;transition:border-color .12s,color .12s}
   .nearpick:hover{border-color:var(--accent2);color:var(--accent2)}
   .nearpick.on{border-color:var(--accent2);color:var(--accent2);font-weight:700}
@@ -121,7 +136,7 @@
      max-width:100% on the input resolves against the stretched parent and caps
      nothing. Measured: a date field asked for 900px got all 900. */
   .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
-  .fld label{color:var(--muted);font-size:.8rem;}
+  .fld label{color:var(--muted);font-size:var(--fs-s)}
   /* Said, not shown: the control underneath already names itself. */
   .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
       clip:rect(0 0 0 0);white-space:nowrap;border:0}
@@ -129,16 +144,20 @@
      not go below its content either, which is the same trap one level up. */
   .grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-  .panel h3{font-size:.8rem;color:var(--muted);margin-bottom:10px}
+  /* The title outranks what is under it: it used to be .8rem muted, smaller
+     than the coaster names in its own list. */
+  .panel h3{font-size:var(--fs);font-weight:700;color:var(--fg);margin-bottom:8px}
+  .panelhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .panelhead h3{margin:0;min-width:0}
   .clist{max-height:60vh;overflow-y:auto;margin:-4px -4px 0}
   .crow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--soft)}
   .crow:last-child{border-bottom:0}
   .crow .nm{flex:1;min-width:0}
-  .crow .nm b{display:block;font-weight:600;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .crow .nm b{display:block;font-weight:600;font-size:var(--fs);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* Where it is and what it is, then the flag. The text clips, the flag never
      does — it is one word and it is the thing you are scanning for. */
   .crow .nm .sub{display:flex;align-items:baseline;gap:8px;min-width:0;
-                 color:var(--muted);font-size:.78rem}
+                 color:var(--muted);font-size:var(--fs-s)}
   .crow .nm .sub .txt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* The same flag /count uses, down to the colours: a coloured word, and a
      coloured dot where a phone has no room for one. */
@@ -150,9 +169,17 @@
     .crow .nm .sub .stat{font-size:0;line-height:0}
     .crow .nm .sub .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
   }
-  .stepper{display:flex;align-items:center;gap:8px;flex:none}
-  .stepper button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center}
-  .stepper button:hover{border-color:var(--accent2)}
+  /* A soft fill, not a hairline box: 46 bordered squares down one list were a
+     good part of the noise. + is the one you press, so it is the strong one. */
+  .stepper{display:flex;align-items:center;gap:4px;flex:none}
+  .stepper button{width:34px;height:34px;border-radius:10px;border:0;background-color:var(--soft);
+    color:var(--muted);cursor:pointer;font-family:inherit;font-size:1.1rem;line-height:1;
+    display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+  .stepper button[data-act=inc]{color:var(--accent2);background-color:var(--tint)}
+  .stepper button:hover{color:var(--fg)}
+  .stepper button:focus-visible{outline:2px solid var(--accent2);outline-offset:1px}
+  /* Thumb-sized where there is a thumb. */
+  @media (pointer:coarse),(max-width:680px){ .stepper button{width:44px;height:44px} }
   .stepper .v{min-width:1.6em;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
   .stepper .v.zero{color:var(--muted);font-weight:400}
   /* List mode: the whole row is the target. Ticking 200 coasters is the point,
@@ -163,17 +190,22 @@
         display:flex;align-items:center;justify-content:center;color:transparent}
   .crow.pick:hover .tick{border-color:var(--accent2)}
   .tick.on{background:var(--accent2);border-color:var(--accent2);color:var(--well)}
-  .crow .have{flex:none;color:var(--muted);font-size:.77rem;padding-right:6px}
+  .crow .have{flex:none;color:var(--muted);font-size:var(--fs-s);padding-right:6px}
   .crow.owned .nm b{font-weight:500;color:var(--muted)}
-  .basket .brow{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:.88rem;border-bottom:1px solid var(--soft)}
+  .basket .brow{display:flex;align-items:center;gap:8px;padding:2px 0;font-size:var(--fs);border-bottom:1px solid var(--soft)}
   .basket .brow:last-of-type{border-bottom:0}
   /* ×N reads as part of the ride, so it follows the name; the remove control
      is what gets pushed to the far edge. */
   .basket .brow .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .basket .brow .x{color:var(--bad);cursor:pointer;padding:0 4px;margin-left:auto;flex:none}
+  .basket .brow .lap{color:var(--muted);font-variant-numeric:tabular-nums}
+  /* A real button, and quiet: six red marks made a routine list read as six
+     errors. It goes red when you are about to press it. */
+  .basket .brow .x{margin-left:auto;flex:none;width:40px;height:40px;border:0;border-radius:10px;
+    background-color:transparent;color:var(--muted);font:inherit;font-size:1.15rem;line-height:1;cursor:pointer}
+  .basket .brow .x:hover,.basket .brow .x:focus-visible{color:var(--bad);background-color:var(--soft)}
   /* You can stage more than one park before saving, so the basket says which
      park each row came from once there is more than one to tell apart. */
-  .basket .bpark{color:var(--muted);font-size:.8rem;
+  .basket .bpark{color:var(--muted);font-size:var(--fs-s);font-weight:600;
                  margin:12px 0 0;padding-top:8px;border-top:1px solid var(--soft)}
   .basket .bpark.first{margin-top:0;padding-top:0;border-top:0}
   /* Inline "add a park / add a coaster" forms. Hidden until asked for, so the
@@ -182,13 +214,19 @@
             background:var(--panel);border:1px solid var(--line);border-radius:12px;
             padding:12px 14px;margin:0 0 14px}
   .miniform.on{display:flex}
-  .miniform input,.miniform select{padding:9px 11px;font-size:.88rem}
+  .miniform input,.miniform select{padding:9px 11px}
   .miniform .grow{flex:1;min-width:170px}
-  .miniform .note{flex-basis:100%;color:var(--muted);font-size:.78rem;margin:0}
+  .miniform .note,.fld .note{flex-basis:100%;color:var(--muted);font-size:var(--fs-s);margin:0}
   /* "Copy to a friend" under the date: a small picker inside the sentence. */
-  #dayhint .copysel{width:auto;display:inline-block;padding:4px 8px;font-size:.85rem;margin:4px 4px 4px 0}
-  #dayhint .copybtn{padding:5px 12px;font-size:.85rem;margin-right:6px}
-  .miniform .err{flex-basis:100%;color:var(--bad);font-size:.82rem;margin:0}
+  #dayhint .copysel{width:auto;display:inline-block;padding:6px 8px;margin:4px 4px 4px 0}
+  #dayhint .copybtn{margin-right:6px}
+  /* "Already saved this day" is a notice about something ELSE, not the basket's
+     total, so it gets its own box (it read as the totals above it, and saving
+     again quietly adds on top). */
+  #dayhint{background-color:var(--soft);border-radius:10px;padding:10px 12px;color:var(--fg);
+    font-size:var(--fs-s);line-height:1.5;margin:4px 0 0}
+  #dayhint a{color:var(--accent2);font-weight:600}
+  .miniform .err{flex-basis:100%;color:var(--bad);font-size:var(--fs-s);margin:0}
   /* The locations filter. 54 of them is a list rather than a row of pills, so
      it scrolls inside the panel and columns up when there is width for it.
      column-count, not the `columns` shorthand — see CLAUDE.md on shorthands
@@ -198,9 +236,8 @@
         border:1px solid var(--line);border-radius:14px;padding:12px 14px;
         box-shadow:0 18px 40px rgba(0,0,0,.28)}
   .drop.on{display:block}
-  .drop .note{margin:0 0 8px;color:var(--muted);font-size:.8rem}
+  .drop .note{margin:0 0 8px;color:var(--muted);font-size:var(--fs-s)}
   .drop .foot{display:flex;gap:8px;margin-top:10px}
-  .drop .foot button{padding:8px 12px;font-size:.85rem}
   /* A GRID, not column-count. A grid fills left to right and wraps DOWNWARD, so
      capping its height scrolls vertically. Multi-column does the opposite: cap
      the height and the columns run off the side, which is how this panel grew a
@@ -212,7 +249,7 @@
         border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg)}
   /* align-items:CENTER. A checkbox's baseline is its bottom edge, so baseline
      alignment hung every box above the words it belongs to. */
-  .regs label{display:flex;gap:7px;align-items:center;font-size:.85rem;line-height:1.3;
+  .regs label{display:flex;gap:7px;align-items:center;font-size:var(--fs);line-height:1.3;
               padding:2px 0;cursor:pointer;min-width:0}
   /* Let a long one wrap rather than truncate. "United Arab Emirates" is the
      only name that does not fit a column, and an ellipsis is a worse answer
@@ -220,17 +257,49 @@
   .regs label span{min-width:0}
   /* The page styles every input like a text field; a tick box is not one. */
   .regs .tick{width:auto;height:auto;min-height:0;padding:0;margin:0;flex:none}
-  .regs .n{color:var(--muted);font-size:.76rem}
-  .regs .sec{grid-column:1/-1;font-size:.8rem;
+  .regs .n{color:var(--muted);font-size:var(--fs-s)}
+  .regs .sec{grid-column:1/-1;font-size:var(--fs-s);font-weight:600;
              color:var(--muted);margin:10px 0 3px}
   .regs .sec.first{margin-top:0}
-  .addbar{display:flex;justify-content:flex-end;margin:0 0 10px}
-  .addbar button{padding:7px 12px;font-size:.84rem}
-  .tot{display:flex;justify-content:space-between;margin:12px 0;padding-top:12px;border-top:1px solid var(--line);font-weight:700}
-  .msg{margin-top:12px;font-size:.88rem}
+  .addbar{display:flex;flex:none}
+  .addbar button{min-height:34px;padding:0 12px;font-size:var(--fs-s)}
+  .tot{display:flex;justify-content:space-between;margin:10px 0 2px;padding-top:10px;border-top:1px solid var(--line);font-weight:700}
+  .totnote{color:var(--muted);font-size:var(--fs-s);margin:0 0 12px}
+  .actions{display:flex;gap:8px}
+  .msg{margin-top:12px;font-size:var(--fs)}
+  .msg:empty{display:none}
+  .msg.ok{background-color:var(--tint);border-radius:10px;padding:12px 14px;line-height:1.5}
   .msg.ok{color:var(--accent2)} .msg.bad{color:var(--bad)}
-  .hint{color:var(--muted);font-size:.85rem;padding:18px 4px}
-  @media (max-width:820px){ .grid{grid-template-columns:minmax(0,1fr)} }
+  .hint{color:var(--muted);font-size:var(--fs);padding:14px 4px}
+  @media (max-width:820px){
+    .grid{grid-template-columns:minmax(0,1fr)}
+    /* One scroll, not a scroll inside a scroll: on a phone the page is the list. */
+    .clist{max-height:none;overflow:visible}
+    /* Nothing to show until there is: an empty "This day" with 0 / 0 and a dead
+       Save button was the second thing on the screen. renderBasket() sets it. */
+    .basket.idle{display:none}
+  }
+  /* ---- The save bar (phones) ------------------------------------------------
+     Save sat two screens below the + you were pressing. This rides above the
+     tab bar while anything is staged: what you have, the day it goes on, Save.
+     Tap the left half to see the basket. Carter OK'd it, 2026-10-02. */
+  .savebar{display:none}
+  @media (max-width:680px){
+    .savebar.on{display:flex;position:fixed;z-index:19;left:10px;right:10px;
+      bottom:calc(98px + env(safe-area-inset-bottom,0px));align-items:center;gap:10px;
+      padding:8px 8px 8px 14px;border-radius:14px;background:var(--panel);
+      border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+    .savebar .sum{flex:1;min-width:0;text-align:left;background-color:transparent;border:0;
+      color:var(--fg);font:inherit;padding:2px 0;cursor:pointer}
+    .savebar .sum b{display:block;font-size:var(--fs);font-weight:700;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis}
+    .savebar .sum span{display:block;font-size:var(--fs-s);color:var(--muted);white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis}
+    .savebar .primary{min-height:44px;flex:none}
+    body.barred{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
+    /* The bar is the Save button on a phone; one is enough. */
+    .basket #save{display:none}
+  }
 </style>
 </head>
 <body>
@@ -274,7 +343,6 @@
     <button type="button" class="on" data-mode="day">Log rides</button>
     <button type="button" data-mode="list">Add credits</button>
   </div>
-  <p class="loglinks"><a href="/welcome?add=1" id="addpast">Add past credits &rarr;</a><a href="/import" id="importlink">Import a list &rarr;</a></p>
   <p class="modehint" id="modehint"></p>
   <!-- The "coaster or park not in the database? Add it here" line that used to
        sit here is gone (2026-09-17): the page was reading as a wall of text
@@ -347,15 +415,17 @@
     <button class="primary" id="np_save" type="button">Add park</button>
     <button class="ghost" id="np_cancel" type="button">Cancel</button>
     <p class="note">US parks are &ldquo;&lt;State&gt;, US&rdquo;; everywhere else is just the country.
-      Coordinates come later &mdash; run the geocoder in <b>/edit</b> and it will place the park on the map.</p>
+      It shows up on the map once its location is filled in.</p>
     <p class="err" id="np_err"></p>
   </div>
 
   <div class="grid">
     <div class="panel">
-      <h3 id="listhead">Coasters</h3>
-      <div class="addbar" id="addbar" style="display:none">
-        <button class="ghost" id="newcoaster" type="button">+ Coaster not listed</button>
+      <div class="panelhead">
+        <h3 id="listhead">Coasters</h3>
+        <div class="addbar" id="addbar" style="display:none">
+          <button class="ghost" id="newcoaster" type="button">+ Not listed</button>
+        </div>
       </div>
       <div class="miniform" id="coasterform">
         <div class="fld grow"><label for="nc_name">Coaster name</label>
@@ -371,10 +441,14 @@
       </div>
       <div class="clist" id="clist"><div class="hint">Pick a park, or search for a coaster.</div></div>
     </div>
-    <div class="panel basket">
+    <div class="panel basket idle" id="basketpanel">
       <h3 id="baskethead">This day</h3>
       <div id="basket"><div class="hint" style="padding:6px 0">Nothing staged yet.</div></div>
       <div class="tot"><span id="tot_c">0 coasters</span><span id="tot_r">0 rides</span></div>
+      <!-- Carter, 2026-09-27: say that a ride on a new coaster adds the credit.
+           It used to be a paragraph above the park box; it belongs where you
+           save. -->
+      <p class="totnote" id="totnote">Re-rides count. A coaster new to you joins your credits too.</p>
       <!-- The date sits at the end because it is the last thing you decide: pick
            a park, stage the rides, then say which day they were. -->
       <div class="fld" id="datefld" style="margin:0 0 12px">
@@ -387,12 +461,22 @@
              and offers to load it. See beginEdit(). -->
         <p class="note" id="dayhint" style="display:none;margin:2px 0 0"></p>
       </div>
-      <button class="primary" id="save" disabled>Save day</button>
-      <button class="ghost" id="clear" style="margin-left:8px">Clear</button>
+      <div class="actions">
+        <button class="primary" id="save" disabled>Save day</button>
+        <button class="ghost" id="clear">Clear</button>
+      </div>
       <div class="msg" id="msg"></div>
     </div>
   </div>
+  <p class="loglinks">Earlier rides:
+    <a href="/welcome?add=1" id="addpast">Add past credits &rarr;</a><a href="/import" id="importlink">Import a list &rarr;</a></p>
 </div></section>
+
+<!-- The save bar: phones only, while anything is staged. See .savebar. -->
+<div class="savebar" id="savebar" role="region" aria-label="Staged rides">
+  <button type="button" class="sum" id="sb_sum"><b id="sb_main"></b><span id="sb_sub"></span></button>
+  <button type="button" class="primary" id="sb_save">Save day</button>
+</div>
 
 <!-- The locations filter, built from the parks themselves so a new location
      appears the day a park in it does. It lives at the end of <body> and is
@@ -441,6 +525,18 @@ var DAYS={};
 var OWNED_GEN=0;   // which loadOwned() call is the latest; see there
 var FIRST_LOAD_DONE=false;   // see loadOwned: an empty count opens on Add credits
 function basketCount(){ return Object.keys(basket||{}).length; }
+// The order coasters went into the basket. `basket`'s keys are numbers, which
+// an object always lists in numeric order — so the basket used to read in
+// coaster-id order, matching neither what you tapped nor the list.
+var TAPPED=[];
+function basketIds(){
+  var ids=Object.keys(basket), seen={}, out=[];
+  TAPPED=TAPPED.filter(function(k){ return basket[k]; });
+  TAPPED.forEach(function(k){ seen[k]=1; out.push(k); });
+  ids.forEach(function(k){ if(!seen[k]) out.push(k); });
+  return out;
+}
+function tapped(id){ id=String(id); if(TAPPED.indexOf(id)<0) TAPPED.push(id); }
 var EDITING=null;
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -521,7 +617,7 @@ function boot(){
   $('date').addEventListener('change',offerDay);
   $('date').addEventListener('input',offerDay);
   wireAdders(); wireRiderAdd(); wireRiderLine(); wireNearMe(); wireParkFilter();
-  wireRegions(); wireMode();
+  wireRegions(); wireMode(); wireSaveBar();
   $('addpast').onclick=function(e){ e.preventDefault(); toAddCredits(function(){ setMode('list'); }); };
   // ?mode=list opens straight on "Coaster credits". The two modes are different
   // jobs — tonight's laps versus filling in years of them — and the profile page
@@ -576,6 +672,10 @@ function niceDay(d){
 }
 // Under the date field: what picking this date means right now.
 function offerDay(){
+  offerDay1();
+  if($('savebar')){ var ids=basketIds(); renderSaveBar(ids, ids.reduce(function(a,k){return a+basket[k];},0)); showBasketPanel(); }
+}
+function offerDay1(){
   var h=$('dayhint'), d=$('date').value, day=DAYS[d];
   if(MODE!=='day'){ h.style.display='none'; return; }
   if(EDITING){
@@ -586,7 +686,7 @@ function offerDay(){
   } else if(day){
     var n=Object.keys(day).reduce(function(a,k){return a+day[k];},0), c=Object.keys(day).length;
     h.style.display='';
-    h.innerHTML='You logged '+n+' ride'+(n===1?'':'s')+' on '+c+' coaster'+(c===1?'':'s')+' this day. '
+    h.innerHTML='Already saved this day: '+n+' ride'+(n===1?'':'s')+' on '+c+' coaster'+(c===1?'':'s')+'. Anything you save now adds to it. '
       +'<a href="#" id="dayload">Change that day</a>'
       +(canCopy()?' &middot; <a href="#" id="daycopy">Copy to a friend</a>':'');
   } else { h.style.display='none'; h.innerHTML=''; return; }
@@ -697,8 +797,10 @@ function setMode(m){
   $('modehint').textContent = m==='day'
     // Carter, 2026-09-27: "add language somewhere that says rides on new
     // coasters automatically add that ride to your credit list".
-    ? 'Re-rides included. Riding a coaster that isn’t in your count yet adds it to your credits too.'
+    // That line now sits under the basket totals (#totnote), where you save.
+    ? ''
     : 'All the coasters on your count. No need to add dates or ride counts.';
+  $('totnote').style.display = m==='day' ? '' : 'none';
   $('save').textContent = m==='day' ? 'Save day' : 'Add to my count';
   $('baskethead').textContent = m==='day' ? 'This day' : 'Staged';
   // Laps mean nothing in list mode and a tick means nothing in day mode, so
@@ -1298,8 +1400,8 @@ function renderList(){
   // number you are actually working against when filling in history.
   var have=0; list.forEach(function(c){ if(OWNED[c.id]) have++; });
   $('listhead').textContent = searching
-    ? ('Search — '+list.length+' match'+(list.length===1?'':'es'))
-    : (park+' — '+list.length+(MODE==='list'?(' · '+have+' in your count'):''));
+    ? ('Search \u00b7 '+list.length+' match'+(list.length===1?'':'es'))
+    : (park+' \u00b7 '+list.length+(MODE==='list'?(' \u00b7 '+have+' in your count'):''));
 
   // Steel/Wood said almost nothing — every row in a park reads the same. The
   // model is the interesting half, and the park only earns its place when you
@@ -1355,7 +1457,7 @@ function renderList(){
     el.querySelectorAll('.crow.pick').forEach(function(row){
       var toggle=function(){
         var id=+row.getAttribute('data-id');
-        if(basket[id]) delete basket[id]; else basket[id]=1;
+        if(basket[id]) delete basket[id]; else { basket[id]=1; tapped(id); }
         row.querySelector('.tick').classList.toggle('on',!!basket[id]);
         row.setAttribute('aria-checked',basket[id]?'true':'false');
         renderBasket();
@@ -1371,7 +1473,7 @@ function renderList(){
       var id=+b.closest('.crow').dataset.id;
       var n=basket[id]||0;
       n += (b.dataset.act==='inc'?1:-1);
-      if(n<=0) delete basket[id]; else basket[id]=Math.min(n,50);
+      if(n<=0) delete basket[id]; else { basket[id]=Math.min(n,50); tapped(id); }
       var v=b.closest('.stepper').querySelector('.v');
       v.textContent=basket[id]||0; v.classList.toggle('zero',!basket[id]);
       renderBasket();
@@ -1384,7 +1486,7 @@ function renderList(){
 // already ticked stays. So the basket groups by park and counts them, which is
 // also the number that matters when you are filling in a trip rather than a day.
 function renderBasket(){
-  var ids=Object.keys(basket);
+  var ids=basketIds();
   var rides=ids.reduce(function(a,k){return a+basket[k];},0);
   var order=[], byPark={};
   ids.forEach(function(k){
@@ -1392,7 +1494,6 @@ function renderBasket(){
     if(!byPark[pk]){ byPark[pk]=[]; order.push(pk); }
     byPark[pk].push(k);
   });
-  order.sort(function(a,b){ return a.localeCompare(b); });
 
   $('tot_c').textContent=ids.length+' coaster'+(ids.length===1?'':'s');
   // List mode has no ride count to report — one tick is "I have ridden this",
@@ -1409,6 +1510,7 @@ function renderBasket(){
     $('save').textContent = ids.length ? 'Save changes' : 'Remove this day';
     $('save').disabled=false;
   } else if(MODE==='day'){ $('baskethead').textContent='This day'; $('save').textContent='Save day'; }
+  showBasketPanel(); renderSaveBar(ids,rides);
   if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">'+(EDITING?'Every ride taken off — saving removes the day.':'Nothing staged yet.')+'</div>'; return; }
 
   // One park needs no heading — the picker above already says which it is.
@@ -1419,12 +1521,45 @@ function renderBasket(){
       var c=BYID[k]||{};
       return '<div class="brow"><span class="n">'+esc(c.name||('#'+k))+'</span>'
         +(MODE==='day'?'<span class="lap">×'+basket[k]+'</span>':'')
-        +'<span class="x" data-id="'+k+'" title="Remove">×</span></div>';
+        +'<button type="button" class="x" data-id="'+k+'" aria-label="Remove '+esc(c.name||'')+'">×</button></div>';
     }).join('');
   }).join('');
   $('basket').querySelectorAll('.x').forEach(function(x){
     x.onclick=function(){ delete basket[x.dataset.id]; renderList(); renderBasket(); };
   });
+}
+
+// On a phone the basket panel stays out of the way until it has something to
+// say: rides staged, a day being changed, a day already logged on this date,
+// or the result of a save.
+function showBasketPanel(){
+  var live = basketCount() || EDITING || $('dayhint').style.display!=='none' || $('msg').textContent;
+  $('basketpanel').classList.toggle('idle', !live);
+}
+function renderSaveBar(ids,rides){
+  var on = !!(ids.length || EDITING);
+  $('savebar').classList.toggle('on', on);
+  document.body.classList.toggle('barred', on);
+  if(!on) return;
+  var c=ids.length, d=$('date').value;
+  $('sb_main').textContent = MODE==='day'
+    ? rides+' ride'+(rides===1?'':'s')+' \u00b7 '+c+' coaster'+(c===1?'':'s')
+    : c+' coaster'+(c===1?'':'s');
+  $('sb_sub').textContent = EDITING ? 'Changing '+niceDay(EDITING)
+    : (MODE==='day' ? (d===TODAY ? 'Today' : (d ? niceDay(d) : 'No date yet'))+(DAYS[d]?' \u00b7 adds to '+Object.keys(DAYS[d]).reduce(function(a,k){return a+DAYS[d][k];},0)+' saved':'') : 'To your count');
+  $('sb_save').textContent=$('save').textContent;
+  $('sb_save').disabled=$('save').disabled;
+}
+function wireSaveBar(){
+  $('sb_save').onclick=function(){ $('save').click(); };
+  $('sb_sum').onclick=function(){ $('basketpanel').scrollIntoView({behavior:'instant',block:'start'}); window.scrollBy({top:-76,behavior:'instant'}); };
+}
+// After a save on a phone the result is the thing to see, and it is down in
+// the basket panel, which the bar no longer sends you to.
+function showResult(){
+  showBasketPanel();
+  if(window.matchMedia('(max-width:680px)').matches)
+    $('msg').scrollIntoView({behavior:'instant',block:'center'});
 }
 
 // ---- save ------------------------------------------------------------------
@@ -1434,10 +1569,10 @@ function renderBasket(){
 function saveEdit(entries){
   var rider=$('rider').value, to=$('date').value;
   if(!/^\d{4}-\d{2}-\d{2}$/.test(to||'')){
-    $('msg').className='msg bad'; $('msg').textContent='Pick a valid date.'; return; }
+    $('msg').className='msg bad'; $('msg').textContent='Pick a valid date.'; showResult(); return; }
   if(!entries.length && !confirm('Remove every ride from '+niceDay(EDITING)+'?')) return;
   var was=EDITING;
-  $('save').disabled=true; $('msg').className='msg'; $('msg').textContent='Saving…';
+  $('save').disabled=true; $('sb_save').disabled=true; $('sb_save').textContent='Saving…'; $('msg').className='msg'; $('msg').textContent='Saving…';
   api('PUT','/api/day',{user:rider,d:was,to:to,entries:entries})
     .then(function(r){
       var bits=[];
@@ -1451,12 +1586,12 @@ function saveEdit(entries){
         +' Now on <b>'+r.credits.toLocaleString()+'</b> coaster'+(r.credits===1?'':'s')
         +' over '+r.rides.toLocaleString()+' ride'+(r.rides===1?'':'s')+'. '
         +'<a href="/user/'+encodeURIComponent(rider)+'/credits">View the log →</a>';
-      renderBasket();
+      renderBasket(); showResult();
       return loadOwned();          // DAYS and OWNED both changed
     })
     .catch(function(e){
-      $('save').disabled=false;
-      $('msg').className='msg bad'; $('msg').textContent=String(e.message||e);
+      $('save').disabled=false; renderBasket();
+      $('msg').className='msg bad'; $('msg').textContent=String(e.message||e); showResult();
     });
 }
 function save(){
@@ -1470,10 +1605,10 @@ function save(){
   // Day mode needs one; credits mode takes one if you have it.
   var d = date || null;
   if(MODE==='day' && !/^\d{4}-\d{2}-\d{2}$/.test(d||'')){
-    $('msg').className='msg bad'; $('msg').textContent='Pick a valid date.'; return; }
+    $('msg').className='msg bad'; $('msg').textContent='Pick a valid date.'; showResult(); return; }
   if(d && !/^\d{4}-\d{2}-\d{2}$/.test(d)){
-    $('msg').className='msg bad'; $('msg').textContent='That date is not valid.'; return; }
-  $('save').disabled=true; $('msg').className='msg'; $('msg').textContent='Saving…';
+    $('msg').className='msg bad'; $('msg').textContent='That date is not valid.'; showResult(); return; }
+  $('save').disabled=true; $('sb_save').disabled=true; $('sb_save').textContent='Saving…'; $('msg').className='msg'; $('msg').textContent='Saving…';
   // Which of these were not in the count yet: after a day, the offer to rank
   // them (2026-09-27), so a new credit does not sit unranked until someone
   // remembers.
@@ -1491,10 +1626,11 @@ function save(){
         +'<a href="/user/'+encodeURIComponent(rider)+'/credits">View the log →</a>'
         +(fresh.length ? '<div style="margin-top:10px"><a class="btn" href="/user/'+encodeURIComponent(rider)+'/rankings?rank='+fresh.join(',')+'">Rank your '
           +(fresh.length===1?'new credit':fresh.length+' new credits')+'</a></div>' : '');
+      showResult();
     })
     .catch(function(e){
-      $('save').disabled=false;
-      $('msg').className='msg bad'; $('msg').textContent=String(e.message||e);
+      $('save').disabled=false; renderBasket();
+      $('msg').className='msg bad'; $('msg').textContent='Couldn’t save: '+String(e.message||e); showResult();
     });
 }
 </script>
