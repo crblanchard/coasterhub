@@ -143,11 +143,8 @@
   <!-- What you and the people you follow did: the last five things, your own
        included (Carter, 2026-10-02 — the three-day cutoff is gone). Hidden
        signed out. -->
-  <div id="factivity_wrap" hidden>
-    <span class="eyebrow lh">Friend activity</span>
-    <div class="feed" id="factivity"></div>
-    <p class="more"><a href="/changes">All activity &rarr;</a></p>
-  </div>
+  <!-- Order, Carter 2026-10-02: Friends, Global top 10, Friend activity, Top
+       users, then Recent changes and the feedback card below. -->
   <div id="friends_wrap" hidden>
     <span class="eyebrow lh">Friends</span>
     <div class="riderlist" id="friends"></div>
@@ -157,6 +154,11 @@
        a maker's or a location's page has, over every coaster, read live from
        everyone's rankings. Above Top users (Carter, same day). -->
   <div id="globaltop"></div>
+  <div id="factivity_wrap" hidden>
+    <span class="eyebrow lh">Friend activity</span>
+    <div class="feed" id="factivity"></div>
+    <p class="more"><a href="/changes">All activity &rarr;</a></p>
+  </div>
   <span class="eyebrow lh" id="top_h">Top users</span>
   <div class="riderlist" id="list"></div>
   <p class="more" id="allusers" hidden><a href="/users">All users &rarr;</a></p>
@@ -174,13 +176,6 @@
 <!-- The way to reach a person, at the foot of the hub. The address is
      assembled in script rather than written here: a mailto in the page source is
      the easiest thing in the world for an address harvester to walk off with. -->
-<!-- The home-screen nudge (2026-09-27, Carter: "sure i don't want it to be too
-     pushy"): one quiet line, phones only, signed in, not already on the home
-     screen, and gone for good once closed. -->
-<div class="container"><p class="homenudge" id="homenudge" hidden>
-  <a href="/install">Using Coaster Hub on your phone? Add it to your home screen &rarr;</a>
-  <button type="button" id="homenudge_x" aria-label="Dismiss">&times;</button>
-</p></div>
 <div class="container">
   <div class="fbcard">
     <div>
@@ -191,6 +186,13 @@
     <a class="go" id="fb_link" rel="nofollow">Contact us &rarr;</a>
   </div>
 </div>
+<!-- The home-screen nudge (2026-09-27, Carter: "sure i don't want it to be too
+     pushy"): one quiet line, phones only, signed in, not already on the home
+     screen, and gone for good once closed. -->
+<div class="container"><p class="homenudge" id="homenudge" hidden>
+  <a href="/install">Using Coaster Hub on your phone? Add it to your home screen &rarr;</a>
+  <button type="button" id="homenudge_x" aria-label="Dismiss">&times;</button>
+</p></div>
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>

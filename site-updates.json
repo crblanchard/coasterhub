@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-02T19:35:26Z",
-   "text": "The tab bar is now Home · Explore · Log · Rankings · Me, with Credits moved inside your profile and Home running Friend activity, Friends, a live Global top 10 and Top users. /log is tidier, with bigger + and − buttons and a Save bar on phones, and each of your days under Credits → Rides has an Edit day link to fix a wrong ride."
+   "at": "2026-10-02T19:45:06Z",
+   "text": "The tab bar is now Home · Explore · Log · Rankings · Me, with Credits inside your profile and Home running Friends, a live Global top 10, Friend activity, Top users and Recent changes. /log is tidier, with bigger + and − buttons and a Save bar on phones, and each of your days under Credits → Rides has an Edit day link to fix a wrong ride."
   },
   {
    "at": "2026-10-01T23:06:10Z",
