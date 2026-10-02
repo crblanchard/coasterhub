@@ -4040,6 +4040,16 @@ data. What decides what:
   the new rider or the rankings PUT 401s (claimed rider, different session) — live, the
   signup cookie makes that a non-issue.
 
+## Nav: Home · Explore · Log · Rankings · Me, mockup first (2026-10-02)
+
+Carter picked the interview's order after all: *"i like explore second a lot it feels like
+social media"*, Rankings 4th, **Credits absorbed into Me** (5th). Home stays its own
+"one spot to see everything important" (following activity, top riders, top global
+coasters, site updates); Explore is search + browse, a separate job (*"home and exploring
+are opposites"*). **Not built: he asked for a mockup before anything is pushed.**
+Mockup (5 linked phone screens; Rankings has Mine/Global, Me has Overview/Credits/Map):
+https://claude.ai/artifact/E3eRSePjRHHHxvrGUju3Py
+
 ## Possible future updates
 
 Ideas Carter parked rather than dropped — pick from here when he asks "what next".
