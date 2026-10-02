@@ -30,12 +30,16 @@ they're separate entries"*. **`site-updates.json`** feeds the "Site update" rows
   append a third. `at` is UTC ISO
   (`date -u +%Y-%m-%dT%H:%M:%SZ`). Skip handoff/CLAUDE.md-only commits.
 
-## The impeccable plugin
+## The impeccable design skill
 
-`.claude/settings.json` enables Paul Bakaus's **impeccable** design plugin
-(marketplace `pbakaus/impeccable`, Carter 2026-10-02), so a new session here has its
-`/impeccable` commands (critique, audit, polish …). Its critiques land in `.impeccable/`.
-Both folders are in `.assetsignore` — never served from coasterhub.org.
+Paul Bakaus's **impeccable** (Apache 2.0, github.com/pbakaus/impeccable, copied at
+commit 508d7e8, v4.5.0) lives in the repo as a project skill — `.claude/skills/impeccable/`
+plus its helper agents in `.claude/agents/` — because cloud sessions refuse plugins
+("Plugins aren't available in this environment", Carter 2026-10-02). So `/impeccable
+critique`, `audit`, `polish` … work in any session here. Its launcher downloads a binary
+to `~/.impeccable`, not the repo. To update: copy `plugin/skills/impeccable` and
+`plugin/agents` from a newer checkout over these. Its critiques land in `.impeccable/`.
+`.claude/` and `.impeccable/` are in `.assetsignore` — never served from coasterhub.org.
 
 ## What this sandbox can and cannot reach
 
