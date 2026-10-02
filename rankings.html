@@ -468,6 +468,7 @@
   .srow .meta{color:var(--muted);font-size:.8rem;text-align:right;flex:none;
               font-variant-numeric:tabular-nums;align-self:center;margin-left:24px;min-width:4.6em}
   .srow .meta b{display:block;color:var(--accent2);font-weight:700}
+  .srow .meta .gy{display:block}
   .srow .chev{color:var(--muted);flex:none;align-self:center;transition:transform .15s ease}
   .stog[aria-expanded="true"] .chev{transform:rotate(180deg)}
   /* Scoped to .srow: .who is also a class on the profile and the rider rows. */
@@ -818,7 +819,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002i"></script>
+<script src="/app.js?v=20261002j"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -952,6 +953,7 @@ if(!slug){
     if(shared.length){
       $('shared_sub').textContent='Coasters ranked by 2+ users';
       // All of it: the separate /rankings/all page that held the rest is gone.
+      var mineAt={}; shared.forEach(function(t){ t.who.forEach(function(w){ if(ME && w.slug===ME.slug) mineAt[t.id]=w.pos; }); });
       $('shared').innerHTML=shared.map(function(t,i){
         var c=BYID[t.id], avg=t.sum/t.n, mk=CoasterHub.maker(c);
         // Opening the row is the answer to the obvious question a shared list
@@ -969,7 +971,10 @@ if(!slug){
             +srowName(c, mk)
             // Avg on top, everywhere (Carter, 2026-09-28).
             // No list count (Carter, 2026-10-02) — opening the row shows who.
-            +'<span class="meta"><b>avg #'+(Math.round(avg*10)/10)+'</b></span>'
+            // Your place under it, in grey, when you have ranked it (Carter,
+            // 2026-10-02) — the same two lines as every other Global list.
+            +'<span class="meta"><b>avg #'+(Math.round(avg*10)/10)+'</b>'
+            +(mineAt[t.id]?'<span class="gy">your #'+mineAt[t.id]+'</span>':'')+'</span>'
             +'<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" '
               +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
               +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'

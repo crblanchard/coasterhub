@@ -2111,11 +2111,13 @@
             + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + '</span></span>'
             // The model too, as /rankings' Global list shows it (2026-09-28).
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '')
-            + (me ? '<span class="gyou">you #' + me + '</span>' : '')
-            // Home's card drops the list count (opts.lists: false, Carter
-            // 2026-10-02: "always two rows never three").
-            + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>' + (opts.lists === false ? '' : r.n + ' lists')
-            + (me ? '<em class="gyou2">you #' + me + '</em>' : '') + '</span>' + chev + '</a>';
+            // Two lines, never three (Carter, 2026-10-02): the average in the
+            // accent, and under it in grey "your #3" when you have ranked it —
+            // on every Global list, every width (Carter, same day) — else how
+            // many lists (Home's card leaves that out: opts.lists false).
+            + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>'
+            + (me ? '<span class="gy">your #' + me + '</span>' : (opts.lists === false ? '' : r.n + ' lists'))
+            + '</span>' + chev + '</a>';
         }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
           + (one && !opts.moreHref ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');
       }
