@@ -139,10 +139,13 @@
       +   '<div class="msg" data-msg="pw"></div>'
       + '</form></div>'
 
+      // Folded into one small Account menu (Carter, 2026-10-02): two rarely
+      // used buttons were sitting beside the count, the thing you came to see.
+      + '<details class="acctmenu"><summary>Account</summary>'
       + '<div class="ownrow">'
       +   '<button class="ghost" data-el="pwbtn">Change password</button>'
       +   '<button class="ghost" data-el="signout">Sign out</button>'
-      + '</div>'
+      + '</div></details>'
       + '<div class="msg" data-msg="out"></div>';
   }
 
@@ -186,7 +189,9 @@
     // On a phone the two housekeeping buttons sit beside the numbers in the hero
     // instead of taking a row of their own. Moved, not copied, so their click
     // handlers come along; a marker remembers where they go back to.
-    var row = root.querySelector(".ownrow"), slot = document.getElementById("ownslot");
+    // Not any more (2026-10-02): they live in the Account menu under the bio,
+    // on a phone too, so nothing housekeeping sits beside the count.
+    var row = null, slot = document.getElementById("ownslot");
     if (row && slot && window.matchMedia) {
       var mark = document.createComment("ownrow");
       row.parentNode.insertBefore(mark, row);

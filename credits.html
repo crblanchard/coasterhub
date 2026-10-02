@@ -11,8 +11,8 @@
 <base href="/">
 <title>Credits — Coaster Hub</title>
 <meta name="description" content="Every ride, by day or as one flat list — Coaster Hub.">
-<link rel="stylesheet" href="/style.css?v=20261002c">
-<link rel="stylesheet" href="/lists.css?v=20261002b">
+<link rel="stylesheet" href="/style.css?v=20261002d">
+<link rel="stylesheet" href="/lists.css?v=20261002c">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -73,6 +73,7 @@
   .startcard p{color:var(--muted);margin:6px 0 16px;max-width:52ch}
   .startcard .btn{display:inline-block;margin-right:14px}
   .startcard .alt{color:var(--accent2);font-weight:600;text-decoration:none;white-space:nowrap}
+  .hero.withrh h1,.hero.withrh h1 + p{display:none}
 </style>
 </head>
 <body>
@@ -184,7 +185,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002h"></script>
+<script src="/app.js?v=20261002i"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('count');
@@ -246,6 +247,16 @@ if(slug){
   }).catch(function(){ /* signed out: leave it hidden */ });
 }
 COMBINED = !slug;
+// The rider's head, the same one the Overview and Map tabs open with
+// (CoasterHub.riderHead, 2026-10-02 — "one header, try it"). The page's own
+// headline and line under it step aside for it; the rider switcher stays.
+if(slug){
+  var hc=document.querySelector('.hero .container'), rh=document.createElement('div');
+  rh.className='rhead';
+  hc.insertBefore(rh, hc.querySelector(':scope > h1'));
+  document.querySelector('.hero').classList.add('withrh');
+  CoasterHub.riderHead(rh, slug);
+}
 // No rider in the address: this page is always somebody's now (2026-09-25).
 // The site-wide lists are /coasters and /parks; you go to your own credits,
 // and a visitor to the list they asked for. Old links (/credits?view=list,
@@ -375,7 +386,9 @@ return Promise.all([
     // 2026-09-17) — the headline already says what the list is. An empty <p>
     // still takes its margin, so hide it rather than blanking it.
     function heroSub(t){
-      var p=document.querySelector('.hero p');
+      // The line under the headline — not the first <p> in the hero, which is
+      // the rider head's count line now.
+      var p=document.querySelector('.hero h1 + p');
       p.textContent=t; p.style.display = t ? '' : 'none';
     }
     if(COMBINED){

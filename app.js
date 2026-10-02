@@ -1452,9 +1452,21 @@
   // Only for a named rider — /credits with nobody is the everyone view. /map is
   // a full-screen page and keeps no strip; Me (or Back) is the way out of it.
   function meTabs(page, slug) {
-    if (!slug || (page !== "profile" && page !== "count")) return;
+    if (!slug || (page !== "profile" && page !== "count" && page !== "map")) return;
+    if (document.querySelector(".metabs")) return;
     var hero = document.querySelector("section.hero");
-    if (!hero || document.querySelector(".metabs")) return;
+    // The map is a full-screen page with no hero: it gets a slim band with the
+    // rider's head in it, so its tabs stay (Carter, 2026-10-02: "one header,
+    // try it"). Credits wears the same head inside its hero (credits.html).
+    if (page === "map") {
+      var top = document.querySelector("header.nav"); if (!top) return;
+      hero = document.createElement("section");
+      hero.className = "rhband";
+      hero.innerHTML = '<div class="container"><div class="rhead"></div></div>';
+      top.parentNode.insertBefore(hero, top.nextSibling);
+      riderHead(hero.querySelector(".rhead"), slug);
+    }
+    if (!hero) return;
     var nav = document.createElement("nav");
     nav.className = "metabs";
     nav.setAttribute("aria-label", "This rider");
@@ -1462,6 +1474,25 @@
       return '<a href="' + userPageHref(slug, t[0]) + '"' + (t[0] === page ? ' class="on" aria-current="page"' : '') + '>' + t[1] + '</a>';
     }).join("") + '</div>';
     hero.parentNode.insertBefore(nav, hero.nextSibling);
+  }
+  // A rider's head — picture, name, @username, "562 coasters. 45 ranked." —
+  // the same identity the profile opens with, for the Credits and Map tabs, so
+  // switching tabs does not swap the whole top of the page for another one.
+  function riderHead(el, slug) {
+    if (!el || !slug) return;
+    Promise.all([fetchUsers().catch(function () { return USERS; }), fetchSummary()]).then(function (r) {
+      var E = searchEsc, u = null, sm = null;
+      USERS.forEach(function (x) { if (x.slug === slug) u = x; });
+      (r[1] || []).forEach(function (x) { if (x.slug === slug) sm = x; });
+      var nm = (u && u.name) || slug;
+      var pic = u && u.avatar
+        ? '<span class="rh-av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
+        : '<span class="rh-av">' + E(nm.charAt(0).toUpperCase()) + '</span>';
+      el.innerHTML = '<a class="rh" href="' + userPageHref(slug, "profile") + '">' + pic
+        + '<span class="rh-who"><b>' + E(nm) + '</b><span>@' + E(slug) + '</span></span></a>'
+        + (sm ? '<p class="rh-count"><a href="' + userPageHref(slug, "count") + '">' + Number(sm.credits || 0).toLocaleString() + ' coasters.</a> '
+              + '<a href="' + userPageHref(slug, "rankings") + '">' + Number(sm.ranked || 0).toLocaleString() + ' ranked.</a></p>' : '');
+    });
   }
   // Light one tab, in the header and the tab bar alike ("" = none).
   function lightNav(key) {
@@ -2446,7 +2477,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, riddenOf: riddenOf, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow,
               riderFace: riderFace, needFirst: needFirst, foldList: foldList, globalTally: globalTally };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

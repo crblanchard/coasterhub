@@ -305,7 +305,7 @@ body{background-image:
    compact, because the trail under it already says where you are and the
    tiles are what you came for (Carter, 2026-09-25: "definitely yes"). Each
    page's inline --hero-t/--hero-b still sets the padding. */
-.hero.compact .badge{margin-bottom:10px;padding:4px 11px;font-size:.68rem}
+.hero.compact .badge{margin-bottom:10px;padding:4px 11px;font-size:.72rem}
 .hero.compact h1,.hero.compact h1.wide{font-size:clamp(1.75rem,4.4vw,2.6rem);line-height:1.08}
 .hero.compact p{margin:8px 0 0;font-size:1rem}
 /* Compact is every page's header now (Carter, 2026-09-27: "make them all the
@@ -861,3 +861,29 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 .metabs a:hover{color:var(--fg)}
 .metabs a.on{color:var(--fg);border-bottom-color:var(--accent2)}
 @media (max-width:640px){ .metabs .container{display:grid;grid-template-columns:repeat(3,1fr);gap:0} .metabs a{text-align:center;padding:12px 4px} }
+
+/* A rider's head on the Credits and Map tabs (app.js riderHead, 2026-10-02):
+   the profile's identity, smaller, so the three tabs read as one place. */
+.rhead{display:flex;align-items:center;justify-content:space-between;gap:10px 18px;flex-wrap:wrap}
+.rh{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--fg);min-width:0}
+.rh-av{flex:none;width:52px;height:52px;border-radius:999px;background-color:var(--soft);background-size:cover;
+  background-position:center;background-origin:border-box;border:1px solid var(--line);display:flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:1.3rem;color:var(--accent2)}
+.rh-who{display:flex;flex-direction:column;min-width:0}
+.rh-who b{font-size:1.35rem;font-weight:800;line-height:1.15}
+.rh-who span{color:var(--muted);font-size:.85rem}
+.rh-count{margin:0;font-size:1.15rem;font-weight:800}
+.rh-count a{color:var(--fg);text-decoration:none}
+.rh-count a:hover{color:var(--accent2)}
+.hero .rhead{margin:0 0 14px}
+.rhband{padding:14px 0;border-bottom:1px solid var(--line);background-color:var(--panel)}
+
+/* The Account menu on your own profile: Change password and Sign out, folded. */
+.profedit .acctmenu{margin:8px 0 0}
+.profedit .acctmenu summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;
+  color:var(--muted);font-size:.86rem;font-weight:600;padding:8px 0}
+.profedit .acctmenu summary::-webkit-details-marker{display:none}
+.profedit .acctmenu summary::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;
+  border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px)}
+.profedit .acctmenu[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.profedit .acctmenu summary:hover{color:var(--fg)}

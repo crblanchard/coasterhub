@@ -5470,3 +5470,19 @@ when > 0 · one of Riders here / Models / Years built / Parks) → the main list
 - Folds: main lists 10, secondary lists (rankings, the coaster page's More) 5.
 - Left out on purpose: Riders on manufacturer/model/location (clutter, and it needs everyone's
   rides), chevrons on group rows (Carter, 2026-09-28: no chevrons).
+
+## Layout changes Carter approved from the critiques (2026-10-02)
+- **Home:** the Global card is a top 5 on a phone (`fold`), top 10 wider. Top users still lists people
+  you follow (Carter: "keep people you follow though").
+- **Explore:** Parks and Coasters as two big cards, then Makers · Locations · Map small, then Riders
+  (suggestions under it). The Users card is gone; "All N riders →" sits on the Riders heading.
+- **/log:** one search box. Coasters come up in the park box's popup under the parks; picking one
+  opens its park with the ride brought into view (`pickCoaster`). The old `#search` input is hidden,
+  not removed — `currentList()` still reads it. A day that already has rides shows one line
+  (`#dayline`, phones) instead of opening the basket panel.
+- **Profile:** Change password / Sign out are in an Account menu under the bio (profile-edit.js),
+  no longer moved beside the count on a phone. **Trial** of one header: Credits and Map open with
+  `CoasterHub.riderHead` (picture, name, @username, "562 coasters. 45 ranked."); the map gets it in
+  a band with the Overview · Credits · Map tabs, so they no longer vanish there. Overview keeps its
+  fuller hero. Carter: "try it, not sure how it would look" — ask how it lands before going further.
+- Not taken: credits as the main number on rider rows (his Sep 24 ranked-first sort stays).

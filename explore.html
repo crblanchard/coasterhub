@@ -11,8 +11,8 @@
 <base href="/">
 <title>Explore — Coaster Hub</title>
 <meta name="description" content="Search and browse every coaster, park, manufacturer, location and rider on Coaster Hub.">
-<link rel="stylesheet" href="/style.css?v=20261002c">
-<link rel="stylesheet" href="/lists.css?v=20261002b">
+<link rel="stylesheet" href="/style.css?v=20261002d">
+<link rel="stylesheet" href="/lists.css?v=20261002c">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -35,9 +35,19 @@
     background-color:var(--panel);border:1px solid var(--line);text-decoration:none;color:var(--fg);min-width:0}
   .xgrid a:hover{border-color:var(--accent2)}
   .xgrid b{font-weight:700;font-size:1rem}
+  /* Parks and Coasters: two big cards. The rest: one smaller row. */
+  .xgrid.xbig{grid-template-columns:repeat(2,1fr)}
+  .xgrid.xbig a{padding:20px 18px;min-height:96px;justify-content:flex-end}
+  .xgrid.xbig b{font-size:1.3rem;font-weight:800}
+  .xgrid.xsmall{grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+  .xgrid.xsmall a{padding:11px 12px}
+  .xgrid.xsmall b{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .xgrid.xsmall span{font-size:.78rem}
+  @media (max-width:420px){ .xgrid.xsmall a{padding:10px 9px} .xgrid.xsmall b{font-size:.8rem;letter-spacing:-.01em} }
+  .sugsub{color:var(--muted);font-size:.86rem;margin:0 0 8px}
   .xgrid span{color:var(--muted);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   @media (max-width:420px){ .xgrid span{white-space:normal} }
-  @media (max-width:760px){ .xgrid{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:760px){ .xgrid.xbig{grid-template-columns:repeat(2,1fr)} .xgrid.xsmall{grid-template-columns:repeat(3,1fr)} }
   .sughead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px}
   .sughead a{color:var(--accent2);font-weight:600;font-size:.9rem;text-decoration:none}
   /* Suggested (Carter, 2026-10-02: "a suggested or recommended ... with
@@ -83,17 +93,22 @@
            stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <span>Search coasters, parks, makers, riders&hellip;</span>
     </button>
-    <div class="xgrid">
-      <a href="/coasters"><b>Coasters</b><span id="x_coasters">&nbsp;</span></a>
+    <!-- Parks and Coasters first and big, then the other ways in, smaller,
+         then people (Carter, 2026-10-02, from the critique: six equal cards
+         with nothing leading). -->
+    <div class="xgrid xbig">
       <a href="/parks"><b>Parks</b><span id="x_parks">&nbsp;</span></a>
-      <a href="/manufacturers"><b>Manufacturers</b><span id="x_makers">&nbsp;</span></a>
+      <a href="/coasters"><b>Coasters</b><span id="x_coasters">&nbsp;</span></a>
+    </div>
+    <div class="xgrid xsmall">
+      <a href="/manufacturers"><b>Makers</b><span id="x_makers">&nbsp;</span></a>
       <a href="/locations"><b>Locations</b><span id="x_locs">&nbsp;</span></a>
-      <a href="/map"><b>Map</b><span>Find your nearest ride</span></a>
-      <a href="/users"><b>Riders</b><span id="x_users">&nbsp;</span></a>
+      <a href="/map"><b>Map</b><span>Nearest rides</span></a>
     </div>
   </div>
+  <div class="sughead"><span class="eyebrow">Riders</span><a href="/users">All <span id="x_users">riders</span> &rarr;</a></div>
   <div id="sug_wrap" hidden>
-    <div class="sughead"><span class="eyebrow">Suggested for you</span><a href="/users">All riders &rarr;</a></div>
+    <p class="sugsub">Suggested for you</p>
     <div class="riderlist" id="sug"></div>
   </div>
 </div></section>
@@ -103,7 +118,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002h"></script>
+<script src="/app.js?v=20261002i"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('explore');
@@ -120,13 +135,13 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   $('x_parks').textContent=nf(Object.keys(parks).length)+' parks';
   // The same words the pages they open use (critique, 2026-10-02).
   $('x_coasters').textContent=nf(cs.length)+' coasters';
-  $('x_makers').textContent=nf(Object.keys(makers).length)+' manufacturers';
+  $('x_makers').textContent=nf(Object.keys(makers).length)+' makers';
   $('x_locs').textContent=nf(Object.keys(locs).length)+' places';
 }).catch(function(){ /* the cards still link; they just go without numbers */ });
 
 // How many riders, for the Users card. The list itself is /users.
 CoasterHub.fetchUsers().then(function(){
-  $('x_users').textContent=nf((CoasterHub.USERS||[]).length)+' riders';
+  $('x_users').textContent=nf((CoasterHub.USERS||[]).length)+' riders';   // "All 14 riders →"
 }).catch(function(){});
 // Suggested for you: riders you don't follow yet, the ones your friends follow
 // first, then whoever has ranked and logged the most. Five, each with a Follow
