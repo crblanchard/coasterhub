@@ -557,6 +557,58 @@
     .rrow .glob b{font-size:.84rem}
     .rrow .glob i{font-size:.72rem}
   }
+
+  /* ---- Critique, 2026-10-02 ---------------------------------------------- */
+  /* Buttons take the page's font (they were Arial), and the pick cards its size. */
+  .rrow button,.hh button{font-family:inherit}
+  .pick{font-size:1rem}
+  /* A tapped card stays lit on a phone (sticky hover), which read as already
+     picked on the next question: hover only where there is a pointer. */
+  .pick:hover{border-color:var(--line);background:transparent}
+  @media (hover:hover){ .pick:hover{border-color:var(--accent2);background:var(--tint)} }
+  /* The badge read 10.9px, under the floor. */
+  .hero.compact .badge{font-size:.75rem}
+  /* × on the left, away from ↑ ↓, and only while editing. */
+  .rrow .del.lone{flex:none;width:30px;height:30px;border-radius:8px;border:1px solid transparent;background:transparent;
+    color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
+  .rrow .del.lone:hover{color:var(--bad);border-color:var(--bad)}
+  #mine.readonly .rrow .del.lone{display:none}
+  /* The number moves the row while editing. */
+  #mine:not(.readonly) .rrow > .pos{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;text-decoration-color:var(--line)}
+  .edithint{display:none;color:var(--muted);font-size:.84rem;margin:0 0 8px}
+  #mine:not(.readonly) .edithint{display:block}
+  /* Editing: the hero folds to its name — the list is what you came for. */
+  body:has(#mine:not(.readonly)) #hero_p,body:has(#mine:not(.readonly)) #rprog{display:none}
+  /* The Models filter clears on Edit (dragging needs the whole list), so its
+     button goes while editing. */
+  #mine:not(.readonly) #mfbtn{display:none}
+  /* Rank more · Cancel · Save in a dock above the tab bar on a phone. */
+  .editdock{display:none}
+  @media (max-width:680px){
+    body:has(#mine:not(.readonly)) .editdock{display:flex;position:fixed;z-index:19;left:10px;right:10px;
+      bottom:calc(98px + env(safe-area-inset-bottom,0px));align-items:center;gap:8px;padding:8px 8px 8px 14px;
+      border-radius:14px;background:var(--panel);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+    .editdock .status{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .editdock button{min-height:42px}
+    body:has(#mine:not(.readonly)){padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
+    #mine:not(.readonly) > .bar:first-child #cancel,#mine:not(.readonly) > .bar:first-child #save,
+    #mine:not(.readonly) > .bar:first-child .status{display:none}
+    /* What is left of the bar: the tabs, then Categories and Rank more on one line. */
+    #mine:not(.readonly) > .bar:first-child .spacer{display:none}
+  }
+  /* Bigger ↑ ↓ on a phone, where a thumb is doing a long session. */
+  @media (max-width:560px){
+    .rrow .acts button{width:36px;height:36px;font-size:1rem}
+    /* Names wrap rather than cut off: two "Big Thunder Mount…" were the same row. */
+    .rrow .nm b{white-space:normal;overflow:visible}
+  }
+  .vsx{text-align:center}
+  /* The end of a Rank more run. */
+  .rqrow{display:flex;gap:12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line)}
+  .rqrow:last-child{border-bottom:0}
+  .rqrow b{flex:none;min-width:2.6em;color:var(--accent2);font-variant-numeric:tabular-nums}
+  .rqrow span{min-width:0;font-weight:600}
+  .rqrow i{display:block;font-style:normal;font-weight:400;color:var(--muted);font-size:.8rem}
 </style>
 </head>
 <body>
@@ -660,6 +712,7 @@
         <span>Some rides that are the same appear in more than one place.</span>
         <button class="ghost" type="button" id="gather">Gather them</button>
       </div>
+      <p class="edithint">Drag the handle, or tap a number to move it to a spot.</p>
       <div class="rank" id="ranklist"></div>
       <div class="hint" id="rank_empty" style="display:none">Nothing ranked yet.</div>
     </div>
@@ -675,20 +728,20 @@
           <option value="park">Park</option>
         </select>
         <select id="f_addpark"><option value="">All parks</option></select>
-        <button class="ghost facettog" type="button" id="mf_toggle" aria-expanded="false"
-                aria-controls="mfpanel">Manufacturers</button>
+        <button class="ghost facettog" type="button" id="mk_toggle" aria-expanded="false"
+                aria-controls="mkpanel">Manufacturers</button>
         <button class="ghost facettog" type="button" id="loc_toggle" aria-expanded="false"
                 aria-controls="locpanel">Locations</button>
         <label class="status" style="display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="all_coasters"> Search all coasters
         </label>
       </div>
-      <div class="facetbox" id="mfpanel" hidden>
+      <div class="facetbox" id="mkpanel" hidden>
         <div class="facetbar">
-          <span class="status" id="mfnote"></span>
-          <button class="ghost" type="button" id="mf_clear" disabled>Clear</button>
+          <span class="status" id="mknote"></span>
+          <button class="ghost" type="button" id="mk_clear" disabled>Clear</button>
         </div>
-        <div class="facetlist" id="mflist"></div>
+        <div class="facetlist" id="mklist"></div>
       </div>
       <div class="facetbox" id="locpanel" hidden>
         <div class="facetbar">
@@ -732,10 +785,32 @@
     </div>
     <div class="hhfoot">
       <span class="prog" id="hh_prog"></span>
+      <button class="ghost" id="hh_undo" hidden>Undo</button>
       <button class="ghost" id="hh_skip" hidden></button>
       <button class="ghost" id="hh_cancel">Cancel</button>
     </div>
   </div>
+</div>
+
+<!-- The end of a Rank more run: where each landed, and five more. -->
+<div class="hh" id="rqdone" style="display:none">
+  <div class="hhbox">
+    <h3 id="rqd_h"></h3>
+    <div class="sub" id="rqd_prog"></div>
+    <div id="rqd_list"></div>
+    <div class="hhfoot">
+      <span class="prog"></span>
+      <button class="ghost" id="rqd_close">Done</button>
+      <button class="primary" id="rqd_more">Rank 5 more</button>
+    </div>
+  </div>
+</div>
+
+<!-- Editing on a phone: Cancel and Save stay in reach (critique, 2026-10-02). -->
+<div class="editdock" id="editdock">
+  <span class="status" id="dockstatus">No changes</span>
+  <button class="ghost" id="dock_cancel" type="button">Cancel</button>
+  <button class="primary" id="dock_save" type="button">Save</button>
 </div>
 
 <footer class="site"><div class="container foot-inner">
@@ -957,8 +1032,8 @@ if(!slug){
       // ranking made easy for new users, "not everything to start" when
       // somebody has 200 credits). It does both steps, and the line under it
       // says to start with a handful: Rank places each one by comparison.
-      $('rank_empty').innerHTML = '<b>Nothing ranked yet.</b> Start with your ten or so favorites — '
-        + '<b>Rank</b> finds each one&rsquo;s spot by asking which of two you liked more. '
+      $('rank_empty').innerHTML = '<b>Nothing ranked yet.</b> We&rsquo;ll start with your ten tallest — '
+        + 'each one finds its spot by asking which of two you liked more. '
         + 'The rest can come later.<div style="margin-top:12px">'
         + '<button type="button" class="btn" id="rank_start">Start ranking</button></div>';
       // Straight into head-to-head with the ten tallest, the way /welcome
@@ -979,8 +1054,7 @@ if(!slug){
         $('mine').classList.remove('readonly');
         // The read-only line, plus the one thing edit mode has to say: that
         // the list is draggable.
-        $('hero_p').textContent = 'Judgment-free zone. '
-          + 'Drag to reorder, or compare two at a time.';
+        // The how-to sits over the list now (.edithint); the hero folds away.
       };
     });
     coasters.forEach(function(c){ var pk=parks[c.park];
@@ -1056,7 +1130,21 @@ function wire(){
   $('hh_cancel').onclick=function(){
     // A filtered move took the ride out of the list first: put it back.
     if(hh && hh.restore!=null){ ORDER.splice.apply(ORDER,[hh.restore,0,hh.id].concat(hh.mates||[])); closeHH(); renderRank(); return; }
-    var was=!!RQ; RQ=null; closeHH(); if(was && dirty) save(); };
+    // Cancel mid-run keeps what was placed, saves it, and goes back to the
+    // read-only list if that is where the run started.
+    var was=!!RQ, fr=RQ&&RQ.fromRead; RQ=null; closeHH();
+    if(was && dirty) save(fr ? doneEditing : null); else if(was && fr) cancelEdit(); };
+  $('hh_undo').onclick=function(){
+    if(!hh || !hh.hist || !hh.hist.length) return;
+    var h=hh.hist.pop(); hh.lo=h.lo; hh.hi=h.hi; hh.asked=h.asked; hh.cmp=h.cmp; stepHH(); };
+  $('rqd_close').onclick=function(){ $('rqdone').style.display='none'; };
+  $('rqd_more').onclick=function(){ $('rqdone').style.display='none'; rankMore(5); };
+  $('dock_cancel').onclick=function(){ $('cancel').click(); };
+  $('dock_save').onclick=function(){ $('save').click(); };
+  // The dock says what the bar's status says.
+  new MutationObserver(function(){ $('dockstatus').innerHTML=$('status').innerHTML || 'No changes';
+    $('dockstatus').className='status '+($('status').className.replace('status','').trim()); })
+    .observe($('status'), {childList:true, characterData:true, subtree:true, attributes:true});
   $('hh_skip').onclick=function(){
     if(!hh || hh.skipAt==null) return;
     var at = hh.skipAt<hh.B.length ? hh.B[hh.skipAt] : ORDER.length;
@@ -1094,7 +1182,9 @@ var GLOBAL=null;
 function globCell(id){
   if(!GLOBAL) return '';
   var g=GLOBAL.by[KEY(id)];
-  if(!g) return '<span class="glob"><i>Only your list</i></span>';
+  // Nothing at all while nobody else has ranked it (critique, 2026-10-02:
+  // "Only your list" on nine rows in ten, and on Cole's list it said "your").
+  if(!g) return '';
   // No list count (Carter, 2026-10-02): the place and the average are enough.
   return '<span class="glob"><b>Global #'+g.pos+'</b><i>avg #'+(Math.round(g.avg*10)/10)+'</i></span>';
 }
@@ -1204,13 +1294,14 @@ function renderRank(){
     // to open. It still moves and deletes as one block.
     var cat = b.g && !b.g.racing;
     if (b.g && b.g.racing) return '<div class="rrow tap'+(STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'" data-rid="'+b.ids[0]+'" data-stat="'+b.ids[0]+'">'
+      +'<button class="del lone" data-del="'+i+'" title="Remove from your ranking" aria-label="Remove from your ranking">\u00d7</button>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
       +'<span class="pos rng">'+(b.from+1)+'\u2013'+(b.to+1)+'</span>'
       +headLinks(one, b.g.name)
       +'<span class="acts">'
       +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
       +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
-      +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
+      
       +'</span>'+racingStats(b)+'</div>';
     // A run of the same ride is one row: "Batman: The Ride x5", numbered with
     // the span it occupies. It still holds five positions — the list saved is
@@ -1295,6 +1386,7 @@ function renderRank(){
       +' data-rid="'+b.ids[0]+'"'+(b.g?'':' data-stat="'+b.ids[0]+'"')
       +(b.g?' data-open="'+key+'" role="button" tabindex="0" aria-expanded="'
             +(OPEN[key]?'true':'false')+'"':'')+'>'
+      +'<button class="del lone" data-del="'+i+'" title="Remove from your ranking" aria-label="Remove from your ranking">\u00d7</button>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
       +head
       +(b.g?'':globCell(b.ids[0]))
@@ -1302,7 +1394,7 @@ function renderRank(){
 
         +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
         +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
-        +'<button class="del" data-del="'+i+'" title="Remove" aria-label="Remove">\u00d7</button>'
+        
       +'</span>'+members+(b.g?'':statsFor(b.ids[0]))+'</div>';
   }).join('');
   if($('mfoff')) $('mfoff').onclick=function(e){ e.preventDefault(); MSEL={}; mfDraw(); renderRank(); };
@@ -1326,6 +1418,17 @@ function renderRank(){
   $('catn').textContent = CATS.on===false ? 'off' : live;
   $('catn').className = CATS.on===false ? 'n off' : 'n';
   el.querySelectorAll('[data-up]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.up,-1); }; });
+  // Editing, a row's number moves it straight to a spot (critique, 2026-10-02:
+  // #250 to #30 was a long drag or 220 taps on ↑).
+  el.querySelectorAll('.rrow > .pos').forEach(function(p){ p.onclick=function(ev){
+    if($('mine').classList.contains('readonly') || mfOn()) return;
+    ev.stopPropagation();
+    var row=p.closest('.rrow'), bs=blocks(), at=+row.dataset.i, b=bs[at]; if(!b) return;
+    var nm=b.g ? b.g.name : ((BYID[b.ids[0]]||{}).name||'this one');
+    var v=window.prompt('Move '+nm+' to which spot? (1–'+ORDER.length+')', String(b.from+1));
+    var n=parseInt(v,10); if(!n || n===b.from+1) return;
+    moveTo(at, Math.max(1, Math.min(n, ORDER.length)));
+  }; });
   el.querySelectorAll('[data-down]').forEach(function(b){ b.onclick=function(){ move(+b.dataset.down,1); }; });
   // The whole card is the way in. Every control sitting on it stops the click,
   // or moving a category up the list would also open it — and the grips are
@@ -1628,6 +1731,19 @@ function move(i,d){
     ORDER=head.concat(d>0?b.ids.concat(a.ids):a.ids.concat(b.ids)).concat(tail);
     markDirty(); renderRank();
   });
+}
+
+// Block `at` to position n (1-based), landing on a block boundary: the
+// block that held that spot, and everything after it, shift down one.
+function moveTo(at, n){
+  var bs=blocks(), a=bs[at]; if(!a) return;
+  var rest=bs.filter(function(b,k){ return k!==at; }), pos=0, j=rest.length;
+  for(var k=0;k<rest.length;k++){ if(pos>=n-1){ j=k; break; } pos+=rest[k].ids.length; }
+  var flat=function(list){ return [].concat.apply([], list.map(function(b){ return b.ids; })); };
+  ORDER=flat(rest.slice(0,j)).concat(a.ids).concat(flat(rest.slice(j)));
+  markDirty(); renderRank();
+  var r=document.querySelector('#ranklist [data-rid="'+a.ids[0]+'"]');
+  if(r) r.scrollIntoView({behavior:'instant', block:'center'});
 }
 
 // Moving a ride while the model filter is on (Carter, 2026-09-27, option 2 of
@@ -1973,7 +2089,9 @@ function endDrag(){
 // coaster missing the field still gets a row under 'Unknown' rather than
 // vanishing: otherwise the counts do not add up to the list they filter.
 var FACETS=[
-  { id:'mf',  label:'Manufacturers', sel:{},
+  // 'mk', not 'mf': the Models filter in the bar already owns #mfpanel and
+  // #mflist, and two of each meant this one drew into the wrong box (2026-10-02).
+  { id:'mk',  label:'Manufacturers', sel:{},
     key:function(c){ return String(c&&c.manu||'').trim() || 'Unknown'; } },
   { id:'loc', label:'Locations', sel:{},
     key:function(c){ return String(c&&c.loc||'').trim() || 'Unknown'; } }
@@ -2436,7 +2554,7 @@ function openHH(id, mates, g){
   // lo/hi/cmp are indexes into B, so one answer settles a whole family, and a
   // new ride can never land in the middle of one.
   var B=blocks().map(function(b){ return b.from; });
-  hh={id:id, mates:mates, g:g||null, B:B, lo:0, hi:B.length, asked:0, cmp:{},
+  hh={id:id, mates:mates, g:g||null, B:B, lo:0, hi:B.length, asked:0, cmp:{}, hist:[],
       most:Math.ceil(Math.log2(B.length+1))+2};
   $('hh').style.display='flex';
   stepHH();
@@ -2495,12 +2613,19 @@ function stepHH(){
   var aMdl = ga ? ga.mdl : CoasterHub.maker(a), bMdl = gb ? gb.mdl : CoasterHub.maker(b);
   $('hh_a').innerHTML='<b>'+esc(aName)+'</b><span>'+esc(aSub)+'</span>'+(aMdl?'<span class="mdl">'+esc(aMdl)+'</span>':'');
   $('hh_b').innerHTML='<b>'+esc(bName)+'</b><span>'+esc(bSub)+'</span>'+(bMdl?'<span class="mdl">'+esc(bMdl)+'</span>':'');
-  $('hh_prog').textContent=(RQ?'Coaster '+RQ.done+' of '+RQ.total+' · ':'')+'Pick '+(hh.asked+1)+' · '
-    +(confirming?'confirming against your #':'against your #')+(pos+1);
+  // How many more, roughly (critique, 2026-10-02: the end was invisible): the
+  // halvings still to do plus a confirmation.
+  var togo=Math.max(1, (hh.hi>hh.lo ? Math.ceil(Math.log2(hh.hi-hh.lo+1)) : 0) + 1);
+  $('hh_prog').textContent=(RQ?'Coaster '+RQ.done+' of '+RQ.total+' · ':'')+'Pick '+(hh.asked+1)+' of about '+(hh.asked+togo)
+    +' · against your #'+(pos+1);
+  $('hh_undo').hidden=!hh.hist.length;
   $('hh_a').onclick=function(){ answerHH(mid,true); };   // candidate is better
   $('hh_b').onclick=function(){ answerHH(mid,false); };  // candidate is worse
 }
 function answerHH(mid,better){
+  hh.hist.push({lo:hh.lo, hi:hh.hi, asked:hh.asked, cmp:Object.assign({}, hh.cmp)});
+  // A tapped card must not look picked on the next question.
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
   hh.cmp[mid]=better;
   if(better){ hh.hi=Math.min(hh.hi,mid);   if(hh.lo>hh.hi) hh.lo=hh.hi; }
   else      { hh.lo=Math.max(hh.lo,mid+1); if(hh.hi<hh.lo) hh.hi=hh.lo; }
@@ -2545,17 +2670,37 @@ function rankMore(n, only){
   if(only){ var want={}; only.forEach(function(id){ want[KEY(id)]=1; });
     pool=pool.filter(function(id){ return want[KEY(id)]; }); }
   var ids=pool.slice(0,n); if(!ids.length) return;
+  var fromRead=$('mine').classList.contains('readonly');
   $('edit').onclick && $('edit').onclick();
   setView('rank');
-  RQ={ids:ids, done:0, total:ids.length};
+  RQ={ids:ids, all:ids.slice(), done:0, total:ids.length, fromRead:fromRead};
   nextRQ();
 }
 function nextRQ(){
   if(!RQ) return;
   var id=RQ.ids.shift();
-  if(id==null){ RQ=null; if(dirty) save(); return; }
+  if(id==null){ var r=RQ; RQ=null; finishRQ(r); return; }
   RQ.done++;
   openHH(id);
+}
+
+// The end of a Rank more run (critique, 2026-10-02: it just stopped): where
+// each one landed, how much of the count is ranked now, and five more. It
+// saves, and a run started from the read-only list goes back to it.
+function finishRQ(r){
+  var at={}; ORDER.forEach(function(id,i){ var k=KEY(id); if(at[k]==null) at[k]=i+1; });
+  var rows=r.all.map(function(id){ return {c:BYID[id]||{}, n:at[KEY(id)]}; }).filter(function(x){ return x.n; })
+    .sort(function(a,b){ return a.n-b.n; });
+  var left=unranked().length, all=MINE.length;
+  $('rqd_h').textContent = rows.length===1 ? 'Ranked 1 more' : 'Ranked '+rows.length+' more';
+  $('rqd_list').innerHTML=rows.map(function(x){
+    return '<div class="rqrow"><b>#'+x.n+'</b><span>'+esc(x.c.name||'')+'<i>'+esc(x.c.park||'')+'</i></span></div>'; }).join('');
+  $('rqd_prog').textContent=(all-left).toLocaleString()+' of '+all.toLocaleString()+' credits ranked';
+  $('rqd_more').hidden=!left;
+  $('rqd_more').textContent='Rank '+Math.min(5,left)+' more';
+  $('rqdone').style.display='flex';
+  var after=function(){ if(r.fromRead) doneEditing(); };
+  if(dirty) save(after); else after();
 }
 
 // ------------------------------------------------------------------ save ----
