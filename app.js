@@ -2300,10 +2300,14 @@
     // Typos (Carter: "fuzzy return ... when you make a typo things still come
     // up"): only when the exact passes found little, so a good query's list is
     // not padded with near-misses. "kignda ka", "six flgas mexico".
-    if (hits.length < 8) {
+    // Under 3, not 8 (critique, 2026-10-02): "kings" found Kings Island and
+    // Kings Dominion, then every park in the United KINGdom ahead of Magic
+    // Kingdom. And one typed word is a typo of the NAME, not of where the row
+    // is — only a several-word query reaches into the park and place words.
+    if (hits.length < 3) {
       items.forEach(function (it) {
         if (seenH[it.h] || !it.w) return;
-        var m = wordsMiss(toks, it.w, true);
+        var m = wordsMiss(toks, toks.length > 1 ? it.w : it.n.split(" "), true);
         if (m > 0) hits.push({ it: it, sc: 5 + m });
       });
     }
@@ -2338,14 +2342,28 @@
         + '<div class="srchres" role="listbox"></div></div>';
       document.body.appendChild(searchEl);
       var input = searchEl.querySelector("input"), res = searchEl.querySelector(".srchres");
+      // What you opened from here lately (critique, 2026-10-02: every visit
+      // started from a blank box). This browser only.
+      var recent = function () { try { return JSON.parse(localStorage.getItem("ch_recent") || "[]"); } catch (e) { return []; } };
+      res.addEventListener("click", function (e) {
+        var a = e.target.closest && e.target.closest(".srchrow"); if (!a) return;
+        try {
+          var r = { t: a.getAttribute("data-t"), sub: a.getAttribute("data-sub"), h: a.getAttribute("href"), k: a.getAttribute("data-k") };
+          var list = [r].concat(recent().filter(function (x) { return x.h !== r.h; })).slice(0, 6);
+          localStorage.setItem("ch_recent", JSON.stringify(list));
+        } catch (err) {}
+      });
       var draw = function () {
         buildSearchIndex().then(function (items) {
           var q = input.value, hits = searchFor(items, q);
-          res.innerHTML = !norm(q)
+          var rec = norm(q) ? [] : recent().filter(function (x) { return x && x.h && SEARCH_KINDS[x.k]; });
+          if (rec.length) hits = rec;
+          res.innerHTML = !norm(q) && !rec.length
             ? '<p class="srchhint">Try a coaster, park, manufacturer, location, or user.</p>'
             : hits.length
-              ? hits.map(function (h, i) {
-                  return '<a class="srchrow' + (i === 0 ? " hi" : "") + (h.gone ? " gone" : "") + '" href="' + searchEsc(h.h) + '">'
+              ? (rec.length ? '<p class="srchhint">Recent</p>' : '') + hits.map(function (h, i) {
+                  return '<a class="srchrow' + (i === 0 ? " hi" : "") + (h.gone ? " gone" : "") + '" role="option" href="' + searchEsc(h.h) + '"'
+                    + ' data-t="' + searchEsc(h.t) + '" data-sub="' + searchEsc(h.sub || "") + '" data-k="' + searchEsc(h.k) + '">'
                     + '<span class="st"><b>' + searchEsc(h.t) + '</b><span>' + searchEsc(h.sub)
                     + (h.was ? ' <i class="srchtag">formerly ' + searchEsc(h.was) + '</i>' : '')
                     + (h.moved ? ' <i class="srchtag">now ' + searchEsc(h.moved) + '</i>' : '')
@@ -2357,7 +2375,14 @@
       };
       input.addEventListener("input", draw);
       input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") { var a = res.querySelector(".srchrow"); if (a) location.href = a.getAttribute("href"); }
+        // ↑ ↓ move the highlight; Enter opens the highlighted row.
+        var rows = res.querySelectorAll(".srchrow"), at = Array.prototype.indexOf.call(rows, res.querySelector(".srchrow.hi"));
+        if ((e.key === "ArrowDown" || e.key === "ArrowUp") && rows.length) {
+          e.preventDefault();
+          var to = Math.max(0, Math.min(rows.length - 1, at + (e.key === "ArrowDown" ? 1 : -1)));
+          if (rows[at]) rows[at].classList.remove("hi");
+          rows[to].classList.add("hi"); rows[to].scrollIntoView({ block: "nearest", behavior: "instant" });
+        } else if (e.key === "Enter") { var a = rows[at] || rows[0]; if (a) a.click(); }
         else if (e.key === "Escape") closeSearch();
       });
       searchEl.querySelector(".srchx").addEventListener("click", closeSearch);

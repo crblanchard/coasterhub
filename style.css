@@ -483,7 +483,13 @@ html.srchopen{overflow:hidden}
 .srchres{overflow:auto;overscroll-behavior:contain;padding:6px}
 .srchhint{color:var(--muted);font-size:.9rem;margin:10px 12px}
 .srchrow{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;text-decoration:none;color:var(--fg)}
-.srchrow:hover,.srchrow.hi{background-color:var(--soft)}
+.srchrow.hi{background-color:var(--soft)}
+/* Hover only where there is a pointer: a tap left a second row lit on a phone. */
+@media (hover:hover){ .srchrow:hover{background-color:var(--soft)} }
+/* Controls take the page's font. A <button> or <input> does not inherit it, and
+   the search box, the header buttons and others were rendering in Arial
+   (critique, 2026-10-02). Longhand, so no size or weight is reset. */
+button,input,select,textarea{font-family:inherit}
 .srchrow .st{flex:1;min-width:0;display:flex;flex-direction:column}
 .srchrow .st b{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .srchrow .st span{color:var(--muted);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

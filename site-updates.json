@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-02T21:26:19Z",
-   "text": "Park, manufacturer, model, location and coaster pages now share one layout, with the same coaster rows and a tap-to-add ring everywhere, and Home and /log got tidier. Rankings editing works better on a phone: Cancel and Save stay in reach, tap a number to move a coaster to any spot, and Rank more shows how many picks are left, lets you undo one, and ends with where each one landed."
+   "at": "2026-10-02T21:35:43Z",
+   "text": "Park, manufacturer, model, location and coaster pages now share one layout with a tap-to-add ring on every coaster row, and Rankings editing works better on a phone with Cancel/Save in reach, move-to-a-spot, and an undo and summary in Rank more. Search keeps your recent picks and stops padding results with near-misses, and Users is now Riders."
   },
   {
    "at": "2026-10-01T23:06:10Z",
