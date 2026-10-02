@@ -443,7 +443,7 @@
     </div>
     <div class="panel basket idle" id="basketpanel">
       <h3 id="baskethead">This day</h3>
-      <div id="basket"><div class="hint" style="padding:6px 0">Nothing staged yet.</div></div>
+      <div id="basket"><div class="hint" style="padding:6px 0">Nothing added yet.</div></div>
       <div class="tot"><span id="tot_c">0 coasters</span><span id="tot_r">0 rides</span></div>
       <!-- Carter, 2026-09-27: say that a ride on a new coaster adds the credit.
            It used to be a paragraph above the park box; it belongs where you
@@ -499,7 +499,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002g"></script>
+<script src="/app.js?v=20261002h"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 // Runs before the gate: the nav has to work whether or not you unlock.
@@ -537,6 +537,34 @@ function basketIds(){
   return out;
 }
 function tapped(id){ id=String(id); if(TAPPED.indexOf(id)<0) TAPPED.push(id); }
+// Staged rides survive the tab reloading (critique, 2026-10-02: iOS drops a
+// background tab, and a park day's taps went with it). This browser only,
+// kept for twelve hours, never for a day being changed.
+var STASH='ch_log_basket', STASH_READY=false;   // nothing is written over it until it has been read
+function stash(){
+  if(!STASH_READY) return;
+  try{
+    if(EDITING || MODE!=='day' || !basketCount()){ localStorage.removeItem(STASH); return; }
+    localStorage.setItem(STASH, JSON.stringify({b:basket, t:TAPPED, d:$('date').value, p:$('park').value,
+      r:$('rider').value, at:Date.now()}));
+  }catch(e){}
+}
+function unstash(){
+  var x=null; try{ x=JSON.parse(localStorage.getItem(STASH)||'null'); }catch(e){}
+  STASH_READY=true;
+  if(!x || !x.b || Date.now()-x.at>12*3600e3 || x.r!==$('rider').value || EDITING || EDIT_ASK || basketCount() || MODE!=='day') return;
+  var ids=Object.keys(x.b).filter(function(k){ return BYID[k]; }); if(!ids.length) return;
+  ids.forEach(function(k){ basket[k]=x.b[k]; });
+  TAPPED=(x.t||[]).filter(function(k){ return basket[k]; });
+  if(x.d) $('date').value=x.d;
+  if(x.p && PCOUNT[x.p]!=null) choosePark(x.p);
+  renderList(); renderBasket(); offerDay();
+  var n=ids.reduce(function(a,k){ return a+basket[k]; },0);
+  $('msg').className='msg';
+  $('msg').innerHTML='Picked up where you left off: '+n+' ride'+(n===1?'':'s')+' staged. <a href="#" id="unstash_x">Discard</a>';
+  $('unstash_x').onclick=function(e){ e.preventDefault(); basket={}; TAPPED=[]; $('msg').textContent=''; renderList(); renderBasket(); };
+  showBasketPanel();
+}
 var EDITING=null;
 
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -613,6 +641,7 @@ function boot(){
     syncPark(); setTimeout(syncPark,0);
     window.addEventListener('pageshow',syncPark);
     editFromLink();
+    setTimeout(unstash,0);
   });
 
   $('save').onclick=save;
@@ -764,6 +793,8 @@ function copyPanel(d){
 function beginEdit(d){
   EDITING=d;
   basket={}; Object.keys(DAYS[d]||{}).forEach(function(k){ basket[k]=DAYS[d][k]; });
+  // A–Z, not coaster-id order (critique, 2026-10-02).
+  TAPPED=Object.keys(basket).sort(function(a,b){ return String((BYID[a]||{}).name||'').localeCompare(String((BYID[b]||{}).name||'')); });
   $('date').value=d; $('msg').textContent='';
   renderList(); renderBasket(); offerDay();
   $('basket').scrollIntoView({behavior:'instant',block:'nearest'});
@@ -1524,13 +1555,14 @@ function renderBasket(){
   $('save').disabled=!ids.length;
   // While changing a day the basket IS the day: an empty one is a day to
   // remove, which is a real thing to save, so the button stays live and says so.
+  $('clear').textContent = EDITING ? 'Cancel changes' : 'Clear';
   if(EDITING){
     $('baskethead').textContent='Changing '+niceDay(EDITING);
     $('save').textContent = ids.length ? 'Save changes' : 'Remove this day';
     $('save').disabled=false;
   } else if(MODE==='day'){ $('baskethead').textContent='This day'; $('save').textContent='Save day'; }
-  showBasketPanel(); renderSaveBar(ids,rides);
-  if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">'+(EDITING?'Every ride taken off — saving removes the day.':'Nothing staged yet.')+'</div>'; return; }
+  showBasketPanel(); renderSaveBar(ids,rides); stash();
+  if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">'+(EDITING?'Every ride taken off — saving removes the day.':'Nothing added yet.')+'</div>'; return; }
 
   // One park needs no heading — the picker above already says which it is.
   var multi=order.length>1;
@@ -1647,6 +1679,9 @@ function save(){
         +(fresh.length ? '<div style="margin-top:10px"><a class="btn" href="/user/'+encodeURIComponent(rider)+'/rankings?rank='+fresh.join(',')+'">Rank your '
           +(fresh.length===1?'new credit':fresh.length+' new credits')+'</a></div>' : '');
       showResult();
+      // The day just saved is a day with rides now: the notice and the bar's
+      // "adds to N saved" need to know (critique, 2026-10-02).
+      loadOwned();
     })
     .catch(function(e){
       $('save').disabled=false; renderBasket();

@@ -818,7 +818,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002g"></script>
+<script src="/app.js?v=20261002h"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -904,7 +904,9 @@ if(!slug){
     // is not a consensus — and list count now only breaks a tie.
     var shared=ids.filter(function(id){return tally[id].n>1;})
       .map(function(id){return tally[id];})
-      .sort(function(a,b){ return (a.sum/a.n - b.sum/b.n) || (b.n-a.n); });
+      // Ties by name, as app.js globalTally does, so a Global # is the same number everywhere.
+      .sort(function(a,b){ return (a.sum/a.n - b.sum/b.n) || (b.n-a.n)
+        || String((BYID[a.id]||{}).name||'').localeCompare(String((BYID[b.id]||{}).name||'')); });
 
     $('figs').innerHTML=[
       fig(started.length+' <small style="font-size:.55em;color:var(--muted);font-weight:600">of '+lists.length+'</small>','Lists started'),
@@ -1201,7 +1203,8 @@ function loadGlobal(){
         });
       });
       var list=Object.keys(tally).filter(function(k){ return tally[k].n>1; })
-        .sort(function(a,b){ var x=tally[a], y=tally[b]; return (x.sum/x.n)-(y.sum/y.n) || y.n-x.n; });
+        .sort(function(a,b){ var x=tally[a], y=tally[b]; return (x.sum/x.n)-(y.sum/y.n) || y.n-x.n
+          || String((BYID[a]||{}).name||'').localeCompare(String((BYID[b]||{}).name||'')); });
       var by={}; list.forEach(function(k,i){ by[k]={pos:i+1, n:tally[k].n, avg:tally[k].sum/tally[k].n}; });
       GLOBAL={by:by, of:list.length};
       renderRank();

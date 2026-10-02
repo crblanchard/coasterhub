@@ -2010,7 +2010,7 @@
           (rk.order || []).filter(function (id) {
             var c = byId[id]; if (!c) return false; var k = rideKey(c); if (seen[k]) return false; seen[k] = 1; return true;
           }).forEach(function (id, pos) {
-            var k = rideKey(byId[id]), x = t[k] || (t[k] = { n: 0, sum: 0, who: [] });
+            var k = rideKey(byId[id]), x = t[k] || (t[k] = { n: 0, sum: 0, who: [], name: String(byId[id].name || "") });
             x.n++; x.sum += pos + 1; x.who.push({ name: u.name || u.slug, slug: u.slug, pos: pos + 1 });
           });
         });
@@ -2018,7 +2018,10 @@
         // tab): 2+ lists, by average, more lists first on a tie. The Global
         // rows show THAT number (Carter, 2026-09-28), as Mine shows yours.
         Object.keys(t).filter(function (k) { return t[k].n > 1; })
-          .sort(function (a, b) { var x = t[a], y = t[b]; return (x.sum / x.n) - (y.sum / y.n) || y.n - x.n; })
+          // Ties by name, the same as every list that draws these: without it
+          // tied rides kept whatever order they arrived in, and Home's top ten
+          // read 1, 3, 2, 5, 4 (critique, 2026-10-02).
+          .sort(function (a, b) { var x = t[a], y = t[b]; return (x.sum / x.n) - (y.sum / y.n) || y.n - x.n || x.name.localeCompare(y.name); })
           .forEach(function (k, i) { t[k].pos = i + 1; });
         return t;
       })(r[1] || []);

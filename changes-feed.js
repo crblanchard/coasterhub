@@ -384,7 +384,10 @@
     if (opts.who) { WHO = {}; opts.who.forEach(function(s){ WHO[s] = 1; }); }
 
     function render(){
+      // "joined" and "created an account" for the same rider are one event.
+      var claimed = {}; EVENTS.forEach(function(e){ if (e.kind === 'claimed' && e.actor) claimed[e.actor] = 1; });
       var list = groupRuns(EVENTS.filter(function(e){
+        if (e.kind === 'user_added' && e.actor && claimed[e.actor]) return false;
         if (WHO && !(e.actor && WHO[e.actor])) return false;
         if (NOT && e.actor && NOT[e.actor]) return false;
         if (SINCE && atTime(e.at) < SINCE) return false;
