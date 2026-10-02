@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-02T19:47:49Z",
-   "text": "The tab bar is now Home · Explore · Log · Rankings · Me, and Home runs Friends, a live Global top 10, a shorter Friend activity, Top users and Recent changes, which no longer repeats what your friends did. /log is tidier, with bigger + and − buttons and a Save bar on phones, and each of your days under Credits → Rides has an Edit day link to fix a wrong ride."
+   "at": "2026-10-02T20:57:56Z",
+   "text": "Home runs Friends, a live Global top 10, a shorter Friend activity, Top users and Recent changes, and /log is tidier with a Save bar on phones and an Edit day link on each of your days. Park, manufacturer, model, location and coaster pages now share one layout: the same coaster rows with a tap-to-add ring everywhere, \"You've ridden 16 of 20 · 4 to go\" counted against what still runs, and three tiles."
   },
   {
    "at": "2026-10-01T23:06:10Z",

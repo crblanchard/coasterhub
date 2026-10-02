@@ -15,7 +15,7 @@
 <title>Park — Coaster Hub</title>
 <meta name="description" content="Every coaster at one park, and who has ridden them — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20261002a">
-<link rel="stylesheet" href="/lists.css?v=20261002a">
+<link rel="stylesheet" href="/lists.css?v=20261002b">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -29,92 +29,22 @@
      the facts in an opened row are shared — style.css, "The database pages". */
   .panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
 
-  /* A coaster on the list OPENS IN PLACE (Carter, 2026-09-25: "make it so
-     you can open and view stats, then below that list of riders — we don't
-     need individual roller coaster pages"). The whole strip is the summary,
-     so a thumb anywhere on it opens it; the stats and the riders are inside.
-     .citem is the <details>, .crow its summary row. */
-  .citem{border-bottom:1px solid var(--soft)}
-  .citem:last-child{border-bottom:0}
-  .crow{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:.9rem;
-        color:var(--fg);cursor:pointer;list-style:none}
-  .crow::-webkit-details-marker{display:none}
-  .crow:hover{background:var(--soft)}
-  .citem[open] > .crow{background:var(--soft)}
-  .crow .chev{flex:none;color:var(--muted);transition:transform .15s}
-  .citem[open] > .crow .chev{transform:rotate(180deg)}
-  @media (prefers-reduced-motion: reduce){ .crow .chev{transition:none} }
-  .cbody{padding:4px 16px 16px;display:flex;flex-direction:column;gap:12px}
-  .cbody .former{color:var(--muted);font-size:.84rem;margin:0}
-  .cbody .former b{color:var(--fg)}
-  .cbody .lbl{color:var(--muted);font-size:.8rem;font-weight:700;margin:0 0 6px}
-  @media (max-width:560px){ .cbody{padding:4px 12px 14px} }
-  .cbody .nobody{color:var(--muted);font-size:.85rem;margin:0}
-  .crow a{color:inherit;text-decoration:none}
-  .citem[open] > .crow a{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
-  .citem[open] > .crow a:hover{color:var(--accent2);text-decoration-color:currentColor}
-  .crow .cn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .crow:hover .cn{color:var(--accent2)}
-  /* Who built it. Shrinks before anything else and ellipsizes rather than
-     pushing the status off the row — the same rule the count page's rows use. */
-  /* A ride's place on the site-wide Global list, beside its model. */
-  .crow .gk{flex:none;color:var(--accent2);font-size:.78rem;font-weight:700;white-space:nowrap}
+  /* The list is the site's one coaster row now (CoasterHub.coasterRow, lists.css),
+     opening in place like every other list (critique, 2026-10-02: the park
+     page had its own row, so nothing learned here carried anywhere else).
+     What only this page has: each ride's Global place beside its model, and
+     how many riders have been on it. */
+  a.crow .gk{flex:none;color:var(--accent2);font-size:.78rem;font-weight:700;white-space:nowrap}
   /* "Global" in quiet grey after the number (Carter, 2026-10-02). */
-  .crow .gk i{font-style:normal;font-weight:400;color:var(--muted)}
-  .cbody .facts{max-width:760px}
+  a.crow .gk i{font-style:normal;font-weight:400;color:var(--muted)}
+  /* Grey, not orange: orange means defunct (critique, 2026-10-01). */
+  a.crow .rid{flex:none;color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums}
   .joinline{margin:0 0 14px;font-size:.92rem;color:var(--muted)}
   .joinline a{color:var(--accent2);font-weight:600;text-decoration:none}
-  .crow .mk{color:var(--muted);font-size:.8rem;flex:0 1 auto;min-width:0;
-             overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  /* The far edge of a row, as ONE box. Both things inside it are optional — a
-     coaster with no year known has no status, one nobody has ridden has no
-     count — and hanging the margin-left:auto off either of them meant the other
-     slid back down the row whenever the first was missing. The wrapper is
-     always there, so the right edge always holds. */
-  .crow .end{margin-left:auto;flex:none;display:flex;align-items:baseline;gap:12px;
-              padding-left:10px;white-space:nowrap}
-  /* Status and years. The status carries the colour — teal for running, red for
-     gone — and the years stay body-coloured, because the years are the fact and
-     the status is only the flag on it. */
-  .crow .life{flex:none;display:flex;align-items:baseline;gap:9px;white-space:nowrap}
-  .crow .life .stat{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-  .crow .life .stat.on{color:var(--accent2)}
-  .crow .life .stat.off{color:var(--accent)}
-  .crow .life .yrs{color:var(--fg);font-size:.8rem;font-variant-numeric:tabular-nums}
-  /* How many riders have this one. Filled in after the rider logs land, so it
-     reserves no space and nothing reflows into it. */
-  /* Grey, not orange: orange means defunct (critique, 2026-10-01). */
-  .crow .rid{flex:none;color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums}
-  /* Your ticks, when you are signed in (Carter, 2026-09-24: "on this page
-     don't see checks"): /count's park-view tick, a teal ✓ in a fixed slot so
-     the names line up. The slot only takes room once #list has .ticks. */
-  .crow .tick{display:none;flex:none;width:1.05em;text-align:center;color:var(--accent2);font-size:.82rem}
-  #list.ticks .crow .tick{display:inline-block}
-  /* Not ridden yet: a faint ring you can tap to add it as a credit (Carter,
-     2026-09-27 — "kinda subtle", a set-up count rarely needs it). A tap added
-     this visit can be tapped again to take back. The ::before widens the
-     target past the tiny glyph without moving the names. */
-  #list.ticks .crow .tick.add,#list.ticks .crow .tick.undo{position:relative;cursor:pointer}
-  #list.ticks .crow .tick.add::before,#list.ticks .crow .tick.undo::before{content:"";position:absolute;inset:-14px -12px}
-  #list.ticks .crow .tick.err{color:var(--bad);font-weight:700}
-  #list.ticks .crow .tick.add::after{content:"";display:inline-block;width:.7em;height:.7em;border:1.5px solid var(--line);border-radius:50%;vertical-align:-.05em}
-  #list.ticks .crow .tick.add:hover::after{border-color:var(--accent2)}
-  #list.ticks .crow .tick.busy{opacity:.4;pointer-events:none}
-  /* Grey means defunct, as on /count and /map (Carter, 2026-09-25). */
-  .crow.gone .cn{color:var(--muted)}
-  /* Name and model share one box: side by side here, stacked on a phone —
-     the /rankings row (Carter, 2026-09-28), which used to drop the model. */
-  .crow .two{display:flex;align-items:baseline;gap:10px;min-width:0;flex:0 1 auto}
-  @media (max-width:560px){
-    .crow{gap:7px;padding:7px 13px}
-    /* The name is the thing: it wraps rather than being cut off (2026-10-01). */
-    .crow .two .cn{white-space:normal;overflow:visible}
-    .crow .two{flex-direction:column;align-items:flex-start;gap:1px;line-height:1.25}
-    .crow .two .cn,.crow .two .mk{max-width:100%}
-    .crow .life{gap:7px}
-    .crow .life .stat{font-size:0;line-height:0}
-    .crow .life .stat::before{content:"\25CF";font-size:.62rem;line-height:1}
-  }
+  .cxmore .former{color:var(--muted);font-size:.84rem;margin:0 0 10px}
+  .cxmore .former b{color:var(--fg)}
+  .cxmore .lbl{color:var(--muted);font-size:.8rem;font-weight:700;margin:0 0 6px}
+  .cxmore .nobody{color:var(--muted);font-size:.85rem;margin:0}
 
   /* Rider chips: under the list (who has been here) and inside an opened
      coaster (who has ridden it). */
@@ -126,8 +56,6 @@
   .who a{align-items:center}
   .who a i{font-style:normal;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
 
-  /* Three cards (operating, defunct, riders here) stay on one row on a phone. */
-  @media (max-width:680px){ #tiles{grid-template-columns:repeat(3,1fr)} #tiles .tile:last-child:nth-child(odd){grid-column:auto} }
 </style>
 </head>
 <body>
@@ -156,13 +84,15 @@
   <div id="loading">Loading the park&hellip;</div>
   <div id="ui" style="display:none">
     <p id="crumb"></p>
-    <div class="tiles" id="tiles"></div>
     <p id="you" hidden></p>
+    <div class="tiles row3" id="tiles"></div>
     <p class="joinline" id="joinpk" hidden>Keep your own count of this park &mdash; <a href="/account?tab=up">Start your count &rarr;</a></p>
     <div class="sect" id="list_h">Coasters</div>
     <div class="panel" id="list"></div>
+    <!-- Rankings, as every database page has them (critique, 2026-10-02). -->
+    <div id="ranked"></div>
     <div id="who_wrap" style="display:none">
-      <div class="sect">Riders who have been here</div>
+      <div class="sect">Riders</div>
       <div class="who" id="who"></div>
     </div>
   </div>
@@ -179,7 +109,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002e"></script>
+<script src="/app.js?v=20261002f"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('park');
@@ -232,13 +162,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 
   document.querySelector('.hero h1').textContent=PARK;
   document.title=PARK+' — Coaster Hub';
-  // The region is a link to its location page (2026-09-24).
-  $('hero_sub').innerHTML=meta.region
-    ? '<a href="'+esc(CoasterHub.locationHref(meta.region))+'" style="color:inherit;text-decoration:none;border-bottom:1px solid var(--line)">'+esc(meta.region)+'</a>'
-    : 'A park on Coaster Hub.';
-
-  CoasterHub.crumbs($('crumb'), [meta.region ? ['Locations','/locations'] : ['Parks','/parks'],
-    meta.region ? [meta.region.replace(/, US$/,''), CoasterHub.locationHref(meta.region)] : null, [PARK]]);
+  // "Park · Ohio, US", the region a link to its location page.
+  CoasterHub.kindLine($('hero_sub'), 'Park', meta.region||null, meta.region ? CoasterHub.locationHref(meta.region) : null);
+  CoasterHub.crumbs($('crumb'), CoasterHub.placeTrail(meta.region).concat([[PARK]]));
   CoasterHub.youStrip($('you'), mine);
   var open=mine.filter(function(c){return !c.closed;}).length;
   var gone=mine.length-open;
@@ -251,8 +177,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
     +(gone ? tile(gone.toLocaleString(),'Defunct') : '')
     +tile('\u2013','Riders here').replace('<div class="tile"','<div class="tile" id="tile_riders"');
 
-  $('list').innerHTML=mine.map(row).join('')
-    || '<div style="padding:18px 16px;color:var(--muted)">No coasters on the site for this park yet.</div>';
+  MINE=mine; drawList();
+  CoasterHub.openableCoasters($('list'), {more: more});
 
   $('loading').style.display='none';
   $('ui').style.display='block';
@@ -261,94 +187,43 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   // leaves the park page complete rather than taking it down — the coasters are
   // the page, the riders are the extra.
   riders(mine).catch(function(e){ console.error(e); });
-  // Each ride's Global place beside its model, then the order: yours
-  // (operating, ones you need, A–Z) signed in; signed out, the best on the
-  // Global list first so the headline rides lead (critique, 2026-10-01). Then
-  // the long list folds.
-  Promise.all([ticks(mine).catch(function(){}), CoasterHub.globalTally().catch(function(){ return {}; }),
-               CoasterHub.me().catch(function(){ return null; })]).then(function(r){
-    var G=r[1]||{}, signedIn=!!(r[2]&&r[2].slug), L=$('list');
-    if(!signedIn) $('joinpk').hidden=false;
-    var gp=function(c){ var t=G[CoasterHub.rideKey(c)]; return t&&t.pos ? t.pos : 0; };
-    mine.forEach(function(c){
-      var p=gp(c); if(!p) return;
-      var two=L.querySelector('details.citem[data-c="'+c.id+'"] .two');
-      if(two) two.insertAdjacentHTML('beforeend','<span class="gk" title="Place on the Global rankings">#'+p+' <i>Global</i></span>');
-    });
-    // No re-sort: operating A–Z, defunct last, for everyone (Carter, 2026-10-02;
-    // column sorting was tried the same day and taken out as too busy).
-    CoasterHub.foldList(L, 12);
+  // Your ticks and each ride's Global place, then the list again, folded.
+  Promise.all([CoasterHub.you().catch(function(){ return null; }), CoasterHub.globalTally().catch(function(){ return {}; })]).then(function(r){
+    var y=r[0];
+    if(y){ ME=y.slug; MYR=y.rides; drawWho(); } else $('joinpk').hidden=false;
+    G=r[1]||{};
+    drawList();
+    CoasterHub.foldList($('list'), 10);
   });
+  CoasterHub.rankSection($('ranked'), mine, {model:true, fold:5});
 }).catch(fail);
 
 function tile(n,label){ return '<div class="tile"><b>'+esc(n)+'</b><span>'+esc(label)+'</span></div>'; }
 
-function life(c){
-  var op=c.opened?String(c.opened).slice(0,4):(c.yr?String(c.yr):'');
-  var cl=c.closed?String(c.closed).slice(0,4):'';
-  if(!op && !cl) return '';
-  var years=cl ? (op?esc(op)+'–'+esc(cl):'closed '+esc(cl)) : esc(op);
-  return '<span class="life">'+(c.closing?CoasterHub.CLOSING_SOON:'<span class="stat'+(cl?' off':' on')+'">'+(cl?'Defunct':'Operating')+'</span>')
-    +'<span class="yrs">'+years+'</span></span>';
+// The list: the site's one row (CoasterHub.coasterRow) with the add ring,
+// the model beside the name, this ride's Global place, and how many riders
+// have been on it. Drawn once straight away and again when you and the
+// Global list are known.
+var MINE=[], MYR=null, ME=null, G={}, RIDC={};
+function riderCount(id){ var n=RIDC[id]; return n ? n+(n===1?' rider':' riders') : ''; }
+function drawList(){
+  var L=$('list');
+  L.innerHTML=MINE.map(function(c){
+    var t=G[CoasterHub.rideKey(c)], p=t&&t.pos;
+    return CoasterHub.coasterRow(c, {mine:MYR, add:true, ctx:'model',
+      beside: p ? '<span class="gk" title="Place on the Global rankings">#'+p+' <i>Global</i></span>' : '',
+      end: CoasterHub.lifeTag(c)+'<span class="rid" data-rid="'+c.id+'">'+riderCount(c.id)+'</span>'});
+  }).join('') || '<div style="padding:18px 16px;color:var(--muted)">No coasters on the site for this park yet.</div>';
 }
-var CHEV='<svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
-// Same as the ranking cards (Carter, 2026-09-25): a closed row opens on any
-// tap, its name and model included; open, those two are links, and a tap
-// anywhere else on the row — body included — closes it.
-// One open at a time, like every other coaster list (Carter, 2026-09-28).
-// 'toggle' does not bubble, hence the capture.
-document.addEventListener('click', function(e){
-  var t=e.target.closest && e.target.closest('.tick.add, .tick.undo');
-  if(t){ e.preventDefault(); tapTick(t); return; }
-  var d=e.target.closest && e.target.closest('details.citem'); if(!d) return;
-  var a=e.target.closest('a');
-  if(a && a.closest('summary')){
-    if(d.open) return;                 // open: follow the link
-    e.preventDefault(); d.open=true;   // closed: just open
-    return;
-  }
-  if(!a && !e.target.closest('summary') && e.target.closest('.cbody')) d.open=false;
-});
-function row(c){
-  var mk=CoasterHub.maker(c);
-  return '<details class="citem" data-c="'+c.id+'"><summary class="crow'+(c.closed?' gone':'')+'">'
-    +'<span class="tick" data-tick="'+c.id+'"></span>'
-    // A relocated ride's old row goes straight to the ride's one page.
-    +'<span class="two"><a class="cn" href="'+esc(CoasterHub.coasterHref(CoasterHub.rideHome(LIST.coasters, c)))+'">'+esc(c.name)+'</a>'
-    +(mk?(c.manu?'<a class="mk" href="'+esc(CoasterHub.makerHref(c.manu, c.model||null))+'">'+esc(mk)+'</a>':'<span class="mk">'+esc(mk)+'</span>'):'')+'</span>'
-    +'<span class="end">'+life(c)+'<span class="rid" data-rid="'+c.id+'"></span>'+CHEV+'</span>'
-    +'</summary><div class="cbody"></div></details>';
-}
+function byId(id){ return LIST.coasters.filter(function(c){ return c.id===id; })[0]; }
 
-// What opens under a coaster: its stats, then who has ridden it. Built the
-// first time it opens, and again if the rider list lands while it is open.
+// Under an opened row's facts: former names, where it went if it moved, and
+// who has ridden it.
 var WHO={};        // coaster id -> [{slug,name,n}], filled by riders()
-var MYR=null;      // coaster id -> {n, first} for the signed-in rider, from ticks()
-var MY=null;       // the signed-in rider's ranking: {rank:{id:pos}, ranked, order:[ids]}
-var BYC={};        // coaster id -> coaster, for the maker/model counts
-CoasterHub.you().then(function(y){
-  if(!y) return;
-  var order=Object.keys(y.rank).map(Number).sort(function(a,b){ return y.rank[a]-y.rank[b]; });
-  MY={rank:y.rank, ranked:y.ranked, order:order};
-}).catch(function(){});
-function body(c){
-  // The facts are shared with a ranking's tapped row (CoasterHub.coasterFacts);
-  // yours go below every fact about the coaster itself (Carter, 2026-09-25).
-  // Your ranking of it rather than your ride count (Carter, 2026-09-27:
-  // "instead of rides do your ranking"), and where it sits among your ranked
-  // rides by the same maker and model, grey beside those two lines.
-  var mine=MYR && MYR[c.id], extra=[], among=null;
-  if(MY && MY.rank[c.id]){
-    extra.push(['#'+MY.rank[c.id]+' of '+MY.ranked,'Your ranking']);
-    if(!Object.keys(BYC).length) (LIST.coasters||[]).forEach(function(o){ BYC[o.id]=o; });
-    among=CoasterHub.amongIn(MY.order, BYC, c);
-  }
-  if(mine && mine.first) extra.push([esc(CoasterHub.mdy(mine.first)),'First ridden']);
-  var was=CoasterHub.formerNames(LIST, c.id, c.name);
-  var who=WHO[c.id];
+function more(c){
+  var was=CoasterHub.formerNames(LIST, c.id, c.name), who=WHO[c.id];
   // A relocated ride (023-same-ride.sql), on the OLD park's row only:
-  // "Relocated to Six Flags Mexico in 2013 — now Joker." The new park's row
-  // says nothing; the ride's page has the full history (Carter, 2026-09-26).
+  // "Relocated to Six Flags Mexico in 2013 — now Joker." (Carter, 2026-09-26).
   var home=CoasterHub.rideHome(LIST.coasters, c), moved='';
   if(home!==c){
     var yr=home.opened?String(home.opened).slice(0,4):(home.yr?String(home.yr):'');
@@ -358,74 +233,11 @@ function body(c){
   }
   return (was.length?'<p class="former">Formerly '+was.map(function(n){ return '<b>'+esc(n)+'</b>'; }).join(', ')+'.</p>':'')
     +(moved?'<p class="former">'+moved+'</p>':'')
-    +CoasterHub.coasterFacts(c, extra, null, among)
-    +'<div><p class="lbl">Riders</p>'
+    +'<p class="lbl">Riders</p>'
     +(who===undefined ? '<p class="nobody">Loading&hellip;</p>'
       : who.length ? '<div class="who">'+youFirst(who).map(function(w){
           return '<a class="'+(w.slug===ME?'me':'')+'" href="'+esc(CoasterHub.userPageHref(w.slug,'count'))+'">'+CoasterHub.riderFace(w.slug,w.name)+(w.slug===ME?'You':esc(w.name))+'<i>'+w.n+' ride'+(w.n===1?'':'s')+'</i></a>'; }).join('')+'</div>'
-      : '<p class="nobody">Nobody on the site has ridden it yet.</p>')
-    +'</div>';
-}
-function byId(id){ return LIST.coasters.filter(function(c){ return c.id===id; })[0]; }
-document.addEventListener('toggle', function(e){
-  var d=e.target;
-  if(!d.classList || !d.classList.contains('citem') || !d.open) return;
-  // One open at a time (2026-09-27).
-  Array.prototype.forEach.call(document.querySelectorAll('details.citem[open]'), function(o){ if(o!==d) o.open=false; });
-  var c=byId(Number(d.getAttribute('data-c')));
-  if(c) d.querySelector('.cbody').innerHTML=body(c);
-}, true);
-
-// The signed-in rider's ticks, and "x of y operating ridden" beside the
-// Coasters heading. Signed out, or no rider of your own: nothing changes.
-function ticks(mine){
-  return CoasterHub.me().then(function(a){
-    if(!(a && a.slug)) return;
-    return CoasterHub.fetchRides(a.slug).then(function(l){
-      var got={}; MYR={};
-      (l.rides||[]).forEach(function(r){
-        got[r.c]=1;
-        var m=MYR[r.c]||(MYR[r.c]={n:0, first:null}); m.n++;
-        if(r.d && (!m.first || r.d<m.first)) m.first=r.d;
-      });
-      ME=a.slug;
-      mine.forEach(function(c){
-        var el=document.querySelector('[data-tick="'+c.id+'"]');
-        if(!el) return;
-        if(got[c.id]){ el.textContent='\u2713'; el.setAttribute('aria-label','Ridden'); }
-        else { el.classList.add('add'); el.title='Ridden it? Tap to add it to your credits'; el.setAttribute('role','button'); el.setAttribute('aria-label','Add to your credits'); }
-      });
-      $('list').classList.add('ticks');
-      drawWho();
-    });
-  });
-}
-
-// A tap on the ring: an undated credit, the same call /log's list makes
-// (POST /api/rides, d:null — nothing added if a row already exists). A second
-// tap takes back only what THIS visit added: the rider had no row for it, so
-// deleting the coaster's rows deletes exactly the one just made.
-var ME=null;
-function tapTick(el){
-  var id=Number(el.getAttribute('data-tick')); if(!ME || !id) return;
-  var undo=el.classList.contains('undo');
-  // Adding asks first, with an optional first-ridden date (2026-09-27).
-  if(!undo){
-    CoasterHub.confirmAdd(byId(id)||{id:id,name:'this coaster'}, ME).then(function(ok){
-      if(!ok) return;
-      el.classList.remove('add'); el.classList.add('undo'); el.textContent='\u2713'; el.title='Added — tap again to undo'; el.setAttribute('aria-label','Added. Tap to undo');
-      MYR[id]={n:1, first:ok.d};
-    });
-    return;
-  }
-  el.classList.add('busy');
-  fetch(undo?'/api/credit':'/api/rides',{method:undo?'DELETE':'POST',credentials:'same-origin',headers:{'content-type':'application/json'},
-    body:JSON.stringify(undo?{user:ME, coaster_id:id}:{user:ME, d:null, entries:[{c:id}]})})
-    .then(function(r){ if(!r.ok) throw new Error(r.status); CoasterHub.noteWrite();
-      el.classList.remove('busy');
-      if(undo){ el.classList.remove('undo'); el.classList.add('add'); el.textContent=''; el.title='Ridden it? Tap to add it to your credits'; el.setAttribute('aria-label','Add to your credits'); delete MYR[id]; }
-      else { el.classList.remove('add'); el.classList.add('undo'); el.textContent='\u2713'; el.title='Added — tap again to undo'; el.setAttribute('aria-label','Added. Tap to undo'); MYR[id]={n:1, first:null}; }
-    }).catch(function(){ el.classList.remove('busy'); el.classList.add('err'); el.textContent='!'; el.title='Could not save — try again'; el.setAttribute('aria-label','Could not save. Tap to try again'); });
+      : '<p class="nobody">Nobody on the site has ridden it yet.</p>');
 }
 
 // Every rider's log, the same way the everyone view of /count reads them: a
@@ -483,8 +295,9 @@ function ridersSlow(mine, here){
 // rides: "3" here means three people have been on it.
 function showRiders(mine, perCoaster){
     Object.keys(perCoaster).forEach(function(id){
+      RIDC[id]=perCoaster[id];
       var el=document.querySelector('[data-rid="'+id+'"]');
-      if(el) el.textContent=perCoaster[id]+(perCoaster[id]===1?' rider':' riders');
+      if(el) el.textContent=riderCount(id);
     });
     // Every coaster nobody has: an empty list rather than "Loading" for ever.
     mine.forEach(function(c){ WHO[c.id]=(WHO[c.id]||[]).sort(function(a,b){ return b.n-a.n || a.name.localeCompare(b.name); }); });
@@ -493,8 +306,8 @@ function showRiders(mine, perCoaster){
     var been={}; mine.forEach(function(c){ (WHO[c.id]||[]).forEach(function(w){ been[w.slug]=1; }); });
     var nb=Object.keys(been).length;
     $('tile_riders').innerHTML=tile(nb.toLocaleString(), nb===1?'Rider here':'Riders here').replace(/^<div class="tile">|<\/div>$/g,'');
-    Array.prototype.forEach.call(document.querySelectorAll('details.citem[open]'), function(d){
-      var c=byId(Number(d.getAttribute('data-c'))); if(c) d.querySelector('.cbody').innerHTML=body(c);
+    Array.prototype.forEach.call(document.querySelectorAll('.cxmore[data-more]'), function(d){
+      var c=byId(Number(d.getAttribute('data-more'))); if(c) d.innerHTML=more(c);
     });
     // Riders who have been here: how many of the park's coasters each has.
     // (Taken out and put back the same day, 2026-09-25 — Carter: "readd

@@ -15,7 +15,7 @@
 <title>Manufacturers — Coaster Hub</title>
 <meta name="description" content="Every coaster maker on the site, their models, and how many of each — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20261002a">
-<link rel="stylesheet" href="/lists.css?v=20261002a">
+<link rel="stylesheet" href="/lists.css?v=20261002b">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -63,8 +63,8 @@
   <div id="loading">Loading&hellip;</div>
   <div id="ui" style="display:none">
     <p id="crumb"></p>
-    <div class="tiles" id="tiles"></div>
     <p id="you" hidden></p>
+    <div class="tiles row3" id="tiles"></div>
     <div id="body"></div>
   </div>
   <div id="none" style="display:none">
@@ -80,7 +80,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002e"></script>
+<script src="/app.js?v=20261002f"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('manufacturer');
@@ -217,6 +217,7 @@ function one(name, cs, MINE){
   document.querySelector('.hero h1').textContent=name;
   document.title=name+' — Coaster Hub';
   CoasterHub.crumbs($('crumb'), [['Manufacturers','/manufacturers'],[name]]);
+  CoasterHub.kindLine($('hero_sub'), 'Manufacturer');
   CoasterHub.youStrip($('you'), cs);
   var open=cs.filter(function(c){ return !c.closed; }).length;
   var byModel={};
@@ -224,8 +225,9 @@ function one(name, cs, MINE){
   // A–Z, like every list with no sort menu (Carter, 2026-09-28); no model last.
   var models=Object.keys(byModel).filter(Boolean).sort(function(a,b){ return a.localeCompare(b, undefined, {sensitivity:'base'}); });
   if(byModel['']) models.push('');
-  $('hero_sub').textContent=cs.length+' coaster'+(cs.length===1?'':'s')+' on the site.';
-  $('tiles').innerHTML=tile(cs.length,'Coasters')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
+  // Three tiles, the same three slots on every database page (critique,
+  // 2026-10-02): Operating · Defunct (only when there are any) · this page's own.
+  $('tiles').innerHTML=tile(open,'Operating')+(cs.length-open ? tile(cs.length-open,'Defunct') : '')
     +tile(models.filter(Boolean).length,'Models');
   $('body').innerHTML='<div class="sect">Models</div><div class="panel mlist" id="modellist">'+models.map(function(mo){
     var list=byModel[mo].slice().sort(CoasterHub.needFirst(MINE));   // ones you need first (2026-10-01)
@@ -235,7 +237,8 @@ function one(name, cs, MINE){
     // run, the years built), your ridden/total in grey the way the
     // /manufacturers panel shows it, and a chevron that says it opens.
     var op=list.filter(function(c){ return !c.closed; }).length, yrs=years(list);
-    var sub=yrs||'';
+    // Your ridden/total in grey beside the years (critique, 2026-10-02).
+    var sub=[yrs, CoasterHub.riddenOf(list, MINE)].filter(Boolean).join(' \u00b7 ');
     return '<details class="mdl" id="'+esc(mo ? CoasterHub.slugify(mo) : 'no-model')+'"><summary>'
       +'<span class="mtwo"><span class="nm">'+esc(mo || 'No model on file')+'</span><span class="msub">'+esc(sub)+'</span></span>'
       +CoasterHub.countsTag(op, list.length-op)+'</summary>'
@@ -246,7 +249,7 @@ function one(name, cs, MINE){
   // shared with a location's page).
   // Folded, except when a link points at one model (it would be hidden).
   if(!location.hash) CoasterHub.foldList($('modellist'), 10);
-  CoasterHub.rankSection($('ranked'), cs, {model:true});
+  CoasterHub.rankSection($('ranked'), cs, {model:true, fold:5});
   // A link to one model (/manufacturer/intamin#accelerator-coaster) opens it.
   if(location.hash){
     var d=document.getElementById(decodeURIComponent(location.hash.slice(1)));
@@ -263,11 +266,11 @@ function model(maker, mo, cs, MINE){
   if(canon!==location.pathname) history.replaceState(null,'',canon+location.search);
   document.querySelector('.hero h1').textContent=mo;
   document.title=mo+' — '+maker+' — Coaster Hub';
-  $('hero_sub').innerHTML='A model by <a href="'+esc(CoasterHub.makerHref(maker))+'" style="color:var(--accent2);text-decoration:none">'+esc(maker)+'</a>.';
+  CoasterHub.kindLine($('hero_sub'), 'Model', maker, CoasterHub.makerHref(maker));
   CoasterHub.crumbs($('crumb'), [['Manufacturers','/manufacturers'],[maker, CoasterHub.makerHref(maker)],[mo]]);
   CoasterHub.youStrip($('you'), cs);
   var open=cs.filter(function(c){ return !c.closed; }).length;
-  $('tiles').innerHTML=tile(cs.length,cs.length===1?'Built':'Installations')+tile(open,'Operating')+tile(cs.length-open,'Defunct')
+  $('tiles').innerHTML=tile(open,'Operating')+(cs.length-open ? tile(cs.length-open,'Defunct') : '')
     +tile(years(cs)||'—','Years built');
   // No Statistics block (Carter, 2026-09-29: "remove stats from model pages").
   var rows=cs.slice().sort(CoasterHub.needFirst(MINE));   // ones you need first (2026-10-01)
@@ -277,7 +280,7 @@ function model(maker, mo, cs, MINE){
     +'<div class="sect">Installations</div><div class="panel" id="instlist">'+rows.map(function(c){ return crow(c, MINE); }).join('')+'</div>'
     +'<div id="ranked"></div>';
   CoasterHub.foldList($('instlist'), 10);
-  CoasterHub.rankSection($('ranked'), cs, {model:false});
+  CoasterHub.rankSection($('ranked'), cs, {model:false, fold:5});
 }
 function years(cs){
   var y=cs.map(function(c){ return c.opened?Number(String(c.opened).slice(0,4)):(c.yr?Number(c.yr):null); }).filter(Boolean);
@@ -292,7 +295,7 @@ function years(cs){
 // with where it is in grey beside the name — park · place, as /rankings reads.
 function crow(c, MINE){
   var reg=(PARKS[c.park]||{}).region||'';
-  return CoasterHub.coasterRow(c, { mine:MINE, ctx:'place' });
+  return CoasterHub.coasterRow(c, { mine:MINE, add:true, ctx:'place' });
 }
 </script>
 </body>

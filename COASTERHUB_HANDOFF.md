@@ -5449,3 +5449,24 @@ Then taken back: **no Global column or sort headers on the park page** (Carter, 
 too complicated"). The list is operating A–Z, defunct last; each ride's Global place sits beside its
 model as "#12" in the accent with "Global" in grey.
 
+
+## The database pages share one template (2026-10-02)
+
+From the /impeccable critique of park / manufacturer / model / location / coaster (Carter: "make them
+consistent. I guess coasters will be a little different"). The order on the four list pages is:
+hero (name, then `CoasterHub.kindLine`: "Park · Ohio, US", "Model · B&M", "State · United States",
+"Manufacturer", "Country"; coaster: "Coaster · Cedar Point") → crumbs (`placeTrail` for places, so
+a park reads Locations › United States › Ohio like Ohio's own page; hidden on a phone, where the
+kind line carries the parent) → the you line → three tiles (`.tiles.row3`: Operating · Defunct only
+when > 0 · one of Riders here / Models / Years built / Parks) → the main list → Rankings
+(`rankSection`, `fold:5`) → Riders (park and coaster only).
+- **One coaster row:** park.html's own `details.citem` row is gone; every list is `coasterRow`,
+  opening in place (`openableCoasters`, whose `opts.more(c)` adds the park's former names and
+  riders under the facts). The park keeps its "#12 Global" and "5 riders" as `beside`/`end`.
+- **The add ring is on every page** (`coasterRow` `add:true`, handled once in app.js, capture
+  phase): park, location, manufacturer, model, the coaster page's More lists.
+- **"You've ridden 16 of 20 · 4 to go"** is out of what still runs (all of it when none does);
+  group rows say "16/20 ridden" the same way (`riddenOf`).
+- Folds: main lists 10, secondary lists (rankings, the coaster page's More) 5.
+- Left out on purpose: Riders on manufacturer/model/location (clutter, and it needs everyone's
+  rides), chevrons on group rows (Carter, 2026-09-28: no chevrons).

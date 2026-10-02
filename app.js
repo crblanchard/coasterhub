@@ -1586,6 +1586,25 @@
     }).join('<i aria-hidden="true">\u203a</i>');
   }
 
+  // The line under a database page's name: what kind of page it is, then its
+  // parent as a link — "Park · Ohio, US", "Model · Bolliger & Mabillard",
+  // "Coaster · Cedar Point" (critique, 2026-10-02: four pages, four styles).
+  function kindLine(el, kind, parent, href) {
+    if (!el) return;
+    el.className = "wide kindline";
+    el.innerHTML = '<span>' + searchEsc(kind) + '</span>' + (parent
+      ? '<i aria-hidden="true"> \u00b7 </i>' + (href ? '<a href="' + searchEsc(href) + '">' + searchEsc(parent) + '</a>' : searchEsc(parent)) : '');
+  }
+  // The place half of a breadcrumb, one way everywhere: Locations › United
+  // States › Ohio for a state, Locations › Japan for a country, Parks when
+  // the park has no location on file.
+  function placeTrail(region) {
+    if (!region) return [["Parks", "/parks"]];
+    var us = region === "US" || /, US$/.test(region);
+    return [["Locations", "/locations"], us ? ["United States", "/location/us"] : null,
+            region === "US" ? null : [region.replace(/, US$/, ""), locationHref(region)]];
+  }
+
   // Who you are, what you have ridden (id -> {n, first}) and where you rank
   // each coaster (id -> position), fetched once per page. null signed out.
   var youP = null;
@@ -1641,8 +1660,16 @@
         // Led by how many you have ridden (Carter, 2026-09-27: "make the first one
         // say 'you've ridden'"), then your best-placed one.
         // "of N" back, and "Not been yet" when it is none (Carter, 2026-10-01).
-        var rode = cs.filter(function (c) { return y.rides[c.id]; }).length;
-        bits.push(rode ? "You&rsquo;ve ridden <b>" + rode + "</b> of " + cs.length : "Not been yet");
+        // Out of what still RUNS (critique, 2026-10-02): a defunct one is a
+        // count you can no longer add to, so "19 of 23" with three gone read
+        // as four to go. A list that is all defunct counts all of it.
+        var live = cs.filter(function (c) { return !c.closed; }), base = live.length ? live : cs;
+        var rode = base.filter(function (c) { return y.rides[c.id]; }).length, left = base.length - rode;
+        // No word "operating" in it: the Operating tile right beside it says
+        // what the number is out of, and with it the line wrapped on a phone.
+        bits.push(!rode ? (cs.some(function (c) { return y.rides[c.id]; }) ? "None of the " + base.length + " yet" : "Not been yet")
+          : !left ? "You&rsquo;ve ridden all <b>" + base.length + "</b>"
+          : "You&rsquo;ve ridden <b>" + rode + "</b> of " + base.length + " \u00b7 <b>" + left + "</b> to go");
         if (rk.length) bits.push("best ranked <b>#" + rk[0] + "</b> of " + y.ranked);
       }
       if (!bits.length) { el.hidden = true; return; }
@@ -1768,7 +1795,10 @@
         }
         if (m && m.first) extra.push([mdy(m.first), "First ridden"]);
         inner.innerHTML = coasterFacts(c, extra,
-          '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>', among);
+          '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>', among)
+          // opts.more(c): what a page adds under the facts (the park page's
+          // former names and riders), the same panel otherwise.
+          + (opts.more ? '<div class="cxmore" data-more="' + id + '">' + opts.more(c) + '</div>' : '');
       });
     });
   }
@@ -1843,6 +1873,13 @@
       p.firstChild.textContent = shut ? "Show " + more + " more" : "Show fewer";
     };
   }
+  // "16/20 ridden" for a group row (a model, a park): out of what still runs,
+  // the same rule as the you line; all of it when none does. "" signed out.
+  function riddenOf(cs, mine) {
+    if (!mine || !cs.length) return "";
+    var live = cs.filter(function (c) { return !c.closed; }), base = live.length ? live : cs;
+    return base.filter(function (c) { return mine[c.id]; }).length + "/" + base.length + " ridden";
+  }
   function countsTag(open, gone) {
     // Stacked on a phone (vct), so the name keeps the width.
     return '<span class="ct vct">' + (open + gone ? '<span>' + open + ' operating</span>' + (gone ? '<i> \u00b7 </i><span>' + gone + ' defunct</span>' : '') : '<span>No coasters</span>') + '</span>';
@@ -1876,11 +1913,48 @@
   function coasterRow(c, opts) {
     opts = opts || {};
     var E = searchEsc, got = opts.mine && opts.mine[c.id];
+    // opts.add (the database pages, 2026-10-02: "every coaster row let you
+    // add a ride with a tap"): an unridden row's tick slot is a faint ring that
+    // adds it to YOUR credits — so only where opts.mine is the reader's own.
+    var tick = !opts.mine ? '' : got ? '<span class="tick">✓</span>'
+      : opts.add ? '<span class="tick add" data-tick="' + c.id + '" role="button" aria-label="Add to your credits" title="Ridden it? Tap to add it to your credits"></span>'
+      : '<span class="tick"></span>';
     return '<a class="crow std' + (c.closed ? ' gone' : '') + (opts.mine ? (got ? ' got' : ' miss') : '') + '" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '">'
-      + (opts.mine ? '<span class="tick">' + (got ? '✓' : '') + '</span>' : '')
+      + tick
       + '<span class="two"><span class="cn">' + E(c.name) + '</span>' + (opts.ctx ? '<span class="pk">' + (opts.ctx === "place" || opts.ctx === "park" || opts.ctx === "model" ? ctxLinks(c, opts.ctx) : E(opts.ctx)) + (opts.more ? E(opts.more) : '') + (opts.beside ? ' ' + opts.beside : '') + '</span>' : '') + '</span>'
       + '<span class="end">' + (opts.end != null ? opts.end : lifeTag(c, opts.val)) + '</span></a>';
   }
+
+  // The add ring on a coaster row (coasterRow opts.add), wherever it is: asks
+  // first with an optional first-ridden date (confirmAdd), then shows ✓. A
+  // second tap takes back only what THIS visit added — the reader had no row
+  // for it, so deleting the coaster's rows deletes exactly the one just made.
+  // Capture phase, so the row's own open-in-place and its link never see it.
+  if (typeof document !== "undefined") document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest(".tick.add, .tick.undo");
+    if (!t || !t.hasAttribute("data-tick")) return;
+    e.preventDefault(); e.stopPropagation();
+    var id = Number(t.getAttribute("data-tick"));
+    Promise.all([me(), fetchCoasters()]).then(function (r) {
+      var a = r[0]; if (!a || !a.slug) return;
+      var c = null; ((r[1] && r[1].coasters) || []).forEach(function (x) { if (x.id === id) c = x; });
+      var mark = function (on, first) {
+        t.classList.toggle("add", !on); t.classList.toggle("undo", on); t.textContent = on ? "\u2713" : "";
+        t.title = on ? "Added \u2014 tap again to undo" : "Ridden it? Tap to add it to your credits";
+        t.setAttribute("aria-label", on ? "Added. Tap to undo" : "Add to your credits");
+        if (youP) youP.then(function (y) { if (!y) return; if (on) y.rides[id] = { n: 1, first: first || null }; else delete y.rides[id]; });
+      };
+      if (t.classList.contains("add")) {
+        confirmAdd(c || { id: id, name: "this coaster" }, a.slug).then(function (ok) { if (ok) mark(true, ok.d); });
+        return;
+      }
+      t.classList.add("busy");
+      fetch("/api/credit", { method: "DELETE", credentials: "same-origin", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ user: a.slug, coaster_id: id }) })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); noteWrite(); t.classList.remove("busy"); mark(false); })
+        .catch(function () { t.classList.remove("busy"); });
+    });
+  }, true);
 
   // A day out — the park, the date, how much was ridden — as a group row that
   // opens to that day's coasters (Carter, 2026-09-28: profile's Recent visits
@@ -1959,12 +2033,14 @@
       + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
     el.classList.add("ranksec");
     // Ten, then "Show all N" — a state can have a hundred ranked rides.
-    function cut(a) { return st.all ? a : a.slice(0, 10); }
+    // opts.fold: fewer, where the list is not the page (the database pages: 5).
+    var FOLD = opts.fold || 10;
+    function cut(a) { return st.all ? a : a.slice(0, FOLD); }
     // opts.moreHref (Home's Global top ten, 2026-10-02): the rest is a page
     // of its own, so link there rather than unfolding hundreds in place.
     function more(n) {
       if (opts.moreHref) return '<p class="rnone"><a class="rfull" href="' + E(opts.moreHref) + '">Full rankings &rarr;</a></p>';
-      return n > 10 ? '<p class="rnone"><a class="rmore" href="#">' + (st.all ? "Show fewer" : "Show all " + n) + '</a></p>' : '';
+      return n > FOLD ? '<p class="rnone"><a class="rmore" href="#">' + (st.all ? "Show fewer" : "Show all " + n) + '</a></p>' : '';
     }
     function draw() {
       if (!st.known) return;
@@ -2342,7 +2418,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow,
               riderFace: riderFace, needFirst: needFirst, foldList: foldList, globalTally: globalTally };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

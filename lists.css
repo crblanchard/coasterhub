@@ -234,3 +234,33 @@ a.crow .pk .lap{margin-left:6px}
 .foldp .rmore{display:block;text-align:center;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background-color:var(--panel);
   color:var(--accent2);font-weight:600;text-decoration:none}
 .foldp .rmore:hover{border-color:var(--accent2)}
+
+/* ---- The database pages, one template (critique, 2026-10-02) -------------
+   Park, manufacturer, model, location and coaster pages share these. */
+/* The add ring on an unridden row (CoasterHub.coasterRow opts.add): the park
+   page's, now on every page. ::before widens the target past the glyph
+   without moving the names. */
+a.crow .tick.add,a.crow .tick.undo{position:relative;cursor:pointer}
+a.crow .tick.add::before,a.crow .tick.undo::before{content:"";position:absolute;inset:-14px -12px}
+a.crow .tick.add::after{content:"";display:inline-block;width:.7em;height:.7em;border:1.5px solid var(--line);border-radius:50%;vertical-align:-.05em}
+a.crow .tick.add:hover::after{border-color:var(--accent2)}
+a.crow .tick.busy{opacity:.4;pointer-events:none}
+/* What a page adds under an opened row's facts (the park page's riders). */
+.cx .cxmore{margin-top:12px}
+/* Three tiles, one row, on a phone too: Operating · Defunct · one more. */
+@media (max-width:680px){
+  .tiles.row3{grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
+  .tiles.row3 .tile:last-child:nth-child(odd){grid-column:auto}
+  .tiles.row3 .tile{padding:11px 12px}
+  .tiles.row3 .tile b{font-size:1.15rem;white-space:nowrap}
+}
+/* "Park · Ohio, US": the kind in the hero's own grey, the parent a link. */
+.hero .kindline{color:var(--muted)}
+.hero .kindline i{font-style:normal}
+.hero .kindline a{color:var(--accent2);font-weight:600;text-decoration:none}
+.hero .kindline a:hover{text-decoration:underline}
+/* A phone has the parent in the line above; the full trail is a desktop
+   thing, and on a phone it wrapped to two lines. */
+@media (max-width:560px){ #crumb.crumbs{display:none} }
+/* The orange "Defunct" word was 3.6:1 on white; this one reads. */
+:root[data-theme="light"] a.crow .life .stat.off{color:#93600f}

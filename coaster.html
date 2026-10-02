@@ -15,7 +15,7 @@
 <title>Coaster — Coaster Hub</title>
 <meta name="description" content="One coaster: its specs, its park, and who has ridden it — Coaster Hub.">
 <link rel="stylesheet" href="/style.css?v=20261002a">
-<link rel="stylesheet" href="/lists.css?v=20261002a">
+<link rel="stylesheet" href="/lists.css?v=20261002b">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -172,7 +172,7 @@
     </div>
     <div id="rank_wrap" hidden></div>
     <div id="who_wrap" style="display:none">
-      <div class="sect" id="who_h">Who has ridden it</div>
+      <div class="sect" id="who_h">Riders</div>
     </div>
   </div>
   <div id="more_wrap" hidden></div>
@@ -189,7 +189,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002e"></script>
+<script src="/app.js?v=20261002f"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('coaster');
@@ -245,11 +245,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   var meta=parks[C.park]||{};
   document.querySelector('.hero h1').textContent=C.name;
   document.title=C.name+' — '+C.park+' — Coaster Hub';
-  $('hero_sub').innerHTML='<a href="'+esc(CoasterHub.parkHref(C.park))+'" style="color:var(--accent2);text-decoration:none">'
-    +esc(C.park)+'</a>'+(meta.region?' <span style="opacity:.7">· <a href="'+esc(CoasterHub.locationHref(meta.region))+'" style="color:inherit;text-decoration:none">'+esc(meta.region)+'</a></span>':'');
-  CoasterHub.crumbs($('crumb'), [meta.region ? ['Locations','/locations'] : ['Parks','/parks'],
-    meta.region ? [meta.region.replace(/, US$/,''), CoasterHub.locationHref(meta.region)] : null,
-    [C.park, CoasterHub.parkHref(C.park)], [C.name]]);
+  // "Coaster · Cedar Point", as every database page reads (critique, 2026-10-02).
+  CoasterHub.kindLine($('hero_sub'), 'Coaster', C.park, CoasterHub.parkHref(C.park));
+  CoasterHub.crumbs($('crumb'), CoasterHub.placeTrail(meta.region).concat([[C.park, CoasterHub.parkHref(C.park)], [C.name]]));
   // No "You have ridden it" bar: that is your chip under Riders now.
 
   // Former names: the whole reason an old link still works, so the page says so
@@ -463,15 +461,17 @@ function more(S){
     if(S.manu && S.model){
       seen={};
       var mo=pick(function(x){ return x.manu===S.manu && x.model===S.model; });
-      if(mo.length) html+='<div class="sect morehd"><span>More '+esc(S.model)+' · '+mo.length+'</span><a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">Model page &rarr;</a></div>'
-        +fold(mo, 5, function(x){ return CoasterHub.coasterRow(x,{mine:mine, ctx:'place'}); });
+      if(mo.length) html+='<div class="sect morehd"><span>More '+esc(S.model)+'</span><a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">Model page &rarr;</a></div>'
+        +fold(mo, 5, function(x){ return CoasterHub.coasterRow(x,{mine:mine, add:true, ctx:'place'}); });
     }
     seen={};
     var at=pick(function(x){ return x.park===C.park; });
-    if(at.length) html+='<div class="sect morehd"><span>More at '+esc(C.park)+' · '+at.length+'</span><a href="'+esc(CoasterHub.parkHref(C.park))+'">Park page &rarr;</a></div>'
-      +fold(at, 6, function(x){ return CoasterHub.coasterRow(x,{mine:mine, ctx:'model'}); });
+    if(at.length) html+='<div class="sect morehd"><span>More at '+esc(C.park)+'</span><a href="'+esc(CoasterHub.parkHref(C.park))+'">Park page &rarr;</a></div>'
+      +fold(at, 5, function(x){ return CoasterHub.coasterRow(x,{mine:mine, add:true, ctx:'model'}); });
     if(html){
       $('more_wrap').innerHTML=html; $('more_wrap').hidden=false;
+      // Rows open in place, as on every other page (critique, 2026-10-02).
+      CoasterHub.openableCoasters($('more_wrap'));
       $('more_wrap').querySelectorAll('a.rmore').forEach(function(a){
         a.onclick=function(e){
           e.preventDefault();
