@@ -132,8 +132,6 @@
   #sec_visits{padding-top:22px !important}
   @media (max-width:680px){ #content section.block{padding:24px 0} }
   #morewrap{padding:6px 0 30px}
-  .hero .vsline{margin:6px 0 0;color:var(--muted);font-size:.95rem}
-  .hero .vsline b{color:var(--fg);font-variant-numeric:tabular-nums}
   body.moreclosed #sec_activity,body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
   @media (max-width:680px){
     #content{display:flex;flex-direction:column}
@@ -176,7 +174,6 @@
     .herotop.split .herocount{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:center}
     .herotop.split .herocount .statrow{grid-column:1;grid-row:1;min-width:0}
     .herotop.split .herocount .statrow h1{font-size:1.35rem!important}
-    .herotop.split .herocount .vsline{grid-column:1/-1;grid-row:2}
     .herotop.split .herocount .heroacts{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:stretch;gap:8px;margin:0}
     .herotop.split .herocount .heroacts .btn{width:auto;max-width:160px;padding:10px 12px;font-size:.84rem;white-space:normal;line-height:1.2}
   }
@@ -307,7 +304,6 @@
            adding a missing coaster is a job on the shared list rather than on
            yours — both were things you CAN do rather than things you come here
            to do, and a column of six reads as a menu. -->
-      <p class="vsline" id="vsline" hidden></p>
       <div class="heroacts" id="hero_acts">
         <a class="btn own" href="/log" hidden>Log a day</a>
         <!-- Someone else's page, and you are signed in. Red like "Log a day"
@@ -722,15 +718,6 @@ function render(s){
       mine ? 'Update your rankings' : ('View ' + (s.userName || 'this') + '’s rankings');
     if (mine && !k.credits) document.getElementById('hero_rank').hidden = true;
     document.getElementById('geo_h').textContent = mine ? 'Everywhere you’ve ridden' : 'Everywhere ' + (s.userName || 'they') + ' has ridden';
-    // Friends side by side, in one line (critique, 2026-10-02): on someone
-    // else's page, what you share and what they have that you don't.
-    if (!mine && acct && acct.slug) CoasterHub.you().then(function(y){
-      var theirs = Object.keys(s.byCoaster || {}); if (!y || !theirs.length) return;
-      var both = 0; theirs.forEach(function(id){ if (y.rides[id]) both++; });
-      var el = document.getElementById('vsline');
-      el.innerHTML = 'You&rsquo;ve both ridden <b>' + nf(both) + '</b> &middot; <b>' + nf(theirs.length - both) + '</b> of theirs you haven&rsquo;t';
-      el.hidden = false;
-    });
     CoasterHubProfile.mount(host,
       mine ? acct : { name:s.userName, slug:CoasterHub.currentUser(), bio:s.bio, avatar:s.avatar },
       { editable: !!mine,

@@ -5486,3 +5486,5 @@ when > 0 · one of Riders here / Models / Years built / Parks) → the main list
   a band with the Overview · Credits · Map tabs, so they no longer vanish there. Overview keeps its
   fuller hero. Carter: "try it, not sure how it would look" — ask how it lands before going further.
 - Not taken: credits as the main number on rider rows (his Sep 24 ranked-first sort stays).
+- 2026-10-03: the "You've both ridden N · M of theirs you haven't" line on other riders' profiles
+  is gone (Carter: "remove the thing about credit overlap"). Don't bring it back unasked.
