@@ -365,9 +365,10 @@ CoasterHub.fetchUsers().then(function(){
         CoasterHubFeed.mount({ feed: document.getElementById('factivity'), limit: 3, who: others, compact: true,
                                empty: 'Nothing from you or your friends yet. Log a day or rank a few coasters and it shows up here.' });
         document.getElementById('factivity_wrap').hidden = false;
-        // Recent changes is everyone else: what you and your friends did is
-        // right above it.
-        if (recent) recent.exclude(others);
+        // Updates is everyone but your friends, whose actions are right above
+        // it. Your own stay in both (Carter, 2026-10-04: "Yes include on the
+        // bottom").
+        if (recent) recent.exclude(others.filter(function(s){ return s !== fol.me; }));
       }
     }
     // The top ten, then everyone on /users (Carter, 2026-09-29).
