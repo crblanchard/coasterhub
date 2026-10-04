@@ -23,7 +23,7 @@
   .gate input{width:100%;margin-bottom:10px}
   input,select,textarea{background:var(--panel);border:1px solid var(--line);color:var(--fg);
     padding:10px 12px;border-radius:10px;font-size:.9rem;font-family:inherit}
-  textarea{width:100%;min-height:190px;resize:vertical;line-height:1.45;
+  textarea{width:100%;min-height:120px;resize:vertical;line-height:1.45;
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.84rem}
   button.primary{background:var(--accent2);border:0;color:#06121a;font-weight:700;border-radius:10px;padding:11px 18px;cursor:pointer;font-size:.92rem}
   button.primary:disabled{opacity:.4;cursor:default}
@@ -113,8 +113,7 @@
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
   <h1 class="wide">Import credit list</h1>
-  <p>Paste your list or upload a spreadsheet. You&rsquo;ll be asked for clarification on any
-    rows not auto-assigned, so nothing will be missed.</p>
+  <p>Paste a list, a spreadsheet or a Google Sheets link. Anything we can&rsquo;t match, you pick.</p>
 </div></section>
 
 <div id="gate" class="gate">
@@ -152,11 +151,9 @@
 
   <div class="panel">
     <h3>Paste it</h3>
-    <p class="sub">One coaster per line. A line that matches a park name becomes a heading for
-      everything under it &mdash; or put the park and the coaster on the same line separated by a
-      tab, which is what you get copying two columns out of a spreadsheet. Or paste a
-      Google Sheets link (shared &ldquo;anyone with the link&rdquo;).</p>
-    <textarea id="src" spellcheck="false" placeholder="Cedar Point&#10;Millennium Force&#10;Steel Vengeance&#10;Magnum XL-200&#10;&#10;Kings Island&#10;Beast&#10;Banshee"></textarea>
+    <p class="sub">One coaster per line, under its park&rsquo;s name &mdash; or two columns copied
+      from a spreadsheet. A Sheets link must be shared &ldquo;anyone with the link&rdquo;.</p>
+    <textarea id="src" spellcheck="false" placeholder="Cedar Point&#10;Millennium Force&#10;Steel Vengeance&#10;Magnum XL-200"></textarea>
     <div class="drop" id="drop">
       Or drop a file here &mdash; <b id="pick">choose one</b>
       <input id="file" type="file" accept=".xlsx,.csv,.tsv,.txt">
@@ -274,6 +271,38 @@ function byName(a,b){ return a.name.localeCompare(b.name)||String(a.park).locale
 // apart — a loose rule here silently credits the wrong continent. Coaster names
 // may be matched loosely, but only WITHIN an already-resolved park.
 function findPark(name){ return PARK_EXACT[squash(name)]||null; }
+
+// Near misses we are sure enough of to offer ticked, under "Partial match",
+// rather than leave for the rider to pick (Carter, 2026-10-04: "If some are
+// partial matches but very close relatively confident just call them 'partial
+// match'"). Sure enough = one candidate clearly ahead of the rest: a typo of
+// one park ("Parque De Attracciones Madrid", "Heide Park" for "… Resort"), or
+// one coaster whose name is nearly the line's. Anything less certain still
+// lands in "Not found" with the candidates as a shortlist.
+function bestBySim(q, names){
+  var best=null, r1=0, r2=0;
+  names.forEach(function(n){
+    var s=squash(n), r=sim(q,s);
+    // a name that holds the other whole, at a similar length, is as good as a typo
+    if(r<0.85&&q.length>=5&&s.length>=5&&(s.indexOf(q)>=0||q.indexOf(s)>=0)
+       &&Math.min(s.length,q.length)/Math.max(s.length,q.length)>=0.6) r=0.85;
+    if(r>r1){ r2=r1; r1=r; best=n; } else if(r>r2) r2=r;
+  });
+  return best&&r1>=0.85&&r1-r2>=0.05?best:null;
+}
+function nearPark(name){
+  var q=squash(name); if(q.length<4) return null;
+  var p=bestBySim(q, Object.keys(PARK_EXACT).map(function(k){ return PARK_EXACT[k]; })
+    .filter(function(v,i,a){ return a.indexOf(v)===i; }));
+  return p;
+}
+function nearCoaster(name, list){
+  if(!list||!list.length) return null;
+  var q=squash(name), byN={};
+  list.forEach(function(c){ (byN[c.name]=byN[c.name]||[]).push(c); });
+  var n=bestBySim(q, Object.keys(byN));
+  return n&&byN[n].length===1?byN[n][0]:null;
+}
 
 function findCoaster(name,park){
   var q=squash(name), cands=BY_PARK[park]||[], i, k;
@@ -712,19 +741,32 @@ function run(){
   var seen={}, ready=[], check=[], owned=[], fix=[], skipped=[], dupes=0;
   var skipMode=noParkMode()==='__skip__';
   parsed.forEach(function(p){
-    var park=p.park?findPark(p.park):null;
+    var park=p.park?findPark(p.park):null, near='', hit=null;
+    if(!park&&p.park&&FIXES[(p.park||'')+'\u0000'+p.name]==null){
+      var np=nearPark(p.park);
+      if(np&&findCoaster(p.name,np).c){ park=np; near='park “'+np+'” · '; }
+    }
     if(!park){
       if(skipMode&&!p.park){ skipped.push({src:p,why:'no park'}); return; }
-      fix.push(fixRow(p,''));
-      return;
+      var fr=fixRow(p,'');
+      // No park on the line at all, but one coaster anywhere is plainly the one
+      // meant. A line that NAMES a park we lack is left alone: Rampage at The
+      // Big Sheep is not Rampage at Alabama Adventure.
+      var only=!p.park&&FIXES[fr.key]==null?(fr.pick?fr.c:nearCoaster(p.name,fr.alts)):null;
+      if(only){ park=only.park; hit={c:only,how:'found at '+only.park}; }
+      else { fix.push(fr); return; }
     }
-    var hit=findCoaster(p.name,park);
+    if(!hit) hit=findCoaster(p.name,park);
+    if(!hit.c&&hit.how==='ambiguous'){
+      var one=nearCoaster(p.name,hit.opts);
+      if(one) hit={c:one,how:'close match',opts:hit.opts};
+    }
     if(!hit.c){ fix.push(fixRow(p,hit.how==='ambiguous'?'more than one match':'')); return; }
     if(seen[hit.c.id]){ dupes++; return; }
     seen[hit.c.id]=1;
     if(OWNED[hit.c.id]){ owned.push({src:p,c:hit.c}); return; }
-    var rec={src:p,park:park,c:hit.c,how:hit.how,opts:hit.opts||[],pick:true};
-    if(hit.how==='exact'||hit.how.indexOf('former name')===0) ready.push(rec); else check.push(rec);
+    var rec={src:p,park:park,c:hit.c,how:near+hit.how,opts:hit.opts||[],pick:true};
+    if(!near&&(hit.how==='exact'||hit.how.indexOf('former name')===0)) ready.push(rec); else check.push(rec);
   });
 
   // A fix row that lands on a coaster the rider already has belongs with the
