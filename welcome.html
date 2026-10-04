@@ -37,6 +37,8 @@
   #wel .eyebrow{color:var(--accent2);font-size:.8rem;font-weight:700}
   #wel h1{font-size:2rem;line-height:1.08;font-weight:800;letter-spacing:-.02em;margin:6px 0 10px;text-wrap:balance}
   #wel .lead{color:var(--muted);margin:0 0 18px}
+  #wel .importhint{margin:-8px 0 16px;font-size:.92rem;color:var(--muted)}
+  #wel .importhint a{color:var(--accent2);font-weight:600;text-decoration:none;display:inline-block;padding:6px 0}
   #wel label.f{display:block;font-size:.8rem;color:var(--muted);margin:14px 0 6px}
   #wel input[type=text],#wel input[type=email],#wel input[type=password],#wel input[type=search]{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
   #wel .go{display:flex;justify-content:center;align-items:center;width:100%;background:var(--accentfill);color:var(--onaccent);border:0;border-radius:12px;padding:14px 18px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
@@ -276,6 +278,9 @@ function vParks(){
       +'<p class="lead">Pick the parks, then check what you&rsquo;ve ridden. Anything already in your count is checked for you.</p>'
     : '<div class="eyebrow">Step 1 of 2</div><h1>Which parks have you been to?</h1>'
       +'<p class="lead">Pick every park you&rsquo;ve ridden a coaster at. Next you&rsquo;ll check the coasters at each one.</p>')
+   // A count kept somewhere else already — a spreadsheet, another site — goes
+   // in faster through /import than park by park (Carter, 2026-10-04).
+   +'<p class="importhint">Already keep a list? <a href="/import">Import a spreadsheet or paste a list &rarr;</a></p>'
    +'<div class="srow"><input type="search" id="pq" placeholder="Search '+PARKS.length+' parks" autocomplete="off">'
    +'<button type="button" class="locbtn'+(S.near?' on':'')+'" id="nearbtn">Near me</button>'
    +'<button type="button" class="locbtn" id="locbtn" aria-expanded="false">Locations</button></div>'
