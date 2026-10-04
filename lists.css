@@ -267,3 +267,11 @@ a.crow .tick.busy{opacity:.4;pointer-events:none}
 :root[data-theme="light"] a.crow .life .stat.off{color:#93600f}
 /* The ×3 re-ride count was 3.6:1 in amber on white (critique, 2026-10-02). */
 :root[data-theme="light"] a.crow .lap{color:#93600f}
+/* Who ranked a Global ride where (CoasterHub.whoByPlace): one line per place. */
+.wplaces{display:flex;flex-direction:column;gap:5px;margin:4px 0 12px;font-size:.88rem;line-height:1.4}
+.wpl{display:flex;gap:10px;align-items:baseline}
+.wpl b{flex:none;min-width:2.4em;color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums}
+.wpl span{min-width:0;color:var(--muted)}
+.wpl a{color:var(--fg);text-decoration:none}
+.wpl a:hover{color:var(--accent2);text-decoration:underline}
+.wpl a.me{font-weight:700}

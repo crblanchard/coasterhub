@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-10-04T15:06:12Z",
+   "text": "Opening a Global ride now lists who ranked it where on one line per place instead of a wall of name tags. Import works out which spreadsheet column is the park and which is the coaster, so lists with the coaster first (or French column titles) read properly."
+  },
+  {
    "at": "2026-10-03T15:00:51Z",
    "text": "On your profile the Account menu now sits beside the rider switcher, with Log a day and your rankings next to your stats on a phone. Other riders' profiles no longer show how many coasters you've both ridden."
   },

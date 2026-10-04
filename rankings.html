@@ -604,6 +604,15 @@
     .rrow .nm b{white-space:normal;overflow:visible}
   }
   .vsx{text-align:center}
+  /* Who ranked a Global ride where (CoasterHub.whoByPlace) — the same rules
+     as lists.css, which this page does not load. */
+  .wplaces{display:flex;flex-direction:column;gap:5px;margin:4px 0 12px;font-size:.88rem;line-height:1.4}
+  .wpl{display:flex;gap:10px;align-items:baseline}
+  .wpl b{flex:none;min-width:2.4em;color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums}
+  .wpl span{min-width:0;color:var(--muted)}
+  .wpl a{color:var(--fg);text-decoration:none}
+  .wpl a:hover{color:var(--accent2);text-decoration:underline}
+  .wpl a.me{font-weight:700}
   /* The end of a Rank more run. */
   .rqrow{display:flex;gap:12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line)}
   .rqrow:last-child{border-bottom:0}
@@ -819,7 +828,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002j"></script>
+<script src="/app.js?v=20261004a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -958,11 +967,8 @@ if(!slug){
         var c=BYID[t.id], avg=t.sum/t.n, mk=CoasterHub.maker(c);
         // Opening the row is the answer to the obvious question a shared list
         // raises — who, and how high? Each name goes to that rider's own list.
-        var full=t.who.slice().sort(function(a,b){return a.pos-b.pos;}).map(function(w){
-          return '<a class="wrow" href="'+CoasterHub.userPageHref(w.slug,'rankings')+'">'
-            +'<span class="wn">'+esc(w.name)+'</span>'
-            +'<span class="wp">#'+w.pos+'</span></a>';
-        }).join('');
+        // One line per place, not a chip per rider (Carter, 2026-10-04).
+        var full=CoasterHub.whoByPlace(t.who, ME && ME.slug);
         // Ranked, so number them: this is a top ten and the position is half of
         // what it says.
         return '<div class="srow">'
@@ -979,7 +985,7 @@ if(!slug){
               +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
               +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
           +'</div>'
-          +'<div class="who" hidden><div class="chips">'+full+'</div>'
+          +'<div class="who" hidden>'+full
             +CoasterHub.coasterFacts(c, null, c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>'
           +'</div>';
       }).join('');

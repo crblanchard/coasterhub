@@ -186,7 +186,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261002j"></script>
+<script src="/app.js?v=20261004a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('log');
@@ -326,11 +326,60 @@ function findAnywhere(name){
 // behaviour and is now the deliberate choice, not the default.
 function noParkMode(){ var v=$('dflt').value; return v==='__fix__'||v==='__skip__'?v:'__park__'; }
 
+// Which column is the park and which is the coaster (2026-10-04). It used to be
+// column A = park, B = coaster, always — and a friend's spreadsheet with the
+// coaster first came back 883 lines out of 885 "need a hand", every ride read
+// as a park. Decided by, in order: column titles (English and the French,
+// Spanish, German and Dutch ones people actually use), then which column's
+// cells are parks we have and which are coasters we have; a column of plain
+// numbers (a rank, a count) is never either. COLS says what was decided, so
+// the page can tell you.
+var COLS=null;
+var PARK_HEAD=/^(park|parks|park name|theme park|amusement park|parc|parc d'attractions|parque|parco|freizeitpark|pretpark|location|lieu)$/i;
+var RIDE_HEAD=/^(coaster|coasters|coaster name|roller coaster|roller coasters|ride|rides|ride name|name|nom|attraction|attractions|manege|manège|montagnes russes|montagne russe|achterbahn|nombre|naam|credit|credits)$/i;
+function pickCols(rows){
+  var head=(rows[0]||[]).map(function(c){ return String(c||'').trim(); });
+  var hp=-1, hr=-1;
+  head.forEach(function(c,i){ if(hp<0&&PARK_HEAD.test(c)) hp=i; else if(hr<0&&RIDE_HEAD.test(c)) hr=i; });
+  var body=(hp>=0||hr>=0)?rows.slice(1):rows, n=0;
+  rows.forEach(function(r){ n=Math.max(n,r.length); });
+  var park=[], ride=[], num=[], full=[];
+  for(var i=0;i<n;i++){ park[i]=0; ride[i]=0; num[i]=0; full[i]=0; }
+  body.forEach(function(r){ for(var i=0;i<n;i++){
+    var v=String(r[i]||'').trim(); if(!v) continue;
+    full[i]++;
+    if(/^[#]?\d+([.,]\d+)?\.?$/.test(v)) { num[i]++; continue; }
+    if(findPark(v)) park[i]++;
+    if(BY_NAME[squash(v)]) ride[i]++;
+  }});
+  var text=function(i){ return full[i] && num[i] < full[i]/2; };
+  var best=function(score, not){ var b=-1; for(var i=0;i<n;i++) if(i!==not&&text(i)&&score[i]>0&&(b<0||score[i]>score[b])) b=i; return b; };
+  var P=hp>=0?hp:best(park,hr), R=hr>=0?hr:best(ride,P);
+  if(P<0&&R<0){ for(var i=0;i<n;i++) if(text(i)){ if(P<0) P=i; else if(R<0){ R=i; break; } } }
+  else if(R<0){ for(var j=0;j<n;j++) if(j!==P&&text(j)){ R=j; break; } }
+  else if(P<0){ for(var k=0;k<n;k++) if(k!==R&&text(k)){ P=k; break; } }
+  return {park:P, name:R, drop:(hp>=0||hr>=0)?1:0};
+}
+function colName(i){ return i<0?'?':String.fromCharCode(65+i); }
+
 function parseText(text){
   var lines=String(text).replace(/\r\n?/g,'\n').split('\n');
   var out=[], park=null, dflt=noParkMode()==='__park__'?$('dflt').value:null;
   var tabbed=lines.filter(function(l){return l.indexOf('\t')>=0;}).length;
   var useTabs=tabbed>=Math.max(2,lines.filter(function(l){return l.trim();}).length*0.5);
+  COLS=null;
+  if(useTabs){
+    // Put every line into park<TAB>coaster order before anything else reads it.
+    var cells=lines.map(function(l){ return l.split('\t'); });
+    var first=0; while(first<cells.length&&!lines[first].trim()) first++;
+    var c=pickCols(cells.slice(first).filter(function(r,i){ return i===0||r.join('').trim(); }));
+    COLS=c;
+    if(c.drop) lines.splice(first,1), cells.splice(first,1);
+    lines=cells.map(function(r){
+      if(!r.join('').trim()) return '';
+      return String(c.park>=0?r[c.park]||'':'').trim()+'\t'+String(c.name>=0?r[c.name]||'':'').trim();
+    });
+  }
 
   // A spreadsheet's first row is nearly always column titles. Dropping it stops
   // "Roller Coaster" being imported as a coaster with no park — but EVERY cell
@@ -432,8 +481,9 @@ async function readXlsx(buf){
   });
   // emit as tab-separated so the text parser handles it, blanks and all
   return rows.map(function(r){
+    // Every column: parseText works out which is the park and which the coaster.
     var a=[]; for(var i=0;i<Math.max(2,r.length);i++) a.push((r[i]==null?'':String(r[i])).replace(/\t/g,' '));
-    return a.slice(0,2).join('\t');
+    return a.join('\t');
   }).join('\n');
 }
 
@@ -658,7 +708,8 @@ function run(){
 
   ROWS={ready:ready,check:check,owned:owned,fix:fix,skipped:skipped,dupes:dupes};
   m.className='msg';
-  m.textContent=parsed.length+' line'+(parsed.length===1?'':'s')+' read'+(dupes?(', '+dupes+' repeated'):'')
+  m.textContent=(COLS&&COLS.park>=0&&COLS.name>=0?'Parks from column '+colName(COLS.park)+', coasters from column '+colName(COLS.name)+'. ':'')
+    +parsed.length+' line'+(parsed.length===1?'':'s')+' read'+(dupes?(', '+dupes+' repeated'):'')
     +(fix.length?(' · '+fix.length+' need'+(fix.length===1?'s':'')+' a hand below'):'')+'.';
   renderReview();
   $('review').style.display='block';

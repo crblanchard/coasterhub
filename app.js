@@ -2144,14 +2144,8 @@
       });
       if (isOpen) return;
       var r = st.rows[row.getAttribute("data-gid")]; if (!r) return;
-      var meS = st.me, chips = r.who.slice().sort(function (a, b) {
-        return (b.slug === meS) - (a.slug === meS) || a.pos - b.pos; }).map(function (w) {
-        var isMe = w.slug === meS;
-        return '<a class="wrow' + (isMe ? ' me' : '') + '" href="' + E(userPageHref(w.slug, "rankings")) + '">' + riderFace(w.slug, w.name)
-          + '<span class="wn">' + (isMe ? "You" : E(w.name)) + '</span><span class="wp">#' + w.pos + '</span></a>';
-      }).join("");
       var box = document.createElement("div"); box.className = "cx";
-      box.innerHTML = '<div class="chips">' + chips + '</div>'
+      box.innerHTML = whoByPlace(r.who, st.me)
         + coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>');
       row.classList.add("open"); row.parentNode.insertBefore(box, row.nextSibling);
     });
@@ -2162,6 +2156,21 @@
                  fetchUsers().catch(function () { return null; })]).then(function (r) {
       st.rank = r[0] ? r[0].rank : null; st.me = r[0] ? r[0].slug : null; parks = r[1] || {};
     }).then(function () { st.known = true; draw(); });
+  }
+
+  // Who put a ride where, one line per place: "#1  Firepheonix, Keltan,
+  // Tyler" (Carter, 2026-10-04: fourteen chips were a wall now that so many
+  // riders rank). Each name goes to that rider's list; you are in bold.
+  function whoByPlace(who, meSlug) {
+    var E = searchEsc, by = {};
+    (who || []).forEach(function (w) { (by[w.pos] = by[w.pos] || []).push(w); });
+    return '<div class="wplaces">' + Object.keys(by).map(Number).sort(function (a, b) { return a - b; }).map(function (p) {
+      return '<div class="wpl"><b>#' + p + '</b><span>' + by[p].sort(function (a, b) {
+        return (b.slug === meSlug) - (a.slug === meSlug) || String(a.name).localeCompare(String(b.name)); }).map(function (w) {
+        return '<a href="' + E(userPageHref(w.slug, "rankings")) + '"' + (w.slug === meSlug ? ' class="me"' : '') + '>'
+          + (w.slug === meSlug ? 'You' : E(w.name || w.slug)) + '</a>';
+      }).join(', ') + '</span></div>';
+    }).join('') + '</div>';
   }
 
   // The footer's contributor links: Add new for anyone signed in (adding a
@@ -2479,7 +2488,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, riddenOf: riddenOf, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow,
               riderFace: riderFace, needFirst: needFirst, foldList: foldList, globalTally: globalTally };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
