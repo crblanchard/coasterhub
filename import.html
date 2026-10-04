@@ -134,7 +134,6 @@
         <button class="ghost" id="newrider" type="button" style="flex:none;padding:10px 12px">+ Person</button>
       </div>
     </div>
-    <div class="fld"><label for="dflt">If a line has no park</label><select id="dflt"></select></div>
   </div>
 
   <div class="miniform" id="riderform">
@@ -325,7 +324,9 @@ function findAnywhere(name){
 // so the line lands in the fix-up bucket and gets a park by hand — nothing is
 // dropped on the floor. A park name fills them all in. SKIP is the old
 // behaviour and is now the deliberate choice, not the default.
-function noParkMode(){ var v=$('dflt').value; return v==='__fix__'||v==='__skip__'?v:'__park__'; }
+// The picker itself is gone (Carter, 2026-10-04: "Remove the if a line has no
+// park"), so every such line now goes to the fix-up bucket.
+function noParkMode(){ return '__fix__'; }
 
 // Which column is the park and which is the coaster (2026-10-04). It used to be
 // column A = park, B = coaster, always — and a friend's spreadsheet with the
@@ -365,7 +366,7 @@ function colName(i){ return i<0?'?':String.fromCharCode(65+i); }
 
 function parseText(text){
   var lines=String(text).replace(/\r\n?/g,'\n').split('\n');
-  var out=[], park=null, dflt=noParkMode()==='__park__'?$('dflt').value:null;
+  var out=[], park=null, dflt=null;
   var tabbed=lines.filter(function(l){return l.indexOf('\t')>=0;}).length;
   var useTabs=tabbed>=Math.max(2,lines.filter(function(l){return l.trim();}).length*0.5);
   COLS=null;
@@ -508,7 +509,6 @@ function boot(){
     try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
     loadOwned(); $('review').style.display='none';
   });
-  $('dflt').addEventListener('change',function(){ if($('src').value.trim()) run(); });
   $('go').onclick=run;
   $('clear').onclick=function(){ $('src').value=''; $('review').style.display='none';
     FIXES={}; $('parse_msg').textContent=''; $('msg').textContent=''; };
@@ -546,15 +546,9 @@ function applyAccountLimits(){
   var el=$('newrider'); if(el) el.style.display='none';
 }
 
-// Every park that has coasters, for the "no park" default and for the park box
-// on each fix-up row.
+// Every park that has coasters, for the park box on each fix-up row.
 function fillParkOptions(){
   var names=Object.keys(BY_PARK).sort(function(a,b){return a.localeCompare(b);});
-  var cur=$('dflt').value;
-  $('dflt').innerHTML='<option value="__fix__">— sort them out below, one by one —</option>'+
-    names.map(function(p){return '<option value="'+esc(p)+'">'+esc(p)+'</option>';}).join('')+
-    '<option value="__skip__">— skip those lines —</option>';
-  if(cur) $('dflt').value=cur;
   $('parklist').innerHTML=names.map(function(p){return '<option value="'+esc(p)+'">';}).join('');
 }
 
