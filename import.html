@@ -827,8 +827,17 @@ function fixOptions(r){
   var away=(r.alts||[]).filter(function(c){ return !seen[c.id]; });
   if(away.length) h+='<optgroup label="'+(here.length?'Elsewhere':'Anywhere')+'">'
     +away.map(function(c){ return lbl(c,true); }).join('')+'</optgroup>';
+  // Missing from the site altogether: make it right here (Carter, 2026-10-04:
+  // "Can't add missing credits to the database from the /import last picker").
+  // The /add link this replaces opened a new tab, which a home-screen app
+  // cannot do signed in. Any account may add a coaster or a park (worker.js,
+  // openToAccounts), so this is no wider than /add or /log.
+  var where=newParkFor(r);
+  if(where&&r.src.name) h+='<option value="__new__">+ Add “'+esc(r.src.name)+'” at '+esc(where)
+    +(findPark(where)?'':' (new park)')+'</option>';
   return h;
 }
+function newParkFor(r){ return (r.park||r.typed||(r.typed==null?r.src.park:'')||'').trim(); }
 function fixHtml(r,i){
   var done=!!r.c;
   return '<div class="irow fix'+(done?' done':'')+'" data-fix="'+i+'">'
@@ -850,7 +859,7 @@ function refreshFix(i){
   var cb=el.querySelector('input[type=checkbox]');
   cb.disabled=!done; cb.checked=done&&r.pick;
   var pk=el.querySelector('input[type=text]');
-  if(document.activeElement!==pk) pk.value=r.park||'';
+  if(document.activeElement!==pk) pk.value=r.park||(r.typed!=null?r.typed:r.src.park)||'';
   pk.classList.toggle('unknown',!!(pk.value.trim()&&!r.park));
   el.querySelector('select').innerHTML=fixOptions(r);
   el.querySelector('.why').textContent=r.why||'';
@@ -864,9 +873,9 @@ function renderReview(){
   if(R.check.length) h+=bucket('b_check','warn',R.check.length,'Partial match','close, not exact — check or untick',
       R.check.map(function(r,i){return rowHtml(r,i,'check');}).join(''), true);
   if(R.fix.length) h+=bucket('b_fix','warn',R.fix.length,'Not found','pick the park and ride yourself',
-      '<div class="fixbar">Nothing here goes in until you pick a ride &mdash; that is the point of this list. '
-      +'Genuinely missing? <a href="/add" target="_blank" rel="noopener">Add it to the database &rarr;</a> '
-      +'then <button class="ghost" type="button" id="reload">reload</button></div>'
+      '<div class="fixbar">Nothing here goes in until you pick a ride. Not on the site at all? '
+      +'Type its park, then choose “+ Add” at the bottom of the ride list.'
+      +'<button class="ghost" type="button" id="reload" hidden>reload</button></div>'
       +R.fix.map(function(r,i){return fixHtml(r,i);}).join(''), true);
   if(R.owned.length) h+=bucket('b_owned','',R.owned.length,'Already in the count','skipped',
       R.owned.map(function(r,i){return rowHtml(r,i,'owned');}).join(''), false);
@@ -892,7 +901,7 @@ function renderReview(){
 // Point one row at a park: keep any ride that still fits, otherwise take the
 // park's own match for the name if there is exactly one.
 function setFixPark(r,park,typed){
-  r.park=park;
+  r.park=park; r.typed=park?'':(typed||'');
   if(r.c&&r.c.park!==park){ r.c=null; r.pick=false; delete FIXES[r.key]; }
   r.alts=findAnywhere(r.src.name).list.filter(function(c){ return c.park!==park; });
   if(park){
@@ -915,7 +924,7 @@ function wireFix(){
     var apply=function(){
       var i=+inp.dataset.p, r=ROWS.fix[i], typed=inp.value.trim();
       var park=typed?findPark(typed):null;
-      if(park===r.park){ inp.classList.toggle('unknown',!!(typed&&!park)); return; }
+      if(park===r.park){ if(!park){ r.typed=typed; refreshFix(i); } inp.classList.toggle('unknown',!!(typed&&!park)); return; }
       var heading=r.src.park||'';
       setFixPark(r,park,typed);
       refreshFix(i);
@@ -935,7 +944,9 @@ function wireFix(){
   });
   box.querySelectorAll('select[data-f]').forEach(function(sel){
     sel.onchange=function(){
-      var i=+sel.dataset.f, r=ROWS.fix[i], c=sel.value?BY_ID[+sel.value]:null;
+      var i=+sel.dataset.f, r=ROWS.fix[i];
+      if(sel.value==='__new__') return addMissing(r,i,sel);
+      var c=sel.value?BY_ID[+sel.value]:null;
       r.c=c||null;
       if(c){ r.park=c.park; r.pick=!OWNED[c.id]; FIXES[r.key]=c.id;
              r.why=OWNED[c.id]?'already in the count':'picked by hand'; }
@@ -952,6 +963,28 @@ function wireFix(){
       indexData(); fillParkOptions(); run();     // hand-picked rows survive: see FIXES
     }).catch(function(){ rl.disabled=false; rl.textContent='reload'; });
   };
+}
+
+// Put a line's ride (and its park, when that is new too) on the shared list,
+// then pick it. One confirm, the same question /log asks.
+function addMissing(r,i,sel){
+  var name=r.src.name.trim(), park=newParkFor(r), known=findPark(park);
+  if(known) park=known;
+  var ask='Add "'+name+'" to '+park+(known?'':' (a new park)')+' in the shared coaster list?'
+    +' Only add it if it is not already on the site under another name.';
+  if(!confirm(ask)){ sel.value=r.c?String(r.c.id):''; return; }
+  sel.disabled=true;
+  var step=known?Promise.resolve():api('PUT','/api/park',{name:park,region:null}).then(function(){
+    PARKS[park]={lat:null,lon:null,region:null}; });
+  step.then(function(){ return api('POST','/api/coaster',{name:name,park:park}); }).then(function(res){
+    var c={id:res.id,name:name,park:park,type:'Steel',laps:1};
+    COASTERS.push(c);
+    indexData(); fillParkOptions();
+    r.park=park; r.typed=''; r.c=c; r.pick=true; FIXES[r.key]=c.id; r.why='added to the site';
+    refreshFix(i);
+  }).catch(function(e){
+    r.why='could not add it: '+e.message; refreshFix(i);
+  }).then(function(){ sel.disabled=false; });
 }
 
 function chosen(){
