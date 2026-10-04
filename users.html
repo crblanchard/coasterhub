@@ -12,7 +12,7 @@
 <title>Riders — Coaster Hub</title>
 <meta name="description" content="Everyone on Coaster Hub, their counts and their rankings.">
 <link rel="stylesheet" href="/style.css?v=20261002d">
-<link rel="stylesheet" href="/lists.css?v=20261004a">
+<link rel="stylesheet" href="/lists.css?v=20261004b">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -50,6 +50,13 @@
   <div id="err" style="display:none"><strong>Couldn&rsquo;t load the data.</strong> This page reads external data files, so it needs to be served over the web.</div>
   <div id="loading">Loading&hellip;</div>
   <div id="ui" style="display:none">
+    <!-- Suggested for you (Carter, 2026-10-04: "users could always have
+         suggested friends at the top with some language about 'mutual
+         friends'"). Home's "Find friends ->" lands here. Signed in only. -->
+    <div id="sug_wrap" hidden>
+      <span class="eyebrow lh">Suggested for you</span>
+      <div class="riderlist suglist" id="sug"></div>
+    </div>
     <div class="tiles" id="tiles"></div>
     <div class="riderlist" id="list"></div>
   </div>
@@ -60,7 +67,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261004a"></script>
+<script src="/app.js?v=20261004b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('users');
@@ -92,6 +99,7 @@ Promise.all([CoasterHub.fetchUsers(), CoasterHub.fetchSummary(), CoasterHub.fetc
   $('list').innerHTML=users.map(function(u){ var x=by[u.slug]||{};
     return CoasterHub.riderRow(u, x.credits||0, x.rides==null?null:x.rides, x.ranked||0); }).join('');
   $('loading').style.display='none'; $('ui').style.display='';
+  CoasterHub.suggestFriends($('sug'), $('sug_wrap'), 5);
 }).catch(function(e){
   console.error(e);
   $('loading').style.display='none'; $('err').style.display='block';

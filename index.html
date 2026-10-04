@@ -12,7 +12,7 @@
 <title>Coaster Hub — Track your coaster count</title>
 <meta name="description" content="Keep track of your roller coaster count — every credit, every re-ride, every park — and see it as maps, records and charts.">
 <link rel="stylesheet" href="/style.css?v=20261002d">
-<link rel="stylesheet" href="/lists.css?v=20261004a">
+<link rel="stylesheet" href="/lists.css?v=20261004b">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -45,7 +45,9 @@
   /* The Global top ten: a panel like every other list here. */
   #globaltop{margin:0 0 34px}
   #globaltop .rfull{color:var(--accent2);font-weight:600;text-decoration:none}
-  #friends{margin-bottom:26px}
+  #friends{margin-bottom:12px}
+  .findf{margin:0 0 26px;font-size:.9rem}
+  .findf a{color:var(--accent2);font-weight:600;text-decoration:none}
   #list{margin-bottom:12px}
   #allusers{margin:0 0 28px;font-size:.9rem}
   #allusers a{color:var(--accent2);font-weight:600;text-decoration:none}
@@ -150,6 +152,9 @@
   <div id="friends_wrap" hidden>
     <span class="eyebrow lh">Friends</span>
     <div class="riderlist" id="friends"></div>
+    <!-- Carter, 2026-10-04: "below your list of friends do a Find friends ->";
+         /users has the suggestions at its top. -->
+    <p class="more findf"><a href="/users">Find friends &rarr;</a></p>
   </div>
   <!-- The Global top ten (Carter, 2026-10-02: "a card that shows live global
        top 5 or 10"): CoasterHub.rankSection, the same Global | Mine section
@@ -201,7 +206,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261004a"></script>
+<script src="/app.js?v=20261004b"></script>
 <script src="/changes-feed.js?v=20261004a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
