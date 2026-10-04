@@ -745,7 +745,7 @@ function run(){
   m.className='msg';
   m.textContent=(COLS&&COLS.park>=0&&COLS.name>=0?'Parks from column '+colName(COLS.park)+', coasters from column '+colName(COLS.name)+'. ':'')
     +parsed.length+' line'+(parsed.length===1?'':'s')+' read'+(dupes?(', '+dupes+' repeated'):'')
-    +(fix.length?(' · '+fix.length+' need'+(fix.length===1?'s':'')+' a hand below'):'')+'.';
+    +(fix.length?(' · '+fix.length+' not found'):'')+'.';
   renderReview();
   $('review').style.display='block';
 }
@@ -821,9 +821,9 @@ function renderReview(){
   h+=bucket('b_ready','',R.ready.length,'Ready to add','matched exactly',
       R.ready.map(function(r,i){return rowHtml(r,i,'ready');}).join('')||'<div class="irow">Nothing.</div>',
       R.check.length===0&&R.fix.length===0);
-  if(R.check.length) h+=bucket('b_check','warn',R.check.length,'Worth a look','close matches — confirm or untick',
+  if(R.check.length) h+=bucket('b_check','warn',R.check.length,'Partial match','close, not exact — check or untick',
       R.check.map(function(r,i){return rowHtml(r,i,'check');}).join(''), true);
-  if(R.fix.length) h+=bucket('b_fix','warn',R.fix.length,'Needs a hand','give each one a park and a ride',
+  if(R.fix.length) h+=bucket('b_fix','warn',R.fix.length,'Not found','pick the park and ride yourself',
       '<div class="fixbar">Nothing here goes in until you pick a ride &mdash; that is the point of this list. '
       +'Genuinely missing? <a href="/add" target="_blank" rel="noopener">Add it to the database &rarr;</a> '
       +'then <button class="ghost" type="button" id="reload">reload</button></div>'
@@ -927,7 +927,7 @@ function tally(){
   var n=chosen().length, left=unresolved();
   // Say what is still outstanding right next to the button, so nobody saves
   // thinking the whole list went in when a dozen lines are still unmatched.
-  $('chosen').textContent=n+' selected'+(left?(' · '+left+' still unmatched'):'');
+  $('chosen').textContent=n+' selected'+(left?(' · '+left+' not found'):'');
   $('save').disabled=!n;
 }
 
