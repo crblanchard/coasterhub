@@ -742,7 +742,7 @@ function run(){
   var m=$('parse_msg');
   if(!parsed.length){ m.className='msg bad'; m.textContent='Nothing to read there yet.'; $('review').style.display='none'; return; }
 
-  var seen={}, ready=[], check=[], owned=[], fix=[], skipped=[], dupes=0;
+  var seen={}, dupN={}, ready=[], check=[], owned=[], fix=[], skipped=[], dupes=0;
   var skipMode=noParkMode()==='__skip__';
   parsed.forEach(function(p){
     var park=p.park?findPark(p.park):null, near='', hit=null;
@@ -766,8 +766,19 @@ function run(){
       if(one) hit={c:one,how:'close match',opts:hit.opts};
     }
     if(!hit.c){ fix.push(fixRow(p,hit.how==='ambiguous'?'more than one match':'')); return; }
-    if(seen[hit.c.id]){ dupes++; return; }
-    seen[hit.c.id]=1;
+    if(seen[hit.c.id]){
+      // The same ride twice. Usually a repeat, but sometimes a second ride of
+      // the same name ("Big Apple", two "Ice Mountain"s), so it goes in the
+      // Skipped list as a fix row rather than vanishing (Carter, 2026-10-04).
+      dupes++;
+      var dk=(p.park||'')+'\u0000'+p.name+'\u0000dup', dn=(dupN[dk]=(dupN[dk]||0)+1), dkey=dk+dn;
+      var memo=FIXES[dkey]!=null?BY_ID[FIXES[dkey]]:null;
+      fix.push({src:p,park:memo?memo.park:park,c:memo||null,pick:!!memo,key:dkey,dup:true,
+        alts:findAnywhere(p.name).list.filter(function(c){ return c.park!==park; }),
+        why:memo?'you picked this':'same as '+seen[hit.c.id]+' above'});
+      return;
+    }
+    seen[hit.c.id]=hit.c.name;
     if(OWNED[hit.c.id]){ owned.push({src:p,c:hit.c}); return; }
     var rec={src:p,park:park,c:hit.c,how:near+hit.how,opts:hit.opts||[],pick:true};
     if(!near&&(hit.how==='exact'||hit.how.indexOf('former name')===0)) ready.push(rec); else check.push(rec);
@@ -783,9 +794,9 @@ function run(){
 
   ROWS={ready:ready,check:check,owned:owned,fix:fix,skipped:skipped,dupes:dupes};
   m.className='msg';
-  m.textContent=(COLS&&COLS.park>=0&&COLS.name>=0?'Parks from column '+colName(COLS.park)+', coasters from column '+colName(COLS.name)+'. ':'')
-    +parsed.length+' line'+(parsed.length===1?'':'s')+' read'+(dupes?(', '+dupes+' repeated'):'')
-    +(fix.length?(' · '+fix.length+' not found'):'')+'.';
+  // Just the count (Carter, 2026-10-04: "cut that to x coasters read"); which
+  // column was which still decides everything, it just isn't narrated.
+  m.textContent=parsed.length+' coaster'+(parsed.length===1?'':'s')+' read.';
   renderReview();
   $('review').style.display='block';
 }
@@ -869,14 +880,17 @@ function renderReview(){
   var R=ROWS, h='';
   h+=bucket('b_ready','',R.ready.length,'Ready to add','matched exactly',
       R.ready.map(function(r,i){return rowHtml(r,i,'ready');}).join('')||'<div class="irow">Nothing.</div>',
-      R.check.length===0&&R.fix.length===0);
+      R.check.length===0&&!R.fix.some(function(r){ return !r.dup; }));
   if(R.check.length) h+=bucket('b_check','warn',R.check.length,'Partial match','close, not exact — check or untick',
       R.check.map(function(r,i){return rowHtml(r,i,'check');}).join(''), true);
-  if(R.fix.length) h+=bucket('b_fix','warn',R.fix.length,'Not found','pick the park and ride yourself',
+  var nf=R.fix.filter(function(r){ return !r.dup; }).length, nd=R.fix.length-nf;
+  if(nf) h+=bucket('b_fix','warn',nf,'Not found','pick the park and ride yourself',
       '<div class="fixbar">Nothing here goes in until you pick a ride. Not on the site at all? '
       +'Type its park, then choose “+ Add” at the bottom of the ride list.'
       +'<button class="ghost" type="button" id="reload" hidden>reload</button></div>'
-      +R.fix.map(function(r,i){return fixHtml(r,i);}).join(''), true);
+      +R.fix.map(function(r,i){return r.dup?'':fixHtml(r,i);}).join(''), true);
+  if(nd) h+=bucket('b_dup','',nd,'Skipped','repeats of a line above — open to pick a different ride',
+      R.fix.map(function(r,i){return r.dup?fixHtml(r,i):'';}).join(''), false);
   if(R.owned.length) h+=bucket('b_owned','',R.owned.length,'Already in the count','skipped',
       R.owned.map(function(r,i){return rowHtml(r,i,'owned');}).join(''), false);
   if(R.skipped.length) h+=bucket('b_skip','bad',R.skipped.length,'Skipped','no park, and you asked to skip those',
@@ -994,7 +1008,7 @@ function chosen(){
   return out;
 }
 function unresolved(){
-  return (ROWS.fix||[]).filter(function(r){ return !r.c; }).length;
+  return (ROWS.fix||[]).filter(function(r){ return !r.c&&!r.dup; }).length;
 }
 function tally(){
   var n=chosen().length, left=unresolved();
