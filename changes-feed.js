@@ -434,14 +434,16 @@
       // lines, not the 300 /changes reads: ranking saves and credit bursts fold
       // together, so a few rows per line is plenty.
       // A `who` feed is a few riders out of everyone, so it reads the long list.
-      // Site updates (opts.site, /changes only — Home tried it for a day, 2026-10-02): a static file written with each
+      // Site updates (opts.site: /changes, and Home again since 2026-10-04): a static file written with each
       // working session on the site (Carter, 2026-09-27: "after every session
       // write a short summary of changes made to the site"). Its failure costs
       // the updates, never the feed.
       var site = opts.site
         ? fetch('/site-updates.json', { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; })
             .then(function(j){ return ((j && j.updates) || []).map(function(u){
-              return { kind: 'site_update', at: u.at, text: u.text || '', items: u.items || [] }; }); })
+              return { kind: 'site_update', at: u.at, text: u.text || '', items: u.items || [] }; })
+              // A short list carries the newest one only; /changes has the rest.
+              .slice(0, limit ? 1 : undefined); })
             .catch(function(){ return []; })
         : Promise.resolve([]);
       return Promise.all([fetch('/api/activity?limit=' + (limit && !WHO && !NOT ? Math.max(40, limit * 8) : 300))
