@@ -52,7 +52,7 @@
   .hint{color:var(--muted);font-size:.9rem;margin:0 0 34px}
   .hint a{color:var(--accent2)}
   /* Inside #friends the list already carries the gap below it. */
-  #friends .hint{margin-bottom:0}
+  #friends .hint{margin:0;padding:14px 16px;line-height:1.45}
   /* Under the join pills: what signing up leads to (/welcome). */
   .homenudge{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:.88rem}
   .homenudge[hidden]{display:none}
@@ -66,7 +66,7 @@
   .heroyou[hidden]{display:none}
   .heroyou h1 a{color:inherit;text-decoration:none}
   .heroyou .hy_sub{margin:6px 0 0;font-size:1.05rem;color:var(--muted)}
-  .heroyou .hy_sub span + span::before{content:" \00b7  ";white-space:pre}
+  .heroyou .hy_sub span:not(:empty) + span::before{content:" \00b7  ";white-space:pre}
   .heroyou .hy_sub b{color:var(--fg);font-weight:700}
   .heroyou .hy_last{margin:4px 0 0;font-size:.92rem;color:var(--muted)}
   .heroyou .hy_last a{color:var(--accent2);text-decoration:none;font-weight:600}
