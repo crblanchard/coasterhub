@@ -1249,6 +1249,31 @@ async function addRides(env, b) {
   };
 }
 
+// ---- Google Sheets, for /import -------------------------------------------
+// Only docs.google.com spreadsheet links, rebuilt from the id (and the tab's
+// gid, when the link names one) rather than fetched as given, so this is never
+// a way to make the Worker fetch anything else. A sheet that is not shared
+// publicly answers with Google's sign-in page, not CSV; that is the message
+// people need, so it gets one. Capped at 2 MB — a count is a few hundred rows.
+async function readSheet(link) {
+  const m = String(link).match(/^https:\/\/docs\.google\.com\/spreadsheets\/d\/([A-Za-z0-9_-]{20,})/);
+  if (!m) return { bad: [400, "That isn't a Google Sheets link."] };
+  const gid = (String(link).match(/[#&?]gid=(\d+)/) || [])[1];
+  const PRIVATE = "That sheet isn't shared. In Google Sheets: Share \u2192 General access \u2192 Anyone with the link, then paste the link again.";
+  let r;
+  try {
+    r = await fetch("https://docs.google.com/spreadsheets/d/" + m[1] + "/export?format=csv" + (gid ? "&gid=" + gid : ""),
+                    { redirect: "follow" });
+  } catch (e) { return { bad: [502, "Couldn't reach Google Sheets just now. Try again in a minute."] }; }
+  if (r.status === 401 || r.status === 403) return { bad: [403, PRIVATE] };
+  if (r.status === 404) return { bad: [404, "No sheet at that link."] };
+  if (!r.ok) return { bad: [502, "Google Sheets answered " + r.status + ". Try again in a minute."] };
+  if (/text\/html/i.test(r.headers.get("content-type") || "")) return { bad: [403, PRIVATE] };
+  const csv = await r.text();
+  if (csv.length > 2_000_000) return { bad: [413, "That sheet is too big to read here. Download it as .csv or .xlsx and drop the file in instead."] };
+  return { csv };
+}
+
 // ---- Activity feed --------------------------------------------------------
 // A plain record of what changed, so five people sharing one password can see
 // each other's work. There are no accounts here and this is not an audit log:
@@ -1856,6 +1881,12 @@ export default {
         const park = url.searchParams.get("park") || "";
         if (!park) return err(400, "need ?park=");
         return json({ riders: await getParkRiders(env, park) });
+      }
+      // A Google Sheet, as CSV, for /import (2026-10-04): a browser cannot read
+      // one (Google sends no CORS headers), the Worker can.
+      if (request.method === "GET" && path === "/api/sheet") {
+        const r = await readSheet(url.searchParams.get("url") || "");
+        return r.bad ? err(r.bad[0], r.bad[1]) : json(r);
       }
       // Who exists. Public: the rider pickers and every /user/<slug>/ page read it.
       if (request.method === "GET" && path === "/api/users") return json({ users: await getUsers(env) });

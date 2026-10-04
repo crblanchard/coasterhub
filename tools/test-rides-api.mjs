@@ -2788,6 +2788,25 @@ async function main() {
     check("feed: a day that no longer exists drops its line", !e, JSON.stringify(e));
   }
 
+  // ---- a Google Sheets link, read for /import (2026-10-04) -----------------
+  {
+    const db = freshDb(), real = globalThis.fetch;
+    const ID = "1uujHV8ELpTczjPhRHcss-5mFN7wJW_nsCDp7cj8d63s";
+    let asked = null;
+    try {
+      let r = await call(db, "GET", "/api/sheet?url=" + encodeURIComponent("https://example.com/x.csv"));
+      check("sheet: a non-Sheets link is refused", r.status === 400, JSON.stringify(r.data));
+      globalThis.fetch = async (u) => { asked = String(u); return new Response("Taiga,Linnanmäki\nX2,Six Flags Magic Mountain\n", { headers: { "content-type": "text/csv" } }); };
+      r = await call(db, "GET", "/api/sheet?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/" + ID + "/edit?usp=drivesdk#gid=42"));
+      check("sheet: a shared sheet comes back as CSV, from Google's export of that tab",
+        r.status === 200 && /Taiga/.test(r.data.csv) && asked === "https://docs.google.com/spreadsheets/d/" + ID + "/export?format=csv&gid=42",
+        asked + " " + JSON.stringify(r.data));
+      globalThis.fetch = async () => new Response("<html>Sign in</html>", { headers: { "content-type": "text/html" } });
+      r = await call(db, "GET", "/api/sheet?url=" + encodeURIComponent("https://docs.google.com/spreadsheets/d/" + ID + "/edit"));
+      check("sheet: a private sheet says how to share it", r.status === 403 && /Anyone with the link/.test(r.data.error), JSON.stringify(r.data));
+    } finally { globalThis.fetch = real; }
+  }
+
   // ---- a day logged and then removed leaves nothing in the feed (2026-10-02)
   {
     const db = freshDb();

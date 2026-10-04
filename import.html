@@ -155,7 +155,8 @@
     <h3>Paste it</h3>
     <p class="sub">One coaster per line. A line that matches a park name becomes a heading for
       everything under it &mdash; or put the park and the coaster on the same line separated by a
-      tab, which is what you get copying two columns out of a spreadsheet.</p>
+      tab, which is what you get copying two columns out of a spreadsheet. Or paste a
+      Google Sheets link (shared &ldquo;anyone with the link&rdquo;).</p>
     <textarea id="src" spellcheck="false" placeholder="Cedar Point&#10;Millennium Force&#10;Steel Vengeance&#10;Magnum XL-200&#10;&#10;Kings Island&#10;Beast&#10;Banshee"></textarea>
     <div class="drop" id="drop">
       Or drop a file here &mdash; <b id="pick">choose one</b>
@@ -606,6 +607,41 @@ function wireFile(){
   d.addEventListener('drop',function(e){ if(e.dataTransfer.files&&e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
 }
 
+// CSV to the tab-separated text the parser reads: RFC 4180 quoting ("" is a
+// quote inside a quoted cell), commas and line breaks inside quotes kept in the
+// cell, a tab or line break inside a cell turned into a space.
+function csvToTabs(csv){
+  var rows=[], row=[], cell='', q=false, s=String(csv).replace(/^\uFEFF/,'');
+  for(var i=0;i<s.length;i++){
+    var ch=s[i];
+    if(q){
+      if(ch==='"'){ if(s[i+1]==='"'){ cell+='"'; i++; } else q=false; }
+      else cell+=ch;
+    } else if(ch==='"') q=true;
+    else if(ch===','){ row.push(cell); cell=''; }
+    else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&s[i+1]==='\n') i++; row.push(cell); rows.push(row); row=[]; cell=''; }
+    else cell+=ch;
+  }
+  if(cell||row.length){ row.push(cell); rows.push(row); }
+  return rows.map(function(r){ return r.map(function(c){ return c.replace(/[\t\r\n]+/g,' '); }).join('\t'); }).join('\n');
+}
+// A Google Sheets link pasted in the box (2026-10-04): the Worker fetches the
+// sheet as CSV (/api/sheet) — a browser can't, Google doesn't allow it — and
+// it is read like any other spreadsheet. The sheet has to be shared "anyone
+// with the link"; a private one comes back as a message saying how.
+var SHEET_RE=/^https:\/\/docs\.google\.com\/spreadsheets\/d\/[A-Za-z0-9_-]+/;
+function loadSheet(link){
+  var m=$('parse_msg'); m.className='msg'; m.textContent='Reading the Google Sheet…';
+  fetch('/api/sheet?url='+encodeURIComponent(link),{credentials:'same-origin'})
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||('error '+r.status)); return j; }); })
+    .then(function(j){
+      $('src').value=csvToTabs(j.csv||'');
+      m.className='msg ok'; m.textContent='Loaded the sheet.';
+      run();
+    })
+    .catch(function(e){ m.className='msg bad'; m.textContent=e.message; });
+}
+
 function loadFile(file){
   var m=$('parse_msg'); m.className='msg'; m.textContent='Reading '+file.name+'…';
   var isXlsx=/\.xlsx$/i.test(file.name);
@@ -624,14 +660,11 @@ function loadFile(file){
         run();
       }).catch(function(err){ m.className='msg bad'; m.textContent='Could not read that spreadsheet: '+err.message; });
     } else {
-      var txt=String(fr.result).replace(/,/g, function(){ return ','; });
-      // CSV: treat commas as column separators only when the file is .csv AND
-      // the line has no tab. Coaster names contain commas ("Casey Jr., Le Petit
-      // Train du Cirque"), so this only splits on the FIRST comma.
-      if(/\.csv$/i.test(file.name)) txt=txt.split('\n').map(function(l){
-        if(l.indexOf('\t')>=0) return l;
-        var i=l.indexOf(','); return i<0?l:(l.slice(0,i)+'\t'+l.slice(i+1));
-      }).join('\n');
+      var txt=String(fr.result);
+      // A real CSV reader (2026-10-04): quoted cells keep their commas, so a
+      // name like "Casey Jr., Le Petit Train du Cirque" or a column of written
+      // reviews stays one cell, and every column reaches pickCols.
+      if(/\.csv$/i.test(file.name)) txt=csvToTabs(txt);
       $('src').value=txt; m.className='msg ok';
       m.textContent='Loaded '+file.name+'.'; run();
     }
@@ -676,6 +709,8 @@ function fixRow(p,why){
 }
 
 function run(){
+  var raw=$('src').value.trim();
+  if(SHEET_RE.test(raw) && raw.indexOf('\n')<0) return loadSheet(raw);
   var parsed=parseText($('src').value);
   var m=$('parse_msg');
   if(!parsed.length){ m.className='msg bad'; m.textContent='Nothing to read there yet.'; $('review').style.display='none'; return; }
