@@ -236,7 +236,7 @@ function more(c){
     +'<p class="lbl">Riders</p>'
     +(who===undefined ? '<p class="nobody">Loading&hellip;</p>'
       : who.length ? '<div class="who">'+youFirst(who).map(function(w){
-          return '<a class="'+(w.slug===ME?'me':'')+'" href="'+esc(CoasterHub.userPageHref(w.slug,'count'))+'">'+CoasterHub.riderFace(w.slug,w.name)+(w.slug===ME?'You':esc(w.name))+'<i>'+w.n+' ride'+(w.n===1?'':'s')+'</i></a>'; }).join('')+'</div>'
+          return '<a class="'+(w.slug===ME?'me':'')+'" href="'+esc(CoasterHub.userPageHref(w.slug,'count'))+'">'+CoasterHub.riderFace(w.slug,w.name)+(w.slug===ME?'You':esc(w.name))+(w.n>1?'<i>'+w.n+' rides</i>':'')+'</a>'; }).join('')+'</div>'
       : '<p class="nobody">Nobody on the site has ridden it yet.</p>');
 }
 

@@ -425,8 +425,9 @@ function youLine(me, mine){
   var el=$('youline');
   if(r){
     // Your place is your chip under Rankings (Carter, 2026-10-01).
-    el.innerHTML='<span><b>'+r+'</b> ride'+(r===1?'':'s')
-      +(first?' since '+String(first).slice(0,4):'')+'</span>';
+    el.innerHTML=r>1
+      ? '<span><b>'+r+'</b> rides'+(first?' since '+String(first).slice(0,4):'')+'</span>'
+      : '<span>Ridden'+(first?' in '+String(first).slice(0,4):'')+'</span>';
   } else {
     el.innerHTML='<span>Not ridden yet</span><button type="button" class="btn alt" id="addme2">+ Add to your credits</button>';
     $('addme2').onclick=function(){ CoasterHub.confirmAdd(C, me.slug).then(function(ok){ if(ok) location.reload(); }); };
@@ -521,12 +522,15 @@ function riders(){
     if(!shown.length) return;
     var moved=ROWS.length>1, ranked=false;
     var chip=function(p, isMe, row){
-      var bits=[p.laps+' ride'+(p.laps===1?'':'s')];
+      // "1 ride" goes unsaid (Carter, 2026-10-04): most counts arrive by import
+      // with one ride per coaster, so a 1 says nothing true. Like the year,
+      // it shows only when it carries information.
+      var bits=p.laps>1?[p.laps+' rides']:[];
       if(p.first) bits.push(String(p.first).slice(0,4));
       // Your place in your ranking is in the Rankings section now, not here (Carter, 2026-10-01).
       var a='<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'"'
         +(p.first?' title="First rode it '+esc(fmtDay(p.first))+'"':'')+'>'
-        +face(p.slug,p.name)+(isMe?'You':esc(p.name))+'<i>'+esc(bits.join(' · '))+'</i></a>';
+        +face(p.slug,p.name)+(isMe?'You':esc(p.name))+(bits.length?'<i>'+esc(bits.join(' · '))+'</i>':'')+'</a>';
       // Yours opens your count like anyone's; ⋯ holds +1 ride and remove
       // (critique, 2026-10-01 — it used to remove on tap).
       return isMe&&row ? '<span class="mine">'+a+'<button type="button" class="dots" data-row="'+row.id+'" data-laps="'+p.laps+'" aria-label="Your ride options">&middot;&middot;&middot;</button></span>' : a;
