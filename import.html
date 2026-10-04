@@ -558,6 +558,10 @@ function fillRiders(){
     sel.value=ME.slug;
     sel.disabled=true;
     sel.title='An import goes to your own count';
+    // Nothing to choose, so nothing to show (Carter, 2026-10-04: "Take out whose
+    // list is this from /import obviously it's your own"). The select stays in
+    // the page, hidden, because loadOwned() and save() read the slug from it.
+    document.querySelector('.setup').style.display='none';
     return;
   }
   sel.disabled=false;
@@ -971,7 +975,7 @@ function save(){
   var ids=chosen(), rider=$('rider').value, left=unresolved();
   if(!ids.length) return;
   if(!confirm('Add '+ids.length+' coaster'+(ids.length===1?'':'s')+' to '+
-      $('rider').options[$('rider').selectedIndex].text+"'s count?\n\n"+
+      (ME?'your':$('rider').options[$('rider').selectedIndex].text+"'s")+" count?\n\n"+
       'They go in without dates, which is right for a list built from memory.'+
       (left?('\n\n'+left+' line'+(left===1?'':'s')+' still have no ride picked and will NOT go in. '
              +'They stay on screen — nothing is lost if you cancel and finish them first.'):''))) return;
