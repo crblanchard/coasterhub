@@ -574,6 +574,20 @@
     color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
   .rrow .del.lone:hover{color:var(--bad);border-color:var(--bad)}
   #mine.readonly .rrow .del.lone{display:none}
+  /* On a phone the x goes and a row deletes the iOS way (Carter, 2026-10-04:
+     "The X's are too big remove them and make it where you can swipe from
+     right to left then get prompted to delete"): swipe left, a red Delete
+     slides in, tap it. Mouse users keep the x. */
+  .rrow .swdel,.swhint{display:none}
+  @media (hover:none) and (pointer:coarse){
+    #mine .rrow .del.lone{display:none}
+    .swhint{display:inline}
+    #mine:not(.readonly) .rrow{position:relative;overflow:hidden;touch-action:pan-y}
+    #mine:not(.readonly) .rrow .swdel{display:flex;position:absolute;top:0;bottom:0;right:0;width:96px;
+      align-items:center;justify-content:center;border:0;padding:0;background:#d92d2d;color:#fff;
+      font:inherit;font-weight:700;font-size:.95rem;transform:translateX(100%);transition:transform .18s ease}
+    #mine:not(.readonly) .rrow.swiped .swdel{transform:none}
+  }
   /* The number moves the row while editing. */
   #mine:not(.readonly) .rrow > .pos{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;text-decoration-color:var(--line)}
   .edithint{display:none;color:var(--muted);font-size:.84rem;margin:0 0 8px}
@@ -722,7 +736,7 @@
         <span>Some rides that are the same appear in more than one place.</span>
         <button class="ghost" type="button" id="gather">Gather them</button>
       </div>
-      <p class="edithint">Drag the handle, or tap a number to move it to a spot.</p>
+      <p class="edithint">Drag the handle, or tap a number to move it to a spot.<span class="swhint"> Swipe left to delete.</span></p>
       <div class="rank" id="ranklist"></div>
       <div class="hint" id="rank_empty" style="display:none">Nothing ranked yet.</div>
     </div>
@@ -1289,6 +1303,38 @@ function mfWire(){
   $('mfdone').onclick=function(){ $('mfpanel').hidden=true; $('mfbtn').setAttribute('aria-expanded','false'); };
 }
 
+// Swipe left on a row (touch, editing only) to bring out its Delete. One row
+// open at a time; a tap anywhere else, or a swipe back right, puts it away.
+// Wired once on the list element, so a re-render keeps it.
+function wireSwipe(el){
+  if(el._swipe) return; el._swipe=1;
+  var row=null, x0=0, y0=0, dx=0, mode='';
+  var close=function(except){ el.querySelectorAll('.rrow.swiped').forEach(function(r){ if(r!==except) r.classList.remove('swiped'); }); };
+  el.addEventListener('touchstart',function(ev){
+    if($('mine').classList.contains('readonly')||ev.touches.length!==1) return;
+    var r=ev.target.closest('.rrow');
+    if(!r||ev.target.closest('.grip, .acts, .swdel, .members, input, select')){ if(!ev.target.closest('.swdel')) close(); row=null; return; }
+    // A touch on the open row puts it away, like iOS; on another row, closes the open one.
+    if(r.classList.contains('swiped')){ close(); dragEnded=Date.now(); row=null; return; }
+    close();
+    row=r; x0=ev.touches[0].clientX; y0=ev.touches[0].clientY; dx=0; mode='';
+  },{passive:true});
+  el.addEventListener('touchmove',function(ev){
+    if(!row) return;
+    var mx=ev.touches[0].clientX-x0, my=ev.touches[0].clientY-y0;
+    if(!mode){ if(Math.abs(mx)<8&&Math.abs(my)<8) return; mode=Math.abs(mx)>Math.abs(my)?'h':'v'; }
+    if(mode!=='h') return;
+    dx=mx;
+  },{passive:true});
+  el.addEventListener('touchend',function(){
+    if(!row||mode!=='h'){ row=null; return; }
+    if(dx<-40){ close(row); row.classList.add('swiped'); }
+    else if(dx>20) row.classList.remove('swiped');
+    dragEnded=Date.now();   // a swipe is not a tap: keep the row from opening
+    row=null;
+  });
+}
+
 function renderRank(){
   moreButton();
   $('mine').classList.toggle('mf', mfOn());
@@ -1310,6 +1356,7 @@ function renderRank(){
     if (b.g && b.g.racing) return '<div class="rrow tap'+(STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'" data-rid="'+b.ids[0]+'" data-stat="'+b.ids[0]+'">'
       +'<button class="del lone" data-del="'+i+'" title="Remove from your ranking" aria-label="Remove from your ranking">\u00d7</button>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
+      +'<button class="swdel" data-del="'+i+'" tabindex="-1">Delete</button>'
       +'<span class="pos rng">'+(b.from+1)+'\u2013'+(b.to+1)+'</span>'
       +headLinks(one, b.g.name)
       +'<span class="acts">'
@@ -1402,6 +1449,7 @@ function renderRank(){
             +(OPEN[key]?'true':'false')+'"':'')+'>'
       +'<button class="del lone" data-del="'+i+'" title="Remove from your ranking" aria-label="Remove from your ranking">\u00d7</button>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
+      +'<button class="swdel" data-del="'+i+'" tabindex="-1">Delete</button>'
       +head
       +(b.g?'':globCell(b.ids[0]))
       +'<span class="acts">'
@@ -1470,6 +1518,7 @@ function renderRank(){
       if(ev.key===' '||ev.key==='Enter'){ ev.preventDefault(); toggle(ev); }
     };
   });
+  wireSwipe(el);
   // The whole run comes out: it is one item on the list now, and taking five
   // rides off one at a time is what the group exists to save you.
   el.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){
