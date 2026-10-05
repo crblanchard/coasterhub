@@ -2105,6 +2105,11 @@
   //     as if a QUARTER of an average rider also ranked it. That is the
   //     "very light" pull: Voltron, on 3 lists that all loved it, lands about
   //     #4; a ride two people happen to put first cannot run away with #1.
+  //  4. The lowest 10% of each ride's scores are dropped before averaging
+  //     (Carter, 2026-10-05: "ignore the lowest 10% ish? For all coasters?"):
+  //     Steel Vengeance, on 13 lists, was sitting #8 because two of them had
+  //     it #17 and #30. Under 10 lists nothing is dropped; at 300 lists the 30
+  //     lowest are, so a few people burying a ride stop setting its score.
   // Still only rides on 2+ lists get a Global place. `score` is out of 100.
   function globalScores(lists, credits, byId) {
     var t = {}, all = [], ws = [];
@@ -2118,14 +2123,18 @@
       ws.push(w);
       order.forEach(function (id, pos) {
         var k = rideKey(byId[id]), sc = 100 * (1 - pos / D);
-        var x = t[k] || (t[k] = { n: 0, sum: 0, sw: 0, ww: 0, who: [], name: String(byId[id].name || "") });
-        x.n++; x.sum += pos + 1; x.sw += sc * w; x.ww += w; all.push(sc);
+        var x = t[k] || (t[k] = { n: 0, sum: 0, sc: [], who: [], name: String(byId[id].name || "") });
+        x.n++; x.sum += pos + 1; x.sc.push([sc, w]); all.push(sc);
         x.who.push({ name: rk.user || rk.slug, slug: rk.slug, pos: pos + 1 });
       });
     });
     var mean = function (a) { return a.length ? a.reduce(function (p, q) { return p + q; }, 0) / a.length : 0; };
     var C = mean(all), m = 0.25 * mean(ws);
-    Object.keys(t).forEach(function (k) { var x = t[k]; x.score = (x.sw + m * C) / (x.ww + m); });
+    Object.keys(t).forEach(function (k) {
+      var x = t[k], v = x.sc.slice().sort(function (a, b) { return a[0] - b[0]; }).slice(Math.floor(x.n * 0.1));
+      var sw = 0, ww = 0; v.forEach(function (p) { sw += p[0] * p[1]; ww += p[1]; });
+      x.score = (sw + m * C) / (ww + m); delete x.sc;
+    });
     // Ties by more lists, then name, so a Global # is the same everywhere.
     Object.keys(t).filter(function (k) { return t[k].n > 1; })
       .sort(function (a, b) { var x = t[a], y = t[b]; return y.score - x.score || y.n - x.n || x.name.localeCompare(y.name); })
