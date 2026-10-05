@@ -736,7 +736,7 @@
         <span>Some rides that are the same appear in more than one place.</span>
         <button class="ghost" type="button" id="gather">Gather them</button>
       </div>
-      <p class="edithint">Drag the handle, or tap a number to move it to a spot.<span class="swhint"> Swipe left to delete.</span></p>
+      <p class="edithint">Drag the handle, or tap a number to move it to a spot.<span class="swhint"> Swipe left to remove.</span></p>
       <div class="rank" id="ranklist"></div>
       <div class="hint" id="rank_empty" style="display:none">Nothing ranked yet.</div>
     </div>
@@ -1356,7 +1356,7 @@ function renderRank(){
     if (b.g && b.g.racing) return '<div class="rrow tap'+(STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'" data-rid="'+b.ids[0]+'" data-stat="'+b.ids[0]+'">'
       +'<button class="del lone" data-del="'+i+'" title="Remove from your ranking" aria-label="Remove from your ranking">\u00d7</button>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
-      +'<button class="swdel" data-del="'+i+'" tabindex="-1">Delete</button>'
+      +'<button class="swdel" data-del="'+i+'" tabindex="-1">Remove</button>'
       +'<span class="pos rng">'+(b.from+1)+'\u2013'+(b.to+1)+'</span>'
       +headLinks(one, b.g.name)
       +'<span class="acts">'
@@ -1449,7 +1449,7 @@ function renderRank(){
             +(OPEN[key]?'true':'false')+'"':'')+'>'
       +'<button class="del lone" data-del="'+i+'" title="Remove from your ranking" aria-label="Remove from your ranking">\u00d7</button>'
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
-      +'<button class="swdel" data-del="'+i+'" tabindex="-1">Delete</button>'
+      +'<button class="swdel" data-del="'+i+'" tabindex="-1">Remove</button>'
       +head
       +(b.g?'':globCell(b.ids[0]))
       +'<span class="acts">'
