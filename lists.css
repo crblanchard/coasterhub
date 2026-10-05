@@ -291,12 +291,17 @@ a.crow .tick.busy{opacity:.4;pointer-events:none}
   background-color:var(--accentfill);color:var(--onaccent)}
 .sugf.on{background-color:transparent;border-color:var(--line);color:var(--fg);font-weight:600}
 .sugf:disabled{opacity:.55;cursor:default}
-/* Bigger rows, and a second line saying why they are here: mutual friends or
-   when they joined (Carter, 2026-10-05: "Make suggested users for you stronger"). */
-.suglist .sugrow .riderrow{padding-top:15px;padding-bottom:15px}
-.suglist .sugrow .riderrow .av{width:52px;height:52px;flex-basis:52px;font-size:1.15rem}
-.suglist .sugrow .riderrow .nm{font-size:1.05rem}
+/* A second line saying why they are here: mutual friends or joined recently
+   (Carter, 2026-10-05). Rows back to normal size, same day: "Shrink it". */
 .suglist .sub.why{color:var(--fg);margin-top:2px}
 .suglist .sub.why b{color:var(--accent2);font-weight:700}
 .suglist .sugrow .riderrow .who{min-width:0;overflow:hidden;padding-right:10px}
 .suglist .sugrow .riderrow .un,.suglist .sugrow .riderrow .nm{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Room under the heading (Carter, 2026-10-05: "gap below 'suggested for you' is too small"). */
+#sug_wrap .eyebrow,#sug_wrap .sugsub{display:block;margin-bottom:14px}
+/* Compact rows (Carter, 2026-10-05: "Shrink it so they're smaller"). */
+.suglist .sugrow .riderrow{padding-top:8px;padding-bottom:8px}
+.suglist .sugrow .riderrow .av{width:40px;height:40px;flex-basis:40px;font-size:1rem}
+.suglist .sugrow .riderrow .nm{font-size:.98rem}
+.suglist .sugrow .riderrow .un,.suglist .sugrow .riderrow .sub{font-size:.82rem}
+.suglist .sugf{min-width:80px;min-height:36px;padding:6px 12px;font-size:.85rem;margin-right:12px}
