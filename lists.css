@@ -298,3 +298,5 @@ a.crow .tick.busy{opacity:.4;pointer-events:none}
 .suglist .sugrow .riderrow .nm{font-size:1.05rem}
 .suglist .sub.why{color:var(--fg);margin-top:2px}
 .suglist .sub.why b{color:var(--accent2);font-weight:700}
+.suglist .sugrow .riderrow .who{min-width:0;overflow:hidden;padding-right:10px}
+.suglist .sugrow .riderrow .un,.suglist .sugrow .riderrow .nm{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

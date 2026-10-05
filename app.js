@@ -571,7 +571,7 @@
     var fresh = [];
     (list || []).forEach(function (u) {
       if (u && u.slug) fresh.push({ slug: u.slug, name: u.name || u.slug, avatar: u.avatar || null,
-                                    claimed: !!u.claimed });
+                                    created: u.created || null, claimed: !!u.claimed });
     });
     if (!fresh.length) return;              // never let an empty answer erase the seed
     USERS.length = 0;
