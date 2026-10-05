@@ -349,12 +349,14 @@ CoasterHub.fetchUsers().then(function(){
     function html(list){ return list.map(function(x){ return row(x.u, x.st, x.ranked); }).join(''); }
     document.getElementById('loading').style.display = 'none';
     if (fol) {
-      // The people you follow, in the same order as below. Not you: the hero
-      // right above already says your count (Carter, 2026-10-02).
+      // The people you follow and you, in the same order as below (Carter,
+      // 2026-10-05: "I want to see myself in the friends list" — 10-02 had
+      // left you out because the hero says your count).
       var inF = {}; fol.slugs.forEach(function(s){ inF[s] = 1; });
-      var mine = rows.filter(function(x){ return inF[x.u.slug] && x.u.slug !== fol.me; });
-      document.getElementById('friends').innerHTML = mine.length ? html(mine)
-        : '<p class="hint">You&rsquo;re not following anyone yet. Find people on <a href="/explore">Explore</a> or in Top users below.</p>';
+      var mine = rows.filter(function(x){ return inF[x.u.slug] || x.u.slug === fol.me; });
+      var anyF = mine.some(function(x){ return x.u.slug !== fol.me; });
+      document.getElementById('friends').innerHTML = html(mine)
+        + (anyF ? '' : '<p class="hint">You&rsquo;re not following anyone yet. Find people on <a href="/explore">Explore</a> or in Top users below.</p>');
       document.getElementById('friends_wrap').hidden = false;
       // You and the people you follow (Carter, 2026-09-26: "also show my own
       // changes in there too") — so it shows whenever you are signed in.
