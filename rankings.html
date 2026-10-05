@@ -2698,10 +2698,21 @@ function closeHH(){ hh=null; $('hh').style.display='none'; $('hh_skip').hidden=t
 // without a question (openHH does that), so it costs nothing.
 var RQ=null;          // {ids:[...], done, total} while a batch is running
 function unranked(){
-  var inList={}; ORDER.forEach(function(id){ inList[KEY(id)]=1; });
-  return MINE.filter(function(id){ return !inList[KEY(id)]; })
+  var inList={}, catIn={}; ORDER.forEach(function(id){ inList[KEY(id)]=1; if(CLONE[id]) catIn[CLONE[id].id]=1; });
+  var list=MINE.filter(function(id){ return !inList[KEY(id)]; })
     .sort(function(a,b){ var x=BYID[a]||{}, y=BYID[b]||{};
       return (y.h||0)-(x.h||0) || String(x.name).localeCompare(String(y.name)); });
+  // Categories you have not ranked yet come first, one ride each (Carter,
+  // 2026-10-05: "When you do rank more and you have unranked categories make
+  // those pop up first"). Placing one places the whole family: the rest of it
+  // folds in without a question when its turn comes (openHH).
+  var first=[], seen={};
+  list.forEach(function(id){ var g=CLONE[id];
+    if(g && !catIn[g.id] && !seen[g.id]){ seen[g.id]=1; first.push(id); } });
+  // Real categories ahead of racing pairs, which are categories found on the page.
+  first=first.filter(function(id){ return !CLONE[id].racing; }).concat(first.filter(function(id){ return CLONE[id].racing; }));
+  var lead={}; first.forEach(function(id){ lead[id]=1; });
+  return first.concat(list.filter(function(id){ return !lead[id]; }));
 }
 function moreButton(){
   var b=$('rankmore'); if(!b) return;
