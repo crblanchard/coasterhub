@@ -2124,7 +2124,8 @@
   //     Vengeance, on 13 lists, was sitting #8 because two of them had it #17
   //     and #30. At 300 lists the 30 lowest go, so a few people burying a ride
   //     stop setting its score.
-  // Still only rides on 2+ lists get a Global place. `score` is out of 100.
+  // Only lists of 10+ rides count, and only rides on 2+ of those get a Global
+  // place. `score` is out of 100.
   function globalScores(lists, credits, byId) {
     var t = {}, all = [], ws = [];
     lists.forEach(function (rk) {
@@ -2132,7 +2133,10 @@
       var order = (rk.order || []).filter(function (id) {
         var c = byId[id]; if (!c) return false; var k = rideKey(c); if (seen[k]) return false; seen[k] = 1; return true;
       });
-      if (!order.length) return;
+      // A list counts once it has 10 rides (Carter, 2026-10-05): two
+      // half-started picks out of 242 credits read as near-perfect scores and
+      // weighed almost like a full list.
+      if (order.length < 10) return;
       var D = Math.max((credits && credits[rk.slug]) || 0, order.length), w = Math.min(Math.sqrt(D), 20);
       ws.push(w);
       order.forEach(function (id, pos) {

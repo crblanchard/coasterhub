@@ -579,6 +579,15 @@
      right to left then get prompted to delete"): swipe left, a red Delete
      slides in, tap it. Mouse users keep the x. */
   .rrow .swdel,.swhint{display:none}
+  /* The rough-placement step: three stacked choices in the head-to-head box. */
+  .hh .tier{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+  .hh .tier[hidden]{display:none}
+  .hh .tier .pick{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;text-align:left}
+  .hh .tier .pick span{color:var(--muted);font-size:.88rem}
+  .hh .vs[hidden]{display:none}
+  /* With Can't decide there are three buttons: the progress line gets its own row. */
+  .hh .hhfoot{flex-wrap:wrap;justify-content:flex-end}
+  .hh .hhfoot .prog{flex:1 1 100%}
   @media (hover:none) and (pointer:coarse){
     #mine .rrow .del.lone{display:none}
     .swhint{display:inline}
@@ -802,7 +811,13 @@
   <div class="hhbox">
     <h3>Which is better?</h3>
     <div class="sub" id="hh_sub"></div>
-    <div class="vs">
+    <!-- Long lists first ask roughly where (Carter, 2026-10-05: 50+ ranked). -->
+    <div class="tier" id="hh_tier" hidden>
+      <button class="pick" data-tier="0"></button>
+      <button class="pick" data-tier="1"></button>
+      <button class="pick" data-tier="2"></button>
+    </div>
+    <div class="vs" id="hh_vs">
       <button class="pick" id="hh_a"></button>
       <span class="vsx">vs</span>
       <button class="pick" id="hh_b"></button>
@@ -811,6 +826,7 @@
       <span class="prog" id="hh_prog"></span>
       <button class="ghost" id="hh_undo" hidden>Undo</button>
       <button class="ghost" id="hh_skip" hidden></button>
+      <button class="ghost" id="hh_tie" hidden>Can&rsquo;t decide</button>
       <button class="ghost" id="hh_cancel">Cancel</button>
     </div>
   </div>
@@ -842,7 +858,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261005h"></script>
+<script src="/app.js?v=20261005i"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -2681,7 +2697,7 @@ function openHH(id, mates, g){
   // Placing a split category: its own scattered rows are not compared against.
   var B=blocks().filter(function(b){ return !regroup || (b.g||CLONE[b.ids[0]])!==regroup; })
     .map(function(b){ return b.from; });
-  hh={id:id, mates:mates, g:g||null, B:B, regroup:regroup, lo:0, hi:B.length, asked:0, cmp:{}, hist:[],
+  hh={id:id, mates:mates, g:g||null, B:B, regroup:regroup, tier:B.length>=50, lo:0, hi:B.length, asked:0, cmp:{}, hist:[],
       most:Math.ceil(Math.log2(B.length+1))+2};
   $('hh').style.display='flex';
   stepHH();
@@ -2695,6 +2711,8 @@ function nextHH(){
 }
 function stepHH(){
   if(!hh) return;
+  $('hh_tier').hidden=!hh.tier; $('hh_vs').hidden=!!hh.tier;
+  if(hh.tier) return tierHH();
   var mid=nextHH();
   if(mid<0){
     var at = hh.lo<hh.B.length ? hh.B[hh.lo] : ORDER.length;
@@ -2753,6 +2771,10 @@ function stepHH(){
   $('hh_prog').textContent=(RQ?'Coaster '+RQ.done+' of '+RQ.total+' · ':'')+'Pick '+(hh.asked+1)+' of about '+(hh.asked+togo)
     +' · against your #'+(pos+1);
   $('hh_undo').hidden=!hh.hist.length;
+  // Two you rate the same: straight in beside it, no more questions (Carter,
+  // 2026-10-05). Only once the comparison has a real neighbour to sit by.
+  $('hh_tie').hidden=false;
+  $('hh_tie').onclick=function(){ placeHH(mid+1<hh.B.length ? hh.B[mid+1] : ORDER.length); };
   $('hh_a').onclick=function(){ answerHH(mid,true); };   // candidate is better
   $('hh_b').onclick=function(){ answerHH(mid,false); };  // candidate is worse
 }
@@ -2766,7 +2788,35 @@ function answerHH(mid,better){
   hh.asked++;
   stepHH();
 }
-function closeHH(){ hh=null; $('hh').style.display='none'; $('hh_skip').hidden=true; }
+function closeHH(){ hh=null; $('hh').style.display='none'; $('hh_skip').hidden=true; $('hh_tie').hidden=true; }
+// The first question on a list of 50+: top, middle or bottom third. Each
+// third is about one fewer halving later, and the confirm step still checks
+// the neighbours either side, so a wrong third is caught, not locked in.
+function tierHH(){
+  var n=hh.B.length, t1=Math.round(n/3), t2=Math.round(2*n/3);
+  var cuts=[[0,t1],[t1,t2],[t2,n]], label=['Top third','Middle','Bottom third'];
+  var a=BYID[hh.id]||{}, name=hh.g?hh.g.name:(a.name||'');
+  $('hh_sub').textContent='Where does '+name+' go on your list?';
+  $('hh_tie').hidden=true; $('hh_undo').hidden=true;
+  Array.prototype.forEach.call($('hh_tier').querySelectorAll('[data-tier]'), function(b){
+    var k=+b.dataset.tier, c=cuts[k], from=(hh.B[c[0]]||0)+1, to=c[1]<n?hh.B[c[1]]:ORDER.length;
+    b.innerHTML='<b>'+label[k]+'</b><span>#'+from+'\u2013'+to+'</span>';
+    b.onclick=function(){
+      if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      hh.tier=false; hh.lo=c[0]; hh.hi=c[1]; hh.most=Math.ceil(Math.log2(c[1]-c[0]+1))+2; stepHH();
+    };
+  });
+  $('hh_prog').textContent=(RQ?'Coaster '+RQ.done+' of '+RQ.total+' \u00b7 ':'')+'Roughly where first';
+}
+// Put the candidate (and its mates) in at ORDER position `at` and finish.
+function placeHH(at){
+  hh.lo=hh.hi=0; hh.cmp={};
+  ORDER.splice.apply(ORDER,[at,0,hh.id].concat(hh.mates||[]));
+  var rg=hh.regroup, placed=[hh.id].concat(hh.mates||[]);
+  closeHH(); markDirty(); renderRank(); renderAdd(); setView('rank');
+  if(rg) askRegroup(rg, placed);
+  else if(RQ) setTimeout(nextRQ,0);
+}
 
 // ---- Rank more (Carter, 2026-09-27) ------------------------------------------
 // Ranking kept getting called hidden: to rank anything you had to find Edit,
