@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-05T05:38:20Z",
-   "text": "Global rankings now use a score out of 100 that weighs each list by the rider's credits, so a long list and a ride loved by many count for more than an average position did. On a phone, swipe a row left on your ranking to remove it."
+   "at": "2026-10-05T07:27:57Z",
+   "text": "Global rankings now use a score out of 100 weighted by each rider's credits, and ranking got faster with a top/middle/bottom first question on long lists, a Can't decide button, and new categories that place as one. Another rider's list now shows how much you agree with them and your biggest split."
   },
   {
    "at": "2026-10-04T16:36:35Z",

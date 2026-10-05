@@ -1127,11 +1127,38 @@ if(!slug){
     document.title=nm+'’s Rankings — Coaster Hub';
 
     $('loading').style.display='none'; $('mine').style.display='block';
-    wire(); mfWire(); renderRank(); renderAdd(); loadGlobal();
+    wire(); mfWire(); renderRank(); renderAdd(); loadGlobal(); compareWithMe(nm);
     // And again once everything is drawn: whichever of these two runs last is
     // the one that finds both the categories and the ownership in place.
     maybeOfferJoins();
   }).catch(function(e){ console.error(e); $('loading').textContent='Couldn’t load your coasters.'; });
+}
+
+// On someone else's list: how much you agree, and the ride you split on most
+// (Carter, 2026-10-05, "Compare with a friend"). Agreement is the share of
+// pairs of shared rides the two lists put in the same order; the split is the
+// shared ride furthest apart by place-in-list. Needs 5 shared rides to mean
+// anything. Read-only — nothing is saved.
+function compareWithMe(nm){
+  Promise.all([CoasterHub.me().catch(function(){ return null; }), CoasterHub.fetchAllRankings()]).then(function(r){
+    var me=r[0]; if(!me || !me.slug || me.slug===slug) return;
+    var mine=(r[1]||[]).filter(function(x){ return x.slug===me.slug; })[0];
+    if(!mine) return;
+    var at=function(list){ var o={}, n=0; oneEach(list).forEach(function(id){ var k=KEY(id); if(o[k]==null){ o[k]=n++; } }); return {o:o, n:n}; };
+    var A=at(mine.order||[]), B=at(ORDER);
+    var both=Object.keys(A.o).filter(function(k){ return B.o[k]!=null; });
+    if(both.length<5) return;
+    var same=0, pairs=0;
+    for(var i=0;i<both.length;i++) for(var j=i+1;j<both.length;j++){
+      var x=both[i], y=both[j]; pairs++;
+      if((A.o[x]-A.o[y])*(B.o[x]-B.o[y])>0) same++;
+    }
+    var far=null, gap=-1;
+    both.forEach(function(k){ var d=Math.abs(A.o[k]/A.n - B.o[k]/B.n); if(d>gap){ gap=d; far=k; } });
+    var c=BYID[far]||{};
+    $('hero_p').innerHTML='You agree on <b>'+Math.round(same/pairs*100)+'%</b> of '+both.length+' shared rides'
+      +(gap>=0.15 ? ' \u00b7 biggest split: <b>'+esc(c.name||'')+'</b> (your #'+(A.o[far]+1)+', their #'+(B.o[far]+1)+')' : '');
+  }).catch(function(){});
 }
 
 // ---------------------------------------------------------------- wiring ----
