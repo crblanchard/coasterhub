@@ -1082,6 +1082,7 @@ if(!slug){
       edit.onclick = function(){
         snapEdit();
         $('mine').classList.remove('readonly');
+        askGather();
         // The read-only line, plus the one thing edit mode has to say: that
         // the list is draggable.
         // The how-to sits over the list now (.edithint); the hero folds away.
@@ -1149,7 +1150,7 @@ function wire(){
     };
     $(f.id+'_clear').onclick=function(){ f.sel={}; renderAdd(); };
   });
-  $('gather').onclick=gather;
+  $('gather').onclick=function(){ gather(); };
   buildAddParks();
   // Save is also how you leave edit mode (Carter, 2026-09-25: "I can't click
   // save to exit update mode, it says saved already"). Nothing to save: just
@@ -1711,6 +1712,29 @@ function blocks(){
   return out;
 }
 
+// A category you already have rides from, split across your list — usually
+// because the category is new (Carter, 2026-10-05: "when you place a category
+// for the first time when you already have stuff from it ranked it asks 'do you
+// want to gather all entries from this category?'"). Asked once per category on
+// entering edit; the answer, either way, is remembered on this device.
+function askGather(){
+  var key='ch_gather_asked_'+slug, done={};
+  try{ done=JSON.parse(localStorage.getItem(key)||'{}')||{}; }catch(e){}
+  var places={}, seenAt={}, first={};
+  blocks().forEach(function(b){
+    var g=b.g||CLONE[b.ids[0]]; if(!g || g.racing) return;
+    places[g.id]=(places[g.id]||0)+1; if(first[g.id]==null) first[g.id]=b.from+1; seenAt[g.id]=g;
+  });
+  var asked=false;
+  Object.keys(places).forEach(function(k){
+    var g=seenAt[k]; if(places[k]<2 || done[catKey(g)]) return;
+    done[catKey(g)]=1; asked=true;
+    if(confirm('Your '+g.name+' are in '+places[k]+' places on your list. Gather them all together at #'
+      +first[k]+', the highest one?')) gather(g);
+  });
+  if(asked){ try{ localStorage.setItem(key, JSON.stringify(done)); }catch(e){} }
+}
+
 // Is any family split across the list? Only then is Gather worth offering.
 function scattered(){
   var seen={}, split=false;
@@ -1724,16 +1748,16 @@ function scattered(){
 
 // Pull every family together at its best-placed member, keeping the order the
 // members are already in. Nothing else moves.
-function gather(){
+function gather(only){
   var best={}, out=[];
   ORDER.forEach(function(id,i){
-    var g=CLONE[id]; if(!g) return;
+    var g=CLONE[id]; if(!g || (only && g!==only)) return;
     if(best[g.id]===undefined) best[g.id]=i;
   });
   var used={};
   ORDER.forEach(function(id,i){
     var g=CLONE[id];
-    if(!g){ out.push(id); return; }
+    if(!g || (only && g!==only)){ out.push(id); return; }
     if(best[g.id]!==i) return;             // a later member: it comes with the first
     if(used[g.id]) return;
     used[g.id]=1;
@@ -2728,7 +2752,10 @@ function unranked(){
   var F={i:0}, H={i:0}, R={i:0};
   while(out.length<list.length){
     var take=null;
-    if((out.length+1)%3===0){ take=nextOf(first,F); if(take==null) take=nextOf(help,H); }
+    // 100+ ranked: every new category comes first — at that size an unranked
+    // one has almost certainly just been added (Carter, 2026-10-05).
+    if(ORDER.length>=100) take=nextOf(first,F);
+    if(take==null && (out.length+1)%3===0){ take=nextOf(first,F); if(take==null) take=nextOf(help,H); }
     if(take==null) take=nextOf(list,R);
     if(take==null) take=nextOf(first,F);
     if(take==null) take=nextOf(help,H);
