@@ -270,9 +270,11 @@
       paintAvatar(el.av); paintBio();
       // Everything past here only exists on your own card.
       if (!editable) return;
-      // An email address is nobody's business but its owner's, so it is only
-      // ever rendered for the person it belongs to.
-      el.email.textContent = me.email || "";
+      // Not shown on the profile at all, even to its owner (Carter, 2026-10-05:
+      // "Hide my email when I'm looking at my own profile"). It is what you
+      // sign in with, and a profile is the page you screenshot.
+      el.email.textContent = "";
+      el.email.hidden = true;
       paintAvatar(el.picprev);
       el.nametext.value = me.name || "";
       el.biotext.value = me.bio || "";
