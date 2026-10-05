@@ -2578,6 +2578,50 @@ function closeJoins(){
 // (Carter, 2026-09-20: "I just want it to be a batman clone want it to fold
 // into that category".) So it folds, in from wherever it came — this dialog's
 // OK, the Add list's Rank button, anything else that calls openHH.
+// Categories on your list in more than one place: {group id: true}.
+function splitCats(){
+  var seen={}, out={};
+  blocks().forEach(function(b){ var g=b.g||CLONE[b.ids[0]]; if(!g) return;
+    if(seen[g.id]) out[g.id]=1; else seen[g.id]=1; });
+  return out;
+}
+// After placing a category that was in pieces (Carter, 2026-10-05: "I'll place
+// roller skaters as my first entry ... then after that a popup 'you have roller
+// skaters in other places in your rankings ... do you want to gather them?'",
+// naming the category, not a ride). The two examples are the rows furthest
+// from the new spot — the case for grouping in one line.
+function askRegroup(g, placed){
+  var at=ORDER.indexOf(placed[0])+1, own={};
+  placed.forEach(function(x){ own[x]=1; });
+  var rest=[]; ORDER.forEach(function(x,i){ if(CLONE[x]===g && !own[x]) rest.push(i+1); });
+  var go=function(){ $('join').style.display='none'; $('join_no').textContent='Not now';
+    $('join_no').onclick=closeJoins; if(RQ) setTimeout(nextRQ,0); };
+  if(!rest.length) return go();
+  var far=rest.slice().sort(function(a,b){ return Math.abs(b-at)-Math.abs(a-at); }).slice(0,2).sort(function(a,b){ return a-b; });
+  var nm=esc(g.name);
+  $('join_h').textContent='Group your '+g.name+'?';
+  $('join_sub').innerHTML='You placed <b>'+nm+'</b> at <b>#'+at+'</b>. You have '+rest.length+' more '
+    +(rest.length===1?'of them':nm)+' elsewhere in your rankings'
+    +(rest.length>2?', including <b>#':rest.length>1?', at <b>#':' at <b>#')+far.join('</b> and <b>#')+'</b>.'
+    +'<br><br>Group all '+(rest.length+placed.length)+' together at #'+at+'?';
+  $('join_list').innerHTML=''; $('join_prog').textContent='';
+  $('join_no').textContent='Keep them separate';
+  $('join_ok').textContent='Group them';
+  $('join').style.display='flex';
+  $('join_ok').onclick=function(){
+    // Everything of the category's moves to just after what was placed; nothing else moves.
+    var moving=ORDER.filter(function(x){ return CLONE[x]===g && !own[x]; });
+    var keep=ORDER.filter(function(x){ return !(CLONE[x]===g && !own[x]); });
+    var last=keep.indexOf(placed[placed.length-1]);
+    keep.splice.apply(keep,[last+1,0].concat(moving));
+    ORDER=keep; markDirty(); renderRank(); go();
+  };
+  // Keep them separate: those stay where they are, ranked on their own from now on.
+  $('join_no').onclick=function(){
+    ORDER.forEach(function(x){ if(CLONE[x]===g && !own[x]){ PULLED[x]=1; CATS.pulled=(CATS.pulled||[]).concat([x]); delete CLONE[x]; } });
+    markPrefs(); renderRank(); go();
+  };
+}
 function foldInto(id, g){
   if(ORDER.indexOf(id)<0) ORDER.push(id);
   snug(id, g);                      // in beside the rest of its family
@@ -2620,8 +2664,13 @@ function openHH(id, mates, g){
   var fam=CLONE[id];
   // `g` means a whole family is being placed at once, none of it ranked yet —
   // that one really is a comparison.
+  var regroup=null;
   if(fam && !g && ORDER.some(function(x){ return CLONE[x]===fam; })){
-    foldInto(id, fam); setView('rank'); if(RQ) setTimeout(nextRQ,0); return;
+    // In pieces on your list: place it as the category, then ask about the rest.
+    if(splitCats()[fam.id] && !fam.racing){
+      regroup=fam; g=fam;
+      mates=MINE.filter(function(x){ return x!==id && CLONE[x]===fam && ORDER.indexOf(x)<0; });
+    } else { foldInto(id, fam); setView('rank'); if(RQ) setTimeout(nextRQ,0); return; }
   }
   if(!ORDER.length){ ORDER=ORDER.concat([id]).concat(mates);
     markDirty(); renderRank(); renderAdd(); setView('rank'); if(RQ) setTimeout(nextRQ,0); return; }
@@ -2632,8 +2681,10 @@ function openHH(id, mates, g){
   // Boomerangs multiple times each"). B holds where each row starts in ORDER;
   // lo/hi/cmp are indexes into B, so one answer settles a whole family, and a
   // new ride can never land in the middle of one.
-  var B=blocks().map(function(b){ return b.from; });
-  hh={id:id, mates:mates, g:g||null, B:B, lo:0, hi:B.length, asked:0, cmp:{}, hist:[],
+  // Placing a split category: its own scattered rows are not compared against.
+  var B=blocks().filter(function(b){ return !regroup || (b.g||CLONE[b.ids[0]])!==regroup; })
+    .map(function(b){ return b.from; });
+  hh={id:id, mates:mates, g:g||null, B:B, regroup:regroup, lo:0, hi:B.length, asked:0, cmp:{}, hist:[],
       most:Math.ceil(Math.log2(B.length+1))+2};
   $('hh').style.display='flex';
   stepHH();
@@ -2651,8 +2702,10 @@ function stepHH(){
   if(mid<0){
     var at = hh.lo<hh.B.length ? hh.B[hh.lo] : ORDER.length;
     ORDER.splice.apply(ORDER,[at,0,hh.id].concat(hh.mates||[]));
+    var rg=hh.regroup, placed=[hh.id].concat(hh.mates||[]);
     closeHH(); markDirty(); renderRank(); renderAdd(); setView('rank');
-    if(RQ) setTimeout(nextRQ,0);
+    if(rg) askRegroup(rg, placed);
+    else if(RQ) setTimeout(nextRQ,0);
     return;
   }
   var pos=hh.B[mid];                // mid is a row; pos is where it starts
@@ -2722,6 +2775,9 @@ function closeHH(){ hh=null; $('hh').style.display='none'; $('hh_skip').hidden=t
 var RQ=null;          // {ids:[...], done, total} while a batch is running
 function unranked(){
   var inList={}, catIn={}; ORDER.forEach(function(id){ inList[KEY(id)]=1; if(CLONE[id]) catIn[CLONE[id].id]=1; });
+  // A category already on your list but in pieces (it was just made, and your
+  // rides from it were ranked one by one) is not placed yet either.
+  Object.keys(splitCats()).forEach(function(k){ delete catIn[k]; });
   var list=MINE.filter(function(id){ return !inList[KEY(id)]; })
     .sort(function(a,b){ var x=BYID[a]||{}, y=BYID[b]||{};
       return (y.h||0)-(x.h||0) || String(x.name).localeCompare(String(y.name)); });
@@ -2794,6 +2850,8 @@ function rankMore(n, only){
 function nextRQ(){
   if(!RQ) return;
   var id=RQ.ids.shift();
+  // Already placed alongside its category earlier in this run.
+  while(id!=null && ORDER.indexOf(id)>=0) id=RQ.ids.shift();
   if(id==null){ var r=RQ; RQ=null; finishRQ(r); return; }
   RQ.done++;
   openHH(id);
