@@ -940,6 +940,25 @@
       .map(function (a) { return a.n; });
   }
 
+  // Former names with the years each one was on the sign, where /edit recorded
+  // the day of a rename (alias `d`). Each dated name ran from the rename before
+  // it — or the ride's opening, for the oldest — to its own date. Newest first;
+  // names with no date follow, as plain names.
+  function formerNamesDated(list, c) {
+    var M = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    function day(d) { var p = d.split('-'); return M[+p[1] - 1] + ' ' + (+p[2]) + ', ' + p[0]; }
+    var names = formerNames(list, c.id, c.name), byName = {};
+    ((list && list.aliases) || []).forEach(function (a) { if (a.c === c.id && a.d) byName[a.n] = a.d; });
+    var dated = names.filter(function (n) { return byName[n]; })
+      .sort(function (a, b) { return byName[a] < byName[b] ? -1 : 1; });
+    var start = c.opened ? String(c.opened).slice(0, 4) : (c.yr ? String(c.yr) : '');
+    var out = dated.map(function (n, i) {
+      var from = i ? day(byName[dated[i - 1]]) : start;
+      return { n: n, from: from, to: day(byName[n]) };
+    }).reverse();
+    return out.concat(names.filter(function (n) { return !byName[n]; }).map(function (n) { return { n: n }; }));
+  }
+
   // The pages that exist per rider, i.e. everything but Home. Used for both
   // the header links and the rider picker so the two can't disagree.
   // Pages that belong to one rider and take a /user/<slug>/ prefix. Add new is
@@ -2594,7 +2613,7 @@
   var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, amongIn: amongIn, confirmAdd: confirmAdd, confirmRemove: confirmRemove, CLOSING_SOON: CLOSING_SOON, coasterHref: coasterHref,
-              findPark: findPark, findCoaster: findCoaster, formerNames: formerNames,
+              findPark: findPark, findCoaster: findCoaster, formerNames: formerNames, formerNamesDated: formerNamesDated,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,

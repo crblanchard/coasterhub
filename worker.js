@@ -611,11 +611,16 @@ async function getCoasters(env) {
 // is how most of this table's duplicates got in.
 async function getAliases(env) {
   const [c, p] = await Promise.all([
-    env.DB.prepare("SELECT coaster_id, former_name FROM coaster_aliases").all(),
+    env.DB.prepare("SELECT coaster_id, former_name, note, added FROM coaster_aliases").all(),
     env.DB.prepare("SELECT park, former_name FROM park_aliases").all(),
   ]);
   return {
-    aliases: c.results.map(r => ({ c: r.coaster_id, n: r.former_name })),
+    // Only a rename recorded WITH its real date carries one ("renamed"); the
+    // older "rename" rows are stamped with the day someone edited the site,
+    // which is not when the park changed the sign.
+    aliases: c.results.map(r => r.note === "renamed" && r.added
+      ? { c: r.coaster_id, n: r.former_name, d: r.added }
+      : { c: r.coaster_id, n: r.former_name }),
     parkAliases: p.results.map(r => ({ p: r.park, n: r.former_name })),
   };
 }
@@ -623,8 +628,16 @@ async function getAliases(env) {
 // Record a former name whenever one stops being current. Called on rename and on
 // merge, so the table maintains itself — every alias below the backfill was
 // reconstructed by hand from git history, which is not repeatable.
-function recordAlias(env, id, formerName, note) {
+// `when` (YYYY-MM-DD) is the day the park renamed it, given from /edit; with it
+// the alias is noted "renamed" and the coaster page shows the name's years.
+function recordAlias(env, id, formerName, note, when) {
   if (!formerName) return null;
+  if (when) return env.DB.prepare(
+    "INSERT INTO coaster_aliases (coaster_id, former_name, note, added) " +
+    "SELECT ?, ?, 'renamed', ? WHERE NOT EXISTS " +
+    "(SELECT 1 FROM coasters WHERE id = ? AND name = ?) " +
+    "ON CONFLICT(coaster_id, former_name) DO UPDATE SET note = 'renamed', added = excluded.added"
+  ).bind(id, formerName, when, id, formerName);
   return env.DB.prepare(
     "INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) " +
     "SELECT ?, ?, ?, date('now') WHERE NOT EXISTS " +
@@ -2872,7 +2885,9 @@ export default {
         vals.push(id);
         await env.DB.prepare("UPDATE coasters SET " + sets.join(", ") + " WHERE id = ?").bind(...vals).run();
         if ("name" in b && prev && prev.name && prev.name !== b.name) {
-          const st = recordAlias(env, id, prev.name, "rename");
+          const when = typeof b.renamedOn === "string" && /^\d{4}-\d{2}-\d{2}$/.test(b.renamedOn)
+            ? b.renamedOn : null;
+          const st = recordAlias(env, id, prev.name, "rename", when);
           // A name that has become current again is no longer a FORMER name.
           // Without this, renaming A->B->A leaves "A" aliased to a coaster
           // called A, and /add would answer "that's the old name, it's now A".
@@ -2887,7 +2902,8 @@ export default {
           // The park rides along so /changes can say WHERE it happened: two names
           // and no place is a riddle when the same retheme lands at six parks.
           await recordActivity(env, "coaster_renamed",
-            { subject: b.name, detail: { id: id, from: prev.name, park: (b.park ?? prev.park) || null } });
+            { subject: b.name, detail: { id: id, from: prev.name, park: (b.park ?? prev.park) || null,
+              ...(typeof b.renamedOn === "string" && /^\d{4}-\d{2}-\d{2}$/.test(b.renamedOn) ? { on: b.renamedOn } : {}) } });
         } else {
           await recordActivity(env, "coaster_edited",
             { subject: (prev && prev.name) || null, n: sets.length,

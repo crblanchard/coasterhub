@@ -1682,6 +1682,12 @@
         '<span style="color:var(--muted)">#'+c.id+'</span>'+geoNote+'</div>'+
       '<p class="hint">Edits update this coaster everywhere — every rider’s page reflects it automatically (they reference it by id).</p>'+
       '<div class="grid" id="form">'+fields+'</div>'+
+      // A real rename gets its date (Carter, 2026-10-05: Canyon Blaster became
+      // Canyon Cruiser on 6/5/2026), so the coaster page can say which years
+      // each name was on the sign. Blank = a typo fix: the old name is still
+      // kept as a former name, just without dates.
+      '<div class="inline" id="renRow" style="display:none;flex-wrap:wrap;margin-top:10px"><label for="renOn" style="margin:0">Renamed on</label>'+
+        '<input id="renOn" type="date" style="width:170px"><span class="hint" style="margin:0">the day the park changed it — leave blank if you’re just fixing a typo</span></div>'+
       '<div class="actions"><button id="save">Save changes</button><button class="ghost" id="revert">Revert</button><span class="toast" id="toast"></span></div>'+
       // Give a rider this coaster without leaving the editor (Carter,
       // 2026-09-24: "'add new credit' button to /edit"). It is /log's list
@@ -1709,6 +1715,9 @@
         '<p class="hint" id="delWho">Checking who has this…</p>'+
         '<div class="inline"><button class="danger" id="delBtn" disabled>Delete #'+c.id+'</button></div></div>';
     document.getElementById('save').addEventListener('click', saveCoaster);
+    document.querySelector('#form [data-k="name"]').addEventListener('input', function(){
+      document.getElementById('renRow').style.display = this.value.trim() !== (c.name||"") ? 'flex' : 'none';
+    });
     document.getElementById('revert').addEventListener('click', function(){ selectCoaster(id); });
     document.getElementById('mergeBtn').addEventListener('click', mergeCoaster);
     document.getElementById('delBtn').addEventListener('click', deleteCoaster);
@@ -2033,7 +2042,9 @@
     try {
       var body = readForm();
       if (body.bad) { toast.textContent = body.bad; toast.className = "toast bad"; return; }
-      await api("PUT","/api/coaster/"+id, body); Object.assign(state.byId[id], body);
+      var ren = document.getElementById('renOn'), on = ren && ren.value;
+      var send = (on && body.name !== state.byId[id].name) ? Object.assign({ renamedOn: on }, body) : body;
+      await api("PUT","/api/coaster/"+id, send); Object.assign(state.byId[id], body);
       state.opts = { manu:distinct("manu"), model:distinct("model") };
       toast.textContent="Saved ✓"; toast.className="toast good"; render();
     } catch(e){ toast.textContent="Error: "+e.message; toast.className="toast bad"; }

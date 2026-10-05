@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-10-05T21:12:49Z",
+   "text": "Coaster pages now show when a former name was in use, like Canyon Cruiser's \"Formerly Canyon Blaster (1999 – June 5, 2026)\". New categories for Zamperla Family Gravity Coasters and Miner Mikes, and \"Manufacturers\" replaces \"makers\" across the site."
+  },
+  {
    "at": "2026-10-05T07:27:57Z",
    "text": "Global rankings now use a score out of 100 weighted by each rider's credits, and ranking got a Can't decide button and new categories that place as one. Another rider's list now shows how much you agree with them and your biggest split."
   },

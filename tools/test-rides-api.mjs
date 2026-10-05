@@ -551,6 +551,18 @@ async function main() {
       rows(db, "SELECT * FROM coaster_aliases WHERE coaster_id=1 AND former_name='Steel Vengeance'").length === 0,
       JSON.stringify(rows(db, "SELECT * FROM coaster_aliases")));
 
+    // a rename with the date the park changed it keeps that date, and /api/coasters shows it
+    const dbd = freshDb();
+    await call(dbd, "PUT", "/api/coaster/1", { token: PW, body: { name: "Iron Vengeance", renamedOn: "2026-06-05" } });
+    const ad = rows(dbd, "SELECT * FROM coaster_aliases WHERE coaster_id=1");
+    check("a dated rename stores note 'renamed' and its date",
+      ad.length === 1 && ad[0].note === "renamed" && ad[0].added === "2026-06-05", JSON.stringify(ad));
+    r = await call(dbd, "GET", "/api/coasters");
+    const sh = (r.data.aliases || []).find(a => a.c === 1);
+    check("...and the date reaches the page", sh && sh.d === "2026-06-05", JSON.stringify(sh));
+    r = await call(db, "GET", "/api/coasters");
+    check("an undated alias carries no date", (r.data.aliases || []).every(a => !("d" in a)), JSON.stringify(r.data.aliases));
+
     // a merge banks the disappearing name AND inherits its aliases
     const db2 = freshDb();
     db2.exec("INSERT INTO coaster_aliases (coaster_id,former_name) VALUES (3,'Old Blue')");
