@@ -5488,3 +5488,19 @@ when > 0 · one of Riders here / Models / Years built / Parks) → the main list
 - Not taken: credits as the main number on rider rows (his Sep 24 ranked-first sort stays).
 - 2026-10-03: the "You've both ridden N · M of theirs you haven't" line on other riders' profiles
   is gone (Carter: "remove the thing about credit overlap"). Don't bring it back unasked.
+
+## Global score replaces the average position (2026-10-05)
+
+Carter: "How to change rankings so they're weighted based on number of riders?"
+then, on seeing Voltron fall out of the top 25, "don't think voltron should be
+penalized so much ... they all LOVED it", and chose the "very light" pull.
+`globalScores()` in app.js is now the only Global arithmetic (rankings.html's
+Global tab and its "Global #" cells, rankSection on home/park/maker/location,
+and the coaster page all read `CoasterHub.globalTally()`):
+- each ranked ride scores 100*(1-(pos-1)/credits) — against the rider's
+  CREDITS, so 100 ranked out of 800 credits scores as their top 100 (Carter's idea);
+- a rider weighs sqrt(credits), capped at 20;
+- a ride's score is the weighted mean pulled toward the site-wide mean as if
+  0.25 of an average rider also ranked it (the "very light" pull: Voltron on 3
+  lists ~#4 on 2026-10-05 data; strong pull 3.0 dropped it out of the top 25);
+- 2+ lists still required for a Global place. Shown as "97.5" (one decimal).

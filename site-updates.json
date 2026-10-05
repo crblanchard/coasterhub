@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-10-05T05:38:20Z",
+   "text": "Global rankings now use a score out of 100 that weighs each list by the rider's credits, so a long list and a ride loved by many count for more than an average position did. On a phone, swipe a row left on your ranking to remove it."
+  },
+  {
    "at": "2026-10-04T16:36:35Z",
    "text": "Import takes a Google Sheets link, matches near-misses for you, and lets you add a missing ride or park right from the list. Added 123 parks and nearly 380 coasters across the UK and Europe, from Linnanmäki and Mirabilandia to the seaside piers and travelling fairs."
   },

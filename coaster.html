@@ -189,7 +189,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261004b"></script>
+<script src="/app.js?v=20261005a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('coaster');
@@ -377,8 +377,8 @@ function face(slug,name){
 // yours, and a chip per rider with their place (Carter, 2026-10-01).
 function rankings(){
   return Promise.all([CoasterHub.fetchAllRankings(), CoasterHub.fetchUsers().catch(function(){ return null; }),
-                      CoasterHub.you().catch(function(){ return null; })]).then(function(r){
-    var lists=r[0]||[], me=r[2], ids={}, byId={};
+                      CoasterHub.you().catch(function(){ return null; }), CoasterHub.globalTally()]).then(function(r){
+    var lists=r[0]||[], me=r[2], GT=r[3]||{}, ids={}, byId={};
     ROWS.forEach(function(x){ ids[x.id]=1; });
     LIST.coasters.forEach(function(x){ byId[x.id]=x; });
     var K=function(id){ return CoasterHub.rideKey(byId[id]) || id; }, myKey=CoasterHub.rideKey(C);
@@ -394,18 +394,17 @@ function rankings(){
       });
       who.forEach(function(w){ if(w.slug===l.slug && !w.of) w.of=Object.keys(seen).length; });
     });
-    var glob=Object.keys(tally).filter(function(k){ return tally[k].n>1; })
-      .sort(function(a,b){ return (tally[a].sum/tally[a].n - tally[b].sum/tally[b].n) || tally[b].n-tally[a].n; });
-    var gpos=glob.indexOf(String(myKey))+1;
+    // Global place and score: app.js's one function (2026-10-05).
+    var mine_g=GT[myKey]||null, gpos=mine_g&&mine_g.pos||0;
+    var gof=Object.keys(GT).filter(function(k){ return GT[k].pos; }).length;
     var mine=me ? who.filter(function(x){ return x.slug===me.slug; })[0] : null;
     youLine(me, mine);
     if(!who.length) return;
     var others=who.filter(function(x){ return x!==mine; }).sort(function(a,b){ return a.pos-b.pos || a.name.localeCompare(b.name); });
-    var avg=who.reduce(function(t,x){ return t+x.pos; },0)/who.length;
     $('rank_wrap').innerHTML='<div class="sect">Rankings</div><p class="rsum">'
-      +(gpos?'<a href="/rankings" style="color:inherit;text-decoration:none">Global <b>#'+gpos+'</b> of '+glob.length+'</a> · ':'')
+      +(gpos?'<a href="/rankings" style="color:inherit;text-decoration:none">Global <b>#'+gpos+'</b> of '+gof+'</a> · ':'')
       +(gpos?'on':'On')+' <b>'+who.length+'</b> list'+(who.length===1?'':'s')
-      +(who.length>1?' · average <b>#'+(Math.round(avg*10)/10)+'</b>':'')+'</p>'
+      +(gpos?' · score <b>'+CoasterHub.scoreText(mine_g.score)+'</b>':'')+'</p>'
       // You first and in the accent (Carter, 2026-10-01: "put me in there too bolder").
       +'<div class="chips">'+(mine?[mine]:[]).concat(others).map(function(x){
         var isMe=x===mine;

@@ -2091,32 +2091,55 @@
   // Mine rows are data-cid rows, so the page's openableCoasters (on an
   // ancestor) opens them; Global rows carry data-gid and open here.
   var globalTallyP = null;
+  // The Global score (Carter, 2026-10-05, "very light" pull agreed). An
+  // average position punished long lists (#50 of 400 is a great ride but
+  // counted worse than #8 of 10) and let two lists beat twenty. So:
+  //  1. Each ranked ride scores by where it falls against the rider's CREDITS,
+  //     not their list: 100 at #1, 100*(1-(pos-1)/credits) below. Someone
+  //     with 800 credits who ranked only their top 100 gets their #100
+  //     scored as top-12% of 800 — they did not bother ranking the back half,
+  //     and that is not the same as it being their worst (Carter's idea).
+  //  2. A rider counts sqrt(credits), capped at 20 (400 credits): a big count
+  //     outweighs a small one without one person drowning the rest.
+  //  3. A ride's score is the weighted mean, pulled toward the site-wide mean
+  //     as if a QUARTER of an average rider also ranked it. That is the
+  //     "very light" pull: Voltron, on 3 lists that all loved it, lands about
+  //     #4; a ride two people happen to put first cannot run away with #1.
+  // Still only rides on 2+ lists get a Global place. `score` is out of 100.
+  function globalScores(lists, credits, byId) {
+    var t = {}, all = [], ws = [];
+    lists.forEach(function (rk) {
+      var seen = {};
+      var order = (rk.order || []).filter(function (id) {
+        var c = byId[id]; if (!c) return false; var k = rideKey(c); if (seen[k]) return false; seen[k] = 1; return true;
+      });
+      if (!order.length) return;
+      var D = Math.max((credits && credits[rk.slug]) || 0, order.length), w = Math.min(Math.sqrt(D), 20);
+      ws.push(w);
+      order.forEach(function (id, pos) {
+        var k = rideKey(byId[id]), sc = 100 * (1 - pos / D);
+        var x = t[k] || (t[k] = { n: 0, sum: 0, sw: 0, ww: 0, who: [], name: String(byId[id].name || "") });
+        x.n++; x.sum += pos + 1; x.sw += sc * w; x.ww += w; all.push(sc);
+        x.who.push({ name: rk.user || rk.slug, slug: rk.slug, pos: pos + 1 });
+      });
+    });
+    var mean = function (a) { return a.length ? a.reduce(function (p, q) { return p + q; }, 0) / a.length : 0; };
+    var C = mean(all), m = 0.25 * mean(ws);
+    Object.keys(t).forEach(function (k) { var x = t[k]; x.score = (x.sw + m * C) / (x.ww + m); });
+    // Ties by more lists, then name, so a Global # is the same everywhere.
+    Object.keys(t).filter(function (k) { return t[k].n > 1; })
+      .sort(function (a, b) { var x = t[a], y = t[b]; return y.score - x.score || y.n - x.n || x.name.localeCompare(y.name); })
+      .forEach(function (k, i) { t[k].pos = i + 1; });
+    return t;
+  }
+  // "97.5": one decimal, because the top of the list sits within a point or two.
+  function scoreText(v) { return (Math.round(v * 10) / 10).toFixed(1); }
   function globalTally() {
-    if (!globalTallyP) globalTallyP = Promise.all([fetchCoasters(), fetchAllRankings()]).then(function (r) {
-      var byId = {};
+    if (!globalTallyP) globalTallyP = Promise.all([fetchCoasters(), fetchAllRankings(), fetchSummary()]).then(function (r) {
+      var byId = {}, cr = {};
       (r[0].coasters || []).forEach(function (c) { byId[c.id] = c; });
-      return (function (all) {
-        var t = {};
-        all.forEach(function (rk) {
-          var seen = {}, u = { slug: rk.slug, name: rk.user };
-          (rk.order || []).filter(function (id) {
-            var c = byId[id]; if (!c) return false; var k = rideKey(c); if (seen[k]) return false; seen[k] = 1; return true;
-          }).forEach(function (id, pos) {
-            var k = rideKey(byId[id]), x = t[k] || (t[k] = { n: 0, sum: 0, who: [], name: String(byId[id].name || "") });
-            x.n++; x.sum += pos + 1; x.who.push({ name: u.name || u.slug, slug: u.slug, pos: pos + 1 });
-          });
-        });
-        // Each ride's place on the site-wide Global list (/rankings' Global
-        // tab): 2+ lists, by average, more lists first on a tie. The Global
-        // rows show THAT number (Carter, 2026-09-28), as Mine shows yours.
-        Object.keys(t).filter(function (k) { return t[k].n > 1; })
-          // Ties by name, the same as every list that draws these: without it
-          // tied rides kept whatever order they arrived in, and Home's top ten
-          // read 1, 3, 2, 5, 4 (critique, 2026-10-02).
-          .sort(function (a, b) { var x = t[a], y = t[b]; return (x.sum / x.n) - (y.sum / y.n) || y.n - x.n || x.name.localeCompare(y.name); })
-          .forEach(function (k, i) { t[k].pos = i + 1; });
-        return t;
-      })(r[1] || []);
+      (r[2] || []).forEach(function (u) { cr[u.slug] = u.credits || 0; });
+      return globalScores(r[1] || [], cr, byId);
     }).catch(function () { return {}; });
     return globalTallyP;
   }
@@ -2162,9 +2185,9 @@
           var k = rideKey(c); if (seen[k]) return; seen[k] = 1;
           var g = st.glob[k]; if (!g) return;
           if (g.n < 2) { one++; return; }
-          rows.push({ c: c, n: g.n, avg: g.sum / g.n, who: g.who, pos: g.pos });
+          rows.push({ c: c, n: g.n, score: g.score, who: g.who, pos: g.pos });
         });
-        rows.sort(function (a, b) { return a.avg - b.avg || b.n - a.n || String(a.c.name).localeCompare(String(b.c.name)); });
+        rows.sort(function (a, b) { return a.pos - b.pos; });
         st.rows = {};
         body = (rows.length ? '<div class="panel">' + cut(rows).map(function (r, i) {
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
@@ -2176,7 +2199,7 @@
             // accent, and under it in grey "your #3" when you have ranked it —
             // on every Global list, every width (Carter, same day) — else how
             // many lists (Home's card leaves that out: opts.lists false).
-            + '<span class="gmeta"><b>avg #' + (Math.round(r.avg * 10) / 10) + '</b>'
+            + '<span class="gmeta"><b title="Global score, out of 100">' + scoreText(r.score) + '</b>'
             + (me ? '<span class="gy">your #' + me + '</span>' : (opts.lists === false ? '' : r.n + ' lists'))
             + '</span>' + chev + '</a>';
         }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
@@ -2551,7 +2574,7 @@
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
-              riderFace: riderFace, needFirst: needFirst, foldList: foldList, globalTally: globalTally };
+              riderFace: riderFace, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);
