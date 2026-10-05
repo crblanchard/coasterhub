@@ -2516,9 +2516,13 @@ function joiners(){
   var ranked={}, out=[];
   ORDER.forEach(function(id){ var g=CLONE[id]; if(g) ranked[g.key]=(ranked[g.key]||0)+1; });
   var inList={}; ORDER.forEach(function(id){ inList[id]=1; });
+  // A category in pieces on your list is left for Rank more, which places it as
+  // one and then offers to group the rest — folding in beside whichever piece
+  // came last would just pick a spot for you.
+  var split=splitCats();
   MINE.forEach(function(id){
     if(inList[id]) return;
-    var g=CLONE[id]; if(!g || !ranked[g.key] || g.racing) return;
+    var g=CLONE[id]; if(!g || !ranked[g.key] || g.racing || split[g.id]) return;
     out.push({ id:id, g:g, n:ranked[g.key] });
   });
   return out;
