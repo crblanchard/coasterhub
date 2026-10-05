@@ -229,11 +229,13 @@ function catCard(g){
       +'<span>'+n+' of '+g.ids.length+' ridden'
       +(g.note?' · '+esc(g.note):'')+'</span></span>';
   if(open){
-    /* Alphabetical by park, then name — the reading order, not the stored one:
+    /* Ridden first (Carter, 2026-10-05: "sort by ridden on top"), then
+       alphabetical by park, then name — the reading order, not the stored one:
        g.ids keeps whatever order the server holds (Carter, 2026-09-21: "sort
        these alphabetically by park"). */
     var rows=g.ids.slice().sort(function(a,b){ var x=BY[a]||{}, y=BY[b]||{};
-      return (x.park||'').localeCompare(y.park||'') || (x.name||'').localeCompare(y.name||''); });
+      return (RIDDEN[b]?1:0)-(RIDDEN[a]?1:0)
+        || (x.park||'').localeCompare(y.park||'') || (x.name||'').localeCompare(y.name||''); });
     h+='<div class="body">'
       +rows.map(function(id){ var c=BY[id]||{};
         return '<div class="mrow'+(RIDDEN[id]?'':' unridden')+'">'
