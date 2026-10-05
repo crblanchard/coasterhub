@@ -5,17 +5,20 @@
 -- Gaps: rides whose model already names a category but which were never put
 -- in it — nearly all from 027/028's UK and European parks (22 Wacky Worms,
 -- 13 Zierer Tivolis, 4 Vekoma Boomerangs, 4 SBF Visa Spinners, 2 Vekoma SFCs).
--- New: Vekoma Roller Skaters (12), Wisdom Dragon Wagons (9), and Wisdom Orient
--- Expresses (9) as their OWN category — an Orient Express is Wisdom's bigger
+-- New: Vekoma Roller Skaters (12), Dragon Wagons (9), and Orient Expresses (9)
+-- (named without "Wisdom", Carter, same day) as their OWN category — an Orient Express is Wisdom's bigger
 -- figure-eight family coaster, not the little oval Dragon Wagon, so lumping
 -- them would collapse two different rides. Members also get the category's
 -- model name where theirs was blank or a short form ("Tivoli", "Kiddie").
 --
 -- Matched on name + park; safe to run twice (groups by name, members by
 -- clone_members' PRIMARY KEY — a ride already in a group stays put).
+-- If an earlier copy of this file already made them under the longer names:
+UPDATE clone_groups SET name = 'Dragon Wagons' WHERE name = 'Wisdom Dragon Wagons' AND NOT EXISTS (SELECT 1 FROM clone_groups WHERE name = 'Dragon Wagons');
+UPDATE clone_groups SET name = 'Orient Expresses' WHERE name = 'Wisdom Orient Expresses' AND NOT EXISTS (SELECT 1 FROM clone_groups WHERE name = 'Orient Expresses');
 INSERT INTO clone_groups (name, note, created) SELECT 'Vekoma Roller Skaters', 'Vekoma Roller Skater', datetime('now') WHERE NOT EXISTS (SELECT 1 FROM clone_groups WHERE name = 'Vekoma Roller Skaters');
-INSERT INTO clone_groups (name, note, created) SELECT 'Wisdom Dragon Wagons', 'Wisdom Dragon Wagon', datetime('now') WHERE NOT EXISTS (SELECT 1 FROM clone_groups WHERE name = 'Wisdom Dragon Wagons');
-INSERT INTO clone_groups (name, note, created) SELECT 'Wisdom Orient Expresses', 'Wisdom Orient Express', datetime('now') WHERE NOT EXISTS (SELECT 1 FROM clone_groups WHERE name = 'Wisdom Orient Expresses');
+INSERT INTO clone_groups (name, note, created) SELECT 'Dragon Wagons', 'Wisdom Dragon Wagon', datetime('now') WHERE NOT EXISTS (SELECT 1 FROM clone_groups WHERE name = 'Dragon Wagons');
+INSERT INTO clone_groups (name, note, created) SELECT 'Orient Expresses', 'Wisdom Orient Express', datetime('now') WHERE NOT EXISTS (SELECT 1 FROM clone_groups WHERE name = 'Orient Expresses');
 INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wacky Worms' AND c.name = 'Big Apple' AND c.park = 'Axels Nöjesfält (travelling)';
 INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wacky Worms' AND c.name = 'Dragon Challenge' AND c.park = 'Barry Island Pleasure Park';
 INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wacky Worms' AND c.name = 'Willy der Wurm' AND c.park = 'Bauermeister (travelling)';
@@ -100,39 +103,39 @@ INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM c
 UPDATE coasters SET model = 'Vekoma Roller Skater' WHERE name = 'Rhino Coaster' AND park = 'West Midland Safari Park' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
 INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Vekoma Roller Skaters' AND c.name = 'K3 Roller Skater' AND c.park = 'Plopsaland Belgium';
 UPDATE coasters SET model = 'Vekoma Roller Skater' WHERE name = 'K3 Roller Skater' AND park = 'Plopsaland Belgium' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Adventureland (New York)';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Adventureland (New York)';
 UPDATE coasters SET model = 'Wisdom Dragon Wagon' WHERE name = 'Dragon Wagon' AND park = 'Adventureland (New York)' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Dragon Wagons' AND c.name = 'Dragon Wagon (Blue)' AND c.park = 'Butler Amusements';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Dragon Wagon (Blue)' AND c.park = 'Butler Amusements';
 UPDATE coasters SET model = 'Wisdom Dragon Wagon' WHERE name = 'Dragon Wagon (Blue)' AND park = 'Butler Amusements' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Dragon Wagons' AND c.name = 'Dragon Wagon (Red)' AND c.park = 'Butler Amusements';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Dragon Wagon (Red)' AND c.park = 'Butler Amusements';
 UPDATE coasters SET model = 'Wisdom Dragon Wagon' WHERE name = 'Dragon Wagon (Red)' AND park = 'Butler Amusements' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Dragon Wagons' AND c.name = 'Flying Dragon Wagon' AND c.park = 'Celebration City';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Flying Dragon Wagon' AND c.park = 'Celebration City';
 UPDATE coasters SET model = 'Wisdom Dragon Wagon' WHERE name = 'Flying Dragon Wagon' AND park = 'Celebration City' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Dragon Wagons' AND c.name = 'Dragon Coaster' AND c.park = 'Clementon Park';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Dragon Coaster' AND c.park = 'Clementon Park';
 UPDATE coasters SET model = 'Wisdom Dragon Wagon' WHERE name = 'Dragon Coaster' AND park = 'Clementon Park' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Davis Amusement Cascadia';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Davis Amusement Cascadia';
 UPDATE coasters SET model = 'Wisdom Dragon Wagon' WHERE name = 'Dragon Wagon' AND park = 'Davis Amusement Cascadia' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Galaxyland';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Galaxyland';
 UPDATE coasters SET model = 'Wisdom Dragon Wagon' WHERE name = 'Dragon Wagon' AND park = 'Galaxyland' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Helm & Sons Amusements';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Helm & Sons Amusements';
 UPDATE coasters SET model = 'Wisdom Dragon Wagon' WHERE name = 'Dragon Wagon' AND park = 'Helm & Sons Amusements' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Sandy Lake Amusement Park';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Dragon Wagon' AND c.park = 'Sandy Lake Amusement Park';
 UPDATE coasters SET model = 'Wisdom Dragon Wagon' WHERE name = 'Dragon Wagon' AND park = 'Sandy Lake Amusement Park' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Orient Expresses' AND c.name = 'Dragon' AND c.park = 'Beech Bend';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Orient Expresses' AND c.name = 'Dragon' AND c.park = 'Beech Bend';
 UPDATE coasters SET model = 'Wisdom Orient Express' WHERE name = 'Dragon' AND park = 'Beech Bend' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Orient Expresses' AND c.name = 'Orient Express (1)' AND c.park = 'Butler Amusements';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Orient Expresses' AND c.name = 'Orient Express (1)' AND c.park = 'Butler Amusements';
 UPDATE coasters SET model = 'Wisdom Orient Express' WHERE name = 'Orient Express (1)' AND park = 'Butler Amusements' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Orient Expresses' AND c.name = 'Orient Express (2)' AND c.park = 'Butler Amusements';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Orient Expresses' AND c.name = 'Orient Express (2)' AND c.park = 'Butler Amusements';
 UPDATE coasters SET model = 'Wisdom Orient Express' WHERE name = 'Orient Express (2)' AND park = 'Butler Amusements' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Butler Amusements';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Butler Amusements';
 UPDATE coasters SET model = 'Wisdom Orient Express' WHERE name = 'Orient Express' AND park = 'Butler Amusements' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Fun Time Shows';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Fun Time Shows';
 UPDATE coasters SET model = 'Wisdom Orient Express' WHERE name = 'Orient Express' AND park = 'Fun Time Shows' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Fun World';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Fun World';
 UPDATE coasters SET model = 'Wisdom Orient Express' WHERE name = 'Orient Express' AND park = 'Fun World' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Mascoutah Homecoming Festival';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Mascoutah Homecoming Festival';
 UPDATE coasters SET model = 'Wisdom Orient Express' WHERE name = 'Orient Express' AND park = 'Mascoutah Homecoming Festival' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Palace Playland';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Orient Expresses' AND c.name = 'Orient Express' AND c.park = 'Palace Playland';
 UPDATE coasters SET model = 'Wisdom Orient Express' WHERE name = 'Orient Express' AND park = 'Palace Playland' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
-INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Wisdom Orient Expresses' AND c.name = 'Dragon Train' AND c.park = 'Sonoma TrainTown Railroad';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Orient Expresses' AND c.name = 'Dragon Train' AND c.park = 'Sonoma TrainTown Railroad';
 UPDATE coasters SET model = 'Wisdom Orient Express' WHERE name = 'Dragon Train' AND park = 'Sonoma TrainTown Railroad' AND (model IS NULL OR model IN ('Tivoli', 'Kiddie', 'Suspended Family Coaster'));
