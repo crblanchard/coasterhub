@@ -2735,7 +2735,9 @@ function stepHH(){
     // Several parks: the category, then how many of it you have ridden
     // (Carter, 2026-10-05: "'Vekoma Roller Skaters' then below 'you've ridden 8'").
     var rode=MINE.filter(function(x){ return CLONE[x]===g; }).length || ids.length;
-    return one ? {name:g.name, sub:Object.keys(parks)[0], mdl:mdl}
+    // A racing pair is one park and says so; a real category always says how
+    // many you have ridden, even when that is one (Carter, 2026-10-05).
+    return (one && g.racing) ? {name:g.name, sub:Object.keys(parks)[0], mdl:mdl}
                : {name:g.name, sub:'You\u2019ve ridden '+rode, mdl:mdl};
   };
   var ga = hh.g ? grpCard(hh.g, [hh.id].concat(hh.mates||[])) : null;
@@ -2750,7 +2752,7 @@ function stepHH(){
   var bName = gb ? gb.name : (b.name||'');
   var bSub  = gb ? gb.sub : (b.park||'');
   $('hh_sub').textContent='Placing '+aName
-    +(hh.g ? ' ('+n+' rides, as one)' : '')+' — every pick narrows it to one exact spot.';
+    +(hh.g && n>1 ? ' ('+n+' rides, as one)' : '')+' — every pick narrows it to one exact spot.';
   var aMdl = ga ? ga.mdl : CoasterHub.maker(a), bMdl = gb ? gb.mdl : CoasterHub.maker(b);
   $('hh_a').innerHTML='<b>'+esc(aName)+'</b><span>'+esc(aSub)+'</span>'+(aMdl?'<span class="mdl">'+esc(aMdl)+'</span>':'');
   $('hh_b').innerHTML='<b>'+esc(bName)+'</b><span>'+esc(bSub)+'</span>'+(bMdl?'<span class="mdl">'+esc(bMdl)+'</span>':'');
