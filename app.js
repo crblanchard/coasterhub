@@ -1700,7 +1700,8 @@
         // what the number is out of, and with it the line wrapped on a phone.
         bits.push(!rode ? (cs.some(function (c) { return y.rides[c.id]; }) ? "None of the " + base.length + " yet" : "Not been yet")
           : !left ? "You&rsquo;ve ridden all <b>" + base.length + "</b>"
-          : "You&rsquo;ve ridden <b>" + rode + "</b> of " + base.length + " \u00b7 <b>" + left + "</b> to go");
+          // No "N to go" (Carter, 2026-10-05: "Remove 6 to go").
+          : "You&rsquo;ve ridden <b>" + rode + "</b> of " + base.length);
         if (rk.length) bits.push("best ranked <b>#" + rk[0] + "</b> of " + y.ranked);
       }
       if (!bits.length) { el.hidden = true; return; }
