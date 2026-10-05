@@ -1888,13 +1888,6 @@
             .sort(function (a, b) { return String(b.created || "").localeCompare(String(a.created || "")) || a.name.localeCompare(b.name); });
           picked = picked.concat(recent.slice(0, lim - picked.length));
           if (!picked.length) return;
-          if (wrapEl) {
-            var lbl = wrapEl.querySelector(".sugsub, .eyebrow");
-            if (lbl) lbl.textContent = mutual.length ? "Suggested for you" : "Joined recently";
-          }
-          var mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-          var joined = function (d) { var t = d && new Date(String(d).replace(" ", "T") + (String(d).length <= 19 ? "Z" : ""));
-            return t && !isNaN(t) ? "Joined " + mon[t.getMonth()] + " " + t.getDate() : ""; };
           listEl.innerHTML = picked.map(function (u) {
             var names = via[u.slug] || [], k = x(u);
             var stats = nf(k.credits) + " credits" + (k.ranked ? " &middot; " + nf(k.ranked) + " ranked" : "");
@@ -1902,7 +1895,10 @@
             var why = names.length
               ? "<b>" + names.length + " mutual friend" + (names.length > 1 ? "s" : "") + "</b> &middot; " + E(names.slice(0, 2).join(", "))
                 + (names.length > 2 ? " +" + (names.length - 2) : "")
-              : joined(u.created);
+              // Always five, always "Suggested for you"; the line says why
+              // (Carter, 2026-10-05: "X mutual friends or 'Joined recently' no
+              // specific date").
+              : "Joined recently";
             var pic = u.avatar ? '<span class="av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
                                : '<span class="av">' + E((u.name || "?").charAt(0).toUpperCase()) + "</span>";
             return '<div class="sugrow"><a class="riderrow" href="' + userPageHref(u.slug, "profile") + '">' + pic
