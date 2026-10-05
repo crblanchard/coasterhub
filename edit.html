@@ -819,7 +819,7 @@
             + '</div>'
             + '<div class="pk">'+m.n+' ride'+(m.n===1?'':'s')
             + (m.gone ? ' · '+open+' operating · '+m.gone+' defunct' : '')
-            + (m.makers>1 ? ' · '+m.makers+' makers' : (m.manu?' · '+esc(m.manu):''))
+            + (m.makers>1 ? ' · '+m.makers+' manufacturers' : (m.manu?' · '+esc(m.manu):''))
             + '</div></div>'; }).join('')
       : '<div class="row"><div class="pk">No model matches that.</div></div>';
     document.getElementById('list').querySelectorAll('[data-mi]').forEach(function(r){
@@ -850,7 +850,7 @@
       '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(modelLabel(name))+'</h2>'
       + '<p class="hint">'+list.length+' ride'+(list.length===1?'':'s')
         + ' · '+(list.length-gone)+' still operating'+(gone?' · '+gone+' defunct':'')
-        + (nmakers>1 ? ' · from '+nmakers+' different makers' : '')+'.</p>'
+        + (nmakers>1 ? ' · from '+nmakers+' different manufacturers' : '')+'.</p>'
       + (blank
           ? '<p class="hint">These carry no model at all. Give a few of them one below and '
             + 'they join the list on the left — this is where that list grows.</p>'
@@ -1080,10 +1080,10 @@
     if (name===NOMODEL) return '';
     var groups = makerGroups(list);
     if (groups.length < 2) return '';
-    return '<div class="toolbar"><h3>Split it by maker</h3>'
+    return '<div class="toolbar"><h3>Split it by manufacturer</h3>'
       + '<p class="hint">'+list.length+' rides carry this model and '+groups.length
-        + ' different makers built them, which usually means it is more than one '
-        + 'model. Leave a box as it is to keep that maker on '+esc(name)+'.</p>'
+        + ' different manufacturers built them, which usually means it is more than one '
+        + 'model. Leave a box as it is to keep that manufacturer on '+esc(name)+'.</p>'
       + '<div class="grid">'
       + groups.map(function(g, i){
           // No stutter: a model that already opens with the maker\u2019s name is
@@ -1295,7 +1295,7 @@
     if (same.length){
       hints += '<div class="toolbar"><h3>The same name elsewhere</h3>'
         + '<p class="hint">Almost always the same ride, and the same ride is the same '
-          + 'model. Check the maker matches before copying it.</p>'
+          + 'model. Check the manufacturer matches before copying it.</p>'
         + listOf(same) + '</div>';
     }
     // Above Merge and Delete, not below them: this is what you read while
@@ -1424,7 +1424,7 @@
       + (made ? '' : '<p class="hint">Members. Untick to drop one; search below to add another.</p>')
       + '<div class="grid" id="cgmem"></div>'
       + '<div class="inline"><input id="cgadd" placeholder="Add a coaster by name\u2026" style="flex:1">'
-      + '<select id="cgmanu" style="max-width:180px"><option value="">Any maker</option>'
+      + '<select id="cgmanu" style="max-width:180px"><option value="">Any manufacturer</option>'
       + state.opts.manu.map(function(o){ return '<option>'+esc(o)+'</option>'; }).join('')
       + '</select>'
       + '<select id="cgmodel" style="max-width:200px"><option value="">Any model</option>'
