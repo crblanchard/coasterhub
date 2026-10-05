@@ -2702,38 +2702,39 @@ function unranked(){
   var list=MINE.filter(function(id){ return !inList[KEY(id)]; })
     .sort(function(a,b){ var x=BYID[a]||{}, y=BYID[b]||{};
       return (y.h||0)-(x.h||0) || String(x.name).localeCompare(String(y.name)); });
-  // Categories you have not ranked yet come first, one ride each (Carter,
-  // 2026-10-05: "When you do rank more and you have unranked categories make
-  // those pop up first"). Placing one places the whole family: the rest of it
-  // folds in without a question when its turn comes (openHH).
+  // Categories you have not ranked yet, one ride each: placing one places the
+  // whole family, the rest folding in without a question when its turn comes
+  // (openHH). Real categories ahead of racing pairs.
   var first=[], seen={};
   list.forEach(function(id){ var g=CLONE[id];
     if(g && !catIn[g.id] && !seen[g.id]){ seen[g.id]=1; first.push(id); } });
-  // Real categories ahead of racing pairs, which are categories found on the page.
   first=first.filter(function(id){ return !CLONE[id].racing; }).concat(first.filter(function(id){ return CLONE[id].racing; }));
-  var lead={}; first.forEach(function(id){ lead[id]=1; });
-  var rest=list.filter(function(id){ return !lead[id]; });
-  // Past your first 20, every third pick is a ride other people have ranked
-  // (Carter, 2026-10-05: "start mixing them in after someone makes 20 ... so
-  // they're on lists more quickly ... to show more overall rankings"). Rides
-  // on exactly one list first — your ranking is what gets them a Global place —
-  // then the ones on the most lists. Your own order stays tallest-first.
-  var cnt=GLOBAL&&GLOBAL.cnt;
+  // And, past your first 20, rides other people have ranked (Carter,
+  // 2026-10-05: "so they're on lists more quickly ... to show more overall
+  // rankings"): on exactly one list first — yours gets them a Global place —
+  // then the most-listed.
+  var cnt=GLOBAL&&GLOBAL.cnt, help=[];
   if(cnt && ORDER.length>=20){
-    var mine=function(id){ return cnt[KEY(id)]||0; };
-    var help=rest.filter(function(id){ return mine(id)>0; })
-      .sort(function(a,b){ var x=mine(a), y=mine(b); return (x===1?0:1)-(y===1?0:1) || y-x; });
-    var used={}, mixed=[], hi=0, ri=0;
-    while(mixed.length<rest.length){
-      var take=null;
-      if((mixed.length+1)%3===0){ while(hi<help.length && used[help[hi]]) hi++; if(hi<help.length) take=help[hi++]; }
-      if(take==null){ while(ri<rest.length && used[rest[ri]]) ri++; if(ri<rest.length) take=rest[ri++];
-        else { while(hi<help.length && used[help[hi]]) hi++; take=help[hi++]; } }
-      used[take]=1; mixed.push(take);
-    }
-    rest=mixed;
+    var n=function(id){ return cnt[KEY(id)]||0; };
+    help=list.filter(function(id){ return n(id)>0; })
+      .sort(function(a,b){ var x=n(a), y=n(b); return (x===1?0:1)-(y===1?0:1) || y-x; });
   }
-  return first.concat(rest);
+  // One pick in three is one of those — a category until they are all placed,
+  // then someone else's ride (Carter, same day: "not 10 categories at once
+  // right at the beginning maybe 1 in every 3 is a category until you have
+  // them cleared"). The other two stay tallest-first.
+  var used={}, out=[], fi=0, hi=0, ri=0;
+  var nextOf=function(arr, k){ while(k.i<arr.length && used[arr[k.i]]) k.i++; return k.i<arr.length ? arr[k.i++] : null; };
+  var F={i:0}, H={i:0}, R={i:0};
+  while(out.length<list.length){
+    var take=null;
+    if((out.length+1)%3===0){ take=nextOf(first,F); if(take==null) take=nextOf(help,H); }
+    if(take==null) take=nextOf(list,R);
+    if(take==null) take=nextOf(first,F);
+    if(take==null) take=nextOf(help,H);
+    used[take]=1; out.push(take);
+  }
+  return out;
 }
 function moreButton(){
   var b=$('rankmore'); if(!b) return;
