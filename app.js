@@ -1893,8 +1893,8 @@
             var stats = nf(k.credits) + " credits" + (k.ranked ? " &middot; " + nf(k.ranked) + " ranked" : "");
             // The second line says why they are here: mutual friends, or new.
             var why = names.length
-              ? "<b>" + names.length + " mutual friend" + (names.length > 1 ? "s" : "") + "</b> &middot; " + E(names.slice(0, 2).join(", "))
-                + (names.length > 2 ? " +" + (names.length - 2) : "")
+              // Just the count (Carter, 2026-10-05: "Don't need to say who the mutuals are").
+              ? "<b>" + names.length + " mutual friend" + (names.length > 1 ? "s" : "") + "</b>"
               // Always five, always "Suggested for you"; the line says why
               // (Carter, 2026-10-05: "X mutual friends or 'Joined recently' no
               // specific date").
