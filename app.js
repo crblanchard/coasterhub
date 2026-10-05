@@ -1877,21 +1877,37 @@
           var cands = (api.USERS || []).filter(function (u) { var k = x(u);
             return u.claimed && u.slug !== who.slug && !fol[u.slug] && ((k.credits || 0) > 0 || (k.ranked || 0) > 0); });
           var m = function (u) { return (via[u.slug] || []).length; };
-          cands.sort(function (a, b) { return m(b) - m(a) || (x(b).ranked || 0) - (x(a).ranked || 0)
-            || (x(b).credits || 0) - (x(a).credits || 0) || a.name.localeCompare(b.name); });
-          cands = cands.slice(0, limit || 5);
-          if (!cands.length) return;
-          listEl.innerHTML = cands.map(function (u) {
+          // People your friends follow first; then whoever joined most
+          // recently (Carter, 2026-10-05: "if you don't have any show
+          // 'Joined recently' with most recent users").
+          var mutual = cands.filter(function (u) { return m(u) > 0; })
+            .sort(function (a, b) { return m(b) - m(a) || (x(b).ranked || 0) - (x(a).ranked || 0) || a.name.localeCompare(b.name); });
+          var lim = limit || 5, picked = mutual.slice(0, lim), took = {};
+          picked.forEach(function (u) { took[u.slug] = 1; });
+          var recent = cands.filter(function (u) { return !took[u.slug]; })
+            .sort(function (a, b) { return String(b.created || "").localeCompare(String(a.created || "")) || a.name.localeCompare(b.name); });
+          picked = picked.concat(recent.slice(0, lim - picked.length));
+          if (!picked.length) return;
+          if (wrapEl) {
+            var lbl = wrapEl.querySelector(".sugsub, .eyebrow");
+            if (lbl) lbl.textContent = mutual.length ? "Suggested for you" : "Joined recently";
+          }
+          var mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+          var joined = function (d) { var t = d && new Date(String(d).replace(" ", "T") + (String(d).length <= 19 ? "Z" : ""));
+            return t && !isNaN(t) ? "Joined " + mon[t.getMonth()] + " " + t.getDate() : ""; };
+          listEl.innerHTML = picked.map(function (u) {
             var names = via[u.slug] || [], k = x(u);
-            // "Mutual friends" (Carter, 2026-10-04): people you follow who follow them.
+            var stats = nf(k.credits) + " credits" + (k.ranked ? " &middot; " + nf(k.ranked) + " ranked" : "");
+            // The second line says why they are here: mutual friends, or new.
             var why = names.length
-              ? names.length + " mutual friend" + (names.length > 1 ? "s" : "") + " &middot; " + E(names.slice(0, 2).join(", "))
+              ? "<b>" + names.length + " mutual friend" + (names.length > 1 ? "s" : "") + "</b> &middot; " + E(names.slice(0, 2).join(", "))
                 + (names.length > 2 ? " +" + (names.length - 2) : "")
-              : (k.ranked ? nf(k.ranked) + " ranked &middot; " : "") + nf(k.credits) + " credits";
+              : joined(u.created);
             var pic = u.avatar ? '<span class="av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
                                : '<span class="av">' + E((u.name || "?").charAt(0).toUpperCase()) + "</span>";
             return '<div class="sugrow"><a class="riderrow" href="' + userPageHref(u.slug, "profile") + '">' + pic
-              + '<span class="who"><b class="nm">' + E(u.name) + '</b><span class="un">@' + E(u.slug) + '</span><span class="sub">' + why + "</span></span></a>"
+              + '<span class="who"><b class="nm">' + E(u.name) + '</b><span class="un">@' + E(u.slug) + '</span>'
+              + '<span class="sub">' + stats + '</span>' + (why ? '<span class="sub why">' + why + "</span>" : "") + "</span></a>"
               + '<button type="button" class="sugf" data-slug="' + E(u.slug) + '">Follow</button></div>';
           }).join("");
           if (wrapEl) wrapEl.hidden = false;

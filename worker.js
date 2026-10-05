@@ -727,10 +727,11 @@ async function getUsers(env) {
   const claimed = await claimedSlugs(env);
   const own = (slug) => !!(claimed && claimed.has(slug));
   try {
+    // `created` feeds "Joined recently" in the suggested riders (2026-10-05).
     const { results } = await env.DB.prepare(
-      "SELECT slug, name, avatar FROM users ORDER BY name").all();
+      "SELECT slug, name, avatar, created FROM users ORDER BY name").all();
     return results.map(u => ({ slug: u.slug, name: u.name, avatar: u.avatar || null,
-                               claimed: own(u.slug) }));
+                               created: u.created || null, claimed: own(u.slug) }));
   } catch (e) {
     const { results } = await env.DB.prepare("SELECT slug, name FROM users ORDER BY name").all();
     return results.map(u => ({ slug: u.slug, name: u.name, claimed: own(u.slug) }));

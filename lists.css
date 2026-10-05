@@ -291,3 +291,10 @@ a.crow .tick.busy{opacity:.4;pointer-events:none}
   background-color:var(--accentfill);color:var(--onaccent)}
 .sugf.on{background-color:transparent;border-color:var(--line);color:var(--fg);font-weight:600}
 .sugf:disabled{opacity:.55;cursor:default}
+/* Bigger rows, and a second line saying why they are here: mutual friends or
+   when they joined (Carter, 2026-10-05: "Make suggested users for you stronger"). */
+.suglist .sugrow .riderrow{padding-top:15px;padding-bottom:15px}
+.suglist .sugrow .riderrow .av{width:52px;height:52px;flex-basis:52px;font-size:1.15rem}
+.suglist .sugrow .riderrow .nm{font-size:1.05rem}
+.suglist .sub.why{color:var(--fg);margin-top:2px}
+.suglist .sub.why b{color:var(--accent2);font-weight:700}
