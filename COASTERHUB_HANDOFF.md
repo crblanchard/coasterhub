@@ -5503,6 +5503,7 @@ and the coaster page all read `CoasterHub.globalTally()`):
 - a ride's score is the weighted mean pulled toward the site-wide mean as if
   0.25 of an average rider also ranked it (the "very light" pull: Voltron on 3
   lists ~#4 on 2026-10-05 data; strong pull 3.0 dropped it out of the top 25);
-- each ride's lowest 10% of scores (floor) are dropped first (Carter, same day:
+- each ride's lowest scores are dropped first — 1 from 5+ lists, then
+  floor(n/10): 2 from 20+, 3 from 30+ (Carter, same day:
   Steel Vengeance on 13 lists sat #8 over two #17/#30 placings; now #3);
 - 2+ lists still required for a Global place. Shown as "97.5" (one decimal).
