@@ -2531,41 +2531,28 @@ function maybeOfferJoins(){
   var rows=joiners().filter(function(r){ return skip.indexOf(r.id)<0; });
   if(!rows.length) return;
   JOIN_ASKED=true; JOIN_ROWS=rows;
-  var one=rows.length===1, first=rows[0];
-  $('join_h').textContent = one
-    ? esc(BYID[first.id].name)+' belongs in '+first.g.name
-    : rows.length+' rides you have been on belong in categories you rank';
-  // Nothing to decide. A clone's position is the position of the row it is a
-  // clone OF, so this is a statement with an OK on it, not a question.
-  $('join_sub').innerHTML = one
-    ? 'You have been on it at <b>'+esc(BYID[first.id].park||'a park you have logged')
-      + '</b>, and it is the same ride as the '+first.n+' already in your '
-      + '<b>'+esc(first.g.name)+'</b> row. It folds straight in \u2014 nothing to '
-      + 'compare, nothing to reorder.'
-    : 'Each one is the same ride as something already in your list, so each folds '
-      + 'into the row that is already there \u2014 nothing to compare, nothing to reorder.';
-  $('join_list').innerHTML = rows.slice(0,6).map(function(r){
-    var c=BYID[r.id];
-    return '<div class="joinrow"><span class="who"><b>'+esc(c.name)+'</b>'
-      + '<span>'+esc(c.park||'\u2014')+' \u00b7 joins '+esc(r.g.name)
-      + ' \u00b7 '+r.n+' already ranked</span></span></div>';
-  }).join('');
-  $('join_prog').textContent = rows.length>6 ? 'and '+(rows.length-6)+' more' : '';
-  $('join_ok').textContent = one ? 'OK, fold it in' : 'OK, fold them in';
-  $('join').style.display='flex';
-  $('join_ok').onclick=function(){
-    var ids=rows.map(function(r){ return r.id; });
-    skipJoins(ids);                    // asked and answered, either way
-    $('join').style.display='none';
-    // Straight into editing: the answer to this dialog is a change to the list,
-    // and stopping to press Edit first is a step with no question in it.
-    $('mine').classList.remove('readonly');
-    rows.forEach(function(r){ foldInto(r.id, r.g); });
-    setView('rank');
-    // And saved, because "OK" is the whole interaction: a fold left sitting
-    // unsaved is the same silence that lost the ride in the first place.
-    save();
-  };
+  // No dialog any more (Carter, 2026-10-05: "Shorten this language actually make
+  // it automatically sort itself"): a clone's place IS its row's place, so
+  // there was never a decision in it. Fold, save, and say so in one line.
+  skipJoins(rows.map(function(r){ return r.id; }));
+  var wasRead=$('mine').classList.contains('readonly');
+  rows.forEach(function(r){ foldInto(r.id, r.g); });
+  var first=rows[0];
+  joinNote(rows.length===1
+    ? 'Added '+(BYID[first.id].name||'a ride')+' to your '+first.g.name+'.'
+    : 'Added '+rows.length+' rides to the categories they belong in.');
+  save(function(){ if(wasRead) $('mine').classList.add('readonly'); });
+}
+// A one-line note at the bottom that fades on its own.
+function joinNote(text){
+  var n=document.getElementById('joinnote');
+  if(!n){ n=document.createElement('div'); n.id='joinnote';
+    n.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom));'
+      +'z-index:40;width:max-content;max-width:calc(100% - 32px);text-align:center;padding:10px 16px;border-radius:12px;background:var(--panel);'
+      +'border:1px solid var(--line);color:var(--fg);font-size:.9rem;box-shadow:0 6px 24px rgba(0,0,0,.25);transition:opacity .4s';
+    document.body.appendChild(n); }
+  n.textContent=text; n.style.opacity='1';
+  clearTimeout(n._t); n._t=setTimeout(function(){ n.style.opacity='0'; }, 4000);
 }
 function closeJoins(){
   $('join').style.display='none';
