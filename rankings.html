@@ -636,6 +636,11 @@
   .rqrow b{flex:none;min-width:2.6em;color:var(--accent2);font-variant-numeric:tabular-nums}
   .rqrow span{min-width:0;font-weight:600}
   .rqrow i{display:block;font-style:normal;font-weight:400;color:var(--muted);font-size:.8rem}
+  /* The way to /how-rankings-work (2026-10-07): quiet on purpose — muted, small,
+     after the list, plus a link in the Global list's subtitle. */
+  .howfoot{margin:30px 0 0;text-align:center;font-size:.86rem}
+  .howfoot a,.howrank{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+  .howfoot a:hover,.howrank:hover{color:var(--accent2)}
 </style>
 </head>
 <body>
@@ -781,6 +786,8 @@
       <div class="list" id="addlist"></div>
     </div>
   </div>
+  <!-- (Carter, 2026-10-07: "a subtle link on /rankings") -->
+  <p class="howfoot" id="howfoot" hidden><a href="/how-rankings-work">How rankings work</a></p>
 </div></section>
 
 <!-- head-to-head overlay -->
@@ -981,7 +988,7 @@ if(!slug){
     }).join('');
 
     if(shared.length){
-      $('shared_sub').textContent='Coasters ranked by 2+ users';
+      $('shared_sub').innerHTML='Coasters ranked by 2+ users &middot; <a class="howrank" href="/how-rankings-work">How it&rsquo;s scored</a>';
       // All of it: the separate /rankings/all page that held the rest is gone.
       var mineAt={}; shared.forEach(function(t){ t.who.forEach(function(w){ if(ME && w.slug===ME.slug) mineAt[t.id]=w.pos; }); });
       $('shared').innerHTML=shared.map(function(t,i){
@@ -1114,7 +1121,7 @@ if(!slug){
     $('hero_p').textContent='Judgment-free zone.';
     document.title=nm+'’s Rankings — Coaster Hub';
 
-    $('loading').style.display='none'; $('mine').style.display='block';
+    $('loading').style.display='none'; $('mine').style.display='block'; $('howfoot').hidden=false;
     wire(); mfWire(); renderRank(); renderAdd(); loadGlobal(); compareWithMe(nm);
     // And again once everything is drawn: whichever of these two runs last is
     // the one that finds both the categories and the ownership in place.
