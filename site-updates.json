@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-10-10T00:12:46Z",
+   "text": "The Updates section on Home now includes what your friends did, not just everyone else."
+  },
+  {
    "at": "2026-10-07T16:09:13Z",
    "text": "New How rankings work page explains how Rank more places a ride and how every list becomes the Global score. It's linked from the bottom of your list on Rankings and from the Global list's heading."
   },
