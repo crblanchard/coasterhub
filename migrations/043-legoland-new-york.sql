@@ -1,0 +1,13 @@
+-- 043: Legoland New York, Goshen (Carter, 2026-10-17, from RCDB;
+-- 41.378316672942226, -74.31336996688945). Not in D1 before.
+--   Dragon              Zierer Force (Five), 7/9/2021, 0 inv, dark-ride section
+--   Dragon's Apprentice Zamperla Family Gravity Coaster (92m), 7/9/2021,
+--                       262.5 ft, 13.1 ft -> joins that category
+-- Models use the site's existing names ("Zierer Force" has 11 rides).
+-- /changes rows in the Worker's shape. Safe to run twice.
+INSERT INTO parks (name, lat, lon, region) SELECT 'Legoland New York', 41.378316672942226, -74.31336996688945, 'New York, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Legoland New York');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Dragon', 'Legoland New York', 'Steel', 'Zierer', 'Zierer Force', NULL, NULL, NULL, 0, NULL, 1, 2021, '2021-07-09', 'day', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Legoland New York') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Dragon' AND park = 'Legoland New York');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Dragon''s Apprentice', 'Legoland New York', 'Steel', 'Zamperla', 'Zamperla Family Gravity Coaster', 13.1, NULL, 262.5, 0, NULL, 1, 2021, '2021-07-09', 'day', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Legoland New York') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Dragon''s Apprentice' AND park = 'Legoland New York');
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Zamperla Family Gravity Coasters' AND c.name = 'Dragon''s Apprentice' AND c.park = 'Legoland New York';
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.park = 'Legoland New York' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND a.subject = c.name AND json_extract(a.detail, '$.park') = 'Legoland New York');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'clone_set', g.name, (SELECT COUNT(*) FROM clone_members m WHERE m.group_id = g.id), json_object('made', 0, 'via', '043') FROM clone_groups g WHERE g.name = 'Zamperla Family Gravity Coasters' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'clone_set' AND a.subject = g.name AND a.detail LIKE '%"via":"043"%');
