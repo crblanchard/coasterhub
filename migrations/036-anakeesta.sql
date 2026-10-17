@@ -64,3 +64,9 @@ INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) SEL
 -- 2,000 m = 6,562 ft.
 INSERT INTO parks (name, lat, lon, region) SELECT 'SkyLand Ranch', 35.83341390494683, -83.57390870785191, 'Tennessee, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'SkyLand Ranch');
 INSERT INTO coasters (id, name, park, type, manu, model, l, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Wild Stallion', 'SkyLand Ranch', 'Steel', 'Wiegand', 'Wiegand Alpine', 6562, 1, 2022, '2022', 'year', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'SkyLand Ranch') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Wild Stallion' AND park = 'SkyLand Ranch');
+
+-- Wilderness at the Smokies, Sevierville (Carter, same day; 35.89421119536928,
+-- -83.58437179829833). Not in D1. Rocky Top Glider (RCDB): Extreme Engineering
+-- Cloud Coaster, indoor, suspended, since 10/2023, 1,312 ft, 25 ft, 0 inv.
+INSERT INTO parks (name, lat, lon, region) SELECT 'Wilderness at the Smokies', 35.89421119536928, -83.58437179829833, 'Tennessee, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Wilderness at the Smokies');
+INSERT INTO coasters (id, name, park, type, manu, model, h, l, inv, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Rocky Top Glider', 'Wilderness at the Smokies', 'Steel', 'Extreme Engineering', 'Extreme Engineering Cloud Coaster', 25, 1312, 0, 1, 2023, '2023-10', 'month', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Wilderness at the Smokies') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Rocky Top Glider' AND park = 'Wilderness at the Smokies');
