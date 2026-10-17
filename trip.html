@@ -260,7 +260,10 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
 
   function save(){
     var p=STOPS.map(function(n){ return CoasterHub.slugify(n); });
-    var w=RIDERS.filter(function(R){ return !R.you; }).map(function(R){ return R.slug; });
+    // Everyone riding, you included, so a shared link carries you along: the
+    // friend who opens it sees themselves as "You" and you beside them (the
+    // viewer's own slug is dropped on load). Carter, 2026-10-17, sending one to Sean.
+    var w=RIDERS.map(function(R){ return R.slug; });
     try { localStorage.setItem(STORE, JSON.stringify({ p:p, w:w })); } catch(e){}
     var qs=[]; if(p.length) qs.push('p='+p.join(',')); if(w.length) qs.push('with='+w.map(encodeURIComponent).join(','));
     history.replaceState(null,'',location.pathname+(qs.length?'?'+qs.join('&'):''));
