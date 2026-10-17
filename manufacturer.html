@@ -35,6 +35,15 @@
   a.crow.mk.open{background:var(--soft)}
   .cx .mrows{margin:12px 0 4px}
   .cx .mrows a.crow{padding-left:14px}
+  /* Every coaster the maker built, in one list (Carter, 2026-10-17: "full list
+     of coasters they've manufactured too"): a search and a sort over it, the
+     same controls /coasters has. background-COLOR, never the shorthand. */
+  .allbar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+  .allbar input,.allbar select{background-color:var(--panel);border:1px solid var(--line);color:var(--fg);
+    padding:10px 12px;border-radius:10px;font-size:.9rem;min-width:0}
+  .allbar input{flex:1 1 220px}
+  .allbar select{flex:0 1 auto;cursor:pointer}
+  .allnone{color:var(--muted);padding:14px 16px;margin:0}
 </style>
 </head>
 <body>
@@ -244,7 +253,13 @@ function one(name, cs, MINE){
       +CoasterHub.countsTag(op, list.length-op)+'</summary>'
       +(mo ? '<a class="crow mlink" href="'+esc(CoasterHub.makerHref(name, mo))+'"><span class="cn">Model page &rarr;</span></a>' : '')
       +list.map(function(c){ return crow(c, MINE); }).join('')+'</details>';
-  }).join('')+'</div><div id="ranked"></div>';
+  }).join('')+'</div>'
+    +'<div class="sect">All coasters</div>'
+    +'<div class="allbar"><input id="aq" type="search" placeholder="Search name or park&hellip;" autocomplete="off">'
+    +'<select id="asort" aria-label="Sort"><option value="name">A–Z</option><option value="new">Newest</option>'
+    +'<option value="old">Oldest</option><option value="h">Tallest</option><option value="s">Fastest</option></select></div>'
+    +'<div id="allwrap"></div><div id="ranked"></div>';
+  allList(cs, MINE);
   // Where these sit in the rankings, Mine / Global (CoasterHub.rankSection,
   // shared with a location's page).
   // Folded, except when a link points at one model (it would be hidden).
@@ -255,6 +270,31 @@ function one(name, cs, MINE){
     var d=document.getElementById(decodeURIComponent(location.hash.slice(1)));
     if(d && d.tagName==='DETAILS'){ d.open=true; d.scrollIntoView({behavior:'instant',block:'start'}); }
   }
+}
+// The whole list under the models. Built again on every keystroke or sort,
+// wrapper and all, so foldList's "Show N more" never stacks up.
+function allList(cs, MINE){
+  var yr=function(c){ return c.opened ? Number(String(c.opened).slice(0,4)) : (c.yr ? Number(c.yr) : null); };
+  var nm=function(a,b){ return String(a.name).localeCompare(String(b.name), undefined, {sensitivity:'base'}) || String(a.park).localeCompare(String(b.park)); };
+  var SORTS={
+    name:nm,
+    // No year last either way, so "Oldest" does not open on a page of blanks.
+    'new':function(a,b){ var x=yr(a), y=yr(b); return (x==null)-(y==null) || (y||0)-(x||0) || nm(a,b); },
+    old:function(a,b){ var x=yr(a), y=yr(b); return (x==null)-(y==null) || (x||0)-(y||0) || nm(a,b); },
+    h:function(a,b){ return (b.h||0)-(a.h||0) || nm(a,b); },
+    s:function(a,b){ return (b.s||0)-(a.s||0) || nm(a,b); }
+  };
+  function draw(){
+    var q=$('aq').value.trim().toLowerCase();
+    var rows=cs.filter(function(c){ return !q || String(c.name).toLowerCase().indexOf(q)>=0 || String(c.park||'').toLowerCase().indexOf(q)>=0; })
+      .sort(SORTS[$('asort').value]||nm);
+    $('allwrap').innerHTML='<div class="panel" id="alllist">'
+      +(rows.length ? rows.map(function(c){ return crow(c, MINE); }).join('') : '<p class="allnone">No coasters match.</p>')+'</div>';
+    if(!q) CoasterHub.foldList($('alllist'), 10);
+  }
+  $('aq').addEventListener('input', draw);
+  $('asort').addEventListener('change', draw);
+  draw();
 }
 // ---- one model ------------------------------------------------------------
 // A reference page for one model (Carter, 2026-09-24: pages to click through
