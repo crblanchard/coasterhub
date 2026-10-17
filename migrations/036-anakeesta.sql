@@ -26,3 +26,9 @@ INSERT INTO coasters (id, name, park, type, manu, model, l, laps, yr, opened, op
 UPDATE parks SET lat = 35.803008733276094, lon = -83.57047558631326 WHERE name = 'Island in Pigeon Forge';
 UPDATE coasters SET manu = 'SBF Visa', model = 'SBF Visa Spinner', inv = 0, yr = 2018, opened = '2018-07-10', openedPrec = 'day' WHERE name = 'Spinning Parrot' AND park = 'Island in Pigeon Forge' AND manu IS NULL;
 INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'SBF Visa Spinners' AND c.name = 'Spinning Parrot' AND c.park = 'Island in Pigeon Forge';
+
+-- Lost Mine Mountain Coaster & Mini-Golf, Pigeon Forge (Carter, same day;
+-- 35.809053216528355, -83.5742475557486). Not in D1. Wiegand, 2023,
+-- 1,646 m = 5,400 ft.
+INSERT INTO parks (name, lat, lon, region) SELECT 'Lost Mine Mountain Coaster & Mini-Golf', 35.809053216528355, -83.5742475557486, 'Tennessee, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Lost Mine Mountain Coaster & Mini-Golf');
+INSERT INTO coasters (id, name, park, type, manu, model, l, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Lost Mine Mountain Coaster', 'Lost Mine Mountain Coaster & Mini-Golf', 'Steel', 'Wiegand', 'Wiegand Alpine', 5400, 1, 2023, '2023', 'year', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Lost Mine Mountain Coaster & Mini-Golf') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Lost Mine Mountain Coaster' AND park = 'Lost Mine Mountain Coaster & Mini-Golf');
