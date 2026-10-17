@@ -49,7 +49,15 @@ jobs:
             # from /log and /import, so naming files here cannot keep up.
             git add -- '*.json'
             git commit -m "chore: sync static JSON from D1"
-            git push
+            # main moves during the two-minute wait whenever a session pushes
+            # code (2026-10-17: three runs in a row were rejected "fetch
+            # first"). Nobody else edits the data files this job writes, so replaying the
+            # commit on top of the new main cannot conflict.
+            for i in 1 2 3; do
+              git pull --rebase -q origin main && git push && break
+              [ "$i" = 3 ] && exit 1
+              sleep 5
+            done
             echo "Synced and pushed."
           else
             echo "No changes to commit."
