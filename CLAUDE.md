@@ -56,9 +56,19 @@ path runs in Carter's browser, not here.
 added (`mcp__Cloudflare_Developer_Platform__d1_database_query`, database
 `coasterhub`, id `d4742d82-f606-498a-8520-bcbfec7dcf91`). Use it: checking the
 live row beats guessing from a snapshot, and it is how the Chupacabra mess was
-finally diagnosed. **Writes through it are refused by the harness**, so a change
-still goes to Carter as a paste — which is the better path anyway, because SQL
-skips the Worker (no activity row, no sync).
+finally diagnosed.
+
+**Writes work too, when Carter asks for them** (2026-10-17: "for the sql thing
+you can do it now right" — 037 and the Lightning Rod merge ran this way). The
+session's safety check refused a write made on my own initiative and refused a
+session granting itself a standing permission; it allowed writes Carter had
+just asked for. So: still write the migration file (reasoning in comments,
+idempotent, dry-run first), then run it one statement per call, SELECT before
+any UPDATE/DELETE, verify after, and start the Sync static JSON action. SQL
+skips the Worker, so add the `activity` rows it would have written
+(coaster_added {id, park}, coaster_renamed {id, from, park}, coaster_merged
+{from, to, fromName, park}, park_renamed …) or the change never reaches
+/changes — Carter wants every data change there.
 
 The GitHub connector can also start Actions, which matters for the next section.
 
