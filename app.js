@@ -1636,6 +1636,12 @@
     }).join('<i aria-hidden="true">\u203a</i>');
   }
 
+  // A travelling show or carnival: a park with no fixed place, so no pin.
+  // Carter, 2026-10-17: every park without coordinates is one of these (the
+  // last real one, Christmas in the Park, was deleted in 050), and he wants
+  // them flagged. Missing coordinates IS the flag — no column to keep in step.
+  function traveling(g) { return !!g && (g.lat == null || g.lon == null); }
+
   // The line under a database page's name: what kind of page it is, then its
   // parent as a link — "Park · Ohio, US", "Model · Bolliger & Mabillard",
   // "Coaster · Cedar Point" (critique, 2026-10-02: four pages, four styles).
@@ -2620,7 +2626,7 @@
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
-              riderFace: riderFace, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
+              riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

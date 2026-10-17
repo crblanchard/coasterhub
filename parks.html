@@ -79,7 +79,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261005j"></script>
+<script src="/app.js?v=20261017a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('parks');
@@ -91,7 +91,7 @@ function short(r){ return r==='US' ? 'United States' : String(r||'').replace(/, 
 Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.you()]).then(function(r){
   var cs=r[0].coasters||[], parks=r[1]||{}; MINE=r[2] ? r[2].rides : null;
   var by={};
-  Object.keys(parks).forEach(function(n){ var g=parks[n]||{}; by[n]={ name:n, region:g.region||'', lat:g.lat, lon:g.lon, open:0, gone:0, got:0, gotAll:0, cs:[] }; });
+  Object.keys(parks).forEach(function(n){ var g=parks[n]||{}; by[n]={ name:n, region:g.region||'', lat:g.lat, lon:g.lon, trav:CoasterHub.traveling(g), open:0, gone:0, got:0, gotAll:0, cs:[] }; });
   cs.forEach(function(c){ var p=by[c.park]; if(!p) return; p.cs.push(c);
     if(c.closed) p.gone++; else { p.open++; if(MINE && MINE[c.id]) p.got++; }
     if(MINE && MINE[c.id]){ p.been=true; p.gotAll++; } });
@@ -105,7 +105,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.you
   // A way to the map from here (Carter, 2026-09-28).
   $('hero_sub').innerHTML=P.length.toLocaleString()+' parks on the site. <a href="/map" style="color:var(--accent2);text-decoration:none;font-weight:600">View them all on the map &rarr;</a>';
   var locs={}; P.forEach(function(p){ if(p.region) locs[p.region]=1; });
-  $('f_loc').innerHTML+=Object.keys(locs).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return '<option value="'+esc(m)+'">'+esc(m)+'</option>'; }).join('');
+  // Traveling shows first: they have a country but no place in it.
+  $('f_loc').innerHTML+='<option value="~trav">Traveling shows</option>'+Object.keys(locs).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return '<option value="'+esc(m)+'">'+esc(m)+'</option>'; }).join('');
   if(MINE) $('f_mine').hidden=false;
   ['q','f_loc','f_mine'].forEach(function(id){ $(id).addEventListener('input', draw); $(id).addEventListener('change', draw); });
   $('f_sort').addEventListener('change', function(){
@@ -137,7 +138,7 @@ function draw(){
   var q=$('q').value.trim().toLowerCase(), lc=$('f_loc').value, mn=$('f_mine').value, so=$('f_sort').value;
   var list=P.filter(function(p){
     if(q && p.name.toLowerCase().indexOf(q)<0) return false;
-    if(lc && p.region!==lc) return false;
+    if(lc==='~trav' ? !p.trav : lc && p.region!==lc) return false;
     if(MINE && mn==='y' && !p.been) return false;
     if(MINE && mn==='n' && p.been) return false;
     return true;
@@ -155,7 +156,7 @@ function draw(){
   // ridden / all its coasters, a chevron. Filled when opened (parkBody).
   $('rows').innerHTML=list.map(function(p){
     var mi = near && p.mi!=null ? (p.mi<10?p.mi.toFixed(1):Math.round(p.mi).toLocaleString())+' mi' : '';
-    var sub=[p.region?short(p.region):'', mi].filter(Boolean).join(' \u00b7 ');
+    var sub=[p.trav?'Traveling':'', p.region?short(p.region):'', mi].filter(Boolean).join(' \u00b7 ');
     return '<details class="mdl" data-park="'+esc(p.name)+'"><summary>'
       +(MINE ? '<span class="tick">'+(p.been?'\u2713':'')+'</span>' : '')
       +'<span class="mtwo"><span class="nm">'+esc(p.name)+'</span><span class="msub">'+esc(sub)+'</span></span>'
