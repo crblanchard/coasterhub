@@ -21,23 +21,20 @@
 <meta property="og:title" content="Coaster trip planner">
 <meta property="og:description" content="Pick parks and see how many new credits each one is worth.">
 <meta property="og:image" content="https://coasterhub.org/og-image.png?v=4">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
-  /* /trip (Carter, 2026-10-17: "4 6 maybe 7" — the trip planner). Pick parks,
-     see how many new credits each one is worth, and which parks nearby would
-     add the most. The trip lives in the address (?p=park-slug,...&with=slug),
-     so a link is the whole plan, and in localStorage so it is there next time. */
-  .trip{max-width:760px}
-  .tbar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;position:relative}
-  .tbar input,.tbar select{background-color:var(--panel);border:1px solid var(--line);color:var(--fg);
-    padding:10px 12px;border-radius:10px;font-size:.9rem;min-width:0}
-  .tbar input{flex:1 1 240px}
-  .tbar select{flex:0 1 auto;cursor:pointer}
-  .tbtn{background-color:transparent;border:1px solid var(--line);border-radius:10px;color:var(--fg);
-    padding:9px 14px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap}
-  .tbtn:hover{border-color:var(--accent2);color:var(--accent2)}
-  .tbtn[disabled]{opacity:.5;cursor:default}
-  /* Search results, under the box. */
-  .hits{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;max-height:320px;overflow:auto;
+  /* /trip (2026-10-17). Carter, the same day, second pass: more than one
+     friend, a list that is easy to reorder with the distances down the side,
+     a map to see the trip and add or rearrange parks from, and something
+     better than the parks / credits / miles tiles — "After this trip", each
+     rider's count before and after. The trip lives in the address
+     (?p=<park-slug>,...&with=<slug>,<slug>) and in localStorage. */
+  .trip{max-width:820px}
+  .tbar{position:relative;margin:0 0 10px}
+  .tbar input{width:100%;box-sizing:border-box;background-color:var(--panel);border:1px solid var(--line);color:var(--fg);
+    padding:11px 12px;border-radius:10px;font-size:.95rem}
+  .hits{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:1000;max-height:320px;overflow:auto;
     background-color:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
   .hits[hidden]{display:none}
   .hits button{display:flex;width:100%;align-items:center;gap:10px;text-align:left;background-color:transparent;border:0;
@@ -47,52 +44,115 @@
   .two{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
   .two b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .two small{color:var(--muted);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .nnew{flex:none;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.82rem;line-height:1.2}
+  .two small b{color:var(--accent2);font-weight:800}
+  .two small b.z{color:var(--muted)}
+  .nnew{flex:none;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.78rem;line-height:1.15}
   .nnew b{display:block;color:var(--accent2);font-size:1.05rem;font-weight:800}
   .nnew.zero b{color:var(--muted)}
-  /* One stop. */
-  .stops{display:flex;flex-direction:column;gap:10px}
-  .stop{border:1px solid var(--line);border-radius:14px;background-color:var(--panel);overflow:hidden}
-  .stop .top{display:flex;align-items:center;gap:12px;padding:12px 14px}
-  .stop .num{flex:none;width:28px;height:28px;border-radius:50%;background-color:var(--soft);color:var(--accent2);
-    font-weight:800;font-size:.88rem;display:flex;align-items:center;justify-content:center}
-  .stop .two a{color:var(--fg);text-decoration:none;font-weight:700;line-height:1.3}
-  /* Riding with someone: the two counts are a line of their own under the
-     name, so a phone does not squeeze the name to "Knott…". */
-  .two .cnt{color:var(--muted);font-size:.82rem;margin-top:2px;white-space:normal}
-  .two .cnt b{color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums}
-  .two .cnt b.z{color:var(--muted)}
-  .stop .two a:hover{color:var(--accent2)}
-  .stop .acts{flex:none;display:flex;gap:2px}
-  .stop .acts button{background-color:transparent;border:0;color:var(--muted);width:30px;height:30px;border-radius:8px;
-    font-size:1rem;cursor:pointer;line-height:1}
-  .stop .acts button:hover{background-color:var(--soft);color:var(--fg)}
-  .stop .acts button[disabled]{opacity:.3;cursor:default;background-color:transparent}
-  .stop details{border-top:1px solid var(--line)}
-  .stop summary{cursor:pointer;padding:9px 14px;color:var(--accent2);font-size:.86rem;font-weight:600;list-style:none}
-  .stop summary::-webkit-details-marker{display:none}
-  .stop summary::after{content:" \25BE"}
-  .stop details[open] summary::after{content:" \25B4"}
-  .stop .rows{border-top:1px solid var(--soft)}
-  .stop .who{font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-  .stop .who.both{color:var(--accent2);border-color:var(--accent2)}
-  .leg{color:var(--muted);font-size:.8rem;margin:0 0 0 18px;padding:2px 0}
-  .tacts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
-  .empty{border:1px dashed var(--line);border-radius:14px;padding:22px;color:var(--muted);text-align:center;line-height:1.5}
+  /* Who is riding: you, then a chip per friend, then a picker for another. */
+  .riders{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 12px}
+  .riders .lbl{color:var(--muted);font-size:.84rem;margin-right:2px}
+  .chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 11px;
+    font-size:.84rem;font-weight:600;background-color:var(--panel)}
+  .chip.me{padding-right:11px}
+  .chip button{background-color:transparent;border:0;color:var(--muted);font-size:1rem;line-height:1;cursor:pointer;padding:0 4px;border-radius:999px}
+  .chip button:hover{color:var(--fg);background-color:var(--soft)}
+  .riders select{background-color:transparent;border:1px dashed var(--line);color:var(--accent2);border-radius:999px;
+    padding:5px 10px;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;max-width:12em}
+  /* The map. */
+  #tmap{height:340px;border-radius:14px;border:1px solid var(--line);overflow:hidden;z-index:1;background-color:var(--panel)}
+  @media (max-width:640px){ #tmap{height:280px} }
+  .maphint{color:var(--muted);font-size:.8rem;margin:6px 0 0}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
+  .leaflet-popup-content{margin:11px 13px;line-height:1.4;min-width:170px}
+  .tp h3{margin:0 0 1px;font-size:.95rem;font-weight:800}
+  .tp h3 a{color:var(--fg);text-decoration:none} .tp h3 a:hover{color:var(--accent2)}
+  .tp small{display:block;color:var(--muted);font-size:.78rem}
+  .tp .cn{margin:6px 0 8px;font-size:.84rem;color:var(--muted)}
+  .tp .cn b{color:var(--accent2)}
+  .tp .btns{display:flex;flex-wrap:wrap;gap:6px}
+  .tp .btns button{background-color:transparent;border:1px solid var(--line);border-radius:8px;color:var(--fg);padding:5px 9px;
+    font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}
+  .tp .btns button.go{border-color:var(--accent2);color:var(--accent2)}
+  .tp .btns button:hover{border-color:var(--accent2)}
+  .leaflet-div-icon.snum{background:none;border:0}
+  .snum span{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;transform:translate(-50%,-50%);
+    background-color:var(--accent2);color:var(--bg);font-weight:800;font-size:.78rem;border:2px solid var(--bg);box-shadow:0 1px 4px rgba(0,0,0,.4)}
+  /* After this trip: each rider's count now and after. */
+  .after{border:1px solid var(--line);border-radius:14px;background-color:var(--panel);margin:16px 0 0;overflow:hidden}
+  .after .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:12px 14px 4px}
+  .after .hd b{font-size:1rem}
+  .after .hd span{color:var(--muted);font-size:.82rem;text-align:right}
+  .after .r{display:flex;align-items:center;gap:12px;padding:9px 14px;border-top:1px solid var(--soft)}
+  .after .r:first-of-type{border-top:0}
+  .after .av{flex:none;width:30px;height:30px;border-radius:50%;background-color:var(--soft);background-size:cover;background-position:center;
+    background-origin:border-box;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:var(--muted)}
+  .after .nm{flex:1 1 auto;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .after .nm small{display:block;color:var(--muted);font-weight:500;font-size:.8rem;font-variant-numeric:tabular-nums}
+  .after .ms{flex:none;font-size:.74rem;font-weight:800;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:2px 8px;white-space:nowrap}
+  .after .plus{flex:none;font-size:1.3rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;min-width:2.6em;text-align:right}
+  .after .plus.z{color:var(--muted)}
+  .after .heads{padding:10px 14px 12px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted);line-height:1.6}
+  .after .heads a{color:var(--fg);text-decoration:none;font-weight:600}
+  .after .heads a:hover{color:var(--accent2)}
+  /* The stops: a timeline. Number down the left rail, the distance to the
+     next one between them, a handle on the right to drag a stop into place. */
+  .shd{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;margin:22px 0 8px}
+  .shd .sect{margin:0}
+  .shd span{color:var(--muted);font-size:.84rem}
+  .tl{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:14px;background-color:var(--panel);overflow:hidden}
+  .tl li.st{display:grid;grid-template-columns:56px minmax(0,1fr) auto;align-items:center;position:relative;background-color:var(--panel)}
+  .tl li.st + li.st{border-top:1px solid var(--soft)}
+  .tl .rail{align-self:stretch;position:relative;display:flex;align-items:center;justify-content:center}
+  .tl .rail::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background-color:var(--soft)}
+  .tl li.st:first-child .rail::before{top:50%}
+  .tl li.st.last .rail::before{bottom:50%}
+  .tl .dot{position:relative;width:24px;height:24px;border-radius:50%;background-color:var(--accent2);color:var(--bg);font-weight:800;font-size:.76rem;
+    display:flex;align-items:center;justify-content:center}
+  .tl .body{display:flex;align-items:center;gap:10px;padding:8px 4px 8px 0;min-width:0;cursor:pointer}
+  .tl .body a{color:var(--fg);text-decoration:none;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tl .body a:hover{color:var(--accent2)}
+  .tl .ctl{display:flex;align-items:center;padding-right:6px}
+  .tl .ctl button{background-color:transparent;border:0;color:var(--muted);width:34px;height:38px;border-radius:8px;font-size:1rem;cursor:pointer;line-height:1}
+  .tl .ctl button:hover{background-color:var(--soft);color:var(--fg)}
+  .tl .grip{cursor:grab;touch-action:none;font-size:1.1rem;letter-spacing:-2px}
+  .tl li.st.drag{background-color:var(--soft);box-shadow:0 4px 16px rgba(0,0,0,.18);z-index:2}
+  .tl li.st.drag .grip{cursor:grabbing}
+  /* The leg to the next stop, on the rail. */
+  /* Sits on the rail, centred on the line between two stops. */
+  .tl li.leg{height:0;position:relative;z-index:1}
+  .tl li.leg span{position:absolute;left:0;width:56px;top:-8px;text-align:center;font-size:.64rem;font-weight:700;line-height:16px;
+    color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tl li.leg span i{font-style:normal;background-color:var(--panel);padding:0 3px;border-radius:4px}
+  .tl li.st + li.leg + li.st, .tl li.more + li.leg + li.st{border-top:1px solid var(--soft)}
+  .tl li.more{grid-column:1 / -1;border-top:1px solid var(--soft);padding:0 0 4px 56px;background-color:var(--panel)}
+  .tl li.more{position:relative}
+  .tl li.more::before{content:"";position:absolute;left:27px;top:0;bottom:0;width:2px;background-color:var(--soft)}
+  .tl li.st.last + li.more::before{display:none}
+  .tl li.more .mv{display:flex;gap:6px;flex-wrap:wrap;padding:8px 0}
+  .tl li.more .mv button{background-color:transparent;border:1px solid var(--line);border-radius:8px;color:var(--fg);padding:5px 10px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}
+  .tl li.more .mv button:hover{border-color:var(--accent2)}
+  .tl li.more .crow{padding-left:4px}
+  .who{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .who.all{color:var(--accent2);border-color:var(--accent2)}
+  .tacts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+  .tbtn{background-color:transparent;border:1px solid var(--line);border-radius:10px;color:var(--fg);
+    padding:9px 14px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap}
+  .tbtn:hover{border-color:var(--accent2);color:var(--accent2)}
+  .tbtn[disabled]{opacity:.5;cursor:default}
+  .toast{color:var(--accent2);font-size:.86rem;font-weight:600;align-self:center}
+  .empty{border:1px dashed var(--line);border-radius:14px;padding:20px;color:var(--muted);text-align:center;line-height:1.5;margin-top:16px}
   .empty .tbtn{margin-top:10px}
   /* Nearby parks worth adding. */
   .near{border:1px solid var(--line);border-radius:14px;background-color:var(--panel);overflow:hidden}
-  .near .row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--soft)}
+  .near .row{display:flex;align-items:center;gap:12px;padding:9px 14px;border-bottom:1px solid var(--soft)}
   .near .row:last-child{border-bottom:0}
-  .near .row a{color:var(--fg);text-decoration:none}
-  .near .two b{white-space:normal;line-height:1.3}
-  .near .row a:hover{color:var(--accent2)}
+  .near .row a{color:var(--fg);text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .near .row a:hover{color:var(--accent2)}
   .near .add{flex:none;background-color:transparent;border:1px solid var(--accent2);color:var(--accent2);border-radius:999px;
     padding:5px 12px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
   .near .add:hover{background-color:var(--accent2);color:var(--onaccent)}
-  .note{color:var(--muted);font-size:.84rem;margin:8px 0 0}
-  .toast{color:var(--accent2);font-size:.86rem;font-weight:600;align-self:center}
-  @media (max-width:520px){ .stop .top{gap:9px;padding:11px 10px} .near .row{gap:9px;padding:10px 10px} }
+  .note{color:var(--muted);font-size:.8rem;margin:6px 0 0}
+  @media (max-width:520px){ .near .row{gap:9px;padding:9px 10px} .tl li.st{grid-template-columns:50px minmax(0,1fr) auto} .tl li.leg span{width:50px} .tl li.more{padding-left:50px} .tl li.more::before{left:24px} }
 </style>
 </head>
 <body>
@@ -122,11 +182,13 @@
   <div id="ui" hidden>
     <div class="tbar">
       <input id="q" type="search" placeholder="Add a park&hellip;" autocomplete="off" aria-label="Add a park">
-      <select id="with" aria-label="Riding with" hidden></select>
       <div class="hits" id="hits" hidden></div>
     </div>
-    <div class="tiles" id="tiles" hidden></div>
-    <div class="stops" id="stops"></div>
+    <div class="riders" id="riders" hidden></div>
+    <div id="tmap" role="application" aria-label="Map of the trip"></div>
+    <p class="maphint" id="maphint">Tap a park on the map to add it. Yellow parks have something new.</p>
+    <div class="after" id="after" hidden></div>
+    <div id="stopwrap"></div>
     <div class="tacts" id="tacts" hidden>
       <button type="button" class="tbtn" id="b_order">Shortest order</button>
       <button type="button" class="tbtn" id="b_share">Share trip</button>
@@ -134,9 +196,9 @@
       <span class="toast" id="toast"></span>
     </div>
     <div id="near_wrap" hidden>
-      <div class="sect" id="near_h">Nearby parks</div>
+      <div class="sect" id="near_h">Worth adding nearby</div>
       <div class="near" id="near"></div>
-      <p class="note" id="near_note"></p>
+      <p class="note">Distances are as the crow flies.</p>
     </div>
   </div>
 </div></section>
@@ -160,11 +222,12 @@ function miles(a,b){
 }
 function mi(n){ return n<10 ? n.toFixed(1) : Math.round(n).toLocaleString(); }
 var Q=new URLSearchParams(location.search);
+var css=function(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); };
 
 Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me().catch(function(){ return null; })]).then(function(r){
   var list=r[0], parks=r[1]||{}, acct=r[2];
   var me=acct && acct.slug;
-  // Every park with somewhere on the map, and its operating coasters.
+  var byId={}; (list.coasters||[]).forEach(function(c){ byId[c.id]=c; });
   var P={}, BYSLUG={};
   Object.keys(parks).forEach(function(n){ P[n]={ name:n, lat:parks[n].lat, lon:parks[n].lon, region:parks[n].region||'', open:[] }; });
   (list.coasters||[]).forEach(function(c){
@@ -176,133 +239,261 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
   var ALL=Object.keys(P).map(function(n){ return P[n]; }).filter(function(p){ return p.open.length; });
   function park(slug){ return P[BYSLUG[slug]] || P[CoasterHub.findPark(list, parks, slug) || ''] || null; }
 
-  // What counts as new: an operating coaster whose ride you have not got —
-  // by rideKey, so a relocated ride you rode at its old park is not new.
-  var MINE=null, MINEK={}, WITH=null, WITHK={}, FRIENDS=[];
+  // Riders. RIDERS[0] is you when signed in; the rest are friends you add.
+  // "New" = operating and not ridden by rideKey, so a relocated ride you got
+  // at its old park is not new.
   function keysOf(log){ var k={}; ((log&&log.rides)||[]).forEach(function(x){ var c=byId[x.c]; k[c ? CoasterHub.rideKey(c) : x.c]=1; }); return k; }
-  var byId={}; (list.coasters||[]).forEach(function(c){ byId[c.id]=c; });
-  function newFor(K, c){ return !K[CoasterHub.rideKey(c)]; }
-  function count(p){
-    var you=0, them=0, both=0;
-    p.open.forEach(function(c){ var a=newFor(MINEK,c), b=WITH && newFor(WITHK,c); if(a) you++; if(b) them++; if(a&&b) both++; });
-    return { you:you, them:them, both:both };
-  }
+  var RIDERS=[], MINE=null, FRIENDS=[];
+  function isNew(R, c){ return !R.K[CoasterHub.rideKey(c)]; }
+  function counts(p){ return RIDERS.map(function(R){ return p.open.filter(function(c){ return isNew(R,c); }).length; }); }
+  function anyNew(p){ return !RIDERS.length ? p.open.length : p.open.some(function(c){ return RIDERS.some(function(R){ return isNew(R,c); }); }); }
+  function score(p){ return counts(p).reduce(function(a,b){ return a+b; },0); }
+  function uName(slug){ var u=(CoasterHub.USERS||[]).filter(function(x){ return x.slug===slug; })[0]; return u; }
 
   var STOPS=[];
-  try { var saved=JSON.parse(localStorage.getItem(STORE)||'null'); } catch(e){ saved=null; }
+  var saved=null; try { saved=JSON.parse(localStorage.getItem(STORE)||'null'); } catch(e){}
   var fromUrl=(Q.get('p')||'').split(',').filter(Boolean);
   (fromUrl.length ? fromUrl : ((saved&&saved.p)||[])).forEach(function(s){ var p=park(s); if(p && STOPS.indexOf(p.name)<0) STOPS.push(p.name); });
-  // /trip?add=<park> — the map's "Add to a trip" — appends to whatever trip you have.
-  if(Q.get('add')){ var a=park(Q.get('add')); if(a && STOPS.indexOf(a.name)<0) STOPS.push(a.name); }
-  var withSlug=Q.get('with') || (!fromUrl.length && saved && saved.w) || '';
-  var HERE=null;    // {lat, lon} once "Near me" has been asked
+  if(Q.get('add')){ var a0=park(Q.get('add')); if(a0 && STOPS.indexOf(a0.name)<0) STOPS.push(a0.name); }
+  var withList=(Q.get('with') || (!fromUrl.length && saved && (Array.isArray(saved.w)?saved.w.join(','):saved.w)) || '').split(',').filter(Boolean);
+  var HERE=null, OPEN=null;   // OPEN: the stop whose rides are showing
 
   function save(){
     var p=STOPS.map(function(n){ return CoasterHub.slugify(n); });
-    try { localStorage.setItem(STORE, JSON.stringify({ p:p, w:WITH?WITH.slug:'' })); } catch(e){}
-    var qs=(p.length?'p='+p.join(','):'')+(WITH?(p.length?'&':'')+'with='+encodeURIComponent(WITH.slug):'');
-    history.replaceState(null,'',location.pathname+(qs?'?'+qs:''));
+    var w=RIDERS.filter(function(R){ return !R.you; }).map(function(R){ return R.slug; });
+    try { localStorage.setItem(STORE, JSON.stringify({ p:p, w:w })); } catch(e){}
+    var qs=[]; if(p.length) qs.push('p='+p.join(',')); if(w.length) qs.push('with='+w.map(encodeURIComponent).join(','));
+    history.replaceState(null,'',location.pathname+(qs.length?'?'+qs.join('&'):''));
   }
 
-  function newLabel(n){ return me ? (n===1?'new credit':'new credits') : (n===1?'coaster':'coasters'); }
-  function tag(n, word){ return '<span class="nnew'+(n?'':' zero')+'"><b>'+n.toLocaleString()+'</b>'+esc(word)+'</span>'; }
-  // The same two numbers as words, for a line under the name.
-  function pair(k){
-    var b=function(n){ return '<b'+(n?'':' class="z"')+'>'+n.toLocaleString()+'</b>'; };
-    return '<small class="cnt">'+b(k.you)+' new for you \u00b7 '+b(k.them)+' for '+esc(WITH.name)+'</small>';
+  // "3 new · Sean 2 · Cole 0" — yours first, then each friend's.
+  function countLine(k){
+    if(!RIDERS.length) return '';
+    var b=function(n){ return '<b'+(n?'':' class="z"')+'>'+n+'</b>'; };
+    return RIDERS.map(function(R,i){ return R.you ? b(k[i])+' new for you' : esc(R.name)+' '+b(k[i]); }).join(' · ');
+  }
+  function bigTag(n, word){ return '<span class="nnew'+(n?'':' zero')+'"><b>'+n.toLocaleString()+'</b>'+esc(word)+'</span>'; }
+  function solo(){ return RIDERS.length<=1; }
+
+  // ---- After this trip ------------------------------------------------------
+  // Each rider's count now and after the trip, and the milestone it crosses;
+  // then the tallest new rides on it. Replaces the parks/credits/miles tiles
+  // (Carter, 2026-10-17: "think of something new there").
+  function drawAfter(){
+    var el=$('after');
+    if(!STOPS.length){ el.hidden=true; return; }
+    var seen={}, add=RIDERS.map(function(){ return 0; }), heads=[];
+    STOPS.forEach(function(n){ P[n].open.forEach(function(c){
+      var k=CoasterHub.rideKey(c); if(seen[k]) return; seen[k]=1;
+      var any=false; RIDERS.forEach(function(R,i){ if(isNew(R,c)){ add[i]++; any=true; } });
+      if(any || !RIDERS.length) heads.push(c);
+    }); });
+    var dist=0; STOPS.forEach(function(n,i){ var a=P[STOPS[i-1]], b=P[n]; if(a && a.lat!=null && b.lat!=null) dist+=miles(a,b); });
+    var h='<div class="hd"><b>After this trip</b><span>'+STOPS.length+' park'+(STOPS.length===1?'':'s')+(STOPS.length>1?' · '+mi(dist)+' mi':'')+'</span></div>';
+    h+=RIDERS.map(function(R,i){
+      var now=R.n, then=now+add[i], step=now<100?25:100;
+      var hit=Math.floor(then/step)>Math.floor(now/step) ? Math.floor(then/step)*step : 0;
+      var u=uName(R.slug)||{}, pic=u.avatar ? ' style="background-image:url(&quot;/avatars/'+esc(encodeURIComponent(u.avatar))+'&quot;)"' : '';
+      return '<div class="r"><span class="av"'+pic+'>'+(u.avatar?'':esc(String(R.name).charAt(0).toUpperCase()))+'</span>'
+        +'<span class="nm">'+esc(R.you?'You':R.name)+'<small>'+now.toLocaleString()+' → '+then.toLocaleString()+'</small></span>'
+        +(hit?'<span class="ms">Hits '+hit.toLocaleString()+'</span>':'')
+        +'<span class="plus'+(add[i]?'':' z')+'">+'+add[i]+'</span></div>';
+    }).join('');
+    heads.sort(function(a,b){ return (b.h||0)-(a.h||0); });
+    if(heads.length) h+='<div class="heads">'+(RIDERS.length?'Biggest new rides: ':'Biggest rides: ')+heads.slice(0,4).map(function(c){
+      return '<a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'+(c.h?' ('+Math.round(c.h)+' ft)':''); }).join(', ')+'</div>';
+    el.innerHTML=h; el.hidden=false;
   }
 
-  function drawTiles(){
-    var t=$('tiles');
-    if(!STOPS.length){ t.hidden=true; return; }
-    var you=0, them=0, dist=0, seen={};
-    STOPS.forEach(function(n,i){
-      P[n].open.forEach(function(c){
-        var k=CoasterHub.rideKey(c); if(seen[k]) return; seen[k]=1;
-        if(newFor(MINEK,c)) you++; if(WITH && newFor(WITHK,c)) them++;
-      });
-      var prev=P[STOPS[i-1]]; if(prev && prev.lat!=null && P[n].lat!=null) dist+=miles(prev,P[n]);
-    });
-    var tl=function(v,l){ return '<div class="tile"><b>'+v+'</b><span>'+esc(l)+'</span></div>'; };
-    t.innerHTML=tl(STOPS.length, STOPS.length===1?'Park':'Parks')
-      +tl(you.toLocaleString(), me ? (WITH?'New for you':'New credits') : 'Operating coasters')
-      +(WITH ? tl(them.toLocaleString(), 'New for '+WITH.name) : '')
-      +(STOPS.length>1 ? tl(mi(dist), 'Miles between parks') : '');
-    t.hidden=false;
-  }
-
+  // ---- the stops -------------------------------------------------------------
   function stopHtml(n, i){
-    var p=P[n], k=count(p), prev=P[STOPS[i-1]];
-    var leg = (prev && prev.lat!=null && p.lat!=null) ? '<p class="leg">&darr; '+mi(miles(prev,p))+' mi</p>' : '';
-    var rows=p.open.filter(function(c){ return newFor(MINEK,c) || (WITH && newFor(WITHK,c)); });
-    var whoTag=function(c){
-      if(!WITH) return undefined;
-      var a=newFor(MINEK,c), b=newFor(WITHK,c);
-      return '<span class="who'+(a&&b?' both':'')+'">'+(a&&b?'Both':a?'You':esc(WITH.name))+'</span>';
-    };
-    var sub=[p.region, p.open.length+' operating'].filter(Boolean).join(' · ');
-    var right = WITH ? '' : tag(k.you, newLabel(k.you));
-    return leg+'<div class="stop" data-i="'+i+'"><div class="top"><span class="num">'+(i+1)+'</span>'
-      +'<span class="two"><a href="'+esc(CoasterHub.parkHref(n))+'">'+esc(n)+'</a><small>'+esc(sub)+'</small>'+(WITH?pair(k):'')+'</span>'
-      +right
-      +'<span class="acts"><button type="button" data-up="'+i+'" aria-label="Move up"'+(i?'':' disabled')+'>&uarr;</button>'
-      +'<button type="button" data-down="'+i+'" aria-label="Move down"'+(i<STOPS.length-1?'':' disabled')+'>&darr;</button>'
-      +'<button type="button" data-rm="'+i+'" aria-label="Remove">&times;</button></span></div>'
-      +(rows.length ? '<details><summary>'+(WITH?'The '+rows.length+' new to one of you':me?'The '+rows.length+' new':'All '+rows.length)+'</summary><div class="rows">'
-        +rows.map(function(c){ return CoasterHub.coasterRow(c, { mine:MINE, add:!!MINE, end:whoTag(c) }); }).join('')+'</div></details>' : '')
-      +'</div>';
+    var p=P[n], k=counts(p), last=i===STOPS.length-1;
+    var sub = solo() ? esc(p.region) : countLine(k);
+    var right = solo() ? bigTag(RIDERS.length?k[0]:p.open.length, RIDERS.length?'new':'coasters') : '';
+    var h='<li class="st'+(last?' last':'')+'" data-i="'+i+'"><span class="rail"><span class="dot">'+(i+1)+'</span></span>'
+      +'<span class="body" data-open="'+i+'"><span class="two"><a href="'+esc(CoasterHub.parkHref(n))+'">'+esc(n)+'</a><small>'+sub+'</small></span>'+right+'</span>'
+      +'<span class="ctl"><button type="button" class="grip" data-grip="'+i+'" aria-label="Drag to reorder" title="Drag to reorder">&#8942;&#8942;</button>'
+      +'<button type="button" data-rm="'+i+'" aria-label="Remove">&times;</button></span></li>';
+    if(OPEN===n){
+      var rows=p.open.filter(function(c){ return !RIDERS.length || RIDERS.some(function(R){ return isNew(R,c); }); });
+      var who=function(c){
+        if(RIDERS.length<2) return undefined;
+        var w=RIDERS.filter(function(R){ return isNew(R,c); });
+        return '<span class="who'+(w.length===RIDERS.length?' all':'')+'">'+(w.length===RIDERS.length?'Everyone':w.map(function(R){ return R.you?'You':esc(R.name); }).join(', '))+'</span>';
+      };
+      h+='<li class="more"><div class="mv"><button type="button" data-up="'+i+'"'+(i?'':' disabled')+'>&uarr; Earlier</button><button type="button" data-down="'+i+'"'+(last?' disabled':'')+'>Later &darr;</button></div>'
+        +(rows.length ? rows.map(function(c){ return CoasterHub.coasterRow(c, { mine:MINE, add:!!MINE, end:who(c) }); }).join('') : '<p class="note" style="margin:0 0 8px">Nothing new here.</p>')+'</li>';
+    }
+    if(!last){
+      var nx=P[STOPS[i+1]];
+      if(p.lat!=null && nx.lat!=null) h+='<li class="leg"><span><i>'+mi(miles(p,nx))+' mi</i></span></li>';
+    }
+    return h;
   }
-
   function drawStops(){
-    var el=$('stops');
+    var el=$('stopwrap');
     if(!STOPS.length){
-      el.innerHTML='<div class="empty">Add a park above to start a trip'+(navigator.geolocation?', or find parks near you.<br><button type="button" class="tbtn" id="b_here">Parks near me</button>':'.')+'</div>';
+      el.innerHTML='<div class="empty">Search above or tap a park on the map to start a trip'+(navigator.geolocation?'.<br><button type="button" class="tbtn" id="b_here">Parks near me</button>':'.')+'</div>';
       var b=$('b_here'); if(b) b.onclick=nearMe;
-    } else el.innerHTML=STOPS.map(stopHtml).join('');
+    } else {
+      el.innerHTML='<div class="shd"><div class="sect">Stops</div><span>'+(RIDERS.length?'Tap a park for its new rides':'Tap a park for its rides')+' &middot; drag &#8942;&#8942; to reorder</span></div>'
+        +'<ol class="tl" id="tl">'+STOPS.map(stopHtml).join('')+'</ol>';
+    }
     $('tacts').hidden=!STOPS.length;
     $('b_order').disabled=STOPS.length<3;
   }
 
-  // Parks within reach of the trip (or of you) that would add something,
-  // most new credits first. 200 miles: a day's drive from somewhere on it.
+  // ---- nearby ------------------------------------------------------------------
   function drawNear(){
     var from=STOPS.map(function(n){ return P[n]; }).filter(function(p){ return p.lat!=null; });
     if(!from.length && HERE) from=[{ name:'you', lat:HERE.lat, lon:HERE.lon, here:true }];
     if(!from.length){ $('near_wrap').hidden=true; return; }
     var inTrip={}; STOPS.forEach(function(n){ inTrip[n]=1; });
     var cand=ALL.filter(function(p){ return p.lat!=null && !inTrip[p.name]; }).map(function(p){
-      var best=null, d=Infinity;
-      from.forEach(function(f){ var x=miles(f,p); if(x<d){ d=x; best=f; } });
-      return { p:p, d:d, from:best, k:count(p) };
-    }).filter(function(x){ return x.d<=200 && (x.k.you || (WITH && x.k.them)); })
-      .sort(function(a,b){ var x=WITH?a.k.you+a.k.them:a.k.you, y=WITH?b.k.you+b.k.them:b.k.you; return y-x || a.d-b.d; })
-      .slice(0,8);
+      var best=null, d=Infinity; from.forEach(function(f){ var x=miles(f,p); if(x<d){ d=x; best=f; } });
+      return { p:p, d:d, from:best, k:counts(p), s:RIDERS.length?score(p):p.open.length };
+    }).filter(function(x){ return x.d<=200 && x.s; }).sort(function(a,b){ return b.s-a.s || a.d-b.d; }).slice(0,8);
     $('near_wrap').hidden=false;
     $('near_h').textContent=from[0].here && !STOPS.length ? 'Parks near you' : 'Worth adding nearby';
-    if(!cand.length){ $('near').innerHTML='<div class="row"><span class="two"><small>Nothing new within 200 miles.</small></span></div>'; $('near_note').textContent=''; return; }
-    $('near').innerHTML=cand.map(function(x){
+    $('near').innerHTML=cand.length ? cand.map(function(x){
       var where=mi(x.d)+' mi from '+(x.from.here?'you':x.from.name);
-      return '<div class="row"><span class="two"><a href="'+esc(CoasterHub.parkHref(x.p.name))+'"><b>'+esc(x.p.name)+'</b></a><small>'+esc(where)+'</small>'+(WITH?pair(x.k):'')+'</span>'
-        +(WITH ? '' : tag(x.k.you, newLabel(x.k.you)))
+      return '<div class="row"><span class="two"><a href="'+esc(CoasterHub.parkHref(x.p.name))+'"><b>'+esc(x.p.name)+'</b></a><small>'+esc(where)+(solo()?'':'</small><small>'+countLine(x.k))+'</small></span>'
+        +(solo() ? bigTag(RIDERS.length?x.k[0]:x.p.open.length, RIDERS.length?'new':'coasters') : '')
         +'<button type="button" class="add" data-add="'+esc(x.p.name)+'">Add</button></div>';
-    }).join('');
-    $('near_note').textContent='Distances are as the crow flies.';
+    }).join('') : '<div class="row"><span class="two"><small>Nothing new within 200 miles.</small></span></div>';
   }
 
-  function draw(){ drawTiles(); drawStops(); drawNear(); save(); }
+  // ---- the map -----------------------------------------------------------------
+  var map=null, dots=L.layerGroup(), stopsL=L.layerGroup(), line=null, fitted=false;
+  function setupMap(){
+    map=L.map('tmap',{ scrollWheelZoom:false, worldCopyJump:true, minZoom:2 }).setView([39,-96], window.innerWidth<=640?3:4);
+    var ESRI='https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+    var TILES={ dark:{url:ESRI+'World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'},
+                light:{url:ESRI+'World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', attribution:'Tiles &copy; Esri'} };
+    var FALLBACK={url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution:'&copy; OpenStreetMap contributors', native:19};
+    var base=null, fellBack=false;
+    function setBase(spec){
+      var layer=L.tileLayer(spec.url,{attribution:spec.attribution, maxNativeZoom:spec.native||16, maxZoom:19}), ok=false, bad=0;
+      layer.on('tileload',function(){ ok=true; });
+      layer.on('tileerror',function(){ if(!ok && !fellBack && ++bad>=8){ fellBack=true; setBase(FALLBACK); } });
+      if(base) map.removeLayer(base); base=layer.addTo(map);
+    }
+    var theme=function(){ return document.documentElement.getAttribute('data-theme')==='light'?'light':'dark'; };
+    setBase(TILES[theme()]);
+    document.documentElement.addEventListener('ch:themechange',function(){ if(!fellBack) setBase(TILES[theme()]); drawMap(); });
+    dots.addTo(map); stopsL.addTo(map);
+    // Buttons in a popup: Leaflet stops clicks inside it from reaching the
+    // page, so they are wired as each one opens.
+    map.on('popupopen', function(e){
+      Array.prototype.forEach.call(e.popup.getElement().querySelectorAll('button[data-act]'), function(b){
+        b.onclick=function(){ var n=b.getAttribute('data-park'), act=b.getAttribute('data-act'), i=STOPS.indexOf(n);
+          map.closePopup();
+          if(act==='add') addPark(n, true);
+          else if(act==='rm' && i>=0){ STOPS.splice(i,1); draw(); }
+          else if(act==='up' && i>0){ STOPS.splice(i-1,0,STOPS.splice(i,1)[0]); draw(); }
+          else if(act==='down' && i>=0 && i<STOPS.length-1){ STOPS.splice(i+1,0,STOPS.splice(i,1)[0]); draw(); }
+          else if(act==='rides'){ OPEN=n; drawStops(); var li=document.querySelector('#tl li.st[data-i="'+i+'"]'); if(li) li.scrollIntoView({behavior:'instant',block:'center'}); }
+        };
+      });
+    });
+  }
+  function popup(p){
+    var i=STOPS.indexOf(p.name), k=counts(p);
+    var cn = RIDERS.length ? countLine(k) : p.open.length+' operating';
+    var btn=function(act,label,go){ return '<button type="button" data-act="'+act+'" data-park="'+esc(p.name)+'"'+(go?' class="go"':'')+'>'+label+'</button>'; };
+    return '<div class="tp"><h3><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+'</a></h3><small>'+esc(p.region)+(i>=0?' · stop '+(i+1):'')+'</small>'
+      +'<div class="cn">'+cn+'</div><div class="btns">'
+      +(i<0 ? btn('add','+ Add to trip',true)
+            : (i>0?btn('up','↑ Earlier'):'')+(i<STOPS.length-1?btn('down','Later ↓'):'')+btn('rides','Rides')+btn('rm','Remove'))
+      +'</div></div>';
+  }
+  function drawMap(){
+    if(!map) return;
+    var yes=css('--accent')||'#ffcc1f', no=css('--muted')||'#888', ink=css('--bg')||'#000', blue=css('--accent2')||'#4cc3ff';
+    var inTrip={}; STOPS.forEach(function(n){ inTrip[n]=1; });
+    dots.clearLayers(); stopsL.clearLayers();
+    ALL.forEach(function(p){
+      if(p.lat==null || inTrip[p.name]) return;
+      var on=anyNew(p);
+      L.circleMarker([p.lat,p.lon],{ radius:on?5:3.5, color:ink, weight:1, fillColor:on?yes:no, fillOpacity:on?.95:.55 })
+        .bindPopup(function(){ return popup(p); }).addTo(dots);
+    });
+    var pts=[];
+    STOPS.forEach(function(n,i){
+      var p=P[n]; if(p.lat==null) return; pts.push([p.lat,p.lon]);
+      L.marker([p.lat,p.lon],{ icon:L.divIcon({ className:'snum', html:'<span>'+(i+1)+'</span>', iconSize:null, popupAnchor:[0,-12] }), zIndexOffset:1000 })
+        .bindPopup(function(){ return popup(p); }).addTo(stopsL);
+    });
+    if(line) map.removeLayer(line);
+    line = pts.length>1 ? L.polyline(pts,{ color:blue, weight:3, opacity:.8, dashArray:'6 6' }).addTo(map) : null;
+    if(!fitted && pts.length){ fitted=true; fitTrip(); }
+  }
+  function fitTrip(){
+    var pts=STOPS.map(function(n){ return P[n]; }).filter(function(p){ return p.lat!=null; }).map(function(p){ return [p.lat,p.lon]; });
+    if(pts.length===1) map.setView(pts[0], 8); else if(pts.length) map.fitBounds(pts,{ padding:[30,30], maxZoom:9 });
+  }
 
-  function addPark(n){ if(n && STOPS.indexOf(n)<0){ STOPS.push(n); draw(); } }
+  function draw(){ drawAfter(); drawStops(); drawNear(); drawMap(); save(); }
+
+  function addPark(n, fromMap){
+    if(!n || STOPS.indexOf(n)>=0) return;
+    STOPS.push(n); draw();
+    // From the search: show where it is, unless it is already in view.
+    var p=P[n]; if(!fromMap && map && p.lat!=null && !map.getBounds().contains([p.lat,p.lon])) fitTrip();
+  }
+
+  // ---- clicks on the page --------------------------------------------------------
   document.addEventListener('click', function(e){
-    var t=e.target.closest('button'); if(!t) return;
-    if(t.hasAttribute('data-add')){ addPark(t.getAttribute('data-add')); return; }
-    var i;
-    if(t.hasAttribute('data-up')){ i=+t.getAttribute('data-up'); if(i>0){ STOPS.splice(i-1,0,STOPS.splice(i,1)[0]); draw(); } return; }
-    if(t.hasAttribute('data-down')){ i=+t.getAttribute('data-down'); if(i<STOPS.length-1){ STOPS.splice(i+1,0,STOPS.splice(i,1)[0]); draw(); } return; }
-    if(t.hasAttribute('data-rm')){ i=+t.getAttribute('data-rm'); STOPS.splice(i,1); draw(); return; }
+    var t=e.target.closest('button'), i;
+    if(t){
+      if(t.hasAttribute('data-add')){ addPark(t.getAttribute('data-add')); return; }
+      if(t.hasAttribute('data-rm')){ i=+t.getAttribute('data-rm'); if(OPEN===STOPS[i]) OPEN=null; STOPS.splice(i,1); draw(); return; }
+      if(t.hasAttribute('data-up')){ i=+t.getAttribute('data-up'); if(i>0){ STOPS.splice(i-1,0,STOPS.splice(i,1)[0]); draw(); } return; }
+      if(t.hasAttribute('data-down')){ i=+t.getAttribute('data-down'); if(i<STOPS.length-1){ STOPS.splice(i+1,0,STOPS.splice(i,1)[0]); draw(); } return; }
+      if(t.hasAttribute('data-unwith')){ var s=t.getAttribute('data-unwith'); RIDERS=RIDERS.filter(function(R){ return R.slug!==s || R.you; }); drawRiders(); draw(); return; }
+      return;
+    }
+    // A tap on a stop (not its link) opens its rides.
+    var b=e.target.closest('[data-open]');
+    if(b && !e.target.closest('a')){ var n=STOPS[+b.getAttribute('data-open')]; OPEN = OPEN===n ? null : n; drawStops(); }
   });
 
-  // Shortest order: start where the trip starts and always drive to the
-  // nearest park not yet visited. Not the perfect route, but a sensible one.
+  // ---- drag to reorder ---------------------------------------------------------
+  // Pointer events on the handle, so mouse and finger work alike. The list is
+  // redrawn as the stop passes each neighbour; window listeners survive that.
+  // Edge scrolling is behavior:'instant' — html{scroll-behavior:smooth} turns
+  // every scrollBy into an animation that a loop keeps restarting (CLAUDE.md).
+  var DRAG=null;
+  document.addEventListener('pointerdown', function(e){
+    var g=e.target.closest('[data-grip]'); if(!g) return;
+    e.preventDefault();
+    OPEN=null;
+    DRAG={ i:+g.getAttribute('data-grip'), y:e.clientY };
+    drawStops(); mark();
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+  });
+  function mark(){ var li=document.querySelector('#tl li.st[data-i="'+DRAG.i+'"]'); if(li) li.classList.add('drag'); }
+  var edge=null;
+  function move(e){
+    if(!DRAG) return;
+    DRAG.y=e.clientY;
+    var rows=document.querySelectorAll('#tl li.st'), to=DRAG.i;
+    Array.prototype.forEach.call(rows, function(li){
+      var j=+li.getAttribute('data-i'), r=li.getBoundingClientRect(), mid=r.top+r.height/2;
+      if(j<DRAG.i && e.clientY<mid) to=Math.min(to,j);
+      if(j>DRAG.i && e.clientY>mid) to=Math.max(to,j);
+    });
+    if(to!==DRAG.i){ STOPS.splice(to,0,STOPS.splice(DRAG.i,1)[0]); DRAG.i=to; drawStops(); mark(); }
+    var vh=window.innerHeight, dy = e.clientY<70 ? -12 : e.clientY>vh-110 ? 12 : 0;
+    if(dy && !edge) edge=setInterval(function(){ window.scrollBy({ top:dy, behavior:'instant' }); }, 16);
+    if(!dy && edge){ clearInterval(edge); edge=null; }
+  }
+  function up(){
+    window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+    if(edge){ clearInterval(edge); edge=null; }
+    DRAG=null; draw();
+  }
+
   $('b_order').onclick=function(){
     var left=STOPS.slice(1), out=[STOPS[0]];
     while(left.length){
@@ -312,7 +503,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     }
     STOPS=out; draw();
   };
-  $('b_clear').onclick=function(){ if(confirm('Clear this trip?')){ STOPS=[]; draw(); } };
+  $('b_clear').onclick=function(){ if(confirm('Clear this trip?')){ STOPS=[]; OPEN=null; fitted=false; draw(); } };
   $('b_share').onclick=function(){
     var url=location.href;
     if(navigator.share) navigator.share({ title:'Coaster trip', url:url }).catch(function(){});
@@ -321,28 +512,29 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
   function nearMe(){
     var b=$('b_here'); if(b){ b.disabled=true; b.textContent='Finding you…'; }
     navigator.geolocation.getCurrentPosition(function(pos){
-      HERE={ lat:pos.coords.latitude, lon:pos.coords.longitude }; drawStops(); drawNear();
+      HERE={ lat:pos.coords.latitude, lon:pos.coords.longitude }; drawNear();
+      if(map) map.setView([HERE.lat,HERE.lon], 7);
+      if(b) b.hidden=true;
     }, function(){ if(b){ b.disabled=false; b.textContent='Couldn’t get your location'; } }, { timeout:10000, maximumAge:600000 });
   }
 
-  // The search: parks by name or place, best match first, with what each one is worth.
+  // ---- search --------------------------------------------------------------------
   var HITS=[], hi=-1;
   function norm(t){ return String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/['’]/g,''); }
   function search(){
     var q=norm($('q').value.trim());
     if(!q){ $('hits').hidden=true; HITS=[]; return; }
-    // Name starts with it, then a word in the name does, then anywhere; bigger parks first within each.
     var rank=function(p){ var n=norm(p.name), i=n.indexOf(q); return i===0?0 : (i>0 && /[^a-z0-9]/.test(n.charAt(i-1)))?1 : i>0?2 : 3; };
     HITS=ALL.filter(function(p){ return STOPS.indexOf(p.name)<0 && (norm(p.name).indexOf(q)>=0 || norm(p.region).indexOf(q)>=0); })
-      .sort(function(a,b){ return rank(a)-rank(b) || b.open.length-a.open.length || a.name.localeCompare(b.name); })
-      .slice(0,8);
+      .sort(function(a,b){ return rank(a)-rank(b) || b.open.length-a.open.length || a.name.localeCompare(b.name); }).slice(0,8);
     hi=HITS.length?0:-1;
-    $('hits').innerHTML=HITS.length ? HITS.map(function(p,i){ var k=count(p);
-      return '<button type="button" data-hit="'+i+'" class="'+(i===hi?'on':'')+'"><span class="two"><b>'+esc(p.name)+'</b><small>'+esc(p.region)+'</small></span>'+tag(k.you, newLabel(k.you))+'</button>'; }).join('')
+    $('hits').innerHTML=HITS.length ? HITS.map(function(p,i){ var k=counts(p);
+      return '<button type="button" data-hit="'+i+'" class="'+(i===hi?'on':'')+'"><span class="two"><b>'+esc(p.name)+'</b><small>'+esc(p.region)+(solo()?'':'</small><small>'+countLine(k))+'</small></span>'
+        +(solo()?bigTag(RIDERS.length?k[0]:p.open.length, RIDERS.length?'new':'coasters'):'')+'</button>'; }).join('')
       : '<button type="button" disabled><span class="two"><small>No park by that name.</small></span></button>';
     $('hits').hidden=false;
   }
-  function pick(i){ var p=HITS[i]; if(!p) return; $('q').value=''; $('hits').hidden=true; addPark(p.name); $('q').focus(); }
+  function pick(i){ var p=HITS[i]; if(!p) return; $('q').value=''; $('hits').hidden=true; addPark(p.name); }
   $('q').addEventListener('input', search);
   $('q').addEventListener('keydown', function(e){
     if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); if(!HITS.length) return; hi=(hi+(e.key==='ArrowDown'?1:-1)+HITS.length)%HITS.length;
@@ -353,39 +545,48 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
   $('hits').addEventListener('mousedown', function(e){ var b=e.target.closest('[data-hit]'); if(b){ e.preventDefault(); pick(+b.getAttribute('data-hit')); } });
   $('q').addEventListener('blur', function(){ setTimeout(function(){ $('hits').hidden=true; }, 150); });
 
-  // Riding with: your friends first, then everyone. Their new credits show
-  // beside yours, and "Both" marks the rides neither of you has.
-  function setWith(s){
-    if(!s){ WITH=null; WITHK={}; draw(); return; }
-    var u=(CoasterHub.USERS||[]).filter(function(x){ return x.slug===s; })[0];
-    CoasterHub.fetchRides(s).then(function(l){ WITH={ slug:s, name:(u&&u.name)||l.user||s }; WITHK=keysOf(l); draw(); })
-      .catch(function(){ WITH=null; WITHK={}; draw(); });
-  }
-  function drawWith(){
-    var users=(CoasterHub.USERS||[]).filter(function(u){ return u.slug!==me; }).sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
+  // ---- riders --------------------------------------------------------------------
+  // You, then a chip per friend riding along, then a picker for one more:
+  // your friends first, then everyone.
+  function drawRiders(){
+    if(!me){ $('riders').hidden=true; return; }
     var inF={}; FRIENDS.forEach(function(s){ inF[s]=1; });
+    var used={}; RIDERS.forEach(function(R){ used[R.slug]=1; });
+    var users=(CoasterHub.USERS||[]).filter(function(u){ return !used[u.slug]; }).sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
     var opt=function(u){ return '<option value="'+esc(u.slug)+'">'+esc(u.name||u.slug)+'</option>'; };
     var f=users.filter(function(u){ return inF[u.slug]; }), rest=users.filter(function(u){ return !inF[u.slug]; });
-    $('with').innerHTML='<option value="">Riding with&hellip;</option>'
+    $('riders').innerHTML='<span class="lbl">Riding:</span>'+RIDERS.map(function(R){
+      return R.you ? '<span class="chip me">You</span>' : '<span class="chip">'+esc(R.name)+'<button type="button" data-unwith="'+esc(R.slug)+'" aria-label="Remove '+esc(R.name)+'">&times;</button></span>';
+    }).join('')
+      +'<select id="addwith" aria-label="Add a rider"><option value="">+ Add a friend</option>'
       +(f.length?'<optgroup label="Friends">'+f.map(opt).join('')+'</optgroup>':'')
-      +(rest.length?'<optgroup label="'+(f.length?'Everyone else':'Riders')+'">'+rest.map(opt).join('')+'</optgroup>':'');
-    $('with').value=WITH?WITH.slug:'';
-    $('with').hidden=false;
+      +(rest.length?'<optgroup label="'+(f.length?'Everyone else':'Riders')+'">'+rest.map(opt).join('')+'</optgroup>':'')+'</select>';
+    $('riders').hidden=false;
+    $('addwith').onchange=function(){ if(this.value) addRider(this.value).then(function(){ drawRiders(); draw(); }); };
   }
-  $('with').addEventListener('change', function(){ setWith(this.value); });
+  function addRider(s, you){
+    if(RIDERS.some(function(R){ return R.slug===s; })) return Promise.resolve();
+    return CoasterHub.fetchRides(s).then(function(l){
+      var u=uName(s), K=keysOf(l);
+      var R={ slug:s, name:(u&&u.name)||l.user||s, K:K, n:Object.keys(K).length, you:!!you };
+      if(you) RIDERS.unshift(R); else RIDERS.push(R);
+      if(you){ MINE={}; (l.rides||[]).forEach(function(x){ MINE[x.c]=1; }); }
+    }).catch(function(){});
+  }
 
-  var mineP = me ? CoasterHub.fetchRides(me).catch(function(){ return null; }) : Promise.resolve(null);
   Promise.all([
-    mineP,
     CoasterHub.fetchUsers().catch(function(){ return []; }),
-    me ? fetch('/api/follows/'+encodeURIComponent(me),{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }) : null
+    me ? fetch('/api/follows/'+encodeURIComponent(me),{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }) : null,
+    me ? addRider(me, true) : null
   ]).then(function(rr){
-    if(rr[0]){ MINE={}; (rr[0].rides||[]).forEach(function(x){ MINE[x.c]=1; }); MINEK=keysOf(rr[0]); }
-    FRIENDS=rr[2] ? (rr[2].following||[]).map(function(x){ return x.slug; }) : [];
+    FRIENDS=rr[1] ? (rr[1].following||[]).map(function(x){ return x.slug; }) : [];
+    return Promise.all(withList.filter(function(s){ return s!==me; }).slice(0,8).map(function(s){ return addRider(s); }));
+  }).then(function(){
     if(!me) $('hero_p').textContent='Pick parks and see what each one has. Sign in to see which coasters are new to you.';
     $('loading').style.display='none'; $('ui').hidden=false;
-    drawWith();
-    if(withSlug) setWith(withSlug); else draw();
+    drawRiders();
+    setupMap();
+    draw();
   });
 }).catch(function(e){ console.error(e); $('loading').style.display='none'; $('err').style.display='block'; });
 </script>

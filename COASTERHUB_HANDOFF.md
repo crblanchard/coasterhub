@@ -5533,3 +5533,16 @@ all three are client pages over endpoints that already existed.
   who that rider follows. "Rode first" only counts when every friend who has the
   ride has a dated log entry later than this rider's; an undated one makes it
   unknowable, so it is left out rather than guessed.
+
+**/trip second pass (same day).** Carter: more than one friend, easier
+reordering with distances "on the side", a map to see and edit the trip, and
+something new instead of the parks / credits / miles tiles. Now: riders are
+chips (you + any number of friends, `?with=a,b`); stops are a timeline with the
+number and the leg distance on a left rail and a drag handle (pointer events,
+window listeners, `behavior:'instant'` edge scroll); a Leaflet map (same Esri
+tiles and OSM fallback as /map) shows every park — yellow if new to anyone
+riding, grey if not — with numbered stops joined by a dashed line, and its
+popups add, remove and move stops. Leaflet stops clicks inside popups from
+reaching the page, so popup buttons are wired on `popupopen`. The tiles became
+"After this trip": each rider's count now -> after, "+N", a "Hits 600" pill
+when a hundred (a 25 under 100) is crossed, and the tallest new rides.
