@@ -890,6 +890,10 @@ function oneEach(order){
   });
 }
 var CANEDIT=false;
+// Your own list, signed in as its rider. CANEDIT is wider (an unclaimed list
+// is editable by anyone), so a prompt that is only yours to answer — Gather
+// them — asks this instead (Carter, 2026-10-17: not on someone else's list).
+var OWN=false;
 
 // ---------------------------------------------------------------- load ------
 if(!slug){
@@ -1059,6 +1063,8 @@ if(!slug){
     CoasterHub.me().then(function(acct){
       var mineToEdit = !rank.claimed || (acct && acct.slug === slug);
       CANEDIT = !!mineToEdit;
+      OWN = !!(acct && acct.slug === slug);
+      $('gatherbar').style.display = OWN && scattered() ? 'flex' : 'none';
       // The offer waits for this: it is only worth making to the person who
       // can place the ride, and who owns the list is not known until here.
       maybeOfferJoins();
@@ -1507,7 +1513,7 @@ function renderRank(){
       var was=!!STATOPEN[id]; STATOPEN={}; MSTAT=0; if(!was) STATOPEN[id]=true; renderRank();
     });
   });
-  $('gatherbar').style.display = scattered() ? 'flex' : 'none';
+  $('gatherbar').style.display = OWN && scattered() ? 'flex' : 'none';
   var live=(CATS.categories||[]).filter(function(g){ return !g.off && !g.racing; }).length;
   $('catn').textContent = CATS.on===false ? 'off' : live;
   $('catn').className = CATS.on===false ? 'n off' : 'n';
