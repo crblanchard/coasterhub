@@ -5561,3 +5561,18 @@ CLOUDFLARE_ACCOUNT_ID and BACKUP_TOKEN (fine-grained, that repo only, Contents
 read/write). First line of defence is still D1 Time Travel (30 days).
 `main` here is meant to be protected against force-pushes and deletion
 (Carter, in GitHub settings), so no session can rewrite history.
+
+## Relocations: found by rule, answered in /edit (2026-10-17)
+
+Carter: "how to do relocated rides? ... trying to think about how to best
+identify them". A relocated ride keeps its hardware, so the rule (in the
+Worker's GET /api/admin/relocations) is: same manu AND model, one row closed
+and the other opened at a different park within 4 years of that closing,
+height within 3% and length within 3% when both have one. Run on the live
+data it found Pandemonium/Joker (already linked) plus eight real moves, all
+linked by 045 — nobody had ridden both halves of any, so no count moved.
+/edit's **Relocations** tab lists what the rule proposes: "Same ride — link
+them" is the existing POST /api/same-ride (home = the later row), "Not the
+same" writes relocation_skipped (046) so the pair never comes back. It cannot
+see rides with no height, moves to parks not in D1, or rebuilt rides — for
+those, link from RCDB's "Relocations" line when Carter sends the page.

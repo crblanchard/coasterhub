@@ -2731,6 +2731,60 @@ export default {
         return afterWrite(ctx, env, request, json({ ok: true, same: await sameOf(mates.map((m) => m.coaster)) }));
       }
 
+      // ---- relocation triage (admin, 2026-10-17) --------------------------
+      //
+      // Carter: "trying to think about how to best identify them". A relocated
+      // ride keeps its hardware, so the rule is: same maker and model, one row
+      // closed and the other opened at a DIFFERENT park within four years of
+      // that, height within 3% and length within 3% when both have one. It
+      // only proposes; /edit's Relocations tab links (POST /api/same-ride) or
+      // answers "not the same" (relocation_skipped, 046), and a pair already
+      // in one set or already answered never comes back.
+      const RELOC_503 = "run migrations/046-relocation-skipped.sql first";
+      if (request.method === "GET" && path === "/api/admin/relocations") {
+        if (!await haveSameRide()) return err(503, SAME_503);
+        let skipWhere = "";
+        try {
+          await env.DB.prepare("SELECT 1 FROM relocation_skipped LIMIT 1").first();
+          skipWhere = " AND NOT EXISTS (SELECT 1 FROM relocation_skipped k WHERE k.a = a.id AND k.b = b.id)";
+        } catch (e) { /* before 046: nothing has been set aside yet */ }
+        const { results } = await env.DB.prepare(
+          "SELECT a.id AS aid, b.id AS bid, " +
+          "(SELECT COUNT(DISTINCT r1.user_slug) FROM rides r1 WHERE r1.coaster_id = a.id AND EXISTS " +
+          " (SELECT 1 FROM rides r2 WHERE r2.coaster_id = b.id AND r2.user_slug = r1.user_slug)) AS both " +
+          "FROM coasters a JOIN coasters b ON a.id <> b.id AND a.park <> b.park " +
+          "AND a.manu = b.manu AND a.model = b.model AND a.closed IS NOT NULL AND b.opened IS NOT NULL " +
+          "AND CAST(substr(b.opened,1,4) AS INTEGER) BETWEEN CAST(substr(a.closed,1,4) AS INTEGER) " +
+          "AND CAST(substr(a.closed,1,4) AS INTEGER) + 4 " +
+          "AND a.h IS NOT NULL AND b.h IS NOT NULL AND ABS(a.h - b.h) <= 0.03 * a.h " +
+          "AND (a.l IS NULL OR b.l IS NULL OR ABS(a.l - b.l) <= 0.03 * a.l) " +
+          "LEFT JOIN same_ride sa ON sa.coaster = a.id LEFT JOIN same_ride sb ON sb.coaster = b.id " +
+          "WHERE NOT (sa.ride IS NOT NULL AND sa.ride = sb.ride)" + skipWhere +
+          " ORDER BY a.manu, a.model, a.id LIMIT 200"
+        ).all();
+        const ids = Array.from(new Set(results.flatMap((r) => [r.aid, r.bid])));
+        const rowsById = {};
+        if (ids.length) {
+          const { results: cs } = await env.DB.prepare(
+            "SELECT id, name, park, manu, model, h, s, l, inv, opened, closed FROM coasters WHERE id IN (" +
+            ids.map(() => "?").join(",") + ")").bind(...ids).all();
+          cs.forEach((c) => { rowsById[c.id] = c; });
+        }
+        return json({ pairs: results.map((r) => ({ from: rowsById[r.aid], to: rowsById[r.bid], both: r.both || 0 })) });
+      }
+      // "Not the same ride": the pair stops being proposed. { a, b } in the
+      // order the list gave them (a closed, b opened later).
+      if (request.method === "POST" && path === "/api/admin/relocations/skip") {
+        const b = await request.json();
+        const a1 = Number(b && b.a), b1 = Number(b && b.b);
+        if (!(a1 > 0 && b1 > 0) || a1 === b1) return err(400, "need two coaster ids");
+        try {
+          await env.DB.prepare("INSERT OR IGNORE INTO relocation_skipped (a, b, at) VALUES (?, ?, datetime('now'))")
+            .bind(a1, b1).run();
+        } catch (e) { return err(503, RELOC_503); }
+        return json({ ok: true });
+      }
+
       // ---- clone groups (admin) ------------------------------------------
       //
       // Curated here rather than computed, because no rule gets it right on its

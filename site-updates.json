@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-10-17T21:42:16Z",
+   "text": "Relocated rides are now linked as one credit with their history on each coaster page, including Deja Vu to Goliath and Aftershock and Viking Voyage's three parks. New parks: Wild Adventures, Dutch Wonderland, Idlewild, Legoland New York and Arnolds Park."
+  },
+  {
    "at": "2026-10-17T01:49:12Z",
    "text": "New Trip planner maps your trip with new credits per park for you and any friends, and Compare puts you head to head with a friend. Profiles now show where you rank among your friends, and manufacturer pages list every coaster they built."
   },

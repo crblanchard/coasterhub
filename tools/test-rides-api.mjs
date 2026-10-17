@@ -35,6 +35,7 @@ const MIGRATION_013 = readFileSync(join(ROOT, "migrations", "013-rider-categorie
 const MIGRATION_015 = readFileSync(join(ROOT, "migrations", "015-category-triage.sql"), "utf8");
 const MIGRATION_017 = readFileSync(join(ROOT, "migrations", "017-model-triage.sql"), "utf8");
 const MIGRATION_023 = readFileSync(join(ROOT, "migrations", "023-same-ride.sql"), "utf8");
+const MIGRATION_046 = readFileSync(join(ROOT, "migrations", "046-relocation-skipped.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
 // D1 rejects a statement with more bound parameters than SQLite's compiled-in
@@ -2765,6 +2766,37 @@ async function main() {
     sr = rows(db, "SELECT coaster, ride FROM same_ride ORDER BY coaster");
     check("same ride: deleting the home picks a new one",
       r.status === 200 && JSON.stringify(sr) === JSON.stringify([{coaster:951,ride:951},{coaster:953,ride:951}]), JSON.stringify(sr));
+
+    // Relocation triage (046): the rule proposes, Link and "Not the same" retire.
+    {
+      const t = freshDb();
+      t.exec("INSERT OR IGNORE INTO users (slug,name,mode) VALUES ('ann','Ann','rides')");
+      t.exec(`INSERT INTO coasters (id,name,park,type,manu,model,h,l,opened,closed) VALUES
+        (961,'Old Ride','Park A','Steel','Vekoma','Vekoma Boomerang',116.5,935,'1990','2005'),
+        (962,'New Ride','Park B','Steel','Vekoma','Vekoma Boomerang',116.5,935,'2007',NULL),
+        (963,'Too Late','Park C','Steel','Vekoma','Vekoma Boomerang',116.5,935,'2015',NULL),
+        (964,'Other Maker','Park D','Steel','Intamin','Vekoma Boomerang',116.5,935,'2006',NULL),
+        (965,'Taller','Park E','Steel','Vekoma','Vekoma Boomerang',140,935,'2006',NULL)`);
+      t.exec("INSERT INTO rides (user_slug,coaster_id,d) VALUES ('ann',961,NULL),('ann',962,NULL)");
+      let q = await call(t, "GET", "/api/admin/relocations");
+      check("relocations: admin only", q.status === 401, q.status);
+      q = await call(t, "GET", "/api/admin/relocations", { token: PW });
+      const pairs = (q.data.pairs || []).map(p => p.from.id + ">" + p.to.id);
+      check("relocations: the rule proposes only the match (maker, model, years, size)",
+        q.status === 200 && pairs.join() === "961>962", JSON.stringify(q.data).slice(0, 300));
+      check("relocations: and says who has ridden both", q.data.pairs[0].both === 1, JSON.stringify(q.data.pairs[0]));
+      q = await call(t, "POST", "/api/admin/relocations/skip", { token: PW, body: { a: 961, b: 962 } });
+      check("relocations: skip before 046 is a 503 naming the file", q.status === 503 && /046-relocation/.test(q.data.error), JSON.stringify(q.data));
+      t.exec(MIGRATION_046);
+      q = await call(t, "POST", "/api/admin/relocations/skip", { token: PW, body: { a: 961, b: 962 } });
+      check("relocations: 'not the same' is recorded", q.status === 200, q.status);
+      q = await call(t, "GET", "/api/admin/relocations", { token: PW });
+      check("relocations: ...and the pair is not proposed again", (q.data.pairs || []).length === 0, JSON.stringify(q.data));
+      t.exec("DELETE FROM relocation_skipped");
+      await call(t, "POST", "/api/same-ride", { token: PW, body: { ids: [961, 962], home: 962 } });
+      q = await call(t, "GET", "/api/admin/relocations", { token: PW });
+      check("relocations: a linked pair is not proposed either", (q.data.pairs || []).length === 0, JSON.stringify(q.data));
+    }
 
     // Before the migration: the list and the counts still work, writes 503.
     const old = freshDb();

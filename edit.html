@@ -196,6 +196,8 @@
       <div class="seg"><button id="mCoasters" class="on">Coasters</button><button id="mParks">Parks</button></div>
       <div class="seg"><button id="mClones">Categories</button><button id="mTriage">Triage</button></div>
       <div class="seg"><button id="mModels">Models</button><button id="mMTriage">Triage</button></div>
+      <!-- Rides that look like one ride that moved parks (Carter, 2026-10-17). -->
+      <div class="seg"><button id="mReloc">Relocations</button></div>
       <input id="q" placeholder="Search…" style="max-width:220px">
       <button class="ghost" id="newcat">+ New category</button>
       <!-- A new ride without leaving the editor (Carter, 2026-09-24). /add is
@@ -393,6 +395,7 @@
     document.getElementById('mModels').addEventListener('click', function(){ setMode('models'); });
     document.getElementById('mTriage').addEventListener('click', function(){ setMode('triage'); });
     document.getElementById('mMTriage').addEventListener('click', function(){ setMode('mtriage'); });
+    document.getElementById('mReloc').addEventListener('click', function(){ setMode('reloc'); });
     document.getElementById('trseg').querySelectorAll('[data-tf]').forEach(function(b){
       b.addEventListener('click', function(){
         state.triageFilter = b.getAttribute('data-tf');
@@ -464,6 +467,7 @@
     document.getElementById('mModels').classList.toggle('on', m==='models');
     document.getElementById('mTriage').classList.toggle('on', m==='triage');
     document.getElementById('mMTriage').classList.toggle('on', m==='mtriage');
+    document.getElementById('mReloc').classList.toggle('on', m==='reloc');
     document.getElementById('fIncWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('fThinWrap').style.display = m==='coasters' ? '' : 'none';
     document.getElementById('fGeoWrap').style.display = m==='coasters' ? '' : 'none';
@@ -485,6 +489,7 @@
     else if (m==='models') loadModels();
     else if (m==='triage') loadTriage();
     else if (m==='mtriage') loadMTriage();
+    else if (m==='reloc') loadReloc();
     else render();
   }
 
@@ -494,6 +499,7 @@
     else if (state.mode==='models') renderModels();
     else if (state.mode==='triage') renderTriage();
     else if (state.mode==='mtriage') renderMTriage();
+    else if (state.mode==='reloc') renderReloc();
     else renderClones();
     updateGeoSummary();
   }
@@ -1214,6 +1220,78 @@
       + (rows.length - shown) + ' more. Search to narrow it.</div></div>');
     return out.join('');
   }
+  // ---------- relocations ----------
+  // Pairs the Worker's rule proposes (GET /api/admin/relocations): same maker
+  // and model, one closed and the other opened at another park within four
+  // years, height and length within 3%. Link makes them one ride (the same
+  // POST /api/same-ride as a coaster's "Same ride, relocated" box); "Not the
+  // same" sets the pair aside for good. Carter, 2026-10-17.
+  async function loadReloc(){
+    state.relocErr = '';
+    try { var d = await api("GET","/api/admin/relocations"); state.reloc = d.pairs || []; }
+    catch(e){ state.reloc = []; state.relocErr = e.message; }
+    if (state.mode==='reloc') renderReloc();
+  }
+  function relYears(c){
+    var o = c.opened ? String(c.opened).slice(0,4) : '?', x = c.closed ? String(c.closed).slice(0,4) : '';
+    return o + '\u2013' + x;
+  }
+  function renderReloc(){
+    var q = document.getElementById('q').value.trim().toLowerCase();
+    var all = state.reloc || [];
+    var rows = all.map(function(p, i){ return { p:p, i:i }; }).filter(function(r){
+      var t = [r.p.from.name, r.p.from.park, r.p.to.name, r.p.to.park, r.p.from.model].join(' ').toLowerCase();
+      return !q || t.indexOf(q) >= 0; });
+    document.getElementById('count').textContent = all.length + (all.length===1 ? ' possible relocation' : ' possible relocations');
+    document.getElementById('list').innerHTML =
+      (state.relocErr ? '<div class="row"><div class="nm">Could not load</div><div class="pk">'+esc(state.relocErr)+'</div></div>' : '')
+      + '<div class="row live"><div class="nm">Same ride, moved parks?</div><div class="pk">Same maker and model, opened elsewhere within 4 years of closing, same height and length</div></div>'
+      + (rows.length ? rows.map(function(r){
+          var p = r.p;
+          return '<div class="row'+(state.relSel===r.i?' sel':'')+'" data-rel="'+r.i+'">'
+            + '<div class="nm">'+esc(p.from.name)+' \u2192 '+esc(p.to.name)+'</div>'
+            + '<div class="pk">'+esc(p.from.park)+' ('+relYears(p.from)+') \u2192 '+esc(p.to.park)+' ('+relYears(p.to)+')</div></div>';
+        }).join('') : '<div class="row"><div class="pk">Nothing to look at. New candidates show up here as rides are added.</div></div>');
+    document.getElementById('list').querySelectorAll('[data-rel]').forEach(function(r){
+      r.onclick = function(){ showReloc(+r.getAttribute('data-rel')); }; });
+  }
+  function showReloc(i){
+    var p = (state.reloc||[])[i]; if(!p) return;
+    state.relSel = i; renderReloc();
+    var F = [['Park','park'],['Manufacturer','manu'],['Model','model'],['Height (ft)','h'],['Speed (mph)','s'],['Length (ft)','l'],['Inversions','inv'],['Opened','opened'],['Closed','closed']];
+    var cell = function(v){ return v==null || v==='' ? '<span style="color:var(--muted)">\u2014</span>' : esc(v); };
+    var both = p.both || 0;
+    document.getElementById('editor').innerHTML =
+      '<h2 style="margin:0 0 4px;font-size:1.15rem">'+esc(p.from.name)+' \u2192 '+esc(p.to.name)+'</h2>'
+      + '<p class="hint">Is this one ride that moved parks? Linking keeps both rows (each park still shows it) and counts them as one credit, with '
+      + esc(p.to.name)+' at '+esc(p.to.park)+' as where it is now.</p>'
+      + '<table class="reltab" style="width:100%;border-collapse:collapse;font-size:.9rem;margin:8px 0 12px">'
+      + '<tr><th></th><th style="text-align:left">#'+p.from.id+'</th><th style="text-align:left">#'+p.to.id+'</th></tr>'
+      + '<tr><td style="color:var(--muted);padding:4px 8px 4px 0">Name</td><td><b>'+esc(p.from.name)+'</b></td><td><b>'+esc(p.to.name)+'</b></td></tr>'
+      + F.map(function(f){ return '<tr><td style="color:var(--muted);padding:4px 8px 4px 0">'+f[0]+'</td><td>'+cell(p.from[f[1]])+'</td><td>'+cell(p.to[f[1]])+'</td></tr>'; }).join('')
+      + '</table>'
+      + '<p class="hint">'+(both ? both+(both===1?' rider has':' riders have')+' ridden both: linking makes it one credit for '+(both===1?'them':'each of them')+'.'
+          : 'Nobody has ridden both, so no credit counts change.')+'</p>'
+      + '<div class="actions"><button id="relLink">Same ride \u2014 link them</button>'
+      + '<button class="ghost" id="relSkip">Not the same</button><span class="toast" id="relToast"></span></div>';
+    var done = function(){
+      state.reloc.splice(i, 1);
+      state.relSel = null;
+      if (state.reloc.length) showReloc(Math.min(i, state.reloc.length-1));
+      else { renderReloc(); document.getElementById('editor').innerHTML = '<div class="empty">All looked at.</div>'; }
+    };
+    document.getElementById('relLink').onclick = async function(){
+      var t = document.getElementById('relToast'); t.textContent = 'Linking\u2026'; t.className = 'toast';
+      try { await api("POST","/api/same-ride",{ ids:[p.from.id, p.to.id], home:p.to.id }); done(); }
+      catch(e){ t.textContent = e.message; t.className = 'toast bad'; }
+    };
+    document.getElementById('relSkip').onclick = async function(){
+      var t = document.getElementById('relToast'); t.textContent = 'Saving\u2026'; t.className = 'toast';
+      try { await api("POST","/api/admin/relocations/skip",{ a:p.from.id, b:p.to.id }); done(); }
+      catch(e){ t.textContent = e.message; t.className = 'toast bad'; }
+    };
+  }
+
   function renderMTriage(){
     var q = document.getElementById('q').value.trim().toLowerCase();
     var b = mtriageBuckets();
