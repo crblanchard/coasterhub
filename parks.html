@@ -105,8 +105,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.you
   // A way to the map from here (Carter, 2026-09-28).
   $('hero_sub').innerHTML=P.length.toLocaleString()+' parks on the site. <a href="/map" style="color:var(--accent2);text-decoration:none;font-weight:600">View them all on the map &rarr;</a>';
   var locs={}; P.forEach(function(p){ if(p.region) locs[p.region]=1; });
-  // Traveling shows first: they have a country but no place in it.
-  $('f_loc').innerHTML+='<option value="~trav">Traveling shows</option>'+Object.keys(locs).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return '<option value="'+esc(m)+'">'+esc(m)+'</option>'; }).join('');
+  // Fair operators (traveling shows) first: they have a country but no place in it.
+  $('f_loc').innerHTML+='<option value="~trav">Fair operators</option>'+Object.keys(locs).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return '<option value="'+esc(m)+'">'+esc(m)+'</option>'; }).join('');
   if(MINE) $('f_mine').hidden=false;
   ['q','f_loc','f_mine'].forEach(function(id){ $(id).addEventListener('input', draw); $(id).addEventListener('change', draw); });
   $('f_sort').addEventListener('change', function(){
@@ -156,7 +156,7 @@ function draw(){
   // ridden / all its coasters, a chevron. Filled when opened (parkBody).
   $('rows').innerHTML=list.map(function(p){
     var mi = near && p.mi!=null ? (p.mi<10?p.mi.toFixed(1):Math.round(p.mi).toLocaleString())+' mi' : '';
-    var sub=[p.trav?'Traveling':'', p.region?short(p.region):'', mi].filter(Boolean).join(' \u00b7 ');
+    var sub=[p.trav?'Fair operator':'', p.region?short(p.region):'', mi].filter(Boolean).join(' \u00b7 ');
     return '<details class="mdl" data-park="'+esc(p.name)+'"><summary>'
       +(MINE ? '<span class="tick">'+(p.been?'\u2713':'')+'</span>' : '')
       +'<span class="mtwo"><span class="nm">'+esc(p.name)+'</span><span class="msub">'+esc(sub)+'</span></span>'

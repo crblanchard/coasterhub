@@ -162,9 +162,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 
   document.querySelector('.hero h1').textContent=PARK;
   document.title=PARK+' — Coaster Hub';
-  // "Park · Ohio, US", the region a link to its location page; "Traveling
-  // show · Germany" for a fair with no fixed place.
-  CoasterHub.kindLine($('hero_sub'), CoasterHub.traveling(parks[PARK]) ? 'Traveling show' : 'Park', meta.region||null, meta.region ? CoasterHub.locationHref(meta.region) : null);
+  // "Park · Ohio, US", the region a link to its location page; "Fair
+  // operator · Germany" for a fair with no fixed place.
+  CoasterHub.kindLine($('hero_sub'), CoasterHub.traveling(parks[PARK]) ? 'Fair operator' : 'Park', meta.region||null, meta.region ? CoasterHub.locationHref(meta.region) : null);
   CoasterHub.crumbs($('crumb'), CoasterHub.placeTrail(meta.region).concat([[PARK]]));
   CoasterHub.youStrip($('you'), mine);
   var open=mine.filter(function(c){return !c.closed;}).length;
