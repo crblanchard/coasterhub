@@ -17,3 +17,12 @@ INSERT INTO coasters (id, name, park, type, manu, model, l, laps, yr, opened, op
 INSERT INTO parks (name, lat, lon, region) SELECT 'Pigeon Forge Racing Coaster', 35.77297542241445, -83.53918509825631, 'Tennessee, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Pigeon Forge Racing Coaster');
 INSERT INTO coasters (id, name, park, type, manu, model, l, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Racing Coaster (Left)', 'Pigeon Forge Racing Coaster', 'Steel', 'Wiegand', 'Wiegand Alpine', 2802, 1, 2025, '2025', 'year', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Pigeon Forge Racing Coaster') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Racing Coaster (Left)' AND park = 'Pigeon Forge Racing Coaster');
 INSERT INTO coasters (id, name, park, type, manu, model, l, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Racing Coaster (Right)', 'Pigeon Forge Racing Coaster', 'Steel', 'Wiegand', 'Wiegand Alpine', 2802, 1, 2025, '2025', 'year', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Pigeon Forge Racing Coaster') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Racing Coaster (Right)' AND park = 'Pigeon Forge Racing Coaster');
+
+-- Spinning Parrot at Island in Pigeon Forge (Carter, same day, from RCDB).
+-- Both were already in D1, the ride with nothing filled in. RCDB: SBF Visa
+-- spinner, operating since 7/10/2018, 0 inversions. It joins the SBF Visa
+-- Spinners category (16 rides, all model 'SBF Visa Spinner'). The park moves
+-- to the coordinates Carter gave; the old pin sat about 4 miles north.
+UPDATE parks SET lat = 35.803008733276094, lon = -83.57047558631326 WHERE name = 'Island in Pigeon Forge';
+UPDATE coasters SET manu = 'SBF Visa', model = 'SBF Visa Spinner', inv = 0, yr = 2018, opened = '2018-07-10', openedPrec = 'day' WHERE name = 'Spinning Parrot' AND park = 'Island in Pigeon Forge' AND manu IS NULL;
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'SBF Visa Spinners' AND c.name = 'Spinning Parrot' AND c.park = 'Island in Pigeon Forge';
