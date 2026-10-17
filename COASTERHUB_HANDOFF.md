@@ -5524,8 +5524,9 @@ all three are client pages over endpoints that already existed.
   popup links in with `/trip?add=<slug>`, which appends to the saved trip.
 - **/compare** (`compare.html`), `?a=&b=` (a defaults to you; `?with=` is b).
   Reads `/api/rides-all` and `/api/rankings-all`. Agreement % is the same
-  pairwise measure as the "You agree on" line on /rankings. Records skip an
-  inversion count over 14: live data had Raton Loco at 1,377. Linked from
+  pairwise measure as the "You agree on" line on /rankings. Records show raw
+  values on purpose — Carter, 2026-10-17: "want to spot errors that way too"
+  (Raton Loco's 1,377 inversions is how one was found). No sanity caps. Linked from
   Explore, the sitemap, a Compare button on someone else's profile, and the
   agreement line on another rider's rankings.
 - **Among friends** on a profile (`mountAmong` in profile.html). "Friends" =

@@ -260,7 +260,7 @@ Promise.all([
     var best=function(R, f){ var w=null; Object.keys(R.keys).forEach(function(k){ var c=R.rep[k], v=f(c); if(v!=null && v>0 && (!w || v>w.v)) w={ c:c, v:v }; }); return w; };
     var oldest=function(c){ var y=c.opened?Number(String(c.opened).slice(0,4)):(c.yr?Number(c.yr):null); return y ? 3000-y : null; };
     var RECS=[['Tallest',function(c){ return c.h; },' ft'],['Fastest',function(c){ return c.s; },' mph'],['Longest',function(c){ return c.l; },' ft'],
-              ['Most inversions',function(c){ return c.inv>0 && c.inv<=14 ? c.inv : null; },''],['Oldest',oldest,'']];
+              ['Most inversions',function(c){ return c.inv; },''],['Oldest',oldest,'']];
     var rr=RECS.map(function(R){
       var x=best(A,R[1]), y=best(B,R[1]); if(!x && !y) return '';
       var cell=function(w, side, other){
