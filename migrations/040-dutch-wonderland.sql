@@ -1,0 +1,14 @@
+-- 040: Dutch Wonderland, Lancaster, Pennsylvania (Carter, 2026-10-17, from
+-- RCDB; 40.027541471390265, -76.21828198743738). Not in D1 before.
+--   Joust            Chance Rides Big Dipper, 5/23/1998, 16.1 ft, 0 inv
+--   Kingdom Coaster  CCI wooden, 1992, 2,000 ft, 55 ft, 40 mph, 0 inv, 1:30;
+--                    formerly Sky Princess (1992-2006)
+--   Merlin's Mayhem  S&S Family Inverted Coaster, 4/28/2018, 1,300 ft, 60 ft
+-- Model names follow the site's maker-first style ("CCI Wood" has 20 rides).
+-- /changes rows in the Worker's shape. Safe to run twice.
+INSERT INTO parks (name, lat, lon, region) SELECT 'Dutch Wonderland', 40.027541471390265, -76.21828198743738, 'Pennsylvania, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Dutch Wonderland');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Joust', 'Dutch Wonderland', 'Steel', 'Chance Rides', 'Chance Rides Big Dipper', 16.1, NULL, NULL, 0, NULL, 1, 1998, '1998-05-23', 'day', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Dutch Wonderland') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Joust' AND park = 'Dutch Wonderland');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Kingdom Coaster', 'Dutch Wonderland', 'Wood', 'Custom Coasters International', 'CCI Wood', 55, 40, 2000, 0, 90, 1, 1992, '1992', 'year', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Dutch Wonderland') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Kingdom Coaster' AND park = 'Dutch Wonderland');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Merlin''s Mayhem', 'Dutch Wonderland', 'Steel', 'S&S Worldwide', 'S&S Family Inverted Coaster', 60, NULL, 1300, 0, NULL, 1, 2018, '2018-04-28', 'day', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Dutch Wonderland') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Merlin''s Mayhem' AND park = 'Dutch Wonderland');
+INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) SELECT id, 'Sky Princess', 'rcdb', date('now') FROM coasters WHERE name = 'Kingdom Coaster' AND park = 'Dutch Wonderland';
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.park = 'Dutch Wonderland' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND a.subject = c.name AND json_extract(a.detail, '$.park') = 'Dutch Wonderland');
