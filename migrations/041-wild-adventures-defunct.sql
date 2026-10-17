@@ -1,0 +1,20 @@
+-- 041: Wild Adventures' removed coasters (Carter, 2026-10-17, from RCDB).
+-- Added as five separate rides; RCDB's relocations (Fiesta Express became
+-- Swampwater Snake, Tiger Terror went to ZooTampa, Viking Voyage came from
+-- Celebration City's Jack Rabbit and went on to Fun Spot as Hurricane) are
+-- NOT linked yet — Carter: "add them as new rides and figure out relocations
+-- later". Tiger Terror is a Wisdom Dragon Wagon, so it joins Dragon Wagons.
+--   Cheetah          CCI wood (hybrid), 6/16/2001 - 3/15/2020, 2,680 ft, 92 ft, 52 mph
+--   Fiesta Express   Zamperla Mini Mouse, 2003 - 2011, 262 ft, 8 ft
+--   Gold Rush        Chance Rides Big Dipper, 1999 - 2009, 16.1 ft
+--   Tiger Terror     Wisdom Dragon Wagon, 1998 - 2008
+--   Viking Voyage    E&F Miler Hi-Miler, 2010 - 2018, 1,300 ft, 52 ft
+-- Safe to run twice.
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Cheetah', 'Wild Adventures', 'Wood', 'Custom Coasters International', 'CCI Wood', 92, 52, 2680, 0, NULL, 1, 2001, '2001-06-16', 'day', '2020-03-15', 'day' WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Cheetah' AND park = 'Wild Adventures');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Fiesta Express', 'Wild Adventures', 'Steel', 'Zamperla', 'Zamperla Mini Mouse', 8, NULL, 262, 0, NULL, 1, 2003, '2003', 'year', '2011', 'year' WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Fiesta Express' AND park = 'Wild Adventures');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Gold Rush', 'Wild Adventures', 'Steel', 'Chance Rides', 'Chance Rides Big Dipper', 16.1, NULL, NULL, 0, NULL, 1, 1999, '1999', 'year', '2009', 'year' WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Gold Rush' AND park = 'Wild Adventures');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Tiger Terror', 'Wild Adventures', 'Steel', 'Wisdom Rides', 'Wisdom Dragon Wagon', NULL, NULL, NULL, 0, NULL, 1, 1998, '1998', 'year', '2008', 'year' WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Tiger Terror' AND park = 'Wild Adventures');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Viking Voyage', 'Wild Adventures', 'Steel', 'E&F Miler', 'Miler Hi-Miler', 52, NULL, 1300, 0, NULL, 1, 2010, '2010', 'year', '2018', 'year' WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Viking Voyage' AND park = 'Wild Adventures');
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE g.name = 'Dragon Wagons' AND c.name = 'Tiger Terror' AND c.park = 'Wild Adventures';
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.park = 'Wild Adventures' AND c.name IN ('Cheetah','Fiesta Express','Gold Rush','Tiger Terror','Viking Voyage') AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND a.subject = c.name AND json_extract(a.detail, '$.park') = 'Wild Adventures');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'clone_set', g.name, (SELECT COUNT(*) FROM clone_members m WHERE m.group_id = g.id), json_object('made', 0, 'via', '041') FROM clone_groups g WHERE g.name = 'Dragon Wagons' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'clone_set' AND a.subject = g.name AND a.detail LIKE '%"via":"041"%');
