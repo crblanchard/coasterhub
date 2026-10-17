@@ -32,3 +32,35 @@ INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM c
 -- 1,646 m = 5,400 ft.
 INSERT INTO parks (name, lat, lon, region) SELECT 'Lost Mine Mountain Coaster & Mini-Golf', 35.809053216528355, -83.5742475557486, 'Tennessee, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Lost Mine Mountain Coaster & Mini-Golf');
 INSERT INTO coasters (id, name, park, type, manu, model, l, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Lost Mine Mountain Coaster', 'Lost Mine Mountain Coaster & Mini-Golf', 'Steel', 'Wiegand', 'Wiegand Alpine', 5400, 1, 2023, '2023', 'year', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Lost Mine Mountain Coaster & Mini-Golf') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Lost Mine Mountain Coaster' AND park = 'Lost Mine Mountain Coaster & Mini-Golf');
+
+-- Rowdy Bear's Funpark, Pigeon Forge (Carter, same day: "rename these two.
+-- and rename the park", with RCDB's pages for both rides). The park was
+-- "Rowdy Bear's Smoky Mountain Snowpark"; the old name stays as a park alias
+-- so old links land. The site's two rides there, renamed to RCDB's names and
+-- filled in:
+--   Ski Lift Shootout Coaster   -> Rowdy's Sky Patrol    Wiegand Mystical Hex,
+--       8/17/2019, 1,300 ft, 0 inv. Former names Alpine Flyer, Laser Gun
+--       Coaster, Ski Lift Shootout Coaster.
+--   Rowdy Bear Mountain Coaster -> Rowdy's Hot Rod Racers  Wiegand CoasterKart,
+--       3/13/2021, 2,200 ft, 0 inv. Former names Power Coaster, Avalanche Snow
+--       Coaster. ("Rowdy Bear Mountain Coaster" was only ever this site's
+--       label, so it is not recorded as a former name.)
+-- The former names are undated aliases: RCDB gives months and "?", and a
+-- dated alias would print a made-up day.
+UPDATE parks SET name = 'Rowdy Bear''s Funpark' WHERE name = 'Rowdy Bear''s Smoky Mountain Snowpark' AND NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Rowdy Bear''s Funpark');
+UPDATE coasters SET park = 'Rowdy Bear''s Funpark' WHERE park = 'Rowdy Bear''s Smoky Mountain Snowpark';
+UPDATE park_aliases SET park = 'Rowdy Bear''s Funpark' WHERE park = 'Rowdy Bear''s Smoky Mountain Snowpark';
+INSERT OR IGNORE INTO park_aliases (park, former_name, note, added) VALUES ('Rowdy Bear''s Funpark', 'Rowdy Bear''s Smoky Mountain Snowpark', 'rename', date('now'));
+UPDATE coasters SET name = 'Rowdy''s Sky Patrol', type = 'Steel', manu = 'Wiegand', model = 'Wiegand Mystical Hex', l = 1300, inv = 0, yr = 2019, opened = '2019-08-17', openedPrec = 'day' WHERE name = 'Ski Lift Shootout Coaster' AND park = 'Rowdy Bear''s Funpark';
+UPDATE coasters SET name = 'Rowdy''s Hot Rod Racers', type = 'Steel', manu = 'Wiegand', model = 'Wiegand CoasterKart', l = 2200, inv = 0, yr = 2021, opened = '2021-03-13', openedPrec = 'day' WHERE name = 'Rowdy Bear Mountain Coaster' AND park = 'Rowdy Bear''s Funpark';
+INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) SELECT id, 'Ski Lift Shootout Coaster', 'rename', date('now') FROM coasters WHERE name = 'Rowdy''s Sky Patrol' AND park = 'Rowdy Bear''s Funpark';
+INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) SELECT id, 'Laser Gun Coaster', 'rename', date('now') FROM coasters WHERE name = 'Rowdy''s Sky Patrol' AND park = 'Rowdy Bear''s Funpark';
+INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) SELECT id, 'Alpine Flyer', 'rename', date('now') FROM coasters WHERE name = 'Rowdy''s Sky Patrol' AND park = 'Rowdy Bear''s Funpark';
+INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) SELECT id, 'Avalanche Snow Coaster', 'rename', date('now') FROM coasters WHERE name = 'Rowdy''s Hot Rod Racers' AND park = 'Rowdy Bear''s Funpark';
+INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) SELECT id, 'Power Coaster', 'rename', date('now') FROM coasters WHERE name = 'Rowdy''s Hot Rod Racers' AND park = 'Rowdy Bear''s Funpark';
+
+-- SkyLand Ranch, Sevierville (Carter, same day; 35.83341390494683,
+-- -83.57390870785191). Not in D1. Wild Stallion: Wiegand, 2022,
+-- 2,000 m = 6,562 ft.
+INSERT INTO parks (name, lat, lon, region) SELECT 'SkyLand Ranch', 35.83341390494683, -83.57390870785191, 'Tennessee, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'SkyLand Ranch');
+INSERT INTO coasters (id, name, park, type, manu, model, l, laps, yr, opened, openedPrec, closed, closedPrec) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Wild Stallion', 'SkyLand Ranch', 'Steel', 'Wiegand', 'Wiegand Alpine', 6562, 1, 2022, '2022', 'year', NULL, NULL WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'SkyLand Ranch') AND NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Wild Stallion' AND park = 'SkyLand Ranch');
