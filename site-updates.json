@@ -3,7 +3,7 @@
  "updates": [
   {
    "at": "2026-10-17T22:37:25Z",
-   "text": "Relocated rides are now linked as one credit with their history on each coaster page, and traveling shows are flagged on park pages with their own filter on /parks. New parks: Wild Adventures, Dutch Wonderland, Idlewild, Legoland New York, Arnolds Park, ZooTampa and Lake Winnepesaukah."
+   "text": "Relocated rides are now linked as one credit with their history on each coaster page, and traveling shows are flagged on park pages with their own filter on /parks."
   },
   {
    "at": "2026-10-17T01:49:12Z",
@@ -27,7 +27,7 @@
   },
   {
    "at": "2026-10-04T16:36:35Z",
-   "text": "Import takes a Google Sheets link, matches near-misses for you, and lets you add a missing ride or park right from the list. Added 123 parks and nearly 380 coasters across the UK and Europe, from Linnanmäki and Mirabilandia to the seaside piers and travelling fairs."
+   "text": "Import takes a Google Sheets link, matches near-misses for you, and lets you add a missing ride or park right from the list."
   },
   {
    "at": "2026-10-03T15:00:51Z",

@@ -29,6 +29,9 @@ they're separate entries"*. **`site-updates.json`** feeds the "Site update" rows
   everything done"). When folding into an entry, REWRITE it to two sentences — never
   append a third. `at` is UTC ISO
   (`date -u +%Y-%m-%dT%H:%M:%SZ`). Skip handoff/CLAUDE.md-only commits.
+- **No new parks or coasters in it** (Carter, 2026-10-17: "remove new parks from the
+  /changes site updates"). Data additions already show on /changes as their own
+  activity rows; a site update is for what changed about the site itself.
 
 ## The impeccable design skill
 
