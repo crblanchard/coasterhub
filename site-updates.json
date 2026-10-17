@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-17T22:41:59Z",
-   "text": "Relocated rides are now linked as one credit with their history on each coaster page, and traveling shows are labeled Fair operator on their pages with their own filter on /parks."
+   "at": "2026-10-17T23:31:15Z",
+   "text": "Relocated rides are now linked as one credit with their history on each coaster page, and traveling shows are labeled Fair operator with their own filter on /parks. On profiles, the rides only you have ridden among your friends are now grouped by park."
   },
   {
    "at": "2026-10-17T01:49:12Z",
