@@ -1,0 +1,129 @@
+name: Nightly backup
+
+# Carter, 2026-10-17: "we need backups". Every night, the whole D1 database
+# (accounts, rides, rankings, follows, categories, aliases, the /changes
+# history — everything, as SQL) and every profile picture go into the PRIVATE
+# repo crblanchard/coasterhub-backups. Never into this one: this repo is
+# public and the export holds emails and password hashes.
+#
+# Each night overwrites the same files, so the backups repo's git history IS
+# the archive: any night's copy is one checkout away, and unchanged nights
+# commit nothing.
+#
+# Needs three repository secrets (Settings -> Secrets and variables -> Actions):
+#   CLOUDFLARE_API_TOKEN   a Cloudflare token with Account > D1 > Edit
+#   CLOUDFLARE_ACCOUNT_ID  the Cloudflare account id
+#   BACKUP_TOKEN           a fine-grained GitHub token for coasterhub-backups
+#                          only, Contents: Read and write
+#
+# Restoring is in the backups repo's README.
+
+on:
+  schedule:
+    - cron: '17 8 * * *'   # 08:17 UTC, the middle of the night in the US
+  workflow_dispatch: {}
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check the secrets are set
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          BACKUP_TOKEN: ${{ secrets.BACKUP_TOKEN }}
+        run: |
+          miss=""
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || miss="$miss CLOUDFLARE_API_TOKEN"
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || miss="$miss CLOUDFLARE_ACCOUNT_ID"
+          [ -n "$BACKUP_TOKEN" ] || miss="$miss BACKUP_TOKEN"
+          if [ -n "$miss" ]; then echo "::error::Missing secrets:$miss"; exit 1; fi
+
+      # The database as one SQL file: schema and every row. wrangler reads the
+      # database id from wrangler.jsonc.
+      - name: Export the database
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@4 d1 export coasterhub --remote --output "$RUNNER_TEMP/coasterhub.sql"
+          # A broken export must fail loudly, not quietly replace a good backup
+          # with an empty one.
+          size=$(wc -c < "$RUNNER_TEMP/coasterhub.sql")
+          echo "Export: $size bytes"
+          grep -q "CREATE TABLE" "$RUNNER_TEMP/coasterhub.sql" || { echo "::error::Export has no tables"; exit 1; }
+          grep -q "INSERT INTO" "$RUNNER_TEMP/coasterhub.sql" || { echo "::error::Export has no rows"; exit 1; }
+          [ "$size" -gt 100000 ] || { echo "::error::Export is suspiciously small ($size bytes)"; exit 1; }
+
+      - name: Get the backups repo
+        env:
+          BACKUP_TOKEN: ${{ secrets.BACKUP_TOKEN }}
+        run: git clone --depth 1 "https://x-access-token:${BACKUP_TOKEN}@github.com/crblanchard/coasterhub-backups.git" "$RUNNER_TEMP/b"
+
+      # Profile pictures. The bucket is private, so they are read the way the
+      # site serves them, /avatars/<key>, using the keys /api/users lists. A key
+      # names one upload and never changes, so a picture already backed up is
+      # skipped, and a replaced one stays in the backup.
+      - name: Copy the database and profile pictures
+        run: |
+          B="$RUNNER_TEMP/b"
+          mkdir -p "$B/d1" "$B/avatars"
+          cp "$RUNNER_TEMP/coasterhub.sql" "$B/d1/coasterhub.sql"
+          curl -fsS https://coasterhub.org/api/users -o "$RUNNER_TEMP/users.json"
+          node -e 'for (const u of require(process.argv[1]).users || []) if (u.avatar && /^[A-Za-z0-9._-]{1,120}$/.test(u.avatar)) console.log(u.avatar)' "$RUNNER_TEMP/users.json" > "$RUNNER_TEMP/keys.txt"
+          n=0
+          while read -r k; do
+            [ -s "$B/avatars/$k" ] && continue
+            curl -fsS "https://coasterhub.org/avatars/$k" -o "$B/avatars/$k" && n=$((n+1)) || echo "::warning::Could not fetch avatar $k"
+          done < "$RUNNER_TEMP/keys.txt"
+          echo "New pictures: $n of $(wc -l < "$RUNNER_TEMP/keys.txt")"
+          # How to put it back, kept beside the backup itself.
+          [ -s "$B/README.md" ] && grep -q "Restoring" "$B/README.md" || cat > "$B/README.md" <<'MD'
+          # Coaster Hub backups
+
+          Written every night by `.github/workflows/backup.yml` in crblanchard/coasterhub.
+          Private on purpose: `d1/coasterhub.sql` holds emails and password hashes.
+
+          - `d1/coasterhub.sql`: the whole D1 database (schema and rows) as SQL.
+          - `avatars/<key>`: every profile picture, named by its R2 key.
+
+          Each night overwrites the same files, so the git history is the archive.
+          `git log d1/coasterhub.sql` lists the nights; `git show <commit>:d1/coasterhub.sql`
+          gets one back.
+
+          ## Restoring
+
+          First try Cloudflare's Time Travel, which rewinds the live database to any
+          minute in the last 30 days: `npx wrangler d1 time-travel restore coasterhub --timestamp=<ISO time>`.
+
+          Older than that, or a lost database: create an empty D1 database, then
+          `npx wrangler d1 execute <name> --remote --file d1/coasterhub.sql`, and point
+          wrangler.jsonc's database_id at it.
+
+          A picture: `npx wrangler r2 object put coasterhub-avatars/<key> --file avatars/<key> --remote`.
+          MD
+          sed -i 's/^          //' "$B/README.md"
+
+      - name: Commit if anything changed
+        run: |
+          cd "$RUNNER_TEMP/b"
+          git add -A
+          if git diff --cached --quiet; then echo "Nothing changed since the last backup."; exit 0; fi
+          git config user.name "coasterhub-backup[bot]"
+          git config user.email "coasterhub-backup@users.noreply.github.com"
+          git commit -q -m "Backup $(date -u +%Y-%m-%d)"
+          git push -q origin HEAD:main
+          echo "Backed up."

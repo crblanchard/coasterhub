@@ -5546,3 +5546,18 @@ popups add, remove and move stops. Leaflet stops clicks inside popups from
 reaching the page, so popup buttons are wired on `popupopen`. The tiles became
 "After this trip": each rider's count now -> after, "+N", a "Hits 600" pill
 when a hundred (a 25 under 100) is crossed, and the tallest new rides.
+
+## Backups (2026-10-17)
+
+Carter: "we need backups". `.github/workflows/backup.yml` runs nightly (08:17
+UTC) and on demand: `wrangler d1 export coasterhub --remote` (the WHOLE database,
+accounts and all) plus every profile picture (fetched from /avatars/<key> using
+/api/users' keys) into the PRIVATE repo crblanchard/coasterhub-backups. Never
+into this repo — it is public and the export has emails and password hashes.
+The backups repo's git history is the archive; its README says how to restore.
+It refuses to overwrite a good backup with an export that has no tables, no
+rows, or under 100 KB. Needs secrets CLOUDFLARE_API_TOKEN (D1 Edit),
+CLOUDFLARE_ACCOUNT_ID and BACKUP_TOKEN (fine-grained, that repo only, Contents
+read/write). First line of defence is still D1 Time Travel (30 days).
+`main` here is meant to be protected against force-pushes and deletion
+(Carter, in GitHub settings), so no session can rewrite history.
