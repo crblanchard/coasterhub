@@ -5576,3 +5576,12 @@ them" is the existing POST /api/same-ride (home = the later row), "Not the
 same" writes relocation_skipped (046) so the pair never comes back. It cannot
 see rides with no height, moves to parks not in D1, or rebuilt rides — for
 those, link from RCDB's "Relocations" line when Carter sends the page.
+
+**The rule is wrong for mass-produced models (same day).** 045 linked
+Zoomerang (Alabama Adventure) to Six Flags St. Louis's Boomerang; RCDB says
+Zoomerang became Recoil at Wonderla Hyderabad. Every Vekoma Boomerang is
+116.5 ft / 935 ft, so identical numbers prove nothing there. 048 unlinked it.
+The triage now returns `twins` (rows sharing manu, model and height) and /edit
+warns "check RCDB" when there are more than two. Of 045's other links,
+Jet Star (Beech Bend) -> Tig'rr (Indiana Beach) is the one not yet confirmed
+against RCDB.

@@ -2785,6 +2785,7 @@ async function main() {
       check("relocations: the rule proposes only the match (maker, model, years, size)",
         q.status === 200 && pairs.join() === "961>962", JSON.stringify(q.data).slice(0, 300));
       check("relocations: and says who has ridden both", q.data.pairs[0].both === 1, JSON.stringify(q.data.pairs[0]));
+      check("relocations: and how many rides share that model and height", q.data.pairs[0].twins === 3, JSON.stringify(q.data.pairs[0]));
       q = await call(t, "POST", "/api/admin/relocations/skip", { token: PW, body: { a: 961, b: 962 } });
       check("relocations: skip before 046 is a 503 naming the file", q.status === 503 && /046-relocation/.test(q.data.error), JSON.stringify(q.data));
       t.exec(MIGRATION_046);

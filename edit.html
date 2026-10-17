@@ -1250,7 +1250,7 @@
           var p = r.p;
           return '<div class="row'+(state.relSel===r.i?' sel':'')+'" data-rel="'+r.i+'">'
             + '<div class="nm">'+esc(p.from.name)+' \u2192 '+esc(p.to.name)+'</div>'
-            + '<div class="pk">'+esc(p.from.park)+' ('+relYears(p.from)+') \u2192 '+esc(p.to.park)+' ('+relYears(p.to)+')</div></div>';
+            + '<div class="pk">'+esc(p.from.park)+' ('+relYears(p.from)+') \u2192 '+esc(p.to.park)+' ('+relYears(p.to)+')'+(p.twins>2?' \u00b7 common model, check RCDB':'')+'</div></div>';
         }).join('') : '<div class="row"><div class="pk">Nothing to look at. New candidates show up here as rides are added.</div></div>');
     document.getElementById('list').querySelectorAll('[data-rel]').forEach(function(r){
       r.onclick = function(){ showReloc(+r.getAttribute('data-rel')); }; });
@@ -1270,6 +1270,7 @@
       + '<tr><td style="color:var(--muted);padding:4px 8px 4px 0">Name</td><td><b>'+esc(p.from.name)+'</b></td><td><b>'+esc(p.to.name)+'</b></td></tr>'
       + F.map(function(f){ return '<tr><td style="color:var(--muted);padding:4px 8px 4px 0">'+f[0]+'</td><td>'+cell(p.from[f[1]])+'</td><td>'+cell(p.to[f[1]])+'</td></tr>'; }).join('')
       + '</table>'
+      + (p.twins > 2 ? '<p class="hint" style="color:var(--bad)"><b>Check RCDB first.</b> '+p.twins+' rides share this exact model and height, so matching numbers prove nothing here \u2014 link only if RCDB lists this move.</p>' : '')
       + '<p class="hint">'+(both ? both+(both===1?' rider has':' riders have')+' ridden both: linking makes it one credit for '+(both===1?'them':'each of them')+'.'
           : 'Nobody has ridden both, so no credit counts change.')+'</p>'
       + '<div class="actions"><button id="relLink">Same ride \u2014 link them</button>'

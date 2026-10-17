@@ -2751,7 +2751,12 @@ export default {
         const { results } = await env.DB.prepare(
           "SELECT a.id AS aid, b.id AS bid, " +
           "(SELECT COUNT(DISTINCT r1.user_slug) FROM rides r1 WHERE r1.coaster_id = a.id AND EXISTS " +
-          " (SELECT 1 FROM rides r2 WHERE r2.coaster_id = b.id AND r2.user_slug = r1.user_slug)) AS both " +
+          " (SELECT 1 FROM rides r2 WHERE r2.coaster_id = b.id AND r2.user_slug = r1.user_slug)) AS both, " +
+          // How many rows share this exact model and height. A Vekoma
+          // Boomerang is the same 116.5 ft everywhere, so a match there proves
+          // nothing: the rule linked Zoomerang to Six Flags St. Louis's
+          // Boomerang, and RCDB says it went to Wonderla as Recoil (2026-10-17).
+          "(SELECT COUNT(*) FROM coasters t WHERE t.manu = a.manu AND t.model = a.model AND t.h = a.h) AS twins " +
           "FROM coasters a JOIN coasters b ON a.id <> b.id AND a.park <> b.park " +
           "AND a.manu = b.manu AND a.model = b.model AND a.closed IS NOT NULL AND b.opened IS NOT NULL " +
           "AND CAST(substr(b.opened,1,4) AS INTEGER) BETWEEN CAST(substr(a.closed,1,4) AS INTEGER) " +
@@ -2770,7 +2775,7 @@ export default {
             ids.map(() => "?").join(",") + ")").bind(...ids).all();
           cs.forEach((c) => { rowsById[c.id] = c; });
         }
-        return json({ pairs: results.map((r) => ({ from: rowsById[r.aid], to: rowsById[r.bid], both: r.both || 0 })) });
+        return json({ pairs: results.map((r) => ({ from: rowsById[r.aid], to: rowsById[r.bid], both: r.both || 0, twins: r.twins || 0 })) });
       }
       // "Not the same ride": the pair stops being proposed. { a, b } in the
       // order the list gave them (a closed, b opened later).
