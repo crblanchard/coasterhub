@@ -5507,3 +5507,28 @@ and the coaster page all read `CoasterHub.globalTally()`):
   floor(n/10): 2 from 20+, 3 from 30+ (Carter, same day:
   Steel Vengeance on 13 lists sat #8 over two #17/#30 placings; now #3);
 - 2+ lists still required for a Global place. Shown as "97.5" (one decimal).
+
+## Trip planner, Compare, Among friends (2026-10-17)
+
+Carter picked three of the "fun features" ideas: 4 (trip planner), 6 (head to
+head) and "maybe 7" (records among friends). None touches the Worker or D1;
+all three are client pages over endpoints that already existed.
+
+- **/trip** (`trip.html`). Stops are park names; the trip lives in the URL
+  (`?p=<park-slug>,...&with=<slug>`) and in localStorage `ch_trip`, so a link is
+  the whole plan. "New" = operating and not ridden **by rideKey**, so a
+  relocated ride you got at its old park is not new. "Worth adding nearby" is
+  any park within 200 miles (straight line) of a stop — or of you, after "Parks
+  near me" — with something new, most new first. "Shortest order" is
+  nearest-neighbour from the first stop, not a real route solver. The map's park
+  popup links in with `/trip?add=<slug>`, which appends to the saved trip.
+- **/compare** (`compare.html`), `?a=&b=` (a defaults to you; `?with=` is b).
+  Reads `/api/rides-all` and `/api/rankings-all`. Agreement % is the same
+  pairwise measure as the "You agree on" line on /rankings. Records skip an
+  inversion count over 14: live data had Raton Loco at 1,377. Linked from
+  Explore, the sitemap, a Compare button on someone else's profile, and the
+  agreement line on another rider's rankings.
+- **Among friends** on a profile (`mountAmong` in profile.html). "Friends" =
+  who that rider follows. "Rode first" only counts when every friend who has the
+  ride has a dated log entry later than this rider's; an undated one makes it
+  unknowable, so it is left out rather than guessed.

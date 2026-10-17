@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- Add to home screen (2026-09-27): opens full-screen with its own icon. See site.webmanifest. -->
+<link rel="manifest" href="/site.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coaster Hub">
+<base href="/">
+<title>Trip planner — Coaster Hub</title>
+<meta name="description" content="Plan a coaster trip: pick parks and see how many new credits each one is worth.">
+<link rel="stylesheet" href="/style.css?v=20261002d">
+<link rel="stylesheet" href="/lists.css?v=20261005d">
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
+<link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png?v=20260924b" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260924b">
+<meta property="og:title" content="Coaster trip planner">
+<meta property="og:description" content="Pick parks and see how many new credits each one is worth.">
+<meta property="og:image" content="https://coasterhub.org/og-image.png?v=4">
+<style>
+  /* /trip (Carter, 2026-10-17: "4 6 maybe 7" — the trip planner). Pick parks,
+     see how many new credits each one is worth, and which parks nearby would
+     add the most. The trip lives in the address (?p=park-slug,...&with=slug),
+     so a link is the whole plan, and in localStorage so it is there next time. */
+  .trip{max-width:760px}
+  .tbar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;position:relative}
+  .tbar input,.tbar select{background-color:var(--panel);border:1px solid var(--line);color:var(--fg);
+    padding:10px 12px;border-radius:10px;font-size:.9rem;min-width:0}
+  .tbar input{flex:1 1 240px}
+  .tbar select{flex:0 1 auto;cursor:pointer}
+  .tbtn{background-color:transparent;border:1px solid var(--line);border-radius:10px;color:var(--fg);
+    padding:9px 14px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap}
+  .tbtn:hover{border-color:var(--accent2);color:var(--accent2)}
+  .tbtn[disabled]{opacity:.5;cursor:default}
+  /* Search results, under the box. */
+  .hits{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;max-height:320px;overflow:auto;
+    background-color:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+  .hits[hidden]{display:none}
+  .hits button{display:flex;width:100%;align-items:center;gap:10px;text-align:left;background-color:transparent;border:0;
+    border-bottom:1px solid var(--soft);color:var(--fg);padding:10px 14px;font:inherit;cursor:pointer}
+  .hits button:last-child{border-bottom:0}
+  .hits button:hover,.hits button.on{background-color:var(--soft)}
+  .two{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+  .two b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .two small{color:var(--muted);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nnew{flex:none;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.82rem;line-height:1.2}
+  .nnew b{display:block;color:var(--accent2);font-size:1.05rem;font-weight:800}
+  .nnew.zero b{color:var(--muted)}
+  /* One stop. */
+  .stops{display:flex;flex-direction:column;gap:10px}
+  .stop{border:1px solid var(--line);border-radius:14px;background-color:var(--panel);overflow:hidden}
+  .stop .top{display:flex;align-items:center;gap:12px;padding:12px 14px}
+  .stop .num{flex:none;width:28px;height:28px;border-radius:50%;background-color:var(--soft);color:var(--accent2);
+    font-weight:800;font-size:.88rem;display:flex;align-items:center;justify-content:center}
+  .stop .two a{color:var(--fg);text-decoration:none;font-weight:700;line-height:1.3}
+  /* Riding with someone: the two counts are a line of their own under the
+     name, so a phone does not squeeze the name to "Knott…". */
+  .two .cnt{color:var(--muted);font-size:.82rem;margin-top:2px;white-space:normal}
+  .two .cnt b{color:var(--accent2);font-weight:800;font-variant-numeric:tabular-nums}
+  .two .cnt b.z{color:var(--muted)}
+  .stop .two a:hover{color:var(--accent2)}
+  .stop .acts{flex:none;display:flex;gap:2px}
+  .stop .acts button{background-color:transparent;border:0;color:var(--muted);width:30px;height:30px;border-radius:8px;
+    font-size:1rem;cursor:pointer;line-height:1}
+  .stop .acts button:hover{background-color:var(--soft);color:var(--fg)}
+  .stop .acts button[disabled]{opacity:.3;cursor:default;background-color:transparent}
+  .stop details{border-top:1px solid var(--line)}
+  .stop summary{cursor:pointer;padding:9px 14px;color:var(--accent2);font-size:.86rem;font-weight:600;list-style:none}
+  .stop summary::-webkit-details-marker{display:none}
+  .stop summary::after{content:" \25BE"}
+  .stop details[open] summary::after{content:" \25B4"}
+  .stop .rows{border-top:1px solid var(--soft)}
+  .stop .who{font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .stop .who.both{color:var(--accent2);border-color:var(--accent2)}
+  .leg{color:var(--muted);font-size:.8rem;margin:0 0 0 18px;padding:2px 0}
+  .tacts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+  .empty{border:1px dashed var(--line);border-radius:14px;padding:22px;color:var(--muted);text-align:center;line-height:1.5}
+  .empty .tbtn{margin-top:10px}
+  /* Nearby parks worth adding. */
+  .near{border:1px solid var(--line);border-radius:14px;background-color:var(--panel);overflow:hidden}
+  .near .row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--soft)}
+  .near .row:last-child{border-bottom:0}
+  .near .row a{color:var(--fg);text-decoration:none}
+  .near .two b{white-space:normal;line-height:1.3}
+  .near .row a:hover{color:var(--accent2)}
+  .near .add{flex:none;background-color:transparent;border:1px solid var(--accent2);color:var(--accent2);border-radius:999px;
+    padding:5px 12px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+  .near .add:hover{background-color:var(--accent2);color:var(--onaccent)}
+  .note{color:var(--muted);font-size:.84rem;margin:8px 0 0}
+  .toast{color:var(--accent2);font-size:.86rem;font-weight:600;align-self:center}
+  @media (max-width:520px){ .stop .top{gap:9px;padding:11px 10px} .near .row{gap:9px;padding:10px 10px} }
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260924b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="riders">Home</a>
+    <a href="/explore" data-nav="explore">Explore</a>
+    <a href="/log" data-nav="log" class="navlog">+ Log</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/account" data-nav="profile">Me</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
+  <h1 class="wide">Trip planner</h1>
+  <p id="hero_p">Pick parks and see how many new credits each one is worth.</p>
+</div></section>
+
+<section class="block" style="padding-top:20px"><div class="container trip">
+  <div id="loading" data-loading>Loading&hellip;</div>
+  <div id="err" style="display:none"><strong>Couldn&rsquo;t load the data.</strong></div>
+  <div id="ui" hidden>
+    <div class="tbar">
+      <input id="q" type="search" placeholder="Add a park&hellip;" autocomplete="off" aria-label="Add a park">
+      <select id="with" aria-label="Riding with" hidden></select>
+      <div class="hits" id="hits" hidden></div>
+    </div>
+    <div class="tiles" id="tiles" hidden></div>
+    <div class="stops" id="stops"></div>
+    <div class="tacts" id="tacts" hidden>
+      <button type="button" class="tbtn" id="b_order">Shortest order</button>
+      <button type="button" class="tbtn" id="b_share">Share trip</button>
+      <button type="button" class="tbtn" id="b_clear">Clear</button>
+      <span class="toast" id="toast"></span>
+    </div>
+    <div id="near_wrap" hidden>
+      <div class="sect" id="near_h">Nearby parks</div>
+      <div class="near" id="near"></div>
+      <p class="note" id="near_note"></p>
+    </div>
+  </div>
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
+</div></footer>
+
+<script src="/app.js?v=20261005j"></script>
+<script>
+document.getElementById('y').textContent=new Date().getFullYear();
+CoasterHub.initNav('trip');
+var $=function(id){ return document.getElementById(id); };
+function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+var STORE='ch_trip';
+function miles(a,b){
+  var R=3958.8, r=Math.PI/180, dLat=(b.lat-a.lat)*r, dLon=(b.lon-a.lon)*r;
+  var h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function mi(n){ return n<10 ? n.toFixed(1) : Math.round(n).toLocaleString(); }
+var Q=new URLSearchParams(location.search);
+
+Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me().catch(function(){ return null; })]).then(function(r){
+  var list=r[0], parks=r[1]||{}, acct=r[2];
+  var me=acct && acct.slug;
+  // Every park with somewhere on the map, and its operating coasters.
+  var P={}, BYSLUG={};
+  Object.keys(parks).forEach(function(n){ P[n]={ name:n, lat:parks[n].lat, lon:parks[n].lon, region:parks[n].region||'', open:[] }; });
+  (list.coasters||[]).forEach(function(c){
+    if(!c.park) return;
+    var p=P[c.park] || (P[c.park]={ name:c.park, lat:null, lon:null, region:'', open:[] });
+    if(!c.closed) p.open.push(c);
+  });
+  Object.keys(P).forEach(function(n){ BYSLUG[CoasterHub.slugify(n)]=n; P[n].open.sort(function(a,b){ return (b.h||0)-(a.h||0) || String(a.name).localeCompare(String(b.name)); }); });
+  var ALL=Object.keys(P).map(function(n){ return P[n]; }).filter(function(p){ return p.open.length; });
+  function park(slug){ return P[BYSLUG[slug]] || P[CoasterHub.findPark(list, parks, slug) || ''] || null; }
+
+  // What counts as new: an operating coaster whose ride you have not got —
+  // by rideKey, so a relocated ride you rode at its old park is not new.
+  var MINE=null, MINEK={}, WITH=null, WITHK={}, FRIENDS=[];
+  function keysOf(log){ var k={}; ((log&&log.rides)||[]).forEach(function(x){ var c=byId[x.c]; k[c ? CoasterHub.rideKey(c) : x.c]=1; }); return k; }
+  var byId={}; (list.coasters||[]).forEach(function(c){ byId[c.id]=c; });
+  function newFor(K, c){ return !K[CoasterHub.rideKey(c)]; }
+  function count(p){
+    var you=0, them=0, both=0;
+    p.open.forEach(function(c){ var a=newFor(MINEK,c), b=WITH && newFor(WITHK,c); if(a) you++; if(b) them++; if(a&&b) both++; });
+    return { you:you, them:them, both:both };
+  }
+
+  var STOPS=[];
+  try { var saved=JSON.parse(localStorage.getItem(STORE)||'null'); } catch(e){ saved=null; }
+  var fromUrl=(Q.get('p')||'').split(',').filter(Boolean);
+  (fromUrl.length ? fromUrl : ((saved&&saved.p)||[])).forEach(function(s){ var p=park(s); if(p && STOPS.indexOf(p.name)<0) STOPS.push(p.name); });
+  // /trip?add=<park> — the map's "Add to a trip" — appends to whatever trip you have.
+  if(Q.get('add')){ var a=park(Q.get('add')); if(a && STOPS.indexOf(a.name)<0) STOPS.push(a.name); }
+  var withSlug=Q.get('with') || (!fromUrl.length && saved && saved.w) || '';
+  var HERE=null;    // {lat, lon} once "Near me" has been asked
+
+  function save(){
+    var p=STOPS.map(function(n){ return CoasterHub.slugify(n); });
+    try { localStorage.setItem(STORE, JSON.stringify({ p:p, w:WITH?WITH.slug:'' })); } catch(e){}
+    var qs=(p.length?'p='+p.join(','):'')+(WITH?(p.length?'&':'')+'with='+encodeURIComponent(WITH.slug):'');
+    history.replaceState(null,'',location.pathname+(qs?'?'+qs:''));
+  }
+
+  function newLabel(n){ return me ? (n===1?'new credit':'new credits') : (n===1?'coaster':'coasters'); }
+  function tag(n, word){ return '<span class="nnew'+(n?'':' zero')+'"><b>'+n.toLocaleString()+'</b>'+esc(word)+'</span>'; }
+  // The same two numbers as words, for a line under the name.
+  function pair(k){
+    var b=function(n){ return '<b'+(n?'':' class="z"')+'>'+n.toLocaleString()+'</b>'; };
+    return '<small class="cnt">'+b(k.you)+' new for you \u00b7 '+b(k.them)+' for '+esc(WITH.name)+'</small>';
+  }
+
+  function drawTiles(){
+    var t=$('tiles');
+    if(!STOPS.length){ t.hidden=true; return; }
+    var you=0, them=0, dist=0, seen={};
+    STOPS.forEach(function(n,i){
+      P[n].open.forEach(function(c){
+        var k=CoasterHub.rideKey(c); if(seen[k]) return; seen[k]=1;
+        if(newFor(MINEK,c)) you++; if(WITH && newFor(WITHK,c)) them++;
+      });
+      var prev=P[STOPS[i-1]]; if(prev && prev.lat!=null && P[n].lat!=null) dist+=miles(prev,P[n]);
+    });
+    var tl=function(v,l){ return '<div class="tile"><b>'+v+'</b><span>'+esc(l)+'</span></div>'; };
+    t.innerHTML=tl(STOPS.length, STOPS.length===1?'Park':'Parks')
+      +tl(you.toLocaleString(), me ? (WITH?'New for you':'New credits') : 'Operating coasters')
+      +(WITH ? tl(them.toLocaleString(), 'New for '+WITH.name) : '')
+      +(STOPS.length>1 ? tl(mi(dist), 'Miles between parks') : '');
+    t.hidden=false;
+  }
+
+  function stopHtml(n, i){
+    var p=P[n], k=count(p), prev=P[STOPS[i-1]];
+    var leg = (prev && prev.lat!=null && p.lat!=null) ? '<p class="leg">&darr; '+mi(miles(prev,p))+' mi</p>' : '';
+    var rows=p.open.filter(function(c){ return newFor(MINEK,c) || (WITH && newFor(WITHK,c)); });
+    var whoTag=function(c){
+      if(!WITH) return undefined;
+      var a=newFor(MINEK,c), b=newFor(WITHK,c);
+      return '<span class="who'+(a&&b?' both':'')+'">'+(a&&b?'Both':a?'You':esc(WITH.name))+'</span>';
+    };
+    var sub=[p.region, p.open.length+' operating'].filter(Boolean).join(' · ');
+    var right = WITH ? '' : tag(k.you, newLabel(k.you));
+    return leg+'<div class="stop" data-i="'+i+'"><div class="top"><span class="num">'+(i+1)+'</span>'
+      +'<span class="two"><a href="'+esc(CoasterHub.parkHref(n))+'">'+esc(n)+'</a><small>'+esc(sub)+'</small>'+(WITH?pair(k):'')+'</span>'
+      +right
+      +'<span class="acts"><button type="button" data-up="'+i+'" aria-label="Move up"'+(i?'':' disabled')+'>&uarr;</button>'
+      +'<button type="button" data-down="'+i+'" aria-label="Move down"'+(i<STOPS.length-1?'':' disabled')+'>&darr;</button>'
+      +'<button type="button" data-rm="'+i+'" aria-label="Remove">&times;</button></span></div>'
+      +(rows.length ? '<details><summary>'+(WITH?'The '+rows.length+' new to one of you':me?'The '+rows.length+' new':'All '+rows.length)+'</summary><div class="rows">'
+        +rows.map(function(c){ return CoasterHub.coasterRow(c, { mine:MINE, add:!!MINE, end:whoTag(c) }); }).join('')+'</div></details>' : '')
+      +'</div>';
+  }
+
+  function drawStops(){
+    var el=$('stops');
+    if(!STOPS.length){
+      el.innerHTML='<div class="empty">Add a park above to start a trip'+(navigator.geolocation?', or find parks near you.<br><button type="button" class="tbtn" id="b_here">Parks near me</button>':'.')+'</div>';
+      var b=$('b_here'); if(b) b.onclick=nearMe;
+    } else el.innerHTML=STOPS.map(stopHtml).join('');
+    $('tacts').hidden=!STOPS.length;
+    $('b_order').disabled=STOPS.length<3;
+  }
+
+  // Parks within reach of the trip (or of you) that would add something,
+  // most new credits first. 200 miles: a day's drive from somewhere on it.
+  function drawNear(){
+    var from=STOPS.map(function(n){ return P[n]; }).filter(function(p){ return p.lat!=null; });
+    if(!from.length && HERE) from=[{ name:'you', lat:HERE.lat, lon:HERE.lon, here:true }];
+    if(!from.length){ $('near_wrap').hidden=true; return; }
+    var inTrip={}; STOPS.forEach(function(n){ inTrip[n]=1; });
+    var cand=ALL.filter(function(p){ return p.lat!=null && !inTrip[p.name]; }).map(function(p){
+      var best=null, d=Infinity;
+      from.forEach(function(f){ var x=miles(f,p); if(x<d){ d=x; best=f; } });
+      return { p:p, d:d, from:best, k:count(p) };
+    }).filter(function(x){ return x.d<=200 && (x.k.you || (WITH && x.k.them)); })
+      .sort(function(a,b){ var x=WITH?a.k.you+a.k.them:a.k.you, y=WITH?b.k.you+b.k.them:b.k.you; return y-x || a.d-b.d; })
+      .slice(0,8);
+    $('near_wrap').hidden=false;
+    $('near_h').textContent=from[0].here && !STOPS.length ? 'Parks near you' : 'Worth adding nearby';
+    if(!cand.length){ $('near').innerHTML='<div class="row"><span class="two"><small>Nothing new within 200 miles.</small></span></div>'; $('near_note').textContent=''; return; }
+    $('near').innerHTML=cand.map(function(x){
+      var where=mi(x.d)+' mi from '+(x.from.here?'you':x.from.name);
+      return '<div class="row"><span class="two"><a href="'+esc(CoasterHub.parkHref(x.p.name))+'"><b>'+esc(x.p.name)+'</b></a><small>'+esc(where)+'</small>'+(WITH?pair(x.k):'')+'</span>'
+        +(WITH ? '' : tag(x.k.you, newLabel(x.k.you)))
+        +'<button type="button" class="add" data-add="'+esc(x.p.name)+'">Add</button></div>';
+    }).join('');
+    $('near_note').textContent='Distances are as the crow flies.';
+  }
+
+  function draw(){ drawTiles(); drawStops(); drawNear(); save(); }
+
+  function addPark(n){ if(n && STOPS.indexOf(n)<0){ STOPS.push(n); draw(); } }
+  document.addEventListener('click', function(e){
+    var t=e.target.closest('button'); if(!t) return;
+    if(t.hasAttribute('data-add')){ addPark(t.getAttribute('data-add')); return; }
+    var i;
+    if(t.hasAttribute('data-up')){ i=+t.getAttribute('data-up'); if(i>0){ STOPS.splice(i-1,0,STOPS.splice(i,1)[0]); draw(); } return; }
+    if(t.hasAttribute('data-down')){ i=+t.getAttribute('data-down'); if(i<STOPS.length-1){ STOPS.splice(i+1,0,STOPS.splice(i,1)[0]); draw(); } return; }
+    if(t.hasAttribute('data-rm')){ i=+t.getAttribute('data-rm'); STOPS.splice(i,1); draw(); return; }
+  });
+
+  // Shortest order: start where the trip starts and always drive to the
+  // nearest park not yet visited. Not the perfect route, but a sensible one.
+  $('b_order').onclick=function(){
+    var left=STOPS.slice(1), out=[STOPS[0]];
+    while(left.length){
+      var at=P[out[out.length-1]], bi=0, bd=Infinity;
+      left.forEach(function(n,i){ var p=P[n]; var d=(at.lat==null||p.lat==null)?1e9:miles(at,p); if(d<bd){ bd=d; bi=i; } });
+      out.push(left.splice(bi,1)[0]);
+    }
+    STOPS=out; draw();
+  };
+  $('b_clear').onclick=function(){ if(confirm('Clear this trip?')){ STOPS=[]; draw(); } };
+  $('b_share').onclick=function(){
+    var url=location.href;
+    if(navigator.share) navigator.share({ title:'Coaster trip', url:url }).catch(function(){});
+    else if(navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ $('toast').textContent='Link copied'; setTimeout(function(){ $('toast').textContent=''; },2000); });
+  };
+  function nearMe(){
+    var b=$('b_here'); if(b){ b.disabled=true; b.textContent='Finding you…'; }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      HERE={ lat:pos.coords.latitude, lon:pos.coords.longitude }; drawStops(); drawNear();
+    }, function(){ if(b){ b.disabled=false; b.textContent='Couldn’t get your location'; } }, { timeout:10000, maximumAge:600000 });
+  }
+
+  // The search: parks by name or place, best match first, with what each one is worth.
+  var HITS=[], hi=-1;
+  function norm(t){ return String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/['’]/g,''); }
+  function search(){
+    var q=norm($('q').value.trim());
+    if(!q){ $('hits').hidden=true; HITS=[]; return; }
+    // Name starts with it, then a word in the name does, then anywhere; bigger parks first within each.
+    var rank=function(p){ var n=norm(p.name), i=n.indexOf(q); return i===0?0 : (i>0 && /[^a-z0-9]/.test(n.charAt(i-1)))?1 : i>0?2 : 3; };
+    HITS=ALL.filter(function(p){ return STOPS.indexOf(p.name)<0 && (norm(p.name).indexOf(q)>=0 || norm(p.region).indexOf(q)>=0); })
+      .sort(function(a,b){ return rank(a)-rank(b) || b.open.length-a.open.length || a.name.localeCompare(b.name); })
+      .slice(0,8);
+    hi=HITS.length?0:-1;
+    $('hits').innerHTML=HITS.length ? HITS.map(function(p,i){ var k=count(p);
+      return '<button type="button" data-hit="'+i+'" class="'+(i===hi?'on':'')+'"><span class="two"><b>'+esc(p.name)+'</b><small>'+esc(p.region)+'</small></span>'+tag(k.you, newLabel(k.you))+'</button>'; }).join('')
+      : '<button type="button" disabled><span class="two"><small>No park by that name.</small></span></button>';
+    $('hits').hidden=false;
+  }
+  function pick(i){ var p=HITS[i]; if(!p) return; $('q').value=''; $('hits').hidden=true; addPark(p.name); $('q').focus(); }
+  $('q').addEventListener('input', search);
+  $('q').addEventListener('keydown', function(e){
+    if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); if(!HITS.length) return; hi=(hi+(e.key==='ArrowDown'?1:-1)+HITS.length)%HITS.length;
+      Array.prototype.forEach.call($('hits').children, function(b,i){ b.classList.toggle('on', i===hi); }); }
+    else if(e.key==='Enter'){ e.preventDefault(); pick(hi); }
+    else if(e.key==='Escape'){ $('hits').hidden=true; }
+  });
+  $('hits').addEventListener('mousedown', function(e){ var b=e.target.closest('[data-hit]'); if(b){ e.preventDefault(); pick(+b.getAttribute('data-hit')); } });
+  $('q').addEventListener('blur', function(){ setTimeout(function(){ $('hits').hidden=true; }, 150); });
+
+  // Riding with: your friends first, then everyone. Their new credits show
+  // beside yours, and "Both" marks the rides neither of you has.
+  function setWith(s){
+    if(!s){ WITH=null; WITHK={}; draw(); return; }
+    var u=(CoasterHub.USERS||[]).filter(function(x){ return x.slug===s; })[0];
+    CoasterHub.fetchRides(s).then(function(l){ WITH={ slug:s, name:(u&&u.name)||l.user||s }; WITHK=keysOf(l); draw(); })
+      .catch(function(){ WITH=null; WITHK={}; draw(); });
+  }
+  function drawWith(){
+    var users=(CoasterHub.USERS||[]).filter(function(u){ return u.slug!==me; }).sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
+    var inF={}; FRIENDS.forEach(function(s){ inF[s]=1; });
+    var opt=function(u){ return '<option value="'+esc(u.slug)+'">'+esc(u.name||u.slug)+'</option>'; };
+    var f=users.filter(function(u){ return inF[u.slug]; }), rest=users.filter(function(u){ return !inF[u.slug]; });
+    $('with').innerHTML='<option value="">Riding with&hellip;</option>'
+      +(f.length?'<optgroup label="Friends">'+f.map(opt).join('')+'</optgroup>':'')
+      +(rest.length?'<optgroup label="'+(f.length?'Everyone else':'Riders')+'">'+rest.map(opt).join('')+'</optgroup>':'');
+    $('with').value=WITH?WITH.slug:'';
+    $('with').hidden=false;
+  }
+  $('with').addEventListener('change', function(){ setWith(this.value); });
+
+  var mineP = me ? CoasterHub.fetchRides(me).catch(function(){ return null; }) : Promise.resolve(null);
+  Promise.all([
+    mineP,
+    CoasterHub.fetchUsers().catch(function(){ return []; }),
+    me ? fetch('/api/follows/'+encodeURIComponent(me),{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }) : null
+  ]).then(function(rr){
+    if(rr[0]){ MINE={}; (rr[0].rides||[]).forEach(function(x){ MINE[x.c]=1; }); MINEK=keysOf(rr[0]); }
+    FRIENDS=rr[2] ? (rr[2].following||[]).map(function(x){ return x.slug; }) : [];
+    if(!me) $('hero_p').textContent='Pick parks and see what each one has. Sign in to see which coasters are new to you.';
+    $('loading').style.display='none'; $('ui').hidden=false;
+    drawWith();
+    if(withSlug) setWith(withSlug); else draw();
+  });
+}).catch(function(e){ console.error(e); $('loading').style.display='none'; $('err').style.display='block'; });
+</script>
+</body>
+</html>

@@ -1152,7 +1152,8 @@ function compareWithMe(nm){
     both.forEach(function(k){ var d=Math.abs(A.o[k]/A.n - B.o[k]/B.n); if(d>gap){ gap=d; far=k; } });
     var c=BYID[far]||{};
     $('hero_p').innerHTML='You agree on <b>'+Math.round(same/pairs*100)+'%</b> of '+both.length+' shared rides'
-      +(gap>=0.15 ? ' \u00b7 biggest split: <b>'+esc(c.name||'')+'</b> (your #'+(A.o[far]+1)+', their #'+(B.o[far]+1)+')' : '');
+      +(gap>=0.15 ? ' \u00b7 biggest split: <b>'+esc(c.name||'')+'</b> (your #'+(A.o[far]+1)+', their #'+(B.o[far]+1)+')' : '')
+      +' \u00b7 <a href="/compare?b='+encodeURIComponent(slug)+'" style="color:inherit;text-decoration:underline">Compare</a>';
   }).catch(function(){});
 }
 

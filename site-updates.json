@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-17T01:25:43Z",
-   "text": "Manufacturer pages now list every coaster that manufacturer built, with a search and a sort (A–Z, newest, oldest, tallest, fastest)."
+   "at": "2026-10-17T01:39:19Z",
+   "text": "New Trip planner shows how many new credits each park is worth, and Compare puts you head to head with a friend. Profiles now show where you rank among your friends and the rides only you have, and manufacturer pages list every coaster they built."
   },
   {
    "at": "2026-10-10T00:12:46Z",

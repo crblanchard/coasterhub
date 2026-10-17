@@ -69,6 +69,8 @@
   .pp h3{font-size:1rem;margin:0 0 1px;font-weight:800}
   .pp h3 a{color:var(--fg);text-decoration:none}.pp h3 a:hover{color:var(--accent2);text-decoration:underline}
   .pp small{color:var(--muted)}
+  .pp .tripadd{float:right;font-size:.78rem;font-weight:700;color:var(--accent2);text-decoration:none;margin-left:10px}
+  .pp .tripadd:hover{text-decoration:underline}
   .pp .n{color:var(--accent2);font-weight:700;font-size:.82rem;margin:6px 0 4px}
   .pp ul{list-style:none;margin:0;padding:0}
   .pp li{padding:3px 0;border-top:1px solid var(--soft);font-size:.9rem;display:flex;gap:8px;align-items:center}
@@ -343,6 +345,8 @@ Promise.all([
     var ridden=both.filter(function(c){ return MINE[c.id]; }).length;
     var h='<div class="pp"><h3><a href="'+esc(CoasterHub.parkHref(p.name))+'">'+esc(p.name)+' →</a></h3>'
       +'<small>'+esc(p.region)+'</small>'
+      // Into the trip planner (2026-10-17), which keeps whatever trip you had.
+      +(p.open.length ? ' <a class="tripadd" href="/trip?add='+esc(CoasterHub.slugify(p.name))+'">+ Add to trip</a>' : '')
       +'<div class="n">'+(p.open.length ? p.open.length+' operating' : 'No operating coasters');
     if(CMP){
       var th=both.filter(function(c){ return CMP.has[c.id]; }).length;
