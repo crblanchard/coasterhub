@@ -1772,6 +1772,12 @@ Looping Coasters are called Batman: The Ride, Condor, DareDeviler, Kong, Mind Er
 and six other things. Do not offer to generate the list — it was explicitly asked for as his
 job, and the taste is the whole point.
 
+**Models that must NOT become a category** (Carter, 2026-10-18): **Gerstlauer Euro-Fighters**
+— "they vary a lot so people can rank them differently". A category says the rides are
+interchangeable; only a model whose copies really are the same ride (Boomerangs, SLCs, Wacky
+Worms, Galaxis, Jet Stars — 069 made the last two on his yes) qualifies. Ask before proposing
+one for a custom-layout model.
+
 ### Still dormant
 
 `migrations/012-clone-groups.sql` is **not run**. The clone code on `main` stays dormant, and
