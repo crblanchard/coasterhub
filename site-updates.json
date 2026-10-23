@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-23T04:39:18Z",
-   "text": "A rebuilt ride listed twice, like Lightning Rod and its 2016-2020 wood version, now ranks as two independent coasters. Ranking the first of a category now asks whether to rank them together or just that one, so you can say no on your phone."
+   "at": "2026-10-23T05:38:34Z",
+   "text": "Ranking the first of a category now asks whether to rank them together or just that one, and Lightning Rod's 2016-2020 wood version ranks on its own. Explore is down to five tiles, with the trip planner now opened from the map's Plan a trip button."
   },
   {
    "at": "2026-10-17T23:34:17Z",

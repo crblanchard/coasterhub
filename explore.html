@@ -49,7 +49,6 @@
   .xgrid span{color:var(--muted);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   @media (max-width:420px){ .xgrid span{white-space:normal} }
   @media (max-width:760px){ .xgrid.xbig{grid-template-columns:repeat(2,1fr)} .xgrid.xsmall{grid-template-columns:1.5fr 1fr .8fr} }
-  .xgrid.xsmall.x2{grid-template-columns:1fr 1fr}
   .sughead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px}
   .sughead a{color:var(--accent2);font-weight:600;font-size:.9rem;text-decoration:none}
 </style>
@@ -93,11 +92,10 @@
       <a href="/locations"><b>Locations</b><span id="x_locs">&nbsp;</span></a>
       <a href="/map"><b>Map</b><span>Nearest rides</span></a>
     </div>
-    <!-- Two tools (Carter, 2026-10-17): plan a trip, and two riders head to head. -->
-    <div class="xgrid xsmall x2">
-      <a href="/trip"><b>Trip planner</b><span>New credits per park</span></a>
-      <a href="/compare"><b>Compare</b><span>You vs a friend</span></a>
-    </div>
+    <!-- Trip planner and Compare had tiles here too (2026-10-17) until Carter
+         thinned the page (2026-10-23: "too many buttons"). The trip planner is
+         reached from the map ("Plan a trip", and every park popup's "+ Add to
+         trip"); Compare from the button on every rider's profile. -->
   </div>
   <div class="sughead"><span class="eyebrow">Riders</span><a href="/users">All <span id="x_users">riders</span> &rarr;</a></div>
   <div id="sug_wrap" hidden>

@@ -116,6 +116,10 @@
     color:var(--accent2);cursor:pointer;transition:border-color .15s}
   .ctl.who .riderbadge .badge:hover{border-color:var(--accent2)}
   .ctl.who .riderbadge .badge:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+  /* "Plan a trip", under the switcher and in the same pill. */
+  .ctl.trip a.tripgo{display:inline-flex;align-items:center;border:1px solid var(--ring);border-radius:999px;
+    padding:8px 16px;font-size:.9rem;font-weight:700;letter-spacing:.04em;color:var(--accent2);text-decoration:none}
+  .ctl.trip a.tripgo:hover{border-color:var(--accent2)}
   /* Top-left, under the zoom buttons: which parks are on the map — the ones
      you have a credit at, the ones you do not. Only when there is somebody to
      ask that about; "visited" means nothing on the everyone view. */
@@ -264,6 +268,17 @@ who.onAdd=function(){
 };
 who.addTo(map);
 CoasterHub.riderBadge(document.getElementById('hero_badge'),'map',slug);
+
+// The trip planner's door, under the rider switcher (Carter, 2026-10-23: its
+// Explore tile went, and the map is where you pick parks anyway).
+var tripc=L.control({position:'topright'});
+tripc.onAdd=function(){
+  var d=L.DomUtil.create('div','ctl who trip');
+  d.innerHTML='<a class="tripgo" href="/trip">Plan a trip</a>';
+  L.DomEvent.disableClickPropagation(d); L.DomEvent.disableScrollPropagation(d);
+  return d;
+};
+tripc.addTo(map);
 
 // A rider whose log cannot be read gets the everyone map rather than a map
 // that ticks nothing and says "0 of 15" at every park. Who is signed in is
