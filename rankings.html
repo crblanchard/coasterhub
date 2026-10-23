@@ -1670,7 +1670,10 @@ function catKey(g){ return g.key || ('c'+g.id); }
 // or pulling a side out to rank it alone is remembered like any category.
 // Skipped: numbered suffixes and ones with commas — "Orient Express (1)" and
 // "Wacky Worm (yellow track, blue supports)" are two different kiddie coasters
-// at a travelling fair, not one ride with two sides.
+// at a travelling fair, not one ride with two sides. Also skipped: "(Old/…)" /
+// "(New/…)" — the same ride rebuilt, which is two credits ranked on their own
+// (Carter, 2026-10-22, Lightning Rod (Old/Wood) & (New/I-Box): "they should be
+// entirely independent").
 function addRacers(coasters){
   var taken={};
   (CATS.categories||[]).forEach(function(g){ g.ids.forEach(function(id){ taken[id]=1; }); });
@@ -1678,7 +1681,7 @@ function addRacers(coasters){
   coasters.forEach(function(c){
     var m=/^(.*?)\s*\(([^)]+)\)\s*$/.exec(c.name||'');
     if(!m || !c.park || taken[c.id]) return;
-    if(/^\d+$/.test(m[2].trim()) || m[2].indexOf(',')>=0) return;
+    if(/^\d+$/.test(m[2].trim()) || m[2].indexOf(',')>=0 || /^(old|new)\b/i.test(m[2].trim())) return;
     var k=c.park+'\u0000'+m[1].toLowerCase();
     (fams[k]=fams[k]||{name:m[1], sides:[], ids:[]});
     fams[k].sides.push(m[2].trim()); fams[k].ids.push(c.id);

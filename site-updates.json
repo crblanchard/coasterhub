@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-10-23T04:10:51Z",
+   "text": "A rebuilt ride listed twice, like Lightning Rod's wood and I-Box versions, now ranks as two independent coasters instead of moving together like a racing pair."
+  },
+  {
    "at": "2026-10-17T23:34:17Z",
    "text": "Relocated rides are now linked as one credit with their history on each coaster page, and traveling shows are labeled Fair operator with their own filter on /parks. On profiles, the rides only you have ridden among your friends are now listed by park and location."
   },
