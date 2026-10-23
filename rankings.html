@@ -2670,17 +2670,27 @@ function foldInto(id, g){
 // Together places every side you have ridden as one row (or, if a side is
 // already ranked, slots this one in beside it). Just this one pulls it out of
 // the pair, so it is ranked — and stays — a coaster of its own.
+//
+// A category asks the same, once, the first time one of it is ranked and you
+// have ridden others (Carter, 2026-10-23: it placed the whole category with no
+// way to say no, and the only fix was the desktop categories screen). Yes
+// places them as one; Just this one pulls it out and ranks it on its own.
+// A category already in your list still folds in without asking.
 function askRacing(id){
   var g=CLONE[id];
-  if(!g || !g.racing) return openHH(id);
+  if(!g) return openHH(id);
   var inList={}; ORDER.forEach(function(x){ inList[x]=1; });
   var mine={}; MINE.forEach(function(x){ mine[x]=1; });
   var ranked=g.ids.filter(function(x){ return x!==id && inList[x] && CLONE[x]===g; });
   var unranked=g.ids.filter(function(x){ return x!==id && !inList[x] && mine[x] && CLONE[x]===g; });
   if(!ranked.length && !unranked.length) return openHH(id);   // nothing to pair with
+  if(!g.racing && ranked.length) return openHH(id);              // folds into its row
   var c=BYID[id]||{}, others=ranked.concat(unranked).map(function(x){ return (BYID[x]||{}).name; });
   $('join_h').textContent='Rank '+g.name+' together?';
-  $('join_sub').innerHTML = ranked.length
+  $('join_sub').innerHTML = !g.racing
+    ? 'You have ridden '+(unranked.length+1)+' '+esc(g.name)+'. Together, they are placed once and '
+      +'show as one row. Just this one ranks <b>'+esc(c.name)+'</b> on its own.'
+    : ranked.length
     ? '<b>'+esc(others.join(' & '))+'</b> is already in your list. Together, '
       +esc(c.name)+' goes right beside it as one '+esc(g.name)+' row.'
     : 'You have ridden <b>'+esc(others.join(' & '))+'</b> too. Together, they are '
@@ -2711,6 +2721,8 @@ function openHH(id, mates, g){
       mates=MINE.filter(function(x){ return x!==id && CLONE[x]===fam && ORDER.indexOf(x)<0; });
     } else { foldInto(id, fam); setView('rank'); if(RQ) setTimeout(nextRQ,0); return; }
   } else if(fam && !g && !fam.racing){
+    // Others of it ridden: ask first, together or just this one (askRacing).
+    if(MINE.some(function(x){ return x!==id && CLONE[x]===fam && ORDER.indexOf(x)<0; })) return askRacing(id);
     // The first of a category: it is the category being placed, so the card
     // says "Vekoma Roller Skaters", not K3 (Carter, 2026-10-05), and every
     // other one you have ridden comes with it.
