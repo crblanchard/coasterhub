@@ -2101,7 +2101,12 @@
       + '<span class="mtwo"><span class="nm">' + E(o.title) + '</span><span class="msub">' + E(o.date) + '</span></span>'
       // "15 rides · 13 coasters": one line here, stacked on a phone so the park keeps its width.
       + '<span class="ct vct">' + String(o.right || "").split(" \u00b7 ").map(function (x) { return '<span>' + E(x) + '</span>'; }).join('<i> \u00b7 </i>') + '</span>' + chev + '</summary>'
-      + (o.rows || []).map(function (r) {
+      // Park by park on a day with two (Carter, 2026-10-23: Rocky Top Mountain
+      // Coaster was landing between Dollywood's rides), keeping the order the
+      // caller gave within each park — the sort is stable.
+      + (o.rows || []).slice().sort(function (a, b) {
+          return String((a.c && a.c.park) || "").localeCompare(String((b.c && b.c.park) || ""));
+        }).map(function (r) {
         // The day's laps sit right after the model (Carter, 2026-09-28), not
         // out on the far edge.
         return coasterRow(r.c, { ctx: r.ctx, end: r.fresh ? '<span class="nw" title="New credit — first time on this one">New</span>' : '',
