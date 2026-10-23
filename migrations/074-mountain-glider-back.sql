@@ -3,8 +3,8 @@
 -- Carter, 2026-10-23: "Add mountain glider back". 038 deleted both halves
 -- (Left #1099, Keltan's 2019-11-17 log; Right #1765, nobody's). They come
 -- back as they were before 038: same names, same park (Ripley's Mountain
--- Coaster, where Keltan's list filed it — 038 noted it is really at Rowdy Bear
--- Mountain, Gatlinburg, which the site does not have), no stats, and
+-- Coaster — 038 said it was really at Rowdy Bear Mountain; Carter, same day:
+-- "they're at ripley's that's correct", so 038 was wrong there), no stats, and
 -- Keltan's ride on (Left) with its date. New ids; nothing else referenced
 -- the old ones. Guarded on name + park and on Keltan's row, so a second run
 -- is a no-op.
