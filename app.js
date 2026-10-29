@@ -1152,6 +1152,19 @@
       return '<button type="button" role="menuitem" class="rbitem' + (on ? " on" : "")
         + '" data-v="' + escAttr(value) + '">' + escAttr(text) + "</button>";
     }
+    // A rider row: picture (or initial), name, credits — "Aiden · 187" is also
+    // what tells the two Aidens apart (Carter, 2026-10-29).
+    var DUPE = {}, CRED = {}, ME = "", FRIENDS = null;
+    function riderItem(u) {
+      var av = u.avatar
+        ? '<span class="rbav" style="background-image:url(&quot;/avatars/' + escAttr(u.avatar) + '&quot;)"></span>'
+        : '<span class="rbav">' + escAttr(String(u.name || u.slug || "?").trim().charAt(0).toUpperCase()) + "</span>";
+      var n = CRED[u.slug];
+      return '<button type="button" role="menuitem" class="rbitem rbrider' + (u.slug === slug ? " on" : "")
+        + '" data-v="' + escAttr(u.slug) + '">' + av
+        + '<span class="rbnm">' + escAttr(u.name) + (DUPE[String(u.name).toLowerCase()] ? ' <i>@' + escAttr(u.slug) + "</i>" : "") + "</span>"
+        + (n != null ? '<span class="rbct">' + Number(n).toLocaleString() + "</span>" : "") + "</button>";
+    }
     // Refilled rather than rebuilt: this runs once before the rider list has
     // loaded, so the badge reads something immediately, and again once it has.
     //
@@ -1159,17 +1172,68 @@
     // It is not one of the riders — it is the way out of looking at a rider —
     // and at seven riders it had already scrolled off the top of its own menu,
     // which is the one thing it exists to not do.
+    //
+    // With 20-odd riders an A-Z list was a scroll hunt (Carter, 2026-10-29), so:
+    // a search box, then just the people you would pick — you, the riders you
+    // follow (most credits first), and whoever this page is showing — and
+    // "All riders" to open the rest. Typing searches everyone. Signed out, or
+    // following nobody, it is everyone, most credits first.
+    var ALL = false;
     function fill() {
       label.textContent = nameFor(slug);
-      var rows = USERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+      DUPE = {}; var seenN = {};
+      USERS.forEach(function (u) { var k = String(u.name).toLowerCase(); if (seenN[k]) DUPE[k] = 1; seenN[k] = 1; });
       menu.innerHTML =
-        (GLOBAL_PAGES[page] ? '<div class="rbpin">' + item("__all__", "Global", !slug) + "</div>" : "")
-        + '<div class="rbscroll">'
-        + rows.map(function (u) { return item(u.slug, u.name, u.slug === slug); }).join("")
-        + "</div>";
+        '<div class="rbpin"><input type="search" class="rbq" placeholder="Search riders\u2026" autocomplete="off" aria-label="Search riders">'
+        + (GLOBAL_PAGES[page] ? item("__all__", "Global", !slug) : "") + "</div>"
+        + '<div class="rbscroll"></div>';
+      var q = menu.querySelector(".rbq");
+      q.addEventListener("input", function () { rows(q.value); });
+      q.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { var f = menu.querySelector(".rbscroll .rbitem[data-v]"); if (f) f.click(); }
+      });
+      rows("");
+    }
+    function rows(query) {
+      var box = menu.querySelector(".rbscroll"); if (!box) return;
+      var byCred = function (a, b) { return (CRED[b.slug] || 0) - (CRED[a.slug] || 0) || String(a.name).localeCompare(String(b.name)); };
+      var t = String(query || "").trim().toLowerCase();
+      if (t) {
+        var hit = USERS.filter(function (u) {
+          return String(u.name).toLowerCase().indexOf(t) >= 0 || String(u.slug).toLowerCase().indexOf(t) >= 0;
+        }).sort(byCred);
+        box.innerHTML = hit.map(riderItem).join("") || '<div class="rbnone">No rider called that.</div>';
+        return;
+      }
+      var by = {}; USERS.forEach(function (u) { by[u.slug] = u; });
+      var short = !ALL && FRIENDS && FRIENDS.length;
+      if (!short) { box.innerHTML = USERS.slice().sort(byCred).map(riderItem).join(""); return; }
+      var shown = {}, h = "";
+      var add = function (u) { if (u && !shown[u.slug]) { shown[u.slug] = 1; h += riderItem(u); } };
+      if (ME && by[ME]) { h += '<div class="rbhd">You</div>'; add(by[ME]); }
+      if (slug && by[slug] && slug !== ME && FRIENDS.indexOf(slug) < 0) { h += '<div class="rbhd">Viewing</div>'; add(by[slug]); }
+      h += '<div class="rbhd">Friends</div>';
+      FRIENDS.map(function (s) { return by[s]; }).filter(Boolean).sort(byCred).forEach(add);
+      h += '<button type="button" class="rbitem rball">All ' + USERS.length + " riders\u2026</button>";
+      box.innerHTML = h;
     }
     fill();
     fetchUsers().then(fill).catch(function () { /* the badge still reads a name */ });
+    // Credits and friends arrive after; each redraws the list in place.
+    fetchSummary().then(function (list) {
+      (list || []).forEach(function (x) { CRED[x.slug] = x.credits; });
+      rows(menu.querySelector(".rbq") ? menu.querySelector(".rbq").value : "");
+    });
+    me().then(function (acct) {
+      if (!acct || !acct.slug) return;
+      ME = acct.slug;
+      return fetch("/api/follows/" + encodeURIComponent(ME), { credentials: "same-origin", cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          FRIENDS = j ? (j.following || []).map(function (f) { return f.slug; }).filter(function (x) { return x !== ME; }) : null;
+          rows(menu.querySelector(".rbq") ? menu.querySelector(".rbq").value : "");
+        });
+    }).catch(function () {});
 
     // Positioned against the button's rect each time it opens, because it is no
     // longer inside the badge and cannot inherit its place. Fixed, not absolute:
@@ -1202,7 +1266,14 @@
       wrap.classList.toggle("open", on);
       btn.setAttribute("aria-expanded", on ? "true" : "false");
       if (!on) return;
+      // Each opening starts from the short list with an empty search; the box
+      // takes the cursor on a computer, but not on a phone, where focusing it
+      // would throw the keyboard up before you have decided to type.
+      ALL = false;
+      var q = menu.querySelector(".rbq");
+      if (q) { q.value = ""; rows(""); }
       place();
+      if (q && window.matchMedia && window.matchMedia("(pointer: fine)").matches) q.focus();
       // Open onto whoever you are reading, centred, so a name a long way down
       // the list is not something you have to go hunting for.
       //
@@ -1223,11 +1294,15 @@
       open(menu.hidden);
     });
     menu.addEventListener("click", function (e) {
+      e.stopPropagation();                // the search box is inside: typing must not close it
+      if (e.target.closest && e.target.closest(".rball")) {
+        ALL = true; rows(""); var q0 = menu.querySelector(".rbq"); if (q0) q0.focus(); return;
+      }
       var b = e.target;
       while (b && b !== menu && !(b.className && String(b.className).indexOf("rbitem") >= 0)) {
         b = b.parentNode;
       }
-      if (!b || b === menu) return;
+      if (!b || b === menu || !b.getAttribute("data-v")) return;
       var v = b.getAttribute("data-v");
       // Same bookkeeping the old header picker did: the choice is remembered so
       // the rest of the nav follows you to the next page.
@@ -1245,8 +1320,11 @@
     // badge would leave it floating over the middle of the screen. Close it
     // instead of chasing the button. The scroll box inside it has
     // overscroll-behavior:contain, so scrolling the LIST does not reach here.
-    window.addEventListener("scroll", function () { if (!menu.hidden) open(false); },
-      { passive: true });
+    // Not while you are typing in it: a phone scrolls the page to make room for
+    // the keyboard, and that is not you scrolling away.
+    window.addEventListener("scroll", function () {
+      if (!menu.hidden && !(document.activeElement && document.activeElement.className === "rbq")) open(false);
+    }, { passive: true });
     window.addEventListener("resize", function () { if (!menu.hidden) place(); });
   }
 

@@ -189,6 +189,23 @@ body{background-image:
   border-radius:8px;cursor:pointer}
 .rbitem:hover{background-color:var(--soft)}
 .rbitem.on{color:var(--accent2);font-weight:700}
+/* Search, section heads and rider rows (2026-10-29): a picture or initial,
+   the name, credits on the right. */
+.rbmenu{width:min(280px,calc(100vw - 16px))}
+.rbq{display:block;width:100%;box-sizing:border-box;margin:0 0 6px;padding:8px 10px;border-radius:8px;
+  border:1px solid var(--line);background-color:var(--well);color:var(--fg);font-family:inherit;font-size:16px}
+.rbq:focus{outline:none;border-color:var(--accent2)}
+.rbhd{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 12px 2px}
+.rbitem.rbrider{display:flex;align-items:center;gap:10px}
+.rbav{flex:none;width:26px;height:26px;border-radius:999px;background-color:var(--soft);background-size:cover;
+  background-position:center;background-origin:border-box;display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:700;color:var(--muted)}
+.rbnm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rbnm i{font-style:normal;color:var(--muted);font-size:.8rem}
+.rbct{flex:none;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+.rbitem.on .rbct{color:var(--accent2)}
+.rbitem.rball{color:var(--accent2);font-weight:600}
+.rbnone{color:var(--muted);font-size:.85rem;padding:10px 12px}
 .hero h1{font-size:clamp(2.4rem,6.5vw,4rem);line-height:1.03;font-weight:800;letter-spacing:-.02em;max-width:14ch}
 .hero p{color:var(--muted);font-size:clamp(1rem,2.2vw,1.2rem);margin:20px 0 30px;max-width:52ch}
 /* A two-way switch in a hero — Rankings' Mine | Global. */

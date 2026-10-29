@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-10-29T20:57:47Z",
+   "text": "The rider picker on rankings, the map and other pages now has a search box and shows just you and the people you follow, with each rider's picture and credit count. Everyone else is one tap away under All riders."
+  },
+  {
    "at": "2026-10-17T23:34:17Z",
    "text": "Relocated rides are now linked as one credit with their history on each coaster page, and traveling shows are labeled Fair operator with their own filter on /parks. On profiles, the rides only you have ridden among your friends are now listed by park and location."
   },
