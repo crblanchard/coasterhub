@@ -5596,25 +5596,67 @@ against RCDB.
 
 Carter wants Coaster Hub in the App Store and Google Play, looking the same as
 the site. Agreed plan — **do not start until Carter says his Apple Developer
-login is ready** ("wait until I get the apple login"):
+login is ready** ("wait until I get the apple login"). The full step-by-step
+he was given is in the session of 2026-10-29; the facts it rests on (checked
+that day) are here.
 
-- **Capacitor shell loading the live coasterhub.org**, so the app IS the site
-  (same WebKit as Safari) and every push to `main` reaches it with no
-  resubmission. App touches: launch screen, status bar following light/dark,
-  swipe-back, off-site links in an in-app browser. Mind the iOS 26 status-bar
-  trap in CLAUDE.md.
-- **Carter has no Mac and needs none.** iOS builds run on GitHub Actions macOS
-  runners; signing and TestFlight/App Store upload go through an App Store
-  Connect API key Carter adds as a repo secret (fastlane or xcodebuild with
-  `-allowProvisioningUpdates`). Codemagic is the fallback. Never suggest a
-  macOS VM. Testing is TestFlight on his iPhone.
-- **Apple rule 4.2 ("just a website") is the likely rejection**, so ship push
-  notifications in the first submission (friend rides, ranking changes; APNs
-  plus the Worker side). Also add a privacy policy page to the site.
-- **Account:** Apple Individual (not Organization — needs D-U-N-S), $99/yr.
-  No other costs: Actions minutes, APNs and Cloudflare are free, and Apple
-  takes no cut since nothing is sold.
-- **Android from the same project:** Google Play $25 once; builds on Linux.
-  New personal accounts need a 14-day closed test with 12+ testers before
-  production — recruit from the site's riders.
-- The app project is a new top-level folder; add it to `.assetsignore`.
+**Shape.** A Capacitor 8 shell loading the live coasterhub.org, so the app IS
+the site (WebKit on iPhone, Chromium WebView on Android) and every push to
+`main` reaches it with no resubmission. Capacitor 8 targets SDK 36, which
+Google requires of new apps since 2026-08-31; it dropped
+adjustMarginsForEdgeToEdge for env()/CSS insets, so the phone bar and status
+bar need safe-area CSS (the site's viewport meta has no viewport-fit=cover
+today). App touches: launch screen, status bar driven natively on the theme
+flip (sidesteps the iOS 26 Safari quirk in CLAUDE.md), swipe-back, off-site
+links in an in-app browser, Android back button, a real offline screen (an
+airplane-mode browser error is the classic 4.2 tell), camera/photo usage
+strings for the avatar picker, hide /install (it names Android: guideline
+2.3.10). Universal Links/App Links + webcredentials so reset emails open the
+app and Keychain/Google autofill work (needs /.well-known files on the site).
+
+**No Mac, ever.** The repo is PUBLIC, so GitHub-hosted macOS runners are free
+and unlimited. Signing/upload: an App Store Connect **Team** API key (Admin),
+which only the Account Holder can request (Users and Access > Integrations >
+Request Access; Apple approves case by case, and individual accounts have
+mixed reports). An *Individual* key cannot use the provisioning endpoints, so
+it cannot do cloud signing. Fallback that still needs no Mac: generate the
+key + CSR here with openssl, Carter uploads the CSR on developer.apple.com
+(Apple Distribution certificate + App Store profile), p12/profile go in repo
+secrets, upload with an app-specific password. Codemagic is a second
+fallback. Never suggest a macOS VM. Secrets go straight into GitHub/Cloudflare
+settings, never through the chat.
+
+**Required before either store will accept it** (the site has none of these
+today): in-app account deletion (Apple 5.1.1(v); Google also wants a web URL
+for deletion requests); for profiles/bios/avatars (UGC, Apple 1.2): terms
+agreed at sign-up with zero tolerance for abuse, a filter for objectionable
+names/bios, report a profile, block a user, reports emailed to Carter, who
+must act within 24 hours; /privacy and /terms pages; a reviewer demo login.
+Signup is open to anyone (POST /api/auth/signup), so no invite-only issue. No
+third-party login, so no Sign in with Apple; no payments or tips, so no IAP.
+These touch sign-up and profile pages: show Carter before shipping.
+
+**Push** (the main 4.2 mitigation; not a guarantee on its own): via Firebase
+Cloud Messaging for BOTH platforms, sent from the Worker with a service-account
+JWT. Not APNs directly: APNs requires HTTP/2, which Worker fetch does not
+speak. Carter creates the Firebase project, the APNs .p8 (uploaded to
+Firebase), and the service-account JSON as a Worker secret.
+
+**Google Play.** $25 once, personal account, government-ID verification. New
+personal accounts must verify a physical Android 10+ phone in the Play Console
+app (Carter has an iPhone: borrow one, under a minute), and run a closed test
+with 12+ testers opted in for 14 straight days before applying for
+production (Google may answer "test more"). The first .aab must be uploaded
+by hand in Play Console. Upload key: generated here, kept by Carter as a
+secret plus a backup (Play App Signing makes it resettable).
+
+**Other stores: skip.** Samsung Galaxy Store wants a D-U-N-S number for
+commercial seller status even for free apps; Amazon's Appstore left non-Amazon
+Android devices on 2025-08-20 (Fire tablets only).
+
+**Costs to Carter:** $99/yr Apple (Individual; listing shows his legal name as
+seller) + $25 once Google. Everything else is free. Ongoing: renew Apple
+yearly, a store update about once a year (Google's target-SDK deadline each
+August, Apple's new-Xcode requirement), and the 24-hour report duty.
+
+The app project is a new top-level folder; add it to `.assetsignore`.
