@@ -5596,9 +5596,16 @@ against RCDB.
 
 Carter wants Coaster Hub in the App Store and Google Play, looking the same as
 the site. Agreed plan — **do not start until Carter says his Apple Developer
-login is ready** ("wait until I get the apple login"). The full step-by-step
-he was given is in the session of 2026-10-29; the facts it rests on (checked
-that day) are here.
+login is ready** ("wait until I get the apple login"). The facts the plan
+rests on (checked that day) are here.
+
+**The tracker: https://claude.ai/artifact/VQapU5bbnLfA5DK964mun4** — Carter's
+step-by-step page (costs, odds, timeline, every step with a tick box). Read it
+FIRST when the app work resumes: progress lives in its database, collection
+`steps`, one document per step id, `{done, at}` (ArtifactData `list steps`).
+Tick Claude's steps the same way (`set`, with `if_version` on an existing
+doc). The page source is in that session's scratchpad; to change the page from
+a new session, `Artifact read` it and republish to the same URL.
 
 **Shape.** A Capacitor 8 shell loading the live coasterhub.org, so the app IS
 the site (WebKit on iPhone, Chromium WebView on Android) and every push to
