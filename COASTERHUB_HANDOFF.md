@@ -5591,3 +5591,30 @@ The triage now returns `twins` (rows sharing manu, model and height) and /edit
 warns "check RCDB" when there are more than two. Of 045's other links,
 Jet Star (Beech Bend) -> Tig'rr (Indiana Beach) is the one not yet confirmed
 against RCDB.
+
+## iPhone and Android apps: the plan, waiting on Carter's Apple account (2026-10-29)
+
+Carter wants Coaster Hub in the App Store and Google Play, looking the same as
+the site. Agreed plan — **do not start until Carter says his Apple Developer
+login is ready** ("wait until I get the apple login"):
+
+- **Capacitor shell loading the live coasterhub.org**, so the app IS the site
+  (same WebKit as Safari) and every push to `main` reaches it with no
+  resubmission. App touches: launch screen, status bar following light/dark,
+  swipe-back, off-site links in an in-app browser. Mind the iOS 26 status-bar
+  trap in CLAUDE.md.
+- **Carter has no Mac and needs none.** iOS builds run on GitHub Actions macOS
+  runners; signing and TestFlight/App Store upload go through an App Store
+  Connect API key Carter adds as a repo secret (fastlane or xcodebuild with
+  `-allowProvisioningUpdates`). Codemagic is the fallback. Never suggest a
+  macOS VM. Testing is TestFlight on his iPhone.
+- **Apple rule 4.2 ("just a website") is the likely rejection**, so ship push
+  notifications in the first submission (friend rides, ranking changes; APNs
+  plus the Worker side). Also add a privacy policy page to the site.
+- **Account:** Apple Individual (not Organization — needs D-U-N-S), $99/yr.
+  No other costs: Actions minutes, APNs and Cloudflare are free, and Apple
+  takes no cut since nothing is sold.
+- **Android from the same project:** Google Play $25 once; builds on Linux.
+  New personal accounts need a 14-day closed test with 12+ testers before
+  production — recruit from the site's riders.
+- The app project is a new top-level folder; add it to `.assetsignore`.
