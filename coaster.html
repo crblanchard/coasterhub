@@ -29,9 +29,9 @@
 
   /* The facts, as one block over the numbers (Carter, 2026-10-29: the page
      had four thin lines in four styles, "be careful it's still easily
-     legible"). The status is the one fact said in colour; then when it
-     opened, then what kind of ride it is, all at reading size. Former names
-     sit under it, smaller. The trail is gone: the line under the name says
+     legible"). Three rows (Carter, same day: "a lot for only two rows"):
+     the status, said in colour, and when it opened; what kind of ride it is;
+     former names, smaller. The trail is gone: the line under the name says
      the park and its country, which is all the trail was adding. */
   .cfacts{margin:0 0 16px}
   .factline{margin:0;font-size:1rem;line-height:1.6;color:var(--fg)}
@@ -169,6 +169,7 @@
   <div id="ui" style="display:none">
     <div class="cfacts" id="facts">
       <p class="factline" id="factline"></p>
+      <p class="factline" id="kindline"></p>
       <p class="former" id="former" style="display:none"></p>
     </div>
     <div class="stats" id="specs"></div>
@@ -307,13 +308,17 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   });
   // What it is, as one line: Steel · Arrow Dynamics · Arrow Looper. The maker
   // and the model are pages (Carter, 2026-09-24).
-  // "Intamin · Giga", not "Intamin · Intamin Giga".
-  if(S.manu) facts.push('<a href="'+esc(CoasterHub.makerHref(S.manu))+'">'+esc(S.manu)+'</a>');
-  var mshow=S.model && S.manu && S.model.indexOf(S.manu+' ')===0 ? S.model.slice(S.manu.length+1) : S.model;
-  if(S.model) facts.push(S.manu ? '<a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">'+esc(mshow)+'</a>' : '<span>'+esc(S.model)+'</span>');
-  if(S.type) facts.push('<span class="dim">'+esc(S.type)+'</span>');
   $('factline').innerHTML=facts.join(' ');
-  if(!facts.length && $('former').style.display==='none') $('facts').style.display='none';
+  // "Intamin · Giga", not "Intamin · Intamin Giga".
+  var kind=[];
+  if(S.manu) kind.push('<a href="'+esc(CoasterHub.makerHref(S.manu))+'">'+esc(S.manu)+'</a>');
+  var mshow=S.model && S.manu && S.model.indexOf(S.manu+' ')===0 ? S.model.slice(S.manu.length+1) : S.model;
+  if(S.model) kind.push(S.manu ? '<a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">'+esc(mshow)+'</a>' : '<span>'+esc(S.model)+'</span>');
+  if(S.type) kind.push('<span class="dim">'+esc(S.type)+'</span>');
+  $('kindline').innerHTML=kind.join(' ');
+  if(!facts.length) $('factline').style.display='none';
+  if(!kind.length) $('kindline').style.display='none';
+  if(!facts.length && !kind.length && $('former').style.display==='none') $('facts').style.display='none';
   // The numbers as one strip. A flag only when it is in the top 10 of the
   // operating coasters on the site for that number (Carter, 2026-10-01: no
   // "taller than x%").
