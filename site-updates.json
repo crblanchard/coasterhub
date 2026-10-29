@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-29T21:04:45Z",
-   "text": "The rider picker now has a search box and shows just you and the people you follow, with pictures and credit counts. Racing pairs in your rankings now show their Global place, taken from the better of the two tracks."
+   "at": "2026-10-29T22:34:12Z",
+   "text": "The rider picker now has a search box and shows just you and the people you follow, and racing pairs in your rankings show their Global place. Coaster pages are tidier: the facts sit on one line, the park's country is under the name, and adding a credit is a small button beside it."
   },
   {
    "at": "2026-10-17T23:34:17Z",

@@ -27,30 +27,37 @@
   /* Crumbs, the "you" line, .sect and .missing are shared with the other
      database pages — style.css. */
 
-  /* The status is the one fact worth saying in colour, so it sits on its own
-     above the specs rather than in the grid with the numbers. */
-  .status{display:inline-flex;align-items:baseline;gap:10px;margin:0 0 18px}
-  .status .stat{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
-  .status .stat.on{color:var(--accent2)}
-  .status .stat.off{color:var(--accent)}
-  .status .yrs{color:var(--fg);font-size:.9rem;font-variant-numeric:tabular-nums}
+  /* The facts, as one block over the numbers (Carter, 2026-10-29: the page
+     had four thin lines in four styles, "be careful it's still easily
+     legible"). The status is the one fact said in colour; then when it
+     opened, then what kind of ride it is, all at reading size. Former names
+     sit under it, smaller. The trail is gone: the line under the name says
+     the park and its country, which is all the trail was adding. */
+  .cfacts{margin:0 0 16px}
+  .factline{margin:0;font-size:1rem;line-height:1.6;color:var(--fg)}
+  .factline .stat{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+  .factline .stat.on{color:var(--accent2)}
+  .factline .stat.off{color:var(--accent)}
+  .factline .yrs{font-variant-numeric:tabular-nums}
+  .factline a{color:var(--fg);font-weight:600;text-decoration:none}
+  .factline a:hover{color:var(--accent2);text-decoration:underline}
+  .factline .dim{color:var(--muted)}
+  /* The dot rides on the end of each part, so a wrap never starts a line with one. */
+  .factline > :not(:last-child)::after{content:"\00a0\00b7";color:var(--muted);font-weight:400}
 
 
   /* The page reworked (Carter, 2026-10-01, "these are so plain"): what kind of
      ride it is as one line, the numbers as one strip, a top-10 flag only where
      it is true, where it sits in everyone's rankings, riders with faces, and
      more of the same model and at the same park. */
-  .kind{margin:-6px 0 14px;font-size:1rem;color:var(--muted)}
-  .kind[hidden]{display:none}
-  .kind a{color:var(--fg);font-weight:600;text-decoration:none}
-  .kind a:hover{color:var(--accent2);text-decoration:underline}
-  /* The dot rides on the end of each part, so a wrap never starts a line with one. */
-  .kind > :not(:last-child)::after{content:"\00a0\00b7";color:var(--muted);font-weight:400}
-  /* Your verdict, right under the facts (critique, 2026-10-01). */
-  .youline{margin:-4px 0 14px;font-size:1rem;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
-  .youline[hidden]{display:none}
-  .youline b{color:var(--fg)}
-  .youline .btn{padding:6px 14px;font-size:.88rem}
+  /* Yours, at the end of the line under the name (Carter, 2026-10-29): a
+     small "+ Add to credits" when you have not ridden it, a quiet "Ridden in
+     2019" when you have. It replaced a full-width grey bar holding one button. */
+  .heroyou{display:inline-flex;align-items:center;gap:6px;margin-left:14px;vertical-align:middle}
+  .heroyou .btn{padding:5px 13px;font-size:.84rem}
+  .heroyou .mine{font-size:.9rem;color:var(--muted)}
+  .heroyou .mine b{color:var(--fg)}
+  @media (max-width:560px){ .heroyou{display:flex;margin:10px 0 0} }
   /* A closed coaster's numbers are grey: grey means defunct, sitewide. */
   .gone .stat1 b{color:var(--muted)}
   .gone .stat1 em{display:none}
@@ -129,7 +136,7 @@
 
   /* Former names. A retheme is the normal way a coaster changes its name, and
      the old one is what somebody following an old link typed. */
-  .former{color:var(--muted);font-size:.86rem;margin:0 0 18px}
+  .former{color:var(--muted);font-size:.9rem;margin:4px 0 0}
   .former b{color:var(--fg);font-weight:600}
 </style>
 </head>
@@ -160,11 +167,10 @@
   <div id="err" style="display:none"><strong>Couldn&rsquo;t load the data.</strong> This page reads external data files, so it needs to be served over the web.</div>
   <div id="loading">Loading the coaster&hellip;</div>
   <div id="ui" style="display:none">
-    <p id="crumb"></p>
-    <p class="former" id="former" style="display:none"></p>
-    <div class="status" id="status"></div>
-    <p class="kind" id="kind" hidden></p>
-    <p class="youline" id="youline" hidden></p>
+    <div class="cfacts" id="facts">
+      <p class="factline" id="factline"></p>
+      <p class="former" id="former" style="display:none"></p>
+    </div>
     <div class="stats" id="specs"></div>
     <div id="reloc_wrap" style="display:none">
       <div class="sect">History</div>
@@ -247,7 +253,11 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   document.title=C.name+' — '+C.park+' — Coaster Hub';
   // "Coaster · Cedar Point", as every database page reads (critique, 2026-10-02).
   CoasterHub.kindLine($('hero_sub'), 'Coaster', C.park, CoasterHub.parkHref(C.park));
-  CoasterHub.crumbs($('crumb'), CoasterHub.placeTrail(meta.region).concat([[C.park, CoasterHub.parkHref(C.park)], [C.name]]));
+  // Then its country (or state), which is what the trail used to add.
+  if(meta.region){
+    var tr=CoasterHub.placeTrail(meta.region), last=tr[tr.length-1];
+    $('hero_sub').insertAdjacentHTML('beforeend','<i aria-hidden="true"> \u00b7 </i><a href="'+esc(last[1])+'">'+esc(meta.region)+'</a>');
+  }
   // No "You have ridden it" bar: that is your chip under Riders now.
 
   // Former names: the whole reason an old link still works, so the page says so
@@ -278,11 +288,12 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   var gone=!!C.closed;
   var op=C.opened?String(C.opened).slice(0,4):(C.yr!=null?String(C.yr):'');
   var cl=gone?String(C.closed).slice(0,4):'';
+  var facts=[];
   if(op||cl){
     // A closing date still ahead: open, and saying so in red (app.js markClosing).
-    $('status').innerHTML=(C.closing ? CoasterHub.CLOSING_SOON : '<span class="stat'+(gone?' off':' on')+'">'+(gone?'Defunct':'Operating')+'</span>')
-      +'<span class="yrs">'+esc(gone?(op?op+'–'+cl:'closed '+cl):('opened '+fullDate(C.opened,C.openedPrec,op)
-        +(C.closing?' · closing '+(fullDate(C.closing,C.closingPrec,String(C.closing).slice(0,4))):'')))+'</span>';
+    facts.push('<span>'+(C.closing ? CoasterHub.CLOSING_SOON : '<span class="stat'+(gone?' off':' on')+'">'+(gone?'Defunct':'Operating')+'</span>')+'</span>');
+    facts.push('<span class="yrs">'+esc(gone?(op?op+'–'+cl:'Closed '+cl):('Opened '+fullDate(C.opened,C.openedPrec,op)))+'</span>');
+    if(!gone && C.closing) facts.push('<span class="yrs">Closing '+esc(fullDate(C.closing,C.closingPrec,String(C.closing).slice(0,4)))+'</span>');
   }
 
   // Only the specs this row actually carries. A grid half full of em-dashes
@@ -296,13 +307,13 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   });
   // What it is, as one line: Steel · Arrow Dynamics · Arrow Looper. The maker
   // and the model are pages (Carter, 2026-09-24).
-  var kind=[];
-  if(S.type) kind.push('<span>'+esc(S.type)+'</span>');
-  if(S.manu) kind.push('<a href="'+esc(CoasterHub.makerHref(S.manu))+'">'+esc(S.manu)+'</a>');
   // "Intamin · Giga", not "Intamin · Intamin Giga".
+  if(S.manu) facts.push('<a href="'+esc(CoasterHub.makerHref(S.manu))+'">'+esc(S.manu)+'</a>');
   var mshow=S.model && S.manu && S.model.indexOf(S.manu+' ')===0 ? S.model.slice(S.manu.length+1) : S.model;
-  if(S.model) kind.push(S.manu ? '<a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">'+esc(mshow)+'</a>' : '<span>'+esc(S.model)+'</span>');
-  if(kind.length){ $('kind').innerHTML=kind.join(' '); $('kind').hidden=false; }
+  if(S.model) facts.push(S.manu ? '<a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">'+esc(mshow)+'</a>' : '<span>'+esc(S.model)+'</span>');
+  if(S.type) facts.push('<span class="dim">'+esc(S.type)+'</span>');
+  $('factline').innerHTML=facts.join(' ');
+  if(!facts.length && $('former').style.display==='none') $('facts').style.display='none';
   // The numbers as one strip. A flag only when it is in the top 10 of the
   // operating coasters on the site for that number (Carter, 2026-10-01: no
   // "taller than x%").
@@ -423,17 +434,17 @@ function youLine(me, mine){
   if(!me) return;
   var r=0, first=null;
   ROWS.forEach(function(x){ var m=me.rides[x.id]; if(m){ r+=m.n; if(m.first && (!first || m.first<first)) first=m.first; } });
-  var el=$('youline');
+  var el=document.createElement('span'); el.className='heroyou';
   if(r){
     // Your place is your chip under Rankings (Carter, 2026-10-01).
     el.innerHTML=r>1
-      ? '<span><b>'+r+'</b> rides'+(first?' since '+String(first).slice(0,4):'')+'</span>'
-      : '<span>Ridden'+(first?' in '+String(first).slice(0,4):'')+'</span>';
+      ? '<span class="mine">&#10003; <b>'+r+'</b> rides'+(first?' since '+String(first).slice(0,4):'')+'</span>'
+      : '<span class="mine">&#10003; Ridden'+(first?' in '+String(first).slice(0,4):'')+'</span>';
   } else {
-    el.innerHTML='<span>Not ridden yet</span><button type="button" class="btn alt" id="addme2">+ Add to your credits</button>';
-    $('addme2').onclick=function(){ CoasterHub.confirmAdd(C, me.slug).then(function(ok){ if(ok) location.reload(); }); };
+    el.innerHTML='<button type="button" class="btn alt" id="addme2">+ Add to credits</button>';
   }
-  el.hidden=false;
+  $('hero_sub').appendChild(el);
+  if($('addme2')) $('addme2').onclick=function(){ CoasterHub.confirmAdd(C, me.slug).then(function(ok){ if(ok) location.reload(); }); };
 }
 
 // A list that shows the first few and opens to the rest in place
@@ -444,6 +455,12 @@ function fold(list, n, row){
     +(more>0?'<div class="rest" hidden>'+list.slice(n).map(row).join('')+'</div>':'')+'</div>'
     +(more>0?'<p class="rnone foldp"><a class="rmore" href="#" data-all="Show '+more+' more">Show '+more+' more</a></p>':'');
 }
+
+// "More Fabbri Spinner coasters", "More Vekoma Junior Coasters" (Carter,
+// 2026-10-29). A plain "s" turns half the model names into nonsense — Woods,
+// RMC Hybrids, B&M Hypers, Kiddies, Wild Mouses — so the noun is "coasters",
+// unless the name already ends in "Coaster".
+function plural(m){ return /(^|\s)Coaster$/.test(m) ? m+'s' : m+' coasters'; }
 
 // More of the same model, and more at the same park, as the site's one row,
 // operating first (the standing rule for lists inside a park or model page).
@@ -463,7 +480,7 @@ function more(S){
     if(S.manu && S.model){
       seen={};
       var mo=pick(function(x){ return x.manu===S.manu && x.model===S.model; });
-      if(mo.length) html+='<div class="sect morehd"><span>More '+esc(S.model)+'</span><a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">Model page &rarr;</a></div>'
+      if(mo.length) html+='<div class="sect morehd"><span>More '+esc(plural(S.model))+'</span><a href="'+esc(CoasterHub.makerHref(S.manu,S.model))+'">Model page &rarr;</a></div>'
         +fold(mo, 5, function(x){ return CoasterHub.coasterRow(x,{mine:mine, add:true, ctx:'place'}); });
     }
     seen={};
