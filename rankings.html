@@ -1263,6 +1263,12 @@ function globCell(id){
   // No list count (Carter, 2026-10-02): the place and the average are enough.
   return '<span class="glob"><b>Global #'+g.pos+'</b><i>'+CoasterHub.scoreText(g.score)+'</i></span>';
 }
+// The member of a group with the best Global place, or its first if none has one.
+function bestGlob(ids){
+  var best=ids[0], bp=Infinity;
+  if(GLOBAL) ids.forEach(function(id){ var g=GLOBAL.by[KEY(id)]; if(g && g.pos<bp){ bp=g.pos; best=id; } });
+  return best;
+}
 function loadGlobal(){
   CoasterHub.fetchUsers().then(function(){
     return CoasterHub.globalTally().then(function(tally){
@@ -1489,7 +1495,10 @@ function renderRank(){
       +'<span class="grip" data-grip="'+i+'" aria-hidden="true">\u283f</span>'
       +'<button class="swdel" data-del="'+i+'" tabindex="-1">Remove</button>'
       +head
-      +(b.g?'':globCell(b.ids[0]))
+      // A racing pair shows its better side's Global place — the two tracks
+      // run side by side, so that is the ride's place; a category shows none,
+      // since its members can sit far apart globally (Carter, 2026-10-29).
+      +(!b.g ? globCell(b.ids[0]) : b.g.racing ? globCell(bestGlob(b.ids)) : '')
       +'<span class="acts">'
 
         +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
