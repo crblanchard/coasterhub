@@ -165,6 +165,9 @@ a.crow .nw{color:var(--accent2);font-size:.72rem;font-weight:700;letter-spacing:
    a thumb can hit it; the negative margin keeps the line's height. */
 .vlist .vedit{margin-left:auto;color:var(--accent2);font-weight:600;text-decoration:none;padding:8px 0;margin-top:-8px;margin-bottom:-8px}
 .vlist .vedit:hover{text-decoration:underline}
+.vlist .vacts{margin-left:auto;display:flex;align-items:center;gap:18px}
+.vlist .vacts .vedit{margin-left:0}
+.vlist .vdel{background-color:transparent;border-style:none;color:var(--bad);font-family:inherit;font-size:inherit;font-weight:600;padding:8px 0;margin:-8px 0;cursor:pointer}
 /* Same for a group's name on a phone: wrap, don't cut. */
 @media (max-width:560px){ .mlist .mtwo .nm{white-space:normal;overflow:visible} }
 /* A ranked list reads like /rankings (Carter, 2026-09-28): no box, a

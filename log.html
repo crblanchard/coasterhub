@@ -513,7 +513,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261030h"></script>
+<script src="/app.js?v=20261030i"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 // Runs before the gate: the nav has to work whether or not you unlock.
@@ -742,7 +742,7 @@ function offerDay1(){
   if(MODE!=='day'){ h.style.display='none'; return; }
   if(EDITING){
     h.style.display='';
-    h.innerHTML = d===EDITING ? 'Changing this day. <a href="#" id="dayback">Cancel</a>'
+    h.innerHTML = d===EDITING ? 'Changing this day. <a href="#" id="dayback">Cancel</a> &middot; <a href="#" id="daydel" class="bad">Delete this day</a>'
       : (d ? 'Moving it to '+esc(niceDay(d))+(DAYS[d]?' — which already has rides; they will merge':'')+'. <a href="#" id="dayback">Cancel</a>'
            : 'Pick the date to move it to, or <a href="#" id="dayback">cancel</a>.');
   } else if(day){
@@ -755,6 +755,7 @@ function offerDay1(){
   var a=$('dayload'); if(a) a.onclick=function(e){ e.preventDefault(); beginEdit(d); };
   var cp=$('daycopy'); if(cp) cp.onclick=function(e){ e.preventDefault(); copyPanel(d); };
   var b=$('dayback'); if(b) b.onclick=function(e){ e.preventDefault(); cancelEdit(); };
+  var dd=$('daydel'); if(dd) dd.onclick=function(e){ e.preventDefault(); $('date').value=EDITING; saveEdit([]); };
 }
 // ---- Copying a day to a friend (Carter, 2026-09-26) -------------------------
 // "Sean was with me at SFMM on Sep 12": the same rides, laps and all, logged

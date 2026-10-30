@@ -2487,6 +2487,36 @@
   // — c a coaster (id, name, park, …), n its laps that day, fresh a first-ever
   // ride on it; o.foot: a grey line under the rows; o.edit: where to change
   // the day, for its owner (a link at the end of that line).
+  // "Delete day" on a visit (Carter, 2026-10-30: "there's no way to remove
+  // rides once you add them"). Asks in a sheet, then empties the day with the
+  // same PUT /api/day that /log's edit mode makes.
+  if (typeof document !== "undefined") document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".vdel");
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var u = b.getAttribute("data-u"), d = b.getAttribute("data-d"), p = d.split("-");
+    var nice = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).toLocaleDateString(undefined, { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" });
+    var wrap = document.createElement("div");
+    wrap.className = "chdlg"; wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true");
+    wrap.innerHTML = '<div class="chdlg-box"><b style="display:block;font-size:1.05rem;line-height:1.3">Delete ' + searchEsc(nice) + '?</b>'
+      + '<span style="display:block;color:var(--muted);font-size:.86rem;margin-top:6px">' + searchEsc(b.getAttribute("data-t") || "") + '. Every ride logged that day comes off your count. A coaster you rode only that day leaves your credits too.</span>'
+      + '<p id="dd_msg" style="color:var(--bad);font-size:.84rem;margin:8px 0 0;min-height:1em"></p>'
+      + '<div class="chdlg-acts"><button type="button" id="dd_no" style="font:inherit;font-weight:600;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer">Cancel</button>'
+      + '<button type="button" id="dd_yes" style="font:inherit;font-weight:700;background:var(--bad);color:#fff;border:0;border-radius:10px;padding:9px 18px;cursor:pointer">Delete day</button></div></div>';
+    document.body.appendChild(wrap);
+    var close = function () { wrap.remove(); };
+    wrap.addEventListener("click", function (ev) { if (ev.target === wrap) close(); });
+    wrap.querySelector("#dd_no").onclick = close;
+    wrap.querySelector("#dd_yes").onclick = function () {
+      var y = wrap.querySelector("#dd_yes"); y.disabled = true;
+      fetch("/api/day", { method: "PUT", credentials: "same-origin", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ user: u, d: d, to: d, entries: [] }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || ("error " + r.status)); }); })
+        .then(function () { noteWrite(); location.reload(); })
+        .catch(function (err) { y.disabled = false; wrap.querySelector("#dd_msg").textContent = "Couldn't delete it: " + (err.message || err); });
+    };
+  }, true);
+
   function visitRow(o) {
     var E = searchEsc;
     var chev = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
@@ -2507,7 +2537,9 @@
           beside: r.n > 1 ? '<span class="lap">×' + r.n + '</span>' : '' });
       }).join("")
       + (o.foot || o.edit ? '<div class="vfoot"><span>' + E(o.foot || '') + '</span>'
-        + (o.edit ? '<a class="vedit" href="' + E(o.edit) + '">Edit day</a>' : '') + '</div>' : '')
+        + (o.edit ? '<span class="vacts"><a class="vedit" href="' + E(o.edit) + '">Edit day</a>'
+          + (o.del ? '<button type="button" class="vdel" data-u="' + E(o.del.user) + '" data-d="' + E(o.del.d) + '" data-t="' + E(o.title) + '">Delete day</button>' : '')
+          + '</span>' : '') + '</div>' : '')
       + '</details>';
   }
 
