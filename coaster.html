@@ -14,7 +14,7 @@
 <base href="/">
 <title>Coaster — Coaster Hub</title>
 <meta name="description" content="One coaster: its specs, its park, and who has ridden it — Coaster Hub.">
-<link rel="stylesheet" href="/style.css?v=20261029a">
+<link rel="stylesheet" href="/style.css?v=20261030a">
 <link rel="stylesheet" href="/lists.css?v=20261005d">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). Light unless "dark" was chosen. */try{var chT=localStorage.getItem("ch_theme")}catch(e){}if(chT!=="dark")document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
@@ -196,7 +196,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261029a"></script>
+<script src="/app.js?v=20261030a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('coaster');
@@ -582,7 +582,14 @@ function riders(){
       var menu=document.createElement('div'); menu.className='mymenu'; menu.hidden=true;
       menu.innerHTML='<button type="button" class="plus">Add ride</button><button type="button" class="rm">Remove from my credits</button>';
       b.closest('.chips').insertAdjacentElement('afterend', menu);
-      b.onclick=function(){ menu.hidden=!menu.hidden; };
+      // A phone gets the two choices as a sheet up from the bottom (2026-10-30).
+      b.onclick=function(){
+        if(CoasterHub.isPhone()) return CoasterHub.actionSheet(row.name, [
+          {label:'Add ride', run:function(){ menu.querySelector('.plus').onclick(); }},
+          {label:'Remove from my credits', danger:true, run:function(){ menu.querySelector('.rm').onclick(); }}
+        ]);
+        menu.hidden=!menu.hidden;
+      };
       menu.querySelector('.plus').onclick=function(){ CoasterHub.confirmAdd(row, me.slug, {again:true}).then(function(ok){ if(ok) riders(); }); };
       menu.querySelector('.rm').onclick=function(){
         CoasterHub.confirmRemove(row, me.slug, +b.getAttribute('data-laps')).then(function(ok){ if(ok) riders(); });

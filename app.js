@@ -733,14 +733,14 @@
       var t = new Date(), today = t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
       var wrap = document.createElement("div");
       wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true");
-      wrap.style.cssText = "position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.45)";
-      wrap.innerHTML = '<div style="background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:20px;width:100%;max-width:360px;box-shadow:0 12px 40px var(--shadow)">'
+      wrap.className = "chdlg";
+      wrap.innerHTML = '<div class="chdlg-box">'
         + '<b style="display:block;font-size:1.05rem;line-height:1.3">' + (again ? 'Add a ride on ' + searchEsc(c.name) + '?' : 'Add ' + searchEsc(c.name) + ' to your credits?') + '</b>'
         + '<span style="display:block;color:var(--muted);font-size:.86rem;margin-top:2px">' + searchEsc(c.park || "") + '</span>'
         + '<label for="ca_date" style="display:block;font-size:.78rem;color:var(--muted);margin:16px 0 6px">' + (again ? 'Ride date' : 'First ridden') + ' <span style="opacity:.8">(optional)</span></label>'
         + '<input id="ca_date" type="date" max="' + today + '" style="width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px">'
         + '<p id="ca_msg" style="color:var(--bad);font-size:.84rem;margin:8px 0 0;min-height:1em"></p>'
-        + '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">'
+        + '<div class="chdlg-acts">'
         + '<button type="button" id="ca_no" style="font:inherit;font-weight:600;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer">Cancel</button>'
         + '<button type="button" id="ca_yes" style="font:inherit;font-weight:700;background:var(--accentfill);color:var(--onaccent);border:0;border-radius:10px;padding:9px 18px;cursor:pointer">' + (again ? 'Add ride' : 'Add') + '</button>'
         + '</div></div>';
@@ -758,7 +758,7 @@
         fetch("/api/rides", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" },
           body: JSON.stringify({ user: slug, d: d, entries: [{ c: c.id, n: 1 }] }) })
           .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || ("error " + r.status)); return j; }); })
-          .then(function (j) { noteWrite(); close({ d: d, result: j }); })
+          .then(function (j) { noteWrite(); haptic(); close({ d: d, result: j }); })
           .catch(function (e) { q("ca_yes").disabled = false; q("ca_msg").textContent = "Couldn't add it: " + (e.message || e); });
       };
       q("ca_yes").focus();
@@ -773,13 +773,13 @@
     return new Promise(function (resolve) {
       var wrap = document.createElement("div");
       wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true");
-      wrap.style.cssText = "position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.45)";
-      wrap.innerHTML = '<div style="background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:20px;width:100%;max-width:360px;box-shadow:0 12px 40px var(--shadow)">'
+      wrap.className = "chdlg";
+      wrap.innerHTML = '<div class="chdlg-box">'
         + '<b style="display:block;font-size:1.05rem;line-height:1.3">Remove ' + searchEsc(c.name) + ' from your credits?</b>'
         + '<span style="display:block;color:var(--muted);font-size:.86rem;margin-top:6px">' + searchEsc(c.park || "")
         + (laps > 1 ? ' &middot; all ' + laps + ' rides, dated ones included' : '') + '. It comes off your ranking too.</span>'
         + '<p id="cr_msg" style="color:var(--bad);font-size:.84rem;margin:8px 0 0;min-height:1em"></p>'
-        + '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">'
+        + '<div class="chdlg-acts">'
         + '<button type="button" id="cr_no" style="font:inherit;font-weight:600;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer">Cancel</button>'
         + '<button type="button" id="cr_yes" style="font:inherit;font-weight:700;background:var(--bad);color:#fff;border:0;border-radius:10px;padding:9px 18px;cursor:pointer">Remove</button>'
         + '</div></div>';
@@ -1240,6 +1240,10 @@
     // the page can scroll under it, and the one thing this must never do again
     // is get clipped by an ancestor.
     function place() {
+      // A phone gets it as a sheet up from the bottom, over a dimmed page.
+      var sheet = isPhone();
+      menu.classList.toggle("sheet", sheet);
+      if (sheet) { menu.style.left = ""; menu.style.top = ""; return; }
       var r = btn.getBoundingClientRect();
       menu.style.position = "fixed";
       menu.style.left = Math.round(r.left) + "px";
@@ -1261,8 +1265,12 @@
         menu.style.top = Math.round(r.top - 6 - h >= 8 ? r.top - 6 - h : Math.max(8, room - h)) + "px";
       }
     }
+    var shade = document.createElement("div");
+    shade.className = "rbback";
+    document.body.appendChild(shade);
     function open(on) {
       menu.hidden = !on;
+      shade.classList.toggle("on", on && isPhone());
       wrap.classList.toggle("open", on);
       btn.setAttribute("aria-expanded", on ? "true" : "false");
       if (!on) return;
@@ -1328,11 +1336,155 @@
     window.addEventListener("resize", function () { if (!menu.hidden) place(); });
   }
 
+  // ---- The phone layout (Carter, 2026-10-30: "a more app-like mobile layout",
+  // all of it but moving search and the theme switch, which he is still deciding).
+  // Everything here is for screens 680px and narrower; style.css scopes the looks
+  // the same way, so a computer sees no change.
+  function isPhone() { return !!(window.matchMedia && window.matchMedia("(max-width: 680px)").matches); }
+
+  // A small buzz when a ride is added. In the iPhone/Android app this becomes the
+  // native haptic (Capacitor's Haptics plugin, once the app exists); in a phone
+  // browser only Android vibrates, and iPhones ignore it.
+  function haptic() {
+    try {
+      var H = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
+      if (H && H.impact) { H.impact({ style: "LIGHT" }); return; }
+      if (navigator.vibrate) navigator.vibrate(10);
+    } catch (e) { /* nothing to buzz */ }
+  }
+
+  // A list of choices that slides up from the bottom of a phone. items: [{label,
+  // danger, run}]. The same .chdlg shell as confirmAdd, so it looks like one of them.
+  function actionSheet(title, items) {
+    var wrap = document.createElement("div");
+    wrap.className = "chdlg";
+    wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true");
+    wrap.innerHTML = '<div class="chdlg-box sheetlist">'
+      + (title ? '<b class="sheettitle">' + searchEsc(title) + '</b>' : '')
+      + items.map(function (it, i) {
+          return '<button type="button" class="sheetitem' + (it.danger ? ' danger' : '') + '" data-i="' + i + '">' + searchEsc(it.label) + '</button>';
+        }).join("")
+      + '<button type="button" class="sheetitem cancel">Cancel</button></div>';
+    document.body.appendChild(wrap);
+    var close = function () { document.removeEventListener("keydown", key); wrap.remove(); };
+    var key = function (e) { if (e.key === "Escape") close(); };
+    document.addEventListener("keydown", key);
+    wrap.addEventListener("click", function (e) {
+      if (e.target === wrap) { close(); return; }
+      var b = e.target.closest && e.target.closest(".sheetitem");
+      if (!b) return;
+      close();
+      var it = items[+b.getAttribute("data-i")];
+      if (it && it.run) it.run();
+    });
+  }
+
+  // The tab pages are the roots; everything else is a page you went INTO, and
+  // gets a Back button where the logo was.
+  var TAB_ROOTS = { riders: 1, explore: 1, log: 1, rankings: 1, account: 1 };
+  function phoneShell(page, urlSlug) {
+    var root = document.documentElement;
+    root.classList.add("pg-" + page);
+    var mine = page === "profile" || page === "count" || page === "map";
+    var detail = !TAB_ROOTS[page] && !(mine && !urlSlug);
+    if (detail) root.classList.add("detail");
+    // Your own profile, count and map are Me's pages, not somewhere you went
+    // into: no Back once we know they are yours.
+    if (mine && urlSlug) me().then(function (a) {
+      if (a && a.slug === urlSlug && page !== "map") root.classList.remove("detail");
+    }).catch(function () {});
+
+    var inner = document.querySelector(".nav-inner"), brand = inner && inner.querySelector(".brand");
+    if (inner && brand && !inner.querySelector(".navback")) {
+      var back = document.createElement("button");
+      back.type = "button"; back.className = "navback"; back.setAttribute("aria-label", "Back");
+      back.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Back</span>';
+      back.onclick = function () {
+        var fromHere = document.referrer && document.referrer.indexOf(location.origin) === 0;
+        if (fromHere && history.length > 1) { history.back(); return; }
+        var k = navKey(page);
+        location.href = k === "explore" ? "/explore" : k === "rankings" ? "/rankings" : k === "profile" ? "/account" : "/";
+      };
+      var title = document.createElement("span");
+      title.className = "navtitle"; title.setAttribute("aria-hidden", "true");
+      brand.insertAdjacentElement("afterend", back);
+      back.insertAdjacentElement("afterend", title);
+      // The page's big title shrinks into the top bar once it scrolls under it.
+      var h1 = document.querySelector(".hero h1");
+      if (h1 && window.IntersectionObserver) {
+        new IntersectionObserver(function (es) {
+          var gone = !es[0].isIntersecting && es[0].boundingClientRect.top < 0;
+          if (gone) title.textContent = h1.textContent;
+          root.classList.toggle("navscrolled", gone);
+        }, { rootMargin: "-64px 0px 0px 0px" }).observe(h1);
+      }
+    }
+
+    // Grey placeholder shapes while a page loads. The words stay for a screen
+    // reader, and on a computer, where style.css hides the shapes instead.
+    var ld = document.getElementById("loading");
+    if (ld && !ld.querySelector(".skel")) {
+      ld.innerHTML = '<span class="skeltext">' + ld.innerHTML + '</span>'
+        + '<div class="skel" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>';
+    }
+
+    if (page === "riders" || page === "changes") pullToRefresh();
+
+    // Each tab remembers where you were (see buildTabBar); this page's scroll
+    // position is kept for when a tab brings you back to it.
+    var here = location.pathname + location.search;
+    window.addEventListener("pagehide", function () {
+      try { window.sessionStorage.setItem("ch_y_" + here, String(Math.round(window.scrollY))); } catch (e) {}
+    });
+    var want = null;
+    try {
+      if (window.sessionStorage.getItem("ch_restore") === here) {
+        window.sessionStorage.removeItem("ch_restore");
+        want = +window.sessionStorage.getItem("ch_y_" + here) || 0;
+      }
+    } catch (e) {}
+    // The page draws its rows after its data arrives, so try twice.
+    if (want) [500, 1400].forEach(function (ms) {
+      setTimeout(function () { if (window.scrollY < want - 40) window.scrollTo({ top: want, behavior: "instant" }); }, ms);
+    });
+  }
+
+  // Pull down at the top of the page to reload it (Home and the activity feed).
+  function pullToRefresh() {
+    if (!("ontouchstart" in window) || !isPhone()) return;
+    var ind = document.createElement("div");
+    ind.className = "ptr"; ind.setAttribute("aria-hidden", "true");
+    ind.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>';
+    document.body.appendChild(ind);
+    var y0 = null, d = 0, GO = 64;
+    var show = function () {
+      ind.style.opacity = Math.min(1, d / 40);
+      ind.style.transform = "translateY(" + (d - 44) + "px) rotate(" + (d * 4) + "deg)";
+      ind.classList.toggle("ready", d >= GO);
+    };
+    window.addEventListener("touchstart", function (e) {
+      var busy = document.querySelector(".chdlg") || document.querySelector(".rbmenu:not([hidden])");
+      y0 = (window.scrollY <= 0 && e.touches.length === 1 && !busy) ? e.touches[0].clientY : null; d = 0;
+    }, { passive: true });
+    window.addEventListener("touchmove", function (e) {
+      if (y0 == null) return;
+      d = window.scrollY > 0 ? 0 : Math.max(0, Math.min(96, (e.touches[0].clientY - y0) * 0.5));
+      show();
+    }, { passive: true });
+    window.addEventListener("touchend", function () {
+      if (y0 == null) return;
+      y0 = null;
+      if (d >= GO) { ind.classList.add("spin"); ind.style.transform = "translateY(" + (GO - 44) + "px)"; location.reload(); return; }
+      d = 0; show();
+    }, { passive: true });
+  }
+
   var RELOADS_ON_WRITE = { riders: 1, count: 1, map: 1, park: 1, coaster: 1, changes: 1, qc: 1, sitemap: 1,
                            manufacturer: 1, location: 1, coasters: 1, parks: 1 };
   function initNav(page) {
     if (typeof document === "undefined") return;
     applyTheme(readTheme());
+    phoneShell(page, currentUser());
 
     // A write in another tab (noteWrite, or /edit's copy of it) reloads a page
     // that only SHOWS data, so the map or the count you left open beside /edit
@@ -1622,6 +1774,31 @@
         + '<span>' + t.label + '</span></a>';
     }).join("");
     document.body.appendChild(nav);
+
+    // Each tab remembers the last page you had open in it (not Log, which is
+    // always a fresh day). Tapping the tab you are on scrolls to the top, and
+    // from the top takes you back to that tab's first page — how every phone
+    // app's tabs behave (Carter, 2026-10-30).
+    var here = location.pathname + location.search;
+    try { if (on && on !== "log") window.sessionStorage.setItem("ch_tab_" + on, here); } catch (e) {}
+    nav.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a[data-nav]");
+      if (!a) return;
+      var k = a.getAttribute("data-nav");
+      if (a.classList.contains("on")) {
+        if (window.scrollY > 8) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+        else if (a.pathname === location.pathname) e.preventDefault();
+        return;
+      }
+      if (k === "log") return;
+      var mem = null;
+      try { mem = window.sessionStorage.getItem("ch_tab_" + k); } catch (x) {}
+      if (mem && mem !== here && mem.charAt(0) === "/") {
+        e.preventDefault();
+        try { window.sessionStorage.setItem("ch_restore", mem); } catch (x) {}
+        location.href = mem;
+      }
+    });
 
     // Your own face on the Profile tab, the way every app you already use does
     // it. No picture, or signed out, and the outline of a person stays — the
@@ -2707,7 +2884,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, riddenOf: riddenOf, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

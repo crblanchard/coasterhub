@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-29T22:34:12Z",
-   "text": "The rider picker now has a search box and shows just you and the people you follow, and racing pairs in your rankings show their Global place. Coaster pages are tidier: the facts sit on one line, the park's country is under the name, and adding a credit is a small button beside it."
+   "at": "2026-10-30T00:13:38Z",
+   "text": "On phones, Coaster Hub now works more like an app: page titles shrink into the top bar as you scroll, pages you open have a Back button, and choices slide up from the bottom. Tabs remember where you were, tapping the tab you're on jumps to the top, and Home refreshes when you pull down."
   },
   {
    "at": "2026-10-17T23:34:17Z",

@@ -5667,3 +5667,31 @@ yearly, a store update about once a year (Google's target-SDK deadline each
 August, Apple's new-Xcode requirement), and the 24-hour report duty.
 
 The app project is a new top-level folder; add it to `.assetsignore`.
+
+## The app-like phone layout (2026-10-30)
+
+Carter approved eight of nine proposals for phones (≤680px; desktop unchanged).
+All of it lives in `app.js` `phoneShell()` (called first thing in `initNav`) and
+one block at the end of `style.css`:
+- `<html>` gets `pg-<page>` and, on pages you went INTO, `detail`. TAB_ROOTS
+  are riders/explore/log/rankings/account; your own profile/count drop `detail`
+  once /api/auth/me says they are yours.
+- Phone header: the brand shows on Home only; `detail` pages get `.navback`
+  (history.back() when the referrer is ours, else the tab's root), and
+  `.navtitle` shows the hero h1's text once it scrolls under the bar
+  (IntersectionObserver, `html.navscrolled`).
+- The skyline strip is Home's only on a phone; no footer on a phone.
+- confirmAdd/confirmRemove are `.chdlg`/`.chdlg-box` classes now (were inline
+  styles) so a phone shows them as bottom sheets; `actionSheet()` is the
+  generic one (coaster page ⋯ uses it on phones); the rider menu becomes
+  `.rbmenu.sheet` with a `.rbback` shade.
+- Tab bar: each tab remembers its last page in sessionStorage (`ch_tab_<k>`,
+  not Log) and restores scroll (`ch_y_<path>`, `ch_restore`); tapping the open
+  tab scrolls to top, then goes to the tab's first page.
+- Pull-to-refresh on Home and /changes; `#loading` gets grey `.skel` shapes on
+  phones (the words stay for screen readers, and show on desktop; a
+  `data-loading` joke line stays visible above the shapes).
+- `CoasterHub.haptic()` — Capacitor Haptics in the app, navigator.vibrate on
+  Android browsers — fires on every ride added (/log tapped(), confirmAdd).
+- **Not done: #3**, moving search into Explore and the theme switch into Me.
+  Carter is undecided; a mockup was shown.
