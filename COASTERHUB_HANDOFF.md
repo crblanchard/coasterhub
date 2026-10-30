@@ -6024,3 +6024,4 @@ proposed, not started.
    stale-while-revalidate would save one more round trip per tap, but every
    deploy would then show one page view late, which would confuse testing.
 - **Map stops at the tab bar on phones** (Carter, 2026-10-31: summary card hidden behind the bar). map.html's body is border-box with padding = the bar's height (60px of tabs + its bottom padding); the general body padding now follows the lowered bar (66px + the same max()).
+- **Global rankings: no Personal lists section** (Carter, 2026-10-31). #cards is kept, hidden, so its filler code is untouched.
