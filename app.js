@@ -1013,14 +1013,6 @@
   function appShell() {
     if (!inApp()) return;
     document.documentElement.classList.add("inapp");
-    // No page slides in the app (Carter, 2026-10-30: Rankings and Home "still
-    // sometimes sliding"). The phone's own swipe-back is the animation there.
-    // A navigation only animates if the page being LEFT opts in, so turning it
-    // off here, on every page, covers every way out of it — taps, redirects,
-    // the back pin — where marking each link missed some.
-    var vt = document.createElement("style");
-    vt.textContent = "@view-transition{navigation:none}";
-    document.head.appendChild(vt);
     pushWire();
     // A coasterhub.org link tapped elsewhere (Mail, Messages) opens the app
     // (apple-app-site-association, worker.js): go to the page it names.
@@ -1478,8 +1470,7 @@
     // A tab change is the same: an app's tabs switch, they do not slide
     // (Carter, 2026-10-30: Rankings "slides even when I do it directly from
     // the menu bar").
-    // In the app nothing slides (the head of every page also opts out there).
-    if (t === "same" || t === "tab" || /CoasterHubApp/.test(navigator.userAgent)) { try { e.viewTransition.skipTransition(); } catch (x) {} return; }
+    if (t === "same" || t === "tab") { try { e.viewTransition.skipTransition(); } catch (x) {} return; }
     // The kind goes on <html> as data-vt rather than as a view-transition
     // type: WebKit in the iPhone app ignored the types, so Back slid the
     // wrong way and tabs slid at all.
@@ -1489,7 +1480,24 @@
       try { e.viewTransition.finished.then(function () { root.removeAttribute("data-vt"); }, function () { root.removeAttribute("data-vt"); }); } catch (x) {}
     }
   });
-  function markTransition(kind) { try { window.sessionStorage.setItem("ch_vt", kind); } catch (e) {} }
+  // A tab tap or a same-level switch never slides (Carter, 2026-10-31: "not
+  // when you use the bottom menu bar to go between pages in any situation").
+  // Skipping on the arriving page was not enough in the app's WebKit, so the
+  // page being LEFT also opts out at the tap: a navigation animates only if
+  // both pages opt in. Back still slides.
+  var NOVT = null;
+  function markTransition(kind) {
+    try { window.sessionStorage.setItem("ch_vt", kind); } catch (e) {}
+    if (kind === "same" || kind === "tab") {
+      if (!NOVT) { NOVT = document.createElement("style"); NOVT.textContent = "@view-transition{navigation:none}"; }
+      if (!NOVT.parentNode) document.head.appendChild(NOVT);
+    }
+  }
+  // Coming back to this page from the browser's cache: it may still carry the
+  // opt-out from the tap that left it.
+  if (typeof window !== "undefined") window.addEventListener("pageshow", function (e) {
+    if (e.persisted && NOVT && NOVT.parentNode) NOVT.parentNode.removeChild(NOVT);
+  });
   // Links between views on one level: Mine | Global, a rider's Overview ·
   // Credits · Map tabs, and your own list from Global's "Personal lists".
   var MY_SLUG = null;
@@ -2268,11 +2276,11 @@
     nav.addEventListener("click", function (e) {
       var a = e.target.closest && e.target.closest("a[data-nav]");
       if (!a) return;
-      markTransition("tab");
       if (a.classList.contains("on")) {
-        if (window.scrollY > 8) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }
-        else if (a.pathname === location.pathname) e.preventDefault();
+        if (window.scrollY > 8) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+        if (a.pathname === location.pathname) { e.preventDefault(); return; }
       }
+      markTransition("tab");
     });
 
     // Your own face on the Profile tab, the way every app you already use does

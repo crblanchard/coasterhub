@@ -55,7 +55,12 @@ self.addEventListener("fetch", function (e) {
       clearTimeout(timer); finish(res);
     }).catch(function () {
       clearTimeout(timer);
-      fallback().then(finish);
+      // A page fetch can fail for a reason that is not "no signal" — the app's
+      // web view interrupting a load on Back, a blip between cell towers —
+      // and "No signal" over a page that was one retry away was showing up
+      // mid-browse (Carter, 2026-10-31). Pages get one more try first.
+      if (req.mode !== "navigate") { fallback().then(finish); return; }
+      fetch(req).then(finish, function () { fallback().then(finish); });
     });
   }));
 });

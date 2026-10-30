@@ -5947,3 +5947,13 @@ runs bash with pipefail — the first run "passed" without uploading.
   agent (`CoasterHubApp`, appended by capacitor.config.json) and writes
   `@view-transition{navigation:none}` plus `html.inapp` before anything
   renders; pagereveal also skips in the app. The website is unchanged.
+- **Revised the same night** (Carter: "I like the slide when you go back a
+  page ... but not when you use the bottom menu bar to go between pages in
+  any situation"). The blanket in-app opt-out is gone (the head script only
+  marks `html.inapp` now). Instead `markTransition("tab"|"same")` appends
+  `@view-transition{navigation:none}` to the page being LEFT at the tap —
+  reliable where skipTransition() on the arriving page was not — and
+  removes it on a bfcache pageshow. Back and links into pages slide again.
+- **"No signal" on Back**: sw.js retries a failed page fetch once before
+  falling back to /offline (build 10 still had Capacitor's errorPath too;
+  build 11 removed it).
