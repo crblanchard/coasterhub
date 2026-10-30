@@ -6047,3 +6047,4 @@ proposed, not started.
    plus every report; a ranking burst is one row, so one push; an admin's own
    actions are skipped.
 7. Weekly digest — "maaaaybe but wait for now". Not built.
+- **/api/push/test** (admins, GET): sends a test to your own phones and returns each step — secret present, project, Google sign-in, FCM's answer per phone — after a reviewer follow sent nothing. sendPush/fcmAuth now console.error FCM's refusals (Workers observability).

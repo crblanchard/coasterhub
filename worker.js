@@ -844,7 +844,7 @@ async function fcmAuth(env) {
     body: "grant_type=" + encodeURIComponent("urn:ietf:params:oauth:grant-type:jwt-bearer")
       + "&assertion=" + head + "." + claims + "." + b64url(sig),
   });
-  if (!res.ok) return null;
+  if (!res.ok) { console.error("FCM sign-in refused", res.status, await res.text().catch(() => "")); return null; }
   const j = await res.json();
   FCM_AUTH = { token: j.access_token, exp: now + (j.expires_in || 3600), project: sa.project_id };
   return FCM_AUTH;
@@ -875,6 +875,7 @@ async function sendPush(env, slugs, { title, body, url }) {
         data: { url: url || "/" }, apns: { payload: { aps: { sound: "default" } } } } }),
     });
     if (res.ok) { sent++; continue; }
+    console.error("FCM send failed", res.status, await res.clone().text().catch(() => ""));
     // A phone that deleted the app, or a token Firebase replaced: forget it.
     if (res.status === 404 || res.status === 400) {
       try { await env.DB.prepare("DELETE FROM push_tokens WHERE token = ?").bind(r.token).run(); } catch (e) {}
@@ -2428,6 +2429,37 @@ export default {
           if (/no such table/i.test(String(e && e.message || e))) return err(503, "run migrations/085-push-tokens.sql first");
           throw e;
         }
+      }
+
+      // Is notification sending working? Admins only (2026-10-31, after a
+      // follow sent nothing): sends a test to your own phones and shows what
+      // each step answered — the secret, Google's sign-in, and FCM per phone.
+      // Open https://coasterhub.org/api/push/test signed in as an admin.
+      if (request.method === "GET" && path === "/api/push/test") {
+        if (!(acct && acct.admin)) return err(401, "admins only");
+        const out = { secret: !!env.FCM_SERVICE_ACCOUNT };
+        if (!out.secret) return json({ ...out, fix: "Set the Worker secret FCM_SERVICE_ACCOUNT (the Firebase service-account JSON)." });
+        try { const sa = JSON.parse(env.FCM_SERVICE_ACCOUNT); out.project = sa.project_id; out.email = sa.client_email; }
+        catch (e) { return json({ ...out, fix: "FCM_SERVICE_ACCOUNT is not valid JSON: paste the whole file, { to }." }); }
+        FCM_AUTH = null;
+        let auth = null;
+        try { auth = await fcmAuth(env); } catch (e) { out.authError = String(e && e.message || e); }
+        out.signedIn = !!auth;
+        if (!auth) return json({ ...out, fix: out.authError ? "The service-account key could not be used." : "Google refused the service account's sign-in." });
+        let rows = [];
+        try { rows = (await env.DB.prepare("SELECT token, platform FROM push_tokens WHERE slug = ?").bind(acct.slug).all()).results; } catch (e) {}
+        out.phones = [];
+        for (const r of rows) {
+          const res = await fetch("https://fcm.googleapis.com/v1/projects/" + auth.project + "/messages:send", {
+            method: "POST", headers: { authorization: "Bearer " + auth.token, "content-type": "application/json" },
+            body: JSON.stringify({ message: { token: r.token, notification: { title: "Test from Coaster Hub", body: "Notifications work." },
+              data: { url: "/" }, apns: { payload: { aps: { sound: "default" } } } } }),
+          });
+          let body = null; try { body = await res.json(); } catch (e) {}
+          out.phones.push({ platform: r.platform, status: res.status, answer: body });
+        }
+        if (!rows.length) out.fix = "No phone registered for your account: allow notifications in the app.";
+        return json(out);
       }
 
       // ---- report and block (084; both app stores require them) ----
