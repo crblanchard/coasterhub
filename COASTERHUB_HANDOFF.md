@@ -5991,3 +5991,4 @@ proposed, not started.
    to keep id specificity. A class-based existence check must skip
    `.snapcopy` (meTabs does) — watch for that in new code.
 - **Swipe-to-log only on park pages and Log** (Carter, 2026-10-31): the '+ Log a ride' strip showed through beside Home's top 5. CSS and the touch handler are scoped to html.pg-park / html.pg-log, and the strip is opacity 0 until a row is being dragged. Long-press 'Log a ride today' still works everywhere.
+- **Coaster page Rankings grouped by place** (Carter, 2026-10-31: fourteen rider pills 'needs to be consolidated'): coaster.html now uses CoasterHub.whoByPlace, the same '#1 · names' rows as Global's expanded rows (lists.css .wplaces).
