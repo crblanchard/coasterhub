@@ -1055,9 +1055,11 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 @media (prefers-reduced-motion:reduce){.lpshade,.lpcard,.lpmenu{animation:none}}
 
 /* Back is the logo's pin, turned to point left (app.js phoneShell, 2026-10-30). */
-.backmark{display:block;width:34px;height:34px;transform:rotate(90deg);animation:pinturn .5s cubic-bezier(.3,1.35,.5,1) both}
+.backmark{display:block;width:34px;height:34px;transform:rotate(90deg);animation:pinturn .65s cubic-bezier(.3,1.35,.5,1) both}
+.backmark.unturn{animation:pinunturn .45s cubic-bezier(.3,1.35,.5,1) both}
+@keyframes pinunturn{from{transform:rotate(90deg)}to{transform:rotate(0)}}
 @keyframes pinturn{from{transform:rotate(0)}to{transform:rotate(90deg)}}
-@media (prefers-reduced-motion:reduce){.backmark{animation:none}}
+@media (prefers-reduced-motion:reduce){.backmark,.backmark.unturn{animation:none}}
 
 /* Page transitions, phones only (2026-10-30). Cross-document view transitions:
    Safari 18.2+, Chrome 126+; anything older just changes page as before. The

@@ -1439,7 +1439,27 @@
       // a page you went into). A 44px target, Apple's minimum.
       var mk = brand.querySelector("img");
       back.innerHTML = '<img class="backmark" alt="" width="34" height="34" src="' + (mk ? mk.getAttribute("src") : "/mark.svg") + '">';
+      var going = false;
       back.onclick = function () {
+        if (going) return;
+        going = true;
+        // The pin spins back upright first, then you go (Carter, 2026-10-30:
+        // "make it spin back when you click on it").
+        var img = back.querySelector(".backmark");
+        if (img && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+          img.classList.add("unturn");
+          setTimeout(goBack, 420);
+        } else goBack();
+      };
+      // Forward again restores this page from the browser's cache as it was
+      // left: pin upright, button locked. Turn it back round.
+      window.addEventListener("pageshow", function (e) {
+        if (!e.persisted) return;
+        going = false;
+        var img = back.querySelector(".backmark");
+        if (img) { img.classList.remove("unturn"); img.style.animation = "none"; void img.offsetWidth; img.style.animation = ""; }
+      });
+      var goBack = function () {
         var fromHere = document.referrer && document.referrer.indexOf(location.origin) === 0;
         markTransition("back");
         if (fromHere && history.length > 1) { history.back(); return; }
@@ -1508,9 +1528,9 @@
     var want = null;
     try {
       var nav0 = window.performance && performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
-      var back = nav0 && nav0.type === "back_forward";
-      if (window.sessionStorage.getItem("ch_restore") === here) { window.sessionStorage.removeItem("ch_restore"); back = true; }
-      if (back) want = +window.sessionStorage.getItem("ch_y_" + here) || 0;
+      var wasBack = nav0 && nav0.type === "back_forward";
+      if (window.sessionStorage.getItem("ch_restore") === here) { window.sessionStorage.removeItem("ch_restore"); wasBack = true; }
+      if (wasBack) want = +window.sessionStorage.getItem("ch_y_" + here) || 0;
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     } catch (e) {}
     if (want > 0) {
