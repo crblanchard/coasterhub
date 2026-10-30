@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyAHv9RThne4qJD8SQ6cXDm_OK1SbM0cFlg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>733036406880</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>org.coasterhub.app</string>
+	<key>PROJECT_ID</key>
+	<string>coaster-7c2cc</string>
+	<key>STORAGE_BUCKET</key>
+	<string>coaster-7c2cc.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:733036406880:ios:bb58667e9328515cd77b05</string>
+</dict>
+</plist>

@@ -19,6 +19,24 @@
       "launchAutoHide": true,
       "backgroundColor": "#0b1020",
       "showSpinner": false
+    },
+    "FirebaseMessaging": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    }
+  },
+  "experimental": {
+    "ios": {
+      "spm": {
+        "packageOptions": {
+          "@capacitor-firebase/messaging": {
+            "symlink": true
+          }
+        }
+      }
     }
   }
 }

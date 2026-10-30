@@ -76,5 +76,9 @@
 	<string>Find the park you're at, so logging a ride opens on it. Your location stays on your phone.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

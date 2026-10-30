@@ -1013,6 +1013,7 @@
   function appShell() {
     if (!inApp()) return;
     document.documentElement.classList.add("inapp");
+    pushWire();
     document.addEventListener("click", function (e) {
       var a = e.target.closest && e.target.closest("a[href]");
       if (!a || e.defaultPrevented) return;
@@ -1022,6 +1023,63 @@
       e.preventDefault();
       br.open({ url: u.href });
     });
+  }
+
+  // ---- notifications, in the app (2026-10-30) ------------------------------
+  // The phone's Firebase token goes to /api/push/token once you allow
+  // notifications; worker.js sends "X followed you" and "X logged a day".
+  // Asked at a moment it makes sense (after you follow someone, after you log a
+  // day), never on a cold launch. Re-sent weekly, or when the token or rider
+  // changes, so the server's copy stays fresh.
+  var PUSH_KEY = "ch_push";
+  function pushSend(tok, slug) {
+    var key = tok + "|" + slug, was = null;
+    try { was = JSON.parse(window.localStorage.getItem(PUSH_KEY) || "null"); } catch (e) {}
+    if (was && was.k === key && Date.now() - was.at < 7 * 86400000) return Promise.resolve(true);
+    return fetch("/api/push/token", { method: "POST", credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: tok, platform: (window.Capacitor.getPlatform && window.Capacitor.getPlatform()) || null }) })
+      .then(function (r) {
+        if (r.ok) { try { window.localStorage.setItem(PUSH_KEY, JSON.stringify({ k: key, at: Date.now() })); } catch (e) {} }
+        return r.ok;
+      });
+  }
+  function pushSync(ask) {
+    var fm = nativePlugin("FirebaseMessaging");
+    if (!fm) return Promise.resolve(false);
+    return me().then(function (a) {
+      if (!a || !a.slug) return false;
+      return fm.checkPermissions().then(function (p) {
+        if (p.receive === "granted") return true;
+        if (p.receive === "prompt" && ask) return fm.requestPermissions().then(function (q) { return q.receive === "granted"; });
+        return false;
+      }).then(function (ok) {
+        return ok ? fm.getToken().then(function (t) { return t && t.token ? pushSend(t.token, a.slug) : false; }) : false;
+      });
+    }).catch(function () { return false; });
+  }
+  function askPush() { return pushSync(true); }
+  // Signing out: this phone stops getting the account's notifications.
+  function pushForget() {
+    var fm = nativePlugin("FirebaseMessaging");
+    try { window.localStorage.removeItem(PUSH_KEY); } catch (e) {}
+    if (!fm) return Promise.resolve();
+    return fm.getToken().then(function (t) {
+      if (!t || !t.token) return;
+      return fetch("/api/push/token", { method: "DELETE", credentials: "same-origin",
+        headers: { "content-type": "application/json" }, body: JSON.stringify({ token: t.token }) });
+    }).catch(function () {});
+  }
+  function pushWire() {
+    var fm = nativePlugin("FirebaseMessaging");
+    if (!fm) return;
+    // Tapped a notification: open the page it is about.
+    fm.addListener("notificationActionPerformed", function (ev) {
+      var u = ev && ev.notification && ev.notification.data && ev.notification.data.url;
+      if (u && u.charAt(0) === "/") location.href = u;
+    });
+    fm.addListener("tokenReceived", function () { pushSync(false); });
+    pushSync(false);
   }
 
   function applyTheme(t) {
@@ -3316,7 +3374,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

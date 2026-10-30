@@ -482,8 +482,8 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261030v"></script>
-<script src="/profile-edit.js?v=20261030a"></script>
+<script src="/app.js?v=20261030w"></script>
+<script src="/profile-edit.js?v=20261030b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('profile');
@@ -765,6 +765,8 @@ function mountFollows(host, slug){
         // in the same frame as the button above it.
         D.you=j.you; D.followers=j.followers; D.following=j.following;
         CoasterHub.haptic();
+        // Just followed someone, in the app: offer notifications (2026-10-30).
+        if(j.you && CoasterHub.askPush) CoasterHub.askPush();
       })
       .catch(function(e){ console.error(e); })
       .then(function(){ busy=false; draw(); });

@@ -799,6 +799,98 @@ async function addUser(env, body) {
   return { ok: true, slug: slug, name: name };
 }
 
+// ---- Push notifications (2026-10-30) -------------------------------------
+// The app (app/) registers each phone's Firebase Cloud Messaging token with
+// POST /api/push/token; migrations/085-push-tokens.sql keeps them, one row per
+// phone, keyed to the rider. Sending goes through FCM's HTTP v1 API for both
+// iPhone and Android — not to Apple directly, because APNs needs HTTP/2 and a
+// Worker's fetch does not speak it. FCM_SERVICE_ACCOUNT is the Firebase
+// service-account JSON, a Worker secret; without it nothing is sent and
+// nothing complains.
+//
+// What sends one: somebody follows you, and somebody you follow logs a day
+// (a recent one, not a back-filled old trip). Every send is fire-and-forget
+// in ctx.waitUntil, after the answer: a notification must never fail a write.
+let FCM_AUTH = null;   // { token, exp, project } cached for the isolate's life
+
+function b64url(bytes) {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function fcmAuth(env) {
+  if (!env.FCM_SERVICE_ACCOUNT) return null;
+  const now = Math.floor(Date.now() / 1000);
+  if (FCM_AUTH && FCM_AUTH.exp - 60 > now) return FCM_AUTH;
+  const sa = JSON.parse(env.FCM_SERVICE_ACCOUNT);
+  const head = b64url(enc.encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
+  const claims = b64url(enc.encode(JSON.stringify({
+    iss: sa.client_email, scope: "https://www.googleapis.com/auth/firebase.messaging",
+    aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600 })));
+  const pem = String(sa.private_key).replace(/-----[^-]+-----/g, "").replace(/\s+/g, "");
+  const der = Uint8Array.from(atob(pem), (c) => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("pkcs8", der, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, enc.encode(head + "." + claims)));
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: "grant_type=" + encodeURIComponent("urn:ietf:params:oauth:grant-type:jwt-bearer")
+      + "&assertion=" + head + "." + claims + "." + b64url(sig),
+  });
+  if (!res.ok) return null;
+  const j = await res.json();
+  FCM_AUTH = { token: j.access_token, exp: now + (j.expires_in || 3600), project: sa.project_id };
+  return FCM_AUTH;
+}
+
+// To every phone of every rider in `slugs`. `url` is a path on the site the
+// app opens when the notification is tapped.
+async function sendPush(env, slugs, { title, body, url }) {
+  if (!env.FCM_SERVICE_ACCOUNT || !slugs.length) return { sent: 0 };
+  let rows = [];
+  try {
+    // In chunks: D1 refuses more than 100 bound values in one statement.
+    for (let i = 0; i < slugs.length; i += 90) {
+      const part = slugs.slice(i, i + 90);
+      rows = rows.concat((await env.DB.prepare("SELECT token FROM push_tokens WHERE slug IN (" + part.map(() => "?").join(",") + ")")
+        .bind(...part).all()).results);
+    }
+  } catch (e) { return { sent: 0 }; }   // 085 not run yet
+  if (!rows.length) return { sent: 0 };
+  const auth = await fcmAuth(env);
+  if (!auth) return { sent: 0 };
+  let sent = 0;
+  for (const r of rows) {
+    const res = await fetch("https://fcm.googleapis.com/v1/projects/" + auth.project + "/messages:send", {
+      method: "POST",
+      headers: { authorization: "Bearer " + auth.token, "content-type": "application/json" },
+      body: JSON.stringify({ message: { token: r.token, notification: { title, body },
+        data: { url: url || "/" }, apns: { payload: { aps: { sound: "default" } } } } }),
+    });
+    if (res.ok) { sent++; continue; }
+    // A phone that deleted the app, or a token Firebase replaced: forget it.
+    if (res.status === 404 || res.status === 400) {
+      try { await env.DB.prepare("DELETE FROM push_tokens WHERE token = ?").bind(r.token).run(); } catch (e) {}
+    }
+  }
+  return { sent };
+}
+
+// Somebody you follow logged a day. Recent days only: a trip from 2019 typed
+// in today is news to nobody.
+async function pushDayLogged(env, slug, out) {
+  if (!out || !out.added || !out.date || !out.park) return;
+  if (Date.now() - Date.parse(out.date + "T00:00:00Z") > 3 * 86400000) return;
+  let fans;
+  try { fans = (await env.DB.prepare("SELECT follower FROM follows WHERE followee = ?").bind(slug).all()).results.map(r => r.follower); }
+  catch (e) { return; }
+  if (!fans.length) return;
+  const u = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(slug).first();
+  const name = (u && u.name) || slug;
+  await sendPush(env, fans, { title: name + " logged a day",
+    body: out.added + " ride" + (out.added === 1 ? "" : "s") + " at " + out.park, url: "/user/" + slug });
+}
+
 // ---- Keeping names and bios clean (2026-10-30) ----------------------------
 // Both app stores want objectionable profile text filtered before anyone sees
 // it, on top of Report. A short list, on purpose: slurs and the strongest
@@ -1189,6 +1281,7 @@ async function editDay(env, b) {
 }
 
 async function addRides(env, b) {
+  let park = null;   // the day's park label, for the followers' notification
   const slug = String(b && b.user || "").toLowerCase();
   const u = await env.DB.prepare("SELECT * FROM users WHERE slug = ?").bind(slug).first();
   if (!u) return { bad: [400, "no such user"] };
@@ -1297,9 +1390,10 @@ async function addRides(env, b) {
           if (t) at = new Date(t + 60 * 1000).toISOString();
         } catch (e) { /* stamped now, as any other day */ }
       }
+      park = await parkLabel(env, ids);
       await recordActivity(env, "rides", {
         actor: slug,
-        subject: await parkLabel(env, ids),
+        subject: park,
         n: inserted,
         detail: { rides: inserted, coasters: norm.length,
                   newCredits: total.credits - wasCredits, date: d,
@@ -1314,6 +1408,7 @@ async function addRides(env, b) {
     total: total.rides,
     credits: total.credits,
     date: d,
+    park: park,
   };
 }
 
@@ -2154,6 +2249,34 @@ export default {
         }
       }
 
+      // ---- push tokens (085) ----
+      // The app sends its phone's FCM token after you allow notifications, and
+      // again whenever it changes; signing out of the app removes it. A token
+      // moves to whoever registers it last, so a shared phone follows its
+      // current rider.
+      if (path === "/api/push/token" && (request.method === "POST" || request.method === "DELETE")) {
+        const b = await request.json().catch(() => ({}));
+        const token = String(b && b.token || "");
+        if (!token || token.length > 4096) return err(400, "need a token");
+        try {
+          if (request.method === "DELETE") {
+            await env.DB.prepare("DELETE FROM push_tokens WHERE token = ?").bind(token).run();
+            return json({ ok: true });
+          }
+          if (!(acct && acct.slug)) return err(401, "sign in first");
+          const platform = /^(ios|android)$/.test(b.platform) ? b.platform : null;
+          const now = new Date().toISOString();
+          await env.DB.prepare(
+            "INSERT INTO push_tokens (token,slug,platform,created,seen) VALUES (?,?,?,?,?) " +
+            "ON CONFLICT(token) DO UPDATE SET slug = excluded.slug, platform = excluded.platform, seen = excluded.seen")
+            .bind(token, acct.slug, platform, now, now).run();
+          return json({ ok: true });
+        } catch (e) {
+          if (/no such table/i.test(String(e && e.message || e))) return err(503, "run migrations/085-push-tokens.sql first");
+          throw e;
+        }
+      }
+
       // ---- report and block (084; both app stores require them) ----
       // Signed in only: a report from nobody is a spam channel, and a block
       // belongs to a rider.
@@ -2248,9 +2371,13 @@ export default {
           if (await eitherBlocked(env, acct.slug, slug)) return err(403, "you can't follow this rider");
           // DO NOTHING, so following twice — two tabs, a double tap — is the
           // same as following once rather than a constraint error.
-          await env.DB.prepare(
+          const fresh = await env.DB.prepare(
             "INSERT INTO follows (follower,followee,at) VALUES (?,?,?) ON CONFLICT DO NOTHING")
             .bind(acct.slug, slug, new Date().toISOString()).run();
+          if (fresh && fresh.meta && fresh.meta.changes) {
+            ctx.waitUntil(sendPush(env, [slug], { title: (acct.name || acct.slug) + " followed you",
+              body: "See their count and follow them back.", url: "/user/" + acct.slug }).catch(() => {}));
+          }
         } else {
           await env.DB.prepare("DELETE FROM follows WHERE follower = ? AND followee = ?")
             .bind(acct.slug, slug).run();
@@ -2695,6 +2822,7 @@ export default {
           q("DELETE FROM category_prefs WHERE user_slug = ?", slug),
           q("DELETE FROM follows WHERE follower = ? OR followee = ?", slug, slug),
           q("DELETE FROM blocks WHERE blocker = ? OR blocked = ?", slug, slug),
+          q("DELETE FROM push_tokens WHERE slug = ?", slug),
           q("DELETE FROM reports WHERE target = ?", slug),
           q("UPDATE reports SET reporter = NULL WHERE reporter = ?", slug),
           q("DELETE FROM invites WHERE slug = ?", slug),
@@ -2723,6 +2851,7 @@ export default {
         if (!mayWriteRider(request, env, b && b.user, acct)) return err(401, "unauthorized");
         const out = await addRides(env, b);
         if (out.bad) return err(out.bad[0], out.bad[1]);
+        ctx.waitUntil(pushDayLogged(env, String(b.user).toLowerCase(), out).catch(() => {}));
         return afterWrite(ctx, env, request, json({ ok: true, ...out }));
       }
       // Change a day that is already logged — see editDay. The body names the

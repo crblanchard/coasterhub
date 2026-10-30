@@ -36,6 +36,7 @@ const MIGRATION_015 = readFileSync(join(ROOT, "migrations", "015-category-triage
 const MIGRATION_017 = readFileSync(join(ROOT, "migrations", "017-model-triage.sql"), "utf8");
 const MIGRATION_023 = readFileSync(join(ROOT, "migrations", "023-same-ride.sql"), "utf8");
 const MIGRATION_084 = readFileSync(join(ROOT, "migrations", "084-reports-blocks.sql"), "utf8");
+const MIGRATION_085 = readFileSync(join(ROOT, "migrations", "085-push-tokens.sql"), "utf8");
 const MIGRATION_046 = readFileSync(join(ROOT, "migrations", "046-relocation-skipped.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
@@ -126,6 +127,8 @@ function freshDb() {
   db.exec(MIGRATION_023);
   db.exec(MIGRATION_084);
   db.exec(MIGRATION_084);
+  db.exec(MIGRATION_085);
+  db.exec(MIGRATION_085);
   return db;
 }
 
@@ -2938,6 +2941,59 @@ async function main() {
     check("block: before 084 it is a 503 naming the file", r.status === 503 && /084-reports-blocks/.test(r.data.error), JSON.stringify(r.data));
     r = await call(db, "GET", "/api/auth/me", { cookie: ann });
     check("...and /api/auth/me still works, saying blocking is off", r.status === 200 && r.data.account.blocked === null, JSON.stringify(r.data));
+  }
+
+  // ---- push notifications (085, 2026-10-30) ---------------------------------
+  {
+    const db = freshDb();
+    const ann = await signedUp(db, "pa@x.y", "Push Ann");
+    const bob = await signedUp(db, "pb@x.y", "Push Bob");
+    const a = rows(db, "SELECT slug FROM accounts WHERE email='pa@x.y'")[0].slug;
+    const b = rows(db, "SELECT slug FROM accounts WHERE email='pb@x.y'")[0].slug;
+    db.exec("INSERT INTO coasters (id,name,park,type) VALUES (995,'P','Push Park','Steel')");
+    let r = await call(db, "POST", "/api/push/token", { body: { token: "t-ann", platform: "ios" } });
+    check("push: registering signed out is a 401", r.status === 401, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/push/token", { cookie: ann, body: { token: "t-ann", platform: "ios" } });
+    check("push: a signed-in phone registers", r.status === 200 && rows(db, "SELECT slug FROM push_tokens WHERE token='t-ann'")[0].slug === a, JSON.stringify(r.data));
+    await call(db, "POST", "/api/push/token", { cookie: bob, body: { token: "t-bob", platform: "ios" } });
+    await call(db, "POST", "/api/push/token", { cookie: bob, body: { token: "t-dead", platform: "ios" } });
+    // A real RSA key, so the JWT signing runs for real; Google and FCM faked.
+    const kp = await crypto.subtle.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" }, true, ["sign", "verify"]);
+    const der = Buffer.from(await crypto.subtle.exportKey("pkcs8", kp.privateKey)).toString("base64");
+    const SA = JSON.stringify({ project_id: "proj", client_email: "x@proj.iam.gserviceaccount.com",
+      private_key: "-----BEGIN PRIVATE KEY-----\n" + der.match(/.{1,64}/g).join("\n") + "\n-----END PRIVATE KEY-----\n" });
+    const pushCall = async (method, path, opts) => {
+      const pending = [], sent = [], realFetch = globalThis.fetch, realWait = ctx.waitUntil;
+      ctx.waitUntil = (p) => pending.push(p);
+      globalThis.fetch = async (u, init) => {
+        u = String(u);
+        if (u.includes("oauth2")) return new Response(JSON.stringify({ access_token: "tok", expires_in: 3600 }), { status: 200 });
+        const m = JSON.parse(init.body).message;
+        sent.push({ u, auth: init.headers.authorization, ...m });
+        return m.token === "t-dead" ? new Response("{}", { status: 404 }) : new Response("{}", { status: 200 });
+      };
+      try {
+        const req = new Request("https://coasterhub.org" + path, { method, headers: { cookie: opts.cookie, "content-type": "application/json" }, body: JSON.stringify(opts.body) });
+        const res = await worker.fetch(req, { DB: new FakeD1(db), ADMIN_PASSWORD: PW, FCM_SERVICE_ACCOUNT: SA }, ctx);
+        await Promise.all(pending);
+        return { status: res.status, sent };
+      } finally { globalThis.fetch = realFetch; ctx.waitUntil = realWait; }
+    };
+    r = await pushCall("POST", "/api/follow/" + b, { cookie: ann, body: {} });
+    check("push: a follow notifies the one followed, on each of their phones",
+      r.status === 200 && r.sent.length === 2 && r.sent.every(m => /followed you/.test(m.notification.title) && m.data.url === "/user/" + a)
+      && r.sent[0].u.includes("/projects/proj/messages:send") && r.sent[0].auth === "Bearer tok", JSON.stringify(r.sent));
+    check("...and a token FCM calls dead is forgotten", rows(db, "SELECT 1 FROM push_tokens WHERE token='t-dead'").length === 0);
+    r = await pushCall("POST", "/api/follow/" + b, { cookie: ann, body: {} });
+    check("...and following again sends nothing", r.sent.length === 0, JSON.stringify(r.sent));
+    const today = new Date().toISOString().slice(0, 10);
+    r = await pushCall("POST", "/api/rides", { cookie: bob, body: { user: b, d: today, entries: [{ c: 995, n: 3 }] } });
+    check("push: a day logged today notifies followers", r.status === 200 && r.sent.length === 1 && r.sent[0].token === "t-ann"
+      && /3 rides at Push Park/.test(r.sent[0].notification.body), JSON.stringify(r.sent));
+    r = await pushCall("POST", "/api/rides", { cookie: bob, body: { user: b, d: "2019-06-01", entries: [{ c: 995, n: 1 }] } });
+    check("...but an old trip typed in today does not", r.status === 200 && r.sent.length === 0, JSON.stringify(r.sent));
+    r = await call(db, "DELETE", "/api/push/token", { body: { token: "t-ann" } });
+    check("push: signing out removes the phone", r.status === 200 && rows(db, "SELECT 1 FROM push_tokens WHERE token='t-ann'").length === 0);
   }
 
   // ---- the name and bio filter (2026-10-30) --------------------------------

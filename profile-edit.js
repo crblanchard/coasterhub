@@ -401,7 +401,8 @@
 
     el.signout.addEventListener("click", function () {
       el.signout.disabled = true;
-      post("/api/auth/logout", {})
+      Promise.resolve(window.CoasterHub && CoasterHub.pushForget ? CoasterHub.pushForget() : null)
+        .then(function () { return post("/api/auth/logout", {}); })
         .then(function () { location.href = "/"; })
         .catch(function () {
           el.signout.disabled = false;

@@ -5824,3 +5824,28 @@ them will be hard" — so iPhone first, Android not added yet.
 - Not done yet: Android platform, push notifications (needs Firebase),
   Universal Links (needs the Team ID for apple-app-site-association), a
   reviewer demo account (Carter makes it), swipe-back gesture.
+
+### Push notifications (2026-10-30)
+
+Firebase project `coaster-7c2cc` (Carter's). Config files: iOS
+`app/ios/App/App/GoogleService-Info.plist` (in the Xcode target's
+resources), Android `app/android-config/google-services.json` (for when the
+Android platform is added). Not secrets: they identify the app.
+
+- App: `@capacitor-firebase/messaging` 8.5 (SPM symlink option in
+  capacitor.config.json, per its README), AppDelegate forwards the APNs
+  callbacks, `App.entitlements` aps-environment=production,
+  UIBackgroundModes remote-notification. Firebase configures itself from the
+  plist (the plugin calls FirebaseApp.configure()).
+- Server: migration 085 `push_tokens`; `POST/DELETE /api/push/token`;
+  `sendPush()` signs a service-account JWT with WebCrypto (RS256), swaps it
+  for an OAuth token (cached per isolate) and calls FCM HTTP v1. Dead tokens
+  (404/400) are deleted. Needs the Worker secret `FCM_SERVICE_ACCOUNT` (the
+  whole service-account JSON); without it nothing is sent.
+- What sends: a new follow (to the one followed) and a day logged with a date
+  within the last 3 days (to the rider's followers). Fire-and-forget in
+  ctx.waitUntil.
+- app.js: `pushWire()` on every app page (registers if already allowed,
+  opens `data.url` on tap); `askPush()` after a follow and after saving a
+  day — never on launch; `pushForget()` in Sign out.
+- Still needs: the APNs .p8 uploaded to Firebase (after Apple approves).
