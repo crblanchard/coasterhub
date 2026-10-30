@@ -982,12 +982,17 @@
   // The system preference is deliberately NOT consulted: one site-wide default,
   // then the toggle.
   var THEME_KEY = "ch_theme";
-  // Light or dark is the phone's setting, always (Carter, 2026-10-30: "if
-  // light/dark mode follows the phone reliably remove the toggle"). A choice
-  // stored by the old toggle is forgotten, so nobody is stuck on one.
+  // Light or dark is the device's setting (Carter, 2026-10-30: "if light/dark
+  // mode follows the phone reliably remove the toggle"). On a desktop the
+  // toggle came back the same day ("readd dark mode toggle to desktop only"),
+  // so there a choice made with it wins; a phone never reads it.
   function phoneTheme() { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
-  function readTheme() { return phoneTheme(); }
-  try { if (typeof window !== "undefined") window.localStorage.removeItem(THEME_KEY); } catch (e) {}
+  function isDesktop() { return !!(window.matchMedia && window.matchMedia("(min-width:681px)").matches); }
+  function readTheme() {
+    var t = null;
+    try { if (isDesktop()) t = window.localStorage.getItem(THEME_KEY); } catch (e) {}
+    return t === "dark" || t === "light" ? t : phoneTheme();
+  }
   if (typeof window !== "undefined" && window.matchMedia) {
     var _mq = window.matchMedia("(prefers-color-scheme: dark)"), _onMq = function () { applyTheme(readTheme()); };
     if (_mq.addEventListener) _mq.addEventListener("change", _onMq); else if (_mq.addListener) _mq.addListener(_onMq);
@@ -1017,6 +1022,9 @@
     } catch (e) { /* CustomEvent is everywhere we support; never block the toggle */ }
   }
 
+  var SUN = '<path d="M12 4V2M12 22v-2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4'
+          + 'M5.6 18.4l-1.4 1.4M19.8 4.2l-1.4 1.4"/><circle cx="12" cy="12" r="4"/>';
+  var MOON = '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>';
 
   // `atStart` is true only inside the #people group, where the toggle sits to
   // the left of "Viewing <rider>". Log and Add have no picker, so there it is
@@ -1072,6 +1080,30 @@
     });
   }
 
+  // Desktop only: style.css hides it at phone width, where the device decides.
+  function buildThemeToggle(wrap, atStart) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "themetoggle";
+    b.innerHTML = '<svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + MOON + '</svg>'
+      + '<svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + SUN + '</svg>';
+    function label() {
+      var next = readTheme() === "light" ? "dark" : "light";
+      b.setAttribute("aria-label", "Switch to " + next + " mode");
+      b.setAttribute("title", "Switch to " + next + " mode");
+    }
+    label();
+    b.addEventListener("click", function () {
+      var next = readTheme() === "light" ? "dark" : "light";
+      try { if (next === phoneTheme()) window.localStorage.removeItem(THEME_KEY); else window.localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      applyTheme(next);
+      label();
+    });
+    if (atStart) wrap.insertBefore(b, wrap.firstChild);
+    else wrap.appendChild(b);
+  }
 
   // The rider switcher, worn as the hero badge.
   //
@@ -1933,12 +1965,13 @@
   }
 
   // The controls every header carries on its right: search and whoever is
-  // signed in. (The theme toggle went 2026-10-30: the site follows the phone.) Split out of initNav so a page with its own header
+  // signed in. (The theme toggle is desktop only since 2026-10-30.) Split out of initNav so a page with its own header
   // and no site nav — /qc — can wear the same corner without inheriting
   // the rest of it (Carter, 2026-09-18).
   function accountCorner(host) {
     if (!host) return;
     if (!host.querySelector(".srchbtn")) buildSearchButton(host);
+    if (!host.querySelector(".themetoggle")) buildThemeToggle(host, true);
     if (!host.querySelector(".acctlink")) buildAccountLink(host);
   }
 

@@ -5784,3 +5784,12 @@ a deletion-request web page for Google Play.
   deletion steps (Google Play wants a public URL for that: /privacy).
   Contact on both is coasterhubofficial@gmail.com (Carter, 2026-10-30: the
   coasterhub.org address isn't set up to receive mail).
+
+### Light/dark toggle back on desktop only (2026-10-30)
+
+Carter: "can you readd dark mode toggle to desktop only not mobile". Above
+680px the top bar has the sun/moon again and its choice is stored in
+`ch_theme` (picking the device's own setting forgets it). At phone width the
+toggle is hidden (style.css) and `ch_theme` is never read — not by app.js's
+readTheme nor by the head script on every page — so a phone always follows
+the device, and so will the app.

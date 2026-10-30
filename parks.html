@@ -10,9 +10,9 @@
 <meta name="apple-mobile-web-app-title" content="Coaster Hub">
 <title>Parks — Coaster Hub</title>
 <meta name="description" content="Every amusement park on Coaster Hub.">
-<link rel="stylesheet" href="/style.css?v=20261030t">
+<link rel="stylesheet" href="/style.css?v=20261030u">
 <link rel="stylesheet" href="/lists.css?v=20261030a">
-<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The phone's light or dark setting, always (2026-10-30). */if(!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","light")</script>
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png?v=20260924b" sizes="16x16" type="image/png">
@@ -79,7 +79,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261030t"></script>
+<script src="/app.js?v=20261030u"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('parks');

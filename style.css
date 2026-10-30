@@ -538,6 +538,8 @@ button,input,select,textarea{font-family:inherit}
 .themetoggle .i-sun{display:none}
 :root[data-theme="light"] .themetoggle .i-sun{display:block}
 :root[data-theme="light"] .themetoggle .i-moon{display:none}
+/* Desktop only (2026-10-30): on a phone the device decides light or dark. */
+@media (max-width:680px){ .themetoggle{display:none} }
 
 /* The theme toggle and the account avatar. The rider picker that used to
    live here is the hero badge now — see .riderbadge. */
