@@ -1379,6 +1379,26 @@
     });
   }
 
+  // What the top bar calls a page once its big title scrolls away (Carter,
+  // 2026-10-30, with screenshots: the profile's and credits' headlines are stat
+  // lines, "610 coasters.2,466 rides.61…"). Whose-page pages get "Your Profile"
+  // or "Patrick's Profile"; the rest a fixed name. null means the big title
+  // itself reads fine up there — a park, a coaster, a maker, a place.
+  var BAR_WHOSE = { profile: "Profile", count: "Credits", rankings: "Rankings", map: "Map" };
+  var BAR_FIXED = { explore: "Explore", log: "Log", changes: "Changes", coasters: "Coasters", parks: "Parks",
+                    categories: "Categories", compare: "Compare", trip: "Trip planner", users: "Riders",
+                    sitemap: "Sitemap", account: "Your Profile", "how-rankings": "How rankings work" };
+  function barTitle(page, urlSlug) {
+    var w = BAR_WHOSE[page];
+    if (!w) return Promise.resolve(BAR_FIXED[page] || null);
+    if (!urlSlug) return Promise.resolve(page === "rankings" ? "Global Rankings" : page === "count" ? "All Credits" : w);
+    return Promise.all([me().catch(function () { return null; }), fetchUsers()]).then(function (r) {
+      if (r[0] && r[0].slug === urlSlug) return "Your " + w;
+      var u = (r[1] || []).filter(function (x) { return x.slug === urlSlug; })[0];
+      return ((u && u.name) || urlSlug) + "\u2019s " + w;
+    }).catch(function () { return w; });
+  }
+
   // The tab pages are the roots; everything else is a page you went INTO, and
   // gets a Back button where the logo was.
   var TAB_ROOTS = { riders: 1, explore: 1, log: 1, rankings: 1, account: 1 };
@@ -1410,13 +1430,17 @@
       brand.insertAdjacentElement("afterend", back);
       back.insertAdjacentElement("afterend", title);
       // The page's big title shrinks into the top bar once it scrolls under it.
-      var h1 = document.querySelector(".hero h1");
-      if (h1 && window.IntersectionObserver) {
+      // Watched on the band, not the h1: some pages redraw their hero, which
+      // would leave an observer holding a heading that is no longer there.
+      var band = document.querySelector(".hero"), named = null;
+      barTitle(page, urlSlug).then(function (t) { named = t; if (t && root.classList.contains("navscrolled")) title.textContent = t; });
+      if (band && window.IntersectionObserver) {
         new IntersectionObserver(function (es) {
           var gone = !es[0].isIntersecting && es[0].boundingClientRect.top < 0;
-          if (gone) title.textContent = h1.textContent;
+          var h1 = band.querySelector("h1");
+          if (gone) title.textContent = named || (h1 ? h1.textContent : "");
           root.classList.toggle("navscrolled", gone);
-        }, { rootMargin: "-64px 0px 0px 0px" }).observe(h1);
+        }, { rootMargin: "-64px 0px 0px 0px" }).observe(band);
       }
     }
 

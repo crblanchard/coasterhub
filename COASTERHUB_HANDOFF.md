@@ -5679,7 +5679,9 @@ one block at the end of `style.css`:
 - Phone header: the brand shows on Home only; `detail` pages get `.navback`
   (history.back() when the referrer is ours, else the tab's root), and
   `.navtitle` shows the hero h1's text once it scrolls under the bar
-  (IntersectionObserver, `html.navscrolled`).
+  (IntersectionObserver on the `.hero` band — pages redraw their h1 —
+  `html.navscrolled`). Whose-page pages say "Your Profile" / "Cole's
+  Credits" / "Global Rankings" instead (barTitle: their h1s are stat lines).
 - The skyline strip is Home's only on a phone; no footer on a phone.
 - confirmAdd/confirmRemove are `.chdlg`/`.chdlg-box` classes now (were inline
   styles) so a phone shows them as bottom sheets; `actionSheet()` is the
