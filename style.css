@@ -927,11 +927,14 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
    the top bar until Carter decides on moving them. */
 @media (max-width:680px){
   html:not(.pg-riders) .brand{display:none}
-  html.detail .navback{display:inline-flex;align-items:center;gap:1px;flex:none;margin-left:-6px;padding:6px 6px 6px 0;
-    background-color:transparent;border-style:none;color:var(--accent2);font-family:inherit;font-size:1rem;font-weight:600;cursor:pointer}
+  html.detail .navback{display:inline-flex;align-items:center;justify-content:flex-start;flex:none;width:44px;height:44px;margin-left:-12px;margin-right:-10px;padding:0 0 0 6px;
+    background-color:transparent;border-style:none;border-radius:999px;color:var(--accent2);cursor:pointer}
+  html.detail .navback:active{background-color:var(--soft2)}
   .navtitle{display:block;flex:1 1 auto;min-width:0;font-weight:700;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     opacity:0;transition:opacity .15s}
   html.navscrolled .navtitle{opacity:1}
+  .navtitle.small{font-size:.86rem}
+  html.detail .people{gap:6px}
   html.pg-riders .navtitle{display:none}
 
   /* The skyline strip is Home's; elsewhere the band is just the title. */

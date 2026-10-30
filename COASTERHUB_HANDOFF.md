@@ -5676,7 +5676,9 @@ one block at the end of `style.css`:
 - `<html>` gets `pg-<page>` and, on pages you went INTO, `detail`. TAB_ROOTS
   are riders/explore/log/rankings/account; your own profile/count drop `detail`
   once /api/auth/me says they are yours.
-- Phone header: the brand shows on Home only; `detail` pages get `.navback`
+- Phone header: the brand shows on Home only; `detail` pages get `.navback` (the
+  arrow alone, a 44px target; a long `.navtitle` steps down to .86rem before
+  its ellipsis)
   (history.back() when the referrer is ours, else the tab's root), and
   `.navtitle` shows the hero h1's text once it scrolls under the bar
   (IntersectionObserver on the `.hero` band — pages redraw their h1 —

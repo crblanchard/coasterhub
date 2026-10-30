@@ -1418,7 +1418,9 @@
     if (inner && brand && !inner.querySelector(".navback")) {
       var back = document.createElement("button");
       back.type = "button"; back.className = "navback"; back.setAttribute("aria-label", "Back");
-      back.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Back</span>';
+      // The arrow alone, as iOS and Android draw it (Carter, 2026-10-30: the
+      // word "Back" cost the title its room). A 44px target, Apple's minimum.
+      back.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4.5 7.5 12l7.5 7.5"/></svg>';
       back.onclick = function () {
         var fromHere = document.referrer && document.referrer.indexOf(location.origin) === 0;
         if (fromHere && history.length > 1) { history.back(); return; }
@@ -1433,12 +1435,19 @@
       // Watched on the band, not the h1: some pages redraw their hero, which
       // would leave an observer holding a heading that is no longer there.
       var band = document.querySelector(".hero"), named = null;
-      barTitle(page, urlSlug).then(function (t) { named = t; if (t && root.classList.contains("navscrolled")) title.textContent = t; });
+      // A long name steps down a size before it is cut off with an ellipsis.
+      var fit = function () {
+        title.classList.remove("small");
+        if (title.scrollWidth > title.clientWidth + 1) title.classList.add("small");
+      };
+      var setTitle = function (t) { title.textContent = t; fit(); };
+      window.addEventListener("resize", fit);
+      barTitle(page, urlSlug).then(function (t) { named = t; if (t && root.classList.contains("navscrolled")) setTitle(t); });
       if (band && window.IntersectionObserver) {
         new IntersectionObserver(function (es) {
           var gone = !es[0].isIntersecting && es[0].boundingClientRect.top < 0;
           var h1 = band.querySelector("h1");
-          if (gone) title.textContent = named || (h1 ? h1.textContent : "");
+          if (gone) setTitle(named || (h1 ? h1.textContent : ""));
           root.classList.toggle("navscrolled", gone);
         }, { rootMargin: "-64px 0px 0px 0px" }).observe(band);
       }
