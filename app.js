@@ -1486,17 +1486,33 @@
     window.addEventListener("pagehide", function () {
       try { window.sessionStorage.setItem("ch_y_" + here, String(Math.round(window.scrollY))); } catch (e) {}
     });
+    // Back (or a tab) returns you to exactly where you were (Carter,
+    // 2026-10-30). The browser tries, but these pages draw their lists after
+    // their data arrives, so its jump lands on a short page and stops at the
+    // top. This keeps trying as the page grows, until it gets there, you touch
+    // the screen, or four seconds pass.
     var want = null;
     try {
-      if (window.sessionStorage.getItem("ch_restore") === here) {
-        window.sessionStorage.removeItem("ch_restore");
-        want = +window.sessionStorage.getItem("ch_y_" + here) || 0;
-      }
+      var nav0 = window.performance && performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+      var back = nav0 && nav0.type === "back_forward";
+      if (window.sessionStorage.getItem("ch_restore") === here) { window.sessionStorage.removeItem("ch_restore"); back = true; }
+      if (back) want = +window.sessionStorage.getItem("ch_y_" + here) || 0;
+      if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     } catch (e) {}
-    // The page draws its rows after its data arrives, so try twice.
-    if (want) [500, 1400].forEach(function (ms) {
-      setTimeout(function () { if (window.scrollY < want - 40) window.scrollTo({ top: want, behavior: "instant" }); }, ms);
-    });
+    if (want > 0) {
+      var gaveUp = false, t0 = Date.now();
+      var stop = function () { gaveUp = true; };
+      window.addEventListener("touchstart", stop, { once: true, passive: true });
+      window.addEventListener("wheel", stop, { once: true, passive: true });
+      (function tryIt() {
+        if (gaveUp) return;
+        var room = document.documentElement.scrollHeight - window.innerHeight;
+        if (room >= want - 4) { window.scrollTo({ top: want, behavior: "instant" }); return; }
+        if (Date.now() - t0 > 4000) { window.scrollTo({ top: Math.min(want, room), behavior: "instant" }); return; }
+        window.scrollTo({ top: room, behavior: "instant" });
+        setTimeout(tryIt, 80);
+      })();
+    }
   }
 
   // Swipe a coaster row and it is logged: one ride, today, no questions
