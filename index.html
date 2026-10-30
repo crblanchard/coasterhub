@@ -80,6 +80,61 @@
   .recent .more{margin:12px 0 0}
   .recent .more a{color:var(--accent2);font-weight:600;text-decoration:none}
   /* An empty friend feed is hidden rather than shown as a lone sentence. */
+
+  /* ---- Home, signed in (Carter picked direction A, 2026-10-30) -------------
+     Your count, a card when you are at a park, the friends feed as the main
+     thing, On this day, riders to follow. Two columns on a computer, the feed
+     on the left; one on a phone. Signed out keeps the slogan page below. */
+  .apphome{padding-top:18px;padding-bottom:28px}
+  /* One column in page order on a phone; on a computer the feed takes the
+     left column and the rest stack on the right (a hidden card leaves no gap). */
+  .ah-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;align-items:start}
+  @media (min-width:900px){
+    .ah-grid{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);column-gap:28px}
+    .ah-grid > *{grid-column:2}
+    .ah-grid > .ah-feedwrap{grid-column:1;grid-row:1 / span 4}
+    /* The narrow right column: a visit's park and date stack, as on a phone. */
+    .ah-otdwrap .mtwo{flex-direction:column;align-items:flex-start;gap:1px}
+    .ah-otdwrap .ct.vct{display:flex;flex-direction:column;align-items:flex-end}
+    .ah-otdwrap .ct.vct i{display:none}
+  }
+  .ah-card{background-color:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .ah-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px}
+  .ah-h h2{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:-.01em}
+  .ah-h a{color:var(--accent2);font-size:.88rem;font-weight:600;text-decoration:none}
+  .ah-mehead{display:flex;align-items:center;gap:14px;padding:16px 16px 12px;text-decoration:none;color:inherit}
+  .ah-av{flex:none;width:52px;height:52px;border-radius:999px;background-color:var(--soft2);background-size:cover;background-position:center;
+    background-origin:border-box;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;color:var(--accent2)}
+  .ah-mehead .t{min-width:0;display:block}
+  .ah-mehead .t b{display:block;font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--fg)}
+  .ah-mehead .t span{display:block;color:var(--muted);font-size:.9rem;margin-top:2px}
+  .ah-last{padding:0 16px 12px;color:var(--muted);font-size:.88rem;margin:0}
+  .ah-last a{color:var(--accent2);font-weight:600;text-decoration:none}
+  .ah-acts{display:flex;gap:8px;padding:0 16px 16px}
+  .ah-acts a{flex:1;text-align:center;padding:11px 10px;border-radius:12px;font-weight:700;font-size:.92rem;text-decoration:none;border:1px solid var(--line);color:var(--fg)}
+  .ah-acts a.y{background-color:var(--accentfill);color:var(--onaccent);border-color:transparent}
+  .ah-park{display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:14px;background-color:var(--tint);border:1px solid var(--line);
+    color:var(--fg);text-decoration:none;font-size:.95rem}
+  .ah-park[hidden]{display:none}
+  .ah-park svg{flex:none;color:var(--accent2)}
+  .ah-park span{flex:1;min-width:0}
+  .ah-park i{font-style:normal;font-weight:700;color:var(--accent2);white-space:nowrap}
+  .ah-it{display:flex;gap:12px;padding:14px 16px;border-top:1px solid var(--line)}
+  .ah-it:first-child{border-top-style:none}
+  .ah-it .ah-av{width:36px;height:36px;font-size:.88rem}
+  .ah-it .b{flex:1;min-width:0}
+  .ah-it p{margin:0;font-size:.95rem;line-height:1.4}
+  .ah-it p a{color:inherit;font-weight:700;text-decoration:none}
+  .ah-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+  .ah-chips a,.ah-chips span{font-size:.8rem;padding:4px 10px;border-radius:999px;background-color:var(--soft);border:1px solid var(--line);color:var(--fg);text-decoration:none}
+  .ah-chips i{font-style:normal;color:var(--accent);font-weight:700;margin-left:3px}
+  .ah-meta{font-size:.8rem;color:var(--muted)}
+  .ah-meta a{color:var(--accent2);font-weight:600;text-decoration:none;margin-left:4px}
+  .ah-empty{padding:16px;color:var(--muted);font-size:.92rem;margin:0}
+  .ah-empty a{color:var(--accent2);font-weight:600;text-decoration:none}
+  .ah-sugwrap .sugrow{border-top:1px solid var(--line)}
+  .ah-sugwrap .sugrow:first-child{border-top-style:none}
+  .apphome .fbcard{margin-top:30px}
 </style>
 </head>
 <body>
@@ -97,6 +152,34 @@
   </nav>
   <div class="people" id="people"></div>
 </div></header>
+
+<!-- Signed in: the app's Home (2026-10-30). Filled by the script at the end. -->
+<main class="container apphome" id="apphome" hidden>
+  <div class="ah-grid">
+    <div class="ah-me ah-card">
+      <a class="ah-mehead" id="ah_mehead" href="/account"><span class="ah-av" id="ah_av"></span><span class="t"><b id="ah_credits">&nbsp;</b><span id="ah_sub">&nbsp;</span></span></a>
+      <p class="ah-last" id="ah_last" hidden></p>
+      <div class="ah-acts"><a class="y" href="/log">+ Log a day</a><a id="ah_rank" href="/rankings">Rank coasters</a></div>
+    </div>
+    <a class="ah-park" id="ah_park" href="/log" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="ah_parkname"></span><i>Log a ride &rarr;</i></a>
+    <section class="ah-feedwrap">
+      <div class="ah-h"><h2>Friends</h2><a href="/changes">All activity &rarr;</a></div>
+      <div class="ah-card" id="ah_feed"><div id="loading2" class="ah-empty">Loading&hellip;</div></div>
+    </section>
+    <section class="ah-otdwrap" id="ah_otd_wrap" hidden>
+      <div class="ah-h"><h2>On this day</h2></div>
+      <div class="mlist vlist" id="ah_otd"></div>
+    </section>
+    <section class="ah-sugwrap" id="ah_sug_wrap" hidden>
+      <div class="ah-h"><h2>Riders to follow</h2><a href="/users">All riders &rarr;</a></div>
+      <div class="ah-card" id="ah_sug"></div>
+    </section>
+  </div>
+  <div class="fbcard">
+    <div><h2>Reach out to us!</h2><p>Please let us know if you come across any bugs, incorrect stats, or suggestions to improve the site.</p></div>
+    <span class="spacer"></span><a class="go fb_link" rel="nofollow">Contact us &rarr;</a>
+  </div>
+</main>
 
 <section class="hero" style="--hero-t:36px;--hero-b:4px"><div class="container">
   <svg class="track" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -203,12 +286,12 @@ CoasterHub.initNav('riders');
 // in the body because "it's broken" is much easier to act on when you know where
 // they were standing.
 (function(){
-  var a=document.getElementById('fb_link');
-  if(!a) return;
   var to=['carter.r.blanchard','gmail.com'].join('@');
-  a.href='mailto:'+to
-    +'?subject='+encodeURIComponent('Coaster Hub feedback')
-    +'&body='+encodeURIComponent('\n\n---\nSent from '+location.href);
+  Array.prototype.forEach.call(document.querySelectorAll('#fb_link, .fb_link'), function(a){
+    a.href='mailto:'+to
+      +'?subject='+encodeURIComponent('Coaster Hub feedback')
+      +'&body='+encodeURIComponent('\n\n---\nSent from '+location.href);
+  });
 })();
 
 
@@ -274,6 +357,9 @@ var following = CoasterHub.me().then(function(acct){
 // their ranking list. The rankings come from their own endpoint, one call per
 // rider, because a ranking is not part of a rider's ride data.
 // The cards' counts, from the two lists every page already caches.
+// Signed out: the lists below the slogan. Signed in, Home is the app view
+// (appHome) and none of this is fetched.
+function guestHome(){
 // The Global top ten, live (see the markup). Rows open in place, as on a
 // maker's page.
 CoasterHub.openableCoasters(document.getElementById('globaltop'));
@@ -368,6 +454,132 @@ CoasterHub.fetchUsers().then(function(){
 // Site updates are back in it (Carter, 2026-10-04: "Put my work into 'updates'
 // also") now the section is called Updates.
 var recent = CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 5, compact: true, site: true });
+}
+
+// ---- Home, signed in (2026-10-30) --------------------------------------------
+var $h=function(id){ return document.getElementById(id); };
+function ago(at){
+  var t=Date.parse(String(at).replace(' ','T')+(/Z|[+-]\d\d:?\d\d$/.test(at)?'':'Z')), m=Math.round((Date.now()-t)/60000);
+  if(!isFinite(m)) return '';
+  if(m<1) return 'Just now'; if(m<60) return m+'m ago';
+  var h=Math.round(m/60); if(h<24) return h+'h ago';
+  var d=Math.round(h/24); if(d===1) return 'Yesterday'; if(d<7) return d+' days ago';
+  return CoasterHub.mdy(new Date(t).toISOString().slice(0,10));
+}
+function avatar(u,name){
+  return u && u.avatar ? '<span class="ah-av" style="background-image:url(/avatars/'+encodeURIComponent(u.avatar)+')"></span>'
+                       : '<span class="ah-av">'+esc(String(name||'?').charAt(0).toUpperCase())+'</span>';
+}
+function appHome(acct){
+  document.querySelectorAll('section.hero, .container.lists, section.block.recent').forEach(function(el){ el.hidden=true; el.style.display='none'; });
+  $h('loading').style.display='none';
+  var oldFb=document.getElementById('fb_link'); if(oldFb) oldFb.closest('.container').style.display='none';
+  $h('apphome').hidden=false;
+  var slug=acct.slug;
+  Promise.all([CoasterHub.fetchSummary(), CoasterHub.fetchRides(slug).catch(function(){ return null; }), CoasterHub.fetchCoasters(),
+               CoasterHub.fetchUsers(), CoasterHub.fetchParks().catch(function(){ return {}; })]).then(function(r){
+    var meRow=(r[0]||[]).filter(function(x){ return x.slug===slug; })[0]||{};
+    var users={}; (CoasterHub.USERS||[]).forEach(function(u){ users[u.slug]=u; });
+    var cs=(r[2]&&r[2].coasters)||[], byId={}; cs.forEach(function(c){ byId[c.id]=c; });
+    var log=(r[1]&&r[1].rides)||[], parks=r[4]||{};
+    // Your count
+    $h('ah_mehead').href=CoasterHub.userPageHref(slug,'profile');
+    $h('ah_av').outerHTML=avatar(users[slug], acct.name||slug);
+    $h('ah_credits').textContent=nf(meRow.credits||0)+(meRow.credits===1?' credit':' credits');
+    $h('ah_sub').textContent=nf(meRow.rides||0)+' rides · '+nf(meRow.ranked||0)+' ranked';
+    $h('ah_rank').href=CoasterHub.userPageHref(slug,'rankings');
+    var last=null; log.forEach(function(x){ if(x.d && (!last || x.d>last)) last=x.d; });
+    if(last){
+      var ps={}; log.forEach(function(x){ if(x.d===last && byId[x.c]) ps[byId[x.c].park]=1; });
+      var names=Object.keys(ps);
+      if(names.length){ $h('ah_last').innerHTML='Latest: '+names.slice(0,2).map(function(p){ return '<a href="'+CoasterHub.parkHref(p)+'">'+esc(p)+'</a>'; }).join(', ')
+        +(names.length>2?' +'+(names.length-2):'')+' · '+CoasterHub.mdy(last); $h('ah_last').hidden=false; }
+    }
+    // At a park: Log's fix from the last two hours, within a mile of one.
+    try{
+      var g=JSON.parse(localStorage.getItem('ch_here')||'null');
+      if(g && g.lat!=null && Date.now()-g.at<2*3600e3){
+        var best=null;
+        Object.keys(parks).forEach(function(n){ var p=parks[n]; if(!p||p.lat==null) return;
+          var R=3958.8, rr=Math.PI/180, dLat=(p.lat-g.lat)*rr, dLon=(p.lon-g.lon)*rr;
+          var h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(g.lat*rr)*Math.cos(p.lat*rr)*Math.sin(dLon/2)*Math.sin(dLon/2);
+          var mi=2*R*Math.asin(Math.min(1,Math.sqrt(h))); if(!best||mi<best.mi) best={n:n,mi:mi}; });
+        if(best && best.mi<=1){ $h('ah_parkname').innerHTML='You’re at <b>'+esc(best.n)+'</b>'; $h('ah_park').hidden=false; }
+      }
+    }catch(e){}
+    // On this day: your days on today's date in earlier years.
+    var md=new Date(), mmdd=String(md.getMonth()+1).padStart(2,'0')+'-'+String(md.getDate()).padStart(2,'0'), year=md.getFullYear();
+    var days={};
+    log.forEach(function(x){ if(x.d && x.d.slice(5)===mmdd && +x.d.slice(0,4)<year){ var d=days[x.d]||(days[x.d]={}); d[x.c]=(d[x.c]||0)+1; } });
+    var dl=Object.keys(days).sort().reverse();
+    if(dl.length){
+      $h('ah_otd').innerHTML=dl.slice(0,3).map(function(d){
+        var ids=Object.keys(days[d]), rides=ids.reduce(function(k,id){ return k+days[d][id]; },0), pk={};
+        ids.forEach(function(id){ if(byId[id]) pk[byId[id].park]=1; });
+        var yrs=year-(+d.slice(0,4));
+        return CoasterHub.visitRow({ title:Object.keys(pk).join(' & '), date:CoasterHub.mdy(d)+' · '+(yrs===1?'a year ago':yrs+' years ago'),
+          right: nf(rides)+' ride'+(rides===1?'':'s')+' · '+nf(ids.length)+' coaster'+(ids.length===1?'':'s'),
+          rows: ids.filter(function(id){ return byId[id]; }).map(function(id){ return {c:byId[id], n:days[d][id], ctx:'model'}; })
+            .sort(function(a,b){ return String(a.c.name).localeCompare(String(b.c.name)); }) });
+      }).join('');
+      CoasterHub.openableCoasters($h('ah_otd'));
+      $h('ah_otd_wrap').hidden=false;
+    }
+    // The friends feed.
+    return following.then(function(fol){
+      var who={}; who[slug]=1; ((fol&&fol.slugs)||[]).forEach(function(s2){ who[s2]=1; });
+      return fetch('/api/activity?limit=300',{cache:'no-store'}).then(function(x){ return x.ok?x.json():{events:[]}; }).then(function(j){
+        var all=((j&&j.events)||[]).filter(function(e){ return e.actor && who[e.actor] && (e.kind==='rides'||e.kind==='ranking'||e.kind==='credits'); });
+        // A rider's ranking saves on one day are one line, with the newly ranked summed.
+        var ev=[], seenRank={};
+        all.forEach(function(e){
+          if(e.kind==='ranking'){
+            var k=e.actor+'|'+String(e.at).slice(0,10);
+            if(seenRank[k]){ var d0=seenRank[k].detail=seenRank[k].detail||{}; d0.added=(d0.added||0)+((e.detail&&e.detail.added)||0); return; }
+            seenRank[k]=e=JSON.parse(JSON.stringify(e));
+          }
+          ev.push(e);
+        });
+        ev=ev.slice(0,6);
+        if(!ev.length){
+          $h('ah_feed').innerHTML='<p class="ah-empty">'+(((fol&&fol.slugs)||[]).length
+            ? 'Nothing from your friends yet.' : 'Follow a few riders and their days show up here.')+' <a href="/users">Find riders &rarr;</a></p>';
+          return;
+        }
+        var actors={}; ev.forEach(function(e){ if(e.kind==='rides') actors[e.actor]=1; });
+        return Promise.all(Object.keys(actors).map(function(a){ return CoasterHub.fetchRides(a).then(function(x){ return [a,(x&&x.rides)||[]]; }).catch(function(){ return [a,[]]; }); }))
+          .then(function(pairs){
+            var rl={}; pairs.forEach(function(p){ rl[p[0]]=p[1]; });
+            $h('ah_feed').innerHTML=ev.map(function(e){
+              var mine=e.actor===slug, u=users[e.actor], nm=mine?'You':esc(e.actorName||e.actor), dt=e.detail||{};
+              var who2='<a href="'+CoasterHub.userPageHref(e.actor,'profile')+'">'+nm+'</a>', line='', chips='', link='';
+              if(e.kind==='rides'){
+                var n=dt.coasters||e.n||0, park=e.subject?'<a href="'+CoasterHub.parkHref(String(e.subject).split(' & ')[0])+'">'+esc(e.subject)+'</a>':'';
+                line=who2+' rode '+n+' coaster'+(n===1?'':'s')+(park?' at '+park:'')+(dt.newCredits>0?' · <b>'+dt.newCredits+' new</b>':'');
+                if(dt.date){
+                  var c={}; (rl[e.actor]||[]).forEach(function(x){ if(x.d===dt.date) c[x.c]=(c[x.c]||0)+1; });
+                  var ids=Object.keys(c).filter(function(id){ return byId[id]; }).sort(function(a,b){ return c[b]-c[a] || String(byId[a].name).localeCompare(String(byId[b].name)); });
+                  chips=ids.slice(0,3).map(function(id){ return '<a href="'+CoasterHub.coasterHref(byId[id])+'">'+esc(byId[id].name)+(c[id]>1?'<i>×'+c[id]+'</i>':'')+'</a>'; }).join('')
+                    +(ids.length>3?'<span>+'+(ids.length-3)+'</span>':'');
+                  link='<a href="'+(mine?'/log?edit='+dt.date:CoasterHub.userPageHref(e.actor,'count'))+'">View day &rarr;</a>';
+                }
+              } else if(e.kind==='ranking'){
+                line=who2+(mine?' updated your rankings':' updated their rankings')+(dt.added?' · '+dt.added+' newly ranked':'');
+                link='<a href="'+CoasterHub.userPageHref(e.actor,'rankings')+'">See rankings &rarr;</a>';
+              } else {
+                line=who2+' added '+(e.n||0)+' credit'+(e.n===1?'':'s')+(e.subject?' at '+esc(e.subject):'');
+              }
+              return '<div class="ah-it">'+avatar(mine?users[slug]:u, mine?(acct.name||slug):(e.actorName||e.actor))+'<div class="b"><p>'+line+'</p>'
+                +(chips?'<div class="ah-chips">'+chips+'</div>':'')
+                +'<div class="ah-meta">'+ago(e.at)+(link?' ·'+link:'')+'</div></div></div>';
+            }).join('');
+          });
+      });
+    });
+  }).catch(function(e){ console.error(e); $h('ah_feed').innerHTML='<p class="ah-empty">Couldn’t load your friends just now.</p>'; });
+  CoasterHub.suggestFriends($h('ah_sug'), $h('ah_sug_wrap'), 4);
+}
+CoasterHub.me().then(function(acct){ if(acct && acct.slug) appHome(acct); else guestHome(); }).catch(function(){ guestHome(); });
 </script>
 </body>
 </html>
