@@ -5934,3 +5934,11 @@ runs bash with pipefail — the first run "passed" without uploading.
   phoneShell decides the first frame from it (corrected when me() answers).
   Same on the website and in the app (Carter: "make both the same that's
   okay if it's less complex").
+- **Slides still misfired, and "No signal" popped up mid-browse** (same
+  evening). In the app, every page now adds `@view-transition{navigation:none}`
+  (appShell): a navigation animates only if the page being left opts in, so
+  this covers taps, redirects and the pin alike; the website keeps its slides.
+  "No signal" was Capacitor's `server.errorPath`, which loads for ANY failed
+  provisional navigation — a load cancelled by the next tap included —
+  removed (needs an app build). The cost: a very first launch with no signal
+  shows a blank screen instead of a message.

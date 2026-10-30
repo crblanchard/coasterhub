@@ -1013,6 +1013,14 @@
   function appShell() {
     if (!inApp()) return;
     document.documentElement.classList.add("inapp");
+    // No page slides in the app (Carter, 2026-10-30: Rankings and Home "still
+    // sometimes sliding"). The phone's own swipe-back is the animation there.
+    // A navigation only animates if the page being LEFT opts in, so turning it
+    // off here, on every page, covers every way out of it — taps, redirects,
+    // the back pin — where marking each link missed some.
+    var vt = document.createElement("style");
+    vt.textContent = "@view-transition{navigation:none}";
+    document.head.appendChild(vt);
     pushWire();
     // A coasterhub.org link tapped elsewhere (Mail, Messages) opens the app
     // (apple-app-site-association, worker.js): go to the page it names.

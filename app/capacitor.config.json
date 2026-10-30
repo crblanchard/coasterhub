@@ -3,8 +3,7 @@
   "appName": "Coaster Hub",
   "webDir": "www",
   "server": {
-    "url": "https://coasterhub.org",
-    "errorPath": "offline.html"
+    "url": "https://coasterhub.org"
   },
   "appendUserAgent": "CoasterHubApp",
   "ios": {

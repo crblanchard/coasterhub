@@ -6,11 +6,14 @@ shell that opens **https://coasterhub.org** (`capacitor.config.json`
 with no store update. A store update is only needed when something in this
 folder changes (icon, permissions, plugins) — about once a year.
 
-- `www/` — what ships inside the app: `offline.html`, shown if the site can't
-  be reached the very first time it opens (`server.errorPath`). After one
-  successful load the site's own service worker handles no signal; iOS
-  allows that only for "app-bound domains", hence `WKAppBoundDomains` in
-  `ios/App/App/Info.plist` and `limitsNavigationsToAppBoundDomains`.
+- `www/` — what ships inside the app. `offline.html` is NOT wired up any
+  more: Capacitor's `server.errorPath` showed it for any failed navigation,
+  including one simply cancelled by tapping the next link, so "No signal"
+  popped up mid-browse (Carter, 2026-10-30). No signal is the site's service
+  worker's job (sw.js); it needs one successful launch first. iOS allows a
+  service worker in a web view only for "app-bound domains", hence
+  `WKAppBoundDomains` in `ios/App/App/Info.plist` and
+  `limitsNavigationsToAppBoundDomains`.
 - `ios/` — the Xcode project, from `npx cap add ios`. iPhone only, portrait
   only. Icon and launch screen: `node tools/render-app-icons.mjs`.
 - The site knows it is in the app through `CoasterHub.inApp()` (app.js): the
