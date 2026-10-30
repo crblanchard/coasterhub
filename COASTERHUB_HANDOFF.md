@@ -5782,5 +5782,5 @@ a deletion-request web page for Google Play.
   Claim it ("By creating an account you agree…"). The terms promise reports
   are looked at within 24 hours, which Apple requires. Privacy has the
   deletion steps (Google Play wants a public URL for that: /privacy).
-  Both give hello@coasterhub.org as the contact, so that address has to
-  receive mail.
+  Contact on both is coasterhubofficial@gmail.com (Carter, 2026-10-30: the
+  coasterhub.org address isn't set up to receive mail).
