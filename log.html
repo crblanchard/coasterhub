@@ -513,7 +513,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261030n"></script>
+<script src="/app.js?v=20261030o"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 // Runs before the gate: the nav has to work whether or not you unlock.
@@ -1742,6 +1742,16 @@ function save(){
       loadOwned();
     })
     .catch(function(e){
+      // No signal (a park): the day waits on this phone and sends itself once
+      // there is a connection (app.js queueRides, 2026-10-30).
+      if(CoasterHub.isNetErr(e)){
+        CoasterHub.queueRides({user:rider,d:d,entries:entries});
+        var k=entries.reduce(function(m,x){ return m+x.n; },0);
+        basket={}; renderList(); renderBasket();
+        $('msg').className='msg ok';
+        $('msg').textContent='No signal. '+k+' ride'+(k===1?' is':'s are')+' saved on this phone and will send when you’re back online.';
+        showResult(); return;
+      }
       $('save').disabled=false; renderBasket();
       $('msg').className='msg bad'; $('msg').textContent='Couldn’t save: '+String(e.message||e); showResult();
     });

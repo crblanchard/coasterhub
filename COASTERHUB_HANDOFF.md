@@ -5690,9 +5690,9 @@ one block at the end of `style.css`:
   styles) so a phone shows them as bottom sheets; `actionSheet()` is the
   generic one (coaster page ⋯ uses it on phones); the rider menu becomes
   `.rbmenu.sheet` with a `.rbback` shade.
-- Tab bar: each tab remembers its last page in sessionStorage (`ch_tab_<k>`,
-  not Log) and restores scroll (`ch_y_<path>`, `ch_restore`); tapping the open
-  tab scrolls to top, then goes to the tab's first page.
+- Tab bar: a tab ALWAYS opens its main page (Carter, 2026-10-30, after per-tab
+  memory sent Explore back to a coaster: "it should go back for default").
+  Tapping the open tab scrolls to top, then goes to its main page.
 - Pull-to-refresh on Home and /changes; `#loading` gets grey `.skel` shapes on
   phones (the words stay for screen readers, and show on desktop; a
   `data-loading` joke line stays visible above the shapes).
@@ -5729,3 +5729,10 @@ and go solid during a transition (backdrop-filter does not survive the
 snapshot). Long-press a coaster row: `rowMenu()` (style A, lifted row +
 menu); swipe: `swipeLog()`. Back restores scroll by retrying as the page
 grows (`ch_y_<path>`, history.scrollRestoration = manual).
+
+Rides logged with no signal (2026-10-30): /log's Save and swipe-to-log put
+the POST /api/rides body in localStorage `ch_outbox` when `isNetErr` (offline
+or a fetch TypeError); `flushOutbox()` sends it on load and on `online`
+(drops on 4xx, keeps on 5xx) and toasts "Sent N rides…". `.offpill` shows
+"N rides waiting to send". Only adds queue; editing/deleting a day needs a
+connection.

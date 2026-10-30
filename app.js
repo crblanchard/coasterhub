@@ -1529,7 +1529,6 @@
     try {
       var nav0 = window.performance && performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
       var wasBack = nav0 && nav0.type === "back_forward";
-      if (window.sessionStorage.getItem("ch_restore") === here) { window.sessionStorage.removeItem("ch_restore"); wasBack = true; }
       if (wasBack) want = +window.sessionStorage.getItem("ch_y_" + here) || 0;
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     } catch (e) {}
@@ -1580,7 +1579,11 @@
           row.classList.remove("miss"); row.classList.add("got");
           toast('<span>Added a ride on <b>' + searchEsc(c.name) + '</b> today</span><a href="/log?edit=' + d + '">View your day</a>');
         })
-        .catch(function () { toast('<span>Couldn’t log that ride. Check your connection and try again.</span>'); });
+        .catch(function (e) {
+          if (!isNetErr(e)) { toast('<span>Couldn’t log that ride. Try again in a moment.</span>'); return; }
+          queueRides({ user: a.slug, d: d, entries: [{ c: cid, n: 1 }] });
+          toast('<span>No signal. <b>' + searchEsc(c.name) + '</b> is saved on this phone and sends when you’re back online.</span>');
+        });
     });
   }
 
@@ -1734,6 +1737,46 @@
 
   var RELOADS_ON_WRITE = { riders: 1, count: 1, map: 1, park: 1, coaster: 1, changes: 1, qc: 1, sitemap: 1,
                            manufacturer: 1, location: 1, coasters: 1, parks: 1 };
+  // Rides logged with no signal wait on this phone and send themselves once
+  // there is a connection again (Carter, 2026-10-30: a park is where the
+  // signal drops). Only adding rides queues: they add, so sending one late can
+  // never undo anything. Changing or deleting a day still needs a connection.
+  var OUTBOX = "ch_outbox";
+  function outbox() { try { return JSON.parse(window.localStorage.getItem(OUTBOX) || "[]"); } catch (e) { return []; } }
+  function setOutbox(q) { try { if (q.length) window.localStorage.setItem(OUTBOX, JSON.stringify(q)); else window.localStorage.removeItem(OUTBOX); } catch (e) {} updatePill(); }
+  function ridesIn(body) { return (body.entries || []).reduce(function (m, e) { return m + (e.n || 1); }, 0); }
+  function waitingRides() { return outbox().reduce(function (k, x) { return k + ridesIn(x.body); }, 0); }
+  // A failure to reach the server at all, as opposed to the server saying no.
+  function isNetErr(e) { return (typeof navigator !== "undefined" && navigator.onLine === false) || e instanceof TypeError; }
+  function queueRides(body) { var q = outbox(); q.push({ body: body, at: Date.now() }); setOutbox(q); }
+  var flushing = false;
+  function flushOutbox() {
+    if (flushing || !outbox().length || navigator.onLine === false) return;
+    flushing = true;
+    var sent = 0;
+    (function next() {
+      var q = outbox();
+      if (!q.length) { flushing = false; if (sent) { noteWrite(); toast("<span>Sent " + sent + " ride" + (sent === 1 ? "" : "s") + " you logged with no signal</span>"); } return; }
+      var item = q[0];
+      fetch("/api/rides", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(item.body) })
+        .then(function (r) {
+          // Sent, or refused for good (a 4xx will not get better by retrying):
+          // either way it leaves the queue. A 5xx stays for next time.
+          if (r.ok) sent += ridesIn(item.body);
+          if (r.ok || (r.status >= 400 && r.status < 500)) { setOutbox(outbox().slice(1)); next(); }
+          else flushing = false;
+        })
+        .catch(function () { flushing = false; });
+    })();
+  }
+  var pillEl = null;
+  function updatePill() {
+    if (!pillEl) return;
+    var off = navigator.onLine === false, w = waitingRides(), wt = w + " ride" + (w === 1 ? "" : "s") + " waiting to send";
+    pillEl.textContent = off ? "No signal \u00b7 " + (w ? wt : "showing what this phone saved") : (w ? wt : "");
+    pillEl.classList.toggle("on", off || w > 0);
+  }
+
   // No signal: sw.js keeps a copy of what you open and uses it only when the
   // network fails (Carter, 2026-10-30). A note at the top says when that is
   // what you are looking at.
@@ -1741,13 +1784,13 @@
     if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
       navigator.serviceWorker.register("/sw.js").catch(function () {});
     }
-    var pill = document.createElement("div");
-    pill.className = "offpill"; pill.setAttribute("role", "status");
-    pill.textContent = "No signal \u00b7 showing what this phone saved";
-    document.body.appendChild(pill);
-    var upd = function () { pill.classList.toggle("on", navigator.onLine === false); };
-    upd();
-    window.addEventListener("online", upd); window.addEventListener("offline", upd);
+    pillEl = document.createElement("div");
+    pillEl.className = "offpill"; pillEl.setAttribute("role", "status");
+    document.body.appendChild(pillEl);
+    updatePill();
+    window.addEventListener("online", function () { updatePill(); flushOutbox(); });
+    window.addEventListener("offline", updatePill);
+    flushOutbox();
   }
 
   function initNav(page) {
@@ -2045,29 +2088,18 @@
     }).join("");
     document.body.appendChild(nav);
 
-    // Each tab remembers the last page you had open in it (not Log, which is
-    // always a fresh day). Tapping the tab you are on scrolls to the top, and
-    // from the top takes you back to that tab's first page — how every phone
-    // app's tabs behave (Carter, 2026-10-30).
-    var here = location.pathname + location.search;
-    try { if (on && on !== "log") window.sessionStorage.setItem("ch_tab_" + on, here); } catch (e) {}
+    // A tab opens its main page, always (Carter, 2026-10-30: going back to
+    // Explore after Home "brought me back to the coaster instead of the main
+    // explore page" — tabs that remembered their last page were dropped). The
+    // tab you are on scrolls to the top when tapped, then from the top goes to
+    // its main page. Back is the pin's job.
     nav.addEventListener("click", function (e) {
       var a = e.target.closest && e.target.closest("a[data-nav]");
       if (!a) return;
-      var k = a.getAttribute("data-nav");
       markTransition("tab");
       if (a.classList.contains("on")) {
         if (window.scrollY > 8) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }
         else if (a.pathname === location.pathname) e.preventDefault();
-        return;
-      }
-      if (k === "log") return;
-      var mem = null;
-      try { mem = window.sessionStorage.getItem("ch_tab_" + k); } catch (x) {}
-      if (mem && mem !== here && mem.charAt(0) === "/") {
-        e.preventDefault();
-        try { window.sessionStorage.setItem("ch_restore", mem); } catch (x) {}
-        location.href = mem;
       }
     });
 
@@ -3216,7 +3248,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, toast: toast, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
