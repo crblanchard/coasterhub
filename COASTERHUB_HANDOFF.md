@@ -6025,3 +6025,25 @@ proposed, not started.
    deploy would then show one page view late, which would confuse testing.
 - **Map stops at the tab bar on phones** (Carter, 2026-10-31: summary card hidden behind the bar). map.html's body is border-box with padding = the bar's height (60px of tabs + its bottom padding); the general body padding now follows the lowered bar (66px + the same max()).
 - **Global rankings: no Personal lists section** (Carter, 2026-10-31). #cards is kept, hidden, so its filler code is untouched.
+
+### Notifications, as decided 2026-10-31
+
+1. **Someone follows you** — at once (unchanged).
+2. **Morning recap** instead of a push per logged day (Carter: people "open
+   it multiple times in a day and add rides"; "I like the next day thing";
+   "always 8-9am pacific so 11-12pm eastern" — no per-rider time zones, "so
+   we're not unnecessarily collecting information"). worker.js
+   `dailyRecap`, run by `scheduled()` from the cron `*/15 * * * *`
+   (wrangler.jsonc): between 8 and 10 am Pacific, each follower gets one
+   "Yesterday on Coaster Hub" listing friends' rides in the previous 24 h
+   (days dated >2 days back excluded) at a minute 8:00–8:59 hashed from
+   slug+date; `recaps` (migration 087) records the Pacific date sent.
+   Without 087 it sends once at the 8:00 run.
+3. **Milestones** — `pushMilestone` after a logged day: crossing 100, 250,
+   500, 750, 1,000 and every 250 after, to the rider's followers.
+4. **Everything, to the admins only** ("every time anyone does anything
+   please notify me only") — `recordActivity` → `pushAdmins` via the
+   request's ctx (AsyncLocalStorage `REQ`, nodejs_compat): every new feed row
+   plus every report; a ranking burst is one row, so one push; an admin's own
+   actions are skipped.
+7. Weekly digest — "maaaaybe but wait for now". Not built.

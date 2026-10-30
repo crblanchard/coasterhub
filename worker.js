@@ -1,3 +1,9 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+
+// The current request's ctx, for code deep in a write that wants to send
+// something after the answer (recordActivity -> pushAdmins). nodejs_compat.
+const REQ = new AsyncLocalStorage();
+
 // Coaster Hub — Worker entrypoint.
 // Serves the static site (via the ASSETS binding) and a small JSON API backed
 // by a D1 database (binding: DB). The API is additive and DEFENSIVE: if D1 is
@@ -808,9 +814,10 @@ async function addUser(env, body) {
 // service-account JSON, a Worker secret; without it nothing is sent and
 // nothing complains.
 //
-// What sends one: somebody follows you, and somebody you follow logs a day
-// (a recent one, not a back-filled old trip). Every send is fire-and-forget
-// in ctx.waitUntil, after the answer: a notification must never fail a write.
+// What sends one: somebody follows you (at once), and a morning recap of the
+// friends who logged rides the day before (dailyRecap, on the cron). A
+// follow's send is fire-and-forget in ctx.waitUntil, after the answer: a
+// notification must never fail a write.
 let FCM_AUTH = null;   // { token, exp, project } cached for the isolate's life
 
 function b64url(bytes) {
@@ -876,19 +883,135 @@ async function sendPush(env, slugs, { title, body, url }) {
   return { sent };
 }
 
-// Somebody you follow logged a day. Recent days only: a trip from 2019 typed
-// in today is news to nobody.
-async function pushDayLogged(env, slug, out) {
-  if (!out || !out.added || !out.date || !out.park) return;
-  if (Date.now() - Date.parse(out.date + "T00:00:00Z") > 3 * 86400000) return;
-  let fans;
+// The morning recap (Carter, 2026-10-31: "maybe a recap at the end of the day
+// because some people might open it multiple times in a day and add rides",
+// then "I like the next day thing", then "always 8-9am pacific so 11-12pm
+// eastern" — no per-rider time zones, so nothing extra is collected). One
+// notification per follower a day, listing the friends who logged rides in
+// the 24 hours before it, instead of one per save. The cron (wrangler.jsonc)
+// runs every 15 minutes; each rider's goes once Pacific time passes a minute
+// between 8:00 and 8:59 picked from their name and the date, so it moves
+// around day to day. Days typed in for the past (dated more than two days
+// back) are not news and are left out, as are edits of a day.
+function pacificNow(now) {
+  const parts = {};
+  for (const p of new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit",
+    day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(now))) parts[p.type] = p.value;
+  return { day: parts.year + "-" + parts.month + "-" + parts.day, min: Number(parts.hour) * 60 + Number(parts.minute) };
+}
+function recapMinute(slug, day) {
+  let h = 0; for (const c of slug + day) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return 8 * 60 + (h % 60);
+}
+async function dailyRecap(env, now = Date.now()) {
+  if (!env.FCM_SERVICE_ACCOUNT) return { sent: 0 };
+  // Outside 8-10 am Pacific the cron has nothing to do (10, not 9: a run that
+  // lands just after a rider's minute still catches them).
+  const pt = pacificNow(now);
+  if (pt.min < 8 * 60 || pt.min >= 10 * 60) return { sent: 0 };
+  const since = new Date(now - 86400000).toISOString(), until = new Date(now).toISOString();
+  const oldest = new Date(now - 2 * 86400000).toISOString().slice(0, 10);
+  let rows;
+  try {
+    rows = (await env.DB.prepare(
+      "SELECT actor, subject, n, detail FROM activity WHERE kind = 'rides' AND actor IS NOT NULL AND at >= ? AND at < ?")
+      .bind(since, until).all()).results;
+  } catch (e) { return { sent: 0 }; }
+  const by = {};
+  for (const r of rows) {
+    let d = {}; try { d = JSON.parse(r.detail || "{}") || {}; } catch (e) {}
+    if (!d.date || d.date < oldest) continue;
+    const a = by[r.actor] || (by[r.actor] = { rides: 0, parks: [] });
+    a.rides += Number(r.n || d.rides || 0);
+    if (r.subject && a.parks.indexOf(r.subject) < 0) a.parks.push(r.subject);
+  }
+  const actors = Object.keys(by).filter(k => by[k].rides > 0);
+  if (!actors.length) return { sent: 0 };
+  const names = {}, fans = {};
+  for (let i = 0; i < actors.length; i += 90) {
+    const part = actors.slice(i, i + 90), qs = part.map(() => "?").join(",");
+    for (const u of (await env.DB.prepare("SELECT slug, name FROM users WHERE slug IN (" + qs + ")").bind(...part).all()).results) names[u.slug] = u.name || u.slug;
+    let f = [];
+    try { f = (await env.DB.prepare("SELECT follower, followee FROM follows WHERE followee IN (" + qs + ")").bind(...part).all()).results; }
+    catch (e) { return { sent: 0 }; }
+    for (const x of f) (fans[x.follower] = fans[x.follower] || []).push(x.followee);
+  }
+  // Whether today's recap already went to each (087).
+  let done = null;
+  try {
+    done = {};
+    for (const r of (await env.DB.prepare("SELECT slug, day FROM recaps").all()).results) done[r.slug] = r.day;
+  } catch (e) { done = null; }   // 087 not run: everyone once, at the 8:00 run
+  let sent = 0;
+  for (const fan of Object.keys(fans)) {
+    if (done) {
+      if (done[fan] === pt.day || pt.min < recapMinute(fan, pt.day)) continue;
+    } else if (pt.min >= 8 * 60 + 15) continue;
+    const friends = fans[fan].sort((a, b) => by[b].rides - by[a].rides);
+    const line = (s) => (names[s] || s) + ": " + by[s].rides + " ride" + (by[s].rides === 1 ? "" : "s") + " at "
+      + by[s].parks[0] + (by[s].parks.length > 1 ? " +" + (by[s].parks.length - 1) : "");
+    const body = friends.slice(0, 3).map(line).join(" · ") + (friends.length > 3 ? " · and " + (friends.length - 3) + " more" : "");
+    const r = await sendPush(env, [fan], { title: "Yesterday on Coaster Hub", body, url: "/" });
+    sent += r.sent || 0;
+    if (done) {
+      try {
+        await env.DB.prepare("INSERT INTO recaps (slug, day) VALUES (?, ?) ON CONFLICT(slug) DO UPDATE SET day = excluded.day")
+          .bind(fan, pt.day).run();
+      } catch (e) {}
+    }
+  }
+  return { sent };
+}
+
+// A milestone of a friend's (Carter, 2026-10-31: "3 is good too"): crossing
+// 100, 250, 500, 750, 1,000 credits and every 250 after, to their followers.
+function milestoneCrossed(was, now) {
+  const marks = [100, 250, 500, 750];
+  for (let m = 1000; m <= now; m += 250) marks.push(m);
+  let hit = null;
+  for (const m of marks) if (was < m && now >= m) hit = m;
+  return hit;
+}
+async function pushMilestone(env, slug, was, now) {
+  const m = milestoneCrossed(was, now);
+  if (!m) return;
+  let fans = [];
   try { fans = (await env.DB.prepare("SELECT follower FROM follows WHERE followee = ?").bind(slug).all()).results.map(r => r.follower); }
   catch (e) { return; }
   if (!fans.length) return;
   const u = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(slug).first();
-  const name = (u && u.name) || slug;
-  await sendPush(env, fans, { title: name + " logged a day",
-    body: out.added + " ride" + (out.added === 1 ? "" : "s") + " at " + out.park, url: "/user/" + slug });
+  await sendPush(env, fans, { title: ((u && u.name) || slug) + " hit " + m.toLocaleString("en-US") + " credits",
+    body: "See their count.", url: "/user/" + slug });
+}
+
+// Everything anyone does, to the admins only (Carter, 2026-10-31: "every time
+// anyone does anything please notify me only"). Hooked into recordActivity,
+// so every new row of /changes is a notification; a ranking burst merges into
+// one row and so notifies once. An admin's own actions are skipped.
+const ADMIN_WORDS = {
+  rides: (n, s) => "logged " + n + " ride" + (n === 1 ? "" : "s") + (s ? " at " + s : ""),
+  credits: (n) => "added " + n + " credit" + (n === 1 ? "" : "s"),
+  ranking: (n) => "ranked " + (n || "some") + " coaster" + (n === 1 ? "" : "s"),
+  user_added: (n, s) => "joined" + (s ? " as " + s : ""),
+  claimed: () => "claimed their page",
+  coaster_added: (n, s) => "added a coaster" + (s ? ": " + s : ""),
+  day_edited: () => "edited a day",
+  ride_removed: () => "removed a ride",
+  import: (n) => "imported " + (n || "") + " rides",
+  user_renamed: (n, s) => "renamed to " + (s || "something new"),
+  report: (n, s) => "reported " + (s || "a rider"),
+};
+async function pushAdmins(env, kind, actor, subject, n) {
+  if (!env.FCM_SERVICE_ACCOUNT) return;
+  let admins = [];
+  try { admins = (await env.DB.prepare("SELECT slug FROM accounts WHERE is_admin = 1 AND slug IS NOT NULL").all()).results.map(r => r.slug); }
+  catch (e) { return; }
+  admins = admins.filter(a => a !== actor);
+  if (!admins.length) return;
+  let who = actor || "Someone";
+  if (actor) { try { const u = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(actor).first(); if (u && u.name) who = u.name; } catch (e) {} }
+  const words = ADMIN_WORDS[kind] ? ADMIN_WORDS[kind](n, subject) : kind.replace(/_/g, " ") + (subject ? ": " + subject : "");
+  await sendPush(env, admins, { title: who + " " + words, body: "Coaster Hub activity", url: actor ? "/user/" + actor : "/changes" });
 }
 
 // ---- Keeping names and bios clean (2026-10-30) ----------------------------
@@ -1407,6 +1530,7 @@ async function addRides(env, b) {
     coasters: norm.length,
     total: total.rides,
     credits: total.credits,
+    newCredits: total.credits - wasCredits,
     date: d,
     park: park,
   };
@@ -1453,7 +1577,11 @@ async function recordActivity(env, kind, { actor = null, subject = null, n = nul
       "INSERT INTO activity (at, actor, kind, subject, n, detail) VALUES (?,?,?,?,?,?)"
     ).bind(at || new Date().toISOString(), actor, kind, subject, n,
            detail == null ? null : JSON.stringify(detail)).run();
-  } catch (e) { /* the edit already succeeded; a missing feed row is not worth a 500 */ }
+  } catch (e) { return; /* the edit already succeeded; a missing feed row is not worth a 500 */ }
+  // Every feed row is a notification to the admins (pushAdmins), sent after
+  // the answer through the request's own waitUntil.
+  const ctx = REQ.getStore();
+  if (ctx && env.FCM_SERVICE_ACCOUNT) ctx.waitUntil(pushAdmins(env, kind, actor, subject, n).catch(() => {}));
 }
 
 // Ranking arrives in bursts. Building a list is fifty small saves — drag one
@@ -1921,7 +2049,16 @@ async function geocodeMissing(env, limit) {
 
 // ---- Router ---------------------------------------------------------------
 export default {
+  // The cron in wrangler.jsonc: the morning recap of friends' park days.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(dailyRecap(env, event && event.scheduledTime || Date.now()).catch(() => {}));
+  },
+
   async fetch(request, env, ctx) {
+    return REQ.run(ctx, () => this.handle(request, env, ctx));
+  },
+
+  async handle(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
 
@@ -2312,6 +2449,7 @@ export default {
           .bind(new Date().toISOString(), acct.slug, slug, reason, note).run();
         // Emailed to every admin, after the answer: a report must never fail
         // because mail did. Without RESEND_API_KEY it sits in the table.
+        ctx.waitUntil(pushAdmins(env, "report", acct.slug, them.name + " — " + REPORT_REASONS[reason], null).catch(() => {}));
         if (mailConfigured(env)) ctx.waitUntil((async () => {
           try {
             const { results } = await env.DB.prepare("SELECT email FROM accounts WHERE is_admin = 1").all();
@@ -2839,6 +2977,7 @@ export default {
           q("DELETE FROM follows WHERE follower = ? OR followee = ?", slug, slug),
           q("DELETE FROM blocks WHERE blocker = ? OR blocked = ?", slug, slug),
           q("DELETE FROM push_tokens WHERE slug = ?", slug),
+          q("DELETE FROM recaps WHERE slug = ?", slug),
           q("DELETE FROM reports WHERE target = ?", slug),
           q("UPDATE reports SET reporter = NULL WHERE reporter = ?", slug),
           q("DELETE FROM invites WHERE slug = ?", slug),
@@ -2867,7 +3006,9 @@ export default {
         if (!mayWriteRider(request, env, b && b.user, acct)) return err(401, "unauthorized");
         const out = await addRides(env, b);
         if (out.bad) return err(out.bad[0], out.bad[1]);
-        ctx.waitUntil(pushDayLogged(env, String(b.user).toLowerCase(), out).catch(() => {}));
+        if (out.added && out.credits != null && out.newCredits) {
+          ctx.waitUntil(pushMilestone(env, String(b.user).toLowerCase(), out.credits - out.newCredits, out.credits).catch(() => {}));
+        }
         return afterWrite(ctx, env, request, json({ ok: true, ...out }));
       }
       // Change a day that is already logged — see editDay. The body names the

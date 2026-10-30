@@ -37,6 +37,7 @@ const MIGRATION_017 = readFileSync(join(ROOT, "migrations", "017-model-triage.sq
 const MIGRATION_023 = readFileSync(join(ROOT, "migrations", "023-same-ride.sql"), "utf8");
 const MIGRATION_084 = readFileSync(join(ROOT, "migrations", "084-reports-blocks.sql"), "utf8");
 const MIGRATION_085 = readFileSync(join(ROOT, "migrations", "085-push-tokens.sql"), "utf8");
+const MIGRATION_087 = readFileSync(join(ROOT, "migrations", "087-recaps.sql"), "utf8");
 const MIGRATION_046 = readFileSync(join(ROOT, "migrations", "046-relocation-skipped.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
@@ -129,6 +130,8 @@ function freshDb() {
   db.exec(MIGRATION_084);
   db.exec(MIGRATION_085);
   db.exec(MIGRATION_085);
+  db.exec(MIGRATION_087);
+  db.exec(MIGRATION_087);
   return db;
 }
 
@@ -2997,10 +3000,47 @@ async function main() {
     check("...and following again sends nothing", r.sent.length === 0, JSON.stringify(r.sent));
     const today = new Date().toISOString().slice(0, 10);
     r = await pushCall("POST", "/api/rides", { cookie: bob, body: { user: b, d: today, entries: [{ c: 995, n: 3 }] } });
-    check("push: a day logged today notifies followers", r.status === 200 && r.sent.length === 1 && r.sent[0].token === "t-ann"
-      && /3 rides at Push Park/.test(r.sent[0].notification.body), JSON.stringify(r.sent));
-    r = await pushCall("POST", "/api/rides", { cookie: bob, body: { user: b, d: "2019-06-01", entries: [{ c: 995, n: 1 }] } });
-    check("...but an old trip typed in today does not", r.status === 200 && r.sent.length === 0, JSON.stringify(r.sent));
+    check("push: logging a day sends nothing at once (the recap does)", r.status === 200 && r.sent.length === 0, JSON.stringify(r.sent));
+    await call(db, "POST", "/api/rides", { cookie: bob, body: { user: b, d: "2019-06-01", entries: [{ c: 995, n: 1 }] } });
+
+    // The morning recap: run the cron at the next 9:30 Pacific (inside 8-10,
+    // past every rider's 8:xx minute), so the day above is in its 24 hours.
+    const ptMin = (t) => { const o = {}; for (const x of new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(t))) o[x.type] = x.value; return +o.hour * 60 + +o.minute; };
+    let at = Date.now(); while (ptMin(at) !== 570) at += 60000;
+    const cron = async (t) => {
+      const pending = [], sent = [], realFetch = globalThis.fetch, realWait = ctx.waitUntil;
+      ctx.waitUntil = (p) => pending.push(p);
+      globalThis.fetch = async (u, init) => {
+        if (String(u).includes("oauth2")) return new Response(JSON.stringify({ access_token: "tok", expires_in: 3600 }), { status: 200 });
+        sent.push(JSON.parse(init.body).message); return new Response("{}", { status: 200 });
+      };
+      try { await worker.scheduled({ scheduledTime: t }, { DB: new FakeD1(db), FCM_SERVICE_ACCOUNT: SA }, ctx); await Promise.all(pending); return sent; }
+      finally { globalThis.fetch = realFetch; ctx.waitUntil = realWait; }
+    };
+    let sent = await cron(at);
+    check("recap: 9:30 Pacific sends each follower one recap of yesterday",
+      sent.length === 1 && sent[0].token === "t-ann" && sent[0].notification.title === "Yesterday on Coaster Hub"
+      && /Push Bob: 3 rides at Push Park/.test(sent[0].notification.body), JSON.stringify(sent));
+    check("...and leaves out a trip typed in for 2019", !/4 rides/.test((sent[0] || {notification:{}}).notification.body || ""), JSON.stringify(sent));
+    sent = await cron(at + 15 * 60000);
+    check("...and only once a day", sent.length === 0, JSON.stringify(sent));
+    sent = await cron(at - 4 * 3600000);
+    check("...and nothing outside 8-10 am Pacific", sent.length === 0, JSON.stringify(sent));
+
+    // Everything, to the admins (ann now); never their own doings.
+    db.exec("UPDATE accounts SET is_admin = 1 WHERE email = 'pa@x.y'");
+    r = await pushCall("POST", "/api/rides", { cookie: bob, body: { user: b, d: today, entries: [{ c: 995, n: 2 }] } });
+    check("admin: someone logging rides notifies the admin", r.sent.some(m => m.token === "t-ann" && /Push Bob logged 2 rides at Push Park/.test(m.notification.title)), JSON.stringify(r.sent));
+    db.exec("INSERT INTO coasters (id,name,park,type) VALUES (996,'Q','Push Park','Steel')");
+    r = await pushCall("POST", "/api/rides", { cookie: ann, body: { user: a, d: today, entries: [{ c: 996, n: 1 }] } });
+    check("...but not about the admin's own", !r.sent.some(m => m.token === "t-ann"), JSON.stringify(r.sent));
+
+    // Milestones: Bob at 99 credits logs one more.
+    const ins = db.prepare("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,NULL)");
+    for (let k = 0; k < 98; k++) { db.prepare("INSERT INTO coasters (id,name,park,type) VALUES (?,?,'Mile Park','Steel')").run(5000 + k, 'M' + k); ins.run(b, 5000 + k); }
+    db.exec("UPDATE accounts SET is_admin = 0");
+    r = await pushCall("POST", "/api/rides", { cookie: bob, body: { user: b, d: today, entries: [{ c: 996, n: 1 }] } });
+    check("milestone: reaching 100 credits tells their followers", r.sent.some(m => m.token === "t-ann" && /Push Bob hit 100 credits/.test(m.notification.title)), JSON.stringify(r.sent));
     r = await call(db, "DELETE", "/api/push/token", { body: { token: "t-ann" } });
     check("push: signing out removes the phone", r.status === 200 && rows(db, "SELECT 1 FROM push_tokens WHERE token='t-ann'").length === 0);
   }
