@@ -49,8 +49,6 @@
   .findf{margin:0 0 26px;font-size:.9rem}
   .findf a{color:var(--accent2);font-weight:600;text-decoration:none}
   #list{margin-bottom:12px}
-  #allusers{margin:0 0 28px;font-size:.9rem}
-  #allusers a{color:var(--accent2);font-weight:600;text-decoration:none}
   .hint{color:var(--muted);font-size:.9rem;margin:0 0 34px}
   .hint a{color:var(--accent2)}
   /* Inside #friends the list already carries the gap below it. */
@@ -76,10 +74,16 @@
   .recent .feed .upd{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0}
   /* Less air above Recent changes (Carter, 2026-10-01). */
   section.block.recent{padding-top:28px}
-  .recent .more,#factivity_wrap .more,#allusers{font-size:.9rem}
+  .recent .more,#factivity_wrap .more{font-size:.9rem}
   .recent .more{margin:12px 0 0}
   .recent .more a{color:var(--accent2);font-weight:600;text-decoration:none}
   /* An empty friend feed is hidden rather than shown as a lone sentence. */
+  .atpark{display:flex;align-items:center;gap:10px;margin:0 0 22px;padding:13px 16px;border-radius:14px;background-color:var(--tint);
+    border:1px solid var(--line);color:var(--fg);text-decoration:none;font-size:.95rem}
+  .atpark[hidden]{display:none}
+  .atpark svg{flex:none;color:var(--accent2)}
+  .atpark span{flex:1;min-width:0}
+  .atpark i{font-style:normal;font-weight:700;color:var(--accent2);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -144,6 +148,9 @@
        signed out. -->
   <!-- Order, Carter 2026-10-02: Friends, Global top 10, Friend activity, Top
        users, then Recent changes and the feedback card below. -->
+  <!-- At a park (Carter, 2026-10-30): shown when Log has found you within a
+       mile of one in the last two hours; one tap to log there. -->
+  <a class="atpark" id="atpark" href="/log" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="atpark_name"></span><i>Log a ride &rarr;</i></a>
   <div id="friends_wrap" hidden>
     <span class="eyebrow lh">Friends</span>
     <div class="riderlist" id="friends"></div>
@@ -161,9 +168,6 @@
     <div class="feed" id="factivity"></div>
     <p class="more"><a href="/changes">All activity &rarr;</a></p>
   </div>
-  <span class="eyebrow lh" id="top_h">Top users</span>
-  <div class="riderlist" id="list"></div>
-  <p class="more" id="allusers" hidden><a href="/users">All riders &rarr;</a></p>
 </div>
 
 <!-- What everyone has been up to, under who everyone is. The same feed /changes
@@ -247,6 +251,28 @@ CoasterHub.me().then(function(acct){
     $('heroyou').hidden = false;
   });
 }).catch(function(){ /* the slogan stays */ });
+
+// At a park: Log's location fix from the last two hours, within a mile of one.
+CoasterHub.me().then(function(acct){
+  if (!acct || !acct.slug) return;
+  var g = null;
+  try { g = JSON.parse(localStorage.getItem('ch_here') || 'null'); } catch (e) {}
+  if (!g || g.lat == null || Date.now() - g.at > 2 * 3600e3) return;
+  return CoasterHub.fetchParks().then(function(parks){
+    var best = null;
+    Object.keys(parks || {}).forEach(function(n){
+      var p = parks[n]; if (!p || p.lat == null || p.lon == null) return;
+      var r = Math.PI / 180, dLat = (p.lat - g.lat) * r, dLon = (p.lon - g.lon) * r;
+      var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(g.lat * r) * Math.cos(p.lat * r) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      var mi = 2 * 3958.8 * Math.asin(Math.min(1, Math.sqrt(h)));
+      if (!best || mi < best.mi) best = { n: n, mi: mi };
+    });
+    if (best && best.mi <= 1) {
+      document.getElementById('atpark_name').innerHTML = 'You\u2019re at <b>' + esc(best.n) + '</b>';
+      document.getElementById('atpark').hidden = false;
+    }
+  });
+}).catch(function(){});
 
 // The join pills, for whoever is not signed in yet.
 CoasterHub.me().then(function(acct){
@@ -351,9 +377,7 @@ CoasterHub.fetchUsers().then(function(){
         // them out because they are in You & friends right above.
       }
     }
-    // The top ten, then everyone on /users (Carter, 2026-09-29).
-    document.getElementById('list').innerHTML = html(rows.slice(0, 10));
-    if (rows.length > 10) document.getElementById('allusers').hidden = false;
+    // Top users came off Home (Carter, 2026-10-30); everyone is on /users.
   });
 }).catch(function(e){
   console.error(e);
