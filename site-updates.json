@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-30T00:13:38Z",
-   "text": "On phones, Coaster Hub now works more like an app: page titles shrink into the top bar as you scroll, pages you open have a Back button, and choices slide up from the bottom. Tabs remember where you were, tapping the tab you're on jumps to the top, and Home refreshes when you pull down."
+   "at": "2026-10-30T00:57:53Z",
+   "text": "On phones, Coaster Hub now works like an app: swipe a coaster to log a ride, Log opens on the park you're standing in, and pages you've opened still work with no signal. You can now delete or edit any day you've logged, right from your profile."
   },
   {
    "at": "2026-10-17T23:34:17Z",
