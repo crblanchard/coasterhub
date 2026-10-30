@@ -6005,3 +6005,4 @@ proposed, not started.
   1.5 s after landing (up to 6 s) to undo a redraw that knocks it back; any
   touch or wheel stops it.
 - **Skyline on Explore and Rankings too, on phones** (Carter, 2026-10-31: 'the pages are basic without it'): 52px tall, bottom-right of the band beside the title or Mine | Global, no extra strip. Home keeps its 72px strip.
+- **Explore's small tiles are Map and Near me** (Carter, 2026-10-31: 'parks > coasters / map > near me'). Near me opens /parks?sort=near, which asks for location and sorts by distance. Manufacturers and Locations left Explore; still in search, the sitemap, the footer and every coaster's links.

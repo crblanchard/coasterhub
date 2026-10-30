@@ -118,6 +118,10 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.you
   });
   $('loading').style.display='none'; $('ui').style.display='block';
   draw();
+  // Explore's "Near me" (2026-10-31) opens here sorted by distance.
+  if(new URLSearchParams(location.search).get('sort')==='near'){
+    $('f_sort').value='near'; $('f_sort').dispatchEvent(new Event('change'));
+  }
 }).catch(fail);
 function miles(p){
   if(!HERE || p.lat==null || p.lon==null) return null;

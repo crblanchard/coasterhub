@@ -41,14 +41,14 @@
   .xgrid.xbig b{font-size:1.3rem;font-weight:800}
   /* "Manufacturers" (Carter, 2026-10-05: not "Makers") is the long one: its
      card gets the extra width so the word fits on a phone. */
-  .xgrid.xsmall{grid-template-columns:1.4fr 1fr .8fr;gap:8px;margin-top:8px}
+  .xgrid.xsmall{grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
   .xgrid.xsmall a{padding:11px 12px}
   .xgrid.xsmall b{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .xgrid.xsmall span{font-size:.78rem}
   @media (max-width:420px){ .xgrid.xsmall a{padding:10px 9px} .xgrid.xsmall b{font-size:.8rem;letter-spacing:-.01em} }
   .xgrid span{color:var(--muted);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   @media (max-width:420px){ .xgrid span{white-space:normal} }
-  @media (max-width:760px){ .xgrid.xbig{grid-template-columns:repeat(2,1fr)} .xgrid.xsmall{grid-template-columns:1.5fr 1fr .8fr} }
+  @media (max-width:760px){ .xgrid.xbig{grid-template-columns:repeat(2,1fr)} .xgrid.xsmall{grid-template-columns:1fr 1fr} }
   .sughead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px}
   .sughead a{color:var(--accent2);font-weight:600;font-size:.9rem;text-decoration:none}
 </style>
@@ -87,10 +87,12 @@
       <a href="/parks"><b>Parks</b><span id="x_parks">&nbsp;</span></a>
       <a href="/coasters"><b>Coasters</b><span id="x_coasters">&nbsp;</span></a>
     </div>
+    <!-- Map and Near me (Carter, 2026-10-31: "parks > coasters / map > near
+         me"). Manufacturers and Locations stay a search away, on the sitemap
+         and in the footer, and in every coaster's and park's own links. -->
     <div class="xgrid xsmall">
-      <a href="/manufacturers"><b>Manufacturers</b><span id="x_makers">&nbsp;</span></a>
-      <a href="/locations"><b>Locations</b><span id="x_locs">&nbsp;</span></a>
-      <a href="/map"><b>Map</b><span>Nearest rides</span></a>
+      <a href="/map"><b>Map</b><span>Every park</span></a>
+      <a href="/parks?sort=near"><b>Near me</b><span>Parks by distance</span></a>
     </div>
     <!-- Trip planner and Compare had tiles here too (2026-10-17) until Carter
          thinned the page (2026-10-23: "too many buttons"). The trip planner is
@@ -119,15 +121,10 @@ $('hubsearch').addEventListener('click', function(){ CoasterHub.openSearch(''); 
 
 // The cards' counts, from the two lists every page already caches.
 Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function(r){
-  var cs=r[0].coasters||[], parks=r[1]||{}, makers={}, locs={};
-  var nOpen=cs.filter(function(c){ return !c.closed; }).length;
-  cs.forEach(function(c){ if(c.manu) makers[String(c.manu).trim()]=1; });
-  Object.keys(parks).forEach(function(p){ if(parks[p] && parks[p].region) locs[parks[p].region]=1; });
+  var cs=r[0].coasters||[], parks=r[1]||{};
   $('x_parks').textContent=nf(Object.keys(parks).length)+' parks';
   // The same words the pages they open use (critique, 2026-10-02).
   $('x_coasters').textContent=nf(cs.length)+' coasters';
-  $('x_makers').textContent=nf(Object.keys(makers).length)+' manufacturers';
-  $('x_locs').textContent=nf(Object.keys(locs).length)+' places';
 }).catch(function(){ /* the cards still link; they just go without numbers */ });
 
 // How many riders, for the Users card. The list itself is /users.
