@@ -982,9 +982,18 @@
   // The system preference is deliberately NOT consulted: one site-wide default,
   // then the toggle.
   var THEME_KEY = "ch_theme";
+  // Your phone's light or dark setting, unless you have picked one here
+  // (Carter, 2026-10-30: follow the phone, like an app). Picking the one the
+  // phone already uses forgets the choice, so it follows the phone again.
+  function phoneTheme() { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
   function readTheme() {
-    try { return window.localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"; }
-    catch (e) { return "light"; }
+    var t = null;
+    try { t = window.localStorage.getItem(THEME_KEY); } catch (e) {}
+    return t === "dark" || t === "light" ? t : phoneTheme();
+  }
+  if (typeof window !== "undefined" && window.matchMedia) {
+    var _mq = window.matchMedia("(prefers-color-scheme: dark)"), _onMq = function () { applyTheme(readTheme()); };
+    if (_mq.addEventListener) _mq.addEventListener("change", _onMq); else if (_mq.addListener) _mq.addListener(_onMq);
   }
   function applyTheme(t) {
     var el = document.documentElement;
@@ -1085,7 +1094,7 @@
     label();
     b.addEventListener("click", function () {
       var next = readTheme() === "light" ? "dark" : "light";
-      try { window.localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      try { if (next === phoneTheme()) window.localStorage.removeItem(THEME_KEY); else window.localStorage.setItem(THEME_KEY, next); } catch (e) {}
       applyTheme(next);
       label();
     });
@@ -1512,7 +1521,8 @@
         + '<div class="skel" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>';
     }
 
-    if (page === "riders" || page === "changes") pullToRefresh();
+    // Home, the feed, your profile and credits, Rankings and park pages (Carter, 2026-10-30).
+    if (/^(riders|changes|profile|count|rankings|park)$/.test(page)) pullToRefresh();
 
     // Each tab remembers where you were (see buildTabBar); this page's scroll
     // position is kept for when a tab brings you back to it.
@@ -1719,7 +1729,10 @@
       ind.classList.toggle("ready", d >= GO);
     };
     window.addEventListener("touchstart", function (e) {
-      var busy = document.querySelector(".chdlg") || document.querySelector(".rbmenu:not([hidden])");
+      // Not over a sheet or menu, and never while Rankings is being reordered
+      // (#mine loses .readonly while you edit) — a pull there is a drag.
+      var busy = document.querySelector(".chdlg") || document.querySelector(".rbmenu:not([hidden])")
+        || document.querySelector(".lpmenu") || document.querySelector("#mine:not(.readonly)");
       y0 = (window.scrollY <= 0 && e.touches.length === 1 && !busy) ? e.touches[0].clientY : null; d = 0;
     }, { passive: true });
     window.addEventListener("touchmove", function (e) {
@@ -2676,7 +2689,18 @@
       fetch("/api/day", { method: "PUT", credentials: "same-origin", headers: { "content-type": "application/json" },
         body: JSON.stringify({ user: u, d: d, to: d, entries: [] }) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || ("error " + r.status)); }); })
-        .then(function () { noteWrite(); location.reload(); })
+        .then(function () {
+          noteWrite(); close();
+          // The day folds out of the list where it was, no reload (Carter, 2026-10-30).
+          var day = b.closest("details");
+          if (day) {
+            day.style.height = day.offsetHeight + "px"; day.style.overflow = "hidden";
+            day.style.transition = "height .28s ease, opacity .2s ease";
+            requestAnimationFrame(function () { day.style.height = "0px"; day.style.opacity = "0"; });
+            setTimeout(function () { day.remove(); }, 320);
+          }
+          toast("<span>Deleted " + searchEsc(nice) + "</span>");
+        })
         .catch(function (err) { y.disabled = false; wrap.querySelector("#dd_msg").textContent = "Couldn't delete it: " + (err.message || err); });
     };
   }, true);
