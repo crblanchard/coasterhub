@@ -826,11 +826,26 @@ function b64url(bytes) {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+// The service-account JSON as pasted into the dashboard, forgiving the usual
+// paste damage (2026-10-31, the first paste did not parse): a byte-order mark
+// or spaces around it, curly quotes from a word processor, surrounding quotes,
+// and the private key's \n turned into real line breaks by an editor.
+function readServiceAccount(raw) {
+  let t = String(raw || "").replace(/^\uFEFF/, "").trim()
+    .replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+  if (/^["'`]/.test(t) && /["'`]$/.test(t) && !t.startsWith("{")) t = t.slice(1, -1).trim();
+  try { return JSON.parse(t); } catch (e) {}
+  const fixed = t.replace(/("private_key"\s*:\s*")([\s\S]*?)(")/, (m, a, key, b) => a + key.replace(/\r?\n/g, "\\n") + b);
+  try { return JSON.parse(fixed); } catch (e) {}
+  return null;
+}
+
 async function fcmAuth(env) {
   if (!env.FCM_SERVICE_ACCOUNT) return null;
   const now = Math.floor(Date.now() / 1000);
   if (FCM_AUTH && FCM_AUTH.exp - 60 > now) return FCM_AUTH;
-  const sa = JSON.parse(env.FCM_SERVICE_ACCOUNT);
+  const sa = readServiceAccount(env.FCM_SERVICE_ACCOUNT);
+  if (!sa || !sa.private_key || !sa.client_email) return null;
   const head = b64url(enc.encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
   const claims = b64url(enc.encode(JSON.stringify({
     iss: sa.client_email, scope: "https://www.googleapis.com/auth/firebase.messaging",
@@ -2439,8 +2454,13 @@ export default {
         if (!(acct && acct.admin)) return err(401, "admins only");
         const out = { secret: !!env.FCM_SERVICE_ACCOUNT };
         if (!out.secret) return json({ ...out, fix: "Set the Worker secret FCM_SERVICE_ACCOUNT (the Firebase service-account JSON)." });
-        try { const sa = JSON.parse(env.FCM_SERVICE_ACCOUNT); out.project = sa.project_id; out.email = sa.client_email; }
-        catch (e) { return json({ ...out, fix: "FCM_SERVICE_ACCOUNT is not valid JSON: paste the whole file, { to }." }); }
+        const raw = String(env.FCM_SERVICE_ACCOUNT), sa = readServiceAccount(raw);
+        // What arrived, without the secret: how long, and how it starts and ends.
+        out.received = { length: raw.length, starts: JSON.stringify(raw.trim().slice(0, 12)), ends: JSON.stringify(raw.trim().slice(-6)),
+                         hasPrivateKey: /"private_key"/.test(raw), hasEmail: /"client_email"/.test(raw) };
+        if (!sa) return json({ ...out, fix: "FCM_SERVICE_ACCOUNT is not valid JSON: paste the whole file, from { to }." });
+        if (!sa.private_key || !sa.client_email) return json({ ...out, fix: "That JSON is not a service-account key (no private_key or client_email)." });
+        out.project = sa.project_id; out.email = sa.client_email;
         FCM_AUTH = null;
         let auth = null;
         try { auth = await fcmAuth(env); } catch (e) { out.authError = String(e && e.message || e); }
