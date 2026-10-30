@@ -929,7 +929,11 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
    behaviour lives in app.js phoneShell(); search and the theme switch stay in
    the top bar until Carter decides on moving them. */
 @media (max-width:680px){
-  html:not(.pg-riders) .brand{display:none}
+  /* The logo fills an empty bar on the tab pages until the title scrolls up
+     into it (Carter, 2026-10-30); pages you went into have Back there instead. */
+  html.detail .brand,html.navscrolled:not(.pg-riders) .brand{display:none}
+  html:not(.navscrolled) .navtitle{flex:0 0 0}
+  .nav-inner .people{margin-left:auto}
   html.detail .navback{display:inline-flex;align-items:center;justify-content:flex-start;flex:none;width:44px;height:44px;margin-left:-12px;margin-right:-10px;padding:0 0 0 6px;
     background-color:transparent;border-style:none;border-radius:999px;color:var(--accent2);cursor:pointer}
   html.detail .navback:active{background-color:var(--soft2)}
