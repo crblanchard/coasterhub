@@ -2943,6 +2943,15 @@ async function main() {
     check("...and /api/auth/me still works, saying blocking is off", r.status === 200 && r.data.account.blocked === null, JSON.stringify(r.data));
   }
 
+  // ---- the iPhone app's apple-app-site-association (2026-10-30) ------------
+  {
+    const res = await worker.fetch(new Request("https://coasterhub.org/.well-known/apple-app-site-association"), { DB: new FakeD1(freshDb()) }, ctx);
+    const j = await res.json().catch(() => null);
+    check("AASA: JSON at the well-known path, naming the app for links and passwords",
+      res.status === 200 && /application\/json/.test(res.headers.get("content-type"))
+      && j.applinks.details[0].appIDs[0] === "CA3NDC8BLZ.org.coasterhub.app" && j.webcredentials.apps[0] === "CA3NDC8BLZ.org.coasterhub.app", JSON.stringify(j));
+  }
+
   // ---- push notifications (085, 2026-10-30) ---------------------------------
   {
     const db = freshDb();

@@ -5886,3 +5886,19 @@ Fixed in app.js — Cancel only closes.
 **Moved, same day** (Carter: "yes" to the subtler spot): "Delete account" is a
 small grey link at the bottom of the Change password form, not an item in
 the Account menu. /privacy, /terms and STORE-LISTING.md say so.
+
+### Apple approved; links and passwords (2026-10-30)
+
+Carter's Apple Team ID: **CA3NDC8BLZ** (public; it is in every app). Set as
+DEVELOPMENT_TEAM in the Xcode project. APNs key: Sandbox & Production, team
+scoped, uploaded to Firebase project coaster-7c2cc (the real one; an empty
+`coaster-hub` project also exists by accident and can be deleted).
+
+- worker.js serves `/.well-known/apple-app-site-association` (and the root
+  copy): applinks for every path except /api/* and /avatars/*, plus
+  webcredentials. Worker-served, not a static file, so it is JSON with no
+  redirect.
+- App.entitlements: `applinks:coasterhub.org`, `webcredentials:coasterhub.org`.
+  The App ID needs **Associated Domains** and **Push Notifications** ticked
+  (cloud signing usually adds them; Carter was asked to tick both).
+- app.js listens for the App plugin's `appUrlOpen` and goes to that path.

@@ -4,5 +4,10 @@
 <dict>
 	<key>aps-environment</key>
 	<string>production</string>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:coasterhub.org</string>
+		<string>webcredentials:coasterhub.org</string>
+	</array>
 </dict>
 </plist>

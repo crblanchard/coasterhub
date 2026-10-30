@@ -1014,6 +1014,15 @@
     if (!inApp()) return;
     document.documentElement.classList.add("inapp");
     pushWire();
+    // A coasterhub.org link tapped elsewhere (Mail, Messages) opens the app
+    // (apple-app-site-association, worker.js): go to the page it names.
+    var ap = nativePlugin("App");
+    if (ap) ap.addListener("appUrlOpen", function (ev) {
+      try {
+        var u = new URL(ev.url);
+        if (u.hostname === "coasterhub.org" && u.pathname + u.search !== location.pathname + location.search) location.href = u.pathname + u.search + u.hash;
+      } catch (e) {}
+    });
     document.addEventListener("click", function (e) {
       var a = e.target.closest && e.target.closest("a[href]");
       if (!a || e.defaultPrevented) return;

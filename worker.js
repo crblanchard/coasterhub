@@ -1936,6 +1936,22 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
+    // The iPhone app's claim on coasterhub.org (2026-10-30): a coasterhub.org
+    // link tapped in Mail or Messages opens the app instead of Safari (a
+    // password-reset email included), and iCloud Keychain offers the site's
+    // saved passwords in the app. Apple fetches this file; it must be JSON at
+    // exactly this path with no redirect. Team ID CA3NDC8BLZ is Carter's
+    // (public: it is in every app he ships). The app's half is
+    // app/ios/App/App/App.entitlements.
+    if (path === "/.well-known/apple-app-site-association" || path === "/apple-app-site-association") {
+      const app = "CA3NDC8BLZ.org.coasterhub.app";
+      return new Response(JSON.stringify({
+        applinks: { details: [{ appIDs: [app], components: [
+          { "/": "/api/*", exclude: true }, { "/": "/avatars/*", exclude: true }, { "/": "/*" }] }] },
+        webcredentials: { apps: [app] },
+      }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=3600" } });
+    }
+
     // Avatars come out of R2 rather than the asset bundle, so they are on
     // coasterhub.org like everything else and no third party sees who is
     // looking at whom. Immutable + a year: the key changes on every upload, so
