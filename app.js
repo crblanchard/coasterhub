@@ -2809,11 +2809,11 @@
       ? '<span class="av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
       : '<span class="av">' + E((u.name || "?").charAt(0).toUpperCase()) + '</span>';
     var showRides = u.claimed && rides != null;
-    // Nothing ranked: the big number is their credits rather than a "0 ranked"
-    // that makes an active rider look idle (Carter, 2026-10-01).
-    var big = ranked ? [ranked, "ranked"] : [credits, credits === 1 ? "credit" : "credits"];
-    var line = ranked ? nf(credits) + " credits" + (showRides ? " / " + nf(rides) + " rides" : "")
-                      : (showRides ? nf(rides) + " rides" : "");
+    // Every row reads the same way, "0 ranked" included, with credits and
+    // rides underneath (Carter, 2026-10-31; it used to put credits in the big
+    // number when nothing was ranked, so one row read differently).
+    var big = [ranked || 0, "ranked"];
+    var line = nf(credits) + " credits" + (showRides ? " / " + nf(rides) + " rides" : "");
     return '<a class="riderrow" href="' + userPageHref(u.slug, "profile") + '">' + pic
       + '<span class="who"><b class="nm">' + E(u.name) + '</b>'
       + '<span class="un">@' + E(u.slug) + '</span>' + (line ? '<span class="sub">' + line + '</span>' : '') + '</span>'

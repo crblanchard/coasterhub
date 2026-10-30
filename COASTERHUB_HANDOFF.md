@@ -5992,3 +5992,4 @@ proposed, not started.
    `.snapcopy` (meTabs does) — watch for that in new code.
 - **Swipe-to-log only on park pages and Log** (Carter, 2026-10-31): the '+ Log a ride' strip showed through beside Home's top 5. CSS and the touch handler are scoped to html.pg-park / html.pg-log, and the strip is opacity 0 until a row is being dragged. Long-press 'Log a ride today' still works everywhere.
 - **Coaster page Rankings grouped by place** (Carter, 2026-10-31: fourteen rider pills 'needs to be consolidated'): coaster.html now uses CoasterHub.whoByPlace, the same '#1 · names' rows as Global's expanded rows (lists.css .wplaces).
+- **Rider rows always '<n> ranked'** (Carter, 2026-10-31: 'say zero ranked with credits below like normal'). Reverses the 2026-10-01 rule that put credits in the big number when nothing was ranked; riderRow (Home friends, /users) now always shows ranked big and 'credits / rides' underneath.
