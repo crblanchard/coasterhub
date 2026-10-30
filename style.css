@@ -1042,10 +1042,14 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 .chtoast a{flex:none;font-weight:700;color:#ffcc1f;text-decoration:none;white-space:nowrap}
 @media (min-width:681px){ .chtoast{bottom:24px} }
 @media (max-width:680px){
-  a.crow[data-cid]{position:relative;transition:transform .2s ease}
+  /* Swipe to log, on a park's page and on Log only (Carter, 2026-10-31: on
+     Home's top 5 the strip showed through beside every row). The strip is
+     there only while a row is being dragged. */
+  html:is(.pg-park,.pg-log) a.crow[data-cid]{position:relative;transition:transform .2s ease}
   a.crow.swiping{transition:none}
-  a.crow[data-cid]::before{content:"+ Log a ride";position:absolute;top:0;bottom:0;right:100%;width:200px;display:flex;align-items:center;justify-content:flex-end;
-    padding-right:16px;font-size:.88rem;font-weight:700;color:var(--onaccent);background-color:var(--accentfill);opacity:.55;pointer-events:none}
+  html:is(.pg-park,.pg-log) a.crow[data-cid]::before{content:"+ Log a ride";position:absolute;top:0;bottom:0;right:100%;width:200px;display:flex;align-items:center;justify-content:flex-end;
+    padding-right:16px;font-size:.88rem;font-weight:700;color:var(--onaccent);background-color:var(--accentfill);opacity:0;pointer-events:none}
+  a.crow.swiping::before{opacity:.55}
   a.crow.swipego::before{opacity:1}
 }
 

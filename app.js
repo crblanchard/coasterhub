@@ -1771,6 +1771,10 @@
     var row = null, x0 = 0, y0 = 0, dx = 0, mode = 0, GO = 84, eat = null;
     document.addEventListener("touchstart", function (e) {
       if (!isPhone() || e.touches.length !== 1) return;
+      // A park's page and Log only (Carter, 2026-10-31): elsewhere a coaster
+      // row is something to read, and long-press still offers "Log a ride".
+      var rc = document.documentElement.classList;
+      if (!rc.contains("pg-park") && !rc.contains("pg-log")) return;
       row = e.target.closest && e.target.closest("a.crow[data-cid]");
       if (!row) return;
       x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0; mode = 0;
