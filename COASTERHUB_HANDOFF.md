@@ -5863,3 +5863,13 @@ Android platform is added). Not secrets: they identify the app.
 - **Swipe from the left edge = Back** in the iOS app: `ViewController.swift`
   (CAPBridgeViewController subclass, allowsBackForwardNavigationGestures),
   used by SceneDelegate.
+
+### No slide between views on one level (2026-10-30)
+
+Carter: "don't do the screen slide for my rankings to global rankings and
+other things that are visually on the same 'level'". A capture-phase click
+listener in app.js marks `ch_vt = "same"` for links inside `.segsw`,
+`.navseg` (Mine | Global, in the band or the top bar), `.metabs` (Overview ·
+Credits · Map), for your own list ⇄ /rankings, and for the rider switcher;
+the arriving page's `pagereveal` then calls `skipTransition()`. Everything
+else keeps the push slide; Back keeps the pop.

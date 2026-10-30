@@ -1129,7 +1129,7 @@
     if (!mePromise) {
       mePromise = fetch("/api/auth/me", { credentials: "same-origin", cache: "no-store" })
         .then(function (r) { return r.ok ? r.json() : { account: null }; })
-        .then(function (d) { return (d && d.account) || null; })
+        .then(function (d) { var a = (d && d.account) || null; MY_SLUG = a && a.slug; return a; })
         .catch(function () { return null; });   // offline, or the API is down
     }
     return mePromise;
@@ -1422,6 +1422,7 @@
         if (v === "__all__") window.localStorage.removeItem("ch_rider");
         else window.localStorage.setItem("ch_rider", v);
       } catch (e2) {}
+      markTransition("same");   // the same page, someone else's: no slide
       window.location.href = v === "__all__" ? ("/" + page) : userPageHref(v, page);
     });
     document.addEventListener("click", function () { if (!menu.hidden) open(false); });
@@ -1449,9 +1450,24 @@
     try { t = window.sessionStorage.getItem("ch_vt"); window.sessionStorage.removeItem("ch_vt"); } catch (x) {}
     var act = window.navigation && window.navigation.activation;
     if (!t && act && act.navigationType === "traverse") t = "back";
+    // Same tier (Carter, 2026-10-30: "don't do the screen slide for my rankings
+    // to global rankings and other things that are visually on the same
+    // level"): the page simply changes, no slide.
+    if (t === "same") { try { e.viewTransition.skipTransition(); } catch (x) {} return; }
     if (t) try { e.viewTransition.types.add(t); } catch (x) {}
   });
   function markTransition(kind) { try { window.sessionStorage.setItem("ch_vt", kind); } catch (e) {} }
+  // Links between views on one level: Mine | Global, a rider's Overview ·
+  // Credits · Map tabs, and your own list from Global's "Personal lists".
+  var MY_SLUG = null;
+  if (typeof document !== "undefined") document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a || e.defaultPrevented || a.target === "_blank") return;
+    if (a.closest(".segsw, .navseg, .metabs")) { markTransition("same"); return; }
+    var mine = MY_SLUG && ("/user/" + MY_SLUG + "/rankings");
+    var here = location.pathname, there = a.pathname;
+    if (mine && ((here === "/rankings" && there === mine) || (here === mine && there === "/rankings"))) markTransition("same");
+  }, true);
 
   // ---- The phone layout (Carter, 2026-10-30: "a more app-like mobile layout",
   // all of it but moving search and the theme switch, which he is still deciding).
