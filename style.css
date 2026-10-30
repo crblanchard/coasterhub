@@ -992,25 +992,18 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   .srch .srchbox,.chdlg,.chdlg-box,.rbmenu.sheet,.rbback.on,.skel i,.ptr.spin svg{animation:none}
 }
 
-/* Swipe-to-log rows and the day sheet (app.js logDaySheet, 2026-10-30). */
-.ld-date{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 8px;font-size:.88rem;color:var(--muted)}
-.ld-date input{font-family:inherit;font-size:16px;color:var(--fg);background-color:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px 10px}
-.ld-list{max-height:min(52vh,420px);overflow-y:auto;overscroll-behavior:contain;border-top:1px solid var(--line);margin:0 -4px}
-.ld-row{display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid var(--line)}
-.ld-nm{flex:1;min-width:0;font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis}
-.ld-nm small{display:block;font-weight:400;font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ld-b{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background-color:var(--soft);color:var(--fg);font-family:inherit;font-size:1.2rem;cursor:pointer}
-.ld-b.plus{color:var(--accent2)}
-.ld-n{flex:none;width:22px;text-align:center;font-variant-numeric:tabular-nums;color:var(--muted)}
-.ld-row.on .ld-n{color:var(--fg)}
-.ld-msg{color:var(--bad);font-size:.84rem;margin:8px 0 0;min-height:1em}
-.ld-cancel{font-family:inherit;font-weight:600;background-color:transparent;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer}
-.ld-save{font-family:inherit;font-weight:700;background-color:var(--accentfill);color:var(--onaccent);border-style:none;border-radius:10px;padding:9px 18px;cursor:pointer}
-.ld-save:disabled{opacity:.5}
+/* Swipe-to-log rows and the card that confirms it (app.js swipeLog, 2026-10-30). */
+.chtoast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:70;width:min(420px,calc(100vw - 24px));
+  display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background-color:#16181b;color:#f3f4f6;border:1px solid rgba(255,255,255,.12);
+  font-size:.9rem;box-shadow:0 10px 30px var(--shadow);transform:translate(-50%,150%);opacity:0;transition:transform .25s ease,opacity .25s ease;pointer-events:none}
+.chtoast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.chtoast span{flex:1;min-width:0}
+.chtoast a{flex:none;font-weight:700;color:#ffcc1f;text-decoration:none;white-space:nowrap}
+@media (min-width:681px){ .chtoast{bottom:24px} }
 @media (max-width:680px){
   a.crow[data-cid]{position:relative;transition:transform .2s ease}
   a.crow.swiping{transition:none}
-  a.crow[data-cid]::before{content:"+ Log rides";position:absolute;top:0;bottom:0;right:100%;width:200px;display:flex;align-items:center;justify-content:flex-end;
+  a.crow[data-cid]::before{content:"+ Log a ride";position:absolute;top:0;bottom:0;right:100%;width:200px;display:flex;align-items:center;justify-content:flex-end;
     padding-right:16px;font-size:.88rem;font-weight:700;color:var(--onaccent);background-color:var(--accentfill);opacity:.55;pointer-events:none}
   a.crow.swipego::before{opacity:1}
 }

@@ -1497,72 +1497,44 @@
     });
   }
 
-  // A day at a park, logged from wherever you are (Carter, 2026-10-30: swipe a
-  // coaster "opens a popup for logging rides so you can do the full day"). The
-  // park's coasters with + and -, the one you swiped already at one ride, and
-  // the date. It ADDS rides (POST /api/rides, the call /log makes), so it can
-  // never wipe a day already logged.
-  function logDaySheet(cid) {
+  // Swipe a coaster row and it is logged: one ride, today, no questions
+  // (Carter, 2026-10-30: "'added to your log for today' kind of thing without
+  // adding a popup"). A card at the bottom says so, with a link to the day on
+  // /log, where it can be changed or taken back.
+  function todayStr() {
+    var t = new Date();
+    return t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
+  }
+  var toastEl = null, toastT = null;
+  function toast(html) {
+    if (!toastEl) { toastEl = document.createElement("div"); toastEl.className = "chtoast"; toastEl.setAttribute("role", "status"); document.body.appendChild(toastEl); }
+    toastEl.innerHTML = html;
+    toastEl.classList.remove("show"); void toastEl.offsetWidth; toastEl.classList.add("show");
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.classList.remove("show"); }, 6000);
+  }
+  function swipeLog(row) {
+    var cid = +row.getAttribute("data-cid"), d = todayStr();
     Promise.all([me(), fetchCoasters()]).then(function (r) {
-      var a = r[0], all = (r[1] && r[1].coasters) || [];
+      var a = r[0];
       if (!a || !a.slug) { location.href = "/account"; return; }
-      var c = all.filter(function (x) { return x.id === cid; })[0];
-      if (!c) return;
-      var list = all.filter(function (x) { return x.park === c.park && !x.closed && (x.same == null || x.same === x.id); })
-        .sort(function (x, y) { return x.id === cid ? -1 : y.id === cid ? 1 : String(x.name).localeCompare(String(y.name)); });
-      var n = {}; n[cid] = 1;
-      var t = new Date(), today = t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
-      var wrap = document.createElement("div");
-      wrap.className = "chdlg"; wrap.setAttribute("role", "dialog"); wrap.setAttribute("aria-modal", "true");
-      wrap.innerHTML = '<div class="chdlg-box logday">'
-        + '<b style="display:block;font-size:1.05rem;line-height:1.3">Log a day at ' + searchEsc(c.park) + '</b>'
-        + '<label class="ld-date"><span>Date</span><input id="ld_date" type="date" max="' + today + '" value="' + today + '"></label>'
-        + '<div class="ld-list">' + list.map(function (x) {
-            return '<div class="ld-row" data-c="' + x.id + '"><span class="ld-nm">' + searchEsc(x.name) + '<small>' + searchEsc(maker(x)) + '</small></span>'
-              + '<button type="button" class="ld-b" data-d="-1" aria-label="One fewer">−</button><b class="ld-n">' + (n[x.id] || 0) + '</b>'
-              + '<button type="button" class="ld-b plus" data-d="1" aria-label="One more">+</button></div>';
-          }).join("") + '</div>'
-        + '<p id="ld_msg" class="ld-msg"></p>'
-        + '<div class="chdlg-acts"><button type="button" id="ld_no" class="ld-cancel">Cancel</button><button type="button" id="ld_yes" class="ld-save">Save 1 ride</button></div></div>';
-      document.body.appendChild(wrap);
-      var q = function (s) { return wrap.querySelector(s); };
-      var total = function () { var k = 0; Object.keys(n).forEach(function (id) { k += n[id]; }); return k; };
-      var label = function () { var k = total(); q("#ld_yes").textContent = k ? "Save " + k + " ride" + (k === 1 ? "" : "s") : "Save"; q("#ld_yes").disabled = !k; };
-      var close = function () { document.removeEventListener("keydown", key); wrap.remove(); };
-      var key = function (e) { if (e.key === "Escape") close(); };
-      document.addEventListener("keydown", key);
-      wrap.addEventListener("click", function (e) {
-        if (e.target === wrap) { close(); return; }
-        var b = e.target.closest && e.target.closest(".ld-b");
-        if (!b) return;
-        var row = b.closest(".ld-row"), id = +row.getAttribute("data-c");
-        n[id] = Math.max(0, Math.min(50, (n[id] || 0) + (+b.getAttribute("data-d"))));
-        if (!n[id]) delete n[id]; else if (+b.getAttribute("data-d") > 0) haptic();
-        row.querySelector(".ld-n").textContent = n[id] || 0;
-        row.classList.toggle("on", !!n[id]);
-        label();
-      });
-      q(".ld-row").classList.add("on");
-      q("#ld_no").onclick = close;
-      q("#ld_yes").onclick = function () {
-        var d = q("#ld_date").value || null;
-        if (d && d > today) { q("#ld_msg").textContent = "That date hasn't happened yet."; return; }
-        var entries = Object.keys(n).map(function (id) { return { c: +id, n: n[id] }; });
-        if (!entries.length) return;
-        q("#ld_yes").disabled = true; q("#ld_msg").textContent = "";
-        fetch("/api/rides", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ user: a.slug, d: d, entries: entries }) })
-          .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || ("error " + r.status)); return j; }); })
-          .then(function () { noteWrite(); close(); location.reload(); })
-          .catch(function (e) { q("#ld_yes").disabled = false; q("#ld_msg").textContent = "Couldn't save: " + (e.message || e); });
-      };
-      label();
+      var c = ((r[1] && r[1].coasters) || []).filter(function (x) { return x.id === cid; })[0] || { name: "that coaster" };
+      return fetch("/api/rides", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ user: a.slug, d: d, entries: [{ c: cid, n: 1 }] }) })
+        .then(function (res) { if (!res.ok) throw new Error(res.status); noteWrite(); })
+        .then(function () {
+          var t = row.querySelector(".tick");
+          if (t) { t.className = "tick"; t.textContent = "✓"; t.removeAttribute("data-tick"); }
+          row.classList.remove("miss"); row.classList.add("got");
+          toast('<span>Added a ride on <b>' + searchEsc(c.name) + '</b> today</span><a href="/log?edit=' + d + '">View your day</a>');
+        })
+        .catch(function () { toast('<span>Couldn’t log that ride. Check your connection and try again.</span>'); });
     });
   }
 
-  // Swipe a coaster row to the right to log rides (phones). Only a clearly
+  // Swipe a coaster row to the right to log a ride (phones). Only a clearly
   // sideways drag counts, so scrolling the list never trips it; a short one
-  // springs back, a long one opens logDaySheet. The tap that ends a swipe is
+  // springs back, a long one logs it (swipeLog). The tap that ends a swipe is
   // swallowed, so the row does not also open.
   if (typeof document !== "undefined") (function () {
     var row = null, x0 = 0, y0 = 0, dx = 0, mode = 0, GO = 84, eat = null;
@@ -1591,7 +1563,7 @@
       eat = r;
       r.style.transform = "";
       r.classList.remove("swiping", "swipego");
-      if (dx >= GO) { haptic(); logDaySheet(+r.getAttribute("data-cid")); }
+      if (dx >= GO) swipeLog(r);
       setTimeout(function () { eat = null; }, 400);
     }, { passive: true });
     document.addEventListener("click", function (e) {
@@ -3063,7 +3035,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, logDaySheet: logDaySheet, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, toast: toast, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
