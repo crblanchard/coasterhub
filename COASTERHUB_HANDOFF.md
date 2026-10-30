@@ -5793,3 +5793,34 @@ Carter: "can you readd dark mode toggle to desktop only not mobile". Above
 toggle is hidden (style.css) and `ch_theme` is never read — not by app.js's
 readTheme nor by the head script on every page — so a phone always follows
 the device, and so will the app.
+
+### The app project exists (2026-10-30)
+
+Carter paid for both developer accounts (Apple pending approval; Google needs
+the Android-phone check and ID). He said "let's start on as much app store
+stuff as we can do now. android will be later because finding 12 people with
+them will be hard" — so iPhone first, Android not added yet.
+
+- `app/` — Capacitor 8.6 shell, `server.url` https://coasterhub.org,
+  `errorPath` offline.html, UA suffix `CoasterHubApp`. Read `app/README.md`.
+  iOS: iPhone only (TARGETED_DEVICE_FAMILY 1), portrait only,
+  `WKAppBoundDomains` coasterhub.org (+ limitsNavigationsToAppBoundDomains)
+  because WKWebView runs service workers only for app-bound domains — without
+  it the offline logging would not work in the app. Permission strings for
+  camera, photos (avatar) and location; ITSAppUsesNonExemptEncryption false.
+- Icon/splash: `node tools/render-app-icons.mjs` (needs `npm i --no-save
+  playwright-core` at the root; flattens to RGB because Apple rejects alpha).
+- Site side: every page has `viewport-fit=cover`; `header.nav` pads by the
+  safe-area insets (zero in a browser tab). app.js `appShell()`/`inApp()`/
+  `nativePlugin()`: `html.inapp`, StatusBar style set on every applyTheme,
+  off-site links open in the Browser plugin sheet.
+- `.github/workflows/ios.yml` — `build` (simulator, unsigned, every app/ push)
+  and `testflight` (by hand, needs APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID,
+  ASC_KEY_P8; cloud signing with a Team key; build number = run number).
+  concurrency cancels an in-progress run on a new push to app/.
+- `app/STORE-LISTING.md` — name, subtitle, description, keywords, review
+  notes, privacy-label answers. Screenshots: take them in the real app on
+  TestFlight (the dev copy has no rankings and no map tiles here).
+- Not done yet: Android platform, push notifications (needs Firebase),
+  Universal Links (needs the Team ID for apple-app-site-association), a
+  reviewer demo account (Carter makes it), swipe-back gesture.
