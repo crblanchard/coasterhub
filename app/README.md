@@ -1,0 +1,26 @@
+# Coaster Hub app
+
+The iPhone (and later Android) app: a [Capacitor](https://capacitorjs.com) 8
+shell that opens **https://coasterhub.org** (`capacitor.config.json`
+`server.url`). The app IS the site, so every push to `main` reaches the app
+with no store update. A store update is only needed when something in this
+folder changes (icon, permissions, plugins) — about once a year.
+
+- `www/` — what ships inside the app: `offline.html`, shown if the site can't
+  be reached the very first time it opens (`server.errorPath`). After one
+  successful load the site's own service worker handles no signal; iOS
+  allows that only for "app-bound domains", hence `WKAppBoundDomains` in
+  `ios/App/App/Info.plist` and `limitsNavigationsToAppBoundDomains`.
+- `ios/` — the Xcode project, from `npx cap add ios`. iPhone only, portrait
+  only. Icon and launch screen: `node tools/render-app-icons.mjs`.
+- The site knows it is in the app through `CoasterHub.inApp()` (app.js): the
+  status bar follows light/dark natively, and links off coasterhub.org open
+  in an in-app browser sheet. `<html class="inapp">` is there for CSS.
+
+No Mac needed: `.github/workflows/ios.yml` builds it on GitHub's Macs, and
+uploads to TestFlight when run by hand with "Send to TestFlight" ticked. The
+secrets it needs are listed at the top of that file.
+
+After changing `capacitor.config.json` or adding a plugin:
+
+    cd app && npm install && npx cap sync ios

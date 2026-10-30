@@ -997,6 +997,33 @@
     var _mq = window.matchMedia("(prefers-color-scheme: dark)"), _onMq = function () { applyTheme(readTheme()); };
     if (_mq.addEventListener) _mq.addEventListener("change", _onMq); else if (_mq.addListener) _mq.addListener(_onMq);
   }
+  // ---- inside the iPhone/Android app (Capacitor, 2026-10-30) ---------------
+  // The app is this site in a native shell (app/). Capacitor puts its bridge on
+  // window before any page script runs; a browser has none of it, so every use
+  // here is a no-op on the web.
+  function inApp() {
+    var C = typeof window !== "undefined" && window.Capacitor;
+    return !!(C && C.isNativePlatform && C.isNativePlatform());
+  }
+  function nativePlugin(name) {
+    return inApp() && window.Capacitor.Plugins ? window.Capacitor.Plugins[name] || null : null;
+  }
+  // Once per page: mark <html> for CSS, and open links off coasterhub.org in an
+  // in-app browser sheet instead of leaving the app for Safari.
+  function appShell() {
+    if (!inApp()) return;
+    document.documentElement.classList.add("inapp");
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a[href]");
+      if (!a || e.defaultPrevented) return;
+      var u; try { u = new URL(a.href, location.href); } catch (x) { return; }
+      if (!/^https?:$/.test(u.protocol) || u.hostname === location.hostname) return;
+      var br = nativePlugin("Browser"); if (!br) return;
+      e.preventDefault();
+      br.open({ url: u.href });
+    });
+  }
+
   function applyTheme(t) {
     var el = document.documentElement;
     if (t === "light") el.setAttribute("data-theme", "light");
@@ -1014,6 +1041,10 @@
       document.head.appendChild(m);
     }
     m.setAttribute("content", t === "light" ? "#f5f5f3" : "#080e20");
+    // In the app the status bar is native: tell it directly, which also
+    // sidesteps the next-page-load lag above.
+    var sb = nativePlugin("StatusBar");
+    if (sb) { try { sb.setStyle({ style: t === "light" ? "LIGHT" : "DARK" }); } catch (e) {} }
 
     // Anything painted with JS rather than CSS — Chart.js canvases, Leaflet
     // markers — has to be told, or it keeps the palette it was built with.
@@ -1820,6 +1851,7 @@
 
   function initNav(page) {
     if (typeof document === "undefined") return;
+    appShell();
     applyTheme(readTheme());
     phoneShell(page, currentUser());
     offlineSupport();
@@ -3284,7 +3316,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

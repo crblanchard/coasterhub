@@ -27,3 +27,6 @@ wrangler.staging.jsonc
 # 2026-10-02) and that plugin's saved critiques: tooling, not site content.
 .claude/
 .impeccable/
+
+# The iPhone/Android app project (2026-10-30): source for the native shell, not site content.
+app/

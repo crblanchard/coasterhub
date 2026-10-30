@@ -25,3 +25,7 @@ staging-seed.sql
 
 # impeccable live-server runtime state (critique runs); not source
 .impeccable/live/
+
+# The app project's installed packages (app/: npm install)
+app/node_modules/
+node_modules/

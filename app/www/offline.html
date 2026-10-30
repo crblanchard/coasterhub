@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>No signal — Coaster Hub</title>
+<!-- What the app shows when coasterhub.org can't be reached at launch
+     (capacitor.config.json server.errorPath). Once the site has loaded once,
+     its own service worker answers offline instead, and this never shows. -->
+<style>
+  :root{--bg:#080e20;--panel:#15203a;--fg:#f3f4f6;--muted:#9ca8bb;--fill:#ffcc1f;--onfill:#16181b}
+  @media (prefers-color-scheme: light){:root{--bg:#f5f5f3;--panel:#fff;--fg:#16181b;--muted:#5f6770}}
+  html,body{height:100%}
+  body{margin:0;background-color:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex;align-items:center;justify-content:center;
+    padding:env(safe-area-inset-top,0px) 24px env(safe-area-inset-bottom,0px);box-sizing:border-box;text-align:center}
+  main{max-width:360px}
+  img{width:72px;height:72px;margin-bottom:18px}
+  h1{font-size:1.8rem;font-weight:800;letter-spacing:-.02em;margin:0 0 8px}
+  p{color:var(--muted);line-height:1.5;margin:0 0 24px}
+  button{font-family:inherit;font-size:1rem;font-weight:700;background-color:var(--fill);color:var(--onfill);border-style:none;border-radius:12px;padding:14px 18px;width:100%;cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+  <img src="mark.svg" alt="">
+  <h1>No signal</h1>
+  <p>Coaster Hub needs a connection the first time it opens. After that, the pages you&rsquo;ve visited work offline too.</p>
+  <button type="button" id="retry">Try again</button>
+</main>
+<script>
+function go(){ location.href = 'https://coasterhub.org/'; }
+document.getElementById('retry').onclick = go;
+window.addEventListener('online', go);
+</script>
+</body>
+</html>

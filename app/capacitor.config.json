@@ -1,0 +1,24 @@
+{
+  "appId": "org.coasterhub.app",
+  "appName": "Coaster Hub",
+  "webDir": "www",
+  "server": {
+    "url": "https://coasterhub.org",
+    "errorPath": "offline.html"
+  },
+  "appendUserAgent": "CoasterHubApp",
+  "backgroundColor": "#0b1020",
+  "ios": {
+    "contentInset": "never",
+    "scheme": "Coaster Hub",
+    "limitsNavigationsToAppBoundDomains": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "launchAutoHide": true,
+      "backgroundColor": "#0b1020",
+      "showSpinner": false
+    }
+  }
+}
