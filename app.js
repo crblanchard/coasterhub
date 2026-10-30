@@ -1462,8 +1462,18 @@
     // Same tier (Carter, 2026-10-30: "don't do the screen slide for my rankings
     // to global rankings and other things that are visually on the same
     // level"): the page simply changes, no slide.
-    if (t === "same") { try { e.viewTransition.skipTransition(); } catch (x) {} return; }
-    if (t) try { e.viewTransition.types.add(t); } catch (x) {}
+    // A tab change is the same: an app's tabs switch, they do not slide
+    // (Carter, 2026-10-30: Rankings "slides even when I do it directly from
+    // the menu bar").
+    if (t === "same" || t === "tab") { try { e.viewTransition.skipTransition(); } catch (x) {} return; }
+    // The kind goes on <html> as data-vt rather than as a view-transition
+    // type: WebKit in the iPhone app ignored the types, so Back slid the
+    // wrong way and tabs slid at all.
+    if (t) {
+      var root = document.documentElement;
+      root.setAttribute("data-vt", t);
+      try { e.viewTransition.finished.then(function () { root.removeAttribute("data-vt"); }, function () { root.removeAttribute("data-vt"); }); } catch (x) {}
+    }
   });
   function markTransition(kind) { try { window.sessionStorage.setItem("ch_vt", kind); } catch (e) {} }
   // Links between views on one level: Mine | Global, a rider's Overview ·

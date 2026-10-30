@@ -582,6 +582,10 @@ button,input,select,textarea{font-family:inherit}
        safe-area-inset-bottom alone isn't enough — it clears the home
        indicator, not the corner radius. */
     padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px);
+    /* Where the inset is real (the app, a home-screen web app) it already
+       clears the corners, so sit lower, like an iPhone app's own tab bar
+       (Carter, 2026-10-30: "the bottom bar is high"). */
+    padding-bottom:max(8px, calc(env(safe-area-inset-bottom,0px) - 12px));
     padding-left:calc(env(safe-area-inset-left,0px) + 4px);
     padding-right:calc(env(safe-area-inset-right,0px) + 4px)}
   .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -1085,10 +1089,8 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   ::view-transition-group(root){animation-duration:.32s}
   ::view-transition-old(root){animation:.32s cubic-bezier(.2,.8,.2,1) both vt-push-out}
   ::view-transition-new(root){animation:.32s cubic-bezier(.2,.8,.2,1) both vt-push-in}
-  html:active-view-transition-type(back)::view-transition-old(root){animation-name:vt-pop-out;z-index:2}
-  html:active-view-transition-type(back)::view-transition-new(root){animation-name:vt-pop-in}
-  html:active-view-transition-type(tab)::view-transition-old(root){animation:.16s ease both vt-fade-out}
-  html:active-view-transition-type(tab)::view-transition-new(root){animation:.16s ease both vt-fade-in}
+  html[data-vt="back"]::view-transition-old(root){animation-name:vt-pop-out;z-index:2}
+  html[data-vt="back"]::view-transition-new(root){animation-name:vt-pop-in}
   /* Frosted glass does not survive the snapshot (the bar went pale mid-slide):
      solid bars while a transition runs. */
   html:active-view-transition header.nav,html:active-view-transition .tabbar{-webkit-backdrop-filter:none;backdrop-filter:none;background-color:var(--bg)}

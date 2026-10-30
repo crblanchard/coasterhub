@@ -5917,3 +5917,15 @@ has Push + Associated Domains, and make an IOS_APP_STORE profile named
 "Coaster Hub App Store CI"; the App target's Release config is Manual with
 that profile. Also: every run's xcodebuild pipes into tail, so the workflow
 runs bash with pipefail — the first run "passed" without uploading.
+
+### First TestFlight build on Carter's phone (2026-10-30)
+
+- **Black flash between pages**: the web view's own background was the
+  fixed dark `backgroundColor`; ViewController.swift now sets a dynamic
+  light/dark colour (the site's --bg) on the view, web view and scroll view.
+- **Tabs slid**: in the app's WebKit, view-transition *types* did nothing, so
+  every navigation got the default push slide. Tab and same-tier changes now
+  `skipTransition()`; Back's direction is `html[data-vt="back"]`, set in
+  pagereveal, instead of `:active-view-transition-type(back)`.
+- **Tab bar sat high**: with a real bottom inset (app / home-screen app) the
+  padding is `max(8px, inset - 12px)`.
