@@ -936,7 +936,12 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   html.navscrolled:not(.pg-riders) .brand-text{display:none}
   html.navscrolled:not(.pg-riders) .brand{flex:none}
   .brand-mark{width:34px;height:34px}
-  html:not(.navscrolled) .navtitle{flex:0 0 0}
+  html:not(.navscrolled):not(.detail) .navtitle{flex:0 0 0}
+  /* On a page with Back, the wordmark sits beside the pin until the page's
+     name replaces it. */
+  html.detail .navtitle{opacity:1}
+  html.detail:not(.navscrolled) .navtitle{font-size:1.05rem;font-weight:800;letter-spacing:-.01em}
+  html.detail:not(.navscrolled) .navtitle b{color:var(--accent2)}
   .nav-inner .people{margin-left:auto}
   html.detail .navback{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;margin-left:-5px;margin-right:-4px;padding:0;
     background-color:transparent;border-style:none;border-radius:999px;color:var(--accent2);cursor:pointer}

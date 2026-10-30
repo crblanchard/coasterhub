@@ -1401,8 +1401,10 @@
   function phoneShell(page, urlSlug) {
     var root = document.documentElement;
     root.classList.add("pg-" + page);
-    var mine = page === "profile" || page === "count" || page === "map";
-    var detail = !TAB_ROOTS[page] && !(mine && !urlSlug);
+    var mine = page === "profile" || page === "count" || page === "map" || page === "rankings";
+    // Somebody else's rankings is a page you went into too (Carter,
+    // 2026-10-30: "the back button is gone"), though Rankings is a tab.
+    var detail = (!TAB_ROOTS[page] || (page === "rankings" && !!urlSlug)) && !(mine && !urlSlug);
     if (detail) root.classList.add("detail");
     // Your own profile, count and map are Me's pages, not somewhere you went
     // into: no Back once we know they are yours.
@@ -1448,6 +1450,7 @@
       };
       var title = document.createElement("span");
       title.className = "navtitle"; title.setAttribute("aria-hidden", "true");
+      title.innerHTML = 'Coaster <b>Hub</b>';
       brand.insertAdjacentElement("afterend", back);
       back.insertAdjacentElement("afterend", title);
       // The page's big title shrinks into the top bar once it scrolls under it.
@@ -1466,12 +1469,17 @@
         new IntersectionObserver(function (es) {
           var gone = !es[0].isIntersecting && es[0].boundingClientRect.top < 0;
           var h1 = band.querySelector("h1");
+          // Until the page's name scrolls up into it, the bar says Coaster Hub
+          // beside the Back pin (Carter, 2026-10-30).
           if (gone) setTitle(named || (h1 ? h1.textContent : ""));
+          else { title.innerHTML = 'Coaster <b>Hub</b>'; title.classList.remove("small"); }
           root.classList.toggle("navscrolled", gone);
           // A switch in the band (Rankings' Mine | Global) stays in reach: it
           // takes the title's place in the top bar (Carter, 2026-10-30: "YES!!!
           // hide the other title stuff if necessary").
-          var sw = band.querySelector(".segsw:not([hidden])");
+          // Not on somebody else's page: there the bar says whose it is
+          // ("Emma's Rankings") rather than offering Mine | Global.
+          var sw = root.classList.contains("detail") ? null : band.querySelector(".segsw:not([hidden])");
           if (gone && sw) {
             var c = sw.cloneNode(true);
             c.removeAttribute("id"); c.className = "navseg";
