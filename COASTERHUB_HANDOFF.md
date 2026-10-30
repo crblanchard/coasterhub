@@ -5677,7 +5677,8 @@ one block at the end of `style.css`:
   are riders/explore/log/rankings/account; your own profile/count drop `detail`
   once /api/auth/me says they are yours.
 - Phone header: the brand shows on Home only; `detail` pages get `.navback` (the
-  arrow alone, a 44px target; a long `.navtitle` steps down to .86rem before
+  logo's pin turned to point left, `.backmark`, a 44px target; the pin is
+  always top-left — the brand on tab pages, minus its wordmark once scrolled; a long `.navtitle` steps down to .86rem before
   its ellipsis)
   (history.back() when the referrer is ours, else the tab's root), and
   `.navtitle` shows the hero h1's text once it scrolls under the bar

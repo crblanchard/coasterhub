@@ -931,10 +931,14 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 @media (max-width:680px){
   /* The logo fills an empty bar on the tab pages until the title scrolls up
      into it (Carter, 2026-10-30); pages you went into have Back there instead. */
-  html.detail .brand,html.navscrolled:not(.pg-riders) .brand{display:none}
+  html.detail .brand{display:none}
+  /* Scrolled, the wordmark gives way to the page name; the pin stays. */
+  html.navscrolled:not(.pg-riders) .brand-text{display:none}
+  html.navscrolled:not(.pg-riders) .brand{flex:none}
+  .brand-mark{width:34px;height:34px}
   html:not(.navscrolled) .navtitle{flex:0 0 0}
   .nav-inner .people{margin-left:auto}
-  html.detail .navback{display:inline-flex;align-items:center;justify-content:flex-start;flex:none;width:44px;height:44px;margin-left:-12px;margin-right:-10px;padding:0 0 0 6px;
+  html.detail .navback{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;margin-left:-5px;margin-right:-4px;padding:0;
     background-color:transparent;border-style:none;border-radius:999px;color:var(--accent2);cursor:pointer}
   html.detail .navback:active{background-color:var(--soft2)}
   .navtitle{display:block;flex:1 1 auto;min-width:0;font-weight:700;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -1049,3 +1053,8 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 @keyframes lplift{from{transform:scale(.97)}to{transform:none}}
 @keyframes lpmenu{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.lpshade,.lpcard,.lpmenu{animation:none}}
+
+/* Back is the logo's pin, turned to point left (app.js phoneShell, 2026-10-30). */
+.backmark{display:block;width:34px;height:34px;transform:rotate(90deg);animation:pinturn .5s cubic-bezier(.3,1.35,.5,1) both}
+@keyframes pinturn{from{transform:rotate(0)}to{transform:rotate(90deg)}}
+@media (prefers-reduced-motion:reduce){.backmark{animation:none}}

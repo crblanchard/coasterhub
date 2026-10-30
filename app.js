@@ -1421,9 +1421,11 @@
     if (inner && brand && !inner.querySelector(".navback")) {
       var back = document.createElement("button");
       back.type = "button"; back.className = "navback"; back.setAttribute("aria-label", "Back");
-      // The arrow alone, as iOS and Android draw it (Carter, 2026-10-30: the
-      // word "Back" cost the title its room). A 44px target, Apple's minimum.
-      back.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4.5 7.5 12l7.5 7.5"/></svg>';
+      // Back is the logo's pin, turned to point left (Carter, 2026-10-30: the
+      // pin is always at the top left, as the logo on a tab page and as Back on
+      // a page you went into). A 44px target, Apple's minimum.
+      var mk = brand.querySelector("img");
+      back.innerHTML = '<img class="backmark" alt="" width="34" height="34" src="' + (mk ? mk.getAttribute("src") : "/mark.svg") + '">';
       back.onclick = function () {
         var fromHere = document.referrer && document.referrer.indexOf(location.origin) === 0;
         if (fromHere && history.length > 1) { history.back(); return; }
