@@ -386,6 +386,9 @@
   // Other readers get the change within the five minutes, as before.
   var WROTE_KEY = "ch_wrote", WROTE_FOR = 10 * 60 * 1000;
   function noteWrite() {
+    // Every write a person makes ends here, so this is the one place a saved
+    // ranking, a logged day or an added credit buzzes (Carter, 2026-10-30).
+    haptic();
     try { window.localStorage.setItem(WROTE_KEY, String(Date.now())); } catch (e) {}
     // A write makes this page's remembered answers old: forget them, so the
     // next read goes to the network (no-store, per wroteLately).
@@ -758,7 +761,7 @@
         fetch("/api/rides", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" },
           body: JSON.stringify({ user: slug, d: d, entries: [{ c: c.id, n: 1 }] }) })
           .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || ("error " + r.status)); return j; }); })
-          .then(function (j) { noteWrite(); haptic(); close({ d: d, result: j }); })
+          .then(function (j) { noteWrite(); close({ d: d, result: j }); })
           .catch(function (e) { q("ca_yes").disabled = false; q("ca_msg").textContent = "Couldn't add it: " + (e.message || e); });
       };
       q("ca_yes").focus();
@@ -1449,6 +1452,18 @@
           var h1 = band.querySelector("h1");
           if (gone) setTitle(named || (h1 ? h1.textContent : ""));
           root.classList.toggle("navscrolled", gone);
+          // A switch in the band (Rankings' Mine | Global) stays in reach: it
+          // takes the title's place in the top bar (Carter, 2026-10-30: "YES!!!
+          // hide the other title stuff if necessary").
+          var sw = band.querySelector(".segsw:not([hidden])");
+          if (gone && sw) {
+            var c = sw.cloneNode(true);
+            c.removeAttribute("id"); c.className = "navseg";
+            Array.prototype.forEach.call(c.querySelectorAll("[id]"), function (x) { x.removeAttribute("id"); });
+            var old = inner.querySelector(".navseg");
+            if (old) old.replaceWith(c); else title.insertAdjacentElement("afterend", c);
+          }
+          root.classList.toggle("hasseg", !!(gone && sw));
         }, { rootMargin: "-64px 0px 0px 0px" }).observe(band);
       }
     }

@@ -916,7 +916,7 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   border-style:none;border-top:1px solid var(--line);padding:14px 10px;cursor:pointer;text-align:center}
 .sheetitem.danger{color:var(--bad)}
 .sheetitem.cancel{color:var(--fg);margin-top:8px;border:1px solid var(--line);border-radius:12px;background-color:var(--soft)}
-.navback,.navtitle,.rbback,.ptr,.skel{display:none}
+.navback,.navtitle,.navseg,.rbback,.ptr,.skel{display:none}
 
 /* ---- The app-like phone layout (Carter, 2026-10-30) --------------------------
    Phones only. A large page title that shrinks into the top bar as you scroll,
@@ -935,6 +935,10 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   html.navscrolled .navtitle{opacity:1}
   .navtitle.small{font-size:.86rem}
   html.detail .people{gap:6px}
+  html.hasseg .navtitle{display:none}
+  html.hasseg .navseg{display:inline-flex;flex:none;margin-right:auto;padding:3px;border:1px solid var(--line);border-radius:999px;background-color:var(--soft)}
+  .navseg a{padding:5px 14px;border-radius:999px;color:var(--muted);font-weight:600;font-size:.88rem;text-decoration:none}
+  .navseg a.on{background-color:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.15)}
   html.pg-riders .navtitle{display:none}
 
   /* The skyline strip is Home's; elsewhere the band is just the title. */
