@@ -6004,3 +6004,4 @@ proposed, not started.
   and the old key was never found again), and the restore keeps watching for
   1.5 s after landing (up to 6 s) to undo a redraw that knocks it back; any
   touch or wheel stops it.
+- **Skyline on Explore and Rankings too, on phones** (Carter, 2026-10-31: 'the pages are basic without it'): 52px tall, bottom-right of the band beside the title or Mine | Global, no extra strip. Home keeps its 72px strip.

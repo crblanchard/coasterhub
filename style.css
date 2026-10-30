@@ -973,10 +973,15 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   .navseg a.on{background-color:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.15)}
   html.pg-riders .navtitle{display:none}
 
-  /* The skyline strip is Home's; elsewhere the band is just the title. */
-  html:not(.pg-riders) .hero{background-image:none!important;padding-bottom:var(--hero-b,84px)}
-  :root[data-theme="light"]:not(.pg-riders) .hero{background-image:linear-gradient(180deg,#cfe5f9,#e6f2fc)!important;
+  /* The skyline strip is Home's, plus a smaller one on Explore and Rankings
+     (Carter, 2026-10-31: "the pages are basic without it"), standing in the
+     band's bottom-right corner beside the title or the Mine | Global switch,
+     with no extra strip; elsewhere the band is just the title. */
+  html:not(.pg-riders):not(.pg-explore):not(.pg-rankings) .hero{background-image:none!important;padding-bottom:var(--hero-b,84px)}
+  :root[data-theme="light"]:not(.pg-riders):not(.pg-explore):not(.pg-rankings) .hero{background-image:linear-gradient(180deg,#cfe5f9,#e6f2fc)!important;
     background-size:100% 100%!important;background-position:0 0!important}
+  html:is(.pg-explore,.pg-rankings) .hero{padding-bottom:var(--hero-b,84px);background-size:auto 52px!important;background-position:right 12px bottom 0}
+  :root[data-theme="light"]:is(.pg-explore,.pg-rankings) .hero{background-size:auto 52px,100% 100%!important;background-position:right 12px bottom 0,0 0}
 
   footer.site{display:none}
 
