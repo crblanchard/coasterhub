@@ -5977,3 +5977,16 @@ proposed, not started.
    fetches those four lists so the worker has them before the first tab tap.
 4. Home draws your remembered count (localStorage ch_hero, keyed to ch_me)
    instead of flashing the signed-out slogan; cleared on sign-out.
+5. **"Last time" snapshots** (Carter: "your profile is still a plain loading
+   screen ... maybe populate it with something we think will be right").
+   app.js `snapshots(page)` on profile, count (credits) and rankings: on
+   pagehide, if `#loading` is hidden, the region between header.nav and
+   footer.site is cloned (lists cut to 40 children, canvases and map tiles
+   dropped, ≤180 KB) into localStorage `ch_snap2:<path>` (12 kept, index
+   `ch_snaps`). Next visit, while `#loading` shows, the copy is laid OVER the
+   page (`.snapcopy`, absolute, under the bars) so charts lay out at real
+   width underneath, and removed when `#loading` hides (or after 10 s).
+   The copy has NO ids (→ data-sid) so "does my button exist yet" checks
+   never find it; #id rules are re-emitted as `:is(#snap-x,[data-sid="x"])`
+   to keep id specificity. A class-based existence check must skip
+   `.snapcopy` (meTabs does) — watch for that in new code.

@@ -541,6 +541,8 @@ button,input,select,textarea{font-family:inherit}
 .themetoggle .i-sun{display:none}
 :root[data-theme="light"] .themetoggle .i-sun{display:block}
 :root[data-theme="light"] .themetoggle .i-moon{display:none}
+/* A page's last-time copy, laid over it while it loads (app.js snapshots); under the bars. */
+.snapcopy{position:absolute;left:0;right:0;z-index:9;min-height:100vh;background-color:var(--bg)}
 /* Desktop only (2026-10-30): on a phone the device decides light or dark. */
 @media (max-width:680px){ .themetoggle{display:none} }
 

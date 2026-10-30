@@ -1974,6 +1974,98 @@
     if (document.readyState === "complete") later(); else window.addEventListener("load", later);
   }
 
+  // ---- "last time" snapshots (2026-10-31, speed) ----------------------------
+  // Carter: "your profile is still a plain loading screen then your
+  // picture/name, rankings is still the loading text then your favorites
+  // ranked ... maybe populate it with something we think will be right".
+  // Leaving a page saves how it looked; opening it again shows that copy at
+  // once while the real page loads behind it, and the copy goes the moment the
+  // page hides its "Loading…" (#loading) — or after 10 seconds regardless.
+  //
+  // The copy is laid OVER the page (style.css .snapcopy), not swapped in: the
+  // real page keeps laying out underneath, so its charts and map measure
+  // their real width. The copy carries NO ids — a page that asks "is my Share
+  // button there yet?" must never find the copy's — so each id becomes
+  // data-sid, and the page's #id rules are repeated for [data-sid] inside the
+  // copy (snapStyles), as :is(#snap-x,[data-sid="x"]) so they keep an id's
+  // weight — #mine.readonly #save has to beat a class rule there too. It is a picture, not the page: links work, buttons do
+  // nothing until the swap.
+  function snapStyles() {
+    var out = [];
+    var walk = function (rules, wrap) {
+      Array.prototype.forEach.call(rules || [], function (r) {
+        if (r.selectorText && r.selectorText.indexOf("#") >= 0) {
+          var sel = r.selectorText.split(",").filter(function (x) { return x.indexOf("#") >= 0; })
+            .map(function (x) { return ".snapcopy " + x.trim().replace(/#([A-Za-z][\w-]*)/g, ':is(#snap-$1,[data-sid="$1"])'); }).join(",");
+          out.push(wrap[0] + sel + "{" + r.style.cssText + "}" + wrap[1]);
+        } else if (r.cssRules && r.media) walk(r.cssRules, ["@media " + r.media.mediaText + "{", "}"]);
+      });
+    };
+    Array.prototype.forEach.call(document.styleSheets, function (sh) { try { walk(sh.cssRules, ["", ""]); } catch (e) { /* another site's sheet */ } });
+    return out.join("\n");
+  }
+  var SNAP_PAGES = { profile: 1, count: 1, rankings: 1 };
+  var SNAP_MAX = 180000, SNAP_KEEP = 12;
+  function snapKey() { return "ch_snap2:" + location.pathname; }
+  function snapRegion() {
+    var out = [], on = false;
+    Array.prototype.forEach.call(document.body.children, function (el) {
+      if (el.matches("header.nav")) { on = true; return; }
+      if (el.matches("footer.site")) { on = false; return; }
+      if (on && !el.matches("script, .snapcopy")) out.push(el);
+    });
+    return out;
+  }
+  function snapshots(page) {
+    var loading = document.getElementById("loading");
+    if (!SNAP_PAGES[page] || !loading) return;
+    var showing = null;
+    var done = function () { if (showing) { showing.remove(); showing = null; } };
+    var ready = function () { return !loading.isConnected || getComputedStyle(loading).display === "none"; };
+    // Show last time's copy.
+    var saved = null;
+    try { saved = window.localStorage.getItem(snapKey()); } catch (e) {}
+    if (saved && !ready()) {
+      showing = document.createElement("div");
+      showing.className = "snapcopy"; showing.setAttribute("aria-hidden", "true");
+      showing.innerHTML = saved;
+      var st = document.createElement("style"); st.textContent = snapStyles(); showing.appendChild(st);
+      var head = document.querySelector("header.nav");
+      showing.style.top = (head ? head.getBoundingClientRect().bottom + window.scrollY : 0) + "px";
+      var foot = document.querySelector("footer.site");
+      document.body.insertBefore(showing, foot || null);
+      var mo = new MutationObserver(function () { if (ready()) { mo.disconnect(); done(); } });
+      mo.observe(document.body, { attributes: true, childList: true, subtree: true, attributeFilter: ["style", "hidden", "class"] });
+      setTimeout(function () { mo.disconnect(); done(); }, 10000);
+    }
+    // Save this one on the way out, if it finished loading.
+    var save = function () {
+      if (showing || !ready()) return;
+      try {
+        var box = document.createElement("div");
+        snapRegion().forEach(function (el) { box.appendChild(el.cloneNode(true)); });
+        // Long lists keep their first screens' worth; charts and maps are
+        // drawn by script and come back empty.
+        Array.prototype.forEach.call(box.querySelectorAll("*"), function (el) {
+          if (el.children.length > 40) while (el.children.length > 40) el.removeChild(el.lastElementChild);
+        });
+        Array.prototype.forEach.call(box.querySelectorAll("canvas, .leaflet-container > *, script"), function (el) { el.remove(); });
+        Array.prototype.forEach.call(box.querySelectorAll("[id]"), function (el) {
+          el.setAttribute("data-sid", el.id); el.removeAttribute("id");
+        });
+        var html = box.innerHTML;
+        if (html.length > SNAP_MAX) return;
+        var ls = window.localStorage, idx = JSON.parse(ls.getItem("ch_snaps") || "[]").filter(function (k) { return k !== snapKey(); });
+        idx.push(snapKey());
+        while (idx.length > SNAP_KEEP) ls.removeItem(idx.shift());
+        ls.setItem(snapKey(), html);
+        ls.setItem("ch_snaps", JSON.stringify(idx));
+      } catch (e) { /* storage full or off: no copy next time */ }
+    };
+    window.addEventListener("pagehide", save);
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") save(); });
+  }
+
   function offlineSupport() {
     if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
       navigator.serviceWorker.register("/sw.js").catch(function () {});
@@ -1994,6 +2086,7 @@
     phoneShell(page, currentUser());
     offlineSupport();
     warmTabs();
+    snapshots(page);
 
     // A write in another tab (noteWrite, or /edit's copy of it) reloads a page
     // that only SHOWS data, so the map or the count you left open beside /edit
@@ -2211,7 +2304,7 @@
   // a full-screen page and keeps no strip; Me (or Back) is the way out of it.
   function meTabs(page, slug) {
     if (!slug || (page !== "profile" && page !== "count" && page !== "map")) return;
-    if (document.querySelector(".metabs")) return;
+    if (Array.prototype.some.call(document.querySelectorAll(".metabs"), function (n) { return !n.closest(".snapcopy"); })) return;
     var hero = document.querySelector("section.hero");
     // The map is a full-screen page with no hero: it gets a slim band with the
     // rider's head in it, so its tabs stay (Carter, 2026-10-02: "one header,
