@@ -5993,3 +5993,14 @@ proposed, not started.
 - **Swipe-to-log only on park pages and Log** (Carter, 2026-10-31): the '+ Log a ride' strip showed through beside Home's top 5. CSS and the touch handler are scoped to html.pg-park / html.pg-log, and the strip is opacity 0 until a row is being dragged. Long-press 'Log a ride today' still works everywhere.
 - **Coaster page Rankings grouped by place** (Carter, 2026-10-31: fourteen rider pills 'needs to be consolidated'): coaster.html now uses CoasterHub.whoByPlace, the same '#1 · names' rows as Global's expanded rows (lists.css .wplaces).
 - **Rider rows always '<n> ranked'** (Carter, 2026-10-31: 'say zero ranked with credits below like normal'). Reverses the 2026-10-01 rule that put credits in the big number when nothing was ranked; riderRow (Home friends, /users) now always shows ranked big and 'credits / rides' underneath.
+- **Suggested for you mixes** (Carter, 2026-10-31, "sure mix that's good"):
+  mutual-friend picks take at most 3 of 5, "Joined recently" at least 2 when
+  there are that many; either fills the other's gap. Blocked riders excluded.
+  Later, with many users: move it to one server endpoint (today the phone
+  fetches every followee's follow list).
+- **Back lands where you were, consistently** (Carter: "just want it to be
+  consistent"): the scroll position is saved under the address at pagehide
+  (pages like /manufacturer replaceState their own address after loading,
+  and the old key was never found again), and the restore keeps watching for
+  1.5 s after landing (up to 6 s) to undo a redraw that knocks it back; any
+  touch or wheel stops it.

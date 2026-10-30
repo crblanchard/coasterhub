@@ -1692,9 +1692,14 @@
 
     // Each tab remembers where you were (see buildTabBar); this page's scroll
     // position is kept for when a tab brings you back to it.
+    // Keyed by the address at the moment you leave, not when the page opened:
+    // several pages tidy their own address once they load (/manufacturer/
+    // Mack%20Rides becomes /manufacturer/mack-rides), and Back returns to the
+    // tidied one — the position saved under the first was never found
+    // (Carter, 2026-10-31: back to Mack Rides landed at the top).
     var here = location.pathname + location.search;
     window.addEventListener("pagehide", function () {
-      try { window.sessionStorage.setItem("ch_y_" + here, String(Math.round(window.scrollY))); } catch (e) {}
+      try { window.sessionStorage.setItem("ch_y_" + location.pathname + location.search, String(Math.round(window.scrollY))); } catch (e) {}
     });
     // Back (or a tab) returns you to exactly where you were (Carter,
     // 2026-10-30). The browser tries, but these pages draw their lists after
@@ -1713,12 +1718,24 @@
       var stop = function () { gaveUp = true; };
       window.addEventListener("touchstart", stop, { once: true, passive: true });
       window.addEventListener("wheel", stop, { once: true, passive: true });
+      // Once there, it keeps watching for a moment: a page that redraws its
+      // list after its data lands (or drops its "last time" copy) can knock
+      // the position back, which is how Back sometimes landed at the top on
+      // one page and halfway down on another (Carter, 2026-10-31). Settled
+      // means 1.5 s at the spot with nothing moving it.
+      var at = 0;
       (function tryIt() {
         if (gaveUp) return;
         var room = document.documentElement.scrollHeight - window.innerHeight;
-        if (room >= want - 4) { window.scrollTo({ top: want, behavior: "instant" }); return; }
-        if (Date.now() - t0 > 4000) { window.scrollTo({ top: Math.min(want, room), behavior: "instant" }); return; }
-        window.scrollTo({ top: room, behavior: "instant" });
+        var late = Date.now() - t0 > 6000;
+        if (room >= want - 4) {
+          if (Math.abs(window.scrollY - want) > 4) { window.scrollTo({ top: want, behavior: "instant" }); at = Date.now(); }
+          else if (!at) at = Date.now();
+          if (Date.now() - at > 1500 || late) return;
+        } else {
+          if (late) { window.scrollTo({ top: Math.min(want, room), behavior: "instant" }); return; }
+          window.scrollTo({ top: room, behavior: "instant" }); at = 0;
+        }
         setTimeout(tryIt, 80);
       })();
     }
@@ -2759,11 +2776,16 @@
           // 'Joined recently' with most recent users").
           var mutual = cands.filter(function (u) { return m(u) > 0; })
             .sort(function (a, b) { return m(b) - m(a) || (x(b).ranked || 0) - (x(a).ranked || 0) || a.name.localeCompare(b.name); });
-          var lim = limit || 5, picked = mutual.slice(0, lim), took = {};
-          picked.forEach(function (u) { took[u.slug] = 1; });
-          var recent = cands.filter(function (u) { return !took[u.slug]; })
+          // Mixed (Carter, 2026-10-31): mutual friends take at most three of
+          // the five, so somebody new is always among them once mutuals are
+          // plentiful; with fewer of either, the other fills the gap.
+          var lim = limit || 5, NEWS = Math.min(2, lim - 1), took = {};
+          var recent = cands.filter(function (u) { return m(u) === 0; })
             .sort(function (a, b) { return String(b.created || "").localeCompare(String(a.created || "")) || a.name.localeCompare(b.name); });
+          var picked = mutual.slice(0, Math.max(lim - Math.min(NEWS, recent.length), 0));
           picked = picked.concat(recent.slice(0, lim - picked.length));
+          picked.forEach(function (u) { took[u.slug] = 1; });
+          if (picked.length < lim) picked = picked.concat(mutual.filter(function (u) { return !took[u.slug]; }).slice(0, lim - picked.length));
           if (!picked.length) return;
           listEl.innerHTML = picked.map(function (u) {
             var names = via[u.slug] || [], k = x(u);
