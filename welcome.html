@@ -164,10 +164,10 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261030s"></script>
+<script src="/app.js?v=20261030t"></script>
 <script>
 document.getElementById('y').textContent = new Date().getFullYear();
 var $=function(id){ return document.getElementById(id); };
@@ -238,6 +238,7 @@ function vAccount(){
    +'<label class="f" for="a_pw">Password</label><input type="password" id="a_pw" autocomplete="new-password" placeholder="At least 8 characters" required>'
    +'<div style="margin-top:22px"><button class="go" type="submit" id="a_go">Create account</button></div>'
    +'<div class="msg" id="a_msg"></div>'
+   +'<p class="small muted" style="margin-top:10px">By creating an account you agree to the <a class="link" href="/terms">Terms of Use</a> and <a class="link" href="/privacy">Privacy Policy</a>.</p>'
    +'<p class="small muted" style="margin-top:6px">Already have an account? <a class="link" href="/account?next=/welcome">Sign in</a></p></form>';
   $('f').addEventListener('submit',function(e){
     e.preventDefault();

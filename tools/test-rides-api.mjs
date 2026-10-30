@@ -35,6 +35,7 @@ const MIGRATION_013 = readFileSync(join(ROOT, "migrations", "013-rider-categorie
 const MIGRATION_015 = readFileSync(join(ROOT, "migrations", "015-category-triage.sql"), "utf8");
 const MIGRATION_017 = readFileSync(join(ROOT, "migrations", "017-model-triage.sql"), "utf8");
 const MIGRATION_023 = readFileSync(join(ROOT, "migrations", "023-same-ride.sql"), "utf8");
+const MIGRATION_084 = readFileSync(join(ROOT, "migrations", "084-reports-blocks.sql"), "utf8");
 const MIGRATION_046 = readFileSync(join(ROOT, "migrations", "046-relocation-skipped.sql"), "utf8");
 
 // ---- D1 shim over node:sqlite ---------------------------------------------
@@ -123,6 +124,8 @@ function freshDb() {
   db.exec(MIGRATION_015);
   db.exec(MIGRATION_023);
   db.exec(MIGRATION_023);
+  db.exec(MIGRATION_084);
+  db.exec(MIGRATION_084);
   return db;
 }
 
@@ -2888,6 +2891,70 @@ async function main() {
     const row2 = rows(db, "SELECT at FROM activity WHERE actor='bo' AND kind='rides' AND detail LIKE '%2026-09-10%'")[0];
     check("copy: with no original line for that date it is stamped now",
       r.status === 200 && row2 && Math.abs(Date.parse(row2.at) - Date.now()) < 60000, JSON.stringify(row2));
+  }
+
+  // ---- report and block (084, 2026-10-30) ---------------------------------
+  {
+    const db = freshDb();
+    const ann = await signedUp(db, "ann@x.y", "Ann Report");
+    const bob = await signedUp(db, "bob@x.y", "Bob Block");
+    const a = rows(db, "SELECT slug FROM accounts WHERE email='ann@x.y'")[0].slug;
+    const b = rows(db, "SELECT slug FROM accounts WHERE email='bob@x.y'")[0].slug;
+    db.exec("UPDATE accounts SET is_admin=1 WHERE email='bob@x.y'");
+    let r = await call(db, "POST", "/api/report/" + b, { body: { reason: "bio" } });
+    check("report: signed out is a 401", r.status === 401, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/report/" + b, { cookie: ann, body: { reason: "nope" } });
+    check("report: an unknown reason is a 400", r.status === 400, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/report/" + a, { cookie: ann, body: { reason: "bio" } });
+    check("report: you cannot report yourself", r.status === 400, JSON.stringify(r.data));
+    // The email goes out after the answer, through ctx.waitUntil: catch it.
+    const pending = [], sent = [], realFetch = globalThis.fetch, realWait = ctx.waitUntil;
+    ctx.waitUntil = (p) => pending.push(p);
+    globalThis.fetch = async (u, init) => { sent.push(JSON.parse(init.body)); return new Response("{}", { status: 200 }); };
+    try {
+      const req = new Request("https://coasterhub.org/api/report/" + b, { method: "POST",
+        headers: { cookie: ann, "content-type": "application/json" }, body: JSON.stringify({ reason: "harass", note: "mean bio" }) });
+      const res = await worker.fetch(req, { DB: new FakeD1(db), ADMIN_PASSWORD: PW, RESEND_API_KEY: "re_x" }, ctx);
+      await Promise.all(pending);
+      const row = rows(db, "SELECT * FROM reports WHERE target=?", b)[0];
+      check("report: saved with reason, note and reporter",
+        res.status === 200 && row && row.reason === "harass" && row.note === "mean bio" && row.reporter === a, JSON.stringify(row));
+      check("...and emailed to the admin", sent.length === 1 && sent[0].to[0] === "bob@x.y" && /Harassment/.test(sent[0].text), JSON.stringify(sent));
+    } finally { globalThis.fetch = realFetch; ctx.waitUntil = realWait; }
+
+    await call(db, "POST", "/api/follow/" + b, { cookie: ann });
+    await call(db, "POST", "/api/follow/" + a, { cookie: bob });
+    r = await call(db, "POST", "/api/block/" + b, { cookie: ann });
+    check("block: ok, and the list comes back", r.status === 200 && r.data.blocked.includes(b), JSON.stringify(r.data));
+    check("...and both follows between them are gone", rows(db, "SELECT 1 FROM follows WHERE (follower=? AND followee=?) OR (follower=? AND followee=?)", a, b, b, a).length === 0);
+    r = await call(db, "POST", "/api/follow/" + a, { cookie: bob });
+    check("...and the blocked rider cannot follow back", r.status === 403, JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/auth/me", { cookie: ann });
+    check("...and /api/auth/me lists who you blocked", r.data.account.blocked.join() === b, JSON.stringify(r.data));
+    r = await call(db, "DELETE", "/api/block/" + b, { cookie: ann });
+    check("unblock: the list is empty again", r.status === 200 && r.data.blocked.length === 0, JSON.stringify(r.data));
+    db.exec("DROP TABLE blocks"); db.exec("DROP TABLE reports");
+    r = await call(db, "POST", "/api/block/" + b, { cookie: ann });
+    check("block: before 084 it is a 503 naming the file", r.status === 503 && /084-reports-blocks/.test(r.data.error), JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/auth/me", { cookie: ann });
+    check("...and /api/auth/me still works, saying blocking is off", r.status === 200 && r.data.account.blocked === null, JSON.stringify(r.data));
+  }
+
+  // ---- the name and bio filter (2026-10-30) --------------------------------
+  {
+    const db = freshDb();
+    let r = await call(db, "POST", "/api/auth/signup", { body: { email: "r@x.y", name: "Sh1t Head", password: "riding-things" } });
+    check("filter: a rude display name is refused at signup", r.status === 400 && /word we don/.test(r.data.error), JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/auth/signup", { body: { email: "r@x.y", name: "Fine", slug: "fuckboy99", password: "riding-things" } });
+    check("filter: a rude username is refused at signup", r.status === 400 && /word we don/.test(r.data.error), JSON.stringify(r.data));
+    const ok = await signedUp(db, "ok@x.y", "Scunthorpe Steve");
+    check("filter: a word inside an innocent one passes", !!ok);
+    r = await call(db, "POST", "/api/account/profile", { cookie: ok, body: { bio: "Hades 360 and Intimidator rule. Possessed is hell." } });
+    check("filter: coaster words in a bio pass", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/account/profile", { cookie: ok, body: { bio: "you are all retards" } });
+    check("filter: a slur in a bio is refused", r.status === 400, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/account/profile", { cookie: ok, body: { name: "B1tch" } });
+    check("filter: a rude rename is refused", r.status === 400, JSON.stringify(r.data));
   }
 
   // ---- delete my account (App Store / Play rule, 2026-10-30) --------------

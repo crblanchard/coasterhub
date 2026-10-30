@@ -64,10 +64,10 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261030s"></script>
+<script src="/app.js?v=20261030t"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('users');
@@ -76,8 +76,10 @@ var esc=function(t){ return String(t).replace(/[&<>"]/g,function(c){ return {'&'
 function tile(n,label){ return '<div class="tile"><b>'+esc(n)+'</b><span>'+esc(label)+'</span></div>'; }
 var nf=function(n){ return Number(n||0).toLocaleString(); };
 
-Promise.all([CoasterHub.fetchUsers(), CoasterHub.fetchSummary(), CoasterHub.fetchAllRankings()]).then(function(r){
-  var users=(CoasterHub.USERS||[]).slice(), sum=r[1]||[], ranks=r[2]||[];
+Promise.all([CoasterHub.fetchUsers(), CoasterHub.fetchSummary(), CoasterHub.fetchAllRankings(), CoasterHub.me().catch(function(){ return null; })]).then(function(r){
+  // Riders you blocked are left off the list (2026-10-30).
+  var blocked=(r[3]&&r[3].blocked)||[];
+  var users=(CoasterHub.USERS||[]).filter(function(u){ return blocked.indexOf(u.slug)<0; }), sum=r[1]||[], ranks=r[2]||[];
   var by={}; sum.forEach(function(x){ by[x.slug]=x; });
   // A–Z by username (Carter, 2026-09-29).
   users.sort(function(a,b){ return String(a.slug).localeCompare(String(b.slug)); });

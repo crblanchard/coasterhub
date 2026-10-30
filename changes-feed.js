@@ -446,10 +446,13 @@
               .slice(0, limit ? 1 : undefined); })
             .catch(function(){ return []; })
         : Promise.resolve([]);
+      // Riders you blocked (2026-10-30) drop out of your feed entirely.
+      var me = global.CoasterHub && global.CoasterHub.me ? global.CoasterHub.me().catch(function(){ return null; }) : Promise.resolve(null);
       return Promise.all([fetch('/api/activity?limit=' + (limit && !WHO && !NOT ? Math.max(40, limit * 8) : 300))
-        .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); }), site])
+        .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); }), site, me])
         .then(function(both){
-          var j = both[0];
+          var j = both[0], blocked = (both[2] && both[2].blocked) || [];
+          if (blocked.length) j.events = (j.events || []).filter(function(e){ return blocked.indexOf(e.actor) < 0; });
           // Sort here rather than trusting the order back: the two `at` formats are
           // sorted as strings by SQL, which interleaves them. See atTime above.
           EVENTS = (j.events || []).concat(both[1]).sort(function(a, b){ return atTime(b.at) - atTime(a.at); });

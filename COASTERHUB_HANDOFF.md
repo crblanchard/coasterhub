@@ -5757,3 +5757,30 @@ plain words and the password box; success lands on `/?deleted=1`, which
 toasts and cleans the URL. Tested in test-rides-api.mjs. Still to do for
 Part 1: report/block, name+bio filter, terms at sign-up, /terms and /privacy,
 a deletion-request web page for Google Play.
+
+### Report, block, name filter, terms (2026-10-30, App Store Part 1)
+
+- **Migration 084** (`reports`, `blocks`). Until it runs, `/api/auth/me` says
+  `blocked: null`, profile.html then shows no ⋯ button, and both endpoints 503
+  naming the file.
+- **⋯ on somebody else's profile** (top right, where your own page has
+  Account): Report → pick a reason (name/picture, bio, spam, harassment, other)
+  → `POST /api/report/:slug`, emailed to every `is_admin` account via Resend
+  after the answer. Block → `POST /api/block/:slug` removes follows both ways;
+  follows between the two are then refused (403). Unblock from the line under
+  the bio, or the ⋯.
+- **What a block hides, for the blocker:** their rows in the activity feed
+  (changes-feed.js, Home and /changes) and their entry on /users. Client-side,
+  from `/api/auth/me`'s `blocked` list.
+- **Name/bio filter** `rude()` in worker.js: whole-word list plus a few
+  run-together ones. Checked against every coaster, park, maker and model
+  name, and every live rider: no false hits. Applies to signup names and
+  usernames, renames and bios. Don't add mild words ("hell", "ass"): coaster
+  names have them.
+- **/terms and /privacy**: plain pages in the how-rankings-work layout,
+  linked from every footer, the sitemap, and a line under Create account and
+  Claim it ("By creating an account you agree…"). The terms promise reports
+  are looked at within 24 hours, which Apple requires. Privacy has the
+  deletion steps (Google Play wants a public URL for that: /privacy).
+  Both give hello@coasterhub.org as the contact, so that address has to
+  receive mail.

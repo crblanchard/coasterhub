@@ -774,6 +774,7 @@ async function addUser(env, body) {
   const name = String(body && body.name || "").trim().replace(/\s+/g, " ");
   if (!name) return { bad: [400, "give the rider a name"] };
   if (name.length > 40) return { bad: [400, "that name is too long"] };
+  if (rude(name)) return { bad: [400, RUDE_MSG] };
   // A username typed by the person (signup, since 2026-09-24) is answered in
   // username terms — "taken", "2-32 characters" — the way the claim form's is.
   // One derived from a name (/log's + New rider) keeps the name-shaped errors.
@@ -798,6 +799,31 @@ async function addUser(env, body) {
   return { ok: true, slug: slug, name: name };
 }
 
+// ---- Keeping names and bios clean (2026-10-30) ----------------------------
+// Both app stores want objectionable profile text filtered before anyone sees
+// it, on top of Report. A short list, on purpose: slurs and the strongest
+// sexual words, nothing a coaster name could trip ("Hades", "Possessed",
+// "Hell", "Intimidator" are all fine). WORDS match whole words only, so a
+// word buried inside an innocent one (Scunthorpe) passes; INSIDE matches
+// anywhere, for the few that never appear inside an ordinary word and get
+// run together in usernames. Leetspeak is folded first (sh1t -> shit).
+const RUDE_WORDS = new Set(["fuck", "fucker", "fucking", "fucked", "motherfucker", "shit", "shitty", "bullshit",
+  "cunt", "cunts", "cock", "cocks", "dick", "dicks", "dickhead", "pussy", "pussies", "twat", "wanker", "bitch",
+  "bitches", "whore", "whores", "slut", "sluts", "porn", "porno", "nazi", "nazis", "hitler", "rape", "rapist",
+  "nigger", "niggers", "nigga", "niggas", "faggot", "faggots", "fag", "fags", "retard", "retarded", "retards",
+  "spic", "spics", "chink", "chinks", "kike", "kikes", "wetback", "tranny", "trannies", "dyke", "dykes",
+  "coon", "coons", "gook", "gooks", "paki", "pakis", "beaner", "beaners", "kys"]);
+const RUDE_INSIDE = ["fuck", "nigger", "nigga", "faggot", "motherf"];
+function rude(text) {
+  const t = String(text || "").toLowerCase()
+    .replace(/[0@4]/g, (c) => ({ "0": "o", "@": "a", "4": "a" }[c]))
+    .replace(/[1!|]/g, "i").replace(/3/g, "e").replace(/[5$]/g, "s").replace(/7/g, "t");
+  if (t.split(/[^a-z]+/).some((w) => RUDE_WORDS.has(w))) return true;
+  const squashed = t.replace(/[^a-z]+/g, "");
+  return RUDE_INSIDE.some((w) => squashed.includes(w));
+}
+const RUDE_MSG = "that has a word we don't allow on Coaster Hub — please pick something else";
+
 // ---- Renaming a rider ------------------------------------------------------
 // See migrations/004-user-rename.sql. `slug` is a public URL and a key in five
 // other tables; `name` is free text nobody joins on. So they validate
@@ -810,6 +836,7 @@ async function slugProblem(env, slug, selfSlug) {
   }
   if (RESERVED_SLUGS.has(slug)) return "“" + slug + "” is a page name — pick another";
   if (slug === selfSlug) return null;
+  if (rude(slug)) return RUDE_MSG;
   const clash = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(slug).first();
   if (clash) return "“" + slug + "” is taken";
   return null;
@@ -865,6 +892,33 @@ async function haveFollows(env) {
   try { await env.DB.prepare("SELECT 1 FROM follows LIMIT 1").first(); return true; }
   catch (e) { return false; }
 }
+
+async function haveBlocks(env) {
+  try { await env.DB.prepare("SELECT 1 FROM blocks LIMIT 1").first(); return true; }
+  catch (e) { return false; }
+}
+
+// Who this rider has blocked (084). Empty before the migration, so every
+// caller can ask without checking first.
+async function blockedBy(env, slug) {
+  if (!slug) return [];
+  try {
+    const { results } = await env.DB.prepare("SELECT blocked FROM blocks WHERE blocker = ?").bind(slug).all();
+    return results.map(r => r.blocked);
+  } catch (e) { return []; }
+}
+
+// Either one blocked the other — follows are off between them both ways.
+async function eitherBlocked(env, a, b) {
+  try {
+    return !!await env.DB.prepare(
+      "SELECT 1 FROM blocks WHERE (blocker = ? AND blocked = ?) OR (blocker = ? AND blocked = ?)")
+      .bind(a, b, b, a).first();
+  } catch (e) { return false; }
+}
+
+const REPORT_REASONS = { name: "Offensive name or picture", bio: "Offensive bio",
+  spam: "Spam or fake account", harass: "Harassment", other: "Something else" };
 
 async function haveClones(env) {
   try { await env.DB.prepare("SELECT 1 FROM clone_groups LIMIT 1").first(); return true; }
@@ -2100,6 +2154,61 @@ export default {
         }
       }
 
+      // ---- report and block (084; both app stores require them) ----
+      // Signed in only: a report from nobody is a spam channel, and a block
+      // belongs to a rider.
+      const rpm = path.match(/^\/api\/report\/([A-Za-z0-9_-]+)$/);
+      if (request.method === "POST" && rpm) {
+        if (!(acct && acct.slug)) return err(401, "sign in to report a rider");
+        if (!await haveBlocks(env)) return err(503, "run migrations/084-reports-blocks.sql first");
+        const slug = rpm[1].toLowerCase();
+        if (slug === acct.slug) return err(400, "you cannot report yourself");
+        const them = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(slug).first();
+        if (!them) return err(404, "no such rider");
+        const b = await request.json().catch(() => ({}));
+        const reason = String(b && b.reason || "");
+        if (!REPORT_REASONS[reason]) return err(400, "pick a reason");
+        const note = String(b && b.note || "").trim().slice(0, 1000) || null;
+        await env.DB.prepare("INSERT INTO reports (at,reporter,target,reason,note) VALUES (?,?,?,?,?)")
+          .bind(new Date().toISOString(), acct.slug, slug, reason, note).run();
+        // Emailed to every admin, after the answer: a report must never fail
+        // because mail did. Without RESEND_API_KEY it sits in the table.
+        if (mailConfigured(env)) ctx.waitUntil((async () => {
+          try {
+            const { results } = await env.DB.prepare("SELECT email FROM accounts WHERE is_admin = 1").all();
+            const text = acct.name + " (@" + acct.slug + ") reported " + them.name + " (@" + slug + ").\n\n"
+              + "Reason: " + REPORT_REASONS[reason] + (note ? "\n\nThey wrote: " + note : "");
+            for (const r of results) {
+              if (r.email) await sendMail(env, { to: r.email, subject: "Report: " + them.name, text,
+                action: { href: "https://coasterhub.org/user/" + slug, label: "Open their profile" } });
+            }
+          } catch (e) {}
+        })());
+        return json({ ok: true });
+      }
+
+      const blm = path.match(/^\/api\/block\/([A-Za-z0-9_-]+)$/);
+      if (blm && (request.method === "POST" || request.method === "DELETE")) {
+        if (!(acct && acct.slug)) return err(401, "sign in to block a rider");
+        if (!await haveBlocks(env)) return err(503, "run migrations/084-reports-blocks.sql first");
+        const slug = blm[1].toLowerCase();
+        if (slug === acct.slug) return err(400, "you cannot block yourself");
+        const them = await env.DB.prepare("SELECT name FROM users WHERE slug = ?").bind(slug).first();
+        if (!them) return err(404, "no such rider");
+        if (request.method === "POST") {
+          await env.DB.prepare("INSERT INTO blocks (blocker,blocked,at) VALUES (?,?,?) ON CONFLICT DO NOTHING")
+            .bind(acct.slug, slug, new Date().toISOString()).run();
+          if (await haveFollows(env)) {
+            await env.DB.prepare(
+              "DELETE FROM follows WHERE (follower = ? AND followee = ?) OR (follower = ? AND followee = ?)")
+              .bind(acct.slug, slug, slug, acct.slug).run();
+          }
+        } else {
+          await env.DB.prepare("DELETE FROM blocks WHERE blocker = ? AND blocked = ?").bind(acct.slug, slug).run();
+        }
+        return json({ ok: true, blocked: await blockedBy(env, acct.slug) });
+      }
+
       // ---- following ----
       // Public to read: the counts sit under every bio, including for people
       // who are not signed in.
@@ -2136,6 +2245,7 @@ export default {
           const claimed = await env.DB.prepare("SELECT id FROM accounts WHERE slug = ?")
             .bind(slug).first();
           if (!claimed) return err(409, "nobody has claimed that page yet");
+          if (await eitherBlocked(env, acct.slug, slug)) return err(403, "you can't follow this rider");
           // DO NOTHING, so following twice — two tabs, a double tap — is the
           // same as following once rather than a constraint error.
           await env.DB.prepare(
@@ -2193,7 +2303,9 @@ export default {
       // "not signed in" look like an error in the console on every page.
       if (request.method === "GET" && path === "/api/auth/me") {
         return json({ account: acct && { email: acct.email, slug: acct.slug, name: acct.name,
-                                         admin: acct.admin, bio: acct.bio, avatar: acct.avatar } });
+                                         admin: acct.admin, bio: acct.bio, avatar: acct.avatar,
+                                         // null before 084: the page then hides Report/Block.
+                                         blocked: await haveBlocks(env) ? await blockedBy(env, acct.slug) : null } });
       }
 
       // Sign up. Open to anyone: creating an account also creates the rider it
@@ -2360,6 +2472,7 @@ export default {
         if (b && b.bio !== undefined) {
           const bio = String(b.bio || "").trim().replace(/\s+/g, " ");
           if (bio.length > BIO_MAX) return err(400, "that bio is too long (" + BIO_MAX + " characters max)");
+          if (rude(bio)) return err(400, RUDE_MSG);
           try {
             await env.DB.prepare("UPDATE users SET bio = ? WHERE slug = ?")
               .bind(bio || null, who.slug).run();
@@ -2377,6 +2490,7 @@ export default {
           const nm = String(b.name || "").trim().replace(/\s+/g, " ");
           if (!nm) return err(400, "give yourself a name");
           if (nm.length > 40) return err(400, "that name is too long");
+          if (rude(nm)) return err(400, RUDE_MSG);
           await env.DB.prepare("UPDATE users SET name = ? WHERE slug = ?").bind(nm, who.slug).run();
           who.name = nm;
           if (b.username === undefined) {
@@ -2580,6 +2694,9 @@ export default {
           q("DELETE FROM rider_categories WHERE user_slug = ?", slug),
           q("DELETE FROM category_prefs WHERE user_slug = ?", slug),
           q("DELETE FROM follows WHERE follower = ? OR followee = ?", slug, slug),
+          q("DELETE FROM blocks WHERE blocker = ? OR blocked = ?", slug, slug),
+          q("DELETE FROM reports WHERE target = ?", slug),
+          q("UPDATE reports SET reporter = NULL WHERE reporter = ?", slug),
           q("DELETE FROM invites WHERE slug = ?", slug),
           q("DELETE FROM user_aliases WHERE slug = ?", slug),
           q("DELETE FROM activity WHERE actor = ?", slug),

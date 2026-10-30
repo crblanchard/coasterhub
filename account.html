@@ -133,6 +133,7 @@
       <input id="up_pw" type="password" autocomplete="new-password" required>
       <p class="hint">Minimum 8 characters.</p>
       <button class="primary" type="submit" id="up_go">Create account</button>
+      <p class="hint agree">By creating an account you agree to the <a href="/terms">Terms of Use</a> and <a href="/privacy">Privacy Policy</a>.</p>
       <div class="msg bad" id="up_msg"></div>
     </form>
   </div>
@@ -161,6 +162,7 @@
       <input id="cl_pw" type="password" autocomplete="new-password" required>
       <p class="hint">At least 8 characters.</p>
       <button class="primary" type="submit" id="cl_go">Claim it</button>
+      <p class="hint agree">By creating an account you agree to the <a href="/terms">Terms of Use</a> and <a href="/privacy">Privacy Policy</a>.</p>
       <div class="msg bad" id="cl_msg"></div>
     </form>
   </div>
@@ -184,10 +186,10 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261030s"></script>
+<script src="/app.js?v=20261030t"></script>
 <script>
 document.getElementById('y').textContent = new Date().getFullYear();
 CoasterHub.initNav('account');

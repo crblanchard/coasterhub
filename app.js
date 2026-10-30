@@ -1383,7 +1383,8 @@
   var BAR_WHOSE = { profile: "Profile", count: "Credits", rankings: "Rankings", map: "Map" };
   var BAR_FIXED = { explore: "Explore", log: "Log", changes: "Changes", coasters: "Coasters", parks: "Parks",
                     categories: "Categories", compare: "Compare", trip: "Trip planner", users: "Riders",
-                    sitemap: "Sitemap", account: "Your Profile", "how-rankings": "How rankings work" };
+                    sitemap: "Sitemap", account: "Your Profile", "how-rankings": "How rankings work",
+                    terms: "Terms of Use", privacy: "Privacy Policy" };
   function barTitle(page, urlSlug) {
     var w = BAR_WHOSE[page];
     if (!w) return Promise.resolve(BAR_FIXED[page] || null);

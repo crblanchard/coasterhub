@@ -220,6 +220,13 @@
   :root[data-theme="light"] .badgerow .acctmenu .ownrow{background-color:#fff}
   .badgerow .acctmenu .ownrow button{white-space:nowrap}
   .badgerow .acctmenu .ownrow button.danger{color:var(--bad)}
+  /* Somebody else's page: ⋯ (Report, Block) where your own page has Account. */
+  .badgerow .morebtn2{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:29px;padding:0 6px;
+    font-family:inherit;font-size:1.3rem;font-weight:700;line-height:1;color:var(--muted);background-color:transparent;
+    border-style:none;cursor:pointer}
+  .badgerow .morebtn2:hover{color:var(--fg)}
+  .hero .profedit .blocknote{margin:10px 0 0;font-size:.92rem;color:var(--muted)}
+  .hero .blocknote .linkbtn{font-family:inherit;font-size:inherit;font-weight:600;color:var(--accent2);background-color:transparent;border-style:none;padding:0;cursor:pointer}
   @media (max-width:680px){ .badgerow{margin-bottom:14px} }
   /* A phone: Account at the far right, its menu opening leftwards. */
   @media (max-width:640px){
@@ -471,11 +478,11 @@
 
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
-  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a><span data-contrib hidden></span></div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261030s"></script>
+<script src="/app.js?v=20261030t"></script>
 <script src="/profile-edit.js?v=20261030a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -738,7 +745,7 @@ function mountFollows(host, slug){
     // can only say no: your own page has nobody to follow, and a page nobody
     // has claimed has nobody on the other end of it.
     if(!btn) return;
-    var canFollow = D.me && D.me !== slug && D.claimed;
+    var canFollow = D.me && D.me !== slug && D.claimed && !BLOCKED;
     btn.hidden = !canFollow;
     if(!canFollow) return;
     btn.textContent = D.you ? 'Unfollow' : 'Follow';
@@ -767,6 +774,71 @@ function mountFollows(host, slug){
   followsOnce(slug)
     .then(function(d){ if(!d) return; D=d; draw(); })
     .catch(function(){ /* not switched on, or offline: the page is fine without it */ });
+}
+
+// Report and block (2026-10-30; both app stores require them). A ⋯ button
+// beside Follow on somebody else's page, for a signed-in reader. Blocking hides
+// the rider from your feeds and lists and ends any follow between you; their
+// page still opens, with a line saying so and a way back.
+var BLOCKED=false;
+function mountSafety(acct, slug, name){
+  var rb=document.querySelector('.herotop .riderbadge')||document.getElementById('hero_badge');
+  var host=document.getElementById('profilehead');
+  if(!rb || !host || document.getElementById('hero_more')) return;
+  var more=document.createElement('button'); more.type='button'; more.className='morebtn2'; more.id='hero_more';
+  more.setAttribute('aria-label','Report or block'); more.textContent='\u22EF';
+  var row=document.createElement('div'); row.className='badgerow';
+  rb.parentNode.insertBefore(row, rb); row.appendChild(rb); row.appendChild(more);
+  var note=document.createElement('p'); note.className='blocknote'; note.hidden=true;
+  host.appendChild(note);
+  var send=function(method, path, body){
+    return fetch(path,{method:method,credentials:'same-origin',
+      headers:body?{'content-type':'application/json'}:{},body:body?JSON.stringify(body):undefined})
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){
+        if(!r.ok) throw new Error(j.error||('HTTP '+r.status)); return j; }); });
+  };
+  var fail=function(e){ CoasterHub.toast('<span>'+esc(e && e.message || 'Something went wrong')+'</span>'); };
+  function setBlocked(on){
+    BLOCKED=on;
+    var fb=document.getElementById('hero_follow'); if(fb && on) fb.hidden=true;
+    note.hidden=!on;
+    note.innerHTML=on ? 'You blocked '+esc(name)+'. They’re hidden from your feeds and lists. <button type="button" class="linkbtn">Unblock</button>' : '';
+    var u=note.querySelector('button');
+    if(u) u.onclick=function(){
+      send('DELETE','/api/block/'+encodeURIComponent(slug)).then(function(){
+        setBlocked(false); CoasterHub.toast('<span>Unblocked '+esc(name)+'.</span>');
+      }).catch(fail);
+    };
+  }
+  setBlocked((acct.blocked||[]).indexOf(slug)>=0);
+  function report(){
+    var R=[['name','Offensive name or picture'],['bio','Offensive bio'],['spam','Spam or fake account'],['harass','Harassment'],['other','Something else']];
+    CoasterHub.actionSheet('Why are you reporting '+name+'?', R.map(function(r){
+      return { label:r[1], run:function(){
+        send('POST','/api/report/'+encodeURIComponent(slug),{reason:r[0]}).then(function(){
+          CoasterHub.haptic();
+          CoasterHub.toast('<span>Thanks — it’s been sent for review.</span>');
+        }).catch(fail);
+      } };
+    }));
+  }
+  function block(){
+    CoasterHub.actionSheet('Block '+name+'? They’ll be hidden from your feeds and lists, and you won’t follow each other.', [
+      { label:'Block '+name, danger:true, run:function(){
+        send('POST','/api/block/'+encodeURIComponent(slug)).then(function(){
+          CoasterHub.haptic(); setBlocked(true);
+          FOLLOWS_P={};
+          CoasterHub.toast('<span>Blocked '+esc(name)+'.</span>');
+        }).catch(fail);
+      } }]);
+  }
+  more.onclick=function(){
+    CoasterHub.actionSheet(name, [
+      { label:'Report '+name, run:report },
+      BLOCKED ? { label:'Unblock '+name, run:function(){ note.querySelector('button').click(); } }
+              : { label:'Block '+name, danger:true, run:block }
+    ]);
+  };
 }
 
 // This rider's follows, fetched once for the page (two parts of it read them).
@@ -840,6 +912,7 @@ function render(s){
       cmp.href='/compare?b='+encodeURIComponent(CoasterHub.currentUser()); cmp.textContent='Compare';
       var fb=document.getElementById('hero_follow'); fb.parentNode.insertBefore(cmp, fb.nextSibling);
     }
+    if (acct && acct.slug && !mine && Array.isArray(acct.blocked)) mountSafety(acct, CoasterHub.currentUser(), s.userName || CoasterHub.currentUser());
     // The Account menu goes up beside the rider switcher, out of the way, on
     // every width (Carter, 2026-10-02): to its right on a desktop, at the far
     // right on a phone. Moved, not copied, so its buttons keep their handlers.

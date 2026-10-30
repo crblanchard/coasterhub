@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-30T03:32:00Z",
-   "text": "You can now delete your account from the Account menu on your profile, which removes your rides, rankings and picture for good. Someone else's rankings now show their name at the top on phones, with Back beside it."
+   "at": "2026-10-30T03:50:29Z",
+   "text": "You can now delete your account from your profile's Account menu, and report or block another rider from the ⋯ on their page. Coaster Hub also has Terms of Use and a Privacy Policy, linked at the bottom of every page."
   },
   {
    "at": "2026-10-30T01:14:19Z",
