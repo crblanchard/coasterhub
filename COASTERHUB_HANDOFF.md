@@ -5929,3 +5929,8 @@ runs bash with pipefail — the first run "passed" without uploading.
   pagereveal, instead of `:active-view-transition-type(back)`.
 - **Tab bar sat high**: with a real bottom inset (app / home-screen app) the
   padding is `max(8px, inset - 12px)`.
+- **Back flashed on your own pages while they loaded**: `detail` waited for
+  /api/auth/me. me() now remembers the slug in localStorage `ch_me`, and
+  phoneShell decides the first frame from it (corrected when me() answers).
+  Same on the website and in the app (Carter: "make both the same that's
+  okay if it's less complex").

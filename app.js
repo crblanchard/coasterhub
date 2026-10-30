@@ -1134,11 +1134,16 @@
   // the wrong name on the log button and hide the sign-in link from someone
   // whose session has since expired.
   var mePromise = null;
+  var ME_KEY = "ch_me";   // the last signed-in slug, for decisions made before /api/auth/me answers
   function me() {
     if (!mePromise) {
       mePromise = fetch("/api/auth/me", { credentials: "same-origin", cache: "no-store" })
         .then(function (r) { return r.ok ? r.json() : { account: null }; })
-        .then(function (d) { var a = (d && d.account) || null; MY_SLUG = a && a.slug; return a; })
+        .then(function (d) {
+          var a = (d && d.account) || null; MY_SLUG = a && a.slug;
+          try { if (a && a.slug) window.localStorage.setItem(ME_KEY, a.slug); else window.localStorage.removeItem(ME_KEY); } catch (e) {}
+          return a;
+        })
         .catch(function () { return null; });   // offline, or the API is down
     }
     return mePromise;
@@ -1563,12 +1568,18 @@
     var mine = page === "profile" || page === "count" || page === "map" || page === "rankings";
     // Somebody else's rankings is a page you went into too (Carter,
     // 2026-10-30: "the back button is gone"), though Rankings is a tab.
-    var detail = (!TAB_ROOTS[page] || (page === "rankings" && !!urlSlug)) && !(mine && !urlSlug);
+    // Your own profile, count and rankings are Me's pages, not somewhere you
+    // went into: no Back. Who "you" are comes from /api/auth/me, which answers
+    // after the first paint, so the last answer is remembered (ch_me) and
+    // decides the first frame; Back no longer shows and then vanishes on your
+    // own pages while they load (Carter, 2026-10-30, in the app).
+    var known = null;
+    try { known = window.localStorage.getItem(ME_KEY); } catch (e) {}
+    var yours = function (slug) { return mine && !!urlSlug && slug === urlSlug && page !== "map"; };
+    var detail = (!TAB_ROOTS[page] || (page === "rankings" && !!urlSlug)) && !(mine && !urlSlug) && !yours(known);
     if (detail) root.classList.add("detail");
-    // Your own profile, count and map are Me's pages, not somewhere you went
-    // into: no Back once we know they are yours.
     if (mine && urlSlug) me().then(function (a) {
-      if (a && a.slug === urlSlug && page !== "map") root.classList.remove("detail");
+      root.classList.toggle("detail", (!TAB_ROOTS[page] || page === "rankings") && !yours(a && a.slug));
     }).catch(function () {});
 
     var inner = document.querySelector(".nav-inner"), brand = inner && inner.querySelector(".brand");
