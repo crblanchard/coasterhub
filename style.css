@@ -636,6 +636,7 @@ button,input,select,textarea{font-family:inherit}
 .profedit button.primary.danger{background-color:var(--bad);color:#fff}
 .profedit .delwarn{color:var(--fg);line-height:1.45}
 .profedit .delwarn b{color:var(--bad)}
+.profedit .dellink{display:block;margin:18px 0 0;padding:0;font-family:inherit;font-size:.8rem;color:var(--muted);background-color:transparent;border-style:none;text-decoration:underline;cursor:pointer}
 .profedit button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);
   border-radius:10px;padding:10px 14px;cursor:pointer;font-size:.9rem;font-family:inherit}
 .profedit button.ghost:hover{color:var(--fg)}

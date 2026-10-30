@@ -66,7 +66,7 @@ Free, no ads, no tracking.
   password here. Never put the password in a chat or in this repo.
 - **Notes for the reviewer** (paste):
 
-  Coaster Hub lets roller coaster fans log the rides they've been on, rank them, and follow friends. To try it: sign in with the account above, tap Log to record a ride, and open Rankings to rank. Account deletion: Me → Account → Delete account. To report or block a rider: open any other rider's profile and tap ⋯ at the top right. Profile names and bios are filtered for objectionable words, and reports are emailed to the developer, who acts on them within 24 hours. Location is used only on the device, to pick the park you're at.
+  Coaster Hub lets roller coaster fans log the rides they've been on, rank them, and follow friends. To try it: sign in with the account above, tap Log to record a ride, and open Rankings to rank. Account deletion: Me → Account → Change password → Delete account (bottom of the form). To report or block a rider: open any other rider's profile and tap ⋯ at the top right. Profile names and bios are filtered for objectionable words, and reports are emailed to the developer, who acts on them within 24 hours. Location is used only on the device, to pick the park you're at.
 
 ## App Privacy ("nutrition label")
 

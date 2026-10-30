@@ -5882,3 +5882,7 @@ is now Account → Delete account → password → Delete my account → a sheet
 has no data-i, `+null` is 0, so **Cancel ran the first item** in every sheet
 (since 688b258, the day sheets arrived: coaster ⋯ on phones, report, block).
 Fixed in app.js — Cancel only closes.
+
+**Moved, same day** (Carter: "yes" to the subtler spot): "Delete account" is a
+small grey link at the bottom of the Change password form, not an item in
+the Account menu. /privacy, /terms and STORE-LISTING.md say so.

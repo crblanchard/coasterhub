@@ -137,6 +137,10 @@
       +   '<p class="hint">Signs you out everywhere else.</p>'
       +   '<button class="primary" type="submit" data-el="pwgo">Change it</button>'
       +   '<div class="msg" data-msg="pw"></div>'
+      // Delete account lives here, small and grey (Carter, 2026-10-30: "put it
+      // somewhere more subtle"): findable where account settings are, out of
+      // the way of a stray tap. Both stores only require that it be findable.
+      +   '<button type="button" class="dellink" data-el="delbtn">Delete account</button>'
       + '</form></div>'
 
       // Delete my account (2026-10-30; both app stores require it). The
@@ -156,7 +160,6 @@
       + '<div class="ownrow">'
       +   '<button class="ghost" data-el="pwbtn">Change password</button>'
       +   '<button class="ghost" data-el="signout">Sign out</button>'
-      +   '<button class="ghost danger" data-el="delbtn">Delete account</button>'
       + '</div></details>'
       + '<div class="msg" data-msg="out"></div>';
   }
