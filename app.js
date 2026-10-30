@@ -1959,6 +1959,21 @@
   // No signal: sw.js keeps a copy of what you open and uses it only when the
   // network fails (Carter, 2026-10-30). A note at the top says when that is
   // what you are looking at.
+  // Warm the tabs (2026-10-31, speed): once a visit, after the page has
+  // finished, fetch the big shared lists the other tabs open with, so the
+  // service worker has them saved and a tab tap draws without waiting.
+  function warmTabs() {
+    if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) return;
+    try { if (window.sessionStorage.getItem("ch_warm")) return; window.sessionStorage.setItem("ch_warm", "1"); } catch (e) { return; }
+    var go = function () {
+      ["/api/coasters", "/api/parks", "/api/summary", "/api/rankings-all"].forEach(function (u) {
+        fetch(u, { credentials: "same-origin" }).catch(function () {});
+      });
+    };
+    var later = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 1500); })(go); };
+    if (document.readyState === "complete") later(); else window.addEventListener("load", later);
+  }
+
   function offlineSupport() {
     if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
       navigator.serviceWorker.register("/sw.js").catch(function () {});
@@ -1978,6 +1993,7 @@
     applyTheme(readTheme());
     phoneShell(page, currentUser());
     offlineSupport();
+    warmTabs();
 
     // A write in another tab (noteWrite, or /edit's copy of it) reloads a page
     // that only SHOWS data, so the map or the count you left open beside /edit

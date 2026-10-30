@@ -24,3 +24,24 @@
   Cache-Control: public, max-age=604800
 /*.svg
   Cache-Control: public, max-age=604800
+
+# Versioned scripts and styles (2026-10-31, speed): every page links them as
+# /app.js?v=… and the ?v= changes whenever the file does (CLAUDE.md), so a
+# copy can be kept a year without asking. Under the no-cache above, every
+# page view re-asked the server about 300 KB of files before it could draw.
+# "! Cache-Control" drops the /* value instead of joining the two.
+/app.js
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+/style.css
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+/lists.css
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+/changes-feed.js
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+/profile-edit.js
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable

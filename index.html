@@ -128,6 +128,17 @@
     <span class="joinnote">Free. Pick your parks, check off your coasters, rank your favorites &mdash; about two minutes.</span>
   </p>
 </div></section>
+<script>
+// Your count from last time, drawn at once (2026-10-31, speed): the hero used
+// to show the signed-out slogan until /api/auth/me answered, then jump to your
+// count. The fresh numbers replace these as soon as they arrive.
+(function(){ try {
+  var me = localStorage.getItem('ch_me'), h = JSON.parse(localStorage.getItem('ch_hero') || 'null');
+  if (!me || !h || h.slug !== me || !h.html) return;
+  var y = document.getElementById('heroyou'); y.innerHTML = h.html; y.hidden = false;
+  document.getElementById('hero_h').hidden = true; document.getElementById('hero_p').hidden = true;
+} catch (e) {} })();
+</script>
 
 
 <div class="container"><div id="loading">Loading riders…</div></div>
@@ -197,7 +208,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261031e"></script>
+<script src="/app.js?v=20261031f"></script>
 <script src="/changes-feed.js?v=20261030a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -249,6 +260,7 @@ CoasterHub.me().then(function(acct){
     }
     $('hero_h').hidden = true; $('hero_p').hidden = true;
     $('heroyou').hidden = false;
+    try { localStorage.setItem('ch_hero', JSON.stringify({ slug: acct.slug, html: $('heroyou').innerHTML })); } catch (e) {}
   });
 }).catch(function(){ /* the slogan stays */ });
 
@@ -282,7 +294,13 @@ if (/[?&]deleted=1/.test(location.search)) {
 
 // The join pills, for whoever is not signed in yet.
 CoasterHub.me().then(function(acct){
-  if (!acct) document.getElementById('joinrow').hidden = false;
+  if (!acct) {
+    document.getElementById('joinrow').hidden = false;
+    // Signed out since last time: the remembered count goes, the slogan comes back.
+    document.getElementById('heroyou').hidden = true;
+    document.getElementById('hero_h').hidden = false; document.getElementById('hero_p').hidden = false;
+    try { localStorage.removeItem('ch_hero'); } catch (e) {}
+  }
 }).catch(function(){ /* API down: no pills rather than wrong pills */ });
 
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));

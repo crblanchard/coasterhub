@@ -5957,3 +5957,23 @@ runs bash with pipefail — the first run "passed" without uploading.
 - **"No signal" on Back**: sw.js retries a failed page fetch once before
   falling back to /offline (build 10 still had Capacitor's errorPath too;
   build 11 removed it).
+
+### Speed: tabs should not open on a blank page (2026-10-31)
+
+Carter: "it doesn't feel like a native app when every time you navigate
+through the menu bar it pulls up a basically blank page". 1–4 of five ideas
+shipped; 5 (tabs that never reload: one document, client-side switching) was
+proposed, not started.
+1. `_headers`: /app.js, /style.css, /lists.css, /changes-feed.js,
+   /profile-edit.js are `public, max-age=31536000, immutable` ("! Cache-Control"
+   detaches the /* no-cache). Safe ONLY because every reference carries ?v= —
+   keep bumping it (CLAUDE.md), and never link one of these without ?v=.
+2. sw.js: any same-origin URL with ?v= is cache-first (older versions of the
+   same path are deleted when a new one is saved); /api/coasters, /api/parks,
+   /api/summary, /api/rankings-all are stale-while-revalidate unless the
+   request is cache:"no-store" (app.js's wroteLately), so your own edits are
+   never hidden. Pages and per-rider data stay network-first.
+3. app.js `warmTabs()`: once a visit (sessionStorage ch_warm), when idle,
+   fetches those four lists so the worker has them before the first tab tap.
+4. Home draws your remembered count (localStorage ch_hero, keyed to ch_me)
+   instead of flashing the signed-out slogan; cleared on sign-out.
