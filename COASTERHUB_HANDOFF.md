@@ -5849,3 +5849,17 @@ Android platform is added). Not secrets: they identify the app.
   opens `data.url` on tap); `askPush()` after a follow and after saving a
   day — never on launch; `pushForget()` in Sign out.
 - Still needs: the APNs .p8 uploaded to Firebase (after Apple approves).
+
+### Share, haptics, swipe-back (2026-10-30)
+
+- **Share on profiles only** (Carter: "share button on profiles only not
+  coasters"): an icon at the right end of the rider-switcher row
+  (`badgeEnd()` in profile.html now owns that row's right side — Share,
+  then Account or ⋯). App → Share plugin sheet; browser → navigator.share;
+  else copy link + toast.
+- **Haptics**: `@capacitor/haptics` installed; app.js `haptic()` already
+  preferred it, so taps buzz for real in the app (iOS Safari ignores
+  navigator.vibrate).
+- **Swipe from the left edge = Back** in the iOS app: `ViewController.swift`
+  (CAPBridgeViewController subclass, allowsBackForwardNavigationGestures),
+  used by SceneDelegate.

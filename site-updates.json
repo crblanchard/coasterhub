@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-10-30T04:10:10Z",
-   "text": "You can now delete your account, and report or block another rider from the ⋯ on their page; Terms of Use and a Privacy Policy are linked at the bottom of every page. On computers, the light/dark toggle is back in the top bar."
+   "at": "2026-10-30T04:33:42Z",
+   "text": "You can now delete your account, report or block a rider from the ⋯ on their page, and share any profile with the new share button; Terms of Use and a Privacy Policy are linked at the bottom of every page. On computers, the light/dark toggle is back in the top bar."
   },
   {
    "at": "2026-10-30T01:14:19Z",

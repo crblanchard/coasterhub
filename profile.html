@@ -225,6 +225,10 @@
     font-family:inherit;font-size:1.3rem;font-weight:700;line-height:1;color:var(--muted);background-color:transparent;
     border-style:none;cursor:pointer}
   .badgerow .morebtn2:hover{color:var(--fg)}
+  .badgerow .badgeend{display:inline-flex;align-items:center;gap:10px}
+  .badgerow .sharebtn{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:29px;padding:0 4px;
+    color:var(--muted);background-color:transparent;border-style:none;cursor:pointer}
+  .badgerow .sharebtn:hover{color:var(--fg)}
   .hero .profedit .blocknote{margin:10px 0 0;font-size:.92rem;color:var(--muted)}
   .hero .blocknote .linkbtn{font-family:inherit;font-size:inherit;font-weight:600;color:var(--accent2);background-color:transparent;border-style:none;padding:0;cursor:pointer}
   @media (max-width:680px){ .badgerow{margin-bottom:14px} }
@@ -782,15 +786,46 @@ function mountFollows(host, slug){
 // beside Follow on somebody else's page, for a signed-in reader. Blocking hides
 // the rider from your feeds and lists and ends any follow between you; their
 // page still opens, with a line saying so and a way back.
+// The row beside the rider switcher, and its right-hand end where Share,
+// Account and ⋯ sit. Made once, by whichever needs it first.
+function badgeEnd(){
+  var rb=document.querySelector('.herotop .riderbadge')||document.getElementById('hero_badge');
+  if(!rb) return null;
+  var row=rb.parentNode.classList.contains('badgerow') ? rb.parentNode : null;
+  if(!row){ row=document.createElement('div'); row.className='badgerow'; rb.parentNode.insertBefore(row, rb); row.appendChild(rb); }
+  var end=row.querySelector('.badgeend');
+  if(!end){ end=document.createElement('span'); end.className='badgeend'; row.appendChild(end); }
+  return end;
+}
+
+// Share this profile (Carter, 2026-10-30: "share button on profiles only").
+// The phone's own share sheet: native in the app, the browser's where it has
+// one, and a copied link everywhere else.
+var SHARE_ICON='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>';
+function mountShare(slug, name, mine){
+  var end=badgeEnd(); if(!end || document.getElementById('hero_share')) return;
+  var b=document.createElement('button'); b.type='button'; b.className='sharebtn'; b.id='hero_share';
+  b.setAttribute('aria-label','Share this profile'); b.innerHTML=SHARE_ICON;
+  end.insertBefore(b, end.firstChild);
+  b.onclick=function(){
+    var url='https://coasterhub.org/user/'+encodeURIComponent(slug);
+    var title=(mine?'My':name+'’s')+' coaster count on Coaster Hub';
+    var P=window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+    if(CoasterHub.inApp() && P){ P.share({ title:title, url:url, dialogTitle:'Share profile' }).catch(function(){}); return; }
+    if(navigator.share){ navigator.share({ title:title, url:url }).catch(function(){}); return; }
+    var done=function(){ CoasterHub.toast('<span>Link copied.</span>'); };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function(){ prompt('Copy this link:', url); });
+    else prompt('Copy this link:', url);
+  };
+}
+
 var BLOCKED=false;
 function mountSafety(acct, slug, name){
-  var rb=document.querySelector('.herotop .riderbadge')||document.getElementById('hero_badge');
-  var host=document.getElementById('profilehead');
-  if(!rb || !host || document.getElementById('hero_more')) return;
+  var end=badgeEnd(), host=document.getElementById('profilehead');
+  if(!end || !host || document.getElementById('hero_more')) return;
   var more=document.createElement('button'); more.type='button'; more.className='morebtn2'; more.id='hero_more';
   more.setAttribute('aria-label','Report or block'); more.textContent='\u22EF';
-  var row=document.createElement('div'); row.className='badgerow';
-  rb.parentNode.insertBefore(row, rb); row.appendChild(rb); row.appendChild(more);
+  end.appendChild(more);
   var note=document.createElement('p'); note.className='blocknote'; note.hidden=true;
   host.appendChild(note);
   var send=function(method, path, body){
@@ -914,14 +949,14 @@ function render(s){
       cmp.href='/compare?b='+encodeURIComponent(CoasterHub.currentUser()); cmp.textContent='Compare';
       var fb=document.getElementById('hero_follow'); fb.parentNode.insertBefore(cmp, fb.nextSibling);
     }
+    mountShare(CoasterHub.currentUser(), s.userName || CoasterHub.currentUser(), !!mine);
     if (acct && acct.slug && !mine && Array.isArray(acct.blocked)) mountSafety(acct, CoasterHub.currentUser(), s.userName || CoasterHub.currentUser());
     // The Account menu goes up beside the rider switcher, out of the way, on
     // every width (Carter, 2026-10-02): to its right on a desktop, at the far
     // right on a phone. Moved, not copied, so its buttons keep their handlers.
-    var am=host.querySelector('.acctmenu'), rb=document.querySelector('.herotop .riderbadge')||document.getElementById('hero_badge');
-    if(am && rb){
-      var row=document.createElement('div'); row.className='badgerow';
-      rb.parentNode.insertBefore(row, rb); row.appendChild(rb); row.appendChild(am);
+    var am=host.querySelector('.acctmenu'), end=am && badgeEnd();
+    if(am && end){
+      end.appendChild(am);
       // A choice made closes the menu (Change password opens its form in the card).
       Array.prototype.forEach.call(am.querySelectorAll('button'), function(b){ b.addEventListener('click', function(){ am.open=false; }); });
     }
