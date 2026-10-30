@@ -1478,7 +1478,8 @@
     // A tab change is the same: an app's tabs switch, they do not slide
     // (Carter, 2026-10-30: Rankings "slides even when I do it directly from
     // the menu bar").
-    if (t === "same" || t === "tab") { try { e.viewTransition.skipTransition(); } catch (x) {} return; }
+    // In the app nothing slides (the head of every page also opts out there).
+    if (t === "same" || t === "tab" || /CoasterHubApp/.test(navigator.userAgent)) { try { e.viewTransition.skipTransition(); } catch (x) {} return; }
     // The kind goes on <html> as data-vt rather than as a view-transition
     // type: WebKit in the iPhone app ignored the types, so Back slid the
     // wrong way and tabs slid at all.

@@ -5942,3 +5942,8 @@ runs bash with pipefail — the first run "passed" without uploading.
   provisional navigation — a load cancelled by the next tap included —
   removed (needs an app build). The cost: a very first launch with no signal
   shows a blank screen instead of a message.
+- **Still slid going to Home/Explore**: the opt-out injected by appShell came
+  too late on some pages. Now the head script of every page checks the user
+  agent (`CoasterHubApp`, appended by capacitor.config.json) and writes
+  `@view-transition{navigation:none}` plus `html.inapp` before anything
+  renders; pagereveal also skips in the app. The website is unchanged.
