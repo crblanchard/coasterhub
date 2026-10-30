@@ -1007,3 +1007,9 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
     padding-right:16px;font-size:.88rem;font-weight:700;color:var(--onaccent);background-color:var(--accentfill);opacity:.55;pointer-events:none}
   a.crow.swipego::before{opacity:1}
 }
+
+/* The no-signal note (app.js offlineSupport, 2026-10-30). */
+.offpill{display:none}
+.offpill.on{display:block;position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:30;
+  padding:6px 14px;border-radius:999px;background-color:#16181b;color:#f3f4f6;font-size:.8rem;font-weight:600;white-space:nowrap;
+  box-shadow:0 6px 18px rgba(0,0,0,.25)}

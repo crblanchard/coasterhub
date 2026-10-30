@@ -1603,10 +1603,27 @@
 
   var RELOADS_ON_WRITE = { riders: 1, count: 1, map: 1, park: 1, coaster: 1, changes: 1, qc: 1, sitemap: 1,
                            manufacturer: 1, location: 1, coasters: 1, parks: 1 };
+  // No signal: sw.js keeps a copy of what you open and uses it only when the
+  // network fails (Carter, 2026-10-30). A note at the top says when that is
+  // what you are looking at.
+  function offlineSupport() {
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
+      navigator.serviceWorker.register("/sw.js").catch(function () {});
+    }
+    var pill = document.createElement("div");
+    pill.className = "offpill"; pill.setAttribute("role", "status");
+    pill.textContent = "No signal \u00b7 showing what this phone saved";
+    document.body.appendChild(pill);
+    var upd = function () { pill.classList.toggle("on", navigator.onLine === false); };
+    upd();
+    window.addEventListener("online", upd); window.addEventListener("offline", upd);
+  }
+
   function initNav(page) {
     if (typeof document === "undefined") return;
     applyTheme(readTheme());
     phoneShell(page, currentUser());
+    offlineSupport();
 
     // A write in another tab (noteWrite, or /edit's copy of it) reloads a page
     // that only SHOWS data, so the map or the count you left open beside /edit

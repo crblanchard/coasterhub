@@ -5699,3 +5699,21 @@ one block at the end of `style.css`:
   Android browsers — fires on every ride added (/log tapped(), confirmAdd).
 - **Not done: #3**, moving search into Explore and the theme switch into Me.
   Carter is undecided; a mockup was shown.
+
+## No signal: sw.js and /offline (2026-10-30)
+
+`sw.js` (registered by app.js `offlineSupport()`) is NETWORK-FIRST for every
+same-origin GET, keeping a copy of each answer, and uses a copy only when the
+network fails or hangs 6s with a copy on hand — so online it can never serve a
+stale file (the site's old stale-CSS trap). Not kept: non-GET, admin API, auth
+calls except /api/auth/me. `/offline` (offline.html, self-contained, no
+style.css/app.js) is what an unvisited page shows with no signal, linking your
+saved profile/credits/rankings. `.offpill` says "No signal · showing what this
+phone saved". To discard every saved copy, bump `CACHE` in sw.js. In the
+Capacitor app, WKWebView only runs service workers for App-Bound Domains
+(WKAppBoundDomains = coasterhub.org) — set that, or offline falls back to the
+native error.
+
+Also 2026-10-30: swipe a coaster row right (phones) = one ride logged today,
+no popup, then a `.chtoast` card with "View your day" (/log?edit=<today>).
+`CoasterHub.toast(html)` is the generic card.
