@@ -5736,3 +5736,9 @@ or a fetch TypeError); `flushOutbox()` sends it on load and on `online`
 (drops on 4xx, keeps on 5xx) and toasts "Sent N rides…". `.offpill` shows
 "N rides waiting to send". Only adds queue; editing/deleting a day needs a
 connection.
+
+Theme (2026-10-30): light/dark ALWAYS follows the phone (prefers-color-scheme,
+live via a matchMedia listener). The top-bar toggle is gone and app.js clears
+any old `ch_theme`. Every page's inline head script sets data-theme="light"
+from matchMedia alone. /edit still has its own toggle (admin, desktop) — it
+does not persist across site pages any more, since app.js clears the key.
