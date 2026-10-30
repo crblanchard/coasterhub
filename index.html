@@ -11,7 +11,7 @@
 <base href="/">
 <title>Coaster Hub — Track your coaster count</title>
 <meta name="description" content="Keep track of your roller coaster count — every credit, every re-ride, every park — and see it as maps, records and charts.">
-<link rel="stylesheet" href="/style.css?v=20261030s">
+<link rel="stylesheet" href="/style.css?v=20261030t">
 <link rel="stylesheet" href="/lists.css?v=20261030a">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The phone's light or dark setting, always (2026-10-30). */if(!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","light")</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
@@ -273,6 +273,12 @@ CoasterHub.me().then(function(acct){
     }
   });
 }).catch(function(){});
+
+// Arriving from Delete account: say it happened.
+if (/[?&]deleted=1/.test(location.search)) {
+  CoasterHub.toast('<span>Your account and everything in it has been deleted.</span>');
+  history.replaceState(null, '', '/');
+}
 
 // The join pills, for whoever is not signed in yet.
 CoasterHub.me().then(function(acct){

@@ -5742,3 +5742,18 @@ live via a matchMedia listener). The top-bar toggle is gone and app.js clears
 any old `ch_theme`. Every page's inline head script sets data-theme="light"
 from matchMedia alone. /edit still has its own toggle (admin, desktop) — it
 does not persist across site pages any more, since app.js clears the key.
+
+### Delete my account (2026-10-30, App Store Part 1)
+
+Both stores reject an app that lets you sign up but not delete the account.
+`POST /api/account/delete` takes the password again, refuses admin accounts
+(403 — Carter's own account can't vanish by a mis-tap), and deletes the
+account, its sessions and resets, then every row keyed to the rider's slug
+(rides, rankings, categories, prefs, follows both ways, invites, aliases,
+activity, users) and the R2 avatar. Statements run one at a time and skip only
+"no such table", so an older database without follows/categories still works.
+UI: "Delete account" (red) in the profile's Account menu opens a panel with
+plain words and the password box; success lands on `/?deleted=1`, which
+toasts and cleans the URL. Tested in test-rides-api.mjs. Still to do for
+Part 1: report/block, name+bio filter, terms at sign-up, /terms and /privacy,
+a deletion-request web page for Google Play.

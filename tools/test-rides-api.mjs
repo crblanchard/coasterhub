@@ -260,7 +260,7 @@ function check(name, cond, detail) {
   if (cond) { pass++; console.log("  ok   " + name); }
   else { fail++; console.log("  FAIL " + name + (detail ? "  -> " + detail : "")); }
 }
-const rows = (db, sql) => db.prepare(sql).all();
+const rows = (db, sql, ...v) => db.prepare(sql).all(...v);
 
 // ---- tests -----------------------------------------------------------------
 async function main() {
@@ -2888,6 +2888,32 @@ async function main() {
     const row2 = rows(db, "SELECT at FROM activity WHERE actor='bo' AND kind='rides' AND detail LIKE '%2026-09-10%'")[0];
     check("copy: with no original line for that date it is stamped now",
       r.status === 200 && row2 && Math.abs(Date.parse(row2.at) - Date.now()) < 60000, JSON.stringify(row2));
+  }
+
+  // ---- delete my account (App Store / Play rule, 2026-10-30) --------------
+  {
+    const db = freshDb();
+    db.exec("INSERT INTO coasters (id,name,park,type) VALUES (990,'D','Del Park','Steel')");
+    const gone = await signedUp(db, "gone@x.y", "Gone Rider");
+    const stay = await signedUp(db, "stay@x.y", "Stay Rider");
+    const slug = rows(db, "SELECT slug FROM accounts WHERE email='gone@x.y'")[0].slug;
+    const keep = rows(db, "SELECT slug FROM accounts WHERE email='stay@x.y'")[0].slug;
+    await call(db, "POST", "/api/rides", { cookie: gone, body: { user: slug, d: "2026-09-12", entries: [{ c: 990, n: 2 }] } });
+    await call(db, "POST", "/api/rides", { cookie: stay, body: { user: keep, d: "2026-09-12", entries: [{ c: 990, n: 1 }] } });
+    let r = await call(db, "POST", "/api/account/delete", { body: { password: "riding-things" } });
+    check("delete account: signed out is a 401", r.status === 401, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/account/delete", { cookie: gone, body: { password: "wrong-one" } });
+    check("delete account: the wrong password is a 401 and deletes nothing",
+      r.status === 401 && rows(db, "SELECT 1 FROM users WHERE slug=?", slug).length === 1, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/account/delete", { cookie: gone, body: { password: "riding-things" } });
+    const left = ["SELECT 1 FROM accounts WHERE email='gone@x.y'", "SELECT 1 FROM users WHERE slug=?",
+      "SELECT 1 FROM rides WHERE user_slug=?", "SELECT 1 FROM activity WHERE actor=?"]
+      .reduce((n, q) => n + rows(db, q, ...(q.includes("?") ? [slug] : [])).length, 0);
+    check("delete account: the account, rider, rides and feed lines are gone", r.status === 200 && left === 0, left);
+    check("...and the cookie is cleared", /max-age=0|expires=thu, 01 jan 1970/i.test(r.setCookie || ""), r.setCookie);
+    const me = await call(db, "GET", "/api/auth/me", { cookie: gone });
+    check("...and the old session no longer signs anyone in", !(me.data && me.data.account), JSON.stringify(me.data));
+    check("...and another rider's rides are untouched", rows(db, "SELECT 1 FROM rides WHERE user_slug=?", keep).length === 1);
   }
 
   console.log("\n" + pass + " passed, " + fail + " failed\n");

@@ -139,12 +139,24 @@
       +   '<div class="msg" data-msg="pw"></div>'
       + '</form></div>'
 
+      // Delete my account (2026-10-30; both app stores require it). The
+      // password again, and plain words about what goes.
+      + '<div class="panel" data-panel="del" hidden><form data-form="del">'
+      +   '<p class="hint delwarn"><b>This deletes your account for good.</b> Your rides, rankings, '
+      +     'categories, follows, picture and profile page all go, and they cannot be brought back.</p>'
+      +   '<label>Your password<input type="password" autocomplete="current-password"'
+      +     ' data-el="delpw" required></label>'
+      +   '<button class="primary danger" type="submit" data-el="delgo">Delete my account</button>'
+      +   '<div class="msg" data-msg="del"></div>'
+      + '</form></div>'
+
       // Folded into one small Account menu (Carter, 2026-10-02): two rarely
       // used buttons were sitting beside the count, the thing you came to see.
       + '<details class="acctmenu"><summary>Account</summary>'
       + '<div class="ownrow">'
       +   '<button class="ghost" data-el="pwbtn">Change password</button>'
       +   '<button class="ghost" data-el="signout">Sign out</button>'
+      +   '<button class="ghost danger" data-el="delbtn">Delete account</button>'
       + '</div></details>'
       + '<div class="msg" data-msg="out"></div>';
   }
@@ -290,7 +302,7 @@
     if (!editable) { render(); return { render: render, account: me }; }
 
     // ---- one editor at a time ------------------------------------------------
-    var NAMES = ["pic", "name", "bio", "user", "pw"];
+    var NAMES = ["pic", "name", "bio", "user", "pw", "del"];
     function open(which) {
       NAMES.forEach(function (n) { panel[n].hidden = (n !== which); });
       if (which === "name") el.nametext.focus();
@@ -374,6 +386,18 @@
       open(panel.pw.hidden ? "pw" : null);
       if (!panel.pw.hidden) el.pwcur.focus();
     });
+
+    el.delbtn.addEventListener("click", function () {
+      open(panel.del.hidden ? "del" : null);
+      if (!panel.del.hidden) { el.delpw.focus(); panel.del.scrollIntoView({ block: "center", behavior: "instant" }); }
+    });
+    wire(root.querySelector('[data-form="del"]'), el.delgo, msg.del,
+      function () { return { password: el.delpw.value }; },
+      "/api/account/delete",
+      function () {
+        try { localStorage.removeItem("ch_rider"); } catch (e) {}
+        location.href = "/?deleted=1";
+      });
 
     el.signout.addEventListener("click", function () {
       el.signout.disabled = true;

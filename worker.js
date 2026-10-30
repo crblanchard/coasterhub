@@ -2550,6 +2550,51 @@ export default {
         return json({ ok: true }, 200, { "set-cookie": setCookie(raw) });
       }
 
+      // Delete my account (Carter, 2026-10-30; Apple 5.1.1(v) and Google Play
+      // both require it in any app with sign-up). Everything goes: the rider,
+      // their rides, rankings, categories, follows both ways, their activity
+      // lines, their picture, every session and reset, and the account. The
+      // password is asked again so a stray tap or a borrowed phone cannot wipe a
+      // count. An admin account is refused, so the site's owner cannot lock
+      // themselves out of /edit by accident.
+      if (request.method === "POST" && path === "/api/account/delete") {
+        if (!acct) return err(401, "sign in first");
+        if (acct.adm) return err(403, "an admin account can't be deleted here");
+        const b = await request.json().catch(() => ({}));
+        const row = await env.DB.prepare("SELECT pw, slug FROM accounts WHERE id = ?").bind(acct.id).first();
+        if (!row || !await verifyPassword(String(b && b.password || ""), row.pw)) {
+          return err(401, "that is not your password");
+        }
+        const slug = row.slug;
+        const u = slug ? await env.DB.prepare("SELECT avatar FROM users WHERE slug = ?").bind(slug).first() : null;
+        const q = (sql, ...v) => env.DB.prepare(sql).bind(...v);
+        const batch = [
+          q("DELETE FROM sessions WHERE account = ?", acct.id),
+          q("DELETE FROM resets WHERE account = ?", acct.id),
+          q("DELETE FROM accounts WHERE id = ?", acct.id),
+        ];
+        if (slug) batch.push(
+          q("DELETE FROM rides WHERE user_slug = ?", slug),
+          q("DELETE FROM rankings WHERE user_slug = ?", slug),
+          q("DELETE FROM rider_category_members WHERE user_slug = ?", slug),
+          q("DELETE FROM rider_categories WHERE user_slug = ?", slug),
+          q("DELETE FROM category_prefs WHERE user_slug = ?", slug),
+          q("DELETE FROM follows WHERE follower = ? OR followee = ?", slug, slug),
+          q("DELETE FROM invites WHERE slug = ?", slug),
+          q("DELETE FROM user_aliases WHERE slug = ?", slug),
+          q("DELETE FROM activity WHERE actor = ?", slug),
+          q("DELETE FROM users WHERE slug = ?", slug),
+        );
+        // A table an older database never got (follows, categories) must not
+        // stop the rest: run them one by one, skipping only "no such table".
+        for (const st of batch) {
+          try { await st.run(); }
+          catch (e) { if (!/no such table/i.test(String(e && e.message || e))) throw e; }
+        }
+        if (u && u.avatar) { try { await env.AVATARS.delete(u.avatar); } catch (e) {} }
+        return afterWrite(ctx, env, request, json({ ok: true }, 200, { "set-cookie": clearCookie() }));
+      }
+
       // ---- rider-owned writes ----
       // These carry their own authorization (mayWriteRider) instead of the
       // blanket admin check below: the whole point of accounts is that Cole can
