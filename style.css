@@ -574,7 +574,9 @@ button,input,select,textarea{font-family:inherit}
    footer clear of it. These MUST stay in the 680px query — nesting them in the
    374px one above hid the tab bar on every phone 375px and wider. */
 @media (max-width:680px){
-  body{padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))}
+  /* The tab bar's height (about 55px of tabs, plus its bottom padding below)
+     and a little air. Kept in step with .tabbar's padding-bottom. */
+  body{padding-bottom:calc(66px + max(8px, calc(env(safe-area-inset-bottom,0px) - 12px)))}
   footer.site{margin-bottom:8px}
   .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;
     background:var(--veil2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);

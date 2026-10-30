@@ -6023,3 +6023,4 @@ proposed, not started.
    NOT done: pages (HTML) are still network-first — making them
    stale-while-revalidate would save one more round trip per tap, but every
    deploy would then show one page view late, which would confuse testing.
+- **Map stops at the tab bar on phones** (Carter, 2026-10-31: summary card hidden behind the bar). map.html's body is border-box with padding = the bar's height (60px of tabs + its bottom padding); the general body padding now follows the lowered bar (66px + the same max()).

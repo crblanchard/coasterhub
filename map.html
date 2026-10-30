@@ -20,7 +20,7 @@
 <meta property="og:image" content="https://coasterhub.org/og-image.png?v=4">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=20261031d">
+<link rel="stylesheet" href="/style.css?v=20261031e">
 <!-- The same Leaflet the profile page uses, from the same place. -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -34,6 +34,12 @@
   body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
   #map{flex:1 1 auto;min-height:60vh;z-index:1;background-color:var(--panel)}
   footer.site{margin-top:0;padding-top:18px;padding-bottom:18px}
+  /* Phones: the map stops at the tab bar instead of running under it, so the
+     summary card at its bottom is not hidden (Carter, 2026-10-31). The body's
+     padding is the bar's height, counted inside the full-height column. */
+  @media (max-width:680px){
+    body{box-sizing:border-box;padding-bottom:calc(61px + max(8px, calc(env(safe-area-inset-bottom,0px) - 12px)))}
+  }
   /* The number on each park: operating coasters. Every park is its own disc
      at every zoom — they do not combine into clusters (Carter, 2026-09-21:
      "make it so the dots don't combine") — so the disc is small on purpose,
