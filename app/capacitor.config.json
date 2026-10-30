@@ -7,7 +7,6 @@
     "errorPath": "offline.html"
   },
   "appendUserAgent": "CoasterHubApp",
-  "backgroundColor": "#0b1020",
   "ios": {
     "contentInset": "never",
     "scheme": "Coaster Hub",
