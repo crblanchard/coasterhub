@@ -18,8 +18,8 @@ name: iPhone app
 #                ASC_ISSUER_ID     the issuer ID above the keys list
 #                ASC_KEY_P8        the whole .p8 file, BEGIN/END lines included
 #              The key must be a TEAM key with the Admin role (App Store
-#              Connect -> Users and Access -> Integrations): only a Team key may
-#              create the signing certificate and profile on the fly.
+#              Connect -> Users and Access -> Integrations): app/ci/signing.py
+#              uses it to make the signing certificate and profile each run.
 #
 # Every upload needs a build number Apple has not seen: it is this workflow's
 # run number, which only ever goes up. The version people see (1.0) is
@@ -101,18 +101,24 @@ jobs:
       - name: Install and sync
         working-directory: app
         run: npm ci && npx cap sync ios
-      - name: Archive (cloud signing)
+      # Xcode's automatic signing wants a registered iPhone even for an App
+      # Store build, so app/ci/signing.py makes the certificate and profile
+      # through the API instead; the app target's Release config signs
+      # manually with them.
+      - name: Signing certificate and profile
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography || python3 -m pip install --quiet pyjwt cryptography
+          ASC_KEY_PATH="$RUNNER_TEMP/keys/AuthKey.p8" python3 app/ci/signing.py
+      - name: Archive
         working-directory: app/ios/App
         run: |
           xcodebuild -project App.xcodeproj -scheme App -configuration Release \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey.p8" \
-            -authenticationKeyID "${{ secrets.ASC_KEY_ID }}" \
-            -authenticationKeyIssuerID "${{ secrets.ASC_ISSUER_ID }}" \
-            DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" CODE_SIGN_STYLE=Automatic \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
-            archive | tail -60
+            archive | tail -80
       - name: Upload to App Store Connect
         working-directory: app/ios/App
         run: |
@@ -123,16 +129,21 @@ jobs:
             <key>method</key><string>app-store-connect</string>
             <key>destination</key><string>upload</string>
             <key>teamID</key><string>${{ secrets.APPLE_TEAM_ID }}</string>
-            <key>signingStyle</key><string>automatic</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key><dict>
+              <key>org.coasterhub.app</key><string>Coaster Hub App Store CI</string>
+            </dict>
             <key>manageAppVersionAndBuildNumber</key><false/>
           </dict></plist>
           EOF
           xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/out" \
-            -allowProvisioningUpdates \
             -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey.p8" \
             -authenticationKeyID "${{ secrets.ASC_KEY_ID }}" \
             -authenticationKeyIssuerID "${{ secrets.ASC_ISSUER_ID }}" | tail -40
-      - name: Remove the key
+      - name: Remove the key and the keychain
         if: always()
-        run: rm -rf "$RUNNER_TEMP/keys"
+        run: |
+          rm -rf "$RUNNER_TEMP/keys"
+          security delete-keychain "$RUNNER_TEMP/ci.keychain-db" 2>/dev/null || true

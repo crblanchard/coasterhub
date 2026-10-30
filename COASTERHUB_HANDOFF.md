@@ -5902,3 +5902,18 @@ scoped, uploaded to Firebase project coaster-7c2cc (the real one; an empty
   The App ID needs **Associated Domains** and **Push Notifications** ticked
   (cloud signing usually adds them; Carter was asked to tick both).
 - app.js listens for the App plugin's `appUrlOpen` and goes to that path.
+
+### TestFlight signing: why it is manual (2026-10-30)
+
+Three runs taught this. (1) Automatic signing archives with a DEVELOPMENT
+profile, which Apple only makes for a team with a registered device — Carter
+has none ("Your team has no devices"). (2) CODE_SIGN_IDENTITY="Apple
+Distribution" on the xcodebuild command line also hits Firebase's SPM
+targets, which refuse it. (3) The same identity in the App target's Release
+config still fails under Automatic ("automatically signed for development").
+So `app/ci/signing.py` uses the Team API key to revoke the team's old
+Distribution certificates, make a fresh key + certificate, ensure the app ID
+has Push + Associated Domains, and make an IOS_APP_STORE profile named
+"Coaster Hub App Store CI"; the App target's Release config is Manual with
+that profile. Also: every run's xcodebuild pipes into tail, so the workflow
+runs bash with pipefail — the first run "passed" without uploading.
