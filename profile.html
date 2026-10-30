@@ -543,17 +543,16 @@ if(CoasterHub.currentUser()){
   }).catch(function(){ location.replace('/riders'); });
 }
 // ---- getting started ---------------------------------------------------------
-// Four steps, on your OWN page only (Carter approved, 2026-09-27): credits, a
-// top ten, a friend, the home screen. Each links to where it is done; done
-// ones are checked off; the card goes when all four are, or on Hide. A rider
+// Three steps, on your OWN page only (Carter approved, 2026-09-27): credits, a
+// top ten, a friend. Each links to where it is done; done ones are checked
+// off; the card goes when all three are, or on Hide. (A fourth, "Add to your
+// home screen", went with /install on 2026-10-30: the app replaces it.) A rider
 // who is well set up never sees it: it is only offered while the count or
 // the ranking is still small (under 30 credits, or under ten ranked).
 function gettingStarted(k){
   var slug=CoasterHub.currentUser(), key='ch_started_hide_'+slug;
-  var standalone=(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;
-  try{ if(standalone) localStorage.setItem('ch_home','1'); }catch(e){}
-  var hidden=false, home=standalone;
-  try{ hidden=localStorage.getItem(key)==='1'; home=home||localStorage.getItem('ch_home')==='1'; }catch(e){}
+  var hidden=false;
+  try{ hidden=localStorage.getItem(key)==='1'; }catch(e){}
   if(hidden) return;
   CoasterHub.me().then(function(acct){
     if(!(acct && acct.slug===slug)) return;
@@ -567,8 +566,7 @@ function gettingStarted(k){
       var steps=[
         [k.credits>0, k.credits?'/welcome?add=1':'/welcome', 'Add your credits', k.credits?nf(k.credits)+' so far':''],
         [k.credits>0 && ranked>=want, CoasterHub.userPageHref(slug,'rankings'), 'Rank your top ten', ranked?nf(ranked)+' ranked':''],
-        [following>0, '/', 'Follow a friend', following?nf(following)+' following':''],
-        [home, '/install', 'Add to your home screen', '']
+        [following>0, '/', 'Follow a friend', following?nf(following)+' following':'']
       ];
       var done=steps.filter(function(x){ return x[0]; }).length;
       if(done===steps.length) return;

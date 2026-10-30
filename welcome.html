@@ -586,7 +586,6 @@ function vDone(){
    +'<div class="sechead"><h2>What&rsquo;s next</h2></div><div class="next">'
    +link(H('profile'),'Your profile','Your count, top ten, and recent visits.')
    +link(H('rankings'),'Add to your rankings',rest>0?plural(rest,'credit')+' still to rank, a few at a time.':'Reorder your list any time.')
-   +link('/install','Add to Home Screen','Opens full-screen with its own icon, like an app.')
    +'</div>'
    +(PREVIEW?'<div style="margin-top:18px"><button class="go alt" type="button" id="again">Run the preview again</button></div>':'');
   if($('again')) $('again').onclick=function(){ fresh(); go('parks'); };

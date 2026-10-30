@@ -2,6 +2,8 @@
 # redirect here at all. /riders was its address for a day; keep it working.
 /riders               /           301
 /home                 /           301
+# The add-to-home-screen guide, retired 2026-10-30 for the real apps.
+/install              /           301
 
 # Pretty per-user URLs -> serve the page (JS reads the name from the path).
 # 200 = rewrite (browser keeps the pretty URL). Destinations use the CLEAN paths

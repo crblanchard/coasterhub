@@ -5617,8 +5617,8 @@ today). App touches: launch screen, status bar driven natively on the theme
 flip (sidesteps the iOS 26 Safari quirk in CLAUDE.md), swipe-back, off-site
 links in an in-app browser, Android back button, a real offline screen (an
 airplane-mode browser error is the classic 4.2 tell), camera/photo usage
-strings for the avatar picker, hide /install (it names Android: guideline
-2.3.10). Universal Links/App Links + webcredentials so reset emails open the
+strings for the avatar picker. (/install, which named Android — guideline
+2.3.10 — was retired 2026-10-30; it 301s to Home.) Universal Links/App Links + webcredentials so reset emails open the
 app and Keychain/Google autofill work (needs /.well-known files on the site).
 
 **No Mac, ever.** The repo is PUBLIC, so GitHub-hosted macOS runners are free
