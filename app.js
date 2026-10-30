@@ -392,7 +392,7 @@
     try { window.localStorage.setItem(WROTE_KEY, String(Date.now())); } catch (e) {}
     // A write makes this page's remembered answers old: forget them, so the
     // next read goes to the network (no-store, per wroteLately).
-    inFlight = {}; ridesMemo = {}; allRankP = null; globalTallyP = null;
+    inFlight = {}; ridesMemo = {}; allRankP = null; globalTallyP = null; once = {};
   }
   function wroteLately() {
     try { return Date.now() - (+window.localStorage.getItem(WROTE_KEY) || 0) < WROTE_FOR; }
@@ -434,18 +434,27 @@
   // The summaries (2026-09-25): one request instead of one per rider. Both
   // resolve to null when the API cannot answer, and the caller falls back to
   // reading each rider's log, which also works from the static files.
-  function fetchSummary() {
-    return fetch("/api/summary", wroteLately() ? LIVE : undefined)
+  // Speed (2026-10-31): each of these is asked for ONCE per page however many
+  // parts of the page want it (Home asked for /api/summary four times), and,
+  // unless you changed something lately, without no-store, so the service
+  // worker answers from its saved copy at once and refreshes it behind
+  // (sw.js SHARED). noteWrite() forgets them all.
+  var once = {};
+  function onceJSON(path, pick) {
+    if (once[path]) return once[path];
+    var p = once[path] = fetch(path, wroteLately() ? LIVE : { credentials: "same-origin" })
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { return (j && j.users) || null; })
+      .then(function (j) { return pick ? (j && j[pick]) || null : j; })
       .catch(function () { return null; });
+    return p;
   }
-  function fetchAllRides() {
-    return fetch("/api/rides-all", wroteLately() ? LIVE : undefined)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { return (j && j.riders) || null; })
-      .catch(function () { return null; });
-  }
+  function fetchSummary() { return onceJSON("/api/summary", "users"); }
+  function fetchAllRides() { return onceJSON("/api/rides-all", "riders"); }
+  // Who a rider follows and who follows them; { following, followers, ... } or null.
+  function follows(slug) { return onceJSON("/api/follows/" + encodeURIComponent(slug)); }
+  // A rider's ranking, { order } or null — for reading. A page about to change
+  // it reads it fresh itself.
+  function rankingsOf(slug) { return onceJSON("/api/rankings/" + encodeURIComponent(slug)); }
   // Kept where coasterRow can reach it: a row's "park · place" needs the region.
   var PARKS_SEEN = {};
   function fetchParks() { return shared("parks", "/api/parks", "/parks.json").then(function (p) { PARKS_SEEN = p || {}; return p; }); }
@@ -483,7 +492,7 @@
     return allRankP;
   }
   function fetchRidesNow(slug) {
-    return fetch("/api/rides/" + slug, LIVE)
+    return fetch("/api/rides/" + slug, wroteLately() ? LIVE : undefined)
       .then(function (r) { if (!r.ok) throw new Error("api " + r.status); return r.json(); })
       .catch(function () {
         return fetch("/" + slug + ".json").then(function (r) { return r.json(); }).then(function (u) {
@@ -1345,8 +1354,7 @@
     me().then(function (acct) {
       if (!acct || !acct.slug) return;
       ME = acct.slug;
-      return fetch("/api/follows/" + encodeURIComponent(ME), { credentials: "same-origin", cache: "no-store" })
-        .then(function (r) { return r.ok ? r.json() : null; })
+      return follows(ME)
         .then(function (j) {
           FRIENDS = j ? (j.following || []).map(function (f) { return f.slug; }).filter(function (x) { return x !== ME; }) : null;
           rows(menu.querySelector(".rbq") ? menu.querySelector(".rbq").value : "");
@@ -2103,6 +2111,10 @@
   function initNav(page) {
     if (typeof document === "undefined") return;
     appShell();
+    // Your own rides, ranking and follows start loading now, not after
+    // /api/auth/me answers who you are (2026-10-31): the last answer is
+    // remembered (ch_me), and the page's own calls pick these up in flight.
+    try { var known = window.localStorage.getItem(ME_KEY); if (known) { fetchRides(known).catch(function () {}); rankingsOf(known); follows(known); } } catch (e) {}
     applyTheme(readTheme());
     phoneShell(page, currentUser());
     offlineSupport();
@@ -2537,8 +2549,7 @@
       if (!a || !a.slug) return null;
       return Promise.all([
         fetchRides(a.slug).catch(function () { return { rides: [] }; }),
-        fetch("/api/rankings/" + encodeURIComponent(a.slug), { cache: "no-store", credentials: "same-origin" })
-          .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+        rankingsOf(a.slug)
       ]).then(function (r) {
         var rides = {}, rank = {}, order = (r[1] && r[1].order) || [];
         (r[0].rides || []).forEach(function (x) {
@@ -2751,10 +2762,7 @@
   // only claimed riders with something logged or ranked.
   function suggestFriends(listEl, wrapEl, limit) {
     var E = searchEsc, nf = function (n) { return Number(n || 0).toLocaleString(); };
-    var followsOf = function (slug) {
-      return fetch("/api/follows/" + encodeURIComponent(slug), { credentials: "same-origin", cache: "no-store" })
-        .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
-    };
+    var followsOf = follows;
     return Promise.all([me().catch(function () { return null; }), fetchUsers(), fetchSummary()]).then(function (r) {
       var who = r[0]; if (!who || !who.slug) return;
       var by = {}; (r[2] || []).forEach(function (x) { by[x.slug] = x; });
@@ -2811,7 +2819,7 @@
               var on = b.classList.contains("on"); b.disabled = true;
               fetch("/api/follow/" + encodeURIComponent(b.getAttribute("data-slug")), { method: on ? "DELETE" : "POST", credentials: "same-origin" })
                 .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-                .then(function (j) { b.classList.toggle("on", !!j.you); b.textContent = j.you ? "Following" : "Follow"; })
+                .then(function (j) { noteWrite(); b.classList.toggle("on", !!j.you); b.textContent = j.you ? "Following" : "Follow"; })
                 // Say so rather than look as if it worked.
                 .catch(function (e) { console.error(e); b.textContent = "Try again"; })
                 .then(function () { b.disabled = false; });
@@ -3575,7 +3583,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

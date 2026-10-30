@@ -191,7 +191,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261031n"></script>
+<script src="/app.js?v=20261031o"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('map');
@@ -619,7 +619,7 @@ Promise.all([
     var me=acct && acct.slug;
     Promise.all([
       CoasterHub.fetchUsers(),
-      me ? fetch('/api/follows/'+encodeURIComponent(me),{cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }) : null
+      me ? CoasterHub.follows(me) : null
     ]).then(function(r){
       var f=r[1] ? (r[1].following||[]).map(function(x){ return x.slug; }) : [];
       if(me && others) f.unshift(me);

@@ -126,7 +126,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261031n"></script>
+<script src="/app.js?v=20261031o"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('compare');
@@ -292,7 +292,7 @@ Promise.all([
   }
 
   // The pickers offer your friends first.
-  var fP = me ? fetch('/api/follows/'+encodeURIComponent(me),{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }) : Promise.resolve(null);
+  var fP = me ? CoasterHub.follows(me) : Promise.resolve(null);
   Promise.all([fP, me ? CoasterHub.fetchRides(me).catch(function(){ return null; }) : null]).then(function(rr){
     var f=rr[0] ? (rr[0].following||[]).map(function(x){ return x.slug; }) : [];
     $('pa').__f=f; $('pb').__f=f;

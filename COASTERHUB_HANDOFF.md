@@ -6006,3 +6006,20 @@ proposed, not started.
   touch or wheel stops it.
 - **Skyline on Explore and Rankings too, on phones** (Carter, 2026-10-31: 'the pages are basic without it'): 52px tall, bottom-right of the band beside the title or Mine | Global, no extra strip. Home keeps its 72px strip.
 - **Explore's small tiles are Map and Near me** (Carter, 2026-10-31: 'parks > coasters / map > near me'). Near me opens /parks?sort=near, which asks for location and sorts by distance. Manufacturers and Locations left Explore; still in search, the sitemap, the footer and every coaster's links.
+6. **Per-rider data from the worker too, deduped, started early** (Carter:
+   "every time you open a page it shows something freezes for a sec then
+   shows actually what you need"). Measured on a simulated phone (150 ms per
+   request, CPU ×4): content appeared at 0.5–1.6 s per tab before, 0.4–0.7 s
+   after. app.js `onceJSON(path)` asks each of /api/summary, /api/rides-all,
+   /api/follows/<slug>, /api/rankings/<slug> once per page (Home asked for
+   the summary 4×), without no-store unless wroteLately; exported as
+   CoasterHub.follows / rankingsOf and used by index, profile, compare, map,
+   trip. initNav starts your own rides, ranking and follows immediately from
+   the remembered ch_me instead of after /api/auth/me. sw.js SHARED adds
+   rides-all, activity, coaster-riders, park-riders and rides|rankings|
+   follows|categories/<slug> (stale-while-revalidate). Reads that precede a
+   write (coaster.html's "remove from ranking", welcome) stay no-store.
+   Follow, unfollow and block call noteWrite() so the next pages read fresh.
+   NOT done: pages (HTML) are still network-first — making them
+   stale-while-revalidate would save one more round trip per tap, but every
+   deploy would then show one page view late, which would confuse testing.

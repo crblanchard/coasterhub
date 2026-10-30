@@ -208,7 +208,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261031n"></script>
+<script src="/app.js?v=20261031o"></script>
 <script src="/changes-feed.js?v=20261030a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -314,8 +314,7 @@ function row(u, st, ranked){ return CoasterHub.riderRow(u, st.kpi.credits, st.kp
 // is the one list it always was.
 var following = CoasterHub.me().then(function(acct){
   if (!acct || !acct.slug) return null;
-  return fetch('/api/follows/' + encodeURIComponent(acct.slug), { cache: 'no-store' })
-    .then(function(r){ return r.ok ? r.json() : null; })
+  return CoasterHub.follows(acct.slug)
     .then(function(j){ return { me: acct.slug, slugs: j ? (j.following || []).map(function(f){ return f.slug; }) : [] }; })
     .catch(function(){ return { me: acct.slug, slugs: [] }; });
 }).catch(function(){ return null; });

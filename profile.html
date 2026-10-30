@@ -485,7 +485,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261031n"></script>
+<script src="/app.js?v=20261031o"></script>
 <script src="/profile-edit.js?v=20261030d"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -607,7 +607,7 @@ function gettingStarted(k){
 function mountAmong(slug, name, mine){
   if(!slug) return;
   Promise.all([
-    fetch('/api/follows/'+encodeURIComponent(slug),{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }),
+    CoasterHub.follows(slug),
     CoasterHub.fetchAllRides(), CoasterHub.fetchCoasters(), CoasterHub.fetchParks().catch(function(){ return {}; })
   ]).then(function(r){
     var fr=r[0] ? (r[0].following||[]).map(function(x){ return x.slug; }).filter(function(x){ return x!==slug; }) : [];
@@ -767,7 +767,7 @@ function mountFollows(host, slug){
         // The answer carries the fresh lists, so the count under the bio moves
         // in the same frame as the button above it.
         D.you=j.you; D.followers=j.followers; D.following=j.following;
-        CoasterHub.haptic();
+        CoasterHub.noteWrite();   // buzzes, and the next page reads follows fresh
         // Just followed someone, in the app: offer notifications (2026-10-30).
         if(j.you && CoasterHub.askPush) CoasterHub.askPush();
       })
@@ -862,7 +862,7 @@ function mountSafety(acct, slug, name){
     CoasterHub.actionSheet('Block '+name+'? They’ll be hidden from your feeds and lists, and you won’t follow each other.', [
       { label:'Block '+name, danger:true, run:function(){
         send('POST','/api/block/'+encodeURIComponent(slug)).then(function(){
-          CoasterHub.haptic(); setBlocked(true);
+          CoasterHub.noteWrite(); setBlocked(true);
           FOLLOWS_P={};
           CoasterHub.toast('<span>Blocked '+esc(name)+'.</span>');
         }).catch(fail);
@@ -880,8 +880,7 @@ function mountSafety(acct, slug, name){
 // This rider's follows, fetched once for the page (two parts of it read them).
 var FOLLOWS_P={};
 function followsOnce(slug){
-  return FOLLOWS_P[slug] || (FOLLOWS_P[slug]=fetch('/api/follows/'+encodeURIComponent(slug),{credentials:'same-origin',cache:'no-store'})
-    .then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }));
+  return FOLLOWS_P[slug] || (FOLLOWS_P[slug]=CoasterHub.follows(slug));
 }
 function render(s){
   document.getElementById('loading').style.display='none';

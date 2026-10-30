@@ -48,7 +48,14 @@ function versioned(req) {
 // and refreshed behind it, so the next page has the new one. A request made
 // with cache:"no-store" — app.js asks that way for a while after you change
 // something (wroteLately) — skips this and waits for the network.
-var SHARED = /^\/api\/(coasters|parks|summary|rankings-all)$/;
+// Since the same evening, also each rider's rides, ranking, follows and
+// categories, who has ridden a coaster or park, and the feed: every page
+// draws from the saved copy at once instead of "freezing for a sec" (Carter,
+// 2026-10-31). Someone else's change shows one page view later; your own
+// never lags, because for ten minutes after a write you read no-store.
+// Not /api/users or /api/user/<slug> (names and pictures, read live), nor
+// /api/auth/*.
+var SHARED = /^\/api\/(coasters|parks|summary|rankings-all|rides-all|activity|coaster-riders|park-riders|(rides|rankings|follows|categories)\/[^\/]+)$/;
 function sharedList(req) {
   var u = new URL(req.url);
   return u.origin === self.location.origin && SHARED.test(u.pathname) && req.cache !== "no-store";
