@@ -2751,7 +2751,8 @@
             (t.following || []).forEach(function (f) { (via[f.slug] = via[f.slug] || []).push(fol[keys[i]]); }); });
           var x = function (u) { return by[u.slug] || {}; };
           var cands = (api.USERS || []).filter(function (u) { var k = x(u);
-            return u.claimed && u.slug !== who.slug && !fol[u.slug] && ((k.credits || 0) > 0 || (k.ranked || 0) > 0); });
+            return u.claimed && u.slug !== who.slug && !fol[u.slug] && (who.blocked || []).indexOf(u.slug) < 0
+              && ((k.credits || 0) > 0 || (k.ranked || 0) > 0); });
           var m = function (u) { return (via[u.slug] || []).length; };
           // People your friends follow first; then whoever joined most
           // recently (Carter, 2026-10-05: "if you don't have any show
