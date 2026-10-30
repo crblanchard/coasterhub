@@ -1507,6 +1507,8 @@
       var b = e.target.closest && e.target.closest(".sheetitem");
       if (!b) return;
       close();
+      // Cancel has no data-i, and +null is 0: without this it ran the first item.
+      if (!b.hasAttribute("data-i")) return;
       var it = items[+b.getAttribute("data-i")];
       if (it && it.run) it.run();
     });

@@ -391,8 +391,21 @@
       open(panel.del.hidden ? "del" : null);
       if (!panel.del.hidden) { el.delpw.focus(); panel.del.scrollIntoView({ block: "center", behavior: "instant" }); }
     });
-    wire(root.querySelector('[data-form="del"]'), el.delgo, msg.del,
-      function () { return { password: el.delpw.value }; },
+    // One last "are you sure" after the password (Carter, 2026-10-30: "does
+    // the delete account option have a couple clicks so you don't accidentally
+    // do it?"): the first submit only asks; Delete forever submits for real.
+    var delSure = false, delForm = root.querySelector('[data-form="del"]');
+    wire(delForm, el.delgo, msg.del,
+      function () {
+        if (delSure) { delSure = false; return { password: el.delpw.value }; }
+        if (!el.delpw.value) { say(msg.del, "Enter your password first."); return null; }
+        var go = function () { delSure = true; delForm.requestSubmit ? delForm.requestSubmit() : el.delgo.click(); };
+        if (window.CoasterHub && CoasterHub.actionSheet) {
+          CoasterHub.actionSheet("Delete your account for good? Your rides, rankings and profile can't be brought back.",
+            [{ label: "Delete forever", danger: true, run: go }]);
+        } else if (window.confirm("Delete your account for good? This can't be undone.")) go();
+        return null;
+      },
       "/api/account/delete",
       function () {
         try { localStorage.removeItem("ch_rider"); } catch (e) {}

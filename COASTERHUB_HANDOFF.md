@@ -5873,3 +5873,12 @@ listener in app.js marks `ch_vt = "same"` for links inside `.segsw`,
 Credits · Map), for your own list ⇄ /rankings, and for the rider switcher;
 the arriving page's `pagereveal` then calls `skipTransition()`. Everything
 else keeps the push slide; Back keeps the pop.
+
+### Delete account: one more confirm; the sheet Cancel bug (2026-10-30)
+
+Carter asked for "a couple clicks so you don't accidentally do it". Delete
+is now Account → Delete account → password → Delete my account → a sheet,
+"Delete forever". Found while testing it: `actionSheet()`'s Cancel button
+has no data-i, `+null` is 0, so **Cancel ran the first item** in every sheet
+(since 688b258, the day sheets arrived: coaster ⋯ on phones, report, block).
+Fixed in app.js — Cancel only closes.
