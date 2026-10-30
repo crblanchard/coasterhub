@@ -985,6 +985,19 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   .skel i:nth-child(odd){width:92%}
 
   a,button,[role="checkbox"]{-webkit-tap-highlight-color:transparent}
+  /* Buttons, rows and the bars behave like an app's, not a page's: no link
+     preview or text selection on a long press (Carter, 2026-10-30). Reading
+     text, inputs and the coaster facts stay selectable. */
+  header.nav,.tabbar,button,.btn,.crow,.riderrow,.tiles a,.chips a,.segsw,.navseg,summary,.sheetitem,.rbitem,.srchrow,.chtoast{
+    -webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+  /* Tap targets reach Apple's 44px even where the drawing is smaller: the
+     31px top-bar circles get an invisible ring, the small switches and chips
+     grow a little. */
+  .themetoggle,.srchbtn,.acctlink{position:relative}
+  .themetoggle::after,.srchbtn::after,.acctlink::after{content:"";position:absolute;inset:-7px -4px}
+  .hero .segsw a,.navseg a{padding-top:9px;padding-bottom:9px}
+  .chips a{min-height:40px;align-items:center}
+  .vlist .vedit,.vlist .vdel{padding:12px 0;margin:-12px 0}
   .crow:active,.riderrow:active,.tiles a:active,.panel > a:active,.chips a:active,.lrow:active,.trow:active{background-color:var(--soft2)}
   .btn:active,.badge.pick:active{transform:scale(.97)}
 }
@@ -1017,3 +1030,22 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 .offpill.on{display:block;position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:30;
   padding:6px 14px;border-radius:999px;background-color:#16181b;color:#f3f4f6;font-size:.8rem;font-weight:600;white-space:nowrap;
   box-shadow:0 6px 18px rgba(0,0,0,.25)}
+
+/* Long-press menu on a coaster row (app.js rowMenu, 2026-10-30). */
+.lpshade{position:fixed;inset:0;z-index:62;background-color:rgba(10,14,25,.32);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:chfade .18s ease-out}
+.lpcard{position:fixed;left:16px;right:16px;z-index:63;background-color:var(--panel);border-radius:14px;overflow:hidden;
+  box-shadow:0 18px 50px rgba(0,0,0,.3);animation:lplift .2s cubic-bezier(.2,.8,.2,1)}
+.lpcard .crow{display:flex}
+.lpmenu{position:fixed;left:16px;width:min(270px,calc(100vw - 32px));z-index:63;background-color:var(--panel);border-radius:14px;overflow:hidden;
+  box-shadow:0 18px 50px rgba(0,0,0,.3);animation:lpmenu .2s cubic-bezier(.2,.8,.2,1);transform-origin:top left}
+.lpmenu button{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;font-family:inherit;font-size:1rem;
+  color:var(--fg);background-color:transparent;border-style:none;border-top:1px solid var(--line);text-align:left;cursor:pointer;
+  -webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.lpmenu button:first-child{border-top-style:none}
+.lpmenu button:active{background-color:var(--soft2)}
+.lpmenu button.strong{font-weight:700}
+.lpmenu button span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lpmenu svg{flex:none;color:var(--muted)}
+@keyframes lplift{from{transform:scale(.97)}to{transform:none}}
+@keyframes lpmenu{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.lpshade,.lpcard,.lpmenu{animation:none}}

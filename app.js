@@ -1571,6 +1571,85 @@
     }, true);
   })();
 
+  // Long-press a coaster row (phones): the row lifts, the page blurs, and a menu
+  // of what you can do with it opens beside it — the way an iPhone does it
+  // (Carter picked style A from two mockups, 2026-10-30).
+  function rowMenu(row) {
+    var cid = +row.getAttribute("data-cid");
+    Promise.all([me().catch(function () { return null; }), fetchCoasters()]).then(function (r) {
+      var a = r[0], c = ((r[1] && r[1].coasters) || []).filter(function (x) { return x.id === cid; })[0];
+      if (!c) return;
+      var href = row.getAttribute("href") || coasterHref(c);
+      var items = [
+        { t: "Log a ride today", i: '<path d="M12 5v14M5 12h14"/>', go: function () { swipeLog(row); }, strong: true },
+        { t: "Open " + c.name, i: '<path d="M9 6l6 6-6 6"/>', go: function () { location.href = href; } },
+        { t: "Who’s ridden it", i: '<path d="M16 19v-1a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v1M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6M20 19v-1a4 4 0 0 0-3-3.9M15 4.1a3 3 0 0 1 0 5.8"/>', go: function () { location.href = href + "#riders"; } }
+      ];
+      if (a && a.slug) items.push({ t: "Rank it", i: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0z"/>', go: function () { location.href = userPageHref(a.slug, "rankings") + "?rank=" + cid; } });
+      if (c.park) items.push({ t: c.park, i: '<path d="M3 21h18M5 21V9l7-5 7 5v12"/>', go: function () { location.href = parkHref(c.park); } });
+
+      var rect = row.getBoundingClientRect();
+      var shade = document.createElement("div"); shade.className = "lpshade";
+      var card = document.createElement("div"); card.className = "lpcard"; card.innerHTML = row.outerHTML;
+      var menu = document.createElement("div"); menu.className = "lpmenu"; menu.setAttribute("role", "menu");
+      menu.innerHTML = items.map(function (it, k) {
+        return '<button type="button" role="menuitem" data-k="' + k + '"' + (it.strong ? ' class="strong"' : '') + '><span>' + searchEsc(it.t) + '</span>'
+          + '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + it.i + '</svg></button>';
+      }).join("");
+      document.body.appendChild(shade); document.body.appendChild(card); document.body.appendChild(menu);
+      // The lifted row sits where the row was; the menu goes under it, or above
+      // it when the row is low on the screen.
+      var top = Math.max(70, Math.min(rect.top, window.innerHeight - 120));
+      card.style.top = top + "px";
+      var mh = menu.offsetHeight, below = top + rect.height + 10;
+      menu.style.top = (below + mh < window.innerHeight - 90 ? below : Math.max(70, top - mh - 10)) + "px";
+      var close = function () { shade.remove(); card.remove(); menu.remove(); };
+      // The finger that opened it is still down: the tap its lifting sends
+      // must not land on the shade and close it again. Live once it is up.
+      [shade, card, menu].forEach(function (el) { el.style.pointerEvents = "none"; });
+      var arm = function () {
+        document.removeEventListener("touchend", arm, true);
+        setTimeout(function () { [shade, card, menu].forEach(function (el) { el.style.pointerEvents = ""; }); }, 80);
+      };
+      if (lpDown) document.addEventListener("touchend", arm, true); else arm();
+      shade.addEventListener("click", close);
+      card.addEventListener("click", function (e) { e.preventDefault(); close(); });
+      menu.addEventListener("click", function (e) {
+        var b = e.target.closest && e.target.closest("button[data-k]");
+        if (!b) return;
+        close(); items[+b.getAttribute("data-k")].go();
+      });
+    });
+  }
+  var lpDown = false;          // a finger is on the screen (rowMenu waits for it to lift)
+  if (typeof document !== "undefined") (function () {
+    var timer = null, x0 = 0, y0 = 0, fired = null;
+    document.addEventListener("touchstart", function () { lpDown = true; }, { passive: true, capture: true });
+    document.addEventListener("touchend", function () { lpDown = false; }, { passive: true, capture: true });
+    var cancel = function () { clearTimeout(timer); timer = null; };
+    document.addEventListener("touchstart", function (e) {
+      if (!isPhone() || e.touches.length !== 1) return;
+      var row = e.target.closest && e.target.closest("a.crow[data-cid]");
+      if (!row || e.target.closest(".tick.add, .tick.undo")) return;
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+      cancel();
+      timer = setTimeout(function () { timer = null; fired = row; haptic(); rowMenu(row); }, 480);
+    }, { passive: true });
+    document.addEventListener("touchmove", function (e) {
+      if (timer && (Math.abs(e.touches[0].clientX - x0) > 8 || Math.abs(e.touches[0].clientY - y0) > 8)) cancel();
+    }, { passive: true });
+    document.addEventListener("touchend", function () { cancel(); setTimeout(function () { fired = null; }, 450); }, { passive: true });
+    document.addEventListener("touchcancel", cancel, { passive: true });
+    // The tap that ends a long press must not also open the row; and Android's
+    // own long-press menu stays out of the way.
+    document.addEventListener("click", function (e) {
+      if (fired && e.target.closest && e.target.closest("a.crow") === fired) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+    document.addEventListener("contextmenu", function (e) {
+      if (isPhone() && e.target.closest && e.target.closest("a.crow[data-cid]")) e.preventDefault();
+    });
+  })();
+
   // Pull down at the top of the page to reload it (Home and the activity feed).
   function pullToRefresh() {
     if (!("ontouchstart" in window) || !isPhone()) return;
