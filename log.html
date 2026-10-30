@@ -86,6 +86,9 @@
   .riderline a{color:var(--accent2);cursor:pointer;padding:8px 2px}
   .geonote{color:var(--muted);font-size:var(--fs-s);margin:6px 0 0}
   .geonote:empty{display:none}
+  .atpark{display:flex;align-items:center;gap:6px;margin:4px 0 2px;color:var(--fg);font-size:1rem}
+  .atpark svg{color:var(--accent2);flex:none}
+  .atpark a{margin-left:6px;font-size:var(--fs-s)}
   .geonote a{color:var(--accent2);cursor:pointer}
   /* The nearest parks, as things you can press. A line that only NAMED the
      closest park still left you to go and find it in a 247-long dropdown. */
@@ -634,7 +637,7 @@ function boot(){
     readRegions(); showRegionBtn();
     // A location from earlier today is applied here, once the parks it sorts
     // have actually arrived. wireNearMe() only reads it.
-    if(HERE) setHere(HERE); else fillParks();
+    if(HERE) setHere(HERE); else { fillParks(); autoLocate(); }
     // change AND input: some mobile browsers fire only one of the two when a
     // park is chosen from the native picker, and a park that does not open its
     // coaster list is the whole page not working. Rendering twice is harmless —
@@ -923,7 +926,10 @@ function setHere(pos,quiet){
   // Each of the three is a BUTTON, not a name. Naming the closest park still
   // left you to go and find it in a 247-long dropdown, which is the scroll the
   // button was meant to save.
-  n.innerHTML=(near.length
+  // Inside a park, say so plainly (Carter, 2026-10-30: "You're at Carowinds").
+  var at=near.length&&near[0].mi<=1&&sel().value===near[0].p ? near[0].p : null;
+  n.innerHTML=(at?'<span class="atpark"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>You&rsquo;re at <b>'+esc(at)+'</b> <a id="geoclear">Not here?</a></span>':'')
+    +(at ? '' : (near.length
       ? '<span class="nearrow"><span class="lbl">Nearest you:</span>'
         + near.map(function(x){
             return '<button type="button" class="nearpick'+(sel().value===x.p?' on':'')
@@ -931,7 +937,7 @@ function setHere(pos,quiet){
               +'<span class="mi">'+showMiles(x.mi)+'</span></button>';
           }).join('')
         + '<a id="geoclear">Back to A&ndash;Z</a></span>'
-      : '<a id="geoclear">No park has coordinates yet — back to A&ndash;Z</a>');
+      : '<a id="geoclear">No park has coordinates yet — back to A&ndash;Z</a>'));
   Array.prototype.forEach.call(n.querySelectorAll('.nearpick'), function(b){
     b.onclick=function(){ choosePark(b.getAttribute('data-p')); };
   });
@@ -960,6 +966,19 @@ function choosePark(name){
   Array.prototype.forEach.call(document.querySelectorAll('.nearpick'), function(b){
     b.classList.toggle('on', b.getAttribute('data-p')===name);
   });
+}
+// When this site may already read your location (you allowed it on an earlier
+// visit), Log finds you on its own and opens on the park you are standing in,
+// with no button to press (Carter, 2026-10-30). Never asks: a site you have not
+// allowed still waits for Near me.
+function autoLocate(){
+  if(!navigator.geolocation || !navigator.permissions || !navigator.permissions.query) return;
+  navigator.permissions.query({name:'geolocation'}).then(function(st){
+    if(st.state!=='granted') return;
+    navigator.geolocation.getCurrentPosition(function(g){
+      setHere({lat:g.coords.latitude,lon:g.coords.longitude});
+    },function(){},{enableHighAccuracy:false,timeout:8000,maximumAge:5*60*1000});
+  }).catch(function(){});
 }
 function wireNearMe(){
   $('nearme').onclick=function(){
