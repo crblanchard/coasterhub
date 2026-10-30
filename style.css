@@ -911,6 +911,9 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 .chdlg{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background-color:rgba(0,0,0,.45)}
 .chdlg-box{background-color:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:20px;width:100%;max-width:360px;box-shadow:0 12px 40px var(--shadow)}
 .chdlg-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.srchbrowse{display:flex;flex-wrap:wrap;gap:8px;padding:4px 12px 12px}
+.srchbrowse a{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background-color:var(--soft);color:var(--fg);font-size:.9rem;font-weight:600;text-decoration:none}
+.srchbrowse a:hover{border-color:var(--accent2)}
 .sheettitle{display:block;font-size:.86rem;font-weight:600;color:var(--muted);text-align:center;padding:2px 0 10px}
 .sheetitem{display:block;width:100%;font-family:inherit;font-size:1rem;font-weight:600;color:var(--accent2);background-color:transparent;
   border-style:none;border-top:1px solid var(--line);padding:14px 10px;cursor:pointer;text-align:center}
@@ -935,6 +938,7 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   html.navscrolled .navtitle{opacity:1}
   .navtitle.small{font-size:.86rem}
   html.detail .people{gap:6px}
+  .srch:not([hidden]) .srchbox{animation:sheetup .26s cubic-bezier(.2,.8,.2,1)}
   html.hasseg .navtitle{display:none}
   html.hasseg .navseg{display:inline-flex;flex:none;margin-right:auto;padding:3px;border:1px solid var(--line);border-radius:999px;background-color:var(--soft)}
   .navseg a{padding:5px 14px;border-radius:999px;color:var(--muted);font-weight:600;font-size:.88rem;text-decoration:none}
@@ -985,5 +989,5 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 @keyframes ptrspin{to{transform:rotate(360deg)}}
 @keyframes skel{from{background-position:200% 0}to{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){
-  .chdlg,.chdlg-box,.rbmenu.sheet,.rbback.on,.skel i,.ptr.spin svg{animation:none}
+  .srch .srchbox,.chdlg,.chdlg-box,.rbmenu.sheet,.rbback.on,.skel i,.ptr.spin svg{animation:none}
 }

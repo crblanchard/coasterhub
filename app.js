@@ -2812,6 +2812,12 @@
     return hits.slice(0, 40).map(function (h) { return h.it; });
   }
   var searchEl = null;
+  // Haversine, in miles (Earth radius 3958.8mi) — the same sum log.html does.
+  function milesBetween(a, b, c, d) {
+    var r = Math.PI / 180, dLat = (c - a) * r, dLon = (d - b) * r;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 2 * 3958.8 * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
   function searchEsc(t) {
     return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
@@ -2842,23 +2848,46 @@
           localStorage.setItem("ch_recent", JSON.stringify(list));
         } catch (err) {}
       });
+      // The empty box (Carter, 2026-10-30): what you opened lately, the parks
+      // nearest you when Log already knows where you are (its two-hour fix, so
+      // search never asks for your location itself), and the places to browse.
+      var emptyBox = function (rec) {
+        var here = null;
+        try { var g = JSON.parse(localStorage.getItem("ch_here") || "null"); if (g && g.lat != null && Date.now() - g.at < 2 * 3600e3) here = g; } catch (e) {}
+        var near = !here ? Promise.resolve([]) : fetchParks().then(function (parks) {
+          return Object.keys(parks || {}).map(function (n) {
+            var p = parks[n]; if (!p || p.lat == null || p.lon == null) return null;
+            return { t: n, sub: p.region || "", mi: milesBetween(here.lat, here.lon, p.lat, p.lon), h: parkHref(n), k: "park" };
+          }).filter(Boolean).sort(function (a, b) { return a.mi - b.mi; }).slice(0, 3).map(function (x) {
+            x.sub = (x.sub ? x.sub + " \u00b7 " : "") + (x.mi < 10 ? Math.round(x.mi * 10) / 10 : Math.round(x.mi)) + " mi"; return x;
+          });
+        }).catch(function () { return []; });
+        return near.then(function (nr) {
+          return (rec.length ? '<p class="srchhint">Recent</p>' + rec.map(row).join("") : "")
+            + (nr.length ? '<p class="srchhint">Near you</p>' + nr.map(row).join("") : "")
+            + '<p class="srchhint">Browse</p><div class="srchbrowse">'
+            + [["Parks", "/parks"], ["Coasters", "/coasters"], ["Manufacturers", "/manufacturers"], ["Locations", "/locations"], ["Map", "/map"], ["Riders", "/users"]]
+                .map(function (l) { return '<a href="' + l[1] + '">' + l[0] + '</a>'; }).join("") + '</div>';
+        });
+      };
+      var row = function (h, i) {
+        return '<a class="srchrow' + (i === 0 && input.value ? " hi" : "") + (h.gone ? " gone" : "") + '" role="option" href="' + searchEsc(h.h) + '"'
+          + ' data-t="' + searchEsc(h.t) + '" data-sub="' + searchEsc(h.sub || "") + '" data-k="' + searchEsc(h.k) + '">'
+          + '<span class="st"><b>' + searchEsc(h.t) + '</b><span>' + searchEsc(h.sub)
+          + (h.was ? ' <i class="srchtag">formerly ' + searchEsc(h.was) + '</i>' : '')
+          + (h.moved ? ' <i class="srchtag">now ' + searchEsc(h.moved) + '</i>' : '')
+          + '</span></span>'
+          + '<span class="sk">' + SEARCH_KINDS[h.k] + '</span></a>';
+      };
       var draw = function () {
         buildSearchIndex().then(function (items) {
           var q = input.value, hits = searchFor(items, q);
-          var rec = norm(q) ? [] : recent().filter(function (x) { return x && x.h && SEARCH_KINDS[x.k]; });
-          if (rec.length) hits = rec;
-          res.innerHTML = !norm(q) && !rec.length
-            ? '<p class="srchhint">Try a coaster, park, manufacturer, location, or user.</p>'
-            : hits.length
-              ? (rec.length ? '<p class="srchhint">Recent</p>' : '') + hits.map(function (h, i) {
-                  return '<a class="srchrow' + (i === 0 ? " hi" : "") + (h.gone ? " gone" : "") + '" role="option" href="' + searchEsc(h.h) + '"'
-                    + ' data-t="' + searchEsc(h.t) + '" data-sub="' + searchEsc(h.sub || "") + '" data-k="' + searchEsc(h.k) + '">'
-                    + '<span class="st"><b>' + searchEsc(h.t) + '</b><span>' + searchEsc(h.sub)
-                    + (h.was ? ' <i class="srchtag">formerly ' + searchEsc(h.was) + '</i>' : '')
-                    + (h.moved ? ' <i class="srchtag">now ' + searchEsc(h.moved) + '</i>' : '')
-                    + '</span></span>'
-                    + '<span class="sk">' + SEARCH_KINDS[h.k] + '</span></a>';
-                }).join("")
+          if (!norm(q)) {
+            var rec = recent().filter(function (x) { return x && x.h && SEARCH_KINDS[x.k]; });
+            return emptyBox(rec).then(function (h) { if (!norm(input.value)) res.innerHTML = h; });
+          }
+          res.innerHTML = hits.length
+              ? hits.map(row).join("")
               : '<p class="srchhint">Nothing called that.</p>';
         });
       };
