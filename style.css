@@ -1058,3 +1058,31 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 .backmark{display:block;width:34px;height:34px;transform:rotate(90deg);animation:pinturn .5s cubic-bezier(.3,1.35,.5,1) both}
 @keyframes pinturn{from{transform:rotate(0)}to{transform:rotate(90deg)}}
 @media (prefers-reduced-motion:reduce){.backmark{animation:none}}
+
+/* Page transitions, phones only (2026-10-30). Cross-document view transitions:
+   Safari 18.2+, Chrome 126+; anything older just changes page as before. The
+   bars are named so they hold still while the page under them moves. */
+@media (max-width:680px) and (prefers-reduced-motion:no-preference){
+  @view-transition{navigation:auto}
+  header.nav{view-transition-name:topbar}
+  .tabbar{view-transition-name:tabbar}
+  ::view-transition-group(root){animation-duration:.32s}
+  ::view-transition-old(root){animation:.32s cubic-bezier(.2,.8,.2,1) both vt-push-out}
+  ::view-transition-new(root){animation:.32s cubic-bezier(.2,.8,.2,1) both vt-push-in}
+  html:active-view-transition-type(back)::view-transition-old(root){animation-name:vt-pop-out;z-index:2}
+  html:active-view-transition-type(back)::view-transition-new(root){animation-name:vt-pop-in}
+  html:active-view-transition-type(tab)::view-transition-old(root){animation:.16s ease both vt-fade-out}
+  html:active-view-transition-type(tab)::view-transition-new(root){animation:.16s ease both vt-fade-in}
+  /* Frosted glass does not survive the snapshot (the bar went pale mid-slide):
+     solid bars while a transition runs. */
+  html:active-view-transition header.nav,html:active-view-transition .tabbar{-webkit-backdrop-filter:none;backdrop-filter:none;background-color:var(--bg)}
+  ::view-transition-group(topbar),::view-transition-group(tabbar){animation:none}
+  ::view-transition-old(topbar),::view-transition-old(tabbar){animation:none;opacity:0}
+  ::view-transition-new(topbar),::view-transition-new(tabbar){animation:none}
+}
+@keyframes vt-push-in{from{transform:translateX(100%)}}
+@keyframes vt-push-out{to{transform:translateX(-28%);filter:brightness(.92)}}
+@keyframes vt-pop-in{from{transform:translateX(-28%);filter:brightness(.92)}}
+@keyframes vt-pop-out{to{transform:translateX(100%)}}
+@keyframes vt-fade-in{from{opacity:0}}
+@keyframes vt-fade-out{to{opacity:0}}

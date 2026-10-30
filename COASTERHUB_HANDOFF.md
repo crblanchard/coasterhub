@@ -5718,3 +5718,14 @@ native error.
 Also 2026-10-30: swipe a coaster row right (phones) = one ride logged today,
 no popup, then a `.chtoast` card with "View your day" (/log?edit=<today>).
 `CoasterHub.toast(html)` is the generic card.
+
+Also 2026-10-30, phones: cross-document view transitions (`@view-transition`
+in style.css, Safari 18.2+/Chrome 126+, off for reduced motion). Push slides
+in from the right; `back` (the pin, or a history traverse) slides away; `tab`
+(a tab-bar tap) crossfades — the kind is set in sessionStorage `ch_vt` by
+markTransition() and added to the transition's types in a top-level
+`pagereveal` listener. header.nav and .tabbar are named so they hold still,
+and go solid during a transition (backdrop-filter does not survive the
+snapshot). Long-press a coaster row: `rowMenu()` (style A, lifted row +
+menu); swipe: `swipeLog()`. Back restores scroll by retrying as the page
+grows (`ch_y_<path>`, history.scrollRestoration = manual).

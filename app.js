@@ -1339,6 +1339,19 @@
     window.addEventListener("resize", function () { if (!menu.hidden) place(); });
   }
 
+  // Page transitions (style.css @view-transition, phones): a page you open
+  // slides in from the right, Back slides it away, a tab change crossfades.
+  // The kind is read here, on the arriving page, before its first frame.
+  if (typeof window !== "undefined") window.addEventListener("pagereveal", function (e) {
+    if (!e.viewTransition) return;
+    var t = null;
+    try { t = window.sessionStorage.getItem("ch_vt"); window.sessionStorage.removeItem("ch_vt"); } catch (x) {}
+    var act = window.navigation && window.navigation.activation;
+    if (!t && act && act.navigationType === "traverse") t = "back";
+    if (t) try { e.viewTransition.types.add(t); } catch (x) {}
+  });
+  function markTransition(kind) { try { window.sessionStorage.setItem("ch_vt", kind); } catch (e) {} }
+
   // ---- The phone layout (Carter, 2026-10-30: "a more app-like mobile layout",
   // all of it but moving search and the theme switch, which he is still deciding).
   // Everything here is for screens 680px and narrower; style.css scopes the looks
@@ -1428,6 +1441,7 @@
       back.innerHTML = '<img class="backmark" alt="" width="34" height="34" src="' + (mk ? mk.getAttribute("src") : "/mark.svg") + '">';
       back.onclick = function () {
         var fromHere = document.referrer && document.referrer.indexOf(location.origin) === 0;
+        markTransition("back");
         if (fromHere && history.length > 1) { history.back(); return; }
         var k = navKey(page);
         location.href = k === "explore" ? "/explore" : k === "rankings" ? "/rankings" : k === "profile" ? "/account" : "/";
@@ -2021,6 +2035,7 @@
       var a = e.target.closest && e.target.closest("a[data-nav]");
       if (!a) return;
       var k = a.getAttribute("data-nav");
+      markTransition("tab");
       if (a.classList.contains("on")) {
         if (window.scrollY > 8) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }
         else if (a.pathname === location.pathname) e.preventDefault();
