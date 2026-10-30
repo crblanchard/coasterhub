@@ -6049,3 +6049,4 @@ proposed, not started.
 7. Weekly digest — "maaaaybe but wait for now". Not built.
 - **/api/push/test** (admins, GET): sends a test to your own phones and returns each step — secret present, project, Google sign-in, FCM's answer per phone — after a reviewer follow sent nothing. sendPush/fcmAuth now console.error FCM's refusals (Workers observability).
 - **FCM_SERVICE_ACCOUNT paste damage**: the first paste did not parse. worker.js readServiceAccount forgives a BOM, spaces, curly quotes, surrounding quotes and real line breaks inside private_key; a truncated paste still fails. /api/push/test reports the pasted value's length, first 12 and last 6 characters, and whether private_key/client_email are present.
+- **/api/follows out of the service worker's saved copies** (Carter, 2026-10-31: Follow button missing on a profile's first open until reload). Its answer carries the viewer (me, you); still deduped per page and prefetched, but network-first.

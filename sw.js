@@ -55,7 +55,10 @@ function versioned(req) {
 // never lags, because for ten minutes after a write you read no-store.
 // Not /api/users or /api/user/<slug> (names and pictures, read live), nor
 // /api/auth/*.
-var SHARED = /^\/api\/(coasters|parks|summary|rankings-all|rides-all|activity|coaster-riders|park-riders|(rides|rankings|follows|categories)\/[^\/]+)$/;
+// Not /api/follows/<slug> either: its answer says who is LOOKING (me, you),
+// and a saved copy from an earlier visit hid the Follow button on a profile's
+// first open until a reload (Carter, 2026-10-31).
+var SHARED = /^\/api\/(coasters|parks|summary|rankings-all|rides-all|activity|coaster-riders|park-riders|(rides|rankings|categories)\/[^\/]+)$/;
 function sharedList(req) {
   var u = new URL(req.url);
   return u.origin === self.location.origin && SHARED.test(u.pathname) && req.cache !== "no-store";
