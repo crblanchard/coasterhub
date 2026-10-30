@@ -520,6 +520,8 @@ button,input,select,textarea{font-family:inherit}
 @media (max-width:680px){
   .srch{padding:0;background:var(--bg)}
   .srchbox{max-width:none;max-height:none;height:100%;border:0;border-radius:0;box-shadow:none}
+  /* Under the status bar in the app (viewport-fit=cover); zero in a browser tab. */
+  .srchbar{padding-top:calc(10px + env(safe-area-inset-top,0px))}
 }
 /* The account control sits beside the theme toggle and borrows its shape, so
    the header's right-hand controls read as one set. Signed in it shows your
@@ -968,7 +970,10 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   html.navscrolled .navtitle{opacity:1}
   .navtitle.small{font-size:.86rem}
   html.detail .people{gap:6px}
-  .srch:not([hidden]) .srchbox{animation:sheetup .26s cubic-bezier(.2,.8,.2,1)}
+  /* Search opens in place, no slide (Carter, 2026-10-31: "search is super
+     messed up"): its box is focused at once, and focusing a box that is
+     still sliding up from the bottom made the iPhone scroll to follow it,
+     leaving the search bar above the screen and a blank page. */
   html.hasseg .navtitle{display:none}
   html.hasseg .navseg{display:inline-flex;flex:none;margin-right:auto;padding:3px;border:1px solid var(--line);border-radius:999px;background-color:var(--soft)}
   .navseg a{padding:5px 14px;border-radius:999px;color:var(--muted);font-weight:600;font-size:.88rem;text-decoration:none}
