@@ -100,8 +100,8 @@
 
       + '<div class="panel" data-panel="name" hidden><form data-form="name">'
       +   '<label>Display name<input type="text" maxlength="40" data-el="nametext" required></label>'
-      +   '<p class="hint">What the site calls you. Spaces, capitals and accents are all fine, and'
-      +     ' it does not have to be unique.</p>'
+      // Short (Carter, 2026-10-31: "Shorten all that text ... Just like 'Name shown to others'").
+      +   '<p class="hint">Name shown to others.</p>'
       +   '<button class="primary" type="submit" data-el="namego">Save name</button>'
       +   '<div class="msg" data-msg="name"></div>'
       + '</form></div>'
@@ -118,8 +118,7 @@
       +   '<label>Username<input type="text" maxlength="32" autocapitalize="off" autocorrect="off"'
       +     ' spellcheck="false" data-el="usertext" required></label>'
       +   '<p class="hint" data-el="userurl">Your page address.</p>'
-      +   '<p class="hint">Changing this moves your page. Your rides, rankings and sign-in all come'
-      +     ' with you, but the old address stops working &mdash; it does not redirect.</p>'
+      +   '<p class="hint">Old links to your page will stop working.</p>'
       +   '<button class="primary" type="submit" data-el="usergo">Save</button>'
       +   '<div class="msg" data-msg="user"></div>'
       + '</form></div>'
