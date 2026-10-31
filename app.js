@@ -1639,7 +1639,10 @@
       var goBack = function () {
         var fromHere = document.referrer && document.referrer.indexOf(location.origin) === 0;
         markTransition("back");
-        if (fromHere && history.length > 1) { history.back(); return; }
+        if (fromHere && history.length > 1) {
+          try { var r = new URL(document.referrer); window.sessionStorage.setItem("ch_back", r.pathname + r.search); } catch (e) {}
+          history.back(); return;
+        }
         var k = navKey(page);
         location.href = k === "explore" ? "/explore" : k === "rankings" ? "/rankings" : k === "profile" ? "/account" : "/";
       };
@@ -1717,7 +1720,13 @@
     var want = null;
     try {
       var nav0 = window.performance && performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
-      var wasBack = nav0 && nav0.type === "back_forward";
+      // Back, however the browser says so: Navigation Timing's type, the older
+      // performance.navigation (2 = back/forward), or the note the Back pin
+      // leaves (goBack). The iPhone landed at the top where Chromium did not
+      // (Carter, 2026-10-31, rankings → coaster → Back).
+      var noted = false;
+      try { noted = window.sessionStorage.getItem("ch_back") === location.pathname + location.search; window.sessionStorage.removeItem("ch_back"); } catch (e) {}
+      var wasBack = (nav0 && nav0.type === "back_forward") || (window.performance && performance.navigation && performance.navigation.type === 2) || noted;
       // A switch between views on one level (Mine | Global, a profile's
       // Overview · Credits · Map) returns to where you were in that view too
       // (Carter, 2026-10-31). Taps on the tab bar and links into pages start
@@ -1727,6 +1736,13 @@
       if (wasBack || sameTier) want = +window.sessionStorage.getItem("ch_y_" + here) || 0;
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     } catch (e) {}
+    // A page the browser kept in memory comes back as it was left; if it comes
+    // back somewhere else, put it where it was.
+    window.addEventListener("pageshow", function (e) {
+      if (!e.persisted) return;
+      var y = 0; try { y = +window.sessionStorage.getItem("ch_y_" + location.pathname + location.search) || 0; } catch (x) {}
+      if (y > 0 && Math.abs(window.scrollY - y) > 40) window.scrollTo({ top: y, behavior: "instant" });
+    });
     if (want > 0) {
       var gaveUp = false, t0 = Date.now();
       var stop = function () { gaveUp = true; };
