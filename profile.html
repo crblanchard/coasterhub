@@ -1139,7 +1139,8 @@ function render(s){
   if(!has.timeline){ hide('sec_overtime'); }                       // cumulative + new-per-year
   if(!has.activity){ ['sec_activity','panel_days','panel_rides_year'].forEach(hide); } // calendar, biggest days, rides/year
   const circleMetric=has.activity?'rides':'credits';
-  document.getElementById('geo_sub').textContent=k.parks+' parks across '+k.states+' U.S. states and '+k.countries+' countries. Circle size = '+circleMetric+'.';
+  var pl=function(n,one,many){ return n+' '+(n===1?one:many); };
+  document.getElementById('geo_sub').textContent=pl(k.parks,'park','parks')+' across '+pl(k.states,'U.S. state','U.S. states')+' and '+pl(k.countries,'country','countries')+'. Circle size = '+circleMetric+'.';
   document.getElementById('parks_title').textContent=has.activity?'Top parks by rides':'Top parks by credits';
   const R=s.records;
   const order=[['tallest','Tallest'],['fastest','Fastest'],['longest','Longest'],['oldest','Oldest'],['most_ridden','Most ridden'],['most_visited_park','Most visited']];
@@ -1249,7 +1250,9 @@ function render(s){
   // render() partway through, so a brand-new account's own profile greeted them
   // with "Couldn't load the data" — every signup hit it. Keep the world view
   // instead; it is the right picture for a count that has not started.
-  if (pts.length) map.fitBounds(pts,{padding:[30,30]});
+  // Never closer than a region with its cities (Carter, 2026-10-31: one park
+  // zoomed in on the car park).
+  if (pts.length) map.fitBounds(pts,{padding:[30,30],maxZoom:8});
   paintMarkers();
   // The basemap follows the toggle too. It used to be dark on every page, which
   // left a black rectangle sitting in the middle of the light theme.
