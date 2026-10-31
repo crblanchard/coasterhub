@@ -1,0 +1,13 @@
+-- 107: two Central California parks from Carter's RCDB screenshots and coords,
+-- 2026-10-31. Kiwanis Kiddieland (Merced): Go-Gator, Wisdom Rides oval kiddie
+-- coaster, operating since 2008 or earlier (stored as 2008). Blackbeard's Family
+-- Entertainment Center (Fresno): Roller Coaster, Miler oval family coaster,
+-- since 2014. RCDB says it came from a Peter Piper Pizza as "Dragon", but
+-- Peter Piper Pizza is a chain and the site's one row (Texas) is bare, so it
+-- is NOT linked - which location isn't known. Safe to run twice.
+INSERT INTO parks (name, lat, lon, region) SELECT 'Kiwanis Kiddieland', 37.3123, -120.4855, 'California, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Kiwanis Kiddieland');
+INSERT INTO parks (name, lat, lon, region) SELECT 'Blackbeard''s Family Entertainment Center', 36.7914, -119.7300, 'California, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Blackbeard''s Family Entertainment Center');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Go-Gator', 'Kiwanis Kiddieland', 'Steel', 'Wisdom Rides', NULL, NULL, NULL, NULL, 0, NULL, 2008, '2008', 'year', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Go-Gator' AND park = 'Kiwanis Kiddieland');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Go-Gator' AND c.park = 'Kiwanis Kiddieland' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Roller Coaster', 'Blackbeard''s Family Entertainment Center', 'Steel', 'E&F Miler Industries', 'Miler Family Coaster', NULL, NULL, NULL, 0, NULL, 2014, '2014', 'year', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Roller Coaster' AND park = 'Blackbeard''s Family Entertainment Center');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Roller Coaster' AND c.park = 'Blackbeard''s Family Entertainment Center' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
