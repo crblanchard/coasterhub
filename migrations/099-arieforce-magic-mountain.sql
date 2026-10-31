@@ -1,0 +1,11 @@
+-- 099: ArieForce One is moving to Six Flags Magic Mountain, opening 2028
+-- under a name not yet announced (Carter, 2026-10-31, with the RCDB page: "add
+-- arieforce relocation to six flags magic mountain. call it Unknown for now").
+-- Same track: RMC, 155 ft, 64 mph, 3,400 ft, 4 inversions; model kept as
+-- ArieForce's "RMC Hybrid" so the two read as one ride. Linked as the same ride,
+-- home = the Magic Mountain row. Rename it through /edit once the name is out.
+-- Safe to run twice.
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Unknown', 'Six Flags Magic Mountain', 'Steel', 'Rocky Mountain Construction', 'RMC Hybrid', 155.0, 64.0, 3400.0, 4, NULL, 2028, '2028', 'year', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Unknown' AND park = 'Six Flags Magic Mountain');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Unknown' AND c.park = 'Six Flags Magic Mountain' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
+INSERT OR IGNORE INTO same_ride (coaster, ride) SELECT c.id, h.id FROM coasters c, coasters h WHERE h.name = 'Unknown' AND h.park = 'Six Flags Magic Mountain' AND (c.id = h.id OR (c.name = 'ArieForce One' AND c.park = 'Fun Spot America - Atlanta'));
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'same_ride_set', h.name, (SELECT COUNT(*) FROM same_ride s WHERE s.ride = h.id), json_object('ride', h.id, 'at', (SELECT json_group_array(json_object('id', c.id, 'park', c.park, 'name', c.name)) FROM coasters c JOIN same_ride s ON s.coaster = c.id WHERE s.ride = h.id), 'via', '099') FROM coasters h WHERE h.name = 'Unknown' AND h.park = 'Six Flags Magic Mountain' AND (SELECT COUNT(*) FROM same_ride s WHERE s.ride = h.id) > 1 AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'same_ride_set' AND a.detail LIKE '%"via":"099"%' AND json_extract(a.detail, '$.ride') = h.id);
