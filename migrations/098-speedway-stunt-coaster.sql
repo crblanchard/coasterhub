@@ -1,0 +1,5 @@
+-- 098: Speedway Stunt Coaster, Six Flags Mexico (Vekoma Family Boomerang 208m
+-- Rebound, opened 31 Jan 2026), from Carter's RCDB screenshot, 2026-10-31. RCDB
+-- gives only 0 inversions. Safe to run twice.
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Speedway Stunt Coaster', 'Six Flags Mexico', 'Steel', 'Vekoma', 'Vekoma Family Boomerang', NULL, NULL, NULL, 0, NULL, 2026, '2026-01-31', 'day', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Speedway Stunt Coaster' AND park = 'Six Flags Mexico');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Speedway Stunt Coaster' AND c.park = 'Six Flags Mexico' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
