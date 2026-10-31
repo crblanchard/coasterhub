@@ -1122,3 +1122,11 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 @keyframes vt-pop-out{to{transform:translateX(100%)}}
 @keyframes vt-fade-in{from{opacity:0}}
 @keyframes vt-fade-out{to{opacity:0}}
+/* Map tiles without seams (Carter, 2026-10-31: "what's up with the squares").
+   Leaflet 1.9 blends tiles with plus-lighter, which at a fractional display
+   scale (Windows at 125%) adds the overlapping edge pixels twice: a bright
+   grid. Plain blending, and a map background close to the tiles' own grey so
+   a hairline gap, if any, does not show. */
+.leaflet-container img.leaflet-tile{mix-blend-mode:normal}
+.leaflet-container{background-color:#3a3a3a}
+:root[data-theme="light"] .leaflet-container{background-color:#e4e4e2}

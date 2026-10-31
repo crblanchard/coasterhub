@@ -11,7 +11,7 @@
 <base href="/">
 <title>Profile — Coaster Hub</title>
 <meta name="description" content="Interactive roller coaster count statistics.">
-<link rel="stylesheet" href="/style.css?v=20261031f">
+<link rel="stylesheet" href="/style.css?v=20261031g">
 <link rel="stylesheet" href="/lists.css?v=20261030a">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
@@ -114,6 +114,16 @@
   #sec_otd.quiet h2{display:none}
   #sec_otd.quiet .note{margin:0}
   #map{height:420px;border-radius:14px;z-index:1}
+  /* City names, as on /map. */
+  .leaflet-div-icon.city{background:none;border:0}
+  .city i{position:absolute;left:-2.5px;top:-2.5px;width:5px;height:5px;border-radius:50%;background-color:var(--muted);opacity:.85}
+  .city span{position:absolute;left:5px;top:-8px;line-height:16px;white-space:nowrap;
+    font-family:system-ui,sans-serif;font-weight:500;font-size:11px;color:var(--muted);
+    text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 2px var(--bg)}
+  .city.big span{font-weight:600;color:var(--fg);opacity:.85}
+  .city.l span{left:auto;right:5px}
+  .city.t span,.city.b span{left:0;transform:translateX(-50%)}
+  .city.t span{top:-21px} .city.b span{top:3px}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
   .leaflet-popup-content{margin:12px 14px}
   .pp b{font-size:1rem}.pp small{color:var(--muted)}
@@ -1254,6 +1264,44 @@ function render(s){
   // zoomed in on the car park).
   if (pts.length) map.fitBounds(pts,{padding:[30,30],maxZoom:8});
   paintMarkers();
+  // City names (Carter, 2026-10-31: "show cities if you can"), the same way
+  // /map draws them: map-cities.json biggest first, a name only where it does
+  // not cover a park or another name, smaller towns as you zoom in.
+  (function(){
+    var CITIES=null, layer=L.layerGroup().addTo(map);
+    map.createPane('cities'); map.getPane('cities').style.zIndex=450; map.getPane('cities').style.pointerEvents='none';
+    var measure=document.createElement('canvas').getContext('2d');
+    function minPop(z){ return z<=2 ? 6000 : z<=3 ? 3000 : z<=4 ? 1200 : z<=5 ? 600 : z<=6 ? 300 : z<=7 ? 180 : 100; }
+    function over(list,b){ return list.some(function(t){ return b[0]<t[2] && b[2]>t[0] && b[1]<t[3] && b[3]>t[1]; }); }
+    function draw(){
+      layer.clearLayers(); if(!CITIES) return;
+      var z=map.getZoom(), min=minPop(z), size=map.getSize(), taken=[], discs=[], n=0;
+      MARKERS.forEach(function(m){ var q=map.latLngToContainerPoint(m.getLatLng()), r=m.getRadius()+2; discs.push([q.x-r,q.y-r,q.x+r,q.y+r]); });
+      for(var i=0;i<CITIES.length && n<80;i++){
+        var c=CITIES[i]; if(c[3]<min) break;
+        var q=map.latLngToContainerPoint([c[1],c[2]]);
+        if(q.x<-50 || q.y<-20 || q.x>size.x+50 || q.y>size.y+20) continue;
+        var big=c[3]>=1000, mega=c[3]>=2000;
+        var hit=function(b){ return over(taken,b) || (!mega && over(discs,b)); };
+        measure.font=(big?'600 ':'500 ')+'11px system-ui,sans-serif';
+        var w=measure.measureText(c[0]).width+4;
+        var spots=[['',[q.x+4,q.y-8,q.x+6+w,q.y+8]], [' l',[q.x-6-w,q.y-8,q.x-4,q.y+8]],
+                   [' t',[q.x-w/2,q.y-20,q.x+w/2,q.y-4]], [' b',[q.x-w/2,q.y+4,q.x+w/2,q.y+20]]];
+        var spot=null;
+        for(var k=0;k<spots.length && !spot;k++) if(!hit(spots[k][1])) spot=spots[k];
+        if(!spot) continue;
+        taken.push(spot[1]);
+        L.marker([c[1],c[2]],{pane:'cities', interactive:false, keyboard:false,
+          icon:L.divIcon({className:'city'+(big?' big':'')+spot[0], iconSize:null,
+                          html:'<i></i><span>'+esc(c[0])+'</span>'})}).addTo(layer);
+        n++;
+      }
+    }
+    map.on('zoomend moveend', draw);
+    fetch('/map-cities.json').then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){ CITIES=j; draw(); }).catch(function(){});
+    map.attributionControl.addAttribution('Cities: <a href="https://www.geonames.org/">GeoNames</a>');
+  })();
   // The basemap follows the toggle too. It used to be dark on every page, which
   // left a black rectangle sitting in the middle of the light theme.
   document.documentElement.addEventListener('ch:themechange',function(){
