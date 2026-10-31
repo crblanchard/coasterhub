@@ -1,0 +1,15 @@
+-- 113: Adventure World (Bibra Lake, Perth, Western Australia), a new park, with
+-- the three coasters Carter sent from RCDB, 2026-10-31: Abyss (Gerstlauer
+-- Euro-Fighter, indoor-start, 1 Nov 2013), Dragon Express (Zamperla Family
+-- Gravity 80STD, 27 Sep 2003), Turbo Mountain (Schwarzkopf Jet Star 2,
+-- 1991-2009). Coords are the park's Progress Drive site (none were sent);
+-- region "Australia" like Luna Park (Melbourne). Turbo Mountain came from a
+-- "Luna Park" as Geronimo - which Luna Park isn't said and the site has no
+-- Geronimo, so not linked. Safe to run twice.
+INSERT INTO parks (name, lat, lon, region) SELECT 'Adventure World', -32.0953, 115.8196, 'Australia' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Adventure World');
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Abyss', 'Adventure World', 'Steel', 'Gerstlauer', 'Gerstlauer Euro-Fighter', 98.4, 52.8, 2066.9, 3, 120, 2013, '2013-11-01', 'day', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Abyss' AND park = 'Adventure World');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Abyss' AND c.park = 'Adventure World' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Dragon Express', 'Adventure World', 'Steel', 'Zamperla', 'Zamperla Family Gravity Coaster', 13.0, NULL, 262.5, 0, NULL, 2003, '2003-09-27', 'day', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Dragon Express' AND park = 'Adventure World');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Dragon Express' AND c.park = 'Adventure World' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Turbo Mountain', 'Adventure World', 'Steel', 'Schwarzkopf', 'Schwarzkopf Jet Star', 44.3, NULL, 1919.3, 0, NULL, 1991, '1991', 'year', '2009', 'year', 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Turbo Mountain' AND park = 'Adventure World');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Turbo Mountain' AND c.park = 'Adventure World' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
