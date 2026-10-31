@@ -20,5 +20,11 @@ class ViewController: CAPBridgeViewController {
         webView?.isOpaque = false
         webView?.backgroundColor = ViewController.pageBackground
         webView?.scrollView.backgroundColor = ViewController.pageBackground
+        // Behind a swipe-back, where the web view has no picture of the page
+        // you are going back to, it paints this — light grey by default, even
+        // in dark mode (Carter, 2026-10-31).
+        if #available(iOS 15.0, *) {
+            webView?.underPageBackgroundColor = ViewController.pageBackground
+        }
     }
 }
