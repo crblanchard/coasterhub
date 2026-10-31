@@ -1,0 +1,19 @@
+-- 097: Bakken from RCDB via Carter's screenshots, 2026-10-31. All five rows,
+-- guarded on no height and no inversions. Rutschebanen's maker is its builder
+-- (RCDB lists no make; Valdemar Lebech built it, KumbaK the 2010 trains).
+-- Tornado: Intamin spinning coaster -> new model "Intamin Spinner". Vilde Mus:
+-- RCDB has only 0 inversions and the date. Mine Train Ulven: no length on RCDB.
+-- New: Racing (Zierer Flitzer, 1972 to 13 Sep 2020; its other stop, Bohmischer
+-- Prater, is not a park here). Safe to run twice.
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_edited', name, 7, json_object('id', id, 'fields', json_array('h', 's', 'l', 'inv', 'yr', 'opened', 'openedPrec'), 'via', '097') FROM coasters WHERE name = 'Mariehønen' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+UPDATE coasters SET h = 10.8, s = 16.2, l = 197.5, inv = 0, yr = 1981, opened = '1981', openedPrec = 'year' WHERE name = 'Mariehønen' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_edited', name, 7, json_object('id', id, 'fields', json_array('h', 's', 'inv', 'dur', 'yr', 'opened', 'openedPrec'), 'via', '097') FROM coasters WHERE name = 'Mine Train Ulven' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+UPDATE coasters SET h = 60.7, s = 40.4, inv = 0, dur = 70, yr = 1997, opened = '1997', openedPrec = 'year' WHERE name = 'Mine Train Ulven' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_edited', name, 8, json_object('id', id, 'fields', json_array('manu', 'h', 's', 'l', 'inv', 'dur', 'opened', 'openedPrec'), 'via', '097') FROM coasters WHERE name = 'Rutschebanen' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+UPDATE coasters SET manu = 'Valdemar Lebech', h = 72.2, s = 34.2, l = 2795.3, inv = 0, dur = 150, opened = '1932-05-16', openedPrec = 'day' WHERE name = 'Rutschebanen' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_edited', name, 8, json_object('id', id, 'fields', json_array('model', 'h', 's', 'l', 'inv', 'yr', 'opened', 'openedPrec'), 'via', '097') FROM coasters WHERE name = 'Tornado' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+UPDATE coasters SET model = 'Intamin Spinner', h = 39.4, s = 31.7, l = 1122.0, inv = 0, yr = 2009, opened = '2009-04-09', openedPrec = 'day' WHERE name = 'Tornado' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_edited', name, 4, json_object('id', id, 'fields', json_array('inv', 'yr', 'opened', 'openedPrec'), 'via', '097') FROM coasters WHERE name = 'Vilde Mus' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+UPDATE coasters SET inv = 0, yr = 2012, opened = '2012-03-29', openedPrec = 'day' WHERE name = 'Vilde Mus' AND park = 'Bakken' AND h IS NULL AND inv IS NULL;
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Racing', 'Bakken', 'Steel', 'Zierer', 'Zierer Flitzer', NULL, NULL, NULL, 0, 60, 1972, '1972', 'year', '2020-09-13', 'day', 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Racing' AND park = 'Bakken');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Racing' AND c.park = 'Bakken' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
