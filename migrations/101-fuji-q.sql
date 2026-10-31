@@ -1,0 +1,10 @@
+-- 101: two Fuji-Q Highland coasters from Carter's RCDB screenshots, 2026-10-31.
+--   Gaspard et Lisa - Voyage Dans Le Ciel: Hoei Sangyo inverted family coaster,
+--     opened 20 Jul 2000 (was Birdmen, then Great Fluffy Sky Adventure). Name
+--     without RCDB's Japanese half (Carter: "don't include the japanese").
+--   Unknown: MACK PowerSplash 217m, 144.4 ft, opening 2027, name not out yet.
+-- Safe to run twice.
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Gaspard et Lisa - Voyage Dans Le Ciel', 'Fuji-Q Highland', 'Steel', 'Hoei Sangyo', NULL, 75.5, 31.1, 1574.8, 0, 104, 2000, '2000-07-20', 'day', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Gaspard et Lisa - Voyage Dans Le Ciel' AND park = 'Fuji-Q Highland');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Gaspard et Lisa - Voyage Dans Le Ciel' AND c.park = 'Fuji-Q Highland' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Unknown', 'Fuji-Q Highland', 'Steel', 'MACK Rides', 'MACK PowerSplash', 144.4, NULL, NULL, 0, NULL, 2027, '2027', 'year', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Unknown' AND park = 'Fuji-Q Highland');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Unknown' AND c.park = 'Fuji-Q Highland' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
