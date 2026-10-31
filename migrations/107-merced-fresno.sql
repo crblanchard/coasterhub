@@ -4,7 +4,7 @@
 -- Entertainment Center (Fresno): Roller Coaster, Miler oval family coaster,
 -- since 2014. RCDB says it came from a Peter Piper Pizza as "Dragon", but
 -- Peter Piper Pizza is a chain and the site's one row (Texas) is bare, so it
--- is NOT linked - which location isn't known. Safe to run twice.
+-- is NOT linked here - which location wasn't known; 109 links it (Las Vegas). Safe to run twice.
 INSERT INTO parks (name, lat, lon, region) SELECT 'Kiwanis Kiddieland', 37.3123, -120.4855, 'California, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Kiwanis Kiddieland');
 INSERT INTO parks (name, lat, lon, region) SELECT 'Blackbeard''s Family Entertainment Center', 36.7914, -119.7300, 'California, US' WHERE NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Blackbeard''s Family Entertainment Center');
 INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT COALESCE(MAX(id),0)+1 FROM coasters), 'Go-Gator', 'Kiwanis Kiddieland', 'Steel', 'Wisdom Rides', NULL, NULL, NULL, NULL, 0, NULL, 2008, '2008', 'year', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Go-Gator' AND park = 'Kiwanis Kiddieland');
