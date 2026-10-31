@@ -1495,7 +1495,7 @@
   // both pages opt in. Back still slides.
   var NOVT = null;
   function markTransition(kind) {
-    try { window.sessionStorage.setItem("ch_vt", kind); } catch (e) {}
+    try { window.sessionStorage.setItem("ch_vt", kind); window.sessionStorage.setItem("ch_vt_last", kind); } catch (e) {}
     if (kind === "same" || kind === "tab") {
       if (!NOVT) { NOVT = document.createElement("style"); NOVT.textContent = "@view-transition{navigation:none}"; }
       if (!NOVT.parentNode) document.head.appendChild(NOVT);
@@ -1718,7 +1718,13 @@
     try {
       var nav0 = window.performance && performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
       var wasBack = nav0 && nav0.type === "back_forward";
-      if (wasBack) want = +window.sessionStorage.getItem("ch_y_" + here) || 0;
+      // A switch between views on one level (Mine | Global, a profile's
+      // Overview · Credits · Map) returns to where you were in that view too
+      // (Carter, 2026-10-31). Taps on the tab bar and links into pages start
+      // at the top.
+      var sameTier = false;
+      try { sameTier = window.sessionStorage.getItem("ch_vt_last") === "same"; window.sessionStorage.removeItem("ch_vt_last"); } catch (e) {}
+      if (wasBack || sameTier) want = +window.sessionStorage.getItem("ch_y_" + here) || 0;
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     } catch (e) {}
     if (want > 0) {
