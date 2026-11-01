@@ -208,6 +208,15 @@ function say(el, text, ok){
   el.textContent = text || '';
   el.className = 'msg ' + (ok ? 'ok' : 'bad');
 }
+// The two password boxes disagree: say so and stop. This helper used to live
+// with the change-password form, which moved to the profile page; the reset
+// form kept calling it, threw a ReferenceError on submit, and "nothing
+// happened" for anyone resetting a password (Nathan, 2026-11-01).
+function mismatch(a, b, msg){
+  if (a === b) return false;
+  say(msg, 'Those two passwords don’t match.');
+  return true;
+}
 // Every form here posts JSON and reads {error} back, so one helper covers all
 // four. credentials:'same-origin' is the default for same-origin fetch, but it
 // is stated because the whole page depends on the cookie coming back.
