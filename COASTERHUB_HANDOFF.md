@@ -6099,3 +6099,8 @@ little complicated to look at". Agreed list (1, 2, 4, 5, 6 yes; 3 my call):
   there and scroll into view.
 - **Logging for** shows only when an admin picks someone else, from
   "Log for someone else →" at the bottom (`showRiderLine`).
+- Then (same day): **/log only writes to your own count, admins included**
+  (Carter: "make it so I can't log for other people. don't accidentally want
+  to"). `fillRiders` locks the rider to ME for every signed-in account; the
+  rider line never shows with an account. The API still lets an admin write
+  for others (import, /edit) — only this page stopped offering it.

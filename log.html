@@ -1381,7 +1381,10 @@ function fillRiders(){
   // write to anyone else, so offering the list would only be a way to get a
   // 401. Admins keep the full list — logging on someone's behalf is the
   // override the shared password used to give everybody.
-  if(ME && !ME.admin){
+  // Admins too, since 2026-11-02 (Carter: "make it so I can't log for other
+  // people. don't accidentally want to"). /log only ever writes to your own
+  // count now; the shared password, which has no account, still picks.
+  if(ME){
     sel.innerHTML='<option value="'+esc(ME.slug)+'">'+esc(ME.name||ME.slug)+'</option>';
     sel.value=ME.slug;
     sel.disabled=true;
@@ -1407,7 +1410,7 @@ function applyAccountLimits(){
   // Signed in as yourself there is nothing to choose and nothing to say: the
   // API would refuse a write to anyone else anyway. The line and its picker
   // only appear for the two cases that can write to somebody else.
-  if(ME && !ME.admin){ $('riderline').style.display='none'; return; }
+  if(ME){ $('riderline').style.display='none'; return; }
   showRiderLine();
   if(!ME){ var el=$('newrider'); if(el) el.style.display='none'; }
 }
@@ -1416,7 +1419,7 @@ function applyAccountLimits(){
 // It still shows when the rider is somebody else, and for the shared
 // password (no ME), which has to pick someone.
 function showRiderLine(){
-  if(ME && !ME.admin) return;
+  if(ME){ $('riderline').style.display='none'; return; }
   var other = !ME || $('rider').value!==ME.slug || $('riderpick').classList.contains('on');
   $('riderline').style.display = other ? '' : 'none';
 }
