@@ -786,7 +786,7 @@ async function addUser(env, body) {
   // One derived from a name (/log's + New rider) keeps the name-shaped errors.
   if (body && body.slug) {
     const slug = slugify(body.slug);
-    const problem = await slugProblem(env, slug, null);
+    const problem = await slugProblem(env, slug, null, body.slug);
     if (problem) return { bad: [/taken/.test(problem) ? 409 : 400, problem] };
   }
   const slug = slugify(body && body.slug || name);
@@ -1053,6 +1053,53 @@ function rude(text) {
   const squashed = t.replace(/[^a-z]+/g, "");
   return RUDE_INSIDE.some((w) => squashed.includes(w));
 }
+// ---- Sign-up spam guards (2026-11-02) ---------------------------------------
+// The rate limit keys on a hash of the connecting address, never the address.
+// No address (local tests, the dev server) means no limit. No signups table
+// (before migration 120) means no limit either, never a failed sign-up.
+const SIGNUPS_PER_HOUR = 3;
+async function signupKey(request) {
+  const ip = request.headers.get("CF-Connecting-IP");
+  return ip ? (await sha256hex("signup:" + ip)).slice(0, 32) : null;
+}
+async function signupsLately(env, key) {
+  if (!key) return 0;
+  try {
+    const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM signups WHERE ip = ? AND at > ?")
+      .bind(key, new Date(Date.now() - 3600000).toISOString()).first();
+    return (r && r.n) || 0;
+  } catch (e) { return 0; }
+}
+async function noteSignup(env, key) {
+  if (!key) return;
+  try {
+    await env.DB.prepare("INSERT INTO signups (ip, at) VALUES (?, ?)").bind(key, new Date().toISOString()).run();
+    await env.DB.prepare("DELETE FROM signups WHERE at < ?").bind(new Date(Date.now() - 86400000).toISOString()).run();
+  } catch (e) { /* before 120: no limit */ }
+}
+// Cloudflare Turnstile, the "are you human" check on the sign-up forms. Off
+// until BOTH keys are set (TURNSTILE_SITEKEY, public, handed to the page by
+// /api/auth/config; TURNSTILE_SECRET, a secret): with only the secret, every
+// form would be asked for a token it has no widget to make.
+function turnstileOn(env) { return !!(env.TURNSTILE_SECRET && env.TURNSTILE_SITEKEY); }
+async function turnstileProblem(env, request, token) {
+  if (!turnstileOn(env)) return null;
+  if (!token) return "please finish the “I’m human” check and try again";
+  try {
+    const form = new FormData();
+    form.append("secret", env.TURNSTILE_SECRET);
+    form.append("response", String(token));
+    const ip = request.headers.get("CF-Connecting-IP"); if (ip) form.append("remoteip", ip);
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
+    const j = await res.json();
+    return j && j.success ? null : "the “I’m human” check didn’t go through — please try it again";
+  } catch (e) {
+    // Cloudflare's checker unreachable: let the person in rather than lock
+    // every sign-up out; the rate limit still stands.
+    return null;
+  }
+}
+
 const RUDE_MSG = "that has a word we don't allow on Coaster Hub — please pick something else";
 
 // ---- Renaming a rider ------------------------------------------------------
@@ -1061,7 +1108,15 @@ const RUDE_MSG = "that has a word we don't allow on Coaster Hub — please pick 
 // differently and only one of them is hard to change.
 
 // Is this username free?
-async function slugProblem(env, slug, selfSlug) {
+// An email address typed as a username became a public URL with the address
+// in it — /user/shaheershaikh86-gmail-com (Carter, 2026-11-02: "make it so
+// people can't do email there"). Caught on the raw text (an @) and, after
+// slugify has eaten the @ and dots, on a mail provider's name at the end.
+const EMAILISH = /-(gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|icloud|me|mac|aol|proton|protonmail|pm|gmx|mail|comcast|att|verizon|sbcglobal|charter|cox|earthlink)-(com|net|org|me|co-uk|de|fr|ca)$/;
+async function slugProblem(env, slug, selfSlug, raw) {
+  if ((raw && String(raw).indexOf("@") >= 0) || EMAILISH.test(slug)) {
+    return "a username can't be an email address — pick a name instead";
+  }
   if (!/^[a-z0-9][a-z0-9-]{1,31}$/.test(slug)) {
     return "a username needs 2-32 characters, letters, numbers or hyphens";
   }
@@ -2644,6 +2699,12 @@ export default {
       // Sign up. Open to anyone: creating an account also creates the rider it
       // owns, so a new person lands on an empty count of their own rather than
       // anywhere near an existing one.
+      // What the sign-up forms need to know before they draw: the Turnstile
+      // site key, or null while the human check is off.
+      if (request.method === "GET" && path === "/api/auth/config") {
+        return json({ turnstile: turnstileOn(env) ? env.TURNSTILE_SITEKEY : null });
+      }
+
       if (request.method === "POST" && path === "/api/auth/signup") {
         const b = await request.json();
         const email = String(b && b.email || "").trim().toLowerCase();
@@ -2655,6 +2716,16 @@ export default {
         // rider list is public anyway, so which emails are registered is not the
         // secret here, and a silent failure is a support conversation.
         if (taken) return err(409, "there is already an account for that email — sign in instead");
+
+        // Spam: a human check (Cloudflare Turnstile, once its keys are set) and
+        // at most SIGNUPS_PER_HOUR new accounts an hour from one address
+        // (migrations/120-signup-limit.sql). Both before anything is written.
+        const human = await turnstileProblem(env, request, b && b.turnstile);
+        if (human) return err(403, human);
+        const ipKey = await signupKey(request);
+        if (await signupsLately(env, ipKey) >= SIGNUPS_PER_HOUR) {
+          return err(429, "too many new accounts from here lately — try again in an hour");
+        }
 
         // Hash FIRST. addUser() writes a rider row and an activity entry, and D1
         // has no transaction spanning these statements, so anything that can
@@ -2671,6 +2742,7 @@ export default {
         const acctId = (await env.DB.prepare(
           "INSERT INTO accounts (email,pw,slug,is_admin,created) VALUES (?,?,?,0,datetime('now')) RETURNING id"
         ).bind(email, pwHash, made.slug).first()).id;
+        await noteSignup(env, ipKey);
         const raw = await startSession(env, acctId);
         return afterWrite(ctx, env, request, json({ ok: true, slug: made.slug, name: made.name },
           200, { "set-cookie": setCookie(raw) }));
@@ -2742,7 +2814,7 @@ export default {
           wantSlug = slugify(String(b.username));
           // selfSlug is the rider being claimed, so keeping the existing
           // username is not a clash with itself.
-          const bad = await slugProblem(env, wantSlug, inv.slug);
+          const bad = await slugProblem(env, wantSlug, inv.slug, b.username);
           if (bad) return err(400, bad);
         }
 
@@ -2835,7 +2907,7 @@ export default {
         const wanted = String(b && b.username || "").trim();
         if (!wanted) return err(400, "give yourself a username");
         const wantSlug = slugify(wanted);
-        const slugBad = await slugProblem(env, wantSlug, who.slug);
+        const slugBad = await slugProblem(env, wantSlug, who.slug, wanted);
         if (slugBad) return err(409, slugBad);
 
         if (wantSlug !== who.slug) await renameRider(env, who.slug, wantSlug);

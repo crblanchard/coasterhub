@@ -167,7 +167,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261102a"></script>
+<script src="/app.js?v=20261102b"></script>
 <script>
 document.getElementById('y').textContent = new Date().getFullYear();
 var $=function(id){ return document.getElementById(id); };
@@ -233,20 +233,22 @@ function vAccount(){
     '<div class="eyebrow">Welcome</div><h1>Track your coaster count.</h1>'
    +'<p class="lead">Rank your credits and log your rides. It takes about two minutes to get your count started.</p>'
    +'<form id="f"><label class="f" for="a_name">Your name</label><input type="text" id="a_name" autocomplete="name" maxlength="40" placeholder="Werner Stengel" required>'
-   +'<label class="f" for="a_user">Username</label><input type="text" id="a_user" autocomplete="username" maxlength="32" placeholder="username" required>'
+   +'<label class="f" for="a_user">Username</label><input type="text" id="a_user" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="32" placeholder="username" required>'
    +'<label class="f" for="a_email">Email</label><input type="email" id="a_email" autocomplete="email" required>'
    +'<label class="f" for="a_pw">Password</label><input type="password" id="a_pw" autocomplete="new-password" placeholder="At least 8 characters" required>'
+   +'<div id="a_human" style="margin-top:18px"></div>'
    +'<div style="margin-top:22px"><button class="go" type="submit" id="a_go">Create account</button></div>'
    +'<div class="msg" id="a_msg"></div>'
    +'<p class="small muted" style="margin-top:10px">By creating an account you agree to the <a class="link" href="/terms">Terms of Use</a> and <a class="link" href="/privacy">Privacy Policy</a>.</p>'
    +'<p class="small muted" style="margin-top:6px">Already have an account? <a class="link" href="/account?next=/welcome">Sign in</a></p></form>';
+  var human=CoasterHub.humanCheck($('a_human'));   // drawn once its keys are set
   $('f').addEventListener('submit',function(e){
     e.preventDefault();
     $('a_go').disabled=true; $('a_msg').textContent='';
     send('POST','/api/auth/signup',{ name:$('a_name').value, slug:$('a_user').value.trim().toLowerCase(),
-      email:$('a_email').value, password:$('a_pw').value }).then(function(r){
+      email:$('a_email').value, password:$('a_pw').value, turnstile:human.token() }).then(function(r){
       $('a_go').disabled=false;
-      if(!r.ok){ $('a_msg').textContent=r.data.error||('Something went wrong ('+r.status+').'); return; }
+      if(!r.ok){ human.reset(); $('a_msg').textContent=r.data.error||('Something went wrong ('+r.status+').'); return; }
       try { localStorage.setItem('ch_rider', r.data.slug); } catch (e) {}
       ME={slug:r.data.slug, name:r.data.name||r.data.slug};
       go('parks');

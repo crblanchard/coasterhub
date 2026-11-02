@@ -1780,6 +1780,31 @@
     return t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
   }
   var toastEl = null, toastT = null;
+  // The "I'm human" check on the sign-up forms (Cloudflare Turnstile,
+  // 2026-11-02). Draws nothing until the Worker reports a site key
+  // (/api/auth/config), so the forms work exactly as before while it is off.
+  // token() is what the sign-up body sends; reset() after a failed attempt,
+  // because each token is good once.
+  function humanCheck(box) {
+    var st = { id: null, tok: "" };
+    fetch("/api/auth/config").then(function (r) { return r.ok ? r.json() : {}; }).then(function (cfg) {
+      if (!cfg || !cfg.turnstile || !box) return;
+      var draw = function () {
+        st.id = window.turnstile.render(box, { sitekey: cfg.turnstile, theme: "auto",
+          callback: function (t) { st.tok = t; }, "expired-callback": function () { st.tok = ""; } });
+      };
+      if (window.turnstile) return draw();
+      window.chTurnstileReady = draw;
+      var sc = document.createElement("script");
+      sc.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=chTurnstileReady&render=explicit";
+      sc.async = true; document.head.appendChild(sc);
+    }).catch(function () {});
+    return {
+      token: function () { return st.tok; },
+      reset: function () { st.tok = ""; if (st.id != null && window.turnstile) try { window.turnstile.reset(st.id); } catch (e) {} }
+    };
+  }
+
   function toast(html) {
     if (!toastEl) { toastEl = document.createElement("div"); toastEl.className = "chtoast"; toastEl.setAttribute("role", "status"); document.body.appendChild(toastEl); }
     toastEl.innerHTML = html;
@@ -3650,7 +3675,7 @@
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
-              riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho };
+              riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

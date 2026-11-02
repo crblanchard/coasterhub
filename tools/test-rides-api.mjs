@@ -165,15 +165,16 @@ function dbWithoutFollows() {
 let worker, pass = 0, fail = 0;
 const ctx = { waitUntil() {} };
 
-async function call(db, method, path, { body, token, cookie } = {}) {
+async function call(db, method, path, { body, token, cookie, ip, env: extra } = {}) {
   const headers = {};
   if (token) headers["x-admin-token"] = token;
   if (cookie) headers["cookie"] = cookie;
+  if (ip) headers["CF-Connecting-IP"] = ip;
   if (body !== undefined) headers["content-type"] = "application/json";
   const req = new Request("https://coasterhub.org" + path, {
     method, headers, body: body === undefined ? undefined : JSON.stringify(body),
   });
-  const env = { DB: new FakeD1(db), ADMIN_PASSWORD: PW };
+  const env = Object.assign({ DB: new FakeD1(db), ADMIN_PASSWORD: PW }, extra || {});
   const res = await worker.fetch(req, env, ctx);
   let data = null;
   try { data = await res.json(); } catch { /* non-JSON */ }
@@ -3086,6 +3087,38 @@ async function main() {
     const me = await call(db, "GET", "/api/auth/me", { cookie: gone });
     check("...and the old session no longer signs anyone in", !(me.data && me.data.account), JSON.stringify(me.data));
     check("...and another rider's rides are untouched", rows(db, "SELECT 1 FROM rides WHERE user_slug=?", keep).length === 1);
+  }
+
+  console.log("\nSign-up spam guards (2026-11-02)");
+  {
+    const db = freshDb();
+    const up = (n, extra) => call(db, "POST", "/api/auth/signup", Object.assign({ body: { email: n + "@x.y", name: "Rider " + n, slug: n + "-rider", password: "riding-things" } }, extra || {}));
+    let r = await call(db, "POST", "/api/auth/signup", { body: { email: "a@x.y", name: "A", slug: "someone@gmail.com", password: "riding-things" } });
+    check("a username with an @ is refused", r.status === 400 && /email/.test(r.data.error), JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/auth/signup", { body: { email: "b@x.y", name: "B", slug: "someone-gmail-com", password: "riding-things" } });
+    check("...and so is one that reads as an address once slugified", r.status === 400 && /email/.test(r.data.error), JSON.stringify(r.data));
+    check("...leaving no rider behind", rows(db, "SELECT 1 FROM users WHERE slug LIKE 'someone%'").length === 0);
+    // Before migration 120: no limit at all.
+    for (const n of ["p1", "p2", "p3", "p4"]) r = await up(n, { ip: "9.9.9.9" });
+    check("without the signups table there is no limit (4 from one address)", r.status === 200, JSON.stringify(r.data));
+    db.exec("CREATE TABLE signups (ip TEXT NOT NULL, at TEXT NOT NULL)");
+    for (const n of ["q1", "q2", "q3"]) { r = await up(n, { ip: "1.2.3.4" }); if (r.status !== 200) break; }
+    check("three sign-ups an hour from one address go through", r.status === 200, JSON.stringify(r.data));
+    r = await up("q4", { ip: "1.2.3.4" });
+    check("...the fourth is a 429", r.status === 429, JSON.stringify(r.data));
+    check("...and made no rider", rows(db, "SELECT 1 FROM users WHERE slug='q4-rider'").length === 0);
+    r = await up("q5", { ip: "5.6.7.8" });
+    check("another address is not affected", r.status === 200, JSON.stringify(r.data));
+    check("the table holds a hash, never the address", rows(db, "SELECT 1 FROM signups WHERE ip LIKE '%1.2.3.4%'").length === 0
+      && rows(db, "SELECT 1 FROM signups").length === 4);
+    r = await up("q6");
+    check("no address (local) is never limited", r.status === 200, JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/auth/config");
+    check("Turnstile is off without its keys", r.status === 200 && r.data.turnstile === null, JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/auth/config", { env: { TURNSTILE_SECRET: "s" } });
+    check("...and stays off with only the secret", r.data.turnstile === null, JSON.stringify(r.data));
+    r = await up("t1", { env: { TURNSTILE_SECRET: "s", TURNSTILE_SITEKEY: "k" } });
+    check("with both keys, a sign-up with no token is refused", r.status === 403, JSON.stringify(r.data));
   }
 
   console.log("\n" + pass + " passed, " + fail + " failed\n");

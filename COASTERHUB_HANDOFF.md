@@ -6056,3 +6056,25 @@ proposed, not started.
 - **Swipe-back strip**: WKWebView.underPageBackgroundColor set to the same light/dark --bg (it painted light grey behind a swipe when it had no snapshot of the previous page). App build needed.
 - **Profile map never zooms closer than zoom 8** (Carter, 2026-10-31: one park filled the map with a car park), and its line reads '1 park across 1 U.S. state and 1 country'.
 - **Profile map: city names, no tile grid** (Carter, 2026-10-31). The /map city labeller (map-cities.json, biggest first, never over a disc or another name) is copied into profile.html's map. style.css: `.leaflet-container img.leaflet-tile{mix-blend-mode:normal}` — Leaflet 1.9's plus-lighter double-adds overlapping tile edges at fractional display scales (Windows 125%), drawing a bright grid — and a tile-grey .leaflet-container background (#3a3a3a / light #e4e4e2), on /map too.
+
+## Sign-up spam guards (2026-11-02)
+
+A rider signed up as `/user/shaheershaikh86-gmail-com`: iOS autofilled his email
+into the username box (it was `autocomplete="username"`). Carter: strip the
+`-gmail-com` (done by hand in D1, no alias, no activity row) and "make it so
+people can't do email there". Then "yes 12" to the spam ideas:
+
+- **Usernames can't be emails.** `slugProblem(env, slug, self, raw)` refuses an
+  `@` in the raw text and, after slugify, a trailing `-gmail-com`-style provider
+  (`EMAILISH`). All three username paths pass the raw text. The username inputs
+  on /account and /welcome are `autocomplete="off"` now.
+- **3 sign-ups an hour per address** (`SIGNUPS_PER_HOUR`), migration 120
+  (`signups`, a hash of CF-Connecting-IP, never the address; pruned after a
+  day). No table or no address (local) means no limit.
+- **Cloudflare Turnstile**, built and OFF. It turns on only when BOTH
+  `TURNSTILE_SITEKEY` and `TURNSTILE_SECRET` are set on the Worker (Cloudflare
+  dashboard → Turnstile → add site coasterhub.org, managed mode; then
+  `npx wrangler secret put TURNSTILE_SITEKEY` and `... TURNSTILE_SECRET`).
+  `/api/auth/config` hands the page the site key; `CoasterHub.humanCheck(box)`
+  draws the widget. If Cloudflare's verifier is unreachable the sign-up is let
+  through (the rate limit still stands). Tests: "Sign-up spam guards".

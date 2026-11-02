@@ -124,7 +124,7 @@
            is never filled in from the name. -->
       <input id="up_name" type="text" autocomplete="name" maxlength="40" placeholder="Werner Stengel" required>
       <label for="up_user">Username</label>
-      <input id="up_user" type="text" autocomplete="username" maxlength="32" placeholder="username" required>
+      <input id="up_user" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="32" placeholder="username" required>
       <p class="hint">Your page will be coasterhub.org/user/&lt;username&gt;. Letters, numbers
         and hyphens.</p>
       <label for="up_email">Email</label>
@@ -132,6 +132,7 @@
       <label for="up_pw">Password</label>
       <input id="up_pw" type="password" autocomplete="new-password" required>
       <p class="hint">Minimum 8 characters.</p>
+      <div id="up_human" style="margin-top:14px"></div>
       <button class="primary" type="submit" id="up_go">Create account</button>
       <p class="hint agree">By creating an account you agree to the <a href="/terms">Terms of Use</a> and <a href="/privacy">Privacy Policy</a>.</p>
       <div class="msg bad" id="up_msg"></div>
@@ -153,7 +154,7 @@
       <label for="cl_name">Display name</label>
       <input id="cl_name" type="text" autocomplete="name" maxlength="40" placeholder="Your name" required>
       <label for="cl_user">Username</label>
-      <input id="cl_user" type="text" autocomplete="username" maxlength="32" placeholder="username" required>
+      <input id="cl_user" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="32" placeholder="username" required>
       <p class="hint">Your page will be coasterhub.org/user/&lt;username&gt;. Letters, numbers
         and hyphens.</p>
       <label for="cl_email">Email</label>
@@ -189,7 +190,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261102a"></script>
+<script src="/app.js?v=20261102b"></script>
 <script>
 document.getElementById('y').textContent = new Date().getFullYear();
 CoasterHub.initNav('account');
@@ -244,7 +245,7 @@ function wire(form, button, msg, build, path, done){
     say(msg, '');
     post(path, body).then(function(r){
       button.disabled = false;
-      if (!r.ok) { say(msg, r.data.error || ('Something went wrong (' + r.status + ').')); return; }
+      if (!r.ok) { if (form.onFail) form.onFail(); say(msg, r.data.error || ('Something went wrong (' + r.status + ').')); return; }
       done(r.data);
     }).catch(function(){
       button.disabled = false;
@@ -278,9 +279,12 @@ wire($('form_in'), $('in_go'), $('in_msg'),
   '/api/auth/login',
   function(d){ location.href = landing(d.slug); });
 
+// The human check, drawn only once its keys are set (CoasterHub.humanCheck).
+var UPHUMAN = CoasterHub.humanCheck($('up_human'));
+$('form_up').onFail = function(){ UPHUMAN.reset(); };   // each token is good once
 wire($('form_up'), $('up_go'), $('up_msg'),
   function(){ return { name: $('up_name').value, slug: $('up_user').value.trim().toLowerCase(),
-                       email: $('up_email').value, password: $('up_pw').value }; },
+                       email: $('up_email').value, password: $('up_pw').value, turnstile: UPHUMAN.token() }; },
   '/api/auth/signup',
   function(d){
     // A brand new count has nothing on a profile page yet, so send them to the
