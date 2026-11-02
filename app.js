@@ -3131,10 +3131,51 @@
       x.score = (sw + m * C) / (ww + m); delete x.sc;
     });
     // Ties by more lists, then name, so a Global # is the same everywhere.
+    // A racing pair takes ONE place, its better side's (Carter, 2026-11-02:
+    // "just show the highest rank of the 2 in lists. Then you open and see
+    // both"): the lower side gets the same number, .under its partner, and is
+    // left out of lists; the leader carries .sides, best first.
+    var fam = racingFamilies(Object.keys(byId).map(function (id) { return byId[id]; })), lead = {}, n = 0;
     Object.keys(t).filter(function (k) { return t[k].n > 1; })
       .sort(function (a, b) { var x = t[a], y = t[b]; return y.score - x.score || y.n - x.n || x.name.localeCompare(y.name); })
-      .forEach(function (k, i) { t[k].pos = i + 1; });
+      .forEach(function (k) {
+        var f = fam[k];
+        if (f && lead[f.key]) { var L = t[lead[f.key]]; t[k].pos = L.pos; t[k].under = lead[f.key]; L.sides.push(k); return; }
+        t[k].pos = ++n;
+        if (f) { lead[f.key] = k; t[k].sides = [k]; t[k].race = f.name; }
+      });
     return t;
+  }
+  // Racing and dueling pairs: two tracks named "X (Left)" / "X (Right)" at the
+  // same park. The same rule as rankings.html's addRacers (numbered suffixes,
+  // commas and Old/New rebuilds are not pairs). id -> {key, name, ids, side}.
+  function racingFamilies(coasters) {
+    var fams = {}, out = {};
+    (coasters || []).forEach(function (c) {
+      var m = c && /^(.*?)\s*\(([^)]+)\)\s*$/.exec(c.name || "");
+      if (!m || !c.park) return;
+      var side = m[2].trim();
+      if (/^\d+$/.test(side) || side.indexOf(",") >= 0 || /^(old|new)\b/i.test(side)) return;
+      var k = c.park + "\u0000" + m[1].toLowerCase();
+      (fams[k] = fams[k] || { key: k, name: m[1], ids: [] }).ids.push([c.id, side]);
+    });
+    Object.keys(fams).forEach(function (k) {
+      var f = fams[k]; if (f.ids.length < 2) return;
+      f.ids.forEach(function (p) { out[p[0]] = { key: k, name: f.name, side: p[1], ids: f.ids.map(function (q) { return q[0]; }) }; });
+    });
+    return out;
+  }
+  // The open panel of a Global row that stands for a racing pair: each side
+  // under its own name, with its score and who put it where.
+  function racingWho(g, glob, byId, meSlug) {
+    if (!g || !g.sides || g.sides.length < 2) return null;
+    var fam = racingFamilies(g.sides.map(function (k) { return byId[k]; }).filter(Boolean));
+    return g.sides.map(function (k) {
+      var x = glob[k], c = byId[k] || {}, f = fam[k];
+      return '<div class="wside" style="font-weight:700;margin:10px 0 2px">' + searchEsc(f ? f.side : c.name || "")
+        + ' <span style="color:var(--muted);font-weight:600">&middot; ' + scoreText(x.score) + '</span></div>'
+        + whoByPlace(x.who, meSlug);
+    }).join("");
   }
   // "97.5": one decimal, because the top of the list sits within a point or two.
   function scoreText(v) { return (Math.round(v * 10) / 10).toFixed(1); }
@@ -3189,14 +3230,15 @@
           var k = rideKey(c); if (seen[k]) return; seen[k] = 1;
           var g = st.glob[k]; if (!g) return;
           if (g.n < 2) { one++; return; }
-          rows.push({ c: c, n: g.n, score: g.score, who: g.who, pos: g.pos });
+          if (g.under) return;   // the pair's other side: shown inside its row
+          rows.push({ c: c, n: g.n, score: g.score, who: g.who, pos: g.pos, g: g });
         });
         rows.sort(function (a, b) { return a.pos - b.pos; });
         st.rows = {};
         body = (rows.length ? '<div class="panel">' + cut(rows).map(function (r, i) {
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
           return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + r.pos + '</span>'
-            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + '</span></span>'
+            + '<span class="two"><span class="cn">' + E((r.g.sides && r.g.sides.length > 1 && r.g.race) || c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + '</span></span>'
             // The model too, as /rankings' Global list shows it (2026-09-28).
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '')
             // Two lines, never three (Carter, 2026-10-02): the average in the
@@ -3233,7 +3275,8 @@
       if (isOpen) return;
       var r = st.rows[row.getAttribute("data-gid")]; if (!r) return;
       var box = document.createElement("div"); box.className = "cx";
-      box.innerHTML = whoByPlace(r.who, st.me)
+      var byId = {}; cs.forEach(function (c) { byId[c.id] = c; });
+      box.innerHTML = (racingWho(r.g, st.glob, byId, st.me) || whoByPlace(r.who, st.me))
         + coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>');
       row.classList.add("open"); row.parentNode.insertBefore(box, row.nextSibling);
     });
@@ -3607,7 +3650,7 @@
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
-              riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText };
+              riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);

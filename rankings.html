@@ -853,7 +853,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261031q"></script>
+<script src="/app.js?v=20261102a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -946,7 +946,8 @@ if(!slug){
     // The order is app.js's Global score (2026-10-05): weighted by credits,
     // lightly pulled toward the middle for rides on few lists. One function,
     // so a Global # is the same number on every page.
-    var shared=ids.filter(function(id){return tally[id].n>1 && GT[id] && GT[id].pos;})
+    // A racing pair's lower side is inside its partner's row (GT .under).
+    var shared=ids.filter(function(id){return tally[id].n>1 && GT[id] && GT[id].pos && !GT[id].under;})
       .map(function(id){ tally[id].score=GT[id].score; tally[id].gpos=GT[id].pos; return tally[id];})
       .sort(function(a,b){ return a.gpos-b.gpos; });
 
@@ -996,17 +997,20 @@ if(!slug){
       // All of it: the separate /rankings/all page that held the rest is gone.
       var mineAt={}; shared.forEach(function(t){ t.who.forEach(function(w){ if(ME && w.slug===ME.slug) mineAt[t.id]=w.pos; }); });
       $('shared').innerHTML=shared.map(function(t,i){
-        var c=BYID[t.id], mk=CoasterHub.maker(c);
+        var c=BYID[t.id], mk=CoasterHub.maker(c), G=GT[t.id];
+        // A racing pair is one row under its own name, at its better side's
+        // place; opening it shows each side (Carter, 2026-11-02).
+        var label=(G.sides && G.sides.length>1) ? G.race : null;
         // Opening the row is the answer to the obvious question a shared list
         // raises — who, and how high? Each name goes to that rider's own list.
         // One line per place, not a chip per rider (Carter, 2026-10-04).
-        var full=CoasterHub.whoByPlace(t.who, ME && ME.slug);
+        var full=CoasterHub.racingWho(G, GT, BYID, ME && ME.slug) || CoasterHub.whoByPlace(t.who, ME && ME.slug);
         // Ranked, so number them: this is a top ten and the position is half of
         // what it says.
         return '<div class="srow">'
           +'<div class="stog" role="button" tabindex="0" aria-expanded="false">'
             +'<span class="pos">'+(i+1)+'</span>'
-            +srowName(c, mk)
+            +srowName(c, mk, label)
             // Avg on top, everywhere (Carter, 2026-09-28).
             // No list count (Carter, 2026-10-02) — opening the row shows who.
             // Your place under it, in grey, when you have ranked it (Carter,
@@ -3055,9 +3059,9 @@ function save(then){
 // A shared-ranking row: the name, park, location and model each go to their
 // page; a tap anywhere else on the row — the chips' background included —
 // opens or closes it (Carter, 2026-09-25). A rider chip goes to their list.
-function srowName(c, mk){
+function srowName(c, mk, label){
   var L=function(t,h){ return h ? '<a href="'+esc(h)+'">'+esc(t)+'</a>' : esc(t); };
-  return '<span class="n"><b>'+L(c.name, c.park ? CoasterHub.coasterHref(c) : '')+'</b><span class="sub">'
+  return '<span class="n"><b>'+L(label||c.name, c.park ? CoasterHub.coasterHref(c) : '')+'</b><span class="sub">'
     +'<span class="pl">'+L(c.park, c.park ? CoasterHub.parkHref(c.park) : '')
     +(c.loc?'<span class="lc"> \u00b7 '+L(c.loc.replace(/, US$/,''), CoasterHub.locationHref(c.loc))+'</span>':'')+'</span>'
     +(mk?'<span class="mk">'+L(mk, c.manu ? CoasterHub.makerHref(c.manu, c.model||null) : '')+'</span>':'')+'</span></span>';

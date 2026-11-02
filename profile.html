@@ -495,7 +495,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261031q"></script>
+<script src="/app.js?v=20261102a"></script>
 <script src="/profile-edit.js?v=20261031a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -1024,17 +1024,26 @@ function render(s){
     // A merged-away coaster is not a row: an id can outlive the thing it named.
     var known=order.map(function(id){ return byId[id]; }).filter(Boolean);
     if(!known.length) return;                  // stays display:none
-    var ten=known.slice(0,10);
+    // A racing pair ranked together is one row, at the better side's place,
+    // as on the rankings page (Carter, 2026-11-02).
+    var fam=CoasterHub.racingFamilies(s.coasters||[]), rows=[], at={};
+    known.forEach(function(c,i){
+      var f=fam[c.id], r=f && at[f.key];
+      if(r){ if(r.to===i) r.to=i+1; r.label=f.name; return; }
+      r={c:c, from:i+1, to:i+1, label:null}; rows.push(r); if(f) at[f.key]=r;
+    });
+    var ten=rows.slice(0,10);
     var slug=CoasterHub.currentUser();
     var who=s.userName||'this rider';
     var h=document.getElementById('top_h');
     h.href=CoasterHub.userPageHref(slug,'rankings');
     h.innerHTML = (ten.length<10 ? ('Top '+ten.length) : 'Top ten')
-      + '<span class="arw">' + (known.length>ten.length
+      + '<span class="arw">' + (rows.length>ten.length
           ? ('all '+nf(known.length)+' &rarr;') : 'the whole list &rarr;') + '</span>';
-    document.getElementById('toplist').innerHTML=ten.map(function(c,i){
-      return '<a class="trow" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="pos">'+(i+1)+'</span>'
-        +'<span class="n"><b>'+esc(c.name)+'</b><span class="sub">'
+    document.getElementById('toplist').innerHTML=ten.map(function(r){
+      var c=r.c;
+      return '<a class="trow" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="pos">'+(r.to>r.from?r.from+'\u2013'+r.to:r.from)+'</span>'
+        +'<span class="n"><b>'+esc(r.label||c.name)+'</b><span class="sub">'
         +'<span class="pl">'+esc(c.park||'')+(((s.parks||{})[c.park]||{}).region?' \u00b7 '+esc(s.parks[c.park].region):'')+'</span>'
         +(CoasterHub.maker(c)?'<span class="mk">'+esc(CoasterHub.maker(c))+'</span>':'')
         +'</span></span></a>';

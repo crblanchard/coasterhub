@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-02T06:31:17Z",
-   "text": "Other riders' pages no longer show numbers left over from your last visit: a ranking or count you haven't opened in a while now waits a moment for the live figure instead of showing an old saved one."
+   "at": "2026-11-02T06:36:50Z",
+   "text": "Racing coasters like Superman: Escape From Krypton now show as one row in the Global rankings and on profiles' top ten, at the better side's place, and opening the row shows each side. Other riders' pages also no longer show old numbers saved from your last visit."
   },
   {
    "at": "2026-11-01T16:28:49Z",
