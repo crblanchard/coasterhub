@@ -596,6 +596,7 @@
   .edithint{display:none;color:var(--muted);font-size:.84rem;margin:0 0 8px}
   #mine:not(.readonly) .edithint{display:block}
   /* Editing: the hero folds to its name — the list is what you came for. */
+  #hero_p:empty{display:none}
   body:has(#mine:not(.readonly)) #hero_p,body:has(#mine:not(.readonly)) #rprog{display:none}
   /* The Models filter clears on Edit (dragging needs the whole list), so its
      button goes while editing. */
@@ -976,7 +977,7 @@ if(!slug){
         // an empty card reads the same for everyone now (Carter, 2026-09-20).
         var yours = ME && ME.slug === l.user.slug;
         var seedable = false; // an admin sees what a rider sees (Carter, 2026-09-29)
-        var why = yours     ? 'Judgment-free zone'
+        var why = yours     ? ''
                 : seedable  ? 'Not claimed yet — you can start it for them.'
                 :             '';
         return '<a class="card" href="'+href+'"><div class="hd"><b>'+esc(l.user.name)+'</b><em>not started</em></div>'
@@ -1127,8 +1128,8 @@ if(!slug){
     MINE=Object.keys(seen).map(function(k){ return seen[k]; });
 
     var nm=esc(user.user||slug);
-    $('hero_h1').textContent=nm+'’s favorites, ranked.';
-    $('hero_p').textContent='Judgment-free zone.';
+    $('hero_h1').textContent=nm+'’s rankings';
+    $('hero_p').textContent='';
     document.title=nm+'’s Rankings — Coaster Hub';
 
     $('loading').style.display='none'; $('mine').style.display='block'; $('howfoot').hidden=false;
@@ -3015,7 +3016,7 @@ function cancelEdit(){
 function doneEditing(){
   RQ=null;
   $('mine').classList.add('readonly');
-  $('hero_p').textContent='Judgment-free zone.';
+  $('hero_p').textContent='';
   closeHH();
 }
 function save(then){
