@@ -215,6 +215,8 @@
      page). A transparent native date input sits over it, so a tap opens the
      phone's own picker. */
   .logtop{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  /* Desktop: beside the title, clear of the hero's coaster drawing on the right. */
+  @media (min-width:681px){ .logtop{justify-content:flex-start;gap:20px} }
   .daychip{position:relative;display:inline-flex;align-items:center;gap:6px;flex:none;
     border:1px solid var(--line);background-color:var(--panel);border-radius:999px;padding:8px 14px;
     font-weight:600;font-size:.94rem;color:var(--fg);cursor:pointer}
@@ -313,6 +315,9 @@
   .addbar button{min-height:34px;padding:0 12px;font-size:var(--fs-s)}
   .tot{display:flex;justify-content:space-between;margin:10px 0 2px;padding-top:10px;border-top:1px solid var(--line);font-weight:700}
   .totnote{color:var(--muted);font-size:var(--fs-s);margin:0 0 12px}
+  /* Nothing staged yet (desktop shows the panel from the start): one line, not
+     "0 coasters · 0 rides" over a dead Save button. */
+  .basket.empty .tot,.basket.empty .totnote,.basket.empty .actions{display:none}
   .actions{display:flex;gap:8px}
   .msg{margin-top:12px;font-size:var(--fs)}
   .msg:empty{display:none}
@@ -1704,8 +1709,9 @@ function renderBasket(){
     $('save').textContent = ids.length ? 'Save changes' : 'Remove this day';
     $('save').disabled=false;
   } else if(MODE==='day'){ $('baskethead').textContent='This day'; $('save').textContent='Save day'; }
+  $('basketpanel').classList.toggle('empty', !ids.length && !EDITING);
   showBasketPanel(); renderSaveBar(ids,rides); stash();
-  if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">'+(EDITING?'Every ride taken off — saving removes the day.':'Nothing added yet.')+'</div>'; return; }
+  if(!ids.length){ $('basket').innerHTML='<div class="hint" style="padding:6px 0">'+(EDITING?'Every ride taken off — saving removes the day.':'Nothing yet — tap + on a ride.')+'</div>'; return; }
 
   // One park needs no heading — the picker above already says which it is.
   var multi=order.length>1;
