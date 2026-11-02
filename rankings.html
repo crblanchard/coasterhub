@@ -1278,7 +1278,7 @@ function loadGlobal(){
     return CoasterHub.globalTally().then(function(tally){
       // app.js's Global score, the same numbers as the Global tab.
       var by={}, of=0, cnt={};
-      Object.keys(tally).forEach(function(k){ var t=tally[k]; cnt[k]=t.n; if(t.pos){ of++; by[k]={pos:t.pos, n:t.n, score:t.score}; } });
+      Object.keys(tally).forEach(function(k){ var t=tally[k]; cnt[k]=t.n; if(t.pos){ if(!t.under) of++; by[k]={pos:t.pos, n:t.n, score:t.score}; } });
       GLOBAL={by:by, of:of, cnt:cnt};
       renderRank();
     });
@@ -1407,6 +1407,9 @@ function renderRank(){
       +'<button class="swdel" data-del="'+i+'" tabindex="-1">Remove</button>'
       +'<span class="pos rng">'+(b.from+1)+'\u2013'+(b.to+1)+'</span>'
       +headLinks(one, b.g.name)
+      // Its better side's Global place, as the wide row below shows it
+      // (Carter, 2026-11-02: Gemini read blank where its number should be).
+      +globCell(bestGlob(b.ids))
       +'<span class="acts">'
       +'<button data-up="'+b.from+'" title="Move up" aria-label="Move up">\u2191</button>'
       +'<button data-down="'+b.from+'" title="Move down" aria-label="Move down">\u2193</button>'
