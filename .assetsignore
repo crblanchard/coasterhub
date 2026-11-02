@@ -30,3 +30,6 @@ wrangler.staging.jsonc
 
 # The iPhone/Android app project (2026-10-30): source for the native shell, not site content.
 app/
+
+# The to-do list of parks still to add (2026-11-02): a note, not site content.
+missing-parks.md
