@@ -109,6 +109,11 @@
   .rec .rname{flex:1;min-width:0;font-weight:600;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .rec .rval{flex:none;color:var(--fg);font-weight:800;font-size:.95rem;font-variant-numeric:tabular-nums;white-space:nowrap}
   .rec .rval span{color:var(--muted);font-weight:600;font-size:.78rem}
+  /* On this day's "park · N yrs ago" can be long ("Nickelodeon Universe Theme
+     Park · 7 yrs ago"); as an unwrappable column beside the name it pushed the
+     whole profile sideways on a phone (Carter, 2026-11-02). It is a second
+     line under the name now, ellipsized if it still does not fit. */
+  .rec .rname .rsub{display:block;color:var(--muted);font-weight:600;font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* On this day, when nothing opened or closed that date: one line, no heading. */
   #content #sec_otd.quiet{padding:4px 0 18px}
   #sec_otd.quiet h2{display:none}
@@ -1178,7 +1183,7 @@ function render(s){
     var cy=now.getFullYear();
     function otdCards(list,key,label){
       return '<div class="records" style="--rows:'+Math.ceil(list.length/2)+'">'+list.map(function(c){var y=c[key].slice(0,4);var age=cy-parseInt(y,10);
-        return '<div class="rec"><span class="tag">'+label+' '+y+'</span><span class="rname">'+c.name+'</span><span class="rval" style="color:var(--muted);font-weight:600">'+c.park+' · '+age+' yrs ago</span></div>';}).join('')+'</div>';
+        return '<div class="rec"><span class="tag">'+label+' '+y+'</span><span class="rname">'+c.name+'<span class="rsub">'+c.park+' · '+(age===0?'this year':age===1?'1 yr ago':age+' yrs ago')+'</span></span></div>';}).join('')+'</div>';
     }
     var opened=(s.coasters||[]).filter(function(c){return s.byCoaster[c.id]&&c.opened&&c.openedPrec==='day'&&c.opened.slice(5)===mmdd;}).sort(function(a,b){return a.opened.localeCompare(b.opened);});
     var closed=(s.coasters||[]).filter(function(c){return s.byCoaster[c.id]&&c.closed&&c.closedPrec==='day'&&c.closed.slice(5)===mmdd;}).sort(function(a,b){return a.closed.localeCompare(b.closed);});

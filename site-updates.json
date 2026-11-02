@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-02T15:45:19Z",
+   "text": "Profiles no longer scroll sideways on a phone when \"On this day\" lists a coaster at a park with a long name."
+  },
+  {
    "at": "2026-11-02T06:36:50Z",
    "text": "Racing coasters like Superman: Escape From Krypton now show as one row in the Global rankings and on profiles' top ten, at the better side's place, and opening the row shows each side. Other riders' pages also no longer show old numbers saved from your last visit."
   },
