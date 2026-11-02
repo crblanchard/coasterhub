@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-02T19:24:07Z",
-   "text": "Signing up no longer lets an email address become your username (iPhones were filling it in), and new accounts are limited to a few an hour from one connection to keep spam out."
+   "at": "2026-11-02T20:08:24Z",
+   "text": "Log a day is cleaner: one + per coaster until you ride it, the date as a chip at the top, closed rides folded away, and the save bar opens the day's list. Sign-up also won't take an email address as a username and limits new accounts per connection."
   },
   {
    "at": "2026-11-02T15:45:19Z",

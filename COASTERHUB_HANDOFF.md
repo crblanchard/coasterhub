@@ -6078,3 +6078,24 @@ people can't do email there". Then "yes 12" to the spam ideas:
   `/api/auth/config` hands the page the site key; `CoasterHub.humanCheck(box)`
   draws the widget. If Cloudflare's verifier is unreachable the sign-up is let
   through (the rate limit still stands). Tests: "Sign-up spam guards".
+
+## /log cleanup (2026-11-02)
+
+Carter: "log a day is still messy on mobile ... concept is good it's just a
+little complicated to look at". Agreed list (1, 2, 4, 5, 6 yes; 3 my call):
+- **One + per row**: `.stepper.zero` hides − and the count until the first ride.
+- **Compact top**: the date is a chip beside the title (`#daychip`, a
+  transparent `<input type=date>` over it; `showDay()` writes its label;
+  `showPicker()` on desktop). Once a park is picked the search and its buttons
+  collapse to `.parkline` ("📍 Cedar Point · change"; `.setup.chosen`,
+  `.picking` while re-searching). The panel heading says "23 coasters".
+- **Save bar is the summary** (3): on a phone the basket panel is `.quiet`
+  while only rides are staged; tapping the bar's left half opens it as a sheet
+  (`openSheet`). After a save, while editing a day, or with a day notice it
+  shows inline as before.
+- **Closed rides** fold under `details.closedfold`; "Operating" flags are gone
+  and "Defunct" shows only when searching across parks.
+- **Add a coaster / Add a park** are links under the list; their forms open
+  there and scroll into view.
+- **Logging for** shows only when an admin picks someone else, from
+  "Log for someone else →" at the bottom (`showRiderLine`).

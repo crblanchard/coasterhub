@@ -190,6 +190,46 @@
   @media (pointer:coarse),(max-width:680px){ .stepper button{width:44px;height:44px} }
   .stepper .v{min-width:1.6em;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
   .stepper .v.zero{color:var(--muted);font-weight:400}
+  /* One + per row until it is pressed (Carter, 2026-11-02: the page was
+     twenty-three rows of − 0 +, "a little complicated to look at"). The − and
+     the count arrive with the first ride. */
+  .stepper.zero button[data-act=dec],.stepper.zero .v{display:none}
+  .stepper button[data-act=inc]{border-radius:999px}
+  .stepper:not(.zero) button[data-act=inc]{background-color:var(--accent2);color:var(--well)}
+  /* Closed rides fold away under the list. */
+  .closedfold{border-top:1px solid var(--soft);margin-top:2px}
+  .closedfold summary{list-style:none;cursor:pointer;color:var(--muted);font-size:var(--fs-s);
+    font-weight:600;padding:12px 4px;display:flex;align-items:center;gap:6px}
+  .closedfold summary::-webkit-details-marker{display:none}
+  .closedfold summary svg{transition:transform .15s}
+  .closedfold[open] summary svg{transform:rotate(180deg)}
+  /* "Missing something?" — the add-a-coaster and add-a-park doors, as quiet
+     links under the list instead of buttons beside it. */
+  .addlinks{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:baseline;padding:12px 4px 2px;
+    border-top:1px solid var(--soft);margin-top:4px;color:var(--muted);font-size:var(--fs-s)}
+  .addlinks .lnk{background-color:transparent;border:0;padding:6px 0;color:var(--accent2);
+    font:inherit;font-weight:600;cursor:pointer}
+  .addlinks .lnk:hover{text-decoration:underline}
+  .panel .miniform{margin:12px 0 0}
+  /* The day, as a chip beside the title (it used to be the last field on the
+     page). A transparent native date input sits over it, so a tap opens the
+     phone's own picker. */
+  .logtop{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .daychip{position:relative;display:inline-flex;align-items:center;gap:6px;flex:none;
+    border:1px solid var(--line);background-color:var(--panel);border-radius:999px;padding:8px 14px;
+    font-weight:600;font-size:.94rem;color:var(--fg);cursor:pointer}
+  .daychip[hidden]{display:none}
+  .daychip svg{color:var(--muted)}
+  .daychip input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
+    padding:0;border:0;margin:0;font-size:16px}
+  /* A park picked: one line, not the search box and its buttons. */
+  .parkline{display:none;margin:0;font-size:1.02rem;align-items:center;gap:6px;flex-wrap:wrap}
+  .parkline b{font-weight:700}
+  .parkline svg{color:var(--accent2);flex:none}
+  .parkline a{color:var(--accent2);font-size:var(--fs-s);font-weight:600;cursor:pointer;padding:6px 2px}
+  .setup.chosen:not(.picking) .parkbox,.setup.chosen:not(.picking) .parktools,
+  .setup.chosen:not(.picking) .geonote{display:none}
+  .setup.chosen:not(.picking) .parkline{display:flex}
   /* List mode: the whole row is the target. Ticking 200 coasters is the point,
      so it must not require hitting a 30px box each time. */
   .crow.pick{cursor:pointer}
@@ -307,6 +347,18 @@
     body.barred{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
     /* The bar is the Save button on a phone; one is enough. */
     .basket #save{display:none}
+    /* The bar is also the summary: while rides are staged the basket panel
+       stays out of the page, and tapping the bar's left half opens it as a
+       sheet above the bar (Carter, 2026-11-02). */
+    .basket.quiet:not(.sheet){display:none}
+    .basket.sheet{display:block;position:fixed;z-index:20;left:10px;right:10px;
+      bottom:calc(166px + env(safe-area-inset-bottom,0px));max-height:min(58vh,520px);overflow-y:auto;
+      box-shadow:0 12px 32px rgba(0,0,0,.22)}
+    .savebar .sum span::after{content:" \00b7  tap to review";color:var(--muted)}
+    .savebar.open .sum span::after{content:" \00b7  tap to close"}
+    /* The title shrinks to a line with the day beside it. */
+    .hero.compact .container > p{display:none}
+    .hero.compact h1{font-size:1.65rem}
   }
 </style>
 </head>
@@ -329,7 +381,11 @@
 </div></header>
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
-  <h1 class="wide">Log a day.</h1>
+  <div class="logtop"><h1 class="wide">Log a day.</h1>
+    <label class="daychip" id="daychip" hidden><span id="daylbl">Today</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="vh" id="datelbl">Date</span>
+      <input id="date" type="date" aria-labelledby="datelbl"></label></div>
   <p>Where are you today? Tap + once per ride.</p>
 </div></section>
 
@@ -397,8 +453,8 @@
              where they have been. Ticking a few states cuts 247 parks to a
              list you can read, which is most of the work of a first count. -->
         <button class="ghost" id="regbtn" type="button">Locations</button>
-        <button class="ghost" id="newpark" type="button">+ Park</button>
       </div>
+      <p class="parkline" id="parkline"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><b id="parklbl"></b><a id="parkchange" href="#">change</a></p>
       <p class="geonote" id="geonote"></p>
     </div>
     <!-- One search (Carter, 2026-10-02): coasters come up in the park box's
@@ -421,25 +477,15 @@
     <p class="err" id="nr_err"></p>
   </div>
 
-  <div class="miniform" id="parkform">
-    <div class="fld grow"><label for="np_name">Park name</label>
-      <input id="np_name" type="text" placeholder="Silverwood Theme Park"></div>
-    <div class="fld grow"><label for="np_region">Region</label>
-      <input id="np_region" type="text" placeholder="Idaho, US"></div>
-    <button class="primary" id="np_save" type="button">Add park</button>
-    <button class="ghost" id="np_cancel" type="button">Cancel</button>
-    <p class="note">US parks are &ldquo;&lt;State&gt;, US&rdquo;; everywhere else is just the country.
-      It shows up on the map once its location is filled in.</p>
-    <p class="err" id="np_err"></p>
-  </div>
-
   <div class="grid">
     <div class="panel">
       <div class="panelhead">
         <h3 id="listhead">Coasters</h3>
-        <div class="addbar" id="addbar" style="display:none">
-          <button class="ghost" id="newcoaster" type="button">+ Not listed</button>
-        </div>
+      </div>
+      <div class="clist" id="clist"><div class="hint">Pick a park, or search for a coaster.</div></div>
+      <div class="addlinks" id="addbar">Missing something?
+        <button class="lnk" id="newcoaster" type="button">Add a coaster</button>
+        <button class="lnk" id="newpark" type="button">Add a park</button>
       </div>
       <div class="miniform" id="coasterform">
         <div class="fld grow"><label for="nc_name">Coaster name</label>
@@ -453,7 +499,18 @@
           Height, speed, length and the rest get filled in for you later.</p>
         <p class="err" id="nc_err"></p>
       </div>
-      <div class="clist" id="clist"><div class="hint">Pick a park, or search for a coaster.</div></div>
+      <div class="miniform" id="parkform">
+      <div class="fld grow"><label for="np_name">Park name</label>
+        <input id="np_name" type="text" placeholder="Silverwood Theme Park"></div>
+      <div class="fld grow"><label for="np_region">Region</label>
+        <input id="np_region" type="text" placeholder="Idaho, US"></div>
+      <button class="primary" id="np_save" type="button">Add park</button>
+      <button class="ghost" id="np_cancel" type="button">Cancel</button>
+      <p class="note">US parks are &ldquo;&lt;State&gt;, US&rdquo;; everywhere else is just the country.
+        It shows up on the map once its location is filled in.</p>
+      <p class="err" id="np_err"></p>
+    </div>
+
     </div>
     <div class="panel basket idle" id="basketpanel">
       <h3 id="baskethead">This day</h3>
@@ -466,8 +523,6 @@
       <!-- The date sits at the end because it is the last thing you decide: pick
            a park, stage the rides, then say which day they were. -->
       <div class="fld" id="datefld" style="margin:0 0 12px">
-        <label for="date" id="datelbl">Date</label>
-        <input id="date" type="date" style="width:100%">
         <p class="note" id="datehint" style="display:none;margin:2px 0 0">Optional — leave it
           blank if you don&rsquo;t remember.</p>
         <!-- The way into changing a day you have already logged. Picking a date
@@ -483,7 +538,7 @@
     </div>
   </div>
   <p class="loglinks">Earlier rides:
-    <a href="/welcome?add=1" id="addpast">Add past credits &rarr;</a><a href="/import" id="importlink">Import a list &rarr;</a></p>
+    <a href="/welcome?add=1" id="addpast">Add past credits &rarr;</a><a href="/import" id="importlink">Import a list &rarr;</a><a href="#" id="logforother" hidden>Log for someone else &rarr;</a></p>
 </div></section>
 
 <!-- The save bar: phones only, while anything is staged. See .savebar. -->
@@ -590,7 +645,7 @@ function $(id){return document.getElementById(id);}
 var ME=null;
 CoasterHub.me().then(function(acct){
   ME=acct;
-  if(acct){ $('gate').style.display='none'; $('app').style.display='block'; boot(); return; }
+  if(acct){ $('gate').style.display='none'; $('app').style.display='block'; $('daychip').hidden=false; boot(); return; }
 });
 
 
@@ -672,7 +727,7 @@ function boot(){
   if(new URLSearchParams(location.search).get('mode') === 'list') toAddCredits(function(){ setMode('list'); });
   $('rider').addEventListener('change',function(){
     try{ localStorage.setItem('ch_rider',$('rider').value); }catch(e){}
-    showRider();
+    showRider(); showRiderLine();
     EDITING=null; basket={}; renderBasket(); loadOwned();
   });
   loadOwned();
@@ -958,10 +1013,18 @@ function nearest(){
 // the geolocation auto-pick, a filter that narrows to a single match. Clears
 // the coaster search, because a park and a search are two different questions
 // and the search wins in currentList().
+// One line once a park is picked; "change" opens the search again.
+function showParkLine(){
+  var p=sel().value;
+  $('parklbl').textContent=p;
+  document.querySelector('.setup').classList.toggle('chosen', !!p);
+}
 function choosePark(name){
   sel().value=name;
   $('search').value='';
   showParkName();
+  document.querySelector('.setup').classList.remove('picking');
+  showParkLine();
   renderList();
   // The pressed one is the selected one: the row is state, not just a shortcut.
   Array.prototype.forEach.call(document.querySelectorAll('.nearpick'), function(b){
@@ -1290,8 +1353,14 @@ function wireParkFilter(){
     if(b) (b.hasAttribute('data-c') ? pickCoaster(+b.getAttribute('data-c')) : pickFromPop(b.getAttribute('data-p')));
   });
   q.addEventListener('blur',function(){
-    setTimeout(function(){ if(document.activeElement!==q){ parkPop(false); showParkName(); } },120);
+    setTimeout(function(){ if(document.activeElement!==q && !regionsOpen()){ parkPop(false); showParkName();
+      document.querySelector('.setup').classList.remove('picking'); } },120);
   });
+  $('parkchange').onclick=function(e){
+    e.preventDefault();
+    document.querySelector('.setup').classList.add('picking');
+    q.value=''; q.focus();
+  };
 }
 
 // The sentence over the picker. Kept in step with the select rather than
@@ -1322,7 +1391,7 @@ function fillRiders(){
   if(ME && ME.admin && ME.slug) remembered=remembered||ME.slug;
   if(remembered) sel.value=remembered;
   if(!sel.value && sel.options.length) sel.selectedIndex=0;
-  showRider();
+  showRider(); showRiderLine();   // the rider list can land after applyAccountLimits ran
 }
 
 // Adding a park or a coaster is open to any account now (2026-09-16), so the
@@ -1334,14 +1403,27 @@ function applyAccountLimits(){
   // API would refuse a write to anyone else anyway. The line and its picker
   // only appear for the two cases that can write to somebody else.
   if(ME && !ME.admin){ $('riderline').style.display='none'; return; }
-  $('riderline').style.display='';
+  showRiderLine();
   if(!ME){ var el=$('newrider'); if(el) el.style.display='none'; }
+}
+// An admin logging their own day sees no rider line at all (Carter,
+// 2026-11-02); it appears once they pick someone else, from the link at the
+// bottom. The shared password (no ME) always needs it.
+function showRiderLine(){
+  if(ME && !ME.admin) return;
+  var other = !ME || $('rider').value!==ME.slug || $('riderpick').classList.contains('on');
+  $('riderline').style.display = other ? '' : 'none';
+  $('logforother').hidden = !(ME && ME.admin) || other;
 }
 
 function wireRiderLine(){
   var f=$('riderpick');
-  $('riderchange').onclick=function(){ f.classList.toggle('on'); };
-  $('rp_done').onclick=function(){ f.classList.remove('on'); };
+  $('riderchange').onclick=function(){ f.classList.toggle('on'); showRiderLine(); };
+  $('rp_done').onclick=function(){ f.classList.remove('on'); showRiderLine(); };
+  $('logforother').onclick=function(e){
+    e.preventDefault(); f.classList.add('on'); showRiderLine();
+    window.scrollTo({top:0,behavior:'instant'});
+  };
 }
 
 // ---- adding a rider --------------------------------------------------------
@@ -1382,10 +1464,11 @@ function wireRiderAdd(){
 function wireAdders(){
   var pf=$('parkform'), cf=$('coasterform');
   var togglePark=function(on){ pf.classList.toggle('on',on); $('np_err').textContent='';
-    if(on){ $('np_name').value=''; $('np_region').value=''; $('np_name').focus(); } };
+    if(on){ $('np_name').value=''; $('np_region').value=''; $('np_name').focus();
+            pf.scrollIntoView({behavior:'instant',block:'center'}); } };
   var toggleCoaster=function(on){ cf.classList.toggle('on',on); $('nc_err').textContent='';
     if(on){ $('nc_name').value=''; $('nc_note').textContent='Adding to '+$('park').value+'.';
-            $('nc_name').focus(); } };
+            $('nc_name').focus(); cf.scrollIntoView({behavior:'instant',block:'center'}); } };
 
   $('newpark').onclick=function(){ togglePark(!pf.classList.contains('on')); };
   $('np_cancel').onclick=function(){ togglePark(false); };
@@ -1454,7 +1537,7 @@ function wireAdders(){
 // notice a park it was never told about (see the restore note in boot).
 var SHOWN=null;
 function pickPark(){ choosePark($('park').value); }
-function syncPark(){ showParkName(); if($('park').value!==SHOWN) renderList(); }
+function syncPark(){ showParkName(); showParkLine(); if($('park').value!==SHOWN) renderList(); }
 
 // Closed for good. Nothing else about a coaster changes where it sits in the
 // list, so this is the only test the sorts need.
@@ -1489,7 +1572,7 @@ function renderList(){
   // "+ Coaster not listed" only makes sense with a park chosen — a new coaster
   // needs a park to belong to, and search mode spans all of them.
   var park=$('park').value, searching=$('search').value.trim().length>=2;
-  $('addbar').style.display=(park&&!searching)?'flex':'none';
+  $('newcoaster').style.display=(park&&!searching)?'':'none';
   if(!park||searching) $('coasterform').classList.remove('on');
 
   if(!list){ $('listhead').textContent='Coasters'; el.innerHTML='<div class="hint">Pick a park, or search for a coaster above.</div>'; return; }
@@ -1500,7 +1583,8 @@ function renderList(){
   var have=0; list.forEach(function(c){ if(OWNED[c.id]) have++; });
   $('listhead').textContent = searching
     ? ('Search \u00b7 '+list.length+' match'+(list.length===1?'':'es'))
-    : (park+' \u00b7 '+list.length+(MODE==='list'?(' \u00b7 '+have+' in your count'):''));
+    // The park's name is on the line above the panel now; say what is in it.
+    : (list.length+' coaster'+(list.length===1?'':'s')+(MODE==='list'?(' \u00b7 '+have+' in your count'):''));
 
   // Steel/Wood said almost nothing — every row in a park reads the same. The
   // model is the interesting half, and the park only earns its place when you
@@ -1513,10 +1597,12 @@ function renderList(){
     return bits.join(' \u00b7 ');
   }
   // Say nothing when nothing is known — the same rule /count's life() follows.
+  // Closed rides are folded under the list now, so a row only says so when
+  // you are searching across parks; "Operating" on every row was noise
+  // (Carter, 2026-11-02).
   function flag(c){
-    if(c.closed) return '<span class="stat off">Defunct</span>';
+    if(c.closed) return searching ? '<span class="stat off">Defunct</span>' : '';
     if(c.closing) return CoasterHub.CLOSING_SOON;
-    if(c.opened||c.yr) return '<span class="stat on">Operating</span>';
     return '';
   }
   // No second line at all rather than an empty one that still takes its height:
@@ -1526,7 +1612,7 @@ function renderList(){
     if(!t && !f) return '';
     return '<span class="sub">'+(t?'<span class="txt">'+esc(t)+'</span>':'')+f+'</span>';
   }
-  el.innerHTML=list.map(function(c){
+  function rowHtml(c){
     var n=basket[c.id]||0, owned=!!OWNED[c.id];
     // Day mode: a stepper, because you can re-ride something you already have.
     // List mode: a tick, and coasters already counted are shown but inert —
@@ -1539,10 +1625,10 @@ function renderList(){
           +'fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" '
           +'stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>';
     } else {
-      ctrl = '<span class="stepper">'
+      ctrl = '<span class="stepper'+(n?'':' zero')+'">'
         +'<button data-act="dec" aria-label="one fewer">−</button>'
         +'<span class="v'+(n?'':' zero')+'">'+n+'</span>'
-        +'<button data-act="inc" aria-label="one more">+</button>'
+        +'<button data-act="inc" aria-label="Add a ride on '+esc(c.name)+'">+</button>'
       +'</span>';
     }
     var cls='crow'+(MODE==='list'&&!owned?' pick':'')+(MODE==='list'&&owned?' owned':'');
@@ -1550,7 +1636,15 @@ function renderList(){
       +(MODE==='list'&&!owned?' role="checkbox" tabindex="0" aria-checked="'+(n?'true':'false')+'"':'')+'>'
       +'<span class="nm"><b>'+esc(c.name)+'</b>'+under(c,searching)+'</span>'
       +ctrl+'</div>';
-  }).join('');
+  }
+  // A park's closed rides fold under its open ones; searching keeps one list.
+  var open=list, shut=[];
+  if(!searching){ open=list.filter(function(c){ return !gone(c); }); shut=list.filter(gone); }
+  if(!open.length){ open=shut; shut=[]; }
+  el.innerHTML=open.map(rowHtml).join('')
+    +(shut.length ? '<details class="closedfold"'+(shut.some(function(c){ return basket[c.id]; })?' open':'')+'><summary>Closed ('+shut.length+')'
+      +'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>'
+      +shut.map(rowHtml).join('')+'</details>' : '');
 
   if(MODE==='list'){
     el.querySelectorAll('.crow.pick').forEach(function(row){
@@ -1567,14 +1661,14 @@ function renderList(){
     return;
   }
 
-  el.querySelectorAll('button').forEach(function(b){
+  el.querySelectorAll('.stepper button').forEach(function(b){
     b.onclick=function(){
       var id=+b.closest('.crow').dataset.id;
       var n=basket[id]||0;
       n += (b.dataset.act==='inc'?1:-1);
       if(n<=0) delete basket[id]; else { basket[id]=Math.min(n,50); tapped(id); }
-      var v=b.closest('.stepper').querySelector('.v');
-      v.textContent=basket[id]||0; v.classList.toggle('zero',!basket[id]);
+      var st=b.closest('.stepper'), v=st.querySelector('.v');
+      v.textContent=basket[id]||0; v.classList.toggle('zero',!basket[id]); st.classList.toggle('zero',!basket[id]);
       renderBasket();
     };
   });
@@ -1635,6 +1729,9 @@ function renderBasket(){
 function showBasketPanel(){
   var live = basketCount() || EDITING || $('msg').textContent;
   $('basketpanel').classList.toggle('idle', !live);
+  // While only rides are staged, the save bar is the summary (phones; CSS).
+  $('basketpanel').classList.toggle('quiet', !!(basketCount() && !EDITING && !$('msg').textContent
+    && $('dayhint').style.display==='none'));
   // Nothing added yet but this day has rides: one line, not the whole panel.
   var d=$('date').value, day=MODE==='day' && !EDITING && !basketCount() && DAYS[d];
   var dl=$('dayline');
@@ -1645,11 +1742,18 @@ function showBasketPanel(){
     dl.hidden=false;
   } else dl.hidden=true;
 }
+// The chip beside the title says which day the rides go on.
+function showDay(){
+  var d=$('date').value;
+  $('daylbl').textContent = EDITING ? niceDay(EDITING)
+    : !d ? (MODE==='day' ? 'No date' : 'No date (fine)') : d===TODAY ? 'Today' : niceDay(d);
+}
 function renderSaveBar(ids,rides){
+  showDay();
   var on = !!(ids.length || EDITING);
   $('savebar').classList.toggle('on', on);
   document.body.classList.toggle('barred', on);
-  if(!on) return;
+  if(!on){ openSheet(false); return; }
   var c=ids.length, d=$('date').value;
   $('sb_main').textContent = MODE==='day'
     ? rides+' ride'+(rides===1?'':'s')+' \u00b7 '+c+' coaster'+(c===1?'':'s')
@@ -1660,9 +1764,15 @@ function renderSaveBar(ids,rides){
   $('sb_save').textContent = EDITING && basketCount() ? 'Save' : $('save').textContent;
   $('sb_save').disabled=$('save').disabled;
 }
+function openSheet(on){
+  $('basketpanel').classList.toggle('sheet', !!on);
+  $('savebar').classList.toggle('open', !!on);
+}
 function wireSaveBar(){
-  $('sb_save').onclick=function(){ $('save').click(); };
-  $('sb_sum').onclick=function(){ $('basketpanel').scrollIntoView({behavior:'instant',block:'start'}); window.scrollBy({top:-76,behavior:'instant'}); };
+  $('sb_save').onclick=function(){ openSheet(false); $('save').click(); };
+  $('sb_sum').onclick=function(){ openSheet(!$('basketpanel').classList.contains('sheet')); };
+  // Desktop: the chip's input is invisible, so ask for the picker outright.
+  $('date').addEventListener('click',function(){ try{ if(this.showPicker) this.showPicker(); }catch(e){} });
 }
 // After a save on a phone the result is the thing to see, and it is down in
 // the basket panel, which the bar no longer sends you to.
