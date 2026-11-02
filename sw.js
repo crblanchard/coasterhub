@@ -66,9 +66,26 @@ function sharedList(req) {
 function save(req, res) {
   if (res && res.ok && res.type === "basic") {
     var copy = res.clone();
-    caches.open(CACHE).then(function (c) { return c.put(req, copy); }).catch(function () {});
+    caches.open(CACHE).then(function (c) {
+      // Stamped with when it was saved, so a shared list can tell a copy from
+      // a minute ago from one left over from last week (see FRESH below).
+      return copy.blob().then(function (body) {
+        var h = new Headers(copy.headers); h.set("x-sw-saved", String(Date.now()));
+        return c.put(req, new Response(body, { status: copy.status, statusText: copy.statusText, headers: h }));
+      });
+    }).catch(function () {});
   }
   return res;
+}
+// A saved copy older than this is not shown at once: the page waits up to
+// WAIT_STALE for the live answer and uses the copy only if that is slow.
+// Without it a profile opened once a week showed last week's numbers — Max's
+// "Top ten · all 79" with 101 ranked (Carter, 2026-11-02) — because the fresh
+// answer only ever reached the NEXT visit.
+var FRESH = 5 * 60 * 1000, WAIT_STALE = 1500;
+function age(hit) {
+  var t = Number(hit && hit.headers.get("x-sw-saved"));
+  return t ? Date.now() - t : Infinity;
 }
 
 self.addEventListener("fetch", function (e) {
@@ -95,7 +112,12 @@ self.addEventListener("fetch", function (e) {
     var fresh = fetch(req).then(function (res) { return save(req, res); });
     e.waitUntil(fresh.catch(function () {}));
     e.respondWith(caches.match(req, { ignoreVary: true }).then(function (hit) {
-      return hit || fresh;
+      if (!hit) return fresh;
+      if (age(hit) < FRESH) return hit;
+      return Promise.race([
+        fresh.then(function (res) { return res.ok ? res : hit; }, function () { return hit; }),
+        new Promise(function (r) { setTimeout(function () { r(hit); }, WAIT_STALE); }),
+      ]);
     }));
     return;
   }
