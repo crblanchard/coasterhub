@@ -6117,3 +6117,11 @@ active today / week / month. No emails in the payload on purpose.
 bumps it at most once an hour on any signed-in request. Before this, a weeks-long
 session left it frozen at the sign-in (Patrick "last on" Oct 14 while using the app
 daily). New dashboard panels go on the same page and the same endpoint.
+
+**Sign-in notifications (2026-11-03).** Carter: "give me people logged in
+notifications too. Just like the activity ones to me only." Two kinds, both
+through `pushAdmins` (admins only, never their own): "<name> signed in" on every
+password sign-in, and "<name> is on Coaster Hub" when a signed-in rider comes
+back after more than 3 hours away (`COMEBACK_MS`, checked inside the hourly
+`seen` bump in `currentAccount`). A brand-new account (seen NULL) sends nothing
+extra — "joined" already covered it.

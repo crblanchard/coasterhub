@@ -460,9 +460,14 @@ async function currentAccount(request, env) {
   // was last on in October while he used the app daily. Bumped at most once an
   // hour, so an ordinary page view costs a read and nothing more. Never allowed
   // to break the request it rides on.
-  if (!row.seen || Date.now() - Date.parse(row.seen.replace(" ", "T") + "Z") > 3600e3) {
+  const away = row.seen ? Date.now() - Date.parse(row.seen.replace(" ", "T") + "Z") : Infinity;
+  if (away > 3600e3) {
     try { await env.DB.prepare("UPDATE accounts SET seen = datetime('now') WHERE id = ?").bind(row.id).run(); }
     catch (e) { /* a read-only moment is not worth a failed page */ }
+    // And tell the admins someone is on (Carter, 2026-11-03: "people logged in
+    // notifications too ... to me only"). Only after a real gap (COMEBACK), so
+    // an afternoon of use is one notification, not one an hour.
+    if (row.seen && away > COMEBACK_MS) notifyOn(env, row.slug, "came_on");   // a brand-new account already sent "joined"
   }
   return { id: row.id, email: row.email, slug: row.slug, name: row.name, admin: !!row.adm,
            bio: bio, avatar: avatar };
@@ -1025,7 +1030,16 @@ const ADMIN_WORDS = {
   import: (n) => "imported " + (n || "") + " rides",
   user_renamed: (n, s) => "renamed to " + (s || "something new"),
   report: (n, s) => "reported " + (s || "a rider"),
+  came_on: () => "is on Coaster Hub",
+  signed_in: () => "signed in",
 };
+// Someone is on the site: to the admins, after the answer (the request's own
+// waitUntil, as recordActivity does). pushAdmins skips an admin's own visits.
+const COMEBACK_MS = 3 * 3600e3;
+function notifyOn(env, slug, kind) {
+  const ctx = REQ.getStore();
+  if (ctx && env.FCM_SERVICE_ACCOUNT && slug) ctx.waitUntil(pushAdmins(env, kind, slug, null, null).catch(() => {}));
+}
 async function pushAdmins(env, kind, actor, subject, n) {
   if (!env.FCM_SERVICE_ACCOUNT) return;
   let admins = [];
@@ -2769,8 +2783,8 @@ export default {
         const who = String(b && (b.login != null ? b.login : b.email) || "").trim().toLowerCase();
         const byEmail = who.indexOf("@") > 0;
         const row = await env.DB.prepare(byEmail
-          ? "SELECT id, pw, slug FROM accounts WHERE lower(email) = ?"
-          : "SELECT id, pw, slug FROM accounts WHERE lower(slug) = ?").bind(byEmail ? who : who.replace(/^@/, "")).first();
+          ? "SELECT id, pw, slug, seen FROM accounts WHERE lower(email) = ?"
+          : "SELECT id, pw, slug, seen FROM accounts WHERE lower(slug) = ?").bind(byEmail ? who : who.replace(/^@/, "")).first();
         // Verify against a dummy hash when the email is unknown, so "no such
         // account" and "wrong password" take the same time and the response is
         // the same either way.
@@ -2778,6 +2792,7 @@ export default {
                        : await verifyPassword("x", DUMMY_HASH);
         if (!row || !ok) return err(401, "wrong email, username or password");
         await env.DB.prepare("UPDATE accounts SET seen = datetime('now') WHERE id = ?").bind(row.id).run();
+        notifyOn(env, row.slug, "signed_in");
         const raw = await startSession(env, row.id);
         return json({ ok: true, slug: row.slug }, 200, { "set-cookie": setCookie(raw) });
       }

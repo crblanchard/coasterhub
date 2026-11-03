@@ -3083,6 +3083,20 @@ async function main() {
     r = await pushCall("POST", "/api/rides", { cookie: ann, body: { user: a, d: today, entries: [{ c: 996, n: 1 }] } });
     check("...but not about the admin's own", !r.sent.some(m => m.token === "t-ann"), JSON.stringify(r.sent));
 
+    // Someone coming on (2026-11-03): after 3+ hours away, once, to the admins.
+    db.exec("UPDATE accounts SET seen = datetime('now','-5 hours') WHERE email = 'pb@x.y'");
+    r = await pushCall("GET", "/api/auth/me", { cookie: bob });
+    check("admin: someone back after hours away notifies the admin", r.sent.some(m => m.token === "t-ann" && m.notification.title === "Push Bob is on Coaster Hub"), JSON.stringify(r.sent));
+    r = await pushCall("GET", "/api/auth/me", { cookie: bob });
+    check("...once, not on every page", !r.sent.some(m => /is on Coaster Hub/.test(m.notification.title)), JSON.stringify(r.sent));
+    db.exec("UPDATE accounts SET seen = datetime('now','-2 hours') WHERE email = 'pb@x.y'");
+    r = await pushCall("GET", "/api/auth/me", { cookie: bob });
+    check("...nor after a short break", !r.sent.some(m => /is on Coaster Hub/.test(m.notification.title)), JSON.stringify(r.sent));
+    r = await pushCall("POST", "/api/auth/login", { body: { login: b, password: "riding-things" } });
+    check("admin: a password sign-in notifies the admin", r.status === 200 && r.sent.some(m => m.token === "t-ann" && m.notification.title === "Push Bob signed in"), JSON.stringify(r.sent));
+    r = await pushCall("POST", "/api/auth/login", { body: { login: a, password: "riding-things" } });
+    check("...but never the admin's own", !r.sent.some(m => m.token === "t-ann"), JSON.stringify(r.sent));
+
     // Milestones: Bob at 99 credits logs one more.
     const ins = db.prepare("INSERT INTO rides (user_slug,coaster_id,d) VALUES (?,?,NULL)");
     for (let k = 0; k < 98; k++) { db.prepare("INSERT INTO coasters (id,name,park,type) VALUES (?,?,'Mile Park','Steel')").run(5000 + k, 'M' + k); ins.run(b, 5000 + k); }
