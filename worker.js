@@ -436,7 +436,7 @@ async function currentAccount(request, env) {
   if (!raw) return null;
   if (!await haveAccounts(env)) return null;
   const row = await env.DB.prepare(
-    "SELECT a.id AS id, a.email AS email, a.slug AS slug, a.is_admin AS adm, " +
+    "SELECT a.id AS id, a.email AS email, a.slug AS slug, a.is_admin AS adm, a.seen AS seen, " +
     "u.name AS name, s.expires AS expires FROM sessions s " +
     "JOIN accounts a ON a.id = s.account LEFT JOIN users u ON u.slug = a.slug " +
     "WHERE s.token = ?"
@@ -454,6 +454,15 @@ async function currentAccount(request, env) {
     // does not exist. The cookie is cleared by whatever route noticed.
     await env.DB.prepare("DELETE FROM sessions WHERE token = ?").bind(await sha256hex(raw)).run();
     return null;
+  }
+  // accounts.seen is "last active", not just "last typed a password" (2026-11-03,
+  // for /admin): a session lasts weeks, so a sign-in time alone said Patrick
+  // was last on in October while he used the app daily. Bumped at most once an
+  // hour, so an ordinary page view costs a read and nothing more. Never allowed
+  // to break the request it rides on.
+  if (!row.seen || Date.now() - Date.parse(row.seen.replace(" ", "T") + "Z") > 3600e3) {
+    try { await env.DB.prepare("UPDATE accounts SET seen = datetime('now') WHERE id = ?").bind(row.id).run(); }
+    catch (e) { /* a read-only moment is not worth a failed page */ }
   }
   return { id: row.id, email: row.email, slug: row.slug, name: row.name, admin: !!row.adm,
            bio: bio, avatar: avatar };
@@ -3208,6 +3217,37 @@ export default {
           ? (!!acct || tokenOk(request, env))
           : adminOk(request, env, acct);
         if (!allowed) return err(401, "unauthorized");
+      }
+
+      // The /admin dashboard: every rider, when they were last on, and the size
+      // of the site. Admin only (the gate above covers every /api/admin/ path,
+      // GETs included). Emails stay out of it: the page lists people, and an
+      // address is one lookup away in D1 when it is actually needed.
+      if (request.method === "GET" && path === "/api/admin/overview") {
+        if (!await haveAccounts(env)) return err(503, "run migrations/003-accounts.sql first");
+        const riders = await env.DB.prepare(
+          "SELECT u.slug AS slug, u.name AS name, a.id IS NOT NULL AS account, a.created AS joined, " +
+          "a.seen AS seen, a.is_admin AS admin, " +
+          "(SELECT COUNT(DISTINCT coaster_id) FROM rides r WHERE r.user_slug = u.slug) AS credits, " +
+          "(SELECT COUNT(*) FROM rides r WHERE r.user_slug = u.slug) AS rides, " +
+          "(SELECT MAX(d) FROM rides r WHERE r.user_slug = u.slug) AS lastride, " +
+          "(SELECT COUNT(*) FROM rankings k WHERE k.user_slug = u.slug) AS ranked " +
+          "FROM users u LEFT JOIN accounts a ON a.slug = u.slug " +
+          "ORDER BY a.seen IS NULL, a.seen DESC, u.name COLLATE NOCASE").all();
+        const one = (sql) => env.DB.prepare(sql).first().then((r) => (r && r.n) || 0);
+        const [coasters, parks, rides, accounts, d1, d7, d30] = await Promise.all([
+          one("SELECT COUNT(*) AS n FROM coasters"),
+          one("SELECT COUNT(*) AS n FROM parks"),
+          one("SELECT COUNT(*) AS n FROM rides"),
+          one("SELECT COUNT(*) AS n FROM accounts"),
+          one("SELECT COUNT(*) AS n FROM accounts WHERE seen > datetime('now','-1 day')"),
+          one("SELECT COUNT(*) AS n FROM accounts WHERE seen > datetime('now','-7 day')"),
+          one("SELECT COUNT(*) AS n FROM accounts WHERE seen > datetime('now','-30 day')"),
+        ]);
+        return json({ ok: true, now: new Date().toISOString(),
+          totals: { riders: (riders.results || []).length, accounts, coasters, parks, rides,
+                    active: { day: d1, week: d7, month: d30 } },
+          riders: (riders.results || []).map((r) => ({ ...r, account: !!r.account, admin: !!r.admin })) });
       }
 
       // Invite an existing rider to claim their count. Admin only, and it hands

@@ -1073,6 +1073,34 @@ async function main() {
     check("...nor adding riders by hand", r.status === 401);
   }
 
+  console.log("\n/admin — last active and the site overview");
+  {
+    const db = freshDb();
+    const rider = await signedUp(db, "rider@example.com", "Rider");
+    const boss = await signedUp(db, "boss@example.com", "Boss");
+    db.exec("UPDATE accounts SET is_admin = 1 WHERE slug = 'boss'");
+
+    let r = await callNoPassword(db, "GET", "/api/admin/overview", { cookie: rider });
+    check("a rider who is not an admin gets a 401", r.status === 401);
+    r = await callNoPassword(db, "GET", "/api/admin/overview");
+    check("...and so does nobody", r.status === 401);
+
+    db.exec("UPDATE accounts SET seen = '2026-01-01 00:00:00' WHERE slug = 'rider'");
+    await callNoPassword(db, "GET", "/api/auth/me", { cookie: rider });
+    check("using the site with a live session moves 'last active'",
+      rows(db, "SELECT seen FROM accounts WHERE slug = 'rider'")[0].seen > "2026-01-02");
+    db.exec("UPDATE accounts SET seen = datetime('now','-10 minutes') WHERE slug = 'rider'");
+    const before = rows(db, "SELECT seen FROM accounts WHERE slug = 'rider'")[0].seen;
+    await callNoPassword(db, "GET", "/api/auth/me", { cookie: rider });
+    check("...but at most once an hour", rows(db, "SELECT seen FROM accounts WHERE slug = 'rider'")[0].seen === before);
+
+    r = await callNoPassword(db, "GET", "/api/admin/overview", { cookie: boss });
+    check("an admin account gets the overview", r.status === 200 && r.data.riders.length >= 2, JSON.stringify(r.data).slice(0, 300));
+    check("...with every rider's last-active time", r.data.riders.every(x => "seen" in x && "credits" in x));
+    check("...and no email addresses anywhere in it", !JSON.stringify(r.data).includes("@example.com"));
+    check("...and the site totals", r.data.totals.accounts === 2 && r.data.totals.active.day === 2, JSON.stringify(r.data.totals));
+  }
+
   console.log("\nAdmin accounts open the shared database, so the password is optional");
   {
     const db = freshDb();

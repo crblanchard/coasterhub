@@ -6104,3 +6104,16 @@ little complicated to look at". Agreed list (1, 2, 4, 5, 6 yes; 3 my call):
   to"). `fillRiders` locks the rider to ME for every signed-in account; the
   rider line never shows with an account. The API still lets an admin write
   for others (import, /edit) — only this page stopped offering it.
+
+## /admin dashboard (2026-11-03)
+
+Carter: "maybe a full private dashboard with site info but start with that" (who
+was last on). `admin.html` → coasterhub.org/admin, fed by `GET /api/admin/overview`
+(admin accounts only — the `/api/admin/` gate covers GETs). It lists every rider
+with last active, credits, ranked, last ride and join date, plus site totals and
+active today / week / month. No emails in the payload on purpose.
+
+`accounts.seen` now means LAST ACTIVE, not last password sign-in: `currentAccount`
+bumps it at most once an hour on any signed-in request. Before this, a weeks-long
+session left it frozen at the sign-in (Patrick "last on" Oct 14 while using the app
+daily). New dashboard panels go on the same page and the same endpoint.
