@@ -93,8 +93,8 @@
     </div>
 
     <form id="form_in">
-      <label for="in_email">Email</label>
-      <input id="in_email" type="email" autocomplete="username" required>
+      <label for="in_email">Email or username</label>
+      <input id="in_email" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
       <label for="in_pw">Password</label>
       <input id="in_pw" type="password" autocomplete="current-password" required>
       <button class="primary" type="submit" id="in_go">Sign in</button>
@@ -275,7 +275,7 @@ $('tab_up').addEventListener('click', function(){ tab('up'); });
 if (new URLSearchParams(location.search).get('tab') === 'up') tab('up');
 
 wire($('form_in'), $('in_go'), $('in_msg'),
-  function(){ return { email: $('in_email').value, password: $('in_pw').value }; },
+  function(){ return { login: $('in_email').value, password: $('in_pw').value }; },
   '/api/auth/login',
   function(d){ location.href = landing(d.slug); });
 
@@ -300,7 +300,8 @@ function showForgot(on){
   $('form_forgot').style.display = on ? '' : 'none';
   $('tab_in').classList.toggle('on', !on);
   $('tab_up').classList.remove('on');
-  if (on) $('fg_email').value = $('in_email').value;
+  // The sign-in box may hold a username; only an email is worth carrying over.
+  if (on && $('in_email').value.indexOf('@') > 0) $('fg_email').value = $('in_email').value;
 }
 $('forgot_go').addEventListener('click', function(e){ e.preventDefault(); showForgot(true); });
 $('forgot_back').addEventListener('click', function(e){ e.preventDefault(); showForgot(false); say($('fg_msg'),''); });

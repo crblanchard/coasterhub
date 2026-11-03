@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-03T20:15:39Z",
+   "text": "You can now sign in with your username or your email."
+  },
+  {
    "at": "2026-11-02T22:36:38Z",
    "text": "Rankings pages now just say whose rankings they are, without the extra tagline."
   },

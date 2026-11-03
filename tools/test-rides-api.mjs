@@ -968,6 +968,25 @@ async function main() {
     check("a rider name that collides with a page name is refused", r.status === 400, JSON.stringify(r.data));
   }
 
+  console.log("\nAccounts — signing in with a username");
+  {
+    const db = freshDb();
+    await signedUp(db, "nia@example.com", "Nia");
+    let r;
+    const slugNia = rows(db, "SELECT slug FROM accounts")[0].slug;
+    r = await call(db, "POST", "/api/auth/login", { body: { email: slugNia.toUpperCase(), password: "riding-things" } });
+    check("the username works in the same box, any case", r.status === 200 && r.data.slug === slugNia, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/auth/login", { body: { login: "@" + slugNia, password: "riding-things" } });
+    check("...with or without the @ the site prints before it", r.status === 200);
+    r = await call(db, "POST", "/api/auth/login", { body: { login: slugNia, password: "wrong" } });
+    check("...and a wrong password on a username is the same 401", r.status === 401
+      && r.data.error === "wrong email, username or password");
+    r = await call(db, "POST", "/api/auth/login", { body: { login: "nobody-here", password: "riding-things" } });
+    check("...as is an unknown username", r.status === 401);
+    r = await call(db, "POST", "/api/auth/login", { body: { login: "", password: "riding-things" } });
+    check("...and an empty box signs nobody in", r.status === 401);
+  }
+
   console.log("\nAccounts — signing in and out");
   {
     const db = freshDb();
@@ -975,10 +994,10 @@ async function main() {
 
     let r = await call(db, "POST", "/api/auth/login", { body: { email: "nia@example.com", password: "wrong" } });
     check("the wrong password is a 401", r.status === 401);
-    check("...and says nothing about which half was wrong", r.data.error === "wrong email or password");
+    check("...and says nothing about which half was wrong", r.data.error === "wrong email, username or password");
     r = await call(db, "POST", "/api/auth/login", { body: { email: "ghost@example.com", password: "riding-things" } });
     check("an unknown email gets the identical answer", r.status === 401
-      && r.data.error === "wrong email or password");
+      && r.data.error === "wrong email, username or password");
 
     r = await call(db, "POST", "/api/auth/login", { body: { email: "NIA@Example.com", password: "riding-things" } });
     check("the right password signs in, case-insensitively on the email", r.status === 200);

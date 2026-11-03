@@ -2751,15 +2751,23 @@ export default {
       // Sign in.
       if (request.method === "POST" && path === "/api/auth/login") {
         const b = await request.json();
-        const email = String(b && b.email || "").trim().toLowerCase();
-        const row = await env.DB.prepare(
-          "SELECT id, pw, slug FROM accounts WHERE lower(email) = ?").bind(email).first();
+        // One box takes an email or a username (Carter, 2026-11-03: riders who
+        // signed up with a username could not get in from the app). It cannot
+        // be ambiguous: an email always has an @ and a username never can
+        // (slugProblem refuses anything email-shaped), so the @ decides which
+        // column to look in. A leading "@" on a username is the handle as
+        // the site prints it, so it is dropped.
+        const who = String(b && (b.login != null ? b.login : b.email) || "").trim().toLowerCase();
+        const byEmail = who.indexOf("@") > 0;
+        const row = await env.DB.prepare(byEmail
+          ? "SELECT id, pw, slug FROM accounts WHERE lower(email) = ?"
+          : "SELECT id, pw, slug FROM accounts WHERE lower(slug) = ?").bind(byEmail ? who : who.replace(/^@/, "")).first();
         // Verify against a dummy hash when the email is unknown, so "no such
         // account" and "wrong password" take the same time and the response is
         // the same either way.
         const ok = row ? await verifyPassword(String(b && b.password || ""), row.pw)
                        : await verifyPassword("x", DUMMY_HASH);
-        if (!row || !ok) return err(401, "wrong email or password");
+        if (!row || !ok) return err(401, "wrong email, username or password");
         await env.DB.prepare("UPDATE accounts SET seen = datetime('now') WHERE id = ?").bind(row.id).run();
         const raw = await startSession(env, row.id);
         return json({ ok: true, slug: row.slug }, 200, { "set-cookie": setCookie(raw) });
