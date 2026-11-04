@@ -854,7 +854,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261102b"></script>
+<script src="/app.js?v=20261104a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -948,14 +948,14 @@ if(!slug){
     // lightly pulled toward the middle for rides on few lists. One function,
     // so a Global # is the same number on every page.
     // A racing pair's lower side is inside its partner's row (GT .under).
-    var shared=ids.filter(function(id){return tally[id].n>1 && GT[id] && GT[id].pos && !GT[id].under;})
+    var shared=ids.filter(function(id){return GT[id] && GT[id].pos && !GT[id].under;})
       .map(function(id){ tally[id].score=GT[id].score; tally[id].gpos=GT[id].pos; return tally[id];})
       .sort(function(a,b){ return a.gpos-b.gpos; });
 
     $('figs').innerHTML=[
       fig(started.length+' <small style="font-size:.55em;color:var(--muted);font-weight:600">of '+lists.length+'</small>','Lists started'),
       fig(nf(ids.length),'Coasters ranked'),
-      fig(nf(shared.length),'On 2+ lists')
+      fig(nf(shared.length),'On '+(GT.min||2)+'+ lists')
     ].join('');
 
     // Longest list first (2026-09-16). Alphabetical put whoever is early in the
@@ -994,7 +994,7 @@ if(!slug){
     }).join('');
 
     if(shared.length){
-      $('shared_sub').innerHTML='Coasters ranked by 2+ users &middot; <a class="howrank" href="/how-rankings-work">How it&rsquo;s scored</a>';
+      $('shared_sub').innerHTML='Coasters ranked by '+(GT.min||2)+'+ users &middot; <a class="howrank" href="/how-rankings-work">How it&rsquo;s scored</a>';
       // All of it: the separate /rankings/all page that held the rest is gone.
       var mineAt={}; shared.forEach(function(t){ t.who.forEach(function(w){ if(ME && w.slug===ME.slug) mineAt[t.id]=w.pos; }); });
       $('shared').innerHTML=shared.map(function(t,i){
@@ -1280,7 +1280,7 @@ function loadGlobal(){
       // app.js's Global score, the same numbers as the Global tab.
       var by={}, of=0, cnt={};
       Object.keys(tally).forEach(function(k){ var t=tally[k]; cnt[k]=t.n; if(t.pos){ if(!t.under) of++; by[k]={pos:t.pos, n:t.n, score:t.score}; } });
-      GLOBAL={by:by, of:of, cnt:cnt};
+      GLOBAL={by:by, of:of, cnt:cnt, min:tally.min||2};
       renderRank();
     });
   }).catch(function(){ GLOBAL={by:{}, of:0}; });
@@ -1308,7 +1308,7 @@ function factsFor(id){
   // Where it sits on the Global list (Carter, 2026-09-27: "want to see
   // something that says 'global ranking: ' with the number").
   var g=GLOBAL && GLOBAL.by[KEY(id)];
-  var extra=[[ g ? '#'+g.pos+' of '+GLOBAL.of : (GLOBAL ? 'Not on 2+ lists yet' : '&hellip;'), 'Global ranking' ]];
+  var extra=[[ g ? '#'+g.pos+' of '+GLOBAL.of : (GLOBAL ? 'Not on '+(GLOBAL.min||2)+'+ lists yet' : '&hellip;'), 'Global ranking' ]];
   // The same facts the park page opens to (CoasterHub.coasterFacts), with where
   // it sits among this list's rides by the same maker and of the same model
   // ("1 of 10") — counted one per ride, in list order.

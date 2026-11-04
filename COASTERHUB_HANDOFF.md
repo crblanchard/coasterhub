@@ -6125,3 +6125,14 @@ password sign-in, and "<name> is on Coaster Hub" when a signed-in rider comes
 back after more than 3 hours away (`COMEBACK_MS`, checked inside the hourly
 `seen` bump in `currentAccount`). A brand-new account (seen NULL) sends nothing
 extra — "joined" already covered it.
+
+## Global score guards scale with the site (2026-11-04)
+
+Carter asked whether the "pull toward the middle" auto-scales from 20 to 200
+rankers; it did not (m was a fixed quarter of a typical list, and the cut-off a
+fixed 2 lists). Now, in `globalScores`:
+- `MIN` lists for a Global place = max(2, ceil(lists / 20)) — 2 until 40 lists.
+- `m` = max(0.25, median lists-per-placed-ride / 16) × mean list weight. On
+  2026-11-04 the median was 4, so m is exactly what it was; checked old vs new
+  on real lists: zero rows changed.
+The "2+" wording on /rankings and Home reads `globalTally().min`.

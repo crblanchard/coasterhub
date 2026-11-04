@@ -3149,7 +3149,21 @@
       });
     });
     var mean = function (a) { return a.length ? a.reduce(function (p, q) { return p + q; }, 0) / a.length : 0; };
-    var C = mean(all), m = 0.25 * mean(ws);
+    // Both guards grow with the site (Carter, 2026-11-04: "will the softening
+    // auto-scale if say 200 people had rankings rather than 20" -> "might as
+    // well do it now"). Calibrated so today's numbers do not move:
+    //   - MIN, the lists a ride needs for a Global place: 2, until there are
+    //     40+ lists, then one in twenty of them (10 at 200).
+    //   - m, the extra vote at the average: a quarter of a typical list when a
+    //     typical ride (the median one with a place) is on 4 lists, as on
+    //     2026-11-04, and in proportion after that — at a median of 20 it is
+    //     worth more than a whole list, so three superfans no longer outrank
+    //     sixty riders who all loved something.
+    var MIN = Math.max(2, Math.ceil(ws.length / 20));
+    var cnts = Object.keys(t).map(function (k) { return t[k].n; }).filter(function (n) { return n >= MIN; })
+      .sort(function (a, b) { return a - b; });
+    var med = cnts.length ? cnts[Math.floor((cnts.length - 1) / 2)] : 4;
+    var C = mean(all), m = Math.max(0.25, med / 16) * mean(ws);
     Object.keys(t).forEach(function (k) {
       var x = t[k], v = x.sc.slice().sort(function (a, b) { return a[0] - b[0]; }).slice(x.n >= 5 ? Math.max(1, Math.floor(x.n / 10)) : 0);
       var sw = 0, ww = 0; v.forEach(function (p) { sw += p[0] * p[1]; ww += p[1]; });
@@ -3161,7 +3175,7 @@
     // both"): the lower side gets the same number, .under its partner, and is
     // left out of lists; the leader carries .sides, best first.
     var fam = racingFamilies(Object.keys(byId).map(function (id) { return byId[id]; })), lead = {}, n = 0;
-    Object.keys(t).filter(function (k) { return t[k].n > 1; })
+    Object.keys(t).filter(function (k) { return t[k].n >= MIN; })
       .sort(function (a, b) { var x = t[a], y = t[b]; return y.score - x.score || y.n - x.n || x.name.localeCompare(y.name); })
       .forEach(function (k) {
         var f = fam[k];
@@ -3169,6 +3183,8 @@
         t[k].pos = ++n;
         if (f) { lead[f.key] = k; t[k].sides = [k]; t[k].race = f.name; }
       });
+    // Not a ride: how many lists a Global place takes, for the "2+" wording.
+    Object.defineProperty(t, "min", { value: MIN, enumerable: false });
     return t;
   }
   // Racing and dueling pairs: two tracks named "X (Left)" / "X (Right)" at the
@@ -3273,7 +3289,7 @@
             + '<span class="gmeta"><b title="Global score, out of 100">' + scoreText(r.score) + '</b>'
             + (me ? '<span class="gy">your #' + me + '</span>' : (opts.lists === false ? '' : r.n + ' lists'))
             + '</span>' + chev + '</a>';
-        }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on 2+ riders’ lists yet.</p>')
+        }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on ' + ((st.glob && st.glob.min) || 2) + '+ riders’ lists yet.</p>')
           + (one && !opts.moreHref ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');
       }
       el.innerHTML = '<div class="sect rhead"><span>' + E(opts.title ? opts.title(st.view) : "Rankings") + '</span>' + sw + '</div>' + body;
