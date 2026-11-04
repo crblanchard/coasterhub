@@ -462,8 +462,19 @@ async function currentAccount(request, env) {
   // to break the request it rides on.
   const away = row.seen ? Date.now() - Date.parse(row.seen.replace(" ", "T") + "Z") : Infinity;
   if (away > 3600e3) {
-    try { await env.DB.prepare("UPDATE accounts SET seen = datetime('now') WHERE id = ?").bind(row.id).run(); }
-    catch (e) { /* a read-only moment is not worth a failed page */ }
+    // Compare-and-swap on the old value: an app opening fires several requests
+    // in the same instant, and every one of them read the same stale `seen`.
+    // Only the request whose UPDATE actually changed the row goes on to notify
+    // (2026-11-04: Carter got seven "Sean is on Coaster Hub" at once).
+    let won = false;
+    try {
+      const r = await env.DB.prepare(row.seen
+        ? "UPDATE accounts SET seen = datetime('now') WHERE id = ? AND seen = ?"
+        : "UPDATE accounts SET seen = datetime('now') WHERE id = ? AND seen IS NULL")
+        .bind(...(row.seen ? [row.id, row.seen] : [row.id])).run();
+      won = !!(r && r.meta && r.meta.changes);
+    } catch (e) { /* a read-only moment is not worth a failed page */ }
+    if (!won) return { id: row.id, email: row.email, slug: row.slug, name: row.name, admin: !!row.adm, bio: bio, avatar: avatar };
     // And tell the admins someone is on (Carter, 2026-11-03: "people logged in
     // notifications too ... to me only"). Only after a real gap (COMEBACK), so
     // an afternoon of use is one notification, not one an hour.

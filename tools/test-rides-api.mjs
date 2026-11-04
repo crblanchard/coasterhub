@@ -70,6 +70,17 @@ class FakeD1 {
   prepare(sql) { return new Stmt(this.db, sql); }
   async batch(stmts) { const out = []; for (const s of stmts) out.push(await s.run()); return out; }
 }
+// The real D1 is a network hop away, so requests that start together all do
+// their reads before any of them writes. The shim above answers instantly and
+// hides that; this one yields a tick before every query, so a race between
+// concurrent requests can actually happen in a test.
+class SlowD1 extends FakeD1 {
+  prepare(sql) {
+    const st = super.prepare(sql), tick = () => new Promise((r) => setTimeout(r, 0));
+    for (const m of ["all", "first", "run"]) { const f = st[m].bind(st); st[m] = async (...a) => { await tick(); return f(...a); }; }
+    return st;
+  }
+}
 
 function freshDb() {
   const db = new DatabaseSync(":memory:");
@@ -3087,6 +3098,24 @@ async function main() {
     db.exec("UPDATE accounts SET seen = datetime('now','-5 hours') WHERE email = 'pb@x.y'");
     r = await pushCall("GET", "/api/auth/me", { cookie: bob });
     check("admin: someone back after hours away notifies the admin", r.sent.some(m => m.token === "t-ann" && m.notification.title === "Push Bob is on Coaster Hub"), JSON.stringify(r.sent));
+    // An app opening fires a burst of requests at once; all of them read the
+    // same stale `seen`. Exactly one may notify (2026-11-04: seven arrived).
+    db.exec("UPDATE accounts SET seen = datetime('now','-5 hours') WHERE email = 'pb@x.y'");
+    {
+      const pending = [], sent = [], realFetch = globalThis.fetch, realWait = ctx.waitUntil;
+      ctx.waitUntil = (p) => pending.push(p);
+      globalThis.fetch = async (u, init) => {
+        if (String(u).includes("oauth2")) return new Response(JSON.stringify({ access_token: "tok", expires_in: 3600 }), { status: 200 });
+        sent.push(JSON.parse(init.body).message); return new Response("{}", { status: 200 });
+      };
+      try {
+        await Promise.all(Array.from({ length: 7 }, () => worker.fetch(new Request("https://coasterhub.org/api/auth/me", { headers: { cookie: bob } }),
+          { DB: new SlowD1(db), ADMIN_PASSWORD: PW, FCM_SERVICE_ACCOUNT: SA }, ctx)));
+        await Promise.all(pending);
+      } finally { globalThis.fetch = realFetch; ctx.waitUntil = realWait; }
+      check("...and a burst of requests at once sends ONE, not one each",
+        sent.filter(m => /is on Coaster Hub/.test(m.notification.title)).length === 1, JSON.stringify(sent.map(m => m.notification.title)));
+    }
     r = await pushCall("GET", "/api/auth/me", { cookie: bob });
     check("...once, not on every page", !r.sent.some(m => /is on Coaster Hub/.test(m.notification.title)), JSON.stringify(r.sent));
     db.exec("UPDATE accounts SET seen = datetime('now','-2 hours') WHERE email = 'pb@x.y'");
