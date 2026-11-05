@@ -20,6 +20,10 @@ Hong Kong parks got Carter's real coordinates the same day (134). Still guessed:
 - Old Town (Kissimmee, FL) — 139
 - Universal Studios Singapore (Sentosa) — 140
 - Universal Studios Beijing (Tongzhou) — 141
+- Dreamworld (Coomera, QLD) — 142
+- Luna Park (Sydney) — 142
+- Gumbuya World (Tynong, VIC) — 142
+- Warner Bros. Movie World (Gold Coast) — 142
 
 (Google Maps won't give coordinates in South Korea; Naver Map or Kakao Map will.)
 
@@ -52,6 +56,7 @@ linked as the same ride (one credit across parks).
 - Keller's Flea Market (Savannah GA) — Jolly Roger's Sea Serpent
 - Steel Pier (Atlantic City), Williams Grove Amusement Park — Adventure Park USA's Wildcat
 - Big Play Entertainment Center — Jenkinson's Tornado
+- Wet'n'Wild Water World (Gold Coast) — Movie World's Flash: Speed Force
 Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
@@ -71,8 +76,7 @@ Coaster (if it is our UK Adventure Island).
 - India: Wonderla, Imagicaa
 
 ## Australia / New Zealand
-- Dreamworld, Warner Bros. Movie World, Sea World (Gold Coast)
-- Luna Park Sydney (the "Luna Park" in D1 is Coney Island)
+- Sea World (Gold Coast)
 - Rainbow's End (NZ)
 
 ## Middle East / Africa
