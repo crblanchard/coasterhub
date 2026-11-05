@@ -15,6 +15,7 @@ Hong Kong parks got Carter's real coordinates the same day (134). Still guessed:
 - Castles N' Coasters (Phoenix, AZ) — 136
 - Keansburg Amusement Park (Keansburg, NJ) — 136
 - Jenkinson's Boardwalk (Point Pleasant Beach, NJ) — 136
+- Jolly Roger Amusement Park (Ocean City, MD) — 137
 
 (Google Maps won't give coordinates in South Korea; Naver Map or Kakao Map will.)
 
@@ -43,9 +44,11 @@ linked as the same ride (one credit across parks).
 - Boblo Island — Wonderland's Hornet (as Nightmare)
 - Wild Willy's Adventure Zone, Zao Island (Valparaiso IN) — Spin-o-Saurus / Spinning Coaster
 - Sauble Beach Fun World (Ontario) — Keansburg's Looping Star
-- Jolly Roger Amusement Park (Ocean City MD) — Flitzer (also La Ronde's La Course, row missing)
+- Palisades Amusement Park, Pirate's World, Bell's Amusement Park — Jolly Roger's Avalanche
+- Keller's Flea Market (Savannah GA) — Jolly Roger's Sea Serpent
+- Adventure Park USA — Jolly Roger's Sea Serpent (Old), as Tumbleweed
 - Big Play Entertainment Center — Jenkinson's Tornado
-Rows missing at parks we DO have: Knoebels' Whirlwind, La Ronde's La Course,
+Rows missing at parks we DO have: Knoebels' Whirlwind, Valleyfair's Rails (ex-Cedar Point Wildcat),
 Quassy's Mad Mouse (ex-Monster Mouse), Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
