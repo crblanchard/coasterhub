@@ -3,29 +3,12 @@
 ## Parks placed on an ESTIMATED location
 
 Carter, 2026-11-05: "place them all based on estimates but keep a list so I'll
-give you real coords for all of them eventually." The 10 Colorado parks and both
-Hong Kong parks got Carter's real coordinates the same day (134). Still guessed:
+give you real coords for all of them eventually." Colorado and Hong Kong got
+Carter's own coordinates (134); 16 more were looked up from Wikipedia / USGS
+(143). Still guessed:
 
-- Everland (Yongin, South Korea) — from memory, 121
-- Lotte World Adventure (Seoul, South Korea) — from memory, 122
-- Gyeongju World (Gyeongju, South Korea) — from memory, 123
-- Sesame Place (PA) (Langhorne, PA) — 135
-- Sesame Place (CA) (Chula Vista, CA) — 135
-- Wonderland Amusement Park (Amarillo, TX) — 136
-- Castles N' Coasters (Phoenix, AZ) — 136
-- Keansburg Amusement Park (Keansburg, NJ) — 136
-- Jenkinson's Boardwalk (Point Pleasant Beach, NJ) — 136
-- Jolly Roger Amusement Park (Ocean City, MD) — 137
-- Adventure Park USA (Monrovia, MD) — 139
-- Old Town (Kissimmee, FL) — 139
-- Universal Studios Singapore (Sentosa) — 140
-- Universal Studios Beijing (Tongzhou) — 141
-- Dreamworld (Coomera, QLD) — 142
-- Luna Park (Sydney) — 142
-- Gumbuya World (Tynong, VIC) — 142
-- Warner Bros. Movie World (Gold Coast) — 142
-
-(Google Maps won't give coordinates in South Korea; Naver Map or Kakao Map will.)
+- Keansburg Amusement Park (275 Beachway Ave, Keansburg, NJ) — 136
+- Old Town (5770 W Irlo Bronson Memorial Hwy, Kissimmee, FL) — 139
 
 Travelling fairs (Butler Amusements, the "… Family" operators, Oscar Bruch …)
 have no location on purpose and are flagged parks.travel = 1 (migration 130).
