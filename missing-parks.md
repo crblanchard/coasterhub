@@ -9,6 +9,12 @@ Hong Kong parks got Carter's real coordinates the same day (134). Still guessed:
 - Everland (Yongin, South Korea) — from memory, 121
 - Lotte World Adventure (Seoul, South Korea) — from memory, 122
 - Gyeongju World (Gyeongju, South Korea) — from memory, 123
+- Sesame Place (PA) (Langhorne, PA) — 135
+- Sesame Place (CA) (Chula Vista, CA) — 135
+- Wonderland Amusement Park (Amarillo, TX) — 136
+- Castles N' Coasters (Phoenix, AZ) — 136
+- Keansburg Amusement Park (Keansburg, NJ) — 136
+- Jenkinson's Boardwalk (Point Pleasant Beach, NJ) — 136
 
 (Google Maps won't give coordinates in South Korea; Naver Map or Kakao Map will.)
 
@@ -24,6 +30,24 @@ names go in English only (no Hangul/Kanji/Hanzi unless the name itself uses it).
 
 Added so far: Everland (121), Lotte World Adventure (122), Gyeongju World (123),
 Hong Kong Disneyland (124), Ocean Park (125).
+
+## Former homes of relocated coasters (not in the database yet)
+
+From Carter's RCDB screenshots, 2026-11-05. Adding one lets its coaster be
+linked as the same ride (one credit across parks).
+- Hamel's Park, Saginaw County Fairgrounds, Fun Plex — Lakeside's "Coaster" (Zyklon)
+- Jester FEC (Lexington KY) — Malibu Jack's Kowabunga
+- Playcenter (São Paulo), Alpen Park (Brazil) — Playland's Hurricane
+- Parque Diversiones (Costa Rica) — Playland's Whirlwind (also ran at Knoebels, row missing)
+- Springlake Park, Funtown — Wonderland's Cyclone
+- Boblo Island — Wonderland's Hornet (as Nightmare)
+- Wild Willy's Adventure Zone, Zao Island (Valparaiso IN) — Spin-o-Saurus / Spinning Coaster
+- Sauble Beach Fun World (Ontario) — Keansburg's Looping Star
+- Jolly Roger Amusement Park (Ocean City MD) — Flitzer (also La Ronde's La Course, row missing)
+- Big Play Entertainment Center — Jenkinson's Tornado
+Rows missing at parks we DO have: Knoebels' Whirlwind, La Ronde's La Course,
+Quassy's Mad Mouse (ex-Monster Mouse), Adventure Island's Tidal Wave Spinning
+Coaster (if it is our UK Adventure Island).
 
 ## Asia
 - China: Universal Beijing Resort, Chimelong Paradise, the other Happy Valleys
@@ -71,7 +95,3 @@ Hong Kong Disneyland (124), Ocean Park (125).
 - Russia: Dream Island (Moscow), Divo Ostrov (St Petersburg)
 
 ## US / Canada (mostly covered)
-- Sesame Place (Langhorne PA, San Diego)
-- Playland, Rye NY (the "Playland" in D1 is Vancouver's)
-- Wonderland Park (Amarillo), Castles N' Coasters (Phoenix)
-- Keansburg Amusement Park, Jenkinson's Boardwalk (NJ)
