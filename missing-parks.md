@@ -18,6 +18,7 @@ Hong Kong parks got Carter's real coordinates the same day (134). Still guessed:
 - Jolly Roger Amusement Park (Ocean City, MD) — 137
 - Adventure Park USA (Monrovia, MD) — 139
 - Old Town (Kissimmee, FL) — 139
+- Universal Studios Singapore (Sentosa) — 140
 
 (Google Maps won't give coordinates in South Korea; Naver Map or Kakao Map will.)
 
@@ -58,7 +59,6 @@ Coaster (if it is our UK Adventure Island).
   (Beijing, Shanghai, Wuhan, Chengdu, Tianjin, Chongqing; the one in D1 is
   Shenzhen), the Fantawild parks
 - Korea: Seoul Land, E-World, Legoland Korea
-- Singapore: Universal Studios Singapore
 - Malaysia: Genting SkyWorlds, Sunway Lagoon, Legoland Malaysia
 - Japan: Greenland (Kumamoto), Hirakata Park, Suzuka Circuit, Washuzan Highland,
   Lake Sagami Pleasure Forest, Nasu Highland Park, Rusutsu, Legoland Japan
