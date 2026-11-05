@@ -63,3 +63,18 @@ INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) SEL
 INSERT OR IGNORE INTO same_ride (coaster, ride) SELECT c.id, h.id FROM coasters c, coasters h WHERE h.name = 'Project Zero' AND h.park = 'Gumbuya World' AND (c.id = h.id OR (c.name = 'BuzzSaw' AND c.park = 'Dreamworld'));
 INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'same_ride_set', h.name, (SELECT COUNT(*) FROM same_ride s WHERE s.ride = h.id), json_object('ride', h.id, 'at', (SELECT json_group_array(json_object('id', c.id, 'park', c.park, 'name', c.name)) FROM coasters c JOIN same_ride s ON s.coaster = c.id WHERE s.ride = h.id), 'via', '142') FROM coasters h WHERE h.name = 'Project Zero' AND h.park = 'Gumbuya World' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'same_ride_set' AND json_extract(a.detail, '$.ride') = h.id);
 INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE c.name = 'Flight of the Wicked Witch' AND c.park = 'Warner Bros. Movie World' AND g.name = 'Vekoma SFCs' AND NOT EXISTS (SELECT 1 FROM clone_members m WHERE m.coaster = c.id);
+-- And four more Movie World: Road Runner Roller Coaster (Vekoma Junior 335m,
+-- 2000-12-26), SCOOBY-DOO! Spooky Coaster (MACK custom wild mouse, enclosed,
+-- 2002-06-17; former name "Scooby-Doo Spooky Coaster"; SBNO 2023-2025 not
+-- recorded), Superman Escape (Intamin accelerator, 2005-12-26), and Arkham
+-- Asylum - Shock Therapy (Vekoma SLC 765m w/helix, 1995-12-26 to 12/2019;
+-- "Lethal Weapon - The Ride" to 2011), into the Vekoma SLCs category.
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT MAX(id) FROM coasters) + ROW_NUMBER() OVER (), v.* FROM (VALUES
+ ('Road Runner Roller Coaster','Warner Bros. Movie World','Steel','Vekoma','Vekoma Junior Coaster',42.7,28.5,1099.1,0,66,2000,'2000-12-26','day',NULL,NULL,1),
+ ('SCOOBY-DOO! Spooky Coaster','Warner Bros. Movie World','Steel','MACK Rides','MACK Wild Mouse',55.8,28.0,1738.8,0,253,2002,'2002-06-17','day',NULL,NULL,1),
+ ('Superman Escape','Warner Bros. Movie World','Steel','Intamin','Intamin Accelerator',131.3,62.1,NULL,0,NULL,2005,'2005-12-26','day',NULL,NULL,1),
+ ('Arkham Asylum - Shock Therapy','Warner Bros. Movie World','Steel','Vekoma','Vekoma Suspended Looping Coaster',109.3,49.7,2509.8,5,102,1995,'1995-12-26','day','2019-12-01','month',1)
+) v WHERE NOT EXISTS (SELECT 1 FROM coasters c WHERE c.name = v.column1 AND c.park = v.column2);
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.park = 'Warner Bros. Movie World' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id) ORDER BY c.id;
+INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) SELECT c.id, v.column2, 'rcdb', date('now') FROM coasters c JOIN (VALUES ('SCOOBY-DOO! Spooky Coaster','Scooby-Doo Spooky Coaster'),('Arkham Asylum - Shock Therapy','Lethal Weapon - The Ride')) v ON v.column1 = c.name WHERE c.park = 'Warner Bros. Movie World';
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE c.name = 'Arkham Asylum - Shock Therapy' AND c.park = 'Warner Bros. Movie World' AND g.name = 'Vekoma SLCs' AND NOT EXISTS (SELECT 1 FROM clone_members m WHERE m.coaster = c.id);
