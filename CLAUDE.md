@@ -44,6 +44,14 @@ to `~/.impeccable`, not the repo. To update: copy `plugin/skills/impeccable` and
 `plugin/agents` from a newer checkout over these. Its critiques land in `.impeccable/`.
 `.claude/` and `.impeccable/` are in `.assetsignore` — never served from coasterhub.org.
 
+## Never access rcdb.com
+
+Carter, 2026-11-05: "I don't want you to ever access it, I can just do
+screenshots." No fetching, no curl, no web-fetch agent, no environment change
+that allows it. Coaster and park data comes from the RCDB screenshots Carter
+sends. (The coasterhub cloud environment had rcdb.com allowed for a few
+minutes that day; it was removed at his request.)
+
 ## What this sandbox can and cannot reach
 
 Reachable: GitHub, npm, usually the CDNs.
