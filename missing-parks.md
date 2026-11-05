@@ -5,10 +5,8 @@
 Carter, 2026-11-05: "place them all based on estimates but keep a list so I'll
 give you real coords for all of them eventually." Colorado and Hong Kong got
 Carter's own coordinates (134); 16 more were looked up from Wikipedia / USGS
-(143). Still guessed:
-
-- Keansburg Amusement Park (275 Beachway Ave, Keansburg, NJ) — 136
-- Old Town (5770 W Irlo Bronson Memorial Hwy, Kissimmee, FL) — 139
+(143), and Carter sent Keansburg and Old Town. None are guessed now; add new
+ones here as they come in.
 
 Travelling fairs (Butler Amusements, the "… Family" operators, Oscar Bruch …)
 have no location on purpose and are flagged parks.travel = 1 (migration 130).

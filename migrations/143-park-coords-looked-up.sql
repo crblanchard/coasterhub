@@ -55,3 +55,5 @@ UPDATE parks SET
     WHEN 'Gumbuya World' THEN 145.658643
     WHEN 'Warner Bros. Movie World' THEN 153.3125 END
 WHERE name IN ('Everland','Lotte World Adventure','Gyeongju World','Sesame Place (PA)','Sesame Place (CA)','Wonderland Amusement Park','Castles N'' Coasters','Jenkinson''s Boardwalk','Jolly Roger Amusement Park','Adventure Park USA','Universal Studios Singapore','Universal Studios Beijing','Dreamworld','Luna Park (Sydney)','Gumbuya World','Warner Bros. Movie World');
+-- Then Carter sent the last two himself, same day:
+UPDATE parks SET lat = CASE name WHEN 'Keansburg Amusement Park' THEN 40.455348 ELSE 28.332413 END, lon = CASE name WHEN 'Keansburg Amusement Park' THEN -74.134676 ELSE -81.515875 END WHERE name IN ('Keansburg Amusement Park', 'Old Town');
