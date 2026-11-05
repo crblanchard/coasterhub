@@ -3,23 +3,14 @@
 ## Parks placed on an ESTIMATED location
 
 Carter, 2026-11-05: "place them all based on estimates but keep a list so I'll
-give you real coords for all of them eventually." These have a map pin that is
-a guess (resort, town or road, not the gate). Replace each with Carter's real
-coordinates and strike it off.
+give you real coords for all of them eventually." The 10 Colorado parks and both
+Hong Kong parks got Carter's real coordinates the same day (134). Still guessed:
 
-- Aspen Snowmass Ski Resort (Snowmass Village, CO) — 129
-- Breckenridge Ski Resort (Breckenridge, CO) — 129
-- City Park (Pueblo, CO) — 129
-- Fun City (Estes Park, CO) — 129
-- Malibu Jack's (Thornton, CO) — 129
-- Mile High Flea Market (Henderson, CO) — 131
-- Mustang Mountain Coaster (Estes Park, CO) — 131
-- Rocky Mountain Pumpkin Ranch (Longmont, CO) — 131
-- Santa's Workshop (Cascade, CO) — 131
-- Vail Adventure Ridge (Vail, CO) — 131
+- Everland (Yongin, South Korea) — from memory, 121
+- Lotte World Adventure (Seoul, South Korea) — from memory, 122
+- Gyeongju World (Gyeongju, South Korea) — from memory, 123
 
-Also placed from memory (2026-11-02), not from a source:
-Everland, Lotte World Adventure, Gyeongju World, Hong Kong Disneyland, Ocean Park.
+(Google Maps won't give coordinates in South Korea; Naver Map or Kakao Map will.)
 
 Travelling fairs (Butler Amusements, the "… Family" operators, Oscar Bruch …)
 have no location on purpose and are flagged parks.travel = 1 (migration 130).
