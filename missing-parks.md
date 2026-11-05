@@ -19,6 +19,7 @@ Hong Kong parks got Carter's real coordinates the same day (134). Still guessed:
 - Adventure Park USA (Monrovia, MD) — 139
 - Old Town (Kissimmee, FL) — 139
 - Universal Studios Singapore (Sentosa) — 140
+- Universal Studios Beijing (Tongzhou) — 141
 
 (Google Maps won't give coordinates in South Korea; Naver Map or Kakao Map will.)
 
@@ -55,7 +56,7 @@ Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal 
 Coaster (if it is our UK Adventure Island).
 
 ## Asia
-- China: Universal Beijing Resort, Chimelong Paradise, the other Happy Valleys
+- China: Chimelong Paradise, the other Happy Valleys
   (Beijing, Shanghai, Wuhan, Chengdu, Tianjin, Chongqing; the one in D1 is
   Shenzhen), the Fantawild parks
 - Korea: Seoul Land, E-World, Legoland Korea
