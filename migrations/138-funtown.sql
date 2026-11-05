@@ -1,0 +1,12 @@
+-- 138: Funtown Splashtown U.S.A. (Saco ME) from Carter's RCDB screenshots,
+-- 2026-11-05. Excalibur (CCI woodie, 1998-06-05) and Wild Mouse (opened here
+-- 2009-05-30; 137 gave it its stats) get the fields they were missing, and the
+-- removed Galaxi (SDC, 1978-2008) is added, into the SDC Galaxis category.
+-- Edits are logged first and only fill empty fields. Safe to run twice.
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_edited', name, 7, json_object('id', id, 'fields', json_array('manu', 'model', 'h', 's', 'l', 'dur', 'yr'), 'via', '138') FROM coasters WHERE name = 'Excalibur' AND park = 'Funtown Splashtown U.S.A.' AND manu IS NULL;
+UPDATE coasters SET manu = 'Custom Coasters International', model = 'CCI Wood', h = 100.0, s = 55.0, l = 2700.0, inv = 0, dur = 118, yr = 1998, opened = '1998-06-05', openedPrec = 'day' WHERE name = 'Excalibur' AND park = 'Funtown Splashtown U.S.A.' AND manu IS NULL;
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_edited', name, 1, json_object('id', id, 'fields', json_array('yr'), 'via', '138') FROM coasters WHERE name = 'Wild Mouse' AND park = 'Funtown Splashtown U.S.A.' AND yr IS NULL;
+UPDATE coasters SET yr = 2009, opened = '2009-05-30', openedPrec = 'day' WHERE name = 'Wild Mouse' AND park = 'Funtown Splashtown U.S.A.' AND yr IS NULL;
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT MAX(id) FROM coasters) + 1, 'Galaxi', 'Funtown Splashtown U.S.A.', 'Steel', 'SDC', 'SDC Galaxi', NULL, 25.0, NULL, 0, NULL, 1978, '1978', 'year', '2008-06-01', 'year', 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Galaxi' AND park = 'Funtown Splashtown U.S.A.');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.name = 'Galaxi' AND c.park = 'Funtown Splashtown U.S.A.' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE c.name = 'Galaxi' AND c.park = 'Funtown Splashtown U.S.A.' AND g.name = 'SDC Galaxis' AND NOT EXISTS (SELECT 1 FROM clone_members m WHERE m.coaster = c.id);
