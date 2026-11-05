@@ -38,6 +38,7 @@ linked as the same ride (one credit across parks).
 - Steel Pier (Atlantic City), Williams Grove Amusement Park — Adventure Park USA's Wildcat
 - Big Play Entertainment Center — Jenkinson's Tornado
 - Wet'n'Wild Water World (Gold Coast) — Movie World's Flash: Speed Force
+- Sommerland Syd (Denmark), Freizeit-Land Geiselwind — Toverland's Wilde Maus (also Walygator Grand Est's Zig Zag, row missing, no dates)
 Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
