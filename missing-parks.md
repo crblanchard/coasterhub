@@ -41,6 +41,7 @@ linked as the same ride (one credit across parks).
 - Movie Park Germany rows (no dates yet): Black Hole, Marienkäferbahn — Geiselwind's
 - Kneippbyn (Sweden) — Geiselwind's Taka Waka (as Tiger Ride)
 - Safariland Stukenbrock — Schwaben Park's Himalayabahn (as Alpen Coaster)
+- Panorama Park Sauerland — BonBon-Land's Viktor Vandorm (as Flinker Fridolin)
 Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
