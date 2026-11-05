@@ -81,7 +81,7 @@ Coaster (if it is our UK Adventure Island).
 - Germany: Serengeti-Park, Eifelpark, Taunus Wunderland,
   Wunderland Kalkar, Ravensburger Spieleland, Karls Erlebnis-Dorf
 - Austria: Familypark
-- France: OK Corral, Parc Spirou
+- France: OK Corral
 - UK: Gulliver's (Warrington, Matlock, Milton Keynes), M&D's (Scotland)
 - Norway: Kongeparken, Hunderfossen
 - Turkey: Vialand / Isfanbul, Wonderland Eurasia
