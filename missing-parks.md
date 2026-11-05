@@ -16,6 +16,8 @@ Hong Kong parks got Carter's real coordinates the same day (134). Still guessed:
 - Keansburg Amusement Park (Keansburg, NJ) — 136
 - Jenkinson's Boardwalk (Point Pleasant Beach, NJ) — 136
 - Jolly Roger Amusement Park (Ocean City, MD) — 137
+- Adventure Park USA (Monrovia, MD) — 139
+- Old Town (Kissimmee, FL) — 139
 
 (Google Maps won't give coordinates in South Korea; Naver Map or Kakao Map will.)
 
@@ -46,10 +48,9 @@ linked as the same ride (one credit across parks).
 - Sauble Beach Fun World (Ontario) — Keansburg's Looping Star
 - Palisades Amusement Park, Pirate's World, Bell's Amusement Park — Jolly Roger's Avalanche
 - Keller's Flea Market (Savannah GA) — Jolly Roger's Sea Serpent
-- Adventure Park USA — Jolly Roger's Sea Serpent (Old), as Tumbleweed
+- Steel Pier (Atlantic City), Williams Grove Amusement Park — Adventure Park USA's Wildcat
 - Big Play Entertainment Center — Jenkinson's Tornado
-Rows missing at parks we DO have: Knoebels' Whirlwind, Valleyfair's Rails (ex-Cedar Point Wildcat),
-Quassy's Mad Mouse (ex-Monster Mouse), Adventure Island's Tidal Wave Spinning
+Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
 ## Asia
