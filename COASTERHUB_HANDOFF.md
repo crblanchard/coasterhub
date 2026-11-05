@@ -6136,3 +6136,13 @@ fixed 2 lists). Now, in `globalScores`:
   2026-11-04 the median was 4, so m is exactly what it was; checked old vs new
   on real lists: zero rows changed.
 The "2+" wording on /rankings and Home reads `globalTally().min`.
+
+## parks.travel (2026-11-05, migration 130)
+
+"No coordinates" used to BE the travelling-fair flag. It is a column now:
+`parks.travel` = 1 for the 32 fairs/operators, 0 for real parks. `getParks`
+sends it, `CoasterHub.traveling()` reads it (falling back to the old rule only
+when the field is absent). A new travelling show added through /edit gets
+travel NULL → not a fair until someone sets it to 1 in D1; /edit has no toggle
+for it yet. Parks on GUESSED coordinates are listed in missing-parks.md —
+Carter will send real ones.
