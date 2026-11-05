@@ -38,7 +38,9 @@ linked as the same ride (one credit across parks).
 - Steel Pier (Atlantic City), Williams Grove Amusement Park — Adventure Park USA's Wildcat
 - Big Play Entertainment Center — Jenkinson's Tornado
 - Wet'n'Wild Water World (Gold Coast) — Movie World's Flash: Speed Force
-- Sommerland Syd (Denmark), Freizeit-Land Geiselwind — Toverland's Wilde Maus (also Walygator Grand Est's Zig Zag, row missing, no dates)
+- Movie Park Germany rows (no dates yet): Black Hole, Marienkäferbahn — Geiselwind's
+- Kneippbyn (Sweden) — Geiselwind's Taka Waka (as Tiger Ride)
+- Safariland Stukenbrock — Schwaben Park's Himalayabahn (as Alpen Coaster)
 Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
@@ -76,7 +78,7 @@ Coaster (if it is our UK Adventure Island).
 - Spain: Isla Mágica, Terra Mítica
 - Italy: Magicland, Cinecittà World, Movieland, Leolandia, Fiabilandia
 - Netherlands: Avonturenpark Hellendoorn, Julianatoren
-- Germany: Freizeit-Land Geiselwind, Serengeti-Park, Eifelpark, Taunus Wunderland,
+- Germany: Serengeti-Park, Eifelpark, Taunus Wunderland,
   Wunderland Kalkar, Ravensburger Spieleland, Karls Erlebnis-Dorf
 - Austria: Familypark
 - France: OK Corral, Parc Spirou
