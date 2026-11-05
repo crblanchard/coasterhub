@@ -679,7 +679,15 @@ function recordAlias(env, id, formerName, note, when) {
 async function getParks(env) {
   const { results } = await env.DB.prepare("SELECT * FROM parks").all();
   const out = {};
-  for (const p of results) out[p.name] = { lat: p.lat, lon: p.lon, region: p.region };
+  // `travel` (migration 130): a travelling show, flagged on purpose. Before it,
+  // "no coordinates" was the flag; now a real park can be pinless while its
+  // location is unconfirmed (Carter, 2026-11-05: "I'd rather have them not
+  // show than be inaccurate"), so the flag is its own column. Sent only once
+  // the column exists, so app.js can fall back to the old rule until then.
+  for (const p of results) {
+    out[p.name] = { lat: p.lat, lon: p.lon, region: p.region };
+    if (p.travel !== undefined) out[p.name].travel = p.travel ? 1 : 0;
+  }
   return out;
 }
 // Which riders have claimed their page. Used to decide whether a RIDE COUNT is

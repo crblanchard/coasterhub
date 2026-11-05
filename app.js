@@ -2567,7 +2567,15 @@
   // Carter, 2026-10-17: every park without coordinates is one of these (the
   // last real one, Christmas in the Park, was deleted in 050), and he wants
   // them flagged. Missing coordinates IS the flag — no column to keep in step.
-  function traveling(g) { return !!g && (g.lat == null || g.lon == null); }
+  // Since 2026-11-05 it is an explicit `travel` flag (migration 130): a park
+  // can also be pinless because its location is not confirmed yet, and that is
+  // not a fair. Without the flag (old static JSON, migration not run) the old
+  // rule stands.
+  function traveling(g) {
+    if (!g) return false;
+    if (g.travel !== undefined) return !!g.travel;
+    return g.lat == null || g.lon == null;
+  }
 
   // The line under a database page's name: what kind of page it is, then its
   // parent as a link — "Park · Ohio, US", "Model · Bolliger & Mabillard",
