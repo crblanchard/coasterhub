@@ -1,5 +1,30 @@
 # Major parks missing from the database
 
+## Parks with no location yet
+
+Carter, 2026-11-05: "just wait on locations and keep a list going of places
+without locations. I'd rather have them not show than be inaccurate." These are
+in the database with no coordinates (no map pin, no distance) until someone
+confirms the spot. Strike each one off when it gets real coordinates.
+
+- Aspen Snowmass Ski Resort (Snowmass Village, CO)
+- Breckenridge Ski Resort (Breckenridge, CO)
+- City Park (Pueblo, CO)
+- Fun City (Estes Park, CO)
+- Malibu Jack's (Thornton, CO)
+- Mile High Flea Market (Henderson, CO)
+- Mustang Mountain Coaster (Estes Park, CO)
+- Rocky Mountain Pumpkin Ranch (Longmont, CO)
+- Santa's Workshop (Cascade, CO)
+- Vail Adventure Ridge (Vail, CO)
+
+Placed from memory (2026-11-02), not from a source — worth checking:
+Everland, Lotte World Adventure, Gyeongju World, Hong Kong Disneyland, Ocean Park.
+
+Travelling fairs (Butler Amusements, the "… Family" operators, Oscar Bruch …)
+have no location on purpose and are flagged parks.travel = 1 (migration 130).
+
+
 Carter asked for this list on 2026-11-02 ("keep the list of other missing parks
 saved please"). It's my own knowledge of the world's parks checked against the
 418 parks in D1 that day, not taken from an outside source. Strike a park off
