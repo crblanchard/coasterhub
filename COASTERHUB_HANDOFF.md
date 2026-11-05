@@ -6146,3 +6146,8 @@ when the field is absent). A new travelling show added through /edit gets
 travel NULL → not a fair until someone sets it to 1 in D1; /edit has no toggle
 for it yet. Parks on GUESSED coordinates are listed in missing-parks.md —
 Carter will send real ones.
+
+**Stat fill-ins don't go on /changes (2026-11-05).** Carter, on filling in
+Cosmic Rewind and Steel Curtain: "they don't need /changes additions." Filling
+blank stats/maker on an existing coaster writes no coaster_edited row. New
+coasters (coaster_added), renames and relocation links still do.
