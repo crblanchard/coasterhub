@@ -42,7 +42,7 @@ linked as the same ride (one credit across parks).
 - Kneippbyn (Sweden) — Geiselwind's Taka Waka (as Tiger Ride)
 - Safariland Stukenbrock — Schwaben Park's Himalayabahn (as Alpen Coaster)
 - Panorama Park Sauerland — BonBon-Land's Viktor Vandorm (as Flinker Fridolin)
-- Ratanga Junction (South Africa, closed) — Lost Island's Nopuku (as Cobra)
+- Fantasilandia (Chile) — Ratanga Junction's Diamond Devil Run (as Tren Minero)
 Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
