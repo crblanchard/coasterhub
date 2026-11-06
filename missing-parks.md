@@ -29,7 +29,9 @@ From Carter's RCDB screenshots, 2026-11-05. Adding one lets its coaster be
 linked as the same ride (one credit across parks).
 - Hamel's Park, Saginaw County Fairgrounds, Fun Plex — Lakeside's "Coaster" (Zyklon)
 - Jester FEC (Lexington KY) — Malibu Jack's Kowabunga
-- Alpen Park (Brazil) — Playland's Hurricane (its Playcenter stop: no screenshot yet)
+- Alpen Park (Brazil) — Playland Hurricane / Playcenter Windstorm (as Fogo do Dragão)
+- Parque Mutirama — Playcenter's Super Jet; Beto Carrero World — its Tornado
+- Ita Park, Tivoli Park (and Liseberg's Lisebergs Loopen row) — Playcenter's Looping Star
 - HotZone, Playland Osasco — Playcenter's Dragon
 - Dorney Park's Laser, Wiener Prater's Teststrecke (rows missing) — Playcenter's Colossus
 - Parque Diversiones (Costa Rica) — Playland's Whirlwind (also ran at Knoebels, row missing)
@@ -82,7 +84,6 @@ Coaster (if it is our UK Adventure Island).
 
 ## Latin America
 - Beto Carrero World, Hopi Hari (Brazil)
-- Parque de la Costa (Argentina)
 - Mundo Aventura (Colombia)
 - IRTRA Mundo Petapa (Guatemala)
 
