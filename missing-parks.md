@@ -48,7 +48,9 @@ linked as the same ride (one credit across parks).
 - Wet'n'Wild Water World (Gold Coast) — Movie World's Flash: Speed Force
 - Movie Park Germany rows (no dates yet): Black Hole, Marienkäferbahn — Geiselwind's
 - Kneippbyn (Sweden) — Geiselwind's Taka Waka (as Tiger Ride)
-- Safariland Stukenbrock — Schwaben Park's Himalayabahn (as Alpen Coaster)
+- Safariland Stukenbrock (park added in 168) — still missing Schwaben Park's Himalayabahn (as Alpen Coaster)
+- Funland Theme Park — South Sabahiya's €uro Coaster; Ikoma Skyland — South Sabahiya's Ultra Coaster (as Ultra Twister)
+- Lightwater Valley — Spinning Racer (after South Sabahiya; Fantasy Island's row has no closing date yet)
 - Panorama Park Sauerland — BonBon-Land's Viktor Vandorm (as Flinker Fridolin)
 - International Dream Exchange Fair (Japan) — Fantasilandia's Raptor (as Dream Thunder)
 - VulQano Park — Fantasilandia's Cyclon (as Krákaton)
@@ -64,7 +66,7 @@ Coaster (if it is our UK Adventure Island).
 
 Every park with a Vekoma Boomerang that is not in the database, in RCDB's
 order. Page 1 is done (162-166). Next sweeps Carter wants: SLCs, then maybe
-Zierer Tivolis ("that will have a ton").
+Zierer Tivolis ("that will have a ton"), and TOGO Ultra Twisters (Carter, 2026-11-06).
 
 Page 2: Qingdao International Beer City, Star Lake Amusement Park, Siam Amazing
 Park (also Jerudong's Boomerang, Pony Express and Pusing Lagi went there), Rafaela
