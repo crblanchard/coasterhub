@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-06T19:17:30Z",
-   "text": "Coasters that haven't opened yet now say \"Under construction\" in yellow instead of Operating, and switch over on their opening day (June 1 when only the year is known)."
+   "at": "2026-11-06T20:03:35Z",
+   "text": "Coasters that haven't opened yet say \"Under construction\" in yellow until their opening day. The Rankings page no longer lists every rider's ranking under the Global list."
   },
   {
    "at": "2026-11-05T22:39:06Z",

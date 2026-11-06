@@ -416,6 +416,10 @@
   /* Smaller since shared favorites moved above them (2026-09-16): these are a
      glance at who has ranked what, not the point of the page. */
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(214px,1fr));gap:10px}
+  /* The rider cards are gone from this page (2026-10-31, again 2026-11-06:
+     "remove all the people's individual lists from the bottom of /rankings").
+     .cards's display:grid was beating the hidden attribute, so say it here. */
+  #cards[hidden]{display:none}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;
         display:flex;flex-direction:column;text-decoration:none}
   .card:hover{border-color:var(--accent2)}
