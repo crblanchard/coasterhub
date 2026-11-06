@@ -9,6 +9,8 @@ Carter's own coordinates (134); 16 more were looked up from Wikipedia / USGS
 
 - Parque de Atracciones de Montjuïc (Barcelona; site now Jardins de Joan Brossa) — 163
 - Playcenter São Paulo (closed 2012; site by the Marginal Tietê) — 164
+- E-World (Daegu; by 83 Tower) — 166
+- Zygo Park (Nice, 1987-1991) — 166
 
 Travelling fairs (Butler Amusements, the "… Family" operators, Oscar Bruch …)
 have no location on purpose and are flagged parks.travel = 1 (migration 130).
@@ -58,6 +60,25 @@ linked as the same ride (one credit across parks).
 - Parque de Atracciones de Zaragoza — Montjuïc's Vikingo (as Ramses)
 Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
+
+## Boomerang parks (Carter's RCDB model list, 2026-11-06)
+
+Every park with a Vekoma Boomerang that is not in the database, in RCDB's
+order. Page 1 is done (162-166). Next sweeps Carter wants: SLCs, then maybe
+Zierer Tivolis ("that will have a ton").
+
+Page 2: Qingdao International Beer City, Star Lake Amusement Park, Siam Amazing
+Park (also Jerudong's Boomerang, Pony Express and Pusing Lagi went there), Rafaela
+Padilla, Mid America Adventure, Family Fun (also Karolinelund's three), Trans
+Studio Bali (also Pleasure Island's Boomerang), Trans Studio Cibubur, Al-Shallal
+Theme Park, Parque Diversiones (also Playcenter's Boomerang), Tashkentland,
+Glasgow Garden Festival, Habtoorland, Wonderland Sydney.
+Page 3: American Adventure Theme Park, Dixie Landin' (also Hafan y Môr's
+Boomerang), Wonderla Bangalore / Hyderabad / Kochi, Enchanted Kingdom, Fantawild
+Dreamland, Fantawild Adventure, Oriental Heritage, Fantawild Asian Legend, Silk
+Road Dreamland, Aladdin's Kingdom, Trimper Rides, World Expo Park, Floraland
+Continent Park.
+Page 4: Six Flags New Orleans (also Montjuïc's Boomerang, as Zydeco Scream).
 
 ## Asia
 - China: Chimelong Paradise, the other Happy Valleys
