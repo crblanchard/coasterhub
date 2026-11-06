@@ -136,6 +136,78 @@ match rows on something visible (name + park) rather than an id you read off a
 snapshot. Never hand-edit a `<rider>.json` to fake a data change: D1 is the truth,
 those files are the fallback, and the sync overwrites them.
 
+## Adding parks and coasters from Carter's screenshots
+
+The routine job: Carter sends RCDB screenshots (he takes them; **you never open
+rcdb.com**) and you add what's missing. Migrations 121-169 are worked examples;
+copy 167 (`167-six-flags-new-orleans.sql`) for the full pattern. Carter has
+authorised running these on D1 yourself (the Cloudflare D1 MCP tool, database
+`d4742d82-f606-498a-8520-bcbfec7dcf91`), so the paste-into-console path above is
+no longer needed.
+
+**Steps, every time:**
+1. Query D1 first: does the park exist (try `LIKE`, names vary)? Do any of the
+   coasters, or their relocation partners, already exist? What exact model/manu
+   strings do similar rides use (`SELECT manu, model, COUNT(*) ... GROUP BY`)?
+   Reuse an existing string; never invent a near-duplicate ("Maurer SC 2000" is
+   stored as `Maurer Spinner`, a Zamperla Dragon as `Zamperla Powered`).
+2. Write `migrations/NNN-name.sql` (next number), reasoning in the comments,
+   idempotent (`WHERE NOT EXISTS`, `INSERT OR IGNORE`), rows matched by name + park.
+3. Run it on D1 **one statement at a time**, then a SELECT to verify.
+4. Commit + push to `main`, then trigger the **Sync static JSON** workflow
+   (`sync-static.yml`, GitHub `run_workflow`).
+5. Tell Carter in a few lines what went in, and ask about anything unclear.
+No `site-updates.json` entry for data (see above).
+
+**What each migration does, in order:**
+- **Park:** `INSERT INTO parks (name, lat, lon, region, travel)`. Region is
+  `"State, US"` for the US, the country name elsewhere (`"Germany"`, `"Kuwait"`,
+  `"United Kingdom"`). `travel` = 1 for a travelling fair/showman, else 0.
+- **Coasters:** one `INSERT ... SELECT (SELECT MAX(id) FROM coasters) + ROW_NUMBER()
+  OVER (), v.* FROM (VALUES ...) v WHERE NOT EXISTS (same name + park)`. Columns:
+  name, park, type (Steel/Wood), manu, model, h (ft), s (mph), l (ft), inv, dur
+  (seconds), yr, opened, openedPrec, closed, closedPrec, laps (1). Dates are
+  `YYYY-MM-DD`/`day`, `YYYY-MM`/`month`, or `YYYY`/`year`; NULL what you don't know.
+- **Activity:** a `coaster_added` row for each new coaster (copy 167's statement).
+  A rename gets `coaster_renamed`; a new category `clone_set`.
+- **Former names:** `coaster_aliases (coaster_id, former_name, note, added)`, note
+  `'rcdb'`. Use note `'renamed'` only for a rename Carter reports happening now
+  (that note shows the date on the site).
+- **Categories:** `clone_members (coaster, group_id)` by `clone_groups.name`:
+  Vekoma Boomerangs, Vekoma SLCs, Vekoma SFCs, Zierer Tivolis, Schwarzkopf Jet
+  Stars, SDC Galaxis, Wacky Worms, Dragon Wagons (Wisdom), Go Gators, RES Roller
+  Balls, Batman clones. Add every matching new ride.
+- **Relocations:** `same_ride (coaster, ride)` where `ride` is the HOME row's id,
+  and the home links to itself too. The home is the row running now, else the
+  latest one (a future row counts). Then a `same_ride_set` activity row per home
+  (copy 167). If an old home exists, re-point its group (`UPDATE same_ride SET
+  ride = new WHERE ride = old`). Stops at parks not in the DB are noted in
+  `missing-parks.md`, not added.
+
+**Carter's naming and data rules:**
+- English names only: no Hangul/Chinese/Hebrew unless the name itself uses it
+  (keep `€uro Coaster`, `Wilde Biene`, `Marienkäferbahn`).
+- Two rides with the same name at one park: the older one gets " (Old)"
+  (`Wildcat (Old)`). Duelling/racing tracks are two rows, `X (Left)` / `X (Right)`
+  or their side names (`Battlestar Galactica (Human)` / `(Cylon)`).
+- SBNO spells are not recorded; a ride is operating or closed. Its closing date is
+  when it last ran.
+- A ride that never opened at a park is left out (Alpen Coaster at Safariland).
+- Skip rides that closed last century unless Carter asks for them.
+- Future rides: `yr` = the opening year, opened `'2027'`/`year`; the site shows
+  them as Under construction. Unnamed ones are called `Unknown`.
+- Model: no model when Carter says so; NULL beats a guess.
+- Filling in stats or a maker on an EXISTING coaster gets no activity row (Carter,
+  2026-11-05: those "don't need /changes additions").
+
+**Coordinates:** look them up yourself (Wikipedia/Wikidata via WebSearch; never
+RCDB). If you can only estimate, place the pin anyway and add the park to the
+estimated-pins list in `missing-parks.md` so Carter can send real ones.
+
+**`missing-parks.md`** is the running to-do: the Boomerang park sweep (cross off
+pages as they're done), relocation stops not yet in the DB, estimated pins, and
+the model sweeps for later (SLCs, Zierer Tivolis, TOGO Ultra Twisters).
+
 ## Verify before pushing — pushing is deploying
 
 - `node tools/test-rides-api.mjs` — the real `worker.js` against `node:sqlite`.
