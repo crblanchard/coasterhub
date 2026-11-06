@@ -5,8 +5,9 @@
 Carter, 2026-11-05: "place them all based on estimates but keep a list so I'll
 give you real coords for all of them eventually." Colorado and Hong Kong got
 Carter's own coordinates (134); 16 more were looked up from Wikipedia / USGS
-(143), and Carter sent Keansburg and Old Town. None are guessed now; add new
-ones here as they come in.
+(143), and Carter sent Keansburg and Old Town. Still guessed:
+
+- Parque de Atracciones de Montjuïc (Barcelona; site now Jardins de Joan Brossa) — 163
 
 Travelling fairs (Butler Amusements, the "… Family" operators, Oscar Bruch …)
 have no location on purpose and are flagged parks.travel = 1 (migration 130).
@@ -44,6 +45,12 @@ linked as the same ride (one credit across parks).
 - Panorama Park Sauerland — BonBon-Land's Viktor Vandorm (as Flinker Fridolin)
 - International Dream Exchange Fair (Japan) — Fantasilandia's Raptor (as Dream Thunder)
 - VulQano Park — Fantasilandia's Cyclon (as Krákaton)
+- Trans Studio Bali — Pleasure Island's Boomerang; Trans Studio Mini — its Mini Mine Train
+- Dixie Landin' — Hafan y Môr's Boomerang (as Ragin' Cajun)
+- Family Fun — Tivoli Karolinelund's Looping, Kålormen and Boomerang
+- Six Flags New Orleans — Montjuïc's Boomerang (as Zydeco Scream)
+- PPS Park Platja d'Aro — Montjuïc's Ciclón; Coney Island Park — its Loco Ratón
+- Parque de Atracciones de Zaragoza — Montjuïc's Vikingo (as Ramses)
 Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
