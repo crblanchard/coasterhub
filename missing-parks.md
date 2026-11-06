@@ -68,18 +68,31 @@ Every park with a Vekoma Boomerang that is not in the database, in RCDB's
 order. Page 1 is done (162-166). Next sweeps Carter wants: SLCs, then maybe
 Zierer Tivolis ("that will have a ton"), and TOGO Ultra Twisters (Carter, 2026-11-06).
 
-Page 2: Qingdao International Beer City, Star Lake Amusement Park, Siam Amazing
-Park (also Jerudong's Boomerang, Pony Express and Pusing Lagi went there), Rafaela
-Padilla, Mid America Adventure, Family Fun (also Karolinelund's three), Trans
-Studio Bali (also Pleasure Island's Boomerang), Trans Studio Cibubur, Al-Shallal
-Theme Park, Parque Diversiones (also Playcenter's Boomerang), Tashkentland,
-Glasgow Garden Festival, Habtoorland, Wonderland Sydney.
+Page 2: done (migrations 170-174, 2026-11-06).
 Page 3: American Adventure Theme Park, Dixie Landin' (also Hafan y Môr's
 Boomerang), Wonderla Bangalore / Hyderabad / Kochi, Enchanted Kingdom, Fantawild
 Dreamland, Fantawild Adventure, Oriental Heritage, Fantawild Asian Legend, Silk
 Road Dreamland, Aladdin's Kingdom, Trimper Rides, World Expo Park, Floraland
 Continent Park.
 Page 4: done.
+
+## Added from page 2, still to link (2026-11-06)
+- Pins ESTIMATED, need real coordinates from Carter: Qingdao International Beer City,
+  Star Lake Amusement Park, Siam Amazing Park, Rafaela Padilla, Family Fun (Duhok),
+  Trans Studio Bali, Trans Studio Cibubur, Al-Shallal Theme Park, Parque Diversiones,
+  Tashkentland, Glasgow Garden Festival, Habtoorland, Wonderland Sydney.
+- Relocation stops not in the DB yet: Qingdao Boomerang -> Floraland Continent Park
+  (Whirly Roller Coaster); Glasgow Coca-Cola Roller -> American Adventure (Missile) ->
+  Pleasurewood Wipeout (linked to Wipeout already); Habtoorland Colossus -> Wonderla Kochi
+  (Recoil); Habtoorland Twister -> Wonderla Bhubaneswar (Spinning Coaster); Wonderland
+  Sydney Demon -> World Expo Park (Titan) -> Alabama Adventure Zoomerang (linked, home for
+  now) -> Wonderla Hyderabad (Recoil, probably the new home); Alien Taxi (Cibubur) ex
+  Drievliet / Dixie Landin' Xtreme; Dixie Landin' (page 3).
+- Rows missing at parks we DO have: Plopsaland Belgium's Vleermuis (Trans Studio Bali's Bat
+  Glider); Drievliet's Xtreme; Hamanako Pal Pal's Batflyer (Cibubur Bat Glider); Knoebels'
+  Whirlwind (Bocaraca); Six Flags Mexico/Kentucky Kingdom are fine.
+- Karolinelund's Kålormen is Family Fun's 'Unknown'; Jerudong's Pony Express is Siam's Grand
+  Canyon Express; both linked.
 
 ## Asia
 - China: Chimelong Paradise, the other Happy Valleys
