@@ -20,3 +20,14 @@ INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%
 INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE c.park = 'Fantasilandia' AND ((c.name = 'Boomerang' AND g.name = 'Vekoma Boomerangs') OR (c.name = 'Raptor' AND g.name = 'Vekoma SLCs')) AND NOT EXISTS (SELECT 1 FROM clone_members m WHERE m.coaster = c.id);
 INSERT OR IGNORE INTO same_ride (coaster, ride) SELECT c.id, h.id FROM coasters c, coasters h WHERE h.name = 'Tren Minero' AND h.park = 'Fantasilandia' AND (c.id = h.id OR (c.name = 'Diamond Devil Run' AND c.park = 'Ratanga Junction'));
 INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'same_ride_set', h.name, (SELECT COUNT(*) FROM same_ride s WHERE s.ride = h.id), json_object('ride', h.id, 'at', (SELECT json_group_array(json_object('id', c.id, 'park', c.park, 'name', c.name)) FROM coasters c JOIN same_ride s ON s.coaster = c.id WHERE s.ride = h.id), 'via', '161') FROM coasters h WHERE h.name = 'Tren Minero' AND h.park = 'Fantasilandia' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'same_ride_set' AND json_extract(a.detail, '$.ride') = h.id);
+-- Then three more: Wild Mouse (Zamperla Twister 420m, operating since 12/2006),
+-- and two removed: Cyclon (Pinfari Zyklon ZL42, 1994 to 12/2004; later VulQano
+-- Park's Krákaton, a park we don't have) and Galaxy (SDC Galaxi, 10/1978 to
+-- 2013-02-18, into SDC Galaxis).
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT MAX(id) FROM coasters) + ROW_NUMBER() OVER (), v.* FROM (VALUES
+ ('Wild Mouse','Fantasilandia','Steel','Zamperla','Zamperla Twister',42.7,29.1,1377.9,0,90,2006,'2006-12','month',NULL,NULL,1),
+ ('Cyclon','Fantasilandia','Steel','Pinfari','Pinfari Zyklon',36.1,NULL,1197.5,1,NULL,1994,'1994','year','2004-12-01','month',1),
+ ('Galaxy','Fantasilandia','Steel','SDC','SDC Galaxi',NULL,NULL,NULL,0,NULL,1978,'1978-10','month','2013-02-18','day',1)
+) v WHERE NOT EXISTS (SELECT 1 FROM coasters c WHERE c.name = v.column1 AND c.park = v.column2);
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.park = 'Fantasilandia' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id) ORDER BY c.id;
+INSERT OR IGNORE INTO clone_members (coaster, group_id) SELECT c.id, g.id FROM coasters c, clone_groups g WHERE c.park = 'Fantasilandia' AND c.name = 'Galaxy' AND g.name = 'SDC Galaxis' AND NOT EXISTS (SELECT 1 FROM clone_members m WHERE m.coaster = c.id);

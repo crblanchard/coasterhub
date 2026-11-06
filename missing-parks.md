@@ -43,6 +43,7 @@ linked as the same ride (one credit across parks).
 - Safariland Stukenbrock — Schwaben Park's Himalayabahn (as Alpen Coaster)
 - Panorama Park Sauerland — BonBon-Land's Viktor Vandorm (as Flinker Fridolin)
 - International Dream Exchange Fair (Japan) — Fantasilandia's Raptor (as Dream Thunder)
+- VulQano Park — Fantasilandia's Cyclon (as Krákaton)
 Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
