@@ -80,13 +80,13 @@ Page 4: done.
 - Pins ESTIMATED, need real coordinates from Carter: Qingdao International Beer City,
   Star Lake Amusement Park, Siam Amazing Park, Rafaela Padilla, Family Fun (Duhok),
   Trans Studio Bali, Trans Studio Cibubur, Al-Shallal Theme Park, Parque Diversiones,
-  Tashkentland, Glasgow Garden Festival, Habtoorland, Wonderland Sydney.
+  Tashkentland, Glasgow Garden Festival, Habtoorland, Wonderland Sydney, Wonderla Hyderabad.
 - Relocation stops not in the DB yet: Qingdao Boomerang -> Floraland Continent Park
   (Whirly Roller Coaster); Glasgow Coca-Cola Roller -> American Adventure (Missile) ->
   Pleasurewood Wipeout (linked to Wipeout already); Habtoorland Colossus -> Wonderla Kochi
   (Recoil); Habtoorland Twister -> Wonderla Bhubaneswar (Spinning Coaster); Wonderland
-  Sydney Demon -> World Expo Park (Titan) -> Alabama Adventure Zoomerang (linked, home for
-  now) -> Wonderla Hyderabad (Recoil, probably the new home); Alien Taxi (Cibubur) ex
+  Sydney Demon -> World Expo Park (Titan) -> Alabama Adventure Zoomerang -> Wonderla
+  Hyderabad Recoil (all linked, Recoil the home, migration 175); Alien Taxi (Cibubur) ex
   Drievliet / Dixie Landin' Xtreme; Dixie Landin' (page 3).
 - Rows missing at parks we DO have: Plopsaland Belgium's Vleermuis (Trans Studio Bali's Bat
   Glider); Drievliet's Xtreme; Hamanako Pal Pal's Batflyer (Cibubur Bat Glider); Knoebels'
