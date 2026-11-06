@@ -255,8 +255,9 @@ a.crow .tick.busy{opacity:.4;pointer-events:none}
 @media (max-width:680px){
   .tiles.row3{grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
   .tiles.row3 .tile:last-child:nth-child(odd){grid-column:auto}
-  .tiles.row3 .tile{padding:11px 12px}
-  .tiles.row3 .tile b{font-size:1.15rem;white-space:nowrap}
+  .tiles.row3 .tile{padding:11px 10px 11px 12px}
+  /* Shrinks with the screen so "1995–2019" fits a third of a phone (2026-11-06). */
+  .tiles.row3 .tile b{font-size:clamp(.9rem,4.1vw,1.15rem);white-space:nowrap}
 }
 /* "Park · Ohio, US": the kind in the hero's own grey, the parent a link. */
 .hero .kindline{color:var(--muted)}

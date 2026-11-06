@@ -2641,7 +2641,7 @@
   // `ids`, for one coaster: every row of its ride when it moved parks
   // (023-same-ride.sql), so the line counts the rides at both and the ranking
   // of whichever row the list holds.
-  function youStrip(el, cs, ids) {
+  function youStrip(el, cs, ids, none) {
     if (!el) return;
     you().then(function (y) {
       if (!y) { el.hidden = true; return; }
@@ -2666,7 +2666,8 @@
           .map(function (c) { return y.rank[c.id]; }).sort(function (a, b) { return a - b; });
         // Led by how many you have ridden (Carter, 2026-09-27: "make the first one
         // say 'you've ridden'"), then your best-placed one.
-        // "of N" back, and "Not been yet" when it is none (Carter, 2026-10-01).
+        // "of N" back, and "Not been yet" when it is none (Carter, 2026-10-01);
+        // model and maker pages pass "Not ridden yet" (Carter, 2026-11-06).
         // Out of what still RUNS (critique, 2026-10-02): a defunct one is a
         // count you can no longer add to, so "19 of 23" with three gone read
         // as four to go. A list that is all defunct counts all of it.
@@ -2674,7 +2675,7 @@
         var rode = base.filter(function (c) { return y.rides[c.id]; }).length, left = base.length - rode;
         // No word "operating" in it: the Operating tile right beside it says
         // what the number is out of, and with it the line wrapped on a phone.
-        bits.push(!rode ? (cs.some(function (c) { return y.rides[c.id]; }) ? "None of the " + base.length + " yet" : "Not been yet")
+        bits.push(!rode ? (cs.some(function (c) { return y.rides[c.id]; }) ? "None of the " + base.length + " yet" : none || "Not been yet")
           : !left ? "You&rsquo;ve ridden all <b>" + base.length + "</b>"
           // No "N to go" (Carter, 2026-10-05: "Remove 6 to go").
           : "You&rsquo;ve ridden <b>" + rode + "</b> of " + base.length);
