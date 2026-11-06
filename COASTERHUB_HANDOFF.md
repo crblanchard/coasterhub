@@ -6151,3 +6151,12 @@ Carter will send real ones.
 Cosmic Rewind and Steel Curtain: "they don't need /changes additions." Filling
 blank stats/maker on an existing coaster writes no coaster_edited row. New
 coasters (coaster_added), renames and relocation links still do.
+
+**Under construction (2026-11-06).** Carter: future openings should read
+"Under construction" in yellow, like "Closing soon", and "by default change all
+of them on june 1 from opening soon to operating" when only the year is known.
+`markClosing` in app.js sets `c.building` when the opening day is still ahead
+(`openingDay`: full date as given, month → the 1st, year → June 1);
+`CoasterHub.UNDER_CONSTRUCTION` is the yellow tag, used by lifeTag, coaster.html
+and log.html, and the facts say "Opening". Counts (e.g. "N operating") still
+include them.

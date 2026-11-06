@@ -420,17 +420,34 @@
     var s = String(v), n = prec === "year" ? 4 : prec === "month" ? 7 : (s.length >= 10 ? 10 : s.length);
     return s.slice(0, n) > today.slice(0, n);
   }
+  // Not open yet (Carter, 2026-11-06: "make them yellow with 'under
+  // construction' like closing soon rather than operating"). An opening day
+  // still ahead marks the coaster `building`. A bare month opens on its 1st and
+  // a bare year on June 1 ("by default change all of them on june 1"), so a
+  // 2027 coaster reads as under construction until 2027-06-01.
+  function openingDay(c) {
+    var o = c.opened ? String(c.opened) : (c.yr ? String(c.yr) : "");
+    if (!o) return "";
+    var prec = c.opened ? c.openedPrec : "year";
+    if (prec === "year" || o.length === 4) return o.slice(0, 4) + "-06-01";
+    if (prec === "month" || o.length === 7) return o.slice(0, 7) + "-01";
+    return o.slice(0, 10);
+  }
   function markClosing(r) {
     ((r && r.coasters) || []).forEach(function (c) {
       if (c.closed && !c.closing && stillOpen(c.closed, c.closedPrec)) {
         c.closing = c.closed; c.closingPrec = c.closedPrec; c.closed = null; c.closedPrec = null;
       }
+      var od = !c.closed && openingDay(c);
+      if (od && stillOpen(od, "day")) c.building = true;
     });
     return r;
   }
   function fetchCoasters() { return shared("coasters", "/api/coasters", "/coasters.json").then(markClosing); }
   // "Closing soon" in red, for any status spot (see markClosing).
   var CLOSING_SOON = '<span class="stat soon" style="color:var(--bad)">Closing soon</span>';
+  // And yellow for one not open yet (see markClosing).
+  var UNDER_CONSTRUCTION = '<span class="stat soon" style="color:var(--accent)">Under construction</span>';
   // The summaries (2026-09-25): one request instead of one per rider. Both
   // resolve to null when the API cannot answer, and the caller falls back to
   // reading each rider's log, which also works from the static files.
@@ -2692,7 +2709,7 @@
     var amg = function (t) { return t ? '<i class="among" style="font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px">' + E(t) + '</i>' : ''; };
     if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
     if (c.model) kv(info, amg(among && among.model) + (c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model)), "Model");
-    if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), "Opened"); else if (c.yr) kv(info, E(c.yr), "Opened");
+    if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), c.building ? "Opening" : "Opened"); else if (c.yr) kv(info, E(c.yr), c.building ? "Opening" : "Opened");
     if (c.closed) kv(info, E(when(c.closed, c.closedPrec)), "Closed");
     if (c.closing) kv(info, '<span style="color:var(--bad)">' + E(when(c.closing, c.closingPrec)) + '</span>', "Closing");
     if (c.h != null) kv(nums, Math.round(c.h), "Height (ft)");
@@ -2804,7 +2821,7 @@
     var cl = c.closed ? String(c.closed).slice(0, 4) : "";
     if (!op && !cl && val == null) return "";
     var years = val != null ? E(val) : cl ? (op ? E(op) + "–" + E(cl) : "closed " + E(cl)) : E(op);
-    return '<span class="life">' + (c.closing ? CLOSING_SOON : '<span class="stat' + (cl ? ' off' : ' on') + '">' + (cl ? "Defunct" : "Operating") + '</span>')
+    return '<span class="life">' + (c.building ? UNDER_CONSTRUCTION : c.closing ? CLOSING_SOON : '<span class="stat' + (cl ? ' off' : ' on') + '">' + (cl ? "Defunct" : "Operating") + '</span>')
       + '<span class="yrs">' + years + '</span></span>';
   }
   // "2 operating · 1 defunct" on the right of a group or link row (Carter,
@@ -3691,7 +3708,7 @@
 
   var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
-              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, amongIn: amongIn, confirmAdd: confirmAdd, confirmRemove: confirmRemove, CLOSING_SOON: CLOSING_SOON, coasterHref: coasterHref,
+              slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, amongIn: amongIn, confirmAdd: confirmAdd, confirmRemove: confirmRemove, CLOSING_SOON: CLOSING_SOON, UNDER_CONSTRUCTION: UNDER_CONSTRUCTION, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames, formerNamesDated: formerNamesDated,
               fetchCoasters: fetchCoasters, fetchParks: fetchParks, fetchUser: fetchUser,
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
