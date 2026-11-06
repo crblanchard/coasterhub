@@ -55,7 +55,6 @@ linked as the same ride (one credit across parks).
 - Trans Studio Bali — Pleasure Island's Boomerang; Trans Studio Mini — its Mini Mine Train
 - Dixie Landin' — Hafan y Môr's Boomerang (as Ragin' Cajun)
 - Family Fun — Tivoli Karolinelund's Looping, Kålormen and Boomerang
-- Six Flags New Orleans — Montjuïc's Boomerang (as Zydeco Scream)
 - PPS Park Platja d'Aro — Montjuïc's Ciclón; Coney Island Park — its Loco Ratón
 - Parque de Atracciones de Zaragoza — Montjuïc's Vikingo (as Ramses)
 Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
@@ -78,7 +77,7 @@ Boomerang), Wonderla Bangalore / Hyderabad / Kochi, Enchanted Kingdom, Fantawild
 Dreamland, Fantawild Adventure, Oriental Heritage, Fantawild Asian Legend, Silk
 Road Dreamland, Aladdin's Kingdom, Trimper Rides, World Expo Park, Floraland
 Continent Park.
-Page 4: Six Flags New Orleans (also Montjuïc's Boomerang, as Zydeco Scream).
+Page 4: done.
 
 ## Asia
 - China: Chimelong Paradise, the other Happy Valleys
