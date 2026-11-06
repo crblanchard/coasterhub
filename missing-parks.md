@@ -48,7 +48,7 @@ linked as the same ride (one credit across parks).
 - Wet'n'Wild Water World (Gold Coast) — Movie World's Flash: Speed Force
 - Movie Park Germany rows (no dates yet): Black Hole, Marienkäferbahn — Geiselwind's
 - Kneippbyn (Sweden) — Geiselwind's Taka Waka (as Tiger Ride)
-- Safariland Stukenbrock (park added in 168) — still missing Schwaben Park's Himalayabahn (as Alpen Coaster)
+- Safariland Stukenbrock: added (168-169). Alpen Coaster (Schwaben Park's Himalayabahn) left out: never opened there
 - Funland Theme Park — South Sabahiya's €uro Coaster; Ikoma Skyland — South Sabahiya's Ultra Coaster (as Ultra Twister)
 - Lightwater Valley — Spinning Racer (after South Sabahiya; Fantasy Island's row has no closing date yet)
 - Panorama Park Sauerland — BonBon-Land's Viktor Vandorm (as Flinker Fridolin)
