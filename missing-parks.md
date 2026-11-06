@@ -8,6 +8,7 @@ Carter's own coordinates (134); 16 more were looked up from Wikipedia / USGS
 (143), and Carter sent Keansburg and Old Town. Still guessed:
 
 - Parque de Atracciones de Montjuïc (Barcelona; site now Jardins de Joan Brossa) — 163
+- Playcenter São Paulo (closed 2012; site by the Marginal Tietê) — 164
 
 Travelling fairs (Butler Amusements, the "… Family" operators, Oscar Bruch …)
 have no location on purpose and are flagged parks.travel = 1 (migration 130).
@@ -28,7 +29,9 @@ From Carter's RCDB screenshots, 2026-11-05. Adding one lets its coaster be
 linked as the same ride (one credit across parks).
 - Hamel's Park, Saginaw County Fairgrounds, Fun Plex — Lakeside's "Coaster" (Zyklon)
 - Jester FEC (Lexington KY) — Malibu Jack's Kowabunga
-- Playcenter (São Paulo), Alpen Park (Brazil) — Playland's Hurricane
+- Alpen Park (Brazil) — Playland's Hurricane (its Playcenter stop: no screenshot yet)
+- HotZone, Playland Osasco — Playcenter's Dragon
+- Dorney Park's Laser, Wiener Prater's Teststrecke (rows missing) — Playcenter's Colossus
 - Parque Diversiones (Costa Rica) — Playland's Whirlwind (also ran at Knoebels, row missing)
 - Springlake Park, Funtown — Wonderland's Cyclone
 - Boblo Island — Wonderland's Hornet (as Nightmare)
