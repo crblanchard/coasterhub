@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-13T18:48:20Z",
+   "text": "The \"Can't decide\" button when ranking a coaster is now \"About the same\", which says what it does: puts the new ride right below the one you're comparing it with."
+  },
+  {
    "at": "2026-11-06T20:03:35Z",
    "text": "Coasters that haven't opened yet say \"Under construction\" in yellow until their opening day. The Rankings page no longer lists every rider's ranking under the Global list."
   },
