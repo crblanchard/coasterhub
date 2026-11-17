@@ -918,10 +918,11 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 /* `.hero p` and the phone hero rules outrank a bare class, so the count shrank
    to body size (Carter, 2026-11-17: "this text formatting is super small"). */
 .hero p.rh-count{margin:0;max-width:none;color:var(--fg);font-size:clamp(1.3rem,2.4vw,1.65rem);font-weight:800;line-height:1.2}
-/* Under the name at every width, the way the phone already had it (Carter,
-   2026-11-17: "I still don't like this formatting. it looks good on mobile"):
-   off to the right it floated over the skyline at whatever size it got. */
-.hero .rhead{flex-direction:column;align-items:flex-start;gap:8px}
+/* On the right on a wider screen, one figure per line, right-aligned (Carter,
+   2026-11-17: "make them two lines", then "I like it on the right side still
+   not under the name. otherwise the right isn't being used at all"). Under the
+   name on a phone, where it already looked right. */
+@media (min-width:681px){ .hero p.rh-count{text-align:right;line-height:1.15} .hero p.rh-count a{display:block} }
 .rh-count a:hover{color:var(--accent2)}
 .hero .rhead{margin:0 0 14px}
 .rhband{padding:14px 0;border-bottom:1px solid var(--line);background-color:var(--panel)}
