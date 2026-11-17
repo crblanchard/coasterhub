@@ -692,7 +692,7 @@
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
   <span class="badge" id="hero_badge">Rankings</span>
   <h1 class="wide" id="hero_h1" data-loading>Loading&hellip;</h1>
-  <p id="hero_p">Not tallest or fastest — best.</p>
+  <p id="hero_p"></p>
   <!-- Your own list (Carter, 2026-10-02, from the rankings mockup): how much
        of your count is ranked, and the two things you do here — Rank 5 more
        and Edit — up top. They press the bar's own buttons, which stay where
@@ -938,8 +938,8 @@ var OWN=false;
 if(!slug){
   // Everyone = a summary of where every list stands. The combined master
   // ranking comes later; it needs more than one list to mean anything.
-  $('hero_h1').textContent='Combined rankings.';
-  $('hero_p').textContent='Full list of ranked coasters sitewide.';
+  $('hero_h1').textContent='Global rankings.';
+  $('hero_p').textContent='How everyone on Coaster Hub ranks them.';
   CoasterHub.fetchUsers().then(function(){
   // Who is reading matters here: the cards say what YOU can do with each list,
   // so the account rides along with the data rather than arriving after it and
