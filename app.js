@@ -982,7 +982,9 @@
   // names with no date follow, as plain names.
   function formerNamesDated(list, c) {
     var M = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    function day(d) { var p = d.split('-'); return M[+p[1] - 1] + ' ' + (+p[2]) + ', ' + p[0]; }
+    // A rename known only to the year (Limit -> Toxic Garden, 2022) or month
+    // says just that much.
+    function day(d) { var p = String(d).split('-'); return p.length < 2 ? p[0] : p.length < 3 ? M[+p[1] - 1] + ' ' + p[0] : M[+p[1] - 1] + ' ' + (+p[2]) + ', ' + p[0]; }
     var names = formerNames(list, c.id, c.name), byName = {};
     ((list && list.aliases) || []).forEach(function (a) { if (a.c === c.id && a.d) byName[a.n] = a.d; });
     var dated = names.filter(function (n) { return byName[n]; })
