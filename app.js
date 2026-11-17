@@ -53,6 +53,13 @@
   // its own. Anything that counts credits or dedupes a list of coasters by
   // "is this the same ride" goes through this, never through the bare id.
   function rideKey(c) { return c ? (c.same || c.id) : null; }
+  // rideKeys of every credit this rider has at least one UNDATED ride on, from
+  // computeStats' output. Such a credit is never marked new on a dated day.
+  function undatedKeys(s) {
+    var by = (s && s.coastersById) || {}, m = {};
+    ((s && s.rides) || []).forEach(function (r) { if (!r.d && by[r.c]) m[rideKey(by[r.c])] = 1; });
+    return m;
+  }
   // The row whose page a relocated ride lives on: its home. Every other coaster
   // is its own.
   function rideHome(coasters, c) {
@@ -3707,7 +3714,7 @@
     }, { passive: false });
   }
 
-  var api = { computeStats: computeStats, rideKey: rideKey, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
+  var api = { computeStats: computeStats, rideKey: rideKey, undatedKeys: undatedKeys, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, amongIn: amongIn, confirmAdd: confirmAdd, confirmRemove: confirmRemove, CLOSING_SOON: CLOSING_SOON, UNDER_CONSTRUCTION: UNDER_CONSTRUCTION, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames, formerNamesDated: formerNamesDated,

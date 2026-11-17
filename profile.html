@@ -510,7 +510,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261106b"></script>
+<script src="/app.js?v=20261117a"></script>
 <script src="/profile-edit.js?v=20261031a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -1101,6 +1101,12 @@ function render(s){
     // the park, the date, how much, opening to that day's coasters.
     var first={};                          // coaster id -> its first-ever ride date
     Object.keys(s.byCoaster||{}).forEach(function(id){ var ds=(s.byCoaster[id].dates||[]).slice().sort(); if(ds.length) first[id]=ds[0]; });
+    // A credit with an UNDATED ride is never "new" on a dated day: the undated
+    // one may well have come first — an imported list, then a park day logged
+    // (Carter, 2026-11-17, Sean's Disneyland day flagged rides already on his
+    // count). /credits has skipped these since its day cards got the mark.
+    var murky=CoasterHub.undatedKeys(s);
+    Object.keys(first).forEach(function(id){ if(murky[CoasterHub.rideKey((s.coastersById||{})[id])]) delete first[id]; });
     var draw=function(own){
     document.getElementById('visits').innerHTML=days.map(function(d){
       var x=DD[d], rows=byDay[d].filter(function(r){ return r.c; })
@@ -1223,7 +1229,8 @@ function render(s){
       // (Carter, 2026-11-17: "more detail would be cool about what parks /
       // maybe rides specifically"). A credit first ridden that day is marked new.
       var byId={}; (s.coasters||[]).forEach(function(c){ byId[c.id]=c; });
-      var firstOn={}; (s.first_rides||[]).forEach(function(f){ var c=byId[f.c]; if(c) firstOn[CoasterHub.rideKey(c)+'|'+f.d]=1; });
+      var murkyK=CoasterHub.undatedKeys(s);   // never "new" if an undated ride may have come first
+      var firstOn={}; (s.first_rides||[]).forEach(function(f){ var c=byId[f.c]; if(c && !murkyK[CoasterHub.rideKey(c)]) firstOn[CoasterHub.rideKey(c)+'|'+f.d]=1; });
       var visits={}, vorder=[];
       rode.forEach(function(r){
         var c=byId[r.c]; if(!c) return;

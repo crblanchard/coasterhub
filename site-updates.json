@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-17T16:33:51Z",
+   "text": "Rides already on your count from before you started logging dates are no longer marked New in Recent visits or On this day."
+  },
+  {
    "at": "2026-11-17T05:57:49Z",
    "text": "On this day on your profile now lists each past visit on that date: the year, the park and the rides you took, with new credits marked."
   },
