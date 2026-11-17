@@ -6183,6 +6183,9 @@ include them.
 - **Not built: "you rank it X higher than average" (item 7).** Agreed method: renumber the
   Global list over only the rides on YOUR list, then compare your place with that one (raw
   Global # vs your # is meaningless when Global has 1,000 and you rank 200). Carter liked it
-  but not the wording — find a clean way to say it before building.
+  but not the wording. **Dropped for now (2026-11-17):** "those are all confusing ... people
+  can work it out on their own because they see global rankings". Rejected wordings: "Others
+  put it 38 spots higher", "You #100 · Others #62", "38 below the crowd". Don't re-pitch
+  unless he asks.
 - **Everyone's lists** sidebar: Carter said not needed.
 
