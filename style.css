@@ -239,7 +239,9 @@ body{background-image:
 .hero .herojoin{display:flex;flex-wrap:wrap;gap:10px;margin:-14px 0 24px;max-width:none}
 .hero .herojoin[hidden]{display:none}
 .hero .herojoin .btn{padding:10px 18px;font-size:.92rem;border-radius:10px;font-weight:600}
-.hero .herojoin .btn.alt{background:transparent;border:1px solid var(--line);color:var(--fg)}
+/* Solid, not see-through: on a phone the skyline's track ran through "Log in"
+   (home critique, 2026-11-17). */
+.hero .herojoin .btn.alt{background-color:var(--panel);border:1px solid var(--line);color:var(--fg)}
 .hero .herojoin .btn.alt:hover{border-color:var(--accent2);color:var(--accent2)}
 
 /* Feedback card. Laid out as a row so the button sits beside the ask. */

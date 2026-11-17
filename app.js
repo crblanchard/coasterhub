@@ -3395,7 +3395,9 @@
       if (!st.view) st.view = "global";
       if (st.view === "global" && !st.glob) { st.glob = "loading"; globalTally().then(function (t) { st.glob = t; draw(); }); }
       var sw = '<span class="rsw"><a data-rv="global"' + (st.view === "global" ? ' class="on"' : '') + '>Global</a>'
-        + '<a data-rv="mine"' + (st.view === "mine" ? ' class="on"' : '') + '>Mine</a></span>';
+        // No Mine signed out: there is no "yours" to switch to (home critique,
+        // 2026-11-17).
+        + (st.me ? '<a data-rv="mine"' + (st.view === "mine" ? ' class="on"' : '') + '>Mine</a>' : '') + '</span>';
       var body;
       if (st.view === "mine") {
         body = mine.length ? '<div class="panel">' + cut(mine).map(function (c) {
