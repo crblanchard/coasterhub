@@ -245,6 +245,28 @@ CoasterHub.me().then(function(acct){
     var $ = function(id){ return document.getElementById(id); };
     var nfx = function(n){ return Number(n || 0).toLocaleString(); };
     $('hy_credits').textContent = nfx(me.credits) + (me.credits === 1 ? ' credit.' : ' credits.');
+    // The count ticks up to its new number when it has grown since you last
+    // saw Home — log rides, come back, watch it count (Carter, 2026-11-17).
+    // Only upward, at most the last 40 steps, under a second, and never for
+    // anyone who has asked their phone to reduce motion.
+    (function(){
+      var key = 'ch_seen_credits', prev = null;
+      try { var o = JSON.parse(localStorage.getItem(key) || 'null'); if (o && o.slug === acct.slug) prev = o.n; } catch (e) {}
+      try { localStorage.setItem(key, JSON.stringify({ slug: acct.slug, n: me.credits })); } catch (e) {}
+      var to = me.credits;
+      if (prev == null || !(to > prev)) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var from = Math.max(prev, to - 40), el = $('hy_credits'), t0 = null, dur = Math.min(900, 300 + (to - from) * 40);
+      var word = to === 1 ? ' credit.' : ' credits.';
+      el.textContent = nfx(from) + word;
+      function step(ts){
+        if (t0 == null) t0 = ts;
+        var k = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+        el.textContent = nfx(Math.round(from + (to - from) * e)) + word;
+        if (k < 1) requestAnimationFrame(step);
+      }
+      setTimeout(function(){ requestAnimationFrame(step); }, 250);
+    })();
     $('hy_credits').href = CoasterHub.userPageHref(acct.slug, 'count');
     $('hy_rides').innerHTML = me.rides != null ? '<b>' + nfx(me.rides) + '</b> rides' : '';
     $('hy_ranked').innerHTML = '<b>' + nfx(me.ranked) + '</b> ranked';
@@ -267,7 +289,11 @@ CoasterHub.me().then(function(acct){
     }
     $('hero_h').hidden = true; $('hero_p').hidden = true;
     $('heroyou').hidden = false;
-    try { localStorage.setItem('ch_hero', JSON.stringify({ slug: acct.slug, html: $('heroyou').innerHTML })); } catch (e) {}
+    // Saved with the FINAL count even while it is still ticking up, so next
+    // time opens on the real number.
+    try { var hc = $('heroyou').cloneNode(true), hh = hc.querySelector('#hy_credits');
+      if (hh) hh.textContent = nfx(me.credits) + (me.credits === 1 ? ' credit.' : ' credits.');
+      localStorage.setItem('ch_hero', JSON.stringify({ slug: acct.slug, html: hc.innerHTML })); } catch (e) {}
   });
 }).catch(function(){ /* the slogan stays */ });
 

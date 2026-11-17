@@ -159,6 +159,16 @@
   .clist{max-height:60vh;overflow-y:auto;margin:-4px -4px 0}
   .crow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--soft)}
   .crow:last-child{border-bottom:0}
+  /* Coming back to a day (Carter, 2026-11-17: "log a day then come back same
+     day and see what's already been logged/what's new"): a line over the list,
+     "×3 today" on what you have ridden, "New" on what you never have. */
+  .crow.done{background-color:color-mix(in srgb,var(--tint) 65%,transparent)}
+  .crow .nm .sub .tday{flex:none;padding:1px 7px;border-radius:999px;font-size:.72rem;font-weight:700;
+    background-color:var(--tint2);color:var(--accent2);white-space:nowrap}
+  .crow .nm .sub .tnew{flex:none;font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2)}
+  .todaysum{margin:2px 0 8px;padding:10px 13px;border-radius:12px;background-color:var(--tint);color:var(--fg);font-size:var(--fs-s);line-height:1.45}
+  .todaysum span{color:var(--muted)}
+  .todaysum a{color:var(--accent2);font-weight:600;text-decoration:none}
   .crow.flash{background-color:var(--tint)}
   .crow .nm{flex:1;min-width:0}
   .crow .nm b{display:block;font-weight:600;font-size:var(--fs);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -596,6 +606,7 @@ var OWNED={};    // coaster id -> true, what this rider already has in their cou
 // becomes "move it to", and an empty basket means "remove the day". Carter's
 // follow-up from the day /log shipped; built 2026-09-21.
 var DAYS={};
+var FIRSTD={}, UNDATED={};   // coaster id -> first dated ride / has an undated ride (the "new credit" count)
 var OWNED_GEN=0;   // which loadOwned() call is the latest; see there
 var FIRST_LOAD_DONE=false;   // see loadOwned: an empty count opens on Add credits
 function basketCount(){ return Object.keys(basket||{}).length; }
@@ -720,8 +731,9 @@ function boot(){
 
   $('save').onclick=save;
   $('clear').onclick=function(){ if(EDITING){ cancelEdit(); return; } basket={}; renderList(); renderBasket(); $('msg').textContent=''; };
-  $('date').addEventListener('change',offerDay);
-  $('date').addEventListener('input',offerDay);
+  // The list re-draws too: its "×2 today" tags and the line over it are this date's.
+  $('date').addEventListener('change',function(){ renderList(); offerDay(); });
+  $('date').addEventListener('input',function(){ renderList(); offerDay(); });
   wireAdders(); wireRiderAdd(); wireRiderLine(); wireNearMe(); wireParkFilter();
   wireRegions(); wireMode(); wireSaveBar();
   $('addpast').onclick=function(e){ e.preventDefault(); toAddCredits(function(){ setMode('list'); }); };
@@ -752,12 +764,13 @@ function loadOwned(){
   var gen=++OWNED_GEN;
   return CoasterHub.fetchRides(slug).then(function(log){
     if($('rider').value!==slug || gen!==OWNED_GEN) return;   // rider changed, or a newer load is in flight
-    var owned={}, days={};
+    var owned={}, days={}, first={}, und={};
     (log.rides||[]).forEach(function(r){
       owned[r.c]=true;
-      if(r.d){ var day=days[r.d]||(days[r.d]={}); day[r.c]=(day[r.c]||0)+1; }
+      if(r.d){ var day=days[r.d]||(days[r.d]={}); day[r.c]=(day[r.c]||0)+1; if(!first[r.c]||r.d<first[r.c]) first[r.c]=r.d; }
+      else und[r.c]=true;
     });
-    OWNED=owned; DAYS=days;
+    OWNED=owned; DAYS=days; FIRSTD=first; UNDATED=und;
     // A brand-new count opens on "Add credits" — park by park, the coasters
     // you have ridden — rather than on today's rides (2026-09-27). Once, on
     // the first load, and never over a mode somebody picked or linked to.
@@ -768,7 +781,7 @@ function loadOwned(){
         $('modehint').textContent='New here? Pick a park you’ve been to and tick the coasters you rode.';
       }
     }
-    renderList(); offerDay(); OWNED_READY=true; editFromLink();
+    OWNED_READY=true; renderList(); offerDay(); editFromLink();
   }).catch(function(){ renderList(); });
 }
 // /log?edit=2026-09-12 — the "Edit day" link on a day in your credits. Opens
@@ -805,6 +818,12 @@ function offerDay1(){
     h.innerHTML = d===EDITING ? 'Changing this day. <a href="#" id="dayback">Cancel</a> &middot; <a href="#" id="daydel" class="bad">Delete this day</a>'
       : (d ? 'Moving it to '+esc(niceDay(d))+(DAYS[d]?' — which already has rides; they will merge':'')+'. <a href="#" id="dayback">Cancel</a>'
            : 'Pick the date to move it to, or <a href="#" id="dayback">cancel</a>.');
+  } else if(day && document.querySelector('#clist .todaysum')){
+    // The list's own line says what this day has (2026-11-17); only the
+    // admin's copy link is left to offer here.
+    if(!canCopy()){ h.style.display='none'; h.innerHTML=''; return; }
+    h.style.display='';
+    h.innerHTML='<a href="#" id="daycopy">Copy this day to a friend</a>';
   } else if(day){
     var n=Object.keys(day).reduce(function(a,k){return a+day[k];},0), c=Object.keys(day).length;
     h.style.display='';
@@ -1612,10 +1631,20 @@ function renderList(){
   }
   // No second line at all rather than an empty one that still takes its height:
   // a coaster with no model and no dates is just its name.
+  // Day mode, not changing a day: what this date already has, and what would
+  // be a first. A row's own laps (by row id) — a relocated ride's other row
+  // is a different coaster on this list.
+  var dd=$('date').value, onDay=(MODE==='day' && !EDITING && DAYS[dd]) || null;
+  function tags(c){
+    if(MODE!=='day' || EDITING || !OWNED_READY) return '';
+    var n=onDay && onDay[c.id];
+    if(n) return '<span class="tday">\u00d7'+n+' '+(dd===TODAY?'today':'that day')+'</span>';
+    return OWNED[c.id] || c.closed ? '' : '<span class="tnew">New</span>';
+  }
   function under(c,searching){
-    var t=sub(c,searching), f=flag(c);
-    if(!t && !f) return '';
-    return '<span class="sub">'+(t?'<span class="txt">'+esc(t)+'</span>':'')+f+'</span>';
+    var t=sub(c,searching), f=flag(c), g=tags(c);
+    if(!t && !f && !g) return '';
+    return '<span class="sub">'+g+(t?'<span class="txt">'+esc(t)+'</span>':'')+f+'</span>';
   }
   function rowHtml(c){
     var n=basket[c.id]||0, owned=!!OWNED[c.id];
@@ -1636,7 +1665,7 @@ function renderList(){
         +'<button data-act="inc" aria-label="Add a ride on '+esc(c.name)+'">+</button>'
       +'</span>';
     }
-    var cls='crow'+(MODE==='list'&&!owned?' pick':'')+(MODE==='list'&&owned?' owned':'');
+    var cls='crow'+(MODE==='list'&&!owned?' pick':'')+(MODE==='list'&&owned?' owned':'')+(onDay&&onDay[c.id]?' done':'');
     return '<div class="'+cls+'" data-id="'+c.id+'"'
       +(MODE==='list'&&!owned?' role="checkbox" tabindex="0" aria-checked="'+(n?'true':'false')+'"':'')+'>'
       +'<span class="nm"><b>'+esc(c.name)+'</b>'+under(c,searching)+'</span>'
@@ -1646,11 +1675,24 @@ function renderList(){
   var open=list, shut=[];
   if(!searching){ open=list.filter(function(c){ return !gone(c); }); shut=list.filter(gone); }
   if(!open.length){ open=shut; shut=[]; }
-  el.innerHTML=open.map(rowHtml).join('')
+  // The day so far, over the list: rides, coasters, first-time credits.
+  var sum='';
+  if(onDay){
+    var ks=Object.keys(onDay), nr=ks.reduce(function(a,k){ return a+onDay[k]; },0);
+    var nn=ks.filter(function(k){ return FIRSTD[k]===dd && !UNDATED[k]; }).length;
+    sum='<p class="todaysum"><b>Already '+(dd===TODAY?'today':'on '+esc(niceDay(dd)))+':</b> '
+      +nr+' ride'+(nr===1?'':'s')+' on '+ks.length+' coaster'+(ks.length===1?'':'s')
+      +(nn?', '+nn+' new credit'+(nn===1?'':'s'):'')+'. <span>Tap + to add more.</span> <a href="#" id="sum_edit">Edit</a></p>';
+  }
+  el.innerHTML=sum+open.map(rowHtml).join('')
     +(shut.length ? '<details class="closedfold"'+(shut.some(function(c){ return basket[c.id]; })?' open':'')+'><summary>Closed ('+shut.length+')'
       +'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>'
       +shut.map(rowHtml).join('')+'</details>' : '');
 
+  var se=$('sum_edit'); if(se) se.onclick=function(e){ e.preventDefault(); beginEdit(dd); };
+  // The two older "already saved" lines step aside once the list says it.
+  if(typeof offerDay1==='function' && $('dayhint')) offerDay1();
+  if(sum && $('dayline')) $('dayline').hidden=true;
   if(MODE==='list'){
     el.querySelectorAll('.crow.pick').forEach(function(row){
       var toggle=function(){
@@ -1741,7 +1783,7 @@ function showBasketPanel(){
   // Nothing added yet but this day has rides: one line, not the whole panel.
   var d=$('date').value, day=MODE==='day' && !EDITING && !basketCount() && DAYS[d];
   var dl=$('dayline');
-  if(day){
+  if(day && !document.querySelector('#clist .todaysum')){
     var n=Object.keys(day).reduce(function(a,k){ return a+day[k]; },0);
     dl.innerHTML=(d===TODAY?'Today':esc(niceDay(d)))+': '+n+' ride'+(n===1?'':'s')+' already saved &middot; <a href="#" id="dl_edit">Change that day</a>';
     $('dl_edit').onclick=function(e){ e.preventDefault(); beginEdit(d); };
