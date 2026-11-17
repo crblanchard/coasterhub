@@ -59,7 +59,10 @@ linked as the same ride (one credit across parks).
 - Family Fun — Tivoli Karolinelund's Looping, Kålormen and Boomerang
 - PPS Park Platja d'Aro — Montjuïc's Ciclón; Coney Island Park — its Loco Ratón
 - Parque de Atracciones de Zaragoza — Montjuïc's Vikingo (as Ramses)
-Rows missing at parks we DO have: Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
+- Magic Harbor, Myrtle Beach Pavilion (both as Corkscrew) — Salitre Magico's Magnus
+- Divertido (as Space Mountain) — Salitre Magico's Tornado
+Rows missing at parks we DO have: Bobbejaanland's Wervelwind (Salitre's Rallus, after it),
+Morey's Piers' Jumbo Jet (Salitre's Tornado, its first stop), Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
 
 ## Boomerang parks (Carter's RCDB model list, 2026-11-06)
