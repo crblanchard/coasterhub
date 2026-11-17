@@ -90,6 +90,11 @@ header.nav{padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-i
 .brand-text{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;color:var(--fg);white-space:nowrap}
 .brand-text b{color:var(--accent2);font-weight:800}
 nav.links{display:flex;gap:26px;flex:0 0 auto;justify-content:center}
+/* Between phone and wide desktop (a zoomed or half-width window) the wordmark
+   shrank to nothing and "Hub" ran under "Home" (2026-11-17). It keeps its width;
+   the links tighten instead. */
+@media (min-width:681px){ .brand{min-width:max-content} }
+@media (min-width:681px) and (max-width:960px){ nav.links{gap:16px} }
 nav.links a{color:var(--muted);font-weight:500;font-size:.95rem;transition:color .15s}
 nav.links a:hover,nav.links a.active{color:var(--fg)}
 /* Log in the header is the same call to action as the tab bar's raised +. */
@@ -913,9 +918,10 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 /* `.hero p` and the phone hero rules outrank a bare class, so the count shrank
    to body size (Carter, 2026-11-17: "this text formatting is super small"). */
 .hero p.rh-count{margin:0;max-width:none;color:var(--fg);font-size:clamp(1.3rem,2.4vw,1.65rem);font-weight:800;line-height:1.2}
-/* Beside the skyline on a wider screen, one figure per line, right-aligned, like
-   the profile's own count (Carter, 2026-11-17: "make them two lines"). */
-@media (min-width:681px){ .hero p.rh-count{text-align:right;line-height:1.15} .hero p.rh-count a{display:block} }
+/* Under the name at every width, the way the phone already had it (Carter,
+   2026-11-17: "I still don't like this formatting. it looks good on mobile"):
+   off to the right it floated over the skyline at whatever size it got. */
+.hero .rhead{flex-direction:column;align-items:flex-start;gap:8px}
 .rh-count a:hover{color:var(--accent2)}
 .hero .rhead{margin:0 0 14px}
 .rhband{padding:14px 0;border-bottom:1px solid var(--line);background-color:var(--panel)}
