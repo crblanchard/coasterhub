@@ -31,9 +31,14 @@
   function plural(n, one, many){ return n + ' ' + (n === 1 ? one : (many || one + 's')); }
 
   var ICONS = {
-    rides:    '<path d="M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"/>',
+    // A coaster car on its track (2026-11-17, critique: the feed's icons were
+    // generic; a logged day is a day on the rides).
+    rides:    '<path d="M2 20h20"/><path d="M4 15v-4.5A1.5 1.5 0 0 1 5.5 9H14l4 3.5V15z"/><path d="M8 9V6.5M8 6.5h3"/><circle cx="7.5" cy="17.5" r="1.2"/><circle cx="14.5" cy="17.5" r="1.2"/>',
     credits:  '<path d="M12 5v14M5 12h14"/>',
-    ranking:  '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/>',
+    // A podium: a ranking is an order, not a prize.
+    ranking:  '<path d="M3 20h18M9 20V8h6v12M3 20v-7h6M15 20v-5h6v5"/>',
+    // A lift hill with a plus: a coaster new to the database.
+    newcoaster: '<path d="M2 20c3.5 0 5-9 8.5-9S14 20 17 20h5"/><path d="M18 3v6M15 6h6"/>',
     removed:  '<path d="M5 12h14"/>',
     added:    '<path d="M12 5v14M5 12h14"/>',
     edited:   '<path d="M4 20h4L19 9l-4-4L4 16zM14 5l4 4"/>',
@@ -53,7 +58,8 @@
   
   function icon(kind){
     var k = kind === 'ride_removed' ? 'removed'
-          : kind === 'coaster_added' || kind === 'user_added' ? 'added'
+          : kind === 'coaster_added' ? 'newcoaster'
+          : kind === 'user_added' ? 'added'
           : kind === 'coaster_edited' || kind === 'coaster_renamed' ? 'edited'
           : kind === 'coaster_merged' ? 'merged'
           : kind === 'clone_removed' ? 'deleted'
@@ -198,7 +204,10 @@
       if (d.removed) bits.push('dropped ' + plural(d.removed, 'coaster'));
       if (!bits.length) bits.push('reordered their rankings');
       return (who || 'Someone') + ' ' + bits.join(' and ')
-        + (d.total ? ' <span class="sub">(' + d.total + ' ranked)</span>' : '');
+        // The running total only when it says something the sentence did not:
+        // "ranked 180 new coasters (180 ranked)" repeated itself (home
+        // critique, 2026-11-17).
+        + (d.total && !(d.added === d.total && !d.removed) ? ' <span class="sub">(' + d.total + ' ranked)</span>' : '');
     }
     if (e.kind === 'coaster_added')   return (sub ? rideLink(e.subject, park, sub) : 'A coaster')
       + ' was added' + (d.park ? ' at ' + parkLink(d.park, esc(d.park)) : '');

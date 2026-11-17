@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-17T22:42:13Z",
-   "text": "The rankings page now says Global rankings, and a few headlines across the site read more naturally."
+   "at": "2026-11-17T23:17:17Z",
+   "text": "The \"You're at\" card on Home now looks like a park ticket, and activity rows have coaster-themed icons. Rankings now says Global rankings, and a few headlines read more naturally."
   },
   {
    "at": "2026-11-17T20:14:07Z",

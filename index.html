@@ -76,12 +76,22 @@
   .recent .more{margin:12px 0 0}
   .recent .more a{color:var(--accent2);font-weight:600;text-decoration:none}
   /* An empty friend feed is hidden rather than shown as a lone sentence. */
-  .atpark{display:flex;align-items:center;gap:10px;margin:0 0 22px;padding:13px 16px;border-radius:14px;background-color:var(--tint);
-    border:1px solid var(--line);color:var(--fg);text-decoration:none;font-size:.95rem}
+  /* "You're at X" as an admission ticket (Carter, 2026-11-17, from the home
+     critique: "yes please for the ticket thing"). Round notches cut from both
+     sides with a mask, so the page shows through in either theme, and a
+     dashed tear line before the action, like a ticket's stub. */
+  .atpark{position:relative;display:flex;align-items:center;gap:12px;margin:0 0 22px;padding:13px 18px 13px 22px;border-radius:10px;
+    background-color:var(--panel);color:var(--fg);text-decoration:none;font-size:.95rem;
+    -webkit-mask:radial-gradient(circle 9px at 0 50%,#0000 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 9px at 100% 50%,#0000 98%,#000) right/51% 100% no-repeat;
+    mask:radial-gradient(circle 9px at 0 50%,#0000 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 9px at 100% 50%,#0000 98%,#000) right/51% 100% no-repeat}
   .atpark[hidden]{display:none}
   .atpark svg{flex:none;color:var(--accent2)}
-  .atpark span{flex:1;min-width:0}
-  .atpark i{font-style:normal;font-weight:700;color:var(--accent2);white-space:nowrap}
+  .atpark > span{flex:1;min-width:0}
+  .atpark .tk{display:block;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .atpark b{display:block;font-size:1.02rem;line-height:1.3}
+  .atpark i{align-self:stretch;display:flex;align-items:center;margin:-13px 0;padding:13px 0 13px 16px;
+    border-left:1.5px dashed var(--line);font-style:normal;font-weight:700;color:var(--accent2);white-space:nowrap}
+  .atpark:hover i{color:var(--fg)}
 </style>
 </head>
 <body>
@@ -206,7 +216,7 @@
 </div></footer>
 
 <script src="/app.js?v=20261117t"></script>
-<script src="/changes-feed.js?v=20261030a"></script>
+<script src="/changes-feed.js?v=20261117b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('riders');
@@ -277,7 +287,7 @@ CoasterHub.me().then(function(acct){
       if (!best || mi < best.mi) best = { n: n, mi: mi };
     });
     if (best && best.mi <= 1) {
-      document.getElementById('atpark_name').innerHTML = 'You\u2019re at <b>' + esc(best.n) + '</b>';
+      document.getElementById('atpark_name').innerHTML = '<span class="tk">You\u2019re at</span><b>' + esc(best.n) + '</b>';
       document.getElementById('atpark').hidden = false;
     }
   });
@@ -376,7 +386,7 @@ CoasterHub.fetchUsers().then(function(){
       var mine = rows.filter(function(x){ return inF[x.u.slug] || x.u.slug === fol.me; });
       var anyF = mine.some(function(x){ return x.u.slug !== fol.me; });
       document.getElementById('friends').innerHTML = html(mine)
-        + (anyF ? '' : '<p class="hint">You&rsquo;re not following anyone yet. Find people on <a href="/explore">Explore</a> or in Top users below.</p>');
+        + (anyF ? '' : '<p class="hint">You&rsquo;re not following anyone yet. Find people on <a href="/explore">Explore</a>.</p>');
       document.getElementById('friends_wrap').hidden = false;
       // You and the people you follow (Carter, 2026-09-26: "also show my own
       // changes in there too") — so it shows whenever you are signed in.
