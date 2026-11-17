@@ -52,23 +52,25 @@
   /* Among friends (Carter, 2026-10-17): where this rider stands against the
      people they follow — rank in credits and parks, the rides only they have,
      and the ones they rode before any of them. Hidden with nobody followed. */
-  .amg .lead{color:var(--muted);margin:-4px 0 12px;font-size:.95rem}
-  .amg .lead b{color:var(--fg)}
-  .amg .ablk{padding:10px 0;border-top:1px solid var(--line)}
-  .amg .ablk:first-of-type{border-top:0;padding-top:0}
-  .amg .ahd{font-size:.95rem;margin:0 0 8px}
-  .amg .ahd b{color:var(--accent2);font-size:1.15rem;font-variant-numeric:tabular-nums;margin-right:4px}
-  .amg .chips{display:flex;flex-wrap:wrap;gap:6px}
-  .amg .chips a{border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:.84rem;color:var(--fg);text-decoration:none;
-    max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .amg .chips a:hover{border-color:var(--accent2);color:var(--accent2)}
-  .amg .aparks{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px 28px;margin-top:12px}
-  .amg .apr{min-width:0}
-  .amg .apk{margin:0 0 7px;font-size:.98rem;line-height:1.3;overflow-wrap:anywhere}
+  /* Among friends (restyled 2026-11-17, Carter: "formatting on this is funky"):
+     three figures in a row, then a hairline row per park with its rides as a
+     plain comma list — no pill per ride, which filled a phone with outlines. */
+  .amg .astats{display:grid;grid-template-columns:repeat(3,max-content);gap:10px 36px;margin:2px 0 18px}
+  .amg .astat{display:flex;flex-direction:column;min-width:0}
+  @media (max-width:480px){ .amg .astats{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 16px} .amg .astat b{font-size:1.4rem} .amg .astat span{font-size:.76rem} }
+  .amg .astat b{font-size:1.6rem;font-weight:800;line-height:1.1;color:var(--fg);font-variant-numeric:tabular-nums}
+  .amg .astat b.acc{color:var(--accent2)}
+  .amg .astat span{color:var(--muted);font-size:.82rem;font-weight:600;margin-top:2px}
+  .amg .aparks{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));column-gap:36px;border-top:1px solid var(--line)}
+  .amg .apr{min-width:0;padding:10px 0;border-bottom:1px solid var(--line)}
+  .amg .apk{margin:0;font-size:.95rem;line-height:1.3;overflow-wrap:anywhere}
   .amg .apk a{color:var(--fg);font-weight:700;text-decoration:none}
   .amg .apk a:hover{color:var(--accent2)}
-  .amg .apk span{color:var(--muted);font-size:.82rem;font-weight:400;white-space:nowrap}
-  .amg .amore{grid-column:1/-1;justify-self:start;background:none;border:0;font:inherit;font-size:.84rem;color:var(--accent2);padding:4px;cursor:pointer}
+  .amg .apk span{color:var(--muted);font-size:.8rem;font-weight:600;white-space:nowrap;margin-left:4px}
+  .amg .acs{margin:3px 0 0;color:var(--muted);font-size:.86rem;line-height:1.5}
+  .amg .acs a{color:var(--fg);text-decoration:none}
+  .amg .acs a:hover{color:var(--accent2)}
+  .amg .amore{grid-column:1/-1;justify-self:start;background:none;border:0;font:inherit;font-size:.86rem;font-weight:600;color:var(--accent2);padding:10px 0 0;cursor:pointer}
   .records{display:grid;grid-template-columns:1fr;margin-top:6px}
   @media (min-width:641px){ .records{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:column;
     grid-template-rows:repeat(var(--rows,3),auto);column-gap:32px} }
@@ -685,15 +687,19 @@ function mountAmong(slug, name, mine){
       var rest=groups.slice(top.length).reduce(function(n,g){ return n+g.cs.length; },0);
       return top.map(function(g){
           return '<div class="apr"><p class="apk"><a href="'+e(CoasterHub.parkHref(g.park))+'">'+e(g.park||'')+'</a>'
-            +(g.where ? ' <span>'+e(g.where)+'</span>' : '')+'</p><div class="chips">'
-            +g.cs.map(function(c){ return '<a href="'+e(CoasterHub.coasterHref(c))+'">'+e(c.name)+'</a>'; }).join('')
-            +'</div></div>';
+            +(g.where ? '<span>'+e(g.where)+'</span>' : '')+'</p><p class="acs">'
+            +g.cs.map(function(c){ return '<a href="'+e(CoasterHub.coasterHref(c))+'">'+e(c.name)+'</a>'; }).join(', ')
+            +'</p></div>';
         }).join('')
         +(rest ? '<button type="button" class="amore">and '+rest.toLocaleString()+' more</button>' : '');
     };
     var ord=function(n){ return '#'+n; };
-    var h='<p class="lead"><b>'+ord(rank(function(o){ return o.n; }))+'</b> of '+of+' in credits &middot; <b>'+ord(rank(function(o){ return o.np; }))+'</b> in parks</p>';
-    if(only.length) h+='<div class="ablk"><p class="ahd"><b>'+only.length.toLocaleString()+'</b> only '+who+(mine?'&rsquo;ve':' has')+' ridden</p><div class="aparks">'+rows()+'</div></div>';
+    var h='<div class="astats">'
+      +'<div class="astat"><b>'+ord(rank(function(o){ return o.n; }))+'</b><span>of '+of+' in credits</span></div>'
+      +'<div class="astat"><b>'+ord(rank(function(o){ return o.np; }))+'</b><span>of '+of+' in parks</span></div>'
+      +(only.length ? '<div class="astat"><b class="acc">'+only.length.toLocaleString()+'</b><span>only '+who+(mine?'&rsquo;ve':' has')+' ridden</span></div>' : '')
+      +'</div>';
+    if(only.length) h+='<div class="aparks">'+rows()+'</div>';
     document.getElementById('amg_h').textContent = mine ? 'Among your friends' : 'Among '+(name||'their')+'’s friends';
     var host=document.getElementById('amg'); host.innerHTML=h;
     host.onclick=function(ev){

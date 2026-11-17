@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-17T19:18:13Z",
+   "text": "Among friends on a profile is cleaner: your rank in credits and parks and your only-you count sit side by side, and the rides only you have ridden are listed by park instead of as rows of bubbles."
+  },
+  {
    "at": "2026-11-17T16:33:51Z",
    "text": "Rides already on your count from before you started logging dates are no longer marked New in Recent visits or On this day."
   },
