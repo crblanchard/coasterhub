@@ -179,7 +179,18 @@
   #sec_visits{padding-top:22px !important}
   @media (max-width:680px){ #content section.block{padding:24px 0} }
   #morewrap{padding:6px 0 30px}
-  body.moreclosed #sec_activity,body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
+  body.moreclosed #sec_activity,body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown,body.moreclosed #sec_lost{display:none}
+  /* Lost credits (2026-11-17): rides you have done that are gone, closed or
+     moved. Two columns of hairline rows on a desktop, one on a phone. */
+  .lost{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));column-gap:36px;border-top:1px solid var(--line)}
+  .lost .lr{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);min-width:0}
+  .lost .lr .ln{min-width:0}
+  .lost .lr .ln a{color:var(--fg);font-weight:600;font-size:.93rem;text-decoration:none}
+  .lost .lr .ln a:hover{color:var(--accent2)}
+  .lost .lr .ln span{display:block;color:var(--muted);font-size:.8rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lost .lr .lw{flex:none;color:var(--muted);font-size:.8rem;font-weight:600;text-align:right;white-space:nowrap}
+  .lost .lr .lw.mv{color:var(--accent2)}
+  .lostmore{background:none;border:0;font:inherit;font-size:.86rem;font-weight:600;color:var(--accent2);padding:10px 0 0;cursor:pointer}
   @media (max-width:680px){
     #content{display:flex;flex-direction:column}
     #sec_visits{order:1}     /* first, then the top ten: same order, source breaks the tie */
@@ -195,8 +206,9 @@
     #sec_activity{order:7}
     #sec_overtime{order:8}
     #sec_breakdown{order:9}
+    #sec_lost{order:10}
     body.moreclosed #sec_activity,
-    body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown{display:none}
+    body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown,body.moreclosed #sec_lost{display:none}
     /* Two up, not "as many as fit": at 320px auto-fit drops to one column and
        five tiles become five screens. */
     .kpis{grid-template-columns:1fr 1fr;gap:8px}
@@ -504,6 +516,12 @@
     <div class="panel"><h3>Steel vs wood</h3><div class="cap">Credit breakdown</div><div class="cwrap"><canvas id="cType"></canvas></div></div>
   </div>
 </div></section>
+
+<section class="block" id="sec_lost" hidden><div class="container">
+  <h2>Lost credits</h2>
+  <p class="lead" id="lost_sub"></p>
+  <div class="lost" id="lost"></div>
+</div></section>
 </main>
 
 <footer class="site"><div class="container foot-inner">
@@ -512,7 +530,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261117s"></script>
+<script src="/app.js?v=20261117t"></script>
 <script src="/profile-edit.js?v=20261031a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -1265,6 +1283,55 @@ function render(s){
     // Nothing opened, closed or ridden on this date: the section says nothing.
     if(quiet && !rode.length) document.getElementById('sec_otd').style.display='none';
     document.getElementById('otd').innerHTML=html;
+  })();
+
+  // Lost credits (Carter, 2026-11-17): every ride this rider has done that is
+  // gone — closed, or moved on to another park. One row per ride (by ride
+  // key), at the park they rode it, newest loss first. A ride announced to
+  // close later is not lost yet.
+  (function(){
+    var by=s.coastersById||{}, today=new Date().toISOString().slice(0,10), seen={}, rows=[];
+    (s.rides||[]).forEach(function(r){
+      var c=by[r.c]; if(!c || !c.closed || c.closed>today) return;
+      var k=CoasterHub.rideKey(c), home=by[k];
+      var moved = home && home.id!==c.id && !(home.closed && home.closed<=today) && home.park!==c.park;
+      var prev=seen[k];
+      if(prev && prev.c.closed>=c.closed) return;
+      var row={c:c, moved:moved?home:null};
+      if(prev) rows[rows.indexOf(prev)]=row; else rows.push(row);
+      seen[k]=row;
+    });
+    // A ride you also rode at a park where it still runs is not lost.
+    rows=rows.filter(function(x){
+      var k=CoasterHub.rideKey(x.c);
+      return !(s.rides||[]).some(function(r){ var c=by[r.c]; return c && CoasterHub.rideKey(c)==k && (!c.closed || c.closed>today); });
+    });
+    if(!rows.length) return;
+    rows.sort(function(a,b){ return String(b.c.closed).localeCompare(String(a.c.closed)) || String(a.c.name).localeCompare(String(b.c.name)); });
+    var nMoved=rows.filter(function(x){ return x.moved; }).length;
+    document.getElementById('lost_sub').textContent=(mine?'You have ridden ':(s.userName||'They')+' has ridden ')
+      +rows.length+' coaster'+(rows.length>1?'s':'')+' that '+(rows.length>1?'are':'is')+' gone'
+      +(nMoved?' \u2014 '+nMoved+' moved to another park, the rest closed.':'.');
+    var yr=function(d){ return String(d).slice(0,4); };
+    var row=function(x){
+      var c=x.c;
+      return '<div class="lr"><div class="ln"><a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a><span>'+esc(c.park||'')+'</span></div>'
+        +(x.moved
+          ? '<div class="lw mv">Moved '+yr(c.closed)+'<br><a href="'+esc(CoasterHub.coasterHref(x.moved))+'" style="color:inherit;text-decoration:none">now at '+esc(x.moved.park)+'</a></div>'
+          : '<div class="lw">Closed '+yr(c.closed)+'</div>')+'</div>';
+    };
+    var host=document.getElementById('lost'), CAP=12;
+    var draw=function(all){
+      host.innerHTML=(all?rows:rows.slice(0,CAP)).map(row).join('');
+      var b=document.getElementById('lostmore'); if(b) b.remove();
+      if(!all && rows.length>CAP){
+        b=document.createElement('button'); b.type='button'; b.id='lostmore'; b.className='lostmore';
+        b.textContent='and '+(rows.length-CAP)+' more'; b.onclick=function(){ draw(true); };
+        host.parentNode.appendChild(b);
+      }
+    };
+    draw(false);
+    document.getElementById('sec_lost').hidden=false;
   })();
 
   // No Leaflet (a CDN hiccup on park data, a content blocker): no map, and

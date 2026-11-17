@@ -2729,6 +2729,25 @@
     return youP;
   }
 
+  // Your parks, ranked from your coaster ranking (Carter, 2026-11-17). A ride
+  // at #r of N is worth 1 - (r-1)/N (your #1 is 1, your last is near 0); a
+  // park scores its best ride in full, its second at half and its third at a
+  // quarter, so one great coaster beats a pile of so-so ones, but depth still
+  // counts. `rank` is id -> place (you().rank); returns the parks best first:
+  // [{park, score, rides:[{id, rank}], n}], rides best first.
+  function parkRanks(rank, byId) {
+    var ids = Object.keys(rank || {}), N = ids.length, P = {};
+    ids.forEach(function (id) {
+      var c = byId[id]; if (!c || !c.park) return;
+      (P[c.park] = P[c.park] || []).push({ id: id, rank: rank[id] });
+    });
+    return Object.keys(P).map(function (pk) {
+      var rs = P[pk].sort(function (a, b) { return a.rank - b.rank; }), w = [1, .5, .25], score = 0;
+      rs.slice(0, 3).forEach(function (r, i) { score += w[i] * (1 - (r.rank - 1) / N); });
+      return { park: pk, score: score, rides: rs, n: rs.length };
+    }).sort(function (a, b) { return b.score - a.score || a.rides[0].rank - b.rides[0].rank; });
+  }
+
   // The "you" line under a page's tiles: for a set of coasters, how many of
   // the operating ones you have ridden and your best ranked; for one coaster,
   // how many times, since when, and where it ranks. Nothing signed out.
@@ -3809,7 +3828,7 @@
               fetchRides: fetchRides, fetchAllRankings: fetchAllRankings, fetchUsers: fetchUsers, fetchSummary: fetchSummary, fetchAllRides: fetchAllRides, mergeUsers: mergeUsers, noteWrite: noteWrite,
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
-              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, youStrip: youStrip, coasterFacts: coasterFacts,
+              crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, parkRanks: parkRanks, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

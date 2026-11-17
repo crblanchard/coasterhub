@@ -4526,7 +4526,9 @@ matched loosely *within* a park; park names cannot be matched loosely at all.
   the missing fields in its tooltip (515 rows). 490 are complete. Manufacturer, model and
   duration are deliberately outside the count — they are genuinely unpublished for a lot of
   rides, and including them would mark most of the database unfinished.
-- **The coaster table only holds coasters somebody has ridden.** Carter wants "all coasters"
+- **(Done — out of date since at least 2026-11.)** The coaster table holds every coaster, ridden
+  or not, and /coasters has a Ridden / Not ridden filter. The old note: *The coaster table only
+  holds coasters somebody has ridden.* Carter wants "all coasters"
   eventually. That needs a `ridden` flag (or a derived check against `rides`) plus a "show
   all" toggle — otherwise the *Everyone → Full list* view silently changes meaning from
   "everything we have ridden" to "everything that exists".
@@ -6160,3 +6162,27 @@ of them on june 1 from opening soon to operating" when only the year is known.
 `CoasterHub.UNDER_CONSTRUCTION` is the yellow tag, used by lifeTag, coaster.html
 and log.html, and the facts say "Opening". Counts (e.g. "N operating") still
 include them.
+
+## Lost credits, parks ranked, find-in-list, Global filter (2026-11-17)
+
+- **Lost credits** (profile.html `#sec_lost`, folds under More stats): every ride the rider has
+  done whose row has `closed` <= today, one per ride key, newest loss first. "Moved, now at X"
+  when the ride's home row still runs at another park; a ride also ridden somewhere it still
+  runs is not lost. Twelve rows, then "and N more".
+- **Parks ranked** (`CoasterHub.parkRanks(rank, byId)` in app.js): a ride at #r of N is worth
+  1-(r-1)/N; a park scores best ride x1 + second x0.5 + third x0.25. Carter wanted it NOT
+  prominent: a small "See parks ranked" link under a list (5+ ranked, read-only) opens
+  `#parks` in place of the list (rankings.html `parksWire`); park pages add "your #3 park of
+  41" to the you line. rankings.html has `<base href="/">`, so a bare `href="#parks"` went to
+  the HOME page — the link's href is set to the full path in JS. Any new in-page hash link
+  there needs the same.
+- **Find in this list** (`#fq`, lists of 15+): rides on the model filter (`mfOn`/`mfMatch`
+  now include `FQ`), so a found ride still drags in edit mode via moveFiltered.
+- **Global: All / Ridden / Not ridden** (`#gfilt`, signed in only): hides rows by the reader's
+  own ride keys; Global numbers are not renumbered.
+- **Not built: "you rank it X higher than average" (item 7).** Agreed method: renumber the
+  Global list over only the rides on YOUR list, then compare your place with that one (raw
+  Global # vs your # is meaningless when Global has 1,000 and you rank 200). Carter liked it
+  but not the wording — find a clean way to say it before building.
+- **Everyone's lists** sidebar: Carter said not needed.
+

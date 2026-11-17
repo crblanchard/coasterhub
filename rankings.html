@@ -314,6 +314,30 @@
   .mflist label i{font-style:normal;color:var(--muted);font-size:.8rem;margin-left:auto;flex:none}
   .mfacts{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
   .mfnote{color:var(--muted);font-size:.86rem;margin:0 0 6px}
+  /* Find in this list (2026-11-17): narrows the list as you type, numbers kept. */
+  .findbar{margin:0 0 12px}
+  .findbar input{width:100%;max-width:360px;box-sizing:border-box;padding:9px 12px;border:1px solid var(--line);border-radius:10px;
+    background:var(--panel);color:var(--fg);font:inherit;font-size:.92rem}
+  /* Global: All · Ridden · Not ridden, for the reader's own credits. */
+  .gfilt{margin:0 0 12px}
+  .gfilt button{padding:8px 14px}
+  .gfilt[hidden],.findbar[hidden],.srow[hidden]{display:none}
+  /* Parks ranked from the list (2026-11-17): a quiet link under the list, and
+     a view of its own in place of the list. */
+  .parkslink{margin:18px 0 0;font-size:.88rem}
+  .parkslink a{color:var(--accent2);font-weight:600;text-decoration:none}
+  .parkslink[hidden],#pane_parks[hidden],#mine:not(.readonly) .parkslink{display:none}
+  .pkback{margin:0 0 6px;font-size:.88rem}
+  .pkback a{color:var(--accent2);font-weight:600;text-decoration:none}
+  .pkr{border-top:1px solid var(--line)}
+  .pkr .pk{display:flex;gap:14px;align-items:flex-start;padding:11px 2px;border-bottom:1px solid var(--line)}
+  .pkr .pk .pos{flex:none;width:2.2em;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums}
+  .pkr .pk .pn{flex:1;min-width:0}
+  .pkr .pk .pn a.pkn{color:var(--fg);font-weight:700;font-size:.95rem;text-decoration:none}
+  .pkr .pk .pn a.pkn:hover{color:var(--accent2)}
+  .pkr .pk .pn .rg{color:var(--muted);font-size:.8rem;font-weight:600;margin-left:6px;white-space:nowrap}
+  .pkr .pk .pn .rs{display:block;color:var(--muted);font-size:.85rem;line-height:1.5;margin-top:2px}
+  .pkr .pk .pn .rs b{color:var(--fg);font-weight:500}
   .catpill{display:inline-flex;align-items:center;gap:8px;background:var(--panel);
            border:1px solid var(--line);border-radius:99px;padding:7px 14px;margin:0;
            color:var(--fg);font-size:.85rem;font-weight:600;text-decoration:none}
@@ -690,6 +714,7 @@
         <h2>Global list</h2>
         <p id="shared_sub"></p>
       </div>
+      <div class="seg gfilt" id="gfilt" hidden><button type="button" class="on" data-f="">All</button><button type="button" data-f="y">Ridden</button><button type="button" data-f="n">Not ridden</button></div>
       <div class="shared" id="shared"></div>
     </div>
 
@@ -749,9 +774,17 @@
         <span>Some rides that are the same appear in more than one place.</span>
         <button class="ghost" type="button" id="gather">Gather them</button>
       </div>
+      <div class="findbar" id="findbar" hidden><input type="search" id="fq" placeholder="Find in this list&hellip;" autocomplete="off" aria-label="Find in this list"></div>
       <p class="edithint">Drag the handle, or tap a number to move it to a spot.<span class="swhint"> Swipe left to remove.</span></p>
       <div class="rank" id="ranklist"></div>
       <div class="hint" id="rank_empty" style="display:none">Nothing ranked yet.</div>
+      <p class="parkslink" id="parkslink" hidden><a href="#parks">See parks ranked &rarr;</a></p>
+    </div>
+
+    <div id="pane_parks" hidden>
+      <p class="pkback"><a href="#" id="pkback">&larr; Back to the list</a></p>
+      <p class="mfnote" id="pk_sub"></p>
+      <div class="pkr" id="pkr"></div>
     </div>
 
     <div id="pane_add" style="display:none">
@@ -858,7 +891,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261117s"></script>
+<script src="/app.js?v=20261117t"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -1012,7 +1045,7 @@ if(!slug){
         var full=CoasterHub.racingWho(G, GT, BYID, ME && ME.slug) || CoasterHub.whoByPlace(t.who, ME && ME.slug);
         // Ranked, so number them: this is a top ten and the position is half of
         // what it says.
-        return '<div class="srow">'
+        return '<div class="srow" data-k="'+esc(t.id)+'">'
           +'<div class="stog" role="button" tabindex="0" aria-expanded="false">'
             +'<span class="pos">'+(i+1)+'</span>'
             +srowName(c, mk, label)
@@ -1033,6 +1066,24 @@ if(!slug){
       // One open at a time (Carter, 2026-09-28 — this used to keep each row
       // independent, for comparing two side by side).
       srowToggles($('shared'));
+      // All · Ridden · Not ridden (2026-11-17): the crowd's order over your own
+      // credits, or the best-rated rides you still need. Global numbers stay
+      // as they are; the rows just hide. Signed in only — it is about YOUR count.
+      if(ME && ME.slug) CoasterHub.fetchRides(ME.slug).then(function(r){
+        var got={};
+        ((r&&r.rides)||[]).forEach(function(x){ var k=KEY(x.c); if(k!=null) got[k]=1; });
+        if(!Object.keys(got).length) return;
+        var f=$('gfilt'); f.hidden=false;
+        f.onclick=function(e){
+          var b=e.target.closest('button[data-f]'); if(!b) return;
+          f.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x===b); });
+          var want=b.getAttribute('data-f');
+          $('shared').querySelectorAll('.srow').forEach(function(row){
+            var has=!!got[row.getAttribute('data-k')];
+            row.hidden = want==='y' ? !has : want==='n' ? has : false;
+          });
+        };
+      }).catch(function(){});
     } else {
       $('shared_sub').textContent='';
       $('shared').innerHTML='<div class="note">'+(started.length<2
@@ -1137,11 +1188,47 @@ if(!slug){
     document.title=nm+'’s Rankings — Coaster Hub';
 
     $('loading').style.display='none'; $('mine').style.display='block'; $('howfoot').hidden=false;
-    wire(); mfWire(); renderRank(); renderAdd(); loadGlobal(); compareWithMe(nm);
+    wire(); mfWire(); renderRank(); renderAdd(); loadGlobal(); compareWithMe(nm); parksWire(nm);
     // And again once everything is drawn: whichever of these two runs last is
     // the one that finds both the categories and the ownership in place.
     maybeOfferJoins();
   }).catch(function(e){ console.error(e); $('loading').textContent='Couldn’t load your coasters.'; });
+}
+
+// Parks ranked from this list (Carter, 2026-11-17: "don't want to make it super
+// prominent"): a small link under the list opens #parks, which takes the
+// list's place until Back. Scored by CoasterHub.parkRanks — a park's best
+// ride counts in full, its second half, its third a quarter.
+function parksWire(nm){
+  var cameFromList=false;
+  function draw(){
+    var rank={}; ORDER.forEach(function(id,i){ rank[id]=i+1; });
+    var P=CoasterHub.parkRanks(rank, BYID);
+    $('pk_sub').innerHTML=(OWN?'Your':nm+'&rsquo;s')+' parks, from where their best three rides sit on '+(OWN?'your':'this')+' list.';
+    $('pkr').innerHTML=P.map(function(p,i){
+      var top=p.rides.slice(0,3).map(function(r){ var c=BYID[r.id]||{}; return '<b>'+esc(c.name||'')+'</b> #'+r.rank; }).join(' &middot; ')
+        +(p.n>3?' &middot; +'+(p.n-3)+' more':'');
+      var rg=(BYID[p.rides[0].id]||{}).loc||'';
+      return '<div class="pk"><span class="pos">'+(i+1)+'</span><div class="pn"><a class="pkn" href="'+esc(CoasterHub.parkHref(p.park))+'">'+esc(p.park)+'</a>'
+        +(rg?'<span class="rg">'+esc(rg.replace(/, US$/,''))+'</span>':'')+'<span class="rs">'+top+'</span></div></div>';
+    }).join('');
+  }
+  function show(){
+    var on=location.hash==='#parks' && ORDER.length>0;
+    $('pane_parks').hidden=!on;
+    $('pane_rank').style.display = on ? 'none' : (view==='rank' ? 'block' : 'none');
+    var bar=document.querySelector('#mine > .bar'); if(bar) bar.style.display = on ? 'none' : '';
+    if(on){ draw(); window.scrollTo({top:0, behavior:'instant'}); }
+  }
+  $('parkslink').hidden = ORDER.length<5;
+  // A full path, not a bare "#parks": this page has <base href="/">, which
+  // would send a bare hash to the home page.
+  var go=$('parkslink').querySelector('a');
+  go.href=location.pathname+location.search+'#parks';
+  go.addEventListener('click', function(){ cameFromList=true; });
+  $('pkback').onclick=function(e){ e.preventDefault(); if(cameFromList) history.back(); else { history.replaceState(null,'',location.pathname+location.search); show(); } };
+  window.addEventListener('hashchange', show);
+  show();
 }
 
 // On someone else's list: how much you agree, and the ride you split on most
@@ -1331,8 +1418,15 @@ function factsFor(id){
 // Empty = everything. Rows keep their real numbers; a category row stays when
 // any ride in it matches.
 var MSEL={};
-function mfOn(){ return Object.keys(MSEL).length>0; }
-function mfMatch(b){ return b.ids.some(function(id){ return MSEL[CoasterHub.maker(BYID[id]||{})]; }); }
+// The typed "find in this list" text (2026-11-17, Carter's ask for the
+// rankings extras). It rides on the model filter's machinery, so a found ride
+// can still be dragged in edit mode the same way a filtered one can.
+var FQ='';
+function mselOn(){ return Object.keys(MSEL).length>0; }
+function fqHit(id){ var c=BYID[id]||{}; return (String(c.name||'')+' '+String(c.park||'')).toLowerCase().indexOf(FQ)>=0; }
+function idMatch(id){ return (!mselOn() || !!MSEL[CoasterHub.maker(BYID[id]||{})]) && (!FQ || fqHit(id)); }
+function mfOn(){ return mselOn() || !!FQ; }
+function mfMatch(b){ return b.ids.some(idMatch) || (!!FQ && !mselOn() && b.g && String(b.g.name||'').toLowerCase().indexOf(FQ)>=0); }
 function mfDraw(){
   var q=($('mfq').value||'').trim().toLowerCase(), n={}, seen={};
   ORDER.forEach(function(id){ var k=KEY(id); if(seen[k]) return; seen[k]=1; var m=CoasterHub.maker(BYID[id]||{}); if(m) n[m]=(n[m]||0)+1; });
@@ -1353,6 +1447,7 @@ function mfWire(){
   $('mflist').addEventListener('change', function(e){ var m=e.target.getAttribute('data-m'); if(m==null) return;
     if(e.target.checked) MSEL[m]=1; else delete MSEL[m]; mfDraw(); renderRank(); });
   $('mfclear').onclick=function(){ MSEL={}; $('mfq').value=''; mfDraw(); renderRank(); };
+  $('fq').addEventListener('input', function(){ FQ=this.value.trim().toLowerCase(); renderRank(); });
   $('mfdone').onclick=function(){ $('mfpanel').hidden=true; $('mfbtn').setAttribute('aria-expanded','false'); };
 }
 
@@ -1394,9 +1489,12 @@ function renderRank(){
   var el=$('ranklist');
   $('rank_empty').style.display=ORDER.length?'none':'block';
   var bs=blocks(), mf=mfOn();
-  var note = mf ? '<p class="mfnote">Showing '+bs.filter(mfMatch).reduce(function(t,b){ return t+b.ids.filter(function(id){ return MSEL[CoasterHub.maker(BYID[id]||{})]; }).length; },0)
-    // "Showing 19 of your credits · B&M Inverts" — always plural (Carter, 2026-09-27).
-    +' of your credits &middot; '+Object.keys(MSEL).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return esc(/s$/i.test(m)?m:m+'s'); }).join(', ')
+  var shown = mf ? bs.filter(mfMatch).reduce(function(t,b){ var n=b.ids.filter(idMatch).length; return t+(n||b.ids.length); },0) : 0;
+  var what = [];
+  // "Showing 19 of your credits · B&M Inverts" — always plural (Carter, 2026-09-27).
+  if(mselOn()) what.push(Object.keys(MSEL).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return esc(/s$/i.test(m)?m:m+'s'); }).join(', '));
+  if(FQ) what.push('&ldquo;'+esc(FQ)+'&rdquo;');
+  var note = mf ? '<p class="mfnote">'+(shown ? 'Showing '+shown+' of your credits' : 'Nothing in this list matches')+' &middot; '+what.join(' &middot; ')
     +' &middot; <a href="#" id="mfoff" style="color:var(--accent2)">show all</a></p>' : '';
   el.innerHTML=note+bs.map(function(b,i){
     if(mf && !mfMatch(b)) return '';
@@ -1518,7 +1616,9 @@ function renderRank(){
         
       +'</span>'+members+(b.g?'':statsFor(b.ids[0]))+'</div>';
   }).join('');
-  if($('mfoff')) $('mfoff').onclick=function(e){ e.preventDefault(); MSEL={}; mfDraw(); renderRank(); };
+  if($('mfoff')) $('mfoff').onclick=function(e){ e.preventDefault(); MSEL={}; FQ=''; $('fq').value=''; mfDraw(); renderRank(); };
+  // The find box only earns its place on a list long enough to lose a ride in.
+  $('findbar').hidden = ORDER.length < 15;
   // Read-only only: in edit mode a tap on a row is the start of a drag.
   el.querySelectorAll('[data-stat]').forEach(function(r){
     r.addEventListener('click', function(ev){
