@@ -913,6 +913,9 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 /* `.hero p` and the phone hero rules outrank a bare class, so the count shrank
    to body size (Carter, 2026-11-17: "this text formatting is super small"). */
 .hero p.rh-count{margin:0;max-width:none;color:var(--fg);font-size:clamp(1.3rem,2.4vw,1.65rem);font-weight:800;line-height:1.2}
+/* Beside the skyline on a wider screen, one figure per line, right-aligned, like
+   the profile's own count (Carter, 2026-11-17: "make them two lines"). */
+@media (min-width:681px){ .hero p.rh-count{text-align:right;line-height:1.15} .hero p.rh-count a{display:block} }
 .rh-count a:hover{color:var(--accent2)}
 .hero .rhead{margin:0 0 14px}
 .rhband{padding:14px 0;border-bottom:1px solid var(--line);background-color:var(--panel)}
