@@ -114,6 +114,16 @@
      whole profile sideways on a phone (Carter, 2026-11-02). It is a second
      line under the name now, ellipsized if it still does not fit. */
   .rec .rname .rsub{display:block;color:var(--muted);font-weight:600;font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* On this day's own visits: one row per year and park, the rides listed
+     under it. The ride list wraps (it is the point of the row), unlike a
+     record's park line, and the row spans both columns. */
+  .otdv{display:flex;flex-direction:column}
+  .otdv .rec{align-items:flex-start}
+  .otdv .rec .rname{white-space:normal}
+  .otdv .rec .rname .rsub{white-space:normal;font-weight:500;line-height:1.45;margin-top:2px}
+  .otdv .rec .rsub .new{color:var(--accent2);font-weight:700}
+  .otdv .rec .meta{display:block;color:var(--muted);font-weight:600;font-size:.8rem;margin-top:1px}
+  .otdv .rec .tag{width:3.4em}
   /* On this day, when nothing opened or closed that date: one line, no heading. */
   #content #sec_otd.quiet{padding:4px 0 18px}
   #sec_otd.quiet h2{display:none}
@@ -1200,14 +1210,44 @@ function render(s){
     var html='';
     if(opened.length){ html+='<div class="cap" style="margin-bottom:12px">Opened on '+dayLabel+':</div>'+otdCards(opened,'opened','Opened'); }
     if(closed.length){ html+='<div class="cap" style="margin:'+(opened.length?'24px':'0')+' 0 12px">Closed on '+dayLabel+':</div>'+otdCards(closed,'closed','Closed'); }
-    var quiet=!opened.length&&!closed.length;
+    // A line is all it says when nothing opened or closed AND nothing was ridden.
+    var quiet=!opened.length&&!closed.length&&!rode.length;
     document.getElementById('sec_otd').classList.toggle('quiet', quiet);
     if(rode.length){
       var subj=mine?'I':esc(s.userName);
       var phrase=has.activity
         ? (mine?'I have':subj+' has')+' taken <b style="color:var(--accent2)">'+rode.length+'</b> ride'+(rode.length>1?'s':'')
         : subj+' first rode <b style="color:var(--accent2)">'+rode.length+'</b> coaster'+(rode.length>1?'s':'');
-      html+='<p class="note"'+(quiet?'':' style="margin-top:16px"')+'>'+(quiet?'<b>On this day:</b> ':'')+phrase+' on '+dayLabel+' over the years ('+rodeYears.join(', ')+').</p>';
+      html+='<p class="note" style="margin:'+(opened.length||closed.length?'24px':'0')+' 0 8px">'+phrase+' on '+dayLabel+' over the years.</p>';
+      // Which parks and which rides, a row per year and park, newest first
+      // (Carter, 2026-11-17: "more detail would be cool about what parks /
+      // maybe rides specifically"). A credit first ridden that day is marked new.
+      var byId={}; (s.coasters||[]).forEach(function(c){ byId[c.id]=c; });
+      var firstOn={}; (s.first_rides||[]).forEach(function(f){ var c=byId[f.c]; if(c) firstOn[CoasterHub.rideKey(c)+'|'+f.d]=1; });
+      var visits={}, vorder=[];
+      rode.forEach(function(r){
+        var c=byId[r.c]; if(!c) return;
+        var k=r.d.slice(0,4)+'|'+c.park;
+        if(!visits[k]){ visits[k]={y:r.d.slice(0,4), park:c.park, n:0, by:{}, ids:[]}; vorder.push(k); }
+        var v=visits[k]; v.n++;
+        if(!v.by[c.id]){ v.by[c.id]={c:c, n:0, isNew:!!firstOn[CoasterHub.rideKey(c)+'|'+r.d]}; v.ids.push(c.id); }
+        v.by[c.id].n++;
+      });
+      vorder.sort(function(a,b){ var A=visits[a],B=visits[b]; return B.y.localeCompare(A.y)||B.n-A.n||A.park.localeCompare(B.park); });
+      var MAXN=10;
+      html+='<div class="otdv">'+vorder.map(function(k){
+        var v=visits[k], age=cy-parseInt(v.y,10);
+        var list=v.ids.map(function(id){ return v.by[id]; }).sort(function(a,b){ return b.n-a.n||a.c.name.localeCompare(b.c.name); });
+        var nNew=list.filter(function(x){ return x.isNew; }).length;
+        var names=list.slice(0,MAXN).map(function(x){ return esc(x.c.name)+(has.activity&&x.n>1?' \u00d7'+x.n:'')+(has.activity&&x.isNew?' <span class="new">new</span>':''); });
+        if(list.length>MAXN) names.push('+'+(list.length-MAXN)+' more');
+        var tail=has.activity?(v.n+' ride'+(v.n>1?'s':'')+(nNew?' \u00b7 '+nNew+' new':'')):(list.length+' credit'+(list.length>1?'s':''));
+        // The count sits under the park, not in a right-hand column: on a phone
+        // that column squeezed the park and the ride list to a word a line.
+        return '<div class="rec"><span class="tag">'+v.y+'</span><span class="rname">'+esc(v.park)
+          +'<span class="meta">'+(age===0?'This year':age===1?'1 yr ago':age+' yrs ago')+' \u00b7 '+tail+'</span>'
+          +'<span class="rsub">'+names.join(', ')+'</span></span></div>';
+      }).join('')+'</div>';
     }
     // Nothing opened, closed or ridden on this date: the section says nothing.
     if(quiet && !rode.length) document.getElementById('sec_otd').style.display='none';
