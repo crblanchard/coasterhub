@@ -1116,6 +1116,11 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   ::view-transition-old(topbar),::view-transition-old(tabbar){animation:none;opacity:0}
   ::view-transition-new(topbar),::view-transition-new(tabbar){animation:none}
 }
+/* The app's own swipe-back (app.js edgeSwipe, 2026-11-17): what is between the
+   bars follows the finger; this is the shadow on its left edge. */
+html.edgeswiping,html.edgeswiping body{overflow-x:hidden}
+.edgeshade{position:fixed;top:0;bottom:0;left:-16px;width:16px;z-index:15;pointer-events:none;opacity:0;
+  background:linear-gradient(to left,rgba(0,0,0,.18),rgba(0,0,0,0))}
 @keyframes vt-push-in{from{transform:translateX(100%)}}
 @keyframes vt-push-out{to{transform:translateX(-28%);filter:brightness(.92)}}
 @keyframes vt-pop-in{from{transform:translateX(-28%);filter:brightness(.92)}}

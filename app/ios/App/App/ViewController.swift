@@ -2,8 +2,12 @@ import UIKit
 import Capacitor
 
 // The app's one screen: Capacitor's web view, plus
-//  - the iPhone's swipe from the left edge to go back (2026-10-30), which a
-//    plain web view leaves off;
+//  - NOT the iPhone's own swipe-back (on 2026-10-30, off 2026-11-17): it slid
+//    a snapshot of the whole screen, bars included, and painted a flat colour
+//    where it had none. The page does the swipe itself now (app.js
+//    edgeSwipe), moving only what is between the bars; it runs only when the
+//    user agent says "CHSwipe/1" (capacitor.config.json), which only a build
+//    with this line has;
 //  - a background that follows light/dark (2026-10-30): between two pages the
 //    web view shows its own background for a moment, and a fixed dark one
 //    flashed black between light pages. These are the site's --bg colours.
@@ -15,7 +19,7 @@ class ViewController: CAPBridgeViewController {
     }
 
     override func capacitorDidLoad() {
-        webView?.allowsBackForwardNavigationGestures = true
+        webView?.allowsBackForwardNavigationGestures = false
         view.backgroundColor = ViewController.pageBackground
         webView?.isOpaque = false
         webView?.backgroundColor = ViewController.pageBackground

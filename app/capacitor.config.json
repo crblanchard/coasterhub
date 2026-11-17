@@ -5,7 +5,7 @@
   "server": {
     "url": "https://coasterhub.org"
   },
-  "appendUserAgent": "CoasterHubApp",
+  "appendUserAgent": "CoasterHubApp CHSwipe/1",
   "ios": {
     "contentInset": "never",
     "scheme": "Coaster Hub",

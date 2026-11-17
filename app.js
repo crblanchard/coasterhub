@@ -1043,9 +1043,96 @@
   }
   // Once per page: mark <html> for CSS, and open links off coasterhub.org in an
   // in-app browser sheet instead of leaving the app for Safari.
+  // ---- swipe from the left edge = Back, done by the page (2026-11-17) --------
+  // iOS's own back gesture slides a snapshot of the WHOLE screen, bars and
+  // all, and where it has no snapshot of the page underneath it paints a flat
+  // colour — so a swipe turned everything white (or black) (Carter,
+  // 2026-11-17: "make it where the bars at the top and bottom stay"). Here the
+  // finger moves only what is between the bars; let go past a third of the
+  // screen (or flick) and it is history.back(), with the arriving page shown
+  // as is, since the slide already happened. Only in an app build that has
+  // turned the native gesture off and says so in its user agent ("CHSwipe/1",
+  // app/capacitor.config.json) — any older build keeps the native gesture,
+  // and no browser ever runs this.
+  function edgeSwipe() {
+    if (!/CHSwipe\/1/.test(navigator.userAgent || "")) return;
+    var EDGE = 24, sx = 0, sy = 0, st = 0, dx = 0, trail = [], on = false, dead = false, els = [], shade = null;
+    var canBack = function () {
+      var n = window.navigation;
+      if (n && typeof n.canGoBack === "boolean") return n.canGoBack;
+      return history.length > 1;
+    };
+    var movers = function () {
+      return Array.prototype.filter.call(document.body.children, function (el) {
+        var t = el.tagName;
+        // Not the bars, and nothing fixed (pull-to-refresh, pills, menus):
+        // those position themselves, and their own transform must survive.
+        return t !== "SCRIPT" && t !== "STYLE" && t !== "LINK" && t !== "TEMPLATE"
+          && !el.matches("header.nav, .tabbar") && !el.hidden && getComputedStyle(el).position !== "fixed";
+      });
+    };
+    var set = function (x, ms) {
+      var tr = ms ? "transform " + ms + "ms cubic-bezier(.2,.8,.2,1)" : "none";
+      els.forEach(function (el) { el.style.transition = tr; el.style.transform = x ? "translateX(" + x + "px)" : ""; });
+      if (shade) { shade.style.transition = ms ? "transform " + ms + "ms cubic-bezier(.2,.8,.2,1), opacity " + ms + "ms" : "none";
+        shade.style.transform = "translateX(" + x + "px)"; shade.style.opacity = x ? "1" : "0"; }
+    };
+    var reset = function () {
+      els.forEach(function (el) { el.style.transition = ""; el.style.transform = ""; el.style.willChange = ""; });
+      els = []; if (shade && shade.parentNode) shade.parentNode.removeChild(shade); shade = null;
+      document.documentElement.classList.remove("edgeswiping");
+    };
+    document.addEventListener("touchstart", function (e) {
+      on = false; dead = false;
+      if (e.touches.length !== 1) return;
+      var t = e.touches[0];
+      if (t.clientX > EDGE || !canBack()) return;
+      sx = t.clientX; sy = t.clientY; st = Date.now(); dx = 0; trail = []; on = true;
+    }, { passive: true });
+    document.addEventListener("touchmove", function (e) {
+      if (!on || dead) return;
+      var t = e.touches[0], mx = t.clientX - sx, my = t.clientY - sy;
+      if (!els.length) {
+        if (Math.abs(my) > 10 && Math.abs(my) > Math.abs(mx)) { dead = true; return; }   // a scroll, not a swipe
+        if (mx < 8) return;
+        els = movers();
+        els.forEach(function (el) { el.style.willChange = "transform"; });
+        shade = document.createElement("div"); shade.className = "edgeshade"; document.body.appendChild(shade);
+        document.documentElement.classList.add("edgeswiping");
+      }
+      e.preventDefault();
+      dx = Math.max(0, mx);
+      var now = Date.now(); trail.push([now, dx]);
+      while (trail.length > 2 && now - trail[0][0] > 100) trail.shift();
+      set(dx, 0);
+    }, { passive: false });
+    var end = function () {
+      if (!on) return; on = false;
+      if (!els.length) return;
+      // A flick is speed over the last tenth of a second, not the whole drag:
+      // a slow pull let go early must snap back.
+      var w = window.innerWidth, f = trail[0] || [st, 0], v = (dx - f[1]) / Math.max(1, Date.now() - f[0]);
+      if (dx > w / 3 || (v > 0.5 && dx > 40)) {
+        set(w, 180);
+        try { haptic(); } catch (x) {}
+        // The page under the bars has already slid away: the arriving one
+        // must not slide in again.
+        markTransition("same");
+        setTimeout(function () { history.back(); }, 170);
+      } else {
+        set(0, 200);
+        setTimeout(reset, 210);
+      }
+    };
+    document.addEventListener("touchend", end, { passive: true });
+    document.addEventListener("touchcancel", end, { passive: true });
+    // Back here from the page cache, still slid out: put it back.
+    window.addEventListener("pageshow", function (e) { if (e.persisted) reset(); });
+  }
   function appShell() {
     if (!inApp()) return;
     document.documentElement.classList.add("inapp");
+    edgeSwipe();
     pushWire();
     // A coasterhub.org link tapped elsewhere (Mail, Messages) opens the app
     // (apple-app-site-association, worker.js): go to the page it names.
