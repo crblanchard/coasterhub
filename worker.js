@@ -1441,6 +1441,84 @@ async function getOpenCleanup(env) {
   return { stats: STATS.length, rows };
 }
 
+// The review dashboard (/open-review, 2026-11-18): links the strict matchers
+// did not make, open-source coasters to add, and the removal flags, each with
+// any decision already taken. Everything here is the open dataset only; the
+// live site reads none of it until the one-time switch.
+async function getOpenReview(env) {
+  const q = (sql, ...b) => env.DB.prepare(sql).bind(...b).all().then(r => r.results).catch(() => []);
+  const [sugg, adds, reviews, items, cleanup] = await Promise.all([
+    q("SELECT s.source, s.ref, s.coaster_id, s.score, s.reason, c.name, c.park, c.closed FROM open_suggestions s JOIN coasters c ON c.id = s.coaster_id ORDER BY s.score DESC, c.park, c.name"),
+    q("SELECT park, name, status, refs FROM open_adds ORDER BY park, name"),
+    q("SELECT kind, source, ref, coaster_id, decision, note, by, at FROM open_reviews"),
+    q("SELECT source, ref, name, park FROM open_items"),
+    getOpenCleanup(env).catch(() => ({ rows: [] })),
+  ]);
+  const item = new Map(items.map(i => [i.source + "|" + i.ref, i]));
+  // Stats for the records in play, so a suggestion can be judged side by side.
+  const want = new Set(sugg.map(s => s.source + "|" + s.ref));
+  const rf = {};
+  for (const f of await q("SELECT source, ref, field, value FROM open_record_facts WHERE source || '|' || ref IN (SELECT source || '|' || ref FROM open_suggestions)")) {
+    const k = f.source + "|" + f.ref;
+    if (want.has(k)) (rf[k] = rf[k] || {})[f.field] = f.value;
+  }
+  const ids = [...new Set(sugg.map(s => s.coaster_id))];
+  const site = {};
+  for (let i = 0; i < ids.length; i += 90) {
+    const part = ids.slice(i, i + 90);
+    for (const c of await q("SELECT id, " + OPEN_FIELDS.join(", ") + " FROM coasters WHERE id IN (" + part.map(() => "?").join(",") + ")", ...part)) site[c.id] = c;
+  }
+  return {
+    fields: OPEN_FIELDS,
+    suggestions: sugg.map(s => ({ ...s, record: item.get(s.source + "|" + s.ref) || null, facts: rf[s.source + "|" + s.ref] || {}, site: site[s.coaster_id] || {} })),
+    adds: adds.map(a => ({ ...a, refs: JSON.parse(a.refs || "[]").map(r => ({ ...r, name: (item.get(r.source + "|" + r.ref) || {}).name || null })) })),
+    flags: cleanup.rows.filter(r => r[9]).map(r => ({ id: r[0], name: r[1], park: r[2], closed: r[3], siteStats: r[6] })),
+    reviews,
+  };
+}
+
+// One decision. Changes only the open dataset: open_reviews, and for a match
+// the coaster's open_links / open_facts for that source, copied from
+// open_record_facts so the effect shows at once. decision null undoes.
+async function setOpenReview(env, acct, b) {
+  const kind = String(b.kind || ""), source = String(b.source || ""), ref = String(b.ref || ""), cid = +b.coaster_id || 0;
+  const decision = b.decision ? String(b.decision) : null;
+  const ok = { match: ["approve", "reject"], add: ["approve", "reject"], coaster: ["keep", "remove"] };
+  if (!ok[kind] || (decision && !ok[kind].includes(decision))) return err(400, "bad kind or decision");
+  try { await env.DB.prepare("SELECT 1 FROM open_reviews LIMIT 1").first(); }
+  catch (e) { return err(503, "run migrations/192-open-reviews.sql first"); }
+  const stmts = [];
+  const unlink = () => {
+    stmts.push(env.DB.prepare("DELETE FROM open_facts WHERE coaster_id = ? AND source = ? AND ref = ?").bind(cid, source, ref));
+    stmts.push(env.DB.prepare("DELETE FROM open_links WHERE coaster_id = ? AND source = ? AND ref = ?").bind(cid, source, ref));
+  };
+  if (kind === "match") {
+    if (!cid || !source || !ref) return err(400, "coaster_id, source and ref required");
+    if (decision === "approve") {
+      // This coaster's previous link in this source gives way.
+      stmts.push(env.DB.prepare("DELETE FROM open_facts WHERE coaster_id = ? AND source = ?").bind(cid, source));
+      stmts.push(env.DB.prepare("DELETE FROM open_links WHERE coaster_id = ? AND source = ?").bind(cid, source));
+      stmts.push(env.DB.prepare("INSERT INTO open_links (coaster_id, source, ref, method, added) VALUES (?, ?, ?, 'approved', ?)").bind(cid, source, ref, new Date().toISOString().slice(0, 10)));
+      stmts.push(env.DB.prepare(
+        "INSERT OR REPLACE INTO open_facts (coaster_id, field, value, prec, source, ref, cites_rcdb, retrieved) " +
+        "SELECT ?, field, value, prec, source, ref, cites_rcdb, ? FROM open_record_facts WHERE source = ? AND ref = ?")
+        .bind(cid, new Date().toISOString().slice(0, 10), source, ref));
+    } else {
+      unlink();   // reject, or undo an approval: the next refresh re-matches as normal
+    }
+  }
+  if (decision) {
+    stmts.push(env.DB.prepare(
+      "INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(kind, source, ref, cid, decision, b.note ? String(b.note).slice(0, 300) : null,
+            acct ? (acct.slug || acct.name || "admin") : "admin", new Date().toISOString()));
+  } else {
+    stmts.push(env.DB.prepare("DELETE FROM open_reviews WHERE kind = ? AND source = ? AND ref = ? AND coaster_id = ?").bind(kind, source, ref, cid));
+  }
+  await env.DB.batch(stmts);
+  return json({ ok: true, decision });
+}
+
 // A pick where the sources disagree: which source's value is right for this
 // coaster and field, in the parallel dataset only. source 'site' takes the
 // current value; anything else takes that source's open_facts value now.
@@ -2524,6 +2602,11 @@ export default {
         catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
         return json(await getOpenCleanup(env));
       }
+      if (request.method === "GET" && path === "/api/open-review") {
+        try { await env.DB.prepare("SELECT 1 FROM open_suggestions LIMIT 1").first(); }
+        catch (e) { return err(503, "run migrations/191-open-data-review.sql first"); }
+        return json(await getOpenReview(env));
+      }
       // ---- summaries (2026-09-25) ------------------------------------------
       // One request where pages used to make one per rider. The home page
       // fetched every rider's full ride log and ranking just to print "562
@@ -2800,6 +2883,12 @@ export default {
         const id = +b.id;
         if (!id) return err(400, "id required");
         return setOpenChoice(env, acct, id, String(b.field || ""), b.source ? String(b.source) : null);
+      }
+      // A decision on /open-review. Admins only; open dataset only.
+      if (request.method === "POST" && path === "/api/open-review") {
+        if (!adminOk(request, env, acct)) return err(401, "admins only");
+        let b; try { b = await request.json(); } catch (e) { return err(400, "bad JSON"); }
+        return setOpenReview(env, acct, b);
       }
       if (request.method === "GET" && path === "/api/push/test") {
         if (!(acct && acct.admin)) return err(401, "admins only");

@@ -182,6 +182,20 @@ for ms in per.values():
         for m in ms: m['status'] = 'ambiguous'
 
 item_by = {(it['source'], it['ref']): it for it in items}
+
+# Decisions made on /open-review win over the matcher, both ways
+# (tools/open-data/reviews.json, exported from D1's open_reviews by the job).
+reviews = json.load(open('tools/open-data/reviews.json')) if os.path.exists('tools/open-data/reviews.json') else []
+for r in reviews:
+    if r.get('kind') != 'match' or r.get('source') not in ('coasterpedia', 'osm'): continue
+    key, cid = (r['source'], r['ref']), int(r['coaster_id'])
+    if key not in item_by or cid not in byid: continue
+    # This coaster's other links in this source, and this record's other coasters, give way.
+    matches = [m for m in matches if not (m['source'] == r['source'] and (m['coaster_id'] == cid or m['ref'] == r['ref']) and r['decision'] == 'approve')
+               and not (m['source'] == r['source'] and m['ref'] == r['ref'] and m['coaster_id'] == cid)]
+    if r['decision'] == 'approve':
+        matches.append(dict(source=r['source'], ref=r['ref'], coaster_id=cid, method='approved', status='linked'))
+
 facts = []
 for m in matches:
     if m['status'] != 'linked': continue
@@ -193,7 +207,10 @@ out = dict(retrieved=datetime.date.today().isoformat(),
            items=sorted([dict(source=i['source'], ref=i['ref'], name=i['name'], park=i['park'], lat=i['lat'], lon=i['lon'], raw=i['raw'])
                          for i in items], key=lambda i: (i['source'], i['ref'])),
            matches=sorted(matches, key=lambda m: (m['source'], m['ref'], m['coaster_id'])),
-           facts=sorted(facts, key=lambda f: (f['source'], f['coaster_id'], f['field'])))
+           facts=sorted(facts, key=lambda f: (f['source'], f['coaster_id'], f['field'])),
+           # Every record's facts, matched or not, ready for a link approved by hand.
+           records={i['source'] + '|' + i['ref']: {k: (list(v) if isinstance(v, tuple) else [v, None]) for k, v in i['facts'].items()}
+                    for i in items})
 json.dump(out, open('tools/open-data/sources-matches.json', 'w'), ensure_ascii=False, sort_keys=True, indent=0)
 for src in sorted({i['source'] for i in items}):
     st = collections.Counter(m['status'] for m in matches if m['source'] == src)

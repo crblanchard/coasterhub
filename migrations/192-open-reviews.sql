@@ -1,0 +1,15 @@
+-- Decisions made on /open-review (2026-11-18). Part of the open dataset only:
+-- nothing here changes `coasters` or anything the live site reads. Carter:
+-- "don't want pushes to go instantly just want to create a list of
+-- changes/secondary database until it's in good shape. then at once flip".
+--
+-- kind 'match'   source/ref is an open record, coaster_id ours;
+--                decision 'approve' links them, 'reject' never again.
+-- kind 'add'     source/ref is the first record of an open_adds row
+--                (park + name in note); decision 'approve' adds it to the
+--                open dataset at the switch, 'reject' leaves it out.
+-- kind 'coaster' coaster_id ours; decision 'keep' overrides the removal flag,
+--                'remove' confirms it. Nothing is ever deleted from here.
+--
+-- The weekly refresh exports this table first, so the matchers honour it.
+CREATE TABLE IF NOT EXISTS open_reviews (kind TEXT NOT NULL, source TEXT NOT NULL DEFAULT '', ref TEXT NOT NULL DEFAULT '', coaster_id INTEGER NOT NULL DEFAULT 0, decision TEXT NOT NULL, note TEXT, by TEXT, at TEXT, PRIMARY KEY (kind, source, ref, coaster_id));

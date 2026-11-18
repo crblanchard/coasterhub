@@ -6257,6 +6257,28 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   ridden, operating OR closed: Carter does not want RCDB to be how a coaster got
   on the site at all. About 252 live (100 operating, 152 closed). Read only;
   deleting them is a separate step he has to OK.
+- **The review dashboard (/open-review, migrations 191/192), same day.**
+  Carter: "just want a dashboard where I can look at coasters and approve/push
+  new things to the new database ... don't remove them just flag them", and
+  "don't want pushes to go instantly just want to create a list of
+  changes/secondary database until it's in good shape. then at once flip to the
+  new database and store rcdb as a backup-only". So: nothing on /open-review
+  touches `coasters` or anything the live site reads. Tabs:
+  - Suggested matches (`open_suggestions`, from `suggest-matches.py`): near
+    names at the park or within 5 km, former names, OSM tagged with an already
+    linked Wikidata item, the strict matcher's ambiguous ones. Approving
+    copies the record's stats from `open_record_facts` into open_links /
+    open_facts at once.
+  - To add (`open_adds`): open-source coasters at our parks (exact park name
+    within 30 km and same country, or within 2 km) matching none of ours,
+    grouped across sources. OSM-only ones are often mislabelled flumes.
+  - Flagged for removal: the /open-cleanup candidates; Keep / Leave out.
+  - Decided: every `open_reviews` row, with Undo.
+  The weekly job exports open_reviews to `tools/open-data/reviews.json` before
+  matching (and refuses to run without it), so decisions survive refreshes.
+  **The switch itself is not built yet**: when Carter says the new dataset is
+  ready, it becomes the data the site reads and the RCDB-derived values are
+  kept as a backup only. Ask him how before building it.
 - **RCDB IDs hide in URLs and tags.** Wikidata's "described at URL" (P973) held
   45 rcdb.com/NNNN.htm links, and some OSM coasters carry `rcdb_id` /
   `ref:rcdb` tags; all were removed (D1 rows deleted 2026-11-18) and every

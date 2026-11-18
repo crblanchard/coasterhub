@@ -41,6 +41,25 @@ jobs:
         with:
           node-version: '22'
 
+      # Decisions made on /open-review, so the matchers honour them (an
+      # approved link stays linked, a rejected one never comes back). Only
+      # what the matchers need: no names or times.
+      - name: Export review decisions
+        if: ${{ !inputs.file }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if npx --yes wrangler@4 d1 execute coasterhub --remote --json \
+               --command "SELECT kind, source, ref, coaster_id, decision FROM open_reviews ORDER BY kind, source, ref, coaster_id" \
+               > "$RUNNER_TEMP/reviews.raw" 2> "$RUNNER_TEMP/wrangler.log"; then
+            python3 -I -c 'import json,sys; d=json.load(open(sys.argv[1])); json.dump(d[0]["results"], open(sys.argv[2],"w"), indent=0, sort_keys=True); print(len(d[0]["results"]), "decisions")' \
+              "$RUNNER_TEMP/reviews.raw" tools/open-data/reviews.json
+          else
+            tail -n 5 "$RUNNER_TEMP/wrangler.log" | sed -E 's#https?://[^ ]+#[link removed]#g'
+            echo "::error::Could not read open_reviews; refusing to re-match without the decisions"; exit 1
+          fi
+
       - name: Refresh from Wikidata
         if: ${{ !inputs.file }}
         run: |
@@ -55,12 +74,15 @@ jobs:
           bash tools/open-data/osm-pull.sh || echo "::warning::OSM pull failed; reusing the last one"
           python3 -I tools/open-data/match-sources.py
           python3 -I tools/open-data/build-sources-sql.py > migrations/189-open-data-sources.sql
-          echo "FILES=migrations/187-open-data-wikidata.sql migrations/188-open-data-wikidata-raw.sql migrations/189-open-data-sources.sql" >> "$GITHUB_ENV"
+          # The checks behind /open-review: suggested links, coasters to add.
+          python3 -I tools/open-data/suggest-matches.py
+          python3 -I tools/open-data/build-review-sql.py > migrations/191-open-data-review.sql
+          echo "FILES=migrations/187-open-data-wikidata.sql migrations/188-open-data-wikidata-raw.sql migrations/189-open-data-sources.sql migrations/191-open-data-review.sql" >> "$GITHUB_ENV"
 
       - name: Commit the refresh
         if: ${{ !inputs.file }}
         run: |
-          git add tools/open-data migrations/187-open-data-wikidata.sql migrations/188-open-data-wikidata-raw.sql migrations/189-open-data-sources.sql
+          git add tools/open-data migrations/187-open-data-wikidata.sql migrations/188-open-data-wikidata-raw.sql migrations/189-open-data-sources.sql migrations/191-open-data-review.sql
           # The retrieved date changes every run (the last value of each row,
           # "retrieved" in the JSON, "pulled <date>" in the header); only
           # commit when something else did. A line that changed only in that

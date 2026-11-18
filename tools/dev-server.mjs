@@ -88,7 +88,8 @@ const SCHEMA = ["000-base-schema.sql", "003-accounts.sql", "007-password-resets.
                 "014-claimed-accounts.sql", "015-category-triage.sql",
                 "017-model-triage.sql", "018-merge-orphans.sql", "023-same-ride.sql", "084-reports-blocks.sql", "085-push-tokens.sql", "087-recaps.sql",
                 "187-open-data-wikidata.sql", "188-open-data-wikidata-raw.sql",
-                "189-open-data-sources.sql", "190-open-choices.sql"];
+                "189-open-data-sources.sql", "190-open-choices.sql",
+                "191-open-data-review.sql", "192-open-reviews.sql"];
 for (const f of SCHEMA) {
   const p = join(ROOT, "migrations", f);
   if (!existsSync(p)) { console.warn("! missing migration " + f); continue; }

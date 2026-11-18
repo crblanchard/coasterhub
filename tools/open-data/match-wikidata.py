@@ -91,6 +91,20 @@ def maker(wd):
         if sq(m) and sq(m) in s: return m
     return wd
 
+# Every item's facts in our units, matched or not: the review dashboard
+# links an item by hand, and its stats must be ready to copy when it does.
+def record_facts(q):
+    f = {k: {'v': v[0], 'prec': v[1], 'cites_rcdb': v[2]} for k, v in facts.get(q['qid'], {}).items()}
+    mk = next((maker(w) for w in q['makers'] if not owner(w)), None) or next((maker(w) for w in q['makers']), None)
+    if mk: f['manu'] = {'v': mk, 'prec': None, 'cites_rcdb': False}
+    mat = (q['material'] + ' ' + q['types']).lower()
+    t = 'Wood' if 'wood' in mat else 'Steel' if 'steel' in mat else None
+    if t: f['type'] = {'v': t, 'prec': None, 'cites_rcdb': False}
+    return f
+def link(q, m):
+    return {'qid': q['qid'], 'label': q['label'], 'method': m, 'osm': q['osm'] or None,
+            'captainCoaster': q['cc'] or None, 'facts': record_facts(q)}
+
 out, how = {}, collections.Counter()
 for c in coasters:
     names = {sq(c['name']), sq(base(c['name']))} | {sq(n) for n in alias_by_c.get(c['id'], [])}
@@ -106,14 +120,7 @@ for c in coasters:
         if best: break
     if not best: continue
     q, m = best; how[m] += 1
-    f = {k: {'v': v[0], 'prec': v[1], 'cites_rcdb': v[2]} for k, v in facts.get(q['qid'], {}).items()}
-    mk = next((maker(w) for w in q['makers'] if not owner(w)), None) or next((maker(w) for w in q['makers']), None)
-    if mk: f['manu'] = {'v': mk, 'prec': None, 'cites_rcdb': False}
-    mat = (q['material'] + ' ' + q['types']).lower()
-    t = 'Wood' if 'wood' in mat else 'Steel' if 'steel' in mat else None
-    if t: f['type'] = {'v': t, 'prec': None, 'cites_rcdb': False}
-    out[c['id']] = {'qid': q['qid'], 'label': q['label'], 'method': m, 'osm': q['osm'] or None,
-                    'captainCoaster': q['cc'] or None, 'facts': f}
+    out[c['id']] = link(q, m)
 
 # One Wikidata item on several of our rows is right for a racing pair (same
 # park, same base name) and wrong otherwise ("GhostRider (Old)" and
@@ -138,7 +145,21 @@ for qid, ks in groups.items():
             del out[r['id']]; dropped += 1
 print('ambiguous (kept for review, not linked)', dropped)
 
-json.dump({'retrieved': datetime.date.today().isoformat(), 'matches': out, 'ambiguous': ambiguous},
+# Decisions made on /open-review win over the matcher, both ways
+# (tools/open-data/reviews.json, exported from D1's open_reviews by the job).
+import os
+reviews = json.load(open('tools/open-data/reviews.json')) if os.path.exists('tools/open-data/reviews.json') else []
+for r in reviews:
+    if r.get('kind') != 'match' or r.get('source') != 'wikidata': continue
+    cid, qid = int(r['coaster_id']), r['ref']
+    if r['decision'] == 'approve' and qid in items and cid in byid:
+        out[cid] = link(items[qid], 'approved')
+        ambiguous = [a for a in ambiguous if a['coaster_id'] != cid]
+    elif r['decision'] == 'reject' and cid in out and out[cid]['qid'] == qid:
+        del out[cid]
+
+records = {qid: record_facts(q) for qid, q in items.items()}
+json.dump({'retrieved': datetime.date.today().isoformat(), 'matches': out, 'ambiguous': ambiguous, 'records': records},
           open('tools/open-data/wikidata-matches.json', 'w'), indent=0, sort_keys=True)
 fields = collections.Counter(k for v in out.values() for k in v['facts'])
 clean = collections.Counter(k for v in out.values() for k, x in v['facts'].items() if not x['cites_rcdb'])
