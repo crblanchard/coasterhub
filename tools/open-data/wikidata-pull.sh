@@ -16,8 +16,23 @@
 # Run from the repo root: bash tools/open-data/wikidata-pull.sh
 set -euo pipefail
 out=tools/open-data/wikidata; mkdir -p "$out"
-q(){ curl -sS -m 300 -G "https://query.wikidata.org/sparql" -H "Accept: text/csv" \
-      -H "User-Agent: coaster-open-dataset/0.1 (open data build)" --data-urlencode "query=$1"; }
+# Wikidata answers a busy moment with an error page instead of CSV (seen from
+# GitHub's runners). Each query is retried, and an answer that is not CSV, or
+# is suspiciously short, fails the run rather than replacing good data.
+q(){
+  local tmp; tmp=$(mktemp)
+  for try in 1 2 3 4 5; do
+    if curl -sS -m 300 -G "https://query.wikidata.org/sparql" -H "Accept: text/csv" \
+         -H "User-Agent: coaster-open-dataset/0.1 (open data build)" --data-urlencode "query=$1" -o "$tmp" \
+       && head -1 "$tmp" | grep -qE '^[a-zA-Z]+(,[a-zA-Z]+)*\s*$' && [ "$(wc -l < "$tmp")" -gt 100 ]; then
+      # Sorted, so an unchanged answer is an unchanged file (row order varies).
+      { head -1 "$tmp"; tail -n +2 "$tmp" | LC_ALL=C sort; }; rm -f "$tmp"; return 0
+    fi
+    echo "query failed (try $try): $(head -c 200 "$tmp" | tr '\n' ' ')" >&2
+    sleep $((try * 30))
+  done
+  rm -f "$tmp"; return 1
+}
 RC='?c wdt:P31/wdt:P279* wd:Q204832 .'
 REF='OPTIONAL { ?st prov:wasDerivedFrom ?ref . ?ref ?rp ?rv . FILTER(CONTAINS(LCASE(STR(?rv)), "rcdb") || ?rp = pr:P2751) }
      BIND(BOUND(?rv) AS ?rcdbRef)'
