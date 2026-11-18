@@ -58,7 +58,7 @@ jobs:
           # "retrieved" in the JSON, "pulled <date>" in the header); only
           # commit when something else did. A line that changed only in that
           # date shows up once as - and once as +, identical once normalised.
-          n=$(git diff --cached -U0 | grep -E '^[-+]' | grep -vE '^(\+\+\+ b/|--- a/|\+\+\+ /dev/null|--- /dev/null)' \
+          n=$(git diff --cached -U0 -- migrations | grep -E '^[-+]' | grep -vE '^(\+\+\+ b/|--- a/|\+\+\+ /dev/null|--- /dev/null)' \
               | sed -E "s/^[-+]//; s/'[0-9]{4}-[0-9]{2}-[0-9]{2}'\)/'D')/g; s/\"retrieved\": \"[0-9-]+\"/R/; s/pulled [0-9-]{10}/pulled D/" \
               | sort | uniq -u | wc -l)
           if [ "$n" -eq 0 ]; then

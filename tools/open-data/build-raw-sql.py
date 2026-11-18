@@ -33,7 +33,7 @@ items = {}
 for r in csv.DictReader(open(W + 'base.csv')):
     k = qid(r['c'])
     if k in items: continue
-    items[k] = (r['label'], desc.get(k), r['aliases'])
+    items[k] = (r['label'], desc.get(k), '|'.join(sorted(a for a in r['aliases'].split('|') if a)))
 
 props = {}
 for r in csv.DictReader(open(W + 'props.csv')):

@@ -61,11 +61,6 @@
 "qid": "Q1509287"
 },
 {
-"coaster_id": 1223,
-"method": "name+park",
-"qid": "Q1502476"
-},
-{
 "coaster_id": 836,
 "method": "name+park",
 "qid": "Q2182970"
@@ -235,11 +230,27 @@
 },
 "13": {
 "captainCoaster": null,
-"facts": {},
+"facts": {
+"dur": {
+"cites_rcdb": false,
+"prec": null,
+"v": 210
+},
+"l": {
+"cites_rcdb": false,
+"prec": null,
+"v": 2780.0
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "1980-09-23"
+}
+},
 "label": "Big Thunder Mountain Railroad",
-"method": "name+coords",
-"osm": null,
-"qid": "Q859406"
+"method": "name+park",
+"osm": "324922684",
+"qid": "Q85474505"
 },
 "14": {
 "captainCoaster": null,
@@ -291,47 +302,11 @@
 },
 "17": {
 "captainCoaster": null,
-"facts": {
-"dur": {
-"cites_rcdb": false,
-"prec": null,
-"v": 180
-},
-"h": {
-"cites_rcdb": false,
-"prec": null,
-"v": 105.0
-},
-"l": {
-"cites_rcdb": false,
-"prec": null,
-"v": 3280.8
-},
-"manu": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Vekoma"
-},
-"opened": {
-"cites_rcdb": false,
-"prec": "day",
-"v": "1995-06-01"
-},
-"s": {
-"cites_rcdb": false,
-"prec": null,
-"v": 44.0
-},
-"type": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Steel"
-}
-},
+"facts": {},
 "label": "Space Mountain",
 "method": "name+park",
 "osm": null,
-"qid": "Q507026"
+"qid": "Q11704022"
 },
 "18": {
 "captainCoaster": null,
@@ -1364,7 +1339,7 @@
 "closed": {
 "cites_rcdb": false,
 "prec": "day",
-"v": "2017-10-29"
+"v": "2011-01-27"
 },
 "manu": {
 "cites_rcdb": false,
@@ -1483,7 +1458,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Morgan"
+"v": "Arrow Dynamics"
 },
 "type": {
 "cites_rcdb": false,
@@ -1934,8 +1909,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "1976-05-15"
+"prec": "year",
+"v": "1976"
 },
 "type": {
 "cites_rcdb": false,
@@ -3349,10 +3324,20 @@
 "225": {
 "captainCoaster": null,
 "facts": {
+"closed": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "2022-07-31"
+},
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Philadelphia Toboggan Coasters"
+"v": "Great Coasters International"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "1996-05-26"
 },
 "type": {
 "cites_rcdb": false,
@@ -3360,10 +3345,10 @@
 "v": "Wood"
 }
 },
-"label": "Wild Cat",
+"label": "Wildcat",
 "method": "name+park",
 "osm": null,
-"qid": "Q8000575"
+"qid": "Q141251885"
 },
 "226": {
 "captainCoaster": null,
@@ -3924,8 +3909,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "2018-03-14"
+"prec": "month",
+"v": "2018-03"
 },
 "s": {
 "cites_rcdb": false,
@@ -5340,7 +5325,7 @@
 "opened": {
 "cites_rcdb": false,
 "prec": "day",
-"v": "2004-05-27"
+"v": "2003-04-30"
 },
 "type": {
 "cites_rcdb": false,
@@ -6615,8 +6600,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "2020-06-20"
+"prec": "year",
+"v": "2020"
 },
 "s": {
 "cites_rcdb": true,
@@ -6649,8 +6634,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "2020-06-20"
+"prec": "year",
+"v": "2020"
 },
 "s": {
 "cites_rcdb": true,
@@ -6850,7 +6835,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Vekoma"
+"v": "Arrow Dynamics"
 },
 "opened": {
 "cites_rcdb": false,
@@ -7845,8 +7830,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "2001-03-31"
+"prec": "year",
+"v": "2001"
 },
 "s": {
 "cites_rcdb": false,
@@ -9931,10 +9916,15 @@
 "688": {
 "captainCoaster": null,
 "facts": {
-"closed": {
+"dur": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "2019-09-02"
+"prec": null,
+"v": 82
+},
+"l": {
+"cites_rcdb": false,
+"prec": null,
+"v": 3267.7
 },
 "manu": {
 "cites_rcdb": false,
@@ -9944,18 +9934,13 @@
 "opened": {
 "cites_rcdb": false,
 "prec": "day",
-"v": "1999-07-29"
-},
-"type": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Steel"
+"v": "2026-05-26"
 }
 },
-"label": "Rock 'n' Roller Coaster Starring Aerosmith",
-"method": "name+park",
-"osm": null,
-"qid": "Q1502476"
+"label": "Rock \u2019n\u2019 Roller Coaster Starring The Muppets",
+"method": "name+coords",
+"osm": "357021885",
+"qid": "Q139394198"
 },
 "689": {
 "captainCoaster": null,
@@ -12000,11 +11985,17 @@
 },
 "927": {
 "captainCoaster": null,
-"facts": {},
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Intamin"
+}
+},
 "label": "Speed",
 "method": "name+park",
 "osm": null,
-"qid": "Q28840930"
+"qid": "Q137556851"
 },
 "929": {
 "captainCoaster": null,
@@ -12329,7 +12320,7 @@
 "closed": {
 "cites_rcdb": false,
 "prec": "day",
-"v": "2024-06-14"
+"v": "2023-06-25"
 },
 "manu": {
 "cites_rcdb": false,
@@ -14159,6 +14150,45 @@
 "osm": null,
 "qid": "Q2229119"
 },
+"1223": {
+"captainCoaster": null,
+"facts": {
+"h": {
+"cites_rcdb": false,
+"prec": null,
+"v": 78.7
+},
+"l": {
+"cites_rcdb": false,
+"prec": null,
+"v": 3267.7
+},
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Vekoma"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "2002-03-16"
+},
+"s": {
+"cites_rcdb": false,
+"prec": null,
+"v": 57.0
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Avengers Assemble: Flight Force",
+"method": "name+park",
+"osm": null,
+"qid": "Q140199236"
+},
 "1224": {
 "captainCoaster": null,
 "facts": {
@@ -14276,7 +14306,7 @@
 "closed": {
 "cites_rcdb": false,
 "prec": "day",
-"v": "2012-11-20"
+"v": "2009-06-16"
 },
 "h": {
 "cites_rcdb": true,
@@ -14849,8 +14879,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "2008-04-25"
+"prec": "year",
+"v": "2008"
 },
 "type": {
 "cites_rcdb": false,
@@ -14883,8 +14913,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "1951-07-13"
+"prec": "year",
+"v": "1951"
 },
 "s": {
 "cites_rcdb": false,
@@ -15113,8 +15143,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "2017-06-18"
+"prec": "year",
+"v": "2017"
 },
 "type": {
 "cites_rcdb": false,
@@ -18974,22 +19004,11 @@
 },
 "1957": {
 "captainCoaster": null,
-"facts": {
-"manu": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Dynamic Structures"
-},
-"opened": {
-"cites_rcdb": false,
-"prec": "day",
-"v": "1977-05-27"
-}
-},
-"label": "Space Mountain",
-"method": "name+park",
-"osm": "122090695",
-"qid": "Q7572427"
+"facts": {},
+"label": "Hyperspace Mountain",
+"method": "name+coords",
+"osm": null,
+"qid": "Q125670165"
 },
 "1959": {
 "captainCoaster": null,
@@ -19583,7 +19602,7 @@
 "h": {
 "cites_rcdb": false,
 "prec": null,
-"v": 93.5
+"v": 83.7
 },
 "l": {
 "cites_rcdb": false,
@@ -19592,8 +19611,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "2019-04-17"
+"prec": "year",
+"v": "2019"
 },
 "s": {
 "cites_rcdb": false,
