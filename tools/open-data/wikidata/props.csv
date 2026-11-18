@@ -1,0 +1,167 @@
+pid,label,type
+P10,video,http://wikiba.se/ontology#CommonsMedia
+P1000,record held,http://wikiba.se/ontology#WikibaseItem
+P1004,MusicBrainz place ID,http://wikiba.se/ontology#ExternalId
+P10046,"Apple Maps ""auid"" identifier",http://wikiba.se/ontology#ExternalId
+P10664,featured track(s),http://wikiba.se/ontology#WikibaseItem
+P10689,OpenStreetMap way ID,http://wikiba.se/ontology#ExternalId
+P1083,maximum capacity,http://wikiba.se/ontology#Quantity
+P11693,OpenStreetMap node ID,http://wikiba.se/ontology#ExternalId
+P1174,visitors per year,http://wikiba.se/ontology#Quantity
+P12086,WikiKids ID,http://wikiba.se/ontology#ExternalId
+P1216,National Heritage List for England number,http://wikiba.se/ontology#ExternalId
+P12353,CRIS Unique Site Number,http://wikiba.se/ontology#ExternalId
+P12485,British Listed Buildings ID,http://wikiba.se/ontology#ExternalId
+P12565,image of construction,http://wikiba.se/ontology#CommonsMedia
+P1259,coordinates of the point of view,http://wikiba.se/ontology#GlobeCoordinate
+P127,owned by,http://wikiba.se/ontology#WikibaseItem
+P131,located in the administrative territorial entity,http://wikiba.se/ontology#WikibaseItem
+P1325,external data available at URL,http://wikiba.se/ontology#Url
+P13376,Captain Coaster coaster ID,http://wikiba.se/ontology#ExternalId
+P1343,described by source,http://wikiba.se/ontology#WikibaseItem
+P13484,Know Your Meme slug,http://wikiba.se/ontology#ExternalId
+P13558,Coasterpedia ID,http://wikiba.se/ontology#ExternalId
+P13591,Yale LUX ID,http://wikiba.se/ontology#ExternalId
+P136,genre,http://wikiba.se/ontology#WikibaseItem
+P1365,replaces,http://wikiba.se/ontology#WikibaseItem
+P1366,replaced by,http://wikiba.se/ontology#WikibaseItem
+P137,operator,http://wikiba.se/ontology#WikibaseItem
+P138,named after,http://wikiba.se/ontology#WikibaseItem
+P1398,structure replaces,http://wikiba.se/ontology#WikibaseItem
+P1411,nominated for,http://wikiba.se/ontology#WikibaseItem
+P1417,Encyclopædia Britannica Online ID,http://wikiba.se/ontology#ExternalId
+P1434,takes place in fictional universe,http://wikiba.se/ontology#WikibaseItem
+P1435,heritage designation,http://wikiba.se/ontology#WikibaseItem
+P144,based on,http://wikiba.se/ontology#WikibaseItem
+P1448,official name,http://wikiba.se/ontology#Monolingualtext
+P14749,"Apple Maps ""place-id"" identifier",http://wikiba.se/ontology#ExternalId
+P1476,title,http://wikiba.se/ontology#Monolingualtext
+P149,architectural style,http://wikiba.se/ontology#WikibaseItem
+P154,logo image,http://wikiba.se/ontology#CommonsMedia
+P155,follows,http://wikiba.se/ontology#WikibaseItem
+P156,followed by,http://wikiba.se/ontology#WikibaseItem
+P1566,GeoNames ID,http://wikiba.se/ontology#ExternalId
+P1617,BBC Things ID,http://wikiba.se/ontology#ExternalId
+P1619,date of official opening,http://wikiba.se/ontology#Time
+P1651,YouTube video ID,http://wikiba.se/ontology#ExternalId
+P166,award received,http://wikiba.se/ontology#WikibaseItem
+P167,structure replaced by,http://wikiba.se/ontology#WikibaseItem
+P1699,SkyscraperPage building ID,http://wikiba.se/ontology#ExternalId
+P17,country,http://wikiba.se/ontology#WikibaseItem
+P170,creator,http://wikiba.se/ontology#WikibaseItem
+P1705,native label,http://wikiba.se/ontology#Monolingualtext
+P1716,brand,http://wikiba.se/ontology#WikibaseItem
+P176,manufacturer,http://wikiba.se/ontology#WikibaseItem
+P1766,place name sign,http://wikiba.se/ontology#CommonsMedia
+P18,image,http://wikiba.se/ontology#CommonsMedia
+P180,depicts,http://wikiba.se/ontology#WikibaseItem
+P186,made from material,http://wikiba.se/ontology#WikibaseItem
+P1889,different from,http://wikiba.se/ontology#WikibaseItem
+P1968,Foursquare City Guide venue ID,http://wikiba.se/ontology#ExternalId
+P1997,Facebook location ID,http://wikiba.se/ontology#ExternalId
+P2013,Facebook username,http://wikiba.se/ontology#ExternalId
+P2043,length,http://wikiba.se/ontology#Quantity
+P2044,elevation above sea level,http://wikiba.se/ontology#Quantity
+P2046,area,http://wikiba.se/ontology#Quantity
+P2047,duration,http://wikiba.se/ontology#Quantity
+P2048,height,http://wikiba.se/ontology#Quantity
+P2052,speed,http://wikiba.se/ontology#Quantity
+P213,ISNI,http://wikiba.se/ontology#ExternalId
+P2130,capital cost,http://wikiba.se/ontology#Quantity
+P214,VIAF cluster ID,http://wikiba.se/ontology#ExternalId
+P227,GND ID,http://wikiba.se/ontology#ExternalId
+P2283,uses,http://wikiba.se/ontology#WikibaseItem
+P2284,price,http://wikiba.se/ontology#Quantity
+P244,Library of Congress Authorities ID,http://wikiba.se/ontology#ExternalId
+P2561,name,http://wikiba.se/ontology#Monolingualtext
+P2572,hashtag,http://wikiba.se/ontology#String
+P2581,BabelNet ID,http://wikiba.se/ontology#ExternalId
+P2603,Kinopoisk film ID,http://wikiba.se/ontology#ExternalId
+P2670,has part(s) of the class,http://wikiba.se/ontology#WikibaseItem
+P2671,Google Knowledge Graph ID,http://wikiba.se/ontology#ExternalId
+P268,Bibliothèque nationale de France ID,http://wikiba.se/ontology#ExternalId
+P269,IdRef ID,http://wikiba.se/ontology#ExternalId
+P2751,Roller Coaster Database ID,http://wikiba.se/ontology#ExternalId
+P276,location,http://wikiba.se/ontology#WikibaseItem
+P2769,budget,http://wikiba.se/ontology#Quantity
+P279,subclass of,http://wikiba.se/ontology#WikibaseItem
+P2791,power consumed,http://wikiba.se/ontology#Quantity
+P281,postal code,http://wikiba.se/ontology#String
+P287,designed by,http://wikiba.se/ontology#WikibaseItem
+P2899,minimum age,http://wikiba.se/ontology#Quantity
+P2957,throughput,http://wikiba.se/ontology#Quantity
+P30,continent,http://wikiba.se/ontology#WikibaseItem
+P3086,speed limit,http://wikiba.se/ontology#Quantity
+P31,instance of,http://wikiba.se/ontology#WikibaseItem
+P3108,Yelp ID,http://wikiba.se/ontology#ExternalId
+P3134,Tripadvisor ID,http://wikiba.se/ontology#ExternalId
+P3417,Quora topic ID,http://wikiba.se/ontology#ExternalId
+P345,IMDb ID,http://wikiba.se/ontology#ExternalId
+P3451,nighttime view,http://wikiba.se/ontology#CommonsMedia
+P361,part of,http://wikiba.se/ontology#WikibaseItem
+P366,has use,http://wikiba.se/ontology#WikibaseItem
+P373,Commons category,http://wikiba.se/ontology#String
+P3749,Google Maps Customer ID,http://wikiba.se/ontology#ExternalId
+P380,Mérimée ID,http://wikiba.se/ontology#ExternalId
+P3999,date of official closure,http://wikiba.se/ontology#Time
+P402,OpenStreetMap relation ID,http://wikiba.se/ontology#ExternalId
+P406,soundtrack release,http://wikiba.se/ontology#WikibaseItem
+P4183,angle from vertical,http://wikiba.se/ontology#Quantity
+P435,MusicBrainz work ID,http://wikiba.se/ontology#ExternalId
+P443,pronunciation audio,http://wikiba.se/ontology#CommonsMedia
+P454,Structurae structure ID,http://wikiba.se/ontology#ExternalId
+P4839,Wolfram Language entity code,http://wikiba.se/ontology#ExternalId
+P495,country of origin,http://wikiba.se/ontology#WikibaseItem
+P5008,on focus list of Wikimedia project,http://wikiba.se/ontology#WikibaseItem
+P5019,Brockhaus Enzyklopädie online ID,http://wikiba.se/ontology#ExternalId
+P5066,operating temperature,http://wikiba.se/ontology#Quantity
+P516,powered by,http://wikiba.se/ontology#WikibaseItem
+P527,has part(s),http://wikiba.se/ontology#WikibaseItem
+P5383,archINFORM project ID,http://wikiba.se/ontology#ExternalId
+P5555,schematic,http://wikiba.se/ontology#CommonsMedia
+P571,inception,http://wikiba.se/ontology#Time
+P576,"dissolved, abolished or demolished",http://wikiba.se/ontology#Time
+P577,publication date,http://wikiba.se/ontology#Time
+P580,start time,http://wikiba.se/ontology#Time
+P5816,state of conservation,http://wikiba.se/ontology#WikibaseItem
+P5817,state of use,http://wikiba.se/ontology#WikibaseItem
+P582,end time,http://wikiba.se/ontology#Time
+P6012,California Office of Historic Preservation ID,http://wikiba.se/ontology#ExternalId
+P613,OS grid reference,http://wikiba.se/ontology#String
+P6181,Disney A to Z ID,http://wikiba.se/ontology#ExternalId
+P6228,OesterreichWiki ID,http://wikiba.se/ontology#ExternalId
+P625,coordinate location,http://wikiba.se/ontology#GlobeCoordinate
+P6262,Fandom article ID,http://wikiba.se/ontology#ExternalId
+P6375,street address,http://wikiba.se/ontology#Monolingualtext
+P646,Freebase ID,http://wikiba.se/ontology#ExternalId
+P6486,Pacific Coast Architecture Database building ID,http://wikiba.se/ontology#ExternalId
+P649,NRHP reference number,http://wikiba.se/ontology#ExternalId
+P669,located on street,http://wikiba.se/ontology#WikibaseItem
+P6802,related image,http://wikiba.se/ontology#CommonsMedia
+P6839,TV Tropes ID,http://wikiba.se/ontology#ExternalId
+P6949,announcement date,http://wikiba.se/ontology#Time
+P706,located in/on physical feature,http://wikiba.se/ontology#WikibaseItem
+P729,service entry,http://wikiba.se/ontology#Time
+P730,service retirement,http://wikiba.se/ontology#Time
+P7772,Atlas Obscura place ID,http://wikiba.se/ontology#ExternalId
+P793,significant event,http://wikiba.se/ontology#WikibaseItem
+P7959,historic county,http://wikiba.se/ontology#WikibaseItem
+P8169,Heritage Gateway ID,http://wikiba.se/ontology#ExternalId
+P8324,funder,http://wikiba.se/ontology#WikibaseItem
+P8345,media franchise,http://wikiba.se/ontology#WikibaseItem
+P84,architect,http://wikiba.se/ontology#WikibaseItem
+P8408,KBpedia ID,http://wikiba.se/ontology#ExternalId
+P8411,set in environment,http://wikiba.se/ontology#WikibaseItem
+P856,official website,http://wikiba.se/ontology#Url
+P859,sponsor,http://wikiba.se/ontology#WikibaseItem
+P86,composer,http://wikiba.se/ontology#WikibaseItem
+P88,commissioned by,http://wikiba.se/ontology#WikibaseItem
+P8885,Namuwiki ID,http://wikiba.se/ontology#ExternalId
+P8933,category for the view from the item,http://wikiba.se/ontology#WikibaseItem
+P910,topic's main category,http://wikiba.se/ontology#WikibaseItem
+P921,main subject,http://wikiba.se/ontology#WikibaseItem
+P935,Commons gallery,http://wikiba.se/ontology#String
+P941,inspired by,http://wikiba.se/ontology#WikibaseItem
+P9721,image of entrance,http://wikiba.se/ontology#CommonsMedia
+P973,described at URL,http://wikiba.se/ontology#Url
+P9971,has semantic argument,http://wikiba.se/ontology#WikibaseItem
