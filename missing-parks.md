@@ -61,6 +61,7 @@ linked as the same ride (one credit across parks).
 - Parque de Atracciones de Zaragoza — Montjuïc's Vikingo (as Ramses)
 - Magic Harbor, Myrtle Beach Pavilion (both as Corkscrew) — Salitre Magico's Magnus
 - Divertido (as Space Mountain) — Salitre Magico's Tornado
+- Royal Agricultural Society Showground (Sydney) — Luna Park (Sydney)'s Wild Mouse ran there between its two Luna Park stints
 Rows missing at parks we DO have: Walibi Belgium's Grand 8 (Walibi Rhône-Alpes' Le Grand Huit, before it), Bobbejaanland's Wervelwind (Salitre's Rallus, after it),
 Morey's Piers' Jumbo Jet (Salitre's Tornado, its first stop), Knoebels' Whirlwind, Adventure Island's Tidal Wave Spinning
 Coaster (if it is our UK Adventure Island).
