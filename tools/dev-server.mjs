@@ -86,7 +86,8 @@ const db = new DatabaseSync(DB_FILE);
 const SCHEMA = ["000-base-schema.sql", "003-accounts.sql", "007-password-resets.sql",
                 "010-follows.sql", "012-clone-groups.sql", "013-rider-categories.sql",
                 "014-claimed-accounts.sql", "015-category-triage.sql",
-                "017-model-triage.sql", "018-merge-orphans.sql", "023-same-ride.sql", "084-reports-blocks.sql", "085-push-tokens.sql", "087-recaps.sql"];
+                "017-model-triage.sql", "018-merge-orphans.sql", "023-same-ride.sql", "084-reports-blocks.sql", "085-push-tokens.sql", "087-recaps.sql",
+                "187-open-data-wikidata.sql"];
 for (const f of SCHEMA) {
   const p = join(ROOT, "migrations", f);
   if (!existsSync(p)) { console.warn("! missing migration " + f); continue; }
@@ -103,8 +104,11 @@ function seed() {
   const list = Array.isArray(coasters) ? coasters : (coasters.coasters || []);
   const parks = JSON.parse(readFileSync(join(ROOT, "parks.json"), "utf8"));
 
-  const ip = db.prepare("INSERT OR REPLACE INTO parks (name,lat,lon,region) VALUES (?,?,?,?)");
-  for (const [name, p] of Object.entries(parks)) ip.run(name, p.lat ?? null, p.lon ?? null, p.region ?? null);
+  // `travel` (migration 130) is an ALTER, which cannot run twice, so it is
+  // added here rather than through SCHEMA.
+  try { db.exec("ALTER TABLE parks ADD COLUMN travel INTEGER NOT NULL DEFAULT 0"); } catch (e) {}
+  const ip = db.prepare("INSERT OR REPLACE INTO parks (name,lat,lon,region,travel) VALUES (?,?,?,?,?)");
+  for (const [name, p] of Object.entries(parks)) ip.run(name, p.lat ?? null, p.lon ?? null, p.region ?? null, p.travel ? 1 : 0);
 
   const ic = db.prepare(
     "INSERT OR REPLACE INTO coasters (id,name,park,type,manu,model,h,s,l,inv,dur,laps,yr," +

@@ -1248,6 +1248,76 @@ async function eitherBlocked(env, a, b) {
 const REPORT_REASONS = { name: "Offensive name or picture", bio: "Offensive bio",
   spam: "Spam or fake account", harass: "Harassment", other: "Something else" };
 
+// ---- open-data coverage (2026-11-18) ---------------------------------------
+// Per coaster: is it backed by an open source (a Wikidata link, or a fair
+// ride, which never came from RCDB)? Per field: how many coasters have a value
+// now, how many have one from an open source that does not cite RCDB, and
+// whether the two agree. Numbers agree within 5%; dates at the coarser of the
+// two precisions; text once case and punctuation are gone.
+const OPEN_FIELDS = ["manu", "model", "type", "h", "s", "l", "inv", "dur", "opened", "closed"];
+async function getOpenCoverage(env) {
+  const [{ results: cs }, { results: ps }, { results: links }, { results: facts }] = await Promise.all([
+    env.DB.prepare("SELECT id, park, " + OPEN_FIELDS.join(", ") + " FROM coasters").all(),
+    env.DB.prepare("SELECT * FROM parks").all(),
+    env.DB.prepare("SELECT coaster_id, source FROM open_links").all(),
+    env.DB.prepare("SELECT coaster_id, field, value, source, cites_rcdb FROM open_facts").all(),
+  ]);
+  const fair = new Set(ps.filter(p => +p.travel === 1).map(p => p.name));
+  const linked = new Map();
+  for (const l of links) {
+    if (!linked.has(l.coaster_id)) linked.set(l.coaster_id, new Set());
+    linked.get(l.coaster_id).add(l.source);
+  }
+  const own = new Map(), any = new Map();
+  for (const f of facts) {
+    if (f.value == null || f.value === "") continue;
+    const k = f.coaster_id + "|" + f.field;
+    any.set(k, f.value);
+    if (!+f.cites_rcdb) own.set(k, f.value);
+  }
+  const squash = v => String(v).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
+  const agree = (field, a, b) => {
+    if (field === "h" || field === "s" || field === "l" || field === "dur") {
+      const x = +a, y = +b;
+      if (!x || !y) return x === y;
+      return Math.abs(x - y) / Math.max(x, y) <= 0.05;
+    }
+    if (field === "opened" || field === "closed") {
+      const x = String(a), y = String(b), n = Math.min(x.length, y.length);
+      return x.slice(0, n) === y.slice(0, n);
+    }
+    return squash(a) === squash(b);
+  };
+  const blank = v => v == null || v === "";
+  const fields = {};
+  for (const f of OPEN_FIELDS) fields[f] = { current: 0, fair: 0, open: 0, openAny: 0, agree: 0, differ: 0, openOnly: 0 };
+  const sources = {};
+  const hist = { open: OPEN_FIELDS.map(() => 0).concat(0), current: OPEN_FIELDS.map(() => 0).concat(0) };
+  let total = 0, fairN = 0, linkedN = 0, openN = 0;
+  for (const c of cs) {
+    total++;
+    const isFair = fair.has(c.park), ls = linked.get(c.id);
+    if (isFair) fairN++;
+    if (ls) { linkedN++; for (const s of ls) sources[s] = (sources[s] || 0) + 1; }
+    if (isFair || ls) openN++;
+    let nOpen = 0, nCur = 0;
+    for (const f of OPEN_FIELDS) {
+      const F = fields[f], cur = c[f], k = c.id + "|" + f, o = own.get(k);
+      if (!blank(cur)) { F.current++; nCur++; if (isFair) F.fair++; }
+      if (any.has(k)) F.openAny++;
+      if ((isFair && !blank(cur)) || o != null) { F.open++; nOpen++; }
+      if (o != null) {
+        if (blank(cur)) F.openOnly++;
+        else if (agree(f, cur, o)) F.agree++;
+        else F.differ++;
+      }
+    }
+    hist.open[nOpen]++; hist.current[nCur]++;
+  }
+  return { total, fair: fairN, linked: linkedN, open: openN, rcdbOnly: total - openN,
+           sources, fields, hist, fieldOrder: OPEN_FIELDS };
+}
+
 async function haveClones(env) {
   try { await env.DB.prepare("SELECT 1 FROM clone_groups LIMIT 1").first(); return true; }
   catch (e) { return false; }
@@ -2278,6 +2348,16 @@ export default {
       if (request.method === "GET" && path === "/api/clones") {
         if (!await haveClones(env)) return json({ groups: [] }, 200, LIST_CACHE);
         return edgePut(ctx, request, json({ groups: await getClones(env) }, 200, LIST_CACHE));
+      }
+      // How much of the coaster data stands on open sources (2026-11-18). The
+      // site's stats came from RCDB screenshots; open_links / open_facts
+      // (migration 187) hold a parallel set from Wikidata, kept beside the
+      // current values until it is complete enough to swap. Fair coasters
+      // never came from RCDB, so they count as open already. /sources draws it.
+      if (request.method === "GET" && path === "/api/open-coverage") {
+        try { await env.DB.prepare("SELECT 1 FROM open_facts LIMIT 1").first(); }
+        catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
+        return edgePut(ctx, request, json(await getOpenCoverage(env), 200, LIST_CACHE));
       }
       // ---- summaries (2026-09-25) ------------------------------------------
       // One request where pages used to make one per rider. The home page

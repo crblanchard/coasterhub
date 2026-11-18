@@ -6189,3 +6189,27 @@ include them.
   unless he asks.
 - **Everyone's lists** sidebar: Carter said not needed.
 
+
+## Open dataset beside the RCDB one (2026-11-18, migration 187)
+
+Carter wants to move off RCDB-derived data eventually, without swapping yet:
+"keep all rcdb stats for now ... generate a parallel dataset using wikidata and
+all other open source sources." Wikidata copying from RCDB is fine with him;
+**storing RCDB IDs is not** (Wikidata P2751 is never read into our tables).
+Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open.
+
+- `open_links (coaster_id, source, ref, method)`: one row per coaster per open
+  source (ref = Wikidata Q-id). `open_facts (coaster_id, field, value, prec,
+  source, ref, cites_rcdb)`: values in our units (ft, mph, s), never written
+  into `coasters`. `cites_rcdb=1` when the Wikidata statement's reference is RCDB.
+- Built by `tools/open-data/`: `wikidata-pull.sh` (SPARQL, CSVs in
+  `wikidata/`), `match-wikidata.py` (name + park label, or coords within 3 km;
+  ambiguous ones dropped), `build-sql.py` (writes migration 187). Re-run all
+  three to refresh; 187 deletes the wikidata rows and re-inserts.
+- First pull: 882 of 2,068 coasters linked, 2,357 facts. Wikidata has no
+  inversions or models.
+- `/api/open-coverage` + unlisted `/sources` page is the tracker Carter asked
+  for: coasters open vs RCDB-only, and per field current vs open, agree/differ/new.
+- Next sources to try: OSM (Overpass, flaky here), Coasterpedia (has a licence
+  page), Wikipedia infoboxes. Ultimate Rollercoaster has no published terms:
+  treat as not openly licensed.

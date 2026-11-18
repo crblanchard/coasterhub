@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coaster Hub">
+<base href="/">
+<title>Data sources — Coaster Hub</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/style.css?v=20261118a">
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
+<link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260924b">
+<style>
+  /* /sources (2026-11-18): the tracker for the open dataset that is being built
+     beside the RCDB-derived one (migration 187, /api/open-coverage). Unlisted,
+     for Carter: how many coasters and how many of their stats stand on open
+     sources, so he can tell when it is complete enough to swap. */
+  .src{max-width:860px}
+  .src h2{font-size:1.15rem;margin:34px 0 6px}
+  .src .sub{color:var(--muted);font-size:.92rem;line-height:1.55;margin:0 0 14px}
+  .srct{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .srct .t{padding:14px 16px;border-left:1px solid var(--line)}
+  .srct .t:first-child{border-left:0}
+  .srct .t b{display:block;font-size:1.7rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.1}
+  .srct .t span{color:var(--muted);font-size:.85rem}
+  .split{display:flex;height:12px;border-radius:999px;overflow:hidden;background:var(--well);margin:16px 0 8px}
+  .split i{display:block;height:100%}
+  .k-open{background:var(--accent2)} .k-fair{background:var(--accent)} .k-rcdb{background:var(--line)}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.85rem;color:var(--muted)}
+  .legend em{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;font-style:normal}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  table{border-collapse:collapse;width:100%;font-size:.88rem}
+  thead th{background:var(--well);color:var(--muted);text-align:left;padding:9px 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.68rem;border-bottom:1px solid var(--line);white-space:nowrap}
+  th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--soft);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  td.f{font-weight:600}
+  td.muted{color:var(--muted)}
+  .bar{position:relative;width:120px;height:8px;border-radius:999px;background:var(--well);display:inline-block;vertical-align:middle;margin-right:8px;overflow:hidden}
+  .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent2);border-radius:999px}
+  .diff{color:var(--bad)}
+  #loading{color:var(--muted);padding:30px 0}
+  @media (max-width:560px){
+    .srct .t{padding:12px}
+    .srct .t b{font-size:1.35rem}
+    .bar{display:none}
+    tbody td,thead th{padding-left:9px;padding-right:9px}
+  }
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260924b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="riders">Home</a>
+    <a href="/explore" data-nav="explore">Explore</a>
+    <a href="/log" data-nav="log" class="navlog">+ Log</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/account" data-nav="profile">Me</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
+  <h1 class="wide">Data sources</h1>
+  <p>How much of the coaster data is backed by open sources, alongside what the site shows now.</p>
+</div></section>
+
+<section class="block" style="padding-top:22px"><div class="container src">
+  <div id="loading">Loading…</div>
+  <div id="ui" hidden>
+    <div class="srct">
+      <div class="t"><b id="t-total"></b><span>coasters</span></div>
+      <div class="t"><b id="t-open"></b><span>with an open source</span></div>
+      <div class="t"><b id="t-rcdb"></b><span>RCDB only</span></div>
+    </div>
+    <div class="split" id="split"></div>
+    <div class="legend" id="legend"></div>
+
+    <h2>Stats by field</h2>
+    <p class="sub"><b>On the site</b> is how many coasters have the field filled in now. <b>Open source</b> counts the ones where an open source has it without citing RCDB, plus fair coasters, which never came from RCDB. <b>Agree</b> and <b>Differ</b> compare the open value with the current one (numbers within 5%). <b>New</b> is a value only the open source has.</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Field</th><th class="num">On the site</th><th>Open source</th><th class="num">Agree</th><th class="num">Differ</th><th class="num">New</th></tr></thead>
+      <tbody id="fields"></tbody>
+    </table></div>
+
+    <h2>Stats per coaster</h2>
+    <p class="sub">How many of the <span id="nf"></span> fields each coaster has, now and from open sources alone.</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Fields filled</th><th class="num">On the site</th><th class="num">Open source</th></tr></thead>
+      <tbody id="hist"></tbody>
+    </table></div>
+    <p class="sub" style="margin-top:14px">Open data so far: <span id="srcs"></span>. Coasters are matched by name and park; no RCDB IDs are stored.</p>
+  </div>
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
+</div></footer>
+
+<script src="/app.js?v=20261118a"></script>
+<script>
+document.getElementById('y').textContent = new Date().getFullYear();
+CoasterHub.initNav('sources');
+
+const NAMES = { manu: 'Manufacturer', model: 'Model', type: 'Steel / wood', h: 'Height', s: 'Speed',
+  l: 'Length', inv: 'Inversions', dur: 'Duration', opened: 'Opened', closed: 'Closed' };
+const SRC = { wikidata: 'Wikidata' };
+const fmt = n => Number(n).toLocaleString('en-US');
+const pct = (a, b) => b ? Math.round(a * 100 / b) : 0;
+const $ = id => document.getElementById(id);
+
+fetch('/api/open-coverage').then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(j.error || r.status)))
+.then(d => {
+  $('loading').hidden = true; $('ui').hidden = false;
+  $('t-total').textContent = fmt(d.total);
+  $('t-open').textContent = fmt(d.open);
+  $('t-rcdb').textContent = fmt(d.rcdbOnly);
+  // Linked coasters that are also fair rides count once, under the link.
+  const fairOnly = d.open - d.linked;
+  const parts = [['k-open', d.linked, 'Open data (' + Object.keys(d.sources).map(s => SRC[s] || s).join(', ') + ')'],
+                 ['k-fair', fairOnly, 'Fair coasters'], ['k-rcdb', d.rcdbOnly, 'RCDB only']];
+  $('split').innerHTML = parts.map(p => '<i class="' + p[0] + '" style="width:' + (p[1] * 100 / d.total) + '%"></i>').join('');
+  $('legend').innerHTML = parts.map(p => '<span><em class="' + p[0] + '"></em>' + p[2] + ' · ' + fmt(p[1]) + ' (' + pct(p[1], d.total) + '%)</span>').join('');
+
+  $('fields').innerHTML = d.fieldOrder.map(k => {
+    const f = d.fields[k], p = pct(f.open, d.total);
+    return '<tr><td class="f">' + NAMES[k] + '</td>'
+      + '<td class="num">' + fmt(f.current) + '</td>'
+      + '<td><span class="bar"><i style="width:' + p + '%"></i></span>' + fmt(f.open) + ' <span class="muted">(' + p + '%)</span></td>'
+      + '<td class="num">' + (f.agree ? fmt(f.agree) : '<span class="muted">–</span>') + '</td>'
+      + '<td class="num' + (f.differ ? ' diff' : '') + '">' + (f.differ ? fmt(f.differ) : '<span class="muted">–</span>') + '</td>'
+      + '<td class="num">' + (f.openOnly ? fmt(f.openOnly) : '<span class="muted">–</span>') + '</td></tr>';
+  }).join('');
+
+  $('nf').textContent = d.fieldOrder.length;
+  const rows = [];
+  for (let n = d.fieldOrder.length; n >= 0; n--) {
+    rows.push('<tr><td>' + n + '</td><td class="num">' + fmt(d.hist.current[n]) + '</td><td class="num">' + fmt(d.hist.open[n]) + '</td></tr>');
+  }
+  $('hist').innerHTML = rows.join('');
+  $('srcs').textContent = Object.entries(d.sources).map(([s, n]) => (SRC[s] || s) + ' (' + fmt(n) + ' coasters)').join(', ') || 'none';
+}).catch(e => { $('loading').textContent = 'Could not load the coverage numbers' + (typeof e === 'string' ? ': ' + e : '.'); });
+</script>
+</body>
+</html>
