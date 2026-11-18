@@ -431,8 +431,8 @@
      and printing it to someone who followed a stale link tells them nothing.
      Renaming a username deletes the old one outright (see renameRider), so a
      dead /user/<name>/ link is now an ordinary thing to land on. -->
-<div class="container"><div id="nouser" style="display:none">
-  <p class="lead" style="margin-bottom:16px">This username is inactive.</p>
+<div class="container"><div id="nouser" style="display:none;padding:36px 0 8px">
+  <h1 style="margin:0 0 10px">This username is inactive.</h1>
   <p><a class="go" href="/">See everyone on Coaster Hub &rarr;</a></p>
 </div></div>
 
@@ -614,6 +614,11 @@ if(CoasterHub.currentUser()){
       // 2026-09-17): the address bar already says which name was asked for,
       // and the line below says what happened to it.
       document.title = 'Not found \u2014 Coaster Hub';
+      // Nothing of a profile is left standing over it: the hero still said
+      // "Getting in line…" with an "Update your rankings" button, and the
+      // Overview · Credits · Map tabs led nowhere (Carter, 2026-11-18).
+      var hero=document.querySelector('section.hero'); if(hero) hero.style.display='none';
+      document.querySelectorAll('.metabs').forEach(function(m){ m.style.display='none'; });
       document.getElementById('nouser').style.display='block';
     } else {
       document.getElementById('err').style.display='block';
