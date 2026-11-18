@@ -1249,121 +1249,192 @@ const REPORT_REASONS = { name: "Offensive name or picture", bio: "Offensive bio"
   spam: "Spam or fake account", harass: "Harassment", other: "Something else" };
 
 // ---- open-data coverage (2026-11-18) ---------------------------------------
-// Per coaster: is it backed by an open source (a Wikidata link, or a fair
-// ride, which never came from RCDB)? Per field: how many coasters have a value
-// now, how many have one from an open source that does not cite RCDB, and
-// whether the two agree. Numbers agree within 5%; dates at the coarser of the
-// two precisions; text once case and punctuation are gone.
+// The open dataset (migrations 187-190) beside the live one: Wikidata,
+// Coasterpedia and OpenStreetMap, each stat tagged with its source. A coaster
+// is backed by an open source when one links it, or it is a fair ride, which
+// never came from RCDB. Numbers agree within 5%; dates at the coarser of the
+// two precisions; text once case and punctuation are gone, or when one
+// contains the other ("Mack" / "MACK Rides").
 const OPEN_FIELDS = ["manu", "model", "type", "h", "s", "l", "inv", "dur", "opened", "closed"];
-async function getOpenCoverage(env) {
-  const [{ results: cs }, { results: ps }, { results: links }, { results: facts }] = await Promise.all([
-    env.DB.prepare("SELECT id, park, " + OPEN_FIELDS.join(", ") + " FROM coasters").all(),
-    env.DB.prepare("SELECT * FROM parks").all(),
-    env.DB.prepare("SELECT coaster_id, source FROM open_links").all(),
-    env.DB.prepare("SELECT coaster_id, field, value, source, cites_rcdb FROM open_facts").all(),
+// Model names follow each source's own scheme ("Tivoli Large" / "Zierer
+// Tivoli"), so they are shown but never queued as a mismatch to choose.
+const OPEN_NO_PICK = { model: 1 };
+const openSquash = v => String(v).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
+function openAgree(field, a, b) {
+  if (field === "h" || field === "s" || field === "l" || field === "dur") {
+    const x = +a, y = +b;
+    if (!x || !y) return x === y;
+    return Math.abs(x - y) / Math.max(x, y) <= 0.05;
+  }
+  if (field === "inv") return +a === +b;
+  if (field === "opened" || field === "closed") {
+    const x = String(a), y = String(b), n = Math.min(x.length, y.length);
+    return x.slice(0, n) === y.slice(0, n);
+  }
+  const x = openSquash(a), y = openSquash(b);
+  return x === y || (x.length > 3 && y.length > 3 && (x.includes(y) || y.includes(x)));
+}
+const openBlank = v => v == null || v === "";
+
+async function openTables(env) {
+  const q = sql => env.DB.prepare(sql).all().then(r => r.results).catch(() => []);
+  const [cs, ps, links, facts, choices] = await Promise.all([
+    env.DB.prepare("SELECT id, name, park, " + OPEN_FIELDS.join(", ") + " FROM coasters ORDER BY park, name").all().then(r => r.results),
+    env.DB.prepare("SELECT * FROM parks").all().then(r => r.results),
+    q("SELECT coaster_id, source, ref FROM open_links"),
+    q("SELECT coaster_id, field, value, source, cites_rcdb FROM open_facts"),
+    q("SELECT coaster_id, field, source, value FROM open_choices"),
   ]);
   const fair = new Set(ps.filter(p => +p.travel === 1).map(p => p.name));
-  const linked = new Map();
+  const linked = new Map();      // id -> {source: ref}
   for (const l of links) {
-    if (!linked.has(l.coaster_id)) linked.set(l.coaster_id, new Set());
-    linked.get(l.coaster_id).add(l.source);
+    if (!linked.has(l.coaster_id)) linked.set(l.coaster_id, {});
+    linked.get(l.coaster_id)[l.source] = l.ref;
   }
-  const own = new Map(), any = new Map();
+  const open = new Map();        // id -> field -> {source: [value, citesRcdb]}
   for (const f of facts) {
-    if (f.value == null || f.value === "") continue;
-    const k = f.coaster_id + "|" + f.field;
-    any.set(k, f.value);
-    if (!+f.cites_rcdb) own.set(k, f.value);
+    if (openBlank(f.value)) continue;
+    if (!open.has(f.coaster_id)) open.set(f.coaster_id, {});
+    const o = open.get(f.coaster_id);
+    (o[f.field] = o[f.field] || {})[f.source] = [f.value, +f.cites_rcdb];
   }
-  const squash = v => String(v).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
-  const agree = (field, a, b) => {
-    if (field === "h" || field === "s" || field === "l" || field === "dur") {
-      const x = +a, y = +b;
-      if (!x || !y) return x === y;
-      return Math.abs(x - y) / Math.max(x, y) <= 0.05;
-    }
-    if (field === "opened" || field === "closed") {
-      const x = String(a), y = String(b), n = Math.min(x.length, y.length);
-      return x.slice(0, n) === y.slice(0, n);
-    }
-    return squash(a) === squash(b);
-  };
-  const blank = v => v == null || v === "";
+  const chose = new Map();
+  for (const c of choices) chose.set(c.coaster_id + "|" + c.field, [c.source, c.value]);
+  const sources = [...new Set(links.map(l => l.source))].sort();
+  return { cs, fair, linked, open, chose, sources };
+}
+
+// Does this field need a pick? Two values (site or any source) that disagree
+// and no pick yet, or a pick whose source has since changed its value.
+function openMismatch(field, site, bySrc, choice) {
+  if (OPEN_NO_PICK[field]) return false;
+  const vals = [];
+  if (!openBlank(site)) vals.push(["site", site]);
+  for (const s in bySrc) vals.push([s, bySrc[s][0]]);
+  let differ = false;
+  for (let i = 0; i < vals.length && !differ; i++)
+    for (let j = i + 1; j < vals.length; j++) if (!openAgree(field, vals[i][1], vals[j][1])) { differ = true; break; }
+  if (!differ) return false;
+  if (!choice) return true;
+  const now = choice[0] === "site" ? site : (bySrc[choice[0]] || [])[0];
+  return String(now) !== String(choice[1]);
+}
+
+async function getOpenCoverage(env) {
+  const { cs, fair, linked, open, chose } = await openTables(env);
   const fields = {};
-  for (const f of OPEN_FIELDS) fields[f] = { current: 0, fair: 0, open: 0, openAny: 0, agree: 0, differ: 0, openOnly: 0 };
-  const sources = {};
+  for (const f of OPEN_FIELDS) fields[f] = { current: 0, fair: 0, open: 0, agree: 0, differ: 0, openOnly: 0, toPick: 0, picked: 0, bySource: {} };
+  const bySource = {};
   const hist = { open: OPEN_FIELDS.map(() => 0).concat(0), current: OPEN_FIELDS.map(() => 0).concat(0) };
-  let total = 0, fairN = 0, linkedN = 0, openN = 0;
+  let total = 0, fairN = 0, linkedN = 0, openN = 0, toPick = 0;
   for (const c of cs) {
     total++;
-    const isFair = fair.has(c.park), ls = linked.get(c.id);
+    const isFair = fair.has(c.park), ls = linked.get(c.id), o = open.get(c.id) || {};
     if (isFair) fairN++;
-    if (ls) { linkedN++; for (const s of ls) sources[s] = (sources[s] || 0) + 1; }
+    if (ls) { linkedN++; for (const s in ls) bySource[s] = (bySource[s] || 0) + 1; }
     if (isFair || ls) openN++;
     let nOpen = 0, nCur = 0;
     for (const f of OPEN_FIELDS) {
-      const F = fields[f], cur = c[f], k = c.id + "|" + f, o = own.get(k);
-      if (!blank(cur)) { F.current++; nCur++; if (isFair) F.fair++; }
-      if (any.has(k)) F.openAny++;
-      if ((isFair && !blank(cur)) || o != null) { F.open++; nOpen++; }
-      if (o != null) {
-        if (blank(cur)) F.openOnly++;
-        else if (agree(f, cur, o)) F.agree++;
+      const F = fields[f], cur = c[f], src = o[f] || {};
+      const clean = Object.keys(src).filter(s => !src[s][1]);
+      for (const s of Object.keys(src)) F.bySource[s] = (F.bySource[s] || 0) + 1;
+      if (!openBlank(cur)) { F.current++; nCur++; if (isFair) F.fair++; }
+      if ((isFair && !openBlank(cur)) || clean.length) { F.open++; nOpen++; }
+      if (clean.length) {
+        if (openBlank(cur)) F.openOnly++;
+        else if (clean.every(s => openAgree(f, cur, src[s][0]))) F.agree++;
         else F.differ++;
       }
+      const ch = chose.get(c.id + "|" + f);
+      if (ch) F.picked++;
+      if (openMismatch(f, cur, src, ch)) { F.toPick++; toPick++; }
     }
     hist.open[nOpen]++; hist.current[nCur]++;
   }
-  // The raw layer (migration 188): everything Wikidata says, kept unfiltered.
-  let raw = null;
+  // Every record each source holds, matched or not (188 for Wikidata, 189 for the rest).
+  const raw = {};
   try {
-    raw = await env.DB.prepare(
-      "SELECT (SELECT COUNT(*) FROM wd_items) AS items, (SELECT COUNT(*) FROM wd_claims) AS claims, " +
-      "(SELECT COUNT(*) FROM wd_props) AS props, " +
-      "(SELECT COUNT(DISTINCT qid) FROM wd_matches WHERE status = 'linked') AS linked, " +
-      "(SELECT COUNT(DISTINCT qid) FROM wd_matches WHERE status = 'ambiguous') AS ambiguous, " +
-      "(SELECT COUNT(*) FROM wd_items i WHERE NOT EXISTS (SELECT 1 FROM wd_matches m WHERE m.qid = i.qid)) AS unmatched").first();
-  } catch (e) { /* before 188 */ }
-  return { total, fair: fairN, linked: linkedN, open: openN, rcdbOnly: total - openN,
-           sources, fields, hist, fieldOrder: OPEN_FIELDS, raw };
+    raw.wikidata = await env.DB.prepare(
+      "SELECT (SELECT COUNT(*) FROM wd_items) AS items, (SELECT COUNT(*) FROM wd_claims) AS fields, " +
+      "(SELECT COUNT(*) FROM wd_items i WHERE NOT EXISTS (SELECT 1 FROM wd_matches m WHERE m.qid = i.qid)) AS unmatched, " +
+      "(SELECT COUNT(DISTINCT coaster_id) FROM wd_matches WHERE status = 'ambiguous') AS ambiguous").first();
+  } catch (e) {}
+  try {
+    const { results } = await env.DB.prepare(
+      "SELECT i.source, COUNT(*) AS items, (SELECT COUNT(*) FROM open_raw r WHERE r.source = i.source) AS fields, " +
+      "SUM(NOT EXISTS (SELECT 1 FROM open_matches m WHERE m.source = i.source AND m.ref = i.ref)) AS unmatched, " +
+      "(SELECT COUNT(DISTINCT coaster_id) FROM open_matches m WHERE m.source = i.source AND m.status = 'ambiguous') AS ambiguous " +
+      "FROM open_items i GROUP BY i.source").all();
+    for (const r of results) raw[r.source] = r;
+  } catch (e) {}
+  return { total, fair: fairN, linked: linkedN, open: openN, rcdbOnly: total - openN, toPick,
+           sources: bySource, fields, hist, fieldOrder: OPEN_FIELDS, raw };
 }
 
-// Per coaster: [id, name, park, fair, qid|null, {field: [site, open, citesRcdb]}]
-// with only the fields where either side has a value; and the unmatched
-// Wikidata items with what might place them (park, country, opening).
+// Per coaster: [id, name, park, fair, {source: ref}, {field: {site, src, pick, mismatch}}, ambiguous]
+// with only the fields where some side has a value; and the records no
+// coaster here matches, from every source.
 async function getOpenCompare(env) {
-  const [{ results: cs }, { results: ps }, { results: links }, { results: facts }, { results: amb }, { results: un }] = await Promise.all([
-    env.DB.prepare("SELECT id, name, park, " + OPEN_FIELDS.join(", ") + " FROM coasters ORDER BY park, name").all(),
-    env.DB.prepare("SELECT * FROM parks").all(),
-    env.DB.prepare("SELECT coaster_id, ref FROM open_links WHERE source = 'wikidata'").all(),
-    env.DB.prepare("SELECT coaster_id, field, value, cites_rcdb FROM open_facts WHERE source = 'wikidata'").all(),
-    env.DB.prepare("SELECT coaster_id, qid FROM wd_matches WHERE status = 'ambiguous'").all(),
-    env.DB.prepare(
-      "SELECT i.qid, i.label, i.description, " +
-      "(SELECT GROUP_CONCAT(COALESCE(value_label, value), ' | ') FROM wd_claims c WHERE c.qid = i.qid AND c.pid IN ('P361','P276')) AS park, " +
-      "(SELECT value_label FROM wd_claims c WHERE c.qid = i.qid AND c.pid = 'P17' LIMIT 1) AS country, " +
-      "(SELECT MIN(substr(value, 1, 4)) FROM wd_claims c WHERE c.qid = i.qid AND c.pid IN ('P1619','P571','P729')) AS opened " +
-      "FROM wd_items i WHERE NOT EXISTS (SELECT 1 FROM wd_matches m WHERE m.qid = i.qid) ORDER BY country, park, label").all(),
-  ]);
-  const fair = new Set(ps.filter(p => +p.travel === 1).map(p => p.name));
-  const qid = new Map(links.map(l => [l.coaster_id, l.ref]));
-  const ambig = new Map();
-  for (const a of amb) ambig.set(a.coaster_id, a.qid);
-  const open = new Map();
-  for (const f of facts) {
-    if (!open.has(f.coaster_id)) open.set(f.coaster_id, {});
-    open.get(f.coaster_id)[f.field] = [f.value, +f.cites_rcdb];
+  const { cs, fair, linked, open, chose, sources } = await openTables(env);
+  const q = sql => env.DB.prepare(sql).all().then(r => r.results).catch(() => []);
+  const amb = new Map();
+  for (const a of await q("SELECT coaster_id, 'wikidata' AS source, qid AS ref FROM wd_matches WHERE status = 'ambiguous' UNION ALL SELECT coaster_id, source, ref FROM open_matches WHERE status = 'ambiguous'")) {
+    if (!amb.has(a.coaster_id)) amb.set(a.coaster_id, {});
+    amb.get(a.coaster_id)[a.source] = a.ref;
   }
   const rows = cs.map(c => {
     const o = open.get(c.id) || {}, v = {};
     for (const f of OPEN_FIELDS) {
-      const site = c[f] == null || c[f] === "" ? null : c[f];
-      if (site == null && !o[f]) continue;
-      v[f] = [site, o[f] ? o[f][0] : null, o[f] ? o[f][1] : 0];
+      const site = openBlank(c[f]) ? null : c[f], src = o[f] || {};
+      if (site == null && !Object.keys(src).length) continue;
+      const ch = chose.get(c.id + "|" + f) || null;
+      v[f] = { site, src, pick: ch, mismatch: openMismatch(f, site, src, ch) ? 1 : 0 };
     }
-    return [c.id, c.name, c.park, fair.has(c.park) ? 1 : 0, qid.get(c.id) || null, v, ambig.get(c.id) || null];
+    return [c.id, c.name, c.park, fair.has(c.park) ? 1 : 0, linked.get(c.id) || {}, v, amb.get(c.id) || null];
   });
-  return { fields: OPEN_FIELDS, rows, unmatched: un };
+  const unmatched = [
+    ...(await q(
+      "SELECT 'wikidata' AS source, i.qid AS ref, i.label AS name, i.description, " +
+      "(SELECT GROUP_CONCAT(COALESCE(value_label, value), ' | ') FROM wd_claims c WHERE c.qid = i.qid AND c.pid IN ('P361','P276')) AS park, " +
+      "(SELECT value_label FROM wd_claims c WHERE c.qid = i.qid AND c.pid = 'P17' LIMIT 1) AS country, " +
+      "(SELECT MIN(substr(value, 1, 4)) FROM wd_claims c WHERE c.qid = i.qid AND c.pid IN ('P1619','P571','P729')) AS opened " +
+      "FROM wd_items i WHERE NOT EXISTS (SELECT 1 FROM wd_matches m WHERE m.qid = i.qid)")),
+    ...(await q(
+      "SELECT i.source, i.ref, i.name, NULL AS description, i.park, " +
+      "(SELECT v FROM open_raw r WHERE r.source = i.source AND r.ref = i.ref AND r.k = 'country') AS country, " +
+      "(SELECT v FROM open_raw r WHERE r.source = i.source AND r.ref = i.ref AND r.k IN ('opened', 'start_date') LIMIT 1) AS opened " +
+      "FROM open_items i WHERE NOT EXISTS (SELECT 1 FROM open_matches m WHERE m.source = i.source AND m.ref = i.ref)")),
+  ];
+  return { fields: OPEN_FIELDS, noPick: Object.keys(OPEN_NO_PICK), sources, rows, unmatched };
+}
+
+// A pick where the sources disagree: which source's value is right for this
+// coaster and field, in the parallel dataset only. source 'site' takes the
+// current value; anything else takes that source's open_facts value now.
+// source null clears the pick.
+async function setOpenChoice(env, acct, id, field, source) {
+  if (!OPEN_FIELDS.includes(field)) return err(400, "unknown field");
+  try { await env.DB.prepare("SELECT 1 FROM open_choices LIMIT 1").first(); }
+  catch (e) { return err(503, "run migrations/190-open-choices.sql first"); }
+  if (!source) {
+    await env.DB.prepare("DELETE FROM open_choices WHERE coaster_id = ? AND field = ?").bind(id, field).run();
+    return json({ ok: true, pick: null });
+  }
+  let value;
+  if (source === "site") {
+    const row = await env.DB.prepare("SELECT * FROM coasters WHERE id = ?").bind(id).first();
+    if (!row) return err(404, "no such coaster");
+    value = row[field];
+  } else {
+    const row = await env.DB.prepare("SELECT value FROM open_facts WHERE coaster_id = ? AND field = ? AND source = ?").bind(id, field, source).first();
+    if (!row) return err(404, "that source has no value here");
+    value = row.value;
+  }
+  value = value == null ? null : String(value);
+  await env.DB.prepare(
+    "INSERT OR REPLACE INTO open_choices (coaster_id, field, source, value, chosen_by, at) VALUES (?, ?, ?, ?, ?, ?)")
+    .bind(id, field, source, value, acct ? (acct.slug || acct.name || "admin") : "admin", new Date().toISOString()).run();
+  return json({ ok: true, pick: [source, value] });
 }
 
 async function haveClones(env) {
@@ -2405,7 +2476,7 @@ export default {
       if (request.method === "GET" && path === "/api/open-coverage") {
         try { await env.DB.prepare("SELECT 1 FROM open_facts LIMIT 1").first(); }
         catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
-        return edgePut(ctx, request, json(await getOpenCoverage(env), 200, LIST_CACHE));
+        return json(await getOpenCoverage(env));
       }
       // The two datasets side by side, per coaster, for /open-compare: the
       // live value and the open one for every field, plus the Wikidata
@@ -2413,7 +2484,7 @@ export default {
       if (request.method === "GET" && path === "/api/open-compare") {
         try { await env.DB.prepare("SELECT 1 FROM wd_items LIMIT 1").first(); }
         catch (e) { return err(503, "run migrations/188-open-data-wikidata-raw.sql first"); }
-        return edgePut(ctx, request, json(await getOpenCompare(env), 200, LIST_CACHE));
+        return json(await getOpenCompare(env));
       }
       // ---- summaries (2026-09-25) ------------------------------------------
       // One request where pages used to make one per rider. The home page
@@ -2683,6 +2754,15 @@ export default {
       // follow sent nothing): sends a test to your own phones and shows what
       // each step answered — the secret, Google's sign-in, and FCM per phone.
       // Open https://coasterhub.org/api/push/test signed in as an admin.
+      // A pick where the open sources disagree (/open-compare). Admins only;
+      // writes open_choices, never `coasters`. Body {id, field, source|null}.
+      if (request.method === "POST" && path === "/api/open-choice") {
+        if (!adminOk(request, env, acct)) return err(401, "admins only");
+        let b; try { b = await request.json(); } catch (e) { return err(400, "bad JSON"); }
+        const id = +b.id;
+        if (!id) return err(400, "id required");
+        return setOpenChoice(env, acct, id, String(b.field || ""), b.source ? String(b.source) : null);
+      }
       if (request.method === "GET" && path === "/api/push/test") {
         if (!(acct && acct.admin)) return err(401, "admins only");
         const out = { secret: !!env.FCM_SERVICE_ACCOUNT };

@@ -40,7 +40,7 @@
   tbody td{padding:9px 12px;border-bottom:1px solid var(--soft);white-space:nowrap}
   tbody tr:last-child td{border-bottom:0}
   td.f{font-weight:600}
-  td.muted{color:var(--muted)}
+  td.muted{color:var(--muted);white-space:normal;font-size:.8rem}
   .bar{position:relative;width:120px;height:8px;border-radius:999px;background:var(--well);display:inline-block;vertical-align:middle;margin-right:8px;overflow:hidden}
   .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent2);border-radius:999px}
   .diff{color:var(--bad)}
@@ -87,9 +87,9 @@
     <div class="legend" id="legend"></div>
 
     <h2>Stats by field</h2>
-    <p class="sub"><b>On the site</b> is how many coasters have the field filled in now. <b>Open source</b> counts the ones where an open source has it without citing RCDB, plus fair coasters, which never came from RCDB. <b>Agree</b> and <b>Differ</b> compare the open value with the current one (numbers within 5%). <b>New</b> is a value only the open source has.</p>
+    <p class="sub"><b>On the site</b> is how many coasters have the field filled in now. <b>Open source</b> counts the ones where an open source has it without citing RCDB, plus fair coasters, which never came from RCDB. <b>Agree</b> and <b>Differ</b> compare the open value with the current one (numbers within 5%). <b>New</b> is a value only the open source has. <b>To choose</b> counts the coasters where the site and the sources disagree and you haven&rsquo;t picked yet (model names aren&rsquo;t counted: every source names models its own way).</p>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Field</th><th class="num">On the site</th><th>Open source</th><th class="num">Agree</th><th class="num">Differ</th><th class="num">New</th></tr></thead>
+      <thead><tr><th>Field</th><th class="num">On the site</th><th>Open source</th><th class="num">Agree</th><th class="num">Differ</th><th class="num">New</th><th class="num">To choose</th><th>By source</th></tr></thead>
       <tbody id="fields"></tbody>
     </table></div>
 
@@ -100,11 +100,16 @@
       <tbody id="hist"></tbody>
     </table></div>
     <p class="sub" style="margin-top:14px">Open data so far: <span id="srcs"></span>. Coasters are matched by name and park; no RCDB IDs are stored. <a href="/open-compare" style="color:var(--accent2)">See them side by side</a>.</p>
+    <p class="sub" id="pickline" hidden><a href="/open-compare" style="color:var(--accent2)"><b id="topick"></b> mismatches to choose</a></p>
 
     <div id="rawbox" hidden>
-      <h2>Everything Wikidata has</h2>
-      <p class="sub">The raw copy, kept unfiltered so it can be sorted through later: every statement on every roller coaster Wikidata knows, including ones that match nothing here yet.</p>
-      <div class="tbl-wrap"><table><tbody id="raw"></tbody></table></div>
+      <h2>Everything each source has</h2>
+      <p class="sub">The raw copies, kept unfiltered so they can be sorted through later: every record each source has on roller coasters, with every field it gives, including ones that match nothing here yet.</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Source</th><th class="num">Coasters</th><th class="num">Unsure match</th><th class="num">Not on the site</th><th class="num">Fields stored</th></tr></thead>
+        <tbody id="raw"></tbody>
+      </table></div>
+      <p class="sub" style="margin-top:12px">Wikidata is CC0. Coasterpedia is CC BY-SA 4.0. OpenStreetMap is ODbL, &copy; OpenStreetMap contributors.</p>
     </div>
   </div>
 </div></section>
@@ -121,7 +126,8 @@ CoasterHub.initNav('sources');
 
 const NAMES = { manu: 'Manufacturer', model: 'Model', type: 'Steel / wood', h: 'Height', s: 'Speed',
   l: 'Length', inv: 'Inversions', dur: 'Duration', opened: 'Opened', closed: 'Closed' };
-const SRC = { wikidata: 'Wikidata' };
+const SRC = { wikidata: 'Wikidata', coasterpedia: 'Coasterpedia', osm: 'OpenStreetMap' };
+const AB = { wikidata: 'WD', coasterpedia: 'CP', osm: 'OSM' };
 const fmt = n => Number(n).toLocaleString('en-US');
 const pct = (a, b) => b ? Math.round(a * 100 / b) : 0;
 const $ = id => document.getElementById(id);
@@ -134,7 +140,7 @@ fetch('/api/open-coverage').then(r => r.ok ? r.json() : r.json().then(j => Promi
   $('t-rcdb').textContent = fmt(d.rcdbOnly);
   // Linked coasters that are also fair rides count once, under the link.
   const fairOnly = d.open - d.linked;
-  const parts = [['k-open', d.linked, 'Open data (' + Object.keys(d.sources).map(s => SRC[s] || s).join(', ') + ')'],
+  const parts = [['k-open', d.linked, 'Open sources (' + Object.keys(d.sources).map(s => SRC[s] || s).join(', ') + ')'],
                  ['k-fair', fairOnly, 'Fair coasters'], ['k-rcdb', d.rcdbOnly, 'RCDB only']];
   $('split').innerHTML = parts.map(p => '<i class="' + p[0] + '" style="width:' + (p[1] * 100 / d.total) + '%"></i>').join('');
   $('legend').innerHTML = parts.map(p => '<span><em class="' + p[0] + '"></em>' + p[2] + ' · ' + fmt(p[1]) + ' (' + pct(p[1], d.total) + '%)</span>').join('');
@@ -146,7 +152,9 @@ fetch('/api/open-coverage').then(r => r.ok ? r.json() : r.json().then(j => Promi
       + '<td><span class="bar"><i style="width:' + p + '%"></i></span>' + fmt(f.open) + ' <span class="muted">(' + p + '%)</span></td>'
       + '<td class="num">' + (f.agree ? fmt(f.agree) : '<span class="muted">–</span>') + '</td>'
       + '<td class="num' + (f.differ ? ' diff' : '') + '">' + (f.differ ? fmt(f.differ) : '<span class="muted">–</span>') + '</td>'
-      + '<td class="num">' + (f.openOnly ? fmt(f.openOnly) : '<span class="muted">–</span>') + '</td></tr>';
+      + '<td class="num">' + (f.openOnly ? fmt(f.openOnly) : '<span class="muted">–</span>') + '</td>'
+      + '<td class="num' + (f.toPick ? ' diff' : '') + '">' + (f.toPick ? fmt(f.toPick) : '<span class="muted">–</span>') + '</td>'
+      + '<td class="muted">' + Object.entries(f.bySource).map(([s, n]) => (AB[s] || s) + ' ' + fmt(n)).join(' · ') + '</td></tr>';
   }).join('');
 
   $('nf').textContent = d.fieldOrder.length;
@@ -156,12 +164,11 @@ fetch('/api/open-coverage').then(r => r.ok ? r.json() : r.json().then(j => Promi
   }
   $('hist').innerHTML = rows.join('');
   $('srcs').textContent = Object.entries(d.sources).map(([s, n]) => (SRC[s] || s) + ' (' + fmt(n) + ' coasters)').join(', ') || 'none';
-  if (d.raw) {
-    const r = d.raw;
-    $('raw').innerHTML = [['Wikidata coasters', r.items], ['Matched to one here', r.linked],
-      ['Could be more than one here (to review)', r.ambiguous], ['Not on the site yet', r.unmatched],
-      ['Statements', r.claims], ['Different properties', r.props]]
-      .map(x => '<tr><td>' + x[0] + '</td><td class="num">' + fmt(x[1]) + '</td></tr>').join('');
+  if (d.toPick) { $('topick').textContent = fmt(d.toPick); $('pickline').hidden = false; }
+  const raw = Object.entries(d.raw || {});
+  if (raw.length) {
+    $('raw').innerHTML = raw.map(([s, r]) => '<tr><td class="f">' + (SRC[s] || s) + '</td><td class="num">' + fmt(r.items) + '</td><td class="num">'
+      + fmt(r.ambiguous || 0) + '</td><td class="num">' + fmt(r.unmatched || 0) + '</td><td class="num">' + fmt(r.fields) + '</td></tr>').join('');
     $('rawbox').hidden = false;
   }
 }).catch(e => { $('loading').textContent = 'Could not load the coverage numbers' + (typeof e === 'string' ? ': ' + e : '.'); });

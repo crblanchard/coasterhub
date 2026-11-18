@@ -48,12 +48,19 @@ jobs:
           python3 -I tools/open-data/match-wikidata.py
           python3 -I tools/open-data/build-sql.py > migrations/187-open-data-wikidata.sql
           python3 -I tools/open-data/build-raw-sql.py > migrations/188-open-data-wikidata-raw.sql
-          echo "FILES=migrations/187-open-data-wikidata.sql migrations/188-open-data-wikidata-raw.sql" >> "$GITHUB_ENV"
+          # Coasterpedia (CC BY-SA) and OpenStreetMap (ODbL). The public
+          # Overpass servers are often busy: if OSM fails, last week's
+          # tools/open-data/osm/coasters.json is used again.
+          python3 -I tools/open-data/coasterpedia-pull.py
+          bash tools/open-data/osm-pull.sh || echo "::warning::OSM pull failed; reusing the last one"
+          python3 -I tools/open-data/match-sources.py
+          python3 -I tools/open-data/build-sources-sql.py > migrations/189-open-data-sources.sql
+          echo "FILES=migrations/187-open-data-wikidata.sql migrations/188-open-data-wikidata-raw.sql migrations/189-open-data-sources.sql" >> "$GITHUB_ENV"
 
       - name: Commit the refresh
         if: ${{ !inputs.file }}
         run: |
-          git add tools/open-data migrations/187-open-data-wikidata.sql migrations/188-open-data-wikidata-raw.sql
+          git add tools/open-data migrations/187-open-data-wikidata.sql migrations/188-open-data-wikidata-raw.sql migrations/189-open-data-sources.sql
           # The retrieved date changes every run (the last value of each row,
           # "retrieved" in the JSON, "pulled <date>" in the header); only
           # commit when something else did. A line that changed only in that

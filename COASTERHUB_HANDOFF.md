@@ -6233,3 +6233,20 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   regenerates 187/188, commits only if more than the retrieved date changed,
   and loads both into D1. It matches against the repo's coasters.json, so a
   stale snapshot means new coasters match a week late.
+- **Coasterpedia + OSM + picks (migrations 189/190), same day.** Carter asked for
+  Coasterpedia, OSM and Ultimate Rollercoaster, with every stat saying where it
+  came from and mismatches surfaced for him to choose. Coasterpedia
+  (CC BY-SA 4.0): `coasterpedia-pull.py` reads every `Infobox roller coaster`
+  through the MediaWiki API (4,340 pages; units default metric, per its
+  Module:Infobox/coaster). OSM (ODbL): `osm-pull.sh`, attraction=roller_coaster
+  via Overpass, mirrors tried in turn; the sandbox could not get an answer, so
+  its first pull happens in the GitHub job. `match-sources.py` matches both
+  (same rules as Wikidata) and `build-sources-sql.py` writes 189: open_items /
+  open_raw / open_matches (every record and field, unfiltered) plus
+  open_links / open_facts per source. First pass: Coasterpedia linked 1,564
+  coasters, agreeing ~95% with the site. `open_choices` (190) holds picks
+  made on /open-compare (POST /api/open-choice, admins); a pick whose
+  source later changes value comes back as a mismatch. Model names are shown
+  but never queued as mismatches (each source names models differently).
+  **Ultimate Rollercoaster was NOT added**: no published terms or licence, so
+  copying it is the same problem as RCDB. Ask them for permission first.
