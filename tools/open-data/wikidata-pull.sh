@@ -7,6 +7,12 @@
 #              metres per second and seconds (psn:), with whether the
 #              statement's own reference points at RCDB
 #   dates.csv  opening and closing dates the same way
+#   all.csv    EVERY statement on every roller coaster item (2026-11-18,
+#              Carter: "a database that has EVERYTHING wiki includes even if
+#              it might not be right"), except the RCDB ID property P2751,
+#              which is never stored. Quantities also normalised to SI.
+#   props.csv  English label and datatype of every property used in all.csv
+#   desc.csv   English description of every item
 # Run from the repo root: bash tools/open-data/wikidata-pull.sh
 set -euo pipefail
 out=tools/open-data/wikidata; mkdir -p "$out"
@@ -43,4 +49,16 @@ q "SELECT ?c ?field ?value ?prec ?rcdbRef WHERE { $RC
                                      (p:P576 ps:P576 psv:P576 'closed') (p:P730 ps:P730 psv:P730 'closed') }
     ?c ?prop ?st . ?st ?ps ?value . ?st ?psv ?tv . ?tv wikibase:timePrecision ?prec .
     $REF }" > "$out/dates.csv"
+q "SELECT ?c ?pid ?val ?valLabel ?amt ?unit ?prec ?rank ?rcdbRef WHERE { $RC
+    ?c ?p ?st . ?prop wikibase:claim ?p ; wikibase:statementProperty ?ps .
+    FILTER(?prop != wd:P2751)
+    BIND(STRAFTER(STR(?prop), 'entity/') AS ?pid)
+    ?st ?ps ?val . ?st wikibase:rank ?rank .
+    OPTIONAL { ?prop wikibase:statementValueNormalized ?psn . ?st ?psn ?nv . ?nv wikibase:quantityAmount ?amt ; wikibase:quantityUnit ?unit }
+    OPTIONAL { ?prop wikibase:statementValue ?psv . ?st ?psv ?tv . ?tv wikibase:timePrecision ?prec }
+    OPTIONAL { ?val rdfs:label ?valLabel FILTER(LANG(?valLabel)='en') }
+    $REF }" > "$out/all.csv"
+q "SELECT DISTINCT ?pid ?label ?type WHERE { $RC ?c ?p ?st . ?prop wikibase:claim ?p ; wikibase:propertyType ?type .
+    BIND(STRAFTER(STR(?prop), 'entity/') AS ?pid) ?prop rdfs:label ?label FILTER(LANG(?label)='en') }" > "$out/props.csv"
+q "SELECT ?c ?desc WHERE { $RC ?c schema:description ?desc FILTER(LANG(?desc)='en') }" > "$out/desc.csv"
 wc -l "$out"/*.csv

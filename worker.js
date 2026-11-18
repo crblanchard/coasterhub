@@ -1314,8 +1314,18 @@ async function getOpenCoverage(env) {
     }
     hist.open[nOpen]++; hist.current[nCur]++;
   }
+  // The raw layer (migration 188): everything Wikidata says, kept unfiltered.
+  let raw = null;
+  try {
+    raw = await env.DB.prepare(
+      "SELECT (SELECT COUNT(*) FROM wd_items) AS items, (SELECT COUNT(*) FROM wd_claims) AS claims, " +
+      "(SELECT COUNT(*) FROM wd_props) AS props, " +
+      "(SELECT COUNT(DISTINCT qid) FROM wd_matches WHERE status = 'linked') AS linked, " +
+      "(SELECT COUNT(DISTINCT qid) FROM wd_matches WHERE status = 'ambiguous') AS ambiguous, " +
+      "(SELECT COUNT(*) FROM wd_items i WHERE NOT EXISTS (SELECT 1 FROM wd_matches m WHERE m.qid = i.qid)) AS unmatched").first();
+  } catch (e) { /* before 188 */ }
   return { total, fair: fairN, linked: linkedN, open: openN, rcdbOnly: total - openN,
-           sources, fields, hist, fieldOrder: OPEN_FIELDS };
+           sources, fields, hist, fieldOrder: OPEN_FIELDS, raw };
 }
 
 async function haveClones(env) {

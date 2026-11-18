@@ -44,6 +44,7 @@
   .bar{position:relative;width:120px;height:8px;border-radius:999px;background:var(--well);display:inline-block;vertical-align:middle;margin-right:8px;overflow:hidden}
   .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent2);border-radius:999px}
   .diff{color:var(--bad)}
+  #raw td{white-space:normal}
   #loading{color:var(--muted);padding:30px 0}
   @media (max-width:560px){
     .srct .t{padding:12px}
@@ -99,6 +100,12 @@
       <tbody id="hist"></tbody>
     </table></div>
     <p class="sub" style="margin-top:14px">Open data so far: <span id="srcs"></span>. Coasters are matched by name and park; no RCDB IDs are stored.</p>
+
+    <div id="rawbox" hidden>
+      <h2>Everything Wikidata has</h2>
+      <p class="sub">The raw copy, kept unfiltered so it can be sorted through later: every statement on every roller coaster Wikidata knows, including ones that match nothing here yet.</p>
+      <div class="tbl-wrap"><table><tbody id="raw"></tbody></table></div>
+    </div>
   </div>
 </div></section>
 
@@ -149,6 +156,14 @@ fetch('/api/open-coverage').then(r => r.ok ? r.json() : r.json().then(j => Promi
   }
   $('hist').innerHTML = rows.join('');
   $('srcs').textContent = Object.entries(d.sources).map(([s, n]) => (SRC[s] || s) + ' (' + fmt(n) + ' coasters)').join(', ') || 'none';
+  if (d.raw) {
+    const r = d.raw;
+    $('raw').innerHTML = [['Wikidata coasters', r.items], ['Matched to one here', r.linked],
+      ['Could be more than one here (to review)', r.ambiguous], ['Not on the site yet', r.unmatched],
+      ['Statements', r.claims], ['Different properties', r.props]]
+      .map(x => '<tr><td>' + x[0] + '</td><td class="num">' + fmt(x[1]) + '</td></tr>').join('');
+    $('rawbox').hidden = false;
+  }
 }).catch(e => { $('loading').textContent = 'Could not load the coverage numbers' + (typeof e === 'string' ? ': ' + e : '.'); });
 </script>
 </body>

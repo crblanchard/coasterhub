@@ -78,14 +78,15 @@ for q in items.values():
 # Our maker spellings, to map Wikidata's legal names onto (Vekoma Rides
 # Manufacturing B.V. -> Vekoma): the longest of ours contained in theirs.
 # Several spellings that squash the same ("MACK RIdes" / "MACK Rides"): the
-# one most rows use. Wikidata also lists designers and park owners as makers;
-# those are not kept.
+# one most rows use. Wikidata also lists designers and park owners as makers.
+# They are kept (Carter, 2026-11-18: "Keep park owners for now ... filter
+# through instead of drop data"), but a real maker wins when there is one.
 freq = collections.Counter(c['manu'] for c in coasters if c.get('manu'))
 ours = sorted(freq, key=lambda m: (-len(sq(m)), -freq[m]))
 NOT_MAKERS = {'wernerstengel', 'sixflags', 'taftbroadcasting', 'ingburostengelgmbh', 'herschendfamilyentertainment', 'henselphelps', 'cedarfair', 'disney', 'thewaltdisneycompany', 'waltdisneyimagineering'}
+def owner(wd): return any(k in sq(wd) for k in NOT_MAKERS)
 def maker(wd):
     s = sq(wd)
-    if any(k in s for k in NOT_MAKERS): return None
     for m in ours:
         if sq(m) and sq(m) in s: return m
     return wd
@@ -106,7 +107,7 @@ for c in coasters:
     if not best: continue
     q, m = best; how[m] += 1
     f = {k: {'v': v[0], 'prec': v[1], 'cites_rcdb': v[2]} for k, v in facts.get(q['qid'], {}).items()}
-    mk = next((x for x in (maker(w) for w in q['makers']) if x), None)
+    mk = next((maker(w) for w in q['makers'] if not owner(w)), None) or next((maker(w) for w in q['makers']), None)
     if mk: f['manu'] = {'v': mk, 'prec': None, 'cites_rcdb': False}
     mat = (q['material'] + ' ' + q['types']).lower()
     t = 'Wood' if 'wood' in mat else 'Steel' if 'steel' in mat else None
@@ -122,6 +123,7 @@ groups = collections.defaultdict(list)
 for k, v in out.items(): groups[v['qid']].append(k)
 byid = {c['id']: c for c in coasters}
 dropped = 0
+ambiguous = []   # kept for review, not linked: [{qid, coaster_id, method}]
 for qid, ks in groups.items():
     if len(ks) < 2: continue
     rows = [byid[k] for k in ks]
@@ -132,10 +134,11 @@ for qid, ks in groups.items():
              or km(q['lat'], q['lon'], parks[r['park']]['lat'], parks[r['park']]['lon']) <= 3)]
     for r in rows:
         if len(keep_) != 1 or r is not keep_[0]:
+            ambiguous.append({'qid': qid, 'coaster_id': r['id'], 'method': out[r['id']]['method']})
             del out[r['id']]; dropped += 1
-print('dropped as ambiguous', dropped)
+print('ambiguous (kept for review, not linked)', dropped)
 
-json.dump({'retrieved': datetime.date.today().isoformat(), 'matches': out},
+json.dump({'retrieved': datetime.date.today().isoformat(), 'matches': out, 'ambiguous': ambiguous},
           open('tools/open-data/wikidata-matches.json', 'w'), indent=0, sort_keys=True)
 fields = collections.Counter(k for v in out.values() for k in v['facts'])
 clean = collections.Counter(k for v in out.values() for k, x in v['facts'].items() if not x['cites_rcdb'])

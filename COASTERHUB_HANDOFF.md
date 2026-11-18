@@ -6213,3 +6213,13 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
 - Next sources to try: OSM (Overpass, flaky here), Coasterpedia (has a licence
   page), Wikipedia infoboxes. Ultimate Rollercoaster has no published terms:
   treat as not openly licensed.
+- **Raw layer (migration 188), same day.** Carter: "want to build a database that
+  has EVERYTHING wiki includes even if it might not be right. Want to filter
+  through instead of drop data". `wd_items`, `wd_props`, `wd_claims` (every
+  statement on every roller coaster item, 13,668 of them; P2751 RCDB ID excluded)
+  and `wd_matches` (status `linked` or `ambiguous`; ambiguous candidates are kept,
+  not dropped). Park owners Wikidata lists as makers (Six Flags, Cedar Fair,
+  Disney...) are kept too; a real maker still wins in open_facts.
+  `build-raw-sql.py` writes 188. Load big open-data files with the
+  **Load open dataset into D1** Action (`open-data.yml`, dispatch with the file
+  path); it only accepts `migrations/NNN-open-data-*.sql` that touch open_*/wd_*.

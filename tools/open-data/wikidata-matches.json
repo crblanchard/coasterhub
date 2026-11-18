@@ -1,4 +1,86 @@
 {
+"ambiguous": [
+{
+"coaster_id": 200,
+"method": "name+park",
+"qid": "Q798461"
+},
+{
+"coaster_id": 1800,
+"method": "name+park",
+"qid": "Q971592"
+},
+{
+"coaster_id": 1801,
+"method": "name+park",
+"qid": "Q971592"
+},
+{
+"coaster_id": 464,
+"method": "name+park",
+"qid": "Q133460330"
+},
+{
+"coaster_id": 465,
+"method": "name+park",
+"qid": "Q133460330"
+},
+{
+"coaster_id": 484,
+"method": "name+park",
+"qid": "Q2327576"
+},
+{
+"coaster_id": 1604,
+"method": "name+park",
+"qid": "Q2327576"
+},
+{
+"coaster_id": 509,
+"method": "name+park",
+"qid": "Q586854"
+},
+{
+"coaster_id": 864,
+"method": "name+park",
+"qid": "Q586854"
+},
+{
+"coaster_id": 1823,
+"method": "name+park",
+"qid": "Q22073205"
+},
+{
+"coaster_id": 677,
+"method": "name+coords",
+"qid": "Q1509287"
+},
+{
+"coaster_id": 1264,
+"method": "name+coords",
+"qid": "Q1509287"
+},
+{
+"coaster_id": 1223,
+"method": "name+park",
+"qid": "Q1502476"
+},
+{
+"coaster_id": 836,
+"method": "name+park",
+"qid": "Q2182970"
+},
+{
+"coaster_id": 859,
+"method": "name+park",
+"qid": "Q98012894"
+},
+{
+"coaster_id": 1309,
+"method": "name+park",
+"qid": "Q98012894"
+}
+],
 "matches": {
 "3": {
 "captainCoaster": null,
@@ -1401,7 +1483,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Arrow Dynamics"
+"v": "Morgan"
 },
 "type": {
 "cites_rcdb": false,
@@ -4670,6 +4752,11 @@
 "325": {
 "captainCoaster": null,
 "facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Six Flags"
+},
 "type": {
 "cites_rcdb": false,
 "prec": null,
@@ -5387,6 +5474,11 @@
 "396": {
 "captainCoaster": null,
 "facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Taft Broadcasting"
+},
 "type": {
 "cites_rcdb": false,
 "prec": null,
@@ -10254,6 +10346,11 @@
 "744": {
 "captainCoaster": null,
 "facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Hensel Phelps"
+},
 "type": {
 "cites_rcdb": false,
 "prec": null,
@@ -14061,45 +14158,6 @@
 "method": "name+park",
 "osm": null,
 "qid": "Q2229119"
-},
-"1223": {
-"captainCoaster": null,
-"facts": {
-"h": {
-"cites_rcdb": false,
-"prec": null,
-"v": 78.7
-},
-"l": {
-"cites_rcdb": false,
-"prec": null,
-"v": 3267.7
-},
-"manu": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Vekoma"
-},
-"opened": {
-"cites_rcdb": false,
-"prec": "day",
-"v": "2002-03-16"
-},
-"s": {
-"cites_rcdb": false,
-"prec": null,
-"v": 57.0
-},
-"type": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Steel"
-}
-},
-"label": "Avengers Assemble: Flight Force",
-"method": "name+park",
-"osm": null,
-"qid": "Q140199236"
 },
 "1224": {
 "captainCoaster": null,
@@ -19649,6 +19707,11 @@
 "2190": {
 "captainCoaster": null,
 "facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Taft Broadcasting"
+},
 "type": {
 "cites_rcdb": false,
 "prec": null,
