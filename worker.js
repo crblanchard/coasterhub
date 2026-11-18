@@ -1408,6 +1408,39 @@ async function getOpenCompare(env) {
   return { fields: OPEN_FIELDS, noPick: Object.keys(OPEN_NO_PICK), sources, rows, unmatched };
 }
 
+// The cleanup table (2026-11-18): per coaster, (a) does any open source have
+// it, (b) how many stats it has on the site and from open sources, (c) how
+// many riders have it — counting every location of a relocated ride. RCDB-only
+// coasters nobody has ridden are the removal candidates, operating or not:
+// RCDB should not be how one got on the site in the first place. Read only:
+// removing one is a separate, deliberate step.
+async function getOpenCleanup(env) {
+  const { cs, fair, linked, open } = await openTables(env);
+  const q = sql => env.DB.prepare(sql).all().then(r => r.results).catch(() => []);
+  const [rides, same] = await Promise.all([
+    q("SELECT DISTINCT coaster_id, user_slug FROM rides"),
+    q("SELECT coaster, ride FROM same_ride"),
+  ]);
+  const home = new Map(same.map(s => [s.coaster, s.ride]));
+  const riders = new Map();       // group (home id, or own id) -> Set of riders
+  for (const r of rides) {
+    const g = home.get(r.coaster_id) || r.coaster_id;
+    if (!riders.has(g)) riders.set(g, new Set());
+    riders.get(g).add(r.user_slug);
+  }
+  const STATS = ["h", "s", "l", "inv", "dur"];
+  const rows = cs.map(c => {
+    const o = open.get(c.id) || {}, ls = linked.get(c.id) || {};
+    const site = STATS.filter(f => !openBlank(c[f])).length;
+    const openStats = STATS.filter(f => o[f] && Object.values(o[f]).some(v => !v[1])).length;
+    const n = (riders.get(home.get(c.id) || c.id) || new Set()).size;
+    const isFair = fair.has(c.park), hasOpen = isFair || Object.keys(ls).length > 0;
+    return [c.id, c.name, c.park, c.closed || null, Object.keys(ls), isFair ? 1 : 0, site, openStats, n,
+            !hasOpen && n === 0 ? 1 : 0];
+  });
+  return { stats: STATS.length, rows };
+}
+
 // A pick where the sources disagree: which source's value is right for this
 // coaster and field, in the parallel dataset only. source 'site' takes the
 // current value; anything else takes that source's open_facts value now.
@@ -2485,6 +2518,11 @@ export default {
         try { await env.DB.prepare("SELECT 1 FROM wd_items LIMIT 1").first(); }
         catch (e) { return err(503, "run migrations/188-open-data-wikidata-raw.sql first"); }
         return json(await getOpenCompare(env));
+      }
+      if (request.method === "GET" && path === "/api/open-cleanup") {
+        try { await env.DB.prepare("SELECT 1 FROM open_links LIMIT 1").first(); }
+        catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
+        return json(await getOpenCleanup(env));
       }
       // ---- summaries (2026-09-25) ------------------------------------------
       // One request where pages used to make one per rider. The home page

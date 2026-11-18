@@ -6250,6 +6250,13 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   but never queued as mismatches (each source names models differently).
   **Ultimate Rollercoaster was NOT added**: no published terms or licence, so
   copying it is the same problem as RCDB. Ask them for permission first.
+- **Cleanup table (/open-cleanup, /api/open-cleanup), same day.** Per coaster:
+  open source or not (fair rides count as open), stats on the site vs from open
+  sources (h/s/l/inv/dur), and riders, counting every location of a relocated
+  ride. A removal candidate is any coaster with no open source that nobody has
+  ridden, operating OR closed: Carter does not want RCDB to be how a coaster got
+  on the site at all. About 252 live (100 operating, 152 closed). Read only;
+  deleting them is a separate step he has to OK.
 - **RCDB IDs hide in URLs and tags.** Wikidata's "described at URL" (P973) held
   45 rcdb.com/NNNN.htm links, and some OSM coasters carry `rcdb_id` /
   `ref:rcdb` tags; all were removed (D1 rows deleted 2026-11-18) and every
