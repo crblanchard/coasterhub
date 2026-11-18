@@ -6250,3 +6250,9 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   but never queued as mismatches (each source names models differently).
   **Ultimate Rollercoaster was NOT added**: no published terms or licence, so
   copying it is the same problem as RCDB. Ask them for permission first.
+- **RCDB IDs hide in URLs and tags.** Wikidata's "described at URL" (P973) held
+  45 rcdb.com/NNNN.htm links, and some OSM coasters carry `rcdb_id` /
+  `ref:rcdb` tags; all were removed (D1 rows deleted 2026-11-18) and every
+  pull/builder now drops any key or value mentioning RCDB. Grep the generated
+  files for `rcdb` after changing a puller: only the `cites_rcdb` column name
+  should match.

@@ -83,7 +83,7 @@ def cp_items():
     for line in open(p):
         r = json.loads(line)
         # A broken infobox (an unclosed [[) can leave a whole block in one key.
-        b = {k: re.sub(r'\s+', ' ', v) for k, v in r['params'].items() if re.fullmatch(r'[a-z0-9_/ .-]+', k)}
+        b = {k: re.sub(r'\s+', ' ', v) for k, v in r['params'].items() if re.fullmatch(r'[a-z0-9_/ .-]+', k) and 'rcdb' not in k and 'rcdb' not in v.lower()}
         title = r['title']
         name = b.get('name') or re.sub(r'\s*\([^)]*\)$', '', title)
         metric = (b.get('units') or 'metric').lower() != 'imperial'
@@ -113,7 +113,7 @@ def osm_items():
     p = 'tools/open-data/osm/coasters.json'
     if not os.path.exists(p): return
     for e in json.load(open(p))['elements']:
-        t = {k: re.sub(r'\s+', ' ', v) for k, v in e.get('tags', {}).items()}
+        t = {k: re.sub(r'\s+', ' ', v) for k, v in e.get('tags', {}).items() if 'rcdb' not in k.lower() and 'rcdb' not in v.lower()}
         name = t.get('name:en') or t.get('name')
         if not name: continue
         def length(v):

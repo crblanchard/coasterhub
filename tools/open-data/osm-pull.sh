@@ -24,6 +24,8 @@ els=sorted(d["elements"], key=lambda e:(e["type"],e["id"]))
 for e in els:
     c=e.get("center") or {}
     e["lat"]=e.get("lat",c.get("lat")); e["lon"]=e.get("lon",c.get("lon")); e.pop("center",None)
+    # No RCDB identifier is ever stored: OSM carries rcdb_id / ref:rcdb tags on some.
+    e["tags"]={k:v for k,v in e.get("tags",{}).items() if "rcdb" not in k.lower() and "rcdb" not in str(v).lower()}
 json.dump({"source":"OpenStreetMap (ODbL)","elements":els},open(sys.argv[2],"w"),ensure_ascii=False,sort_keys=True,indent=0)
 print(len(els),"OSM coasters from",sys.argv[3])' "$tmp" "$out/coasters.json" "$host"
       rm -f "$tmp"; exit 0

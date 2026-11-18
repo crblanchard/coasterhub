@@ -41,7 +41,9 @@ for r in csv.DictReader(open(W + 'props.csv')):
 
 claims = {}
 for r in csv.DictReader(open(W + 'all.csv')):
-    if r['pid'] == 'P2751': continue
+    # The RCDB ID property, and any value mentioning RCDB: an rcdb.com
+    # "described at URL" (P973) carries the ID in its address.
+    if r['pid'] == 'P2751' or 'rcdb' in (r['val'] + r['valLabel']).lower(): continue
     key = (qid(r['c']), r['pid'], qid(r['val']))
     rc = 1 if r['rcdbRef'] == 'true' else 0
     old = claims.get(key)

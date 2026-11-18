@@ -10,7 +10,8 @@
 #   all.csv    EVERY statement on every roller coaster item (2026-11-18,
 #              Carter: "a database that has EVERYTHING wiki includes even if
 #              it might not be right"), except the RCDB ID property P2751,
-#              which is never stored. Quantities also normalised to SI.
+#              which is never stored, nor any value mentioning RCDB (an
+#              rcdb.com "described at URL" carries the ID). SI-normalised too.
 #   props.csv  English label and datatype of every property used in all.csv
 #   desc.csv   English description of every item
 # Run from the repo root: bash tools/open-data/wikidata-pull.sh
@@ -69,6 +70,7 @@ q "SELECT ?c ?pid ?val ?valLabel ?amt ?unit ?prec ?rank ?rcdbRef WHERE { $RC
     FILTER(?prop != wd:P2751)
     BIND(STRAFTER(STR(?prop), 'entity/') AS ?pid)
     ?st ?ps ?val . ?st wikibase:rank ?rank .
+    FILTER(!CONTAINS(LCASE(STR(?val)), 'rcdb'))
     OPTIONAL { ?prop wikibase:statementValueNormalized ?psn . ?st ?psn ?nv . ?nv wikibase:quantityAmount ?amt ; wikibase:quantityUnit ?unit }
     OPTIONAL { ?prop wikibase:statementValue ?psv . ?st ?psv ?tv . ?tv wikibase:timePrecision ?prec }
     OPTIONAL { ?val rdfs:label ?valLabel FILTER(LANG(?valLabel)='en') }
