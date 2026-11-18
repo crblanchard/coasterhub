@@ -35,6 +35,30 @@
   .kpi .num{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1}
   .kpi .lbl{color:var(--muted);font-size:.8rem;margin-top:6px}
   .kpi .sub{color:var(--accent2);font-size:.76rem;margin-top:4px}
+  /* The season so far (Carter, 2026-11-17: "I love 6 such a good idea"): this
+     year's riding as one card, which reads as a year in review once the year
+     is over. Figures across the top like the coaster page's band, then the
+     two lines worth telling a friend. */
+  .season{background-color:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .season .shd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 18px 0}
+  .season .shd h2{margin:0;font-size:1.25rem}
+  .season .shd span{color:var(--muted);font-size:.82rem;font-weight:600;white-space:nowrap}
+  .season .sfig{display:flex;flex-wrap:wrap;margin:12px 0 0;padding:10px 0;background-color:var(--tint);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .season .sfig div{flex:1 1 0;min-width:96px;padding:4px 18px;border-left:1px solid var(--line)}
+  .season .sfig div:first-child{border-left:0}
+  .season .sfig b{display:block;font-size:1.5rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.1}
+  .season .sfig span{display:block;color:var(--muted);font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-top:3px}
+  .season .slines{margin:0;padding:12px 18px 14px;list-style:none}
+  .season .slines li{padding:3px 0;font-size:.92rem;color:var(--muted)}
+  .season .slines li b{color:var(--fg);font-weight:600}
+  .season .slines a{color:var(--accent2);text-decoration:none}
+  @media (max-width:560px){
+    .season .sfig{display:grid;grid-template-columns:1fr 1fr;padding:4px 0}
+    .season .sfig div{border-left:0;border-top:1px solid var(--line);padding:9px 14px}
+    .season .sfig div:nth-child(-n+2){border-top:0}
+    .season .sfig div:nth-child(2n){border-left:1px solid var(--line)}
+    .season .shd,.season .slines{padding-left:14px;padding-right:14px}
+  }
   /* A standing note about a rider's own data — something known to be missing or
      unresolved, kept visible so it doesn't get forgotten. See RIDER_NOTES. */
   .ridernote{margin:22px 0 -6px;padding:11px 15px;border:1px solid var(--line);
@@ -196,6 +220,7 @@
     #sec_visits{order:1}     /* first, then the top ten: same order, source breaks the tie */
     #sec_top{order:1}
     #sec_kpis{order:2}
+    #sec_season{order:2}
     /* Records before the map on a phone, and not behind More stats: they are
        what you show a friend (critique, 2026-10-02). */
     #sec_otd{order:3}
@@ -455,6 +480,10 @@
     <div class="kpi"><div class="num" id="k_geo"></div><div class="lbl">States · countries</div></div>
     <div class="kpi"><div class="num" id="k_miles"></div><div class="lbl" id="k_miles_lbl">Distance ridden</div><div class="sub" id="k_inv"></div></div>
   </div>
+</div></section>
+
+<section class="block" id="sec_season" hidden><div class="container">
+  <div class="season" id="season"></div>
 </div></section>
 
 <section class="block" id="sec_otd"><div class="container">
@@ -1283,6 +1312,49 @@ function render(s){
     // Nothing opened, closed or ridden on this date: the section says nothing.
     if(quiet && !rode.length) document.getElementById('sec_otd').style.display='none';
     document.getElementById('otd').innerHTML=html;
+  })();
+
+  // The season (Carter, 2026-11-17): this year's dated riding — credits new
+  // this year, rides, park days, parks — then the best day and the park
+  // visited most. In the first two months of a year with nothing logged yet it
+  // shows last year instead, as "<year> in review". A credit with an undated
+  // ride never counts as new (it may have come first), the same rule as the
+  // New marks above.
+  (function(){
+    var by=s.coastersById||{}, rides=(s.rides||[]).filter(function(r){ return r.d && r.d.length>=10 && by[r.c]; });
+    if(!rides.length) return;
+    var now=new Date(), Y=String(now.getFullYear());
+    var inY=function(y){ return rides.filter(function(r){ return r.d.slice(0,4)===y; }); };
+    var cur=inY(Y), done=false;
+    if(!cur.length && now.getMonth()<2){ Y=String(now.getFullYear()-1); cur=inY(Y); done=true; }
+    if(!cur.length) return;
+    var murky=CoasterHub.undatedKeys(s), first={}, firstPark={}, parkUndated={};
+    (s.rides||[]).forEach(function(r){ var c=by[r.c]; if(c && !r.d) parkUndated[c.park]=1; });
+    rides.forEach(function(r){ var c=by[r.c], k=CoasterHub.rideKey(c);
+      if(!first[k]||r.d<first[k]) first[k]=r.d; if(!firstPark[c.park]||r.d<firstPark[c.park]) firstPark[c.park]=r.d; });
+    var days={}, parks={}, parkDays={};
+    cur.forEach(function(r){ var c=by[r.c];
+      var d=days[r.d]||(days[r.d]={n:0,parks:{}}); d.n++; d.parks[c.park]=1;
+      parks[c.park]=1; (parkDays[c.park]=parkDays[c.park]||{})[r.d]=1; });
+    var newCred=Object.keys(first).filter(function(k){ return first[k].slice(0,4)===Y && !murky[k]; }).length;
+    var newParks=Object.keys(parks).filter(function(p){ return firstPark[p].slice(0,4)===Y && !parkUndated[p]; }).length;
+    var nDays=Object.keys(days).length, nParks=Object.keys(parks).length;
+    var best=Object.keys(days).sort(function(a,b){ return days[b].n-days[a].n || b.localeCompare(a); })[0];
+    var top=Object.keys(parkDays).sort(function(a,b){ return Object.keys(parkDays[b]).length-Object.keys(parkDays[a]).length || a.localeCompare(b); })[0];
+    var nf2=function(n){ return Number(n).toLocaleString(); };
+    var fmt=function(d){ var p=d.split('-'); return new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).toLocaleDateString(undefined,{timeZone:'UTC',month:'short',day:'numeric'}); };
+    var plink=function(p){ return '<a href="'+esc(CoasterHub.parkHref(p))+'">'+esc(p)+'</a>'; };
+    var figs=[[newCred,'New credits'],[cur.length,has.activity?'Rides':'Credits ridden'],[nDays,'Park days'],[nParks,'Parks']];
+    var lines=[];
+    if(best && days[best].n>1) lines.push('Biggest day: <b>'+fmt(best)+'</b> at '+Object.keys(days[best].parks).map(plink).join(' & ')+' &middot; '+days[best].n+' rides');
+    if(top && Object.keys(parkDays[top]).length>1) lines.push('Most visited: '+plink(top)+' &middot; '+Object.keys(parkDays[top]).length+' days');
+    if(newParks) lines.push('<b>'+newParks+'</b> first-time park'+(newParks===1?'':'s'));
+    var last=Object.keys(days).sort().pop();
+    document.getElementById('season').innerHTML='<div class="shd"><h2>'+(done?Y+' in review':'Your '+Y).replace('Your ',mine?'Your ':esc(s.userName||'Their')+'\u2019s ')+'</h2>'
+      +(done?'':'<span>Last day '+fmt(last)+'</span>')+'</div>'
+      +'<div class="sfig">'+figs.map(function(f){ return '<div><b>'+nf2(f[0])+'</b><span>'+f[1]+'</span></div>'; }).join('')+'</div>'
+      +(lines.length?'<ul class="slines">'+lines.map(function(l){ return '<li>'+l+'</li>'; }).join('')+'</ul>':'');
+    document.getElementById('sec_season').hidden=false;
   })();
 
   // Lost credits (Carter, 2026-11-17): every ride this rider has done that is
