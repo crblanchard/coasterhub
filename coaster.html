@@ -61,20 +61,27 @@
   /* A closed coaster's numbers are grey: grey means defunct, sitewide. */
   .gone .stat1 b{color:var(--muted)}
   .gone .stat1 em{display:none}
-  .stats{display:flex;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:0 0 6px;overflow:hidden}
+  /* The numbers as a band across the whole screen (Carter, 2026-11-17, from the
+     coaster-page mockups: option A, "too big maybe shrink text & bar height"):
+     a pale strip edge to edge, hairlines above and below, the stats sitting
+     in the page column inside it. */
+  body{overflow-x:clip}   /* the band is 100vw, which counts a desktop scrollbar */
+  .stats{position:relative;display:flex;flex-wrap:wrap;margin:14px 0 18px;padding:10px 0;isolation:isolate}
+  .stats::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%);z-index:-1;
+    background-color:var(--tint);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   .stats:empty{display:none}
-  .stat1{flex:1 1 0;min-width:110px;padding:14px 18px;border-left:1px solid var(--line)}
+  .stat1{flex:1 1 0;min-width:110px;padding:6px 18px;border-left:1px solid var(--line)}
   .stat1:first-child{border-left:0}
-  .stat1 b{display:block;font-size:1.5rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.15;white-space:nowrap}
-  .stat1 span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}
+  .stat1 b{display:block;font-size:1.6rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.1;white-space:nowrap}
+  .stat1 span{display:block;color:var(--muted);font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-top:3px}
   .stat1 em{display:inline-block;margin-top:6px;font-style:normal;font-size:.72rem;font-weight:700;color:var(--onaccent);
             background-color:var(--accentfill);border-radius:999px;padding:2px 8px}
   @media (max-width:560px){
-    .stats{display:grid;grid-template-columns:1fr 1fr}
-    .stat1{border-left:0;border-top:1px solid var(--line);padding:11px 14px}
+    .stats{display:grid;grid-template-columns:1fr 1fr;padding:4px 0}
+    .stat1{border-left:0;border-top:1px solid var(--line);padding:9px 14px}
     .stat1:nth-child(-n+2){border-top:0}
     .stat1:nth-child(2n){border-left:1px solid var(--line)}
-    .stat1 b{font-size:1.25rem}
+    .stat1 b{font-size:1.3rem}
     .stat1:last-child:nth-child(odd){grid-column:1 / -1}
   }
   .rsum{margin:0 0 10px;font-size:.95rem;color:var(--muted)}
@@ -87,11 +94,24 @@
   #more_wrap .rest[hidden]{display:none}
   .morehd a{color:var(--accent2);font-size:.88rem;font-weight:600;text-decoration:none;white-space:nowrap}
 
-  /* History is plain lines (Carter, 2026-09-26). */
-  .hist p,.riders .at{margin:0 0 4px;font-size:.92rem;line-height:1.5}
-  .hist a,.riders .at a{color:var(--accent2);text-decoration:none}
-  .hist a:hover,.riders .at a:hover{text-decoration:underline}
-  .hist .yrs{color:var(--muted)}
+  /* Past locations (Carter, 2026-11-17, from the mockups: renamed from
+     History, the current park kept at the top): a line with a stop per park,
+     newest first; the one running now is a filled dot. */
+  .riders .at{margin:0 0 4px;font-size:.92rem;line-height:1.5}
+  .riders .at a{color:var(--accent2);text-decoration:none}
+  .riders .at a:hover{text-decoration:underline}
+  .hist{position:relative;margin:2px 0 8px;padding-left:22px}
+  .hist::before{content:"";position:absolute;left:6px;top:14px;bottom:14px;width:2px;background-color:var(--line)}
+  .hist .st{position:relative;padding:7px 0}
+  .hist .st::before{content:"";position:absolute;left:-21px;top:12px;width:12px;height:12px;border-radius:50%;
+    box-sizing:border-box;background-color:var(--bg);border:2px solid var(--muted)}
+  .hist .st.now::before{background-color:var(--accent2);border-color:var(--accent2);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent2) 22%,transparent)}
+  .hist .y{display:block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .hist .st.now .y{color:var(--accent2)}
+  .hist .n{font-weight:700;font-size:.95rem}
+  .hist .p{color:var(--muted);font-size:.9rem}
+  .hist .p a{color:var(--accent2);text-decoration:none}
+  .hist .p a:hover{text-decoration:underline}
   /* Riders are chips, the same ones a park page's opened coaster shows; a
      relocated ride gets an "At <park>" line over each park's chips. */
   .riders .at{color:var(--muted);margin:16px 0 8px}
@@ -174,7 +194,7 @@
     </div>
     <div class="stats" id="specs"></div>
     <div id="reloc_wrap" style="display:none">
-      <div class="sect">History</div>
+      <div class="sect">Past locations</div>
       <div class="hist" id="reloc"></div>
     </div>
     <div id="rank_wrap" hidden></div>
@@ -278,10 +298,11 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   if(ROWS.length>1){
     var yr=function(x){ return x.opened?String(x.opened).slice(0,4):(x.yr?String(x.yr):''); };
     var hist=[C].concat(ROWS.slice(1).sort(function(a,b){ return yr(b).localeCompare(yr(a)); }));
-    $('reloc').innerHTML=hist.map(function(x){
-      var op=yr(x), cl=x.closed?String(x.closed).slice(0,4):'';
-      return '<p><b>'+esc(x.name)+'</b> – <a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>'
-        +((op||cl)?' <span class="yrs">('+esc(op||'?')+'–'+esc(cl)+')</span>':'')+'</p>';
+    $('reloc').innerHTML=hist.map(function(x,i){
+      var op=yr(x), cl=x.closed?String(x.closed).slice(0,4):'', now=i===0 && !x.closed;
+      var when=now ? (op?op+' \u2013 now':'Now') : (op||cl ? (op||'?')+'\u2013'+cl : '');
+      return '<div class="st'+(now?' now':'')+'">'+(when?'<span class="y">'+esc(when)+'</span>':'')
+        +'<span class="n">'+esc(x.name)+'</span> <span class="p">at <a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a></span></div>';
     }).join('');
     $('reloc_wrap').style.display='block';
   }

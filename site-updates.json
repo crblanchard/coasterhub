@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-18T00:02:23Z",
+   "text": "Coaster pages show their stats in a band across the page, and a relocated ride lists every park it has run at as a timeline under Past locations."
+  },
+  {
    "at": "2026-11-17T23:24:10Z",
    "text": "Coming back to a park day on Log now shows what you've already ridden that day, with new credits marked, and Home's \"You're at\" card looks like a park ticket. Your count on Home ticks up to its new number after you log, and activity rows have coaster-themed icons."
   },
