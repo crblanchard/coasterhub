@@ -1,0 +1,210 @@
+{
+ "schemaVersion": 2,
+ "generatedAt": "2026-11-18T00:15:04Z",
+ "title": "Design System: Coaster Hub",
+ "extensions": {
+  "colorMeta": {
+   "night-signal-blue": {
+    "role": "primary",
+    "displayName": "Signal Blue (night)",
+    "canonical": "#4cc3ff"
+   },
+   "day-signal-blue": {
+    "role": "primary",
+    "displayName": "Signal Blue (day)",
+    "canonical": "#0a6aa0"
+   },
+   "ride-yellow": {
+    "role": "primary",
+    "displayName": "Ride Yellow",
+    "canonical": "#ffcc1f"
+   },
+   "day-amber": {
+    "role": "secondary",
+    "displayName": "Day Amber",
+    "canonical": "#b7791f"
+   },
+   "night-sky": {
+    "role": "neutral",
+    "displayName": "Night Sky",
+    "canonical": "#080e20"
+   },
+   "day-paper": {
+    "role": "neutral",
+    "displayName": "Day Paper",
+    "canonical": "#f5f5f3"
+   },
+   "night-panel": {
+    "role": "neutral",
+    "displayName": "Night Panel",
+    "canonical": "#15203a"
+   },
+   "day-panel": {
+    "role": "neutral",
+    "displayName": "Day Panel",
+    "canonical": "#ffffff"
+   }
+  },
+  "typographyMeta": {
+   "display": {
+    "displayName": "Display",
+    "purpose": "Hero headlines: a rider's count, a coaster's name, a page title."
+   },
+   "headline": {
+    "displayName": "Headline",
+    "purpose": "Section headings."
+   },
+   "title": {
+    "displayName": "Title",
+    "purpose": "Card headings."
+   },
+   "figure": {
+    "displayName": "Figure",
+    "purpose": "Stats: big, bold, tabular, Signal Blue."
+   },
+   "body": {
+    "displayName": "Body",
+    "purpose": "Sentences and list rows."
+   },
+   "label": {
+    "displayName": "Label",
+    "purpose": "Tiny uppercase labels under figures, status words, timeline years."
+   }
+  },
+  "shadows": [
+   {
+    "name": "panel-whisper",
+    "value": "0 1px 2px rgba(17,24,39,.05)",
+    "purpose": "Light theme cards and panels."
+   },
+   {
+    "name": "lifted-tile",
+    "value": "0 6px 18px -10px rgba(10,30,60,.35)",
+    "purpose": "A tile meant to float. Sparingly."
+   }
+  ],
+  "motion": [
+   {
+    "name": "page-slide",
+    "value": ".32s cubic-bezier(.2,.8,.2,1)",
+    "purpose": "Phone page transitions; bars hold still."
+   },
+   {
+    "name": "count-tick",
+    "value": "ease-out cubic, 300-900ms",
+    "purpose": "Home count ticking up after a park day; skipped with reduced motion."
+   }
+  ],
+  "breakpoints": [
+   {
+    "name": "phone",
+    "value": "680px"
+   },
+   {
+    "name": "small",
+    "value": "560px"
+   },
+   {
+    "name": "mid",
+    "value": "960px"
+   }
+  ]
+ },
+ "components": [
+  {
+   "name": "Primary Button",
+   "kind": "button",
+   "refersTo": "button-primary",
+   "description": "The one main action: Log a day, Start your count.",
+   "html": "<button class=\"ds-btn\">Log a day</button>",
+   "css": ".ds-btn{background:var(--accentfill,#ffcc1f);color:var(--onaccent,#16181b);border:0;border-radius:12px;padding:13px 24px;font:600 .95rem system-ui,sans-serif;cursor:pointer}.ds-btn:focus-visible{outline:2px solid var(--accent2,#0a6aa0);outline-offset:2px}"
+  },
+  {
+   "name": "Outline Button",
+   "kind": "button",
+   "refersTo": "button-outline",
+   "description": "Secondary actions; a Panel fill so it never shows the skyline through.",
+   "html": "<button class=\"ds-btn-o\">Rank more</button>",
+   "css": ".ds-btn-o{background:var(--panel,#fff);color:var(--fg,#16181b);border:1px solid var(--line,rgba(22,24,27,.13));border-radius:10px;padding:10px 18px;font:600 .92rem system-ui,sans-serif;cursor:pointer}.ds-btn-o:hover,.ds-btn-o:focus-visible{border-color:var(--accent2,#0a6aa0);color:var(--accent2,#0a6aa0)}"
+  },
+  {
+   "name": "Stats Band",
+   "kind": "custom",
+   "refersTo": "panel",
+   "description": "Figures on a pale tint band with hairlines; small caps labels.",
+   "html": "<div class=\"ds-band\"><div><b>105 ft</b><span>Height</span></div><div><b>70 mph</b><span>Top speed</span></div><div><b>2</b><span>Inversions</span></div></div>",
+   "css": ".ds-band{display:flex;padding:10px 0;background:var(--tint,rgba(10,106,160,.07));border-top:1px solid var(--line,rgba(22,24,27,.13));border-bottom:1px solid var(--line,rgba(22,24,27,.13));font-family:system-ui,sans-serif}.ds-band div{flex:1;padding:6px 18px;border-left:1px solid var(--line,rgba(22,24,27,.13))}.ds-band div:first-child{border-left:0}.ds-band b{display:block;font-size:1.6rem;font-weight:800;color:var(--accent2,#0a6aa0)}.ds-band span{display:block;font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted,#5f6770)}"
+  },
+  {
+   "name": "Admission Ticket",
+   "kind": "custom",
+   "refersTo": "panel",
+   "description": "The 'You're at' card: notched sides, dashed tear line.",
+   "html": "<a class=\"ds-tk\"><span><i>You're at</i><b>Six Flags Magic Mountain</b></span><em>Log a ride &rarr;</em></a>",
+   "css": ".ds-tk{display:flex;align-items:center;gap:12px;padding:13px 18px 13px 22px;border-radius:10px;background:var(--panel,#fff);color:var(--fg,#16181b);font-family:system-ui,sans-serif;text-decoration:none;-webkit-mask:radial-gradient(circle 9px at 0 50%,#0000 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 9px at 100% 50%,#0000 98%,#000) right/51% 100% no-repeat;mask:radial-gradient(circle 9px at 0 50%,#0000 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 9px at 100% 50%,#0000 98%,#000) right/51% 100% no-repeat}.ds-tk span{flex:1}.ds-tk i{display:block;font-style:normal;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted,#5f6770)}.ds-tk b{display:block}.ds-tk em{font-style:normal;font-weight:700;color:var(--accent2,#0a6aa0);border-left:1.5px dashed var(--line,rgba(22,24,27,.13));padding-left:16px}"
+  },
+  {
+   "name": "Rider Badge",
+   "kind": "chip",
+   "refersTo": "pill-badge",
+   "description": "The rider switcher pill in heroes.",
+   "html": "<span class=\"ds-pill\">Carter</span>",
+   "css": ".ds-pill{display:inline-block;color:var(--accent2,#0a6aa0);border:1px solid var(--ring,rgba(10,106,160,.45));border-radius:999px;padding:6px 14px;font:600 .82rem system-ui,sans-serif}"
+  }
+ ],
+ "narrative": {
+  "northStar": "The Park Map",
+  "overview": "Coaster Hub should feel like the map you are handed at the gate: clear, friendly, and easy to find your way around, with the rides as the point. Calm, flat pages divided by hairlines and pale tinted bands; one bright ride yellow saved for the thing you came to do. Components are allowed to play: rounded shapes and park-themed touches like the admission ticket, coaster icons and the count that ticks up.",
+  "keyCharacteristics": [
+   "Light and dark are both first-class; every color is a token defined for both.",
+   "Flat surfaces, hairline borders and pale signal-blue tints carry the structure.",
+   "Ride yellow means \"do something\" and nothing else.",
+   "Numbers are bold, tabular and blue; their labels are tiny small caps.",
+   "Park-themed shapes (ticket, timeline track, skyline) over generic UI chrome.",
+   "Mobile first: the phone layout is the primary one, desktop second."
+  ],
+  "rules": [
+   {
+    "name": "The One Yellow Rule",
+    "section": "colors",
+    "body": "Ride yellow is the \"do something\" color. One yellow control per view where possible, never yellow text on paper, never yellow as decoration."
+   },
+   {
+    "name": "The Tokens Only Rule",
+    "section": "colors",
+    "body": "Colors come from the :root custom properties, defined for both themes."
+   },
+   {
+    "name": "The Grey Means Gone Rule",
+    "section": "colors",
+    "body": "A defunct coaster's name and numbers go muted grey, sitewide."
+   },
+   {
+    "name": "The Small Caps Under Big Numbers Rule",
+    "section": "typography",
+    "body": "A figure is always big, bold and blue with a tiny uppercase label beneath it."
+   },
+   {
+    "name": "The Flat By Default Rule",
+    "section": "elevation",
+    "body": "Surfaces are flat at rest. Add a tint band before reaching for a shadow; add a hairline before reaching for a fill."
+   }
+  ],
+  "dos": [
+   "Do use the :root tokens for every color and check both themes.",
+   "Do keep Ride Yellow for the one main action on a view.",
+   "Do give every figure a tiny uppercase label beneath it.",
+   "Do reach for a park-themed shape (ticket, track, skyline) when a component needs personality.",
+   "Do bump the ?v= on style.css, lists.css and app.js in every page when they change.",
+   "Do honor prefers-reduced-motion: the count tick and page slides skip it."
+  ],
+  "donts": [
+   "Don't use gradients on text, glows, or glass as decoration.",
+   "Don't put a transparent button over the skyline; outline buttons get a Panel fill.",
+   "Don't use CSS shorthands (background, font) that reset longhands set elsewhere.",
+   "Don't add a heading-sized \"eyebrow\" label above a heading.",
+   "Don't invent numbers, testimonials or placeholder data on any page.",
+   "Don't nest anything that must escape it (menus, popovers) inside .hero; it is overflow:hidden."
+  ]
+ }
+}
