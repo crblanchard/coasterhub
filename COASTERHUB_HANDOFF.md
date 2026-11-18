@@ -6223,3 +6223,13 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   `build-raw-sql.py` writes 188. Load big open-data files with the
   **Load open dataset into D1** Action (`open-data.yml`, dispatch with the file
   path); it only accepts `migrations/NNN-open-data-*.sql` that touch open_*/wd_*.
+- **Side by side + weekly refresh, same day.** Carter wants this parallel and
+  quiet for now ("push in a week or so when it's better"), so the /changes site
+  update for /sources was taken back off. `/open-compare` (unlisted, linked from
+  /sources, data from `/api/open-compare`) shows each coaster's site value over
+  the Wikidata one per field, filters for differs / new / RCDB-only / unsure,
+  and lists the Wikidata coasters not on the site. `open-data.yml` now also runs
+  Mondays (or by hand with the file box empty): re-pulls Wikidata, re-matches,
+  regenerates 187/188, commits only if more than the retrieved date changed,
+  and loads both into D1. It matches against the repo's coasters.json, so a
+  stale snapshot means new coasters match a week late.

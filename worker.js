@@ -1328,6 +1328,44 @@ async function getOpenCoverage(env) {
            sources, fields, hist, fieldOrder: OPEN_FIELDS, raw };
 }
 
+// Per coaster: [id, name, park, fair, qid|null, {field: [site, open, citesRcdb]}]
+// with only the fields where either side has a value; and the unmatched
+// Wikidata items with what might place them (park, country, opening).
+async function getOpenCompare(env) {
+  const [{ results: cs }, { results: ps }, { results: links }, { results: facts }, { results: amb }, { results: un }] = await Promise.all([
+    env.DB.prepare("SELECT id, name, park, " + OPEN_FIELDS.join(", ") + " FROM coasters ORDER BY park, name").all(),
+    env.DB.prepare("SELECT * FROM parks").all(),
+    env.DB.prepare("SELECT coaster_id, ref FROM open_links WHERE source = 'wikidata'").all(),
+    env.DB.prepare("SELECT coaster_id, field, value, cites_rcdb FROM open_facts WHERE source = 'wikidata'").all(),
+    env.DB.prepare("SELECT coaster_id, qid FROM wd_matches WHERE status = 'ambiguous'").all(),
+    env.DB.prepare(
+      "SELECT i.qid, i.label, i.description, " +
+      "(SELECT GROUP_CONCAT(COALESCE(value_label, value), ' | ') FROM wd_claims c WHERE c.qid = i.qid AND c.pid IN ('P361','P276')) AS park, " +
+      "(SELECT value_label FROM wd_claims c WHERE c.qid = i.qid AND c.pid = 'P17' LIMIT 1) AS country, " +
+      "(SELECT MIN(substr(value, 1, 4)) FROM wd_claims c WHERE c.qid = i.qid AND c.pid IN ('P1619','P571','P729')) AS opened " +
+      "FROM wd_items i WHERE NOT EXISTS (SELECT 1 FROM wd_matches m WHERE m.qid = i.qid) ORDER BY country, park, label").all(),
+  ]);
+  const fair = new Set(ps.filter(p => +p.travel === 1).map(p => p.name));
+  const qid = new Map(links.map(l => [l.coaster_id, l.ref]));
+  const ambig = new Map();
+  for (const a of amb) ambig.set(a.coaster_id, a.qid);
+  const open = new Map();
+  for (const f of facts) {
+    if (!open.has(f.coaster_id)) open.set(f.coaster_id, {});
+    open.get(f.coaster_id)[f.field] = [f.value, +f.cites_rcdb];
+  }
+  const rows = cs.map(c => {
+    const o = open.get(c.id) || {}, v = {};
+    for (const f of OPEN_FIELDS) {
+      const site = c[f] == null || c[f] === "" ? null : c[f];
+      if (site == null && !o[f]) continue;
+      v[f] = [site, o[f] ? o[f][0] : null, o[f] ? o[f][1] : 0];
+    }
+    return [c.id, c.name, c.park, fair.has(c.park) ? 1 : 0, qid.get(c.id) || null, v, ambig.get(c.id) || null];
+  });
+  return { fields: OPEN_FIELDS, rows, unmatched: un };
+}
+
 async function haveClones(env) {
   try { await env.DB.prepare("SELECT 1 FROM clone_groups LIMIT 1").first(); return true; }
   catch (e) { return false; }
@@ -2368,6 +2406,14 @@ export default {
         try { await env.DB.prepare("SELECT 1 FROM open_facts LIMIT 1").first(); }
         catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
         return edgePut(ctx, request, json(await getOpenCoverage(env), 200, LIST_CACHE));
+      }
+      // The two datasets side by side, per coaster, for /open-compare: the
+      // live value and the open one for every field, plus the Wikidata
+      // coasters that match nothing here yet.
+      if (request.method === "GET" && path === "/api/open-compare") {
+        try { await env.DB.prepare("SELECT 1 FROM wd_items LIMIT 1").first(); }
+        catch (e) { return err(503, "run migrations/188-open-data-wikidata-raw.sql first"); }
+        return edgePut(ctx, request, json(await getOpenCompare(env), 200, LIST_CACHE));
       }
       // ---- summaries (2026-09-25) ------------------------------------------
       // One request where pages used to make one per rider. The home page
