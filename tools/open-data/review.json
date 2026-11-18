@@ -589,6 +589,10 @@
 {
 "ref": "Snoopy's Racing Railway (Canada's Wonderland)",
 "source": "coasterpedia"
+},
+{
+"ref": "node/14127168711",
+"source": "osm"
 }
 ],
 "status": "operating"
@@ -924,17 +928,6 @@
 {
 "ref": "Q16899487",
 "source": "wikidata"
-}
-],
-"status": null
-},
-{
-"name": "World of PAW Patrol - Coming 2026",
-"park": "Chessington World of Adventures",
-"refs": [
-{
-"ref": "node/12631844891",
-"source": "osm"
 }
 ],
 "status": null
@@ -1525,6 +1518,17 @@
 "status": "defunct"
 },
 {
+"name": "Burning Engine",
+"park": "Energylandia",
+"refs": [
+{
+"ref": "way/1571588189",
+"source": "osm"
+}
+],
+"status": null
+},
+{
 "name": "Dragon Adventure",
 "park": "Energylandia",
 "refs": [
@@ -1611,6 +1615,17 @@
 },
 {
 "ref": "way/163420138",
+"source": "osm"
+}
+],
+"status": null
+},
+{
+"name": "Madame Freudenreich Curiosités",
+"park": "Europa Park",
+"refs": [
+{
+"ref": "node/14249754095",
 "source": "osm"
 }
 ],
@@ -1922,6 +1937,17 @@
 "status": "operating"
 },
 {
+"name": "Launched Water Coaster Donnervind",
+"park": "Freizeitpark Plohn",
+"refs": [
+{
+"ref": "node/1936367558",
+"source": "osm"
+}
+],
+"status": null
+},
+{
 "name": "Plohnseideon",
 "park": "Freizeitpark Plohn",
 "refs": [
@@ -1998,10 +2024,6 @@
 {
 "ref": "Do-Dodonpa",
 "source": "coasterpedia"
-},
-{
-"ref": "way/521164624",
-"source": "osm"
 },
 {
 "ref": "Q30930493",
@@ -2283,6 +2305,17 @@
 "status": null
 },
 {
+"name": "Danny the Dragon",
+"park": "Happy Hollow Park and Zoo",
+"refs": [
+{
+"ref": "node/1975235176",
+"source": "osm"
+}
+],
+"status": null
+},
+{
 "name": "Bullet Coaster",
 "park": "Happy Valley",
 "refs": [
@@ -2557,6 +2590,10 @@
 {
 "ref": "High in the Sky Seuss Trolley Train Ride",
 "source": "coasterpedia"
+},
+{
+"ref": "node/9533788240",
+"source": "osm"
 }
 ],
 "status": "operating"
@@ -4746,17 +4783,6 @@
 "status": "unknown"
 },
 {
-"name": "Rocky Top Mountain Coaser",
-"park": "Rocky Top Mountain Coaster",
-"refs": [
-{
-"ref": "node/6447104874",
-"source": "osm"
-}
-],
-"status": null
-},
-{
 "name": "Marienkäfer Achterbahn",
 "park": "Safariland Stukenbrock",
 "refs": [
@@ -4967,15 +4993,33 @@
 "source": "coasterpedia"
 },
 {
-"ref": "node/9297009753",
-"source": "osm"
-},
-{
 "ref": "Q5898663",
 "source": "wikidata"
 }
 ],
 "status": "operating"
+},
+{
+"name": "Motor Coaster",
+"park": "Six Flags Darien Lake",
+"refs": [
+{
+"ref": "way/605022979",
+"source": "osm"
+}
+],
+"status": null
+},
+{
+"name": "Rolling Thunder",
+"park": "Six Flags Darien Lake",
+"refs": [
+{
+"ref": "node/13990573352",
+"source": "osm"
+}
+],
+"status": null
 },
 {
 "name": "Alpen Blitz",
@@ -5036,17 +5080,6 @@
 {
 "ref": "Q2510025",
 "source": "wikidata"
-}
-],
-"status": null
-},
-{
-"name": "Bizzaro",
-"park": "Six Flags Great Adventure",
-"refs": [
-{
-"ref": "node/4715649736",
-"source": "osm"
 }
 ],
 "status": null
@@ -5613,6 +5646,10 @@
 {
 "ref": "Konect",
 "source": "coasterpedia"
+},
+{
+"ref": "node/13960521493",
+"source": "osm"
 }
 ],
 "status": "operating"
@@ -6296,6 +6333,10 @@
 {
 "ref": "Caïcos Expédition",
 "source": "coasterpedia"
+},
+{
+"ref": "way/1527123650",
+"source": "osm"
 }
 ],
 "status": "under refurbishment"
@@ -6372,17 +6413,6 @@
 "refs": [
 {
 "ref": "node/5647930935",
-"source": "osm"
-}
-],
-"status": null
-},
-{
-"name": "Safari Jeeps",
-"park": "Wild Adventures",
-"refs": [
-{
-"ref": "node/5647998462",
 "source": "osm"
 }
 ],
@@ -6720,7 +6750,7 @@
 "lat": null,
 "lon": null,
 "name": "Snoopy's Great Race",
-"park": "Universal Wonderland | Universal Studios Japan | Universal Studios Japan",
+"park": "Universal Studios Japan | Universal Wonderland | Universal Studios Japan",
 "ref": "Q106467186"
 },
 {
@@ -7119,7 +7149,7 @@
 "lat": 51.646722,
 "lon": 5.051608,
 "name": "Joris en de Draak",
-"park": "Efteling | Efteling | Kaatsheuvel",
+"park": "Efteling | Kaatsheuvel | Efteling",
 "ref": "Q1130871"
 },
 {
@@ -7462,7 +7492,7 @@
 "lat": 52.957282,
 "lon": 6.33441746,
 "name": "Q122460534",
-"park": "Appelscha | Duinen Zathe Amusement Park | Duinen Zathe Amusement Park",
+"park": "Duinen Zathe Amusement Park | Appelscha | Duinen Zathe Amusement Park",
 "ref": "Q122460534"
 },
 {
@@ -7525,7 +7555,7 @@
 "lat": 52.956915,
 "lon": 6.33473665,
 "name": "Q122460758",
-"park": "Duinen Zathe Amusement Park | Duinen Zathe Amusement Park | Appelscha",
+"park": "Duinen Zathe Amusement Park | Appelscha | Duinen Zathe Amusement Park",
 "ref": "Q122460758"
 },
 {
@@ -8869,7 +8899,7 @@
 "lat": 34.4246,
 "lon": -118.596,
 "name": "Flashback",
-"park": "Six Flags Great America | Six Flags Magic Mountain | Six Flags Over Georgia",
+"park": "Six Flags Magic Mountain | Six Flags Over Georgia | Six Flags Great America",
 "ref": "Q1427260"
 },
 {
@@ -9163,14 +9193,14 @@
 "lat": 28.359417,
 "lon": -81.560694,
 "name": "Rock 'n' Roller Coaster Starring Aerosmith",
-"park": "Disney Adventure World | Disney's Hollywood Studios",
+"park": "Disney's Hollywood Studios | Disney Adventure World",
 "ref": "Q1502476"
 },
 {
 "lat": 28.359417,
 "lon": -81.560694,
 "name": "Rock 'n' Roller Coaster Starring Aerosmith",
-"park": "Disney Adventure World | Disney's Hollywood Studios",
+"park": "Disney's Hollywood Studios | Disney Adventure World",
 "ref": "Q1502476"
 },
 {
@@ -10087,7 +10117,7 @@
 "lat": 51.64833,
 "lon": 5.050972,
 "name": "Baron 1898",
-"park": "Efteling | Kaatsheuvel | Efteling",
+"park": "Efteling | Efteling | Kaatsheuvel",
 "ref": "Q18285730"
 },
 {
@@ -10402,14 +10432,14 @@
 "lat": null,
 "lon": null,
 "name": "Q19765421",
-"park": "Bobbejaanland | Lichtaart | Bobbejaanland",
+"park": "Bobbejaanland | Bobbejaanland | Lichtaart",
 "ref": "Q19765421"
 },
 {
 "lat": null,
 "lon": null,
 "name": "Q19765769",
-"park": "Bobbejaanland | Lichtaart | Bobbejaanland",
+"park": "Bobbejaanland | Bobbejaanland | Lichtaart",
 "ref": "Q19765769"
 },
 {
@@ -12187,14 +12217,14 @@
 "lat": 20.954139,
 "lon": 107.047806,
 "name": "Dragon's Run",
-"park": "Ocean Park Ha Long | Freestyle Music Park",
+"park": "Freestyle Music Park | Ocean Park Ha Long",
 "ref": "Q28563538"
 },
 {
 "lat": 20.954139,
 "lon": 107.047806,
 "name": "Dragon's Run",
-"park": "Ocean Park Ha Long | Freestyle Music Park",
+"park": "Freestyle Music Park | Ocean Park Ha Long",
 "ref": "Q28563538"
 },
 {
@@ -15029,7 +15059,7 @@
 "lat": 43.182194,
 "lon": 10.545028,
 "name": "Freestyle",
-"park": "Cavallino Matto | Canada's Wonderland",
+"park": "Canada's Wonderland | Cavallino Matto",
 "ref": "Q7537977"
 },
 {
@@ -16302,34 +16332,6 @@
 "source": "osm"
 },
 {
-"coaster_id": 147,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/837230503",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 147,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/837230507",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 148,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/116779238",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 154,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/723349402",
-"score": 1.0,
-"source": "osm"
-},
-{
 "coaster_id": 365,
 "reason": "tagged with the same Wikidata item",
 "ref": "way/405891521",
@@ -16396,6 +16398,13 @@
 "coaster_id": 514,
 "reason": "tagged with the same Wikidata item",
 "ref": "node/8682234772",
+"score": 1.0,
+"source": "osm"
+},
+{
+"coaster_id": 532,
+"reason": "tagged with the same Wikidata item",
+"ref": "way/1516288950",
 "score": 1.0,
 "source": "osm"
 },
@@ -16470,13 +16479,6 @@
 "source": "osm"
 },
 {
-"coaster_id": 897,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/3741911852",
-"score": 1.0,
-"source": "osm"
-},
-{
 "coaster_id": 948,
 "reason": "tagged with the same Wikidata item",
 "ref": "node/13841791631",
@@ -16498,6 +16500,13 @@
 "source": "osm"
 },
 {
+"coaster_id": 955,
+"reason": "tagged with the same Wikidata item",
+"ref": "way/1105254393",
+"score": 1.0,
+"source": "osm"
+},
+{
 "coaster_id": 979,
 "reason": "tagged with the same Wikidata item",
 "ref": "node/3735871213",
@@ -16507,7 +16516,7 @@
 {
 "coaster_id": 1214,
 "reason": "tagged with the same Wikidata item",
-"ref": "way/40362832",
+"ref": "node/14355009864",
 "score": 1.0,
 "source": "osm"
 },
@@ -16564,6 +16573,13 @@
 "coaster_id": 1856,
 "reason": "tagged with the same Wikidata item",
 "ref": "way/143057996",
+"score": 1.0,
+"source": "osm"
+},
+{
+"coaster_id": 2036,
+"reason": "tagged with the same Wikidata item",
+"ref": "way/52873181",
 "score": 1.0,
 "source": "osm"
 },
@@ -17065,20 +17081,6 @@
 "source": "osm"
 },
 {
-"coaster_id": 412,
-"reason": "similar name, within 5 km",
-"ref": "way/594019854",
-"score": 0.96,
-"source": "osm"
-},
-{
-"coaster_id": 412,
-"reason": "similar name, within 5 km",
-"ref": "way/605022979",
-"score": 0.96,
-"source": "osm"
-},
-{
 "coaster_id": 611,
 "reason": "similar name, within 5 km",
 "ref": "way/837518468",
@@ -17170,6 +17172,13 @@
 "source": "wikidata"
 },
 {
+"coaster_id": 866,
+"reason": "similar name, within 5 km",
+"ref": "node/13584089602",
+"score": 0.95,
+"source": "osm"
+},
+{
 "coaster_id": 950,
 "reason": "similar name, within 5 km",
 "ref": "way/135457578",
@@ -17217,13 +17226,6 @@
 "ref": "Grand Huit (Walibi Rhône-Alpes)",
 "score": 0.95,
 "source": "coasterpedia"
-},
-{
-"coaster_id": 868,
-"reason": "similar name, within 5 km",
-"ref": "node/13271051388",
-"score": 0.94,
-"source": "osm"
 },
 {
 "coaster_id": 1460,
@@ -17280,13 +17282,6 @@
 "ref": "Uncharted: El Enigma de Penitence",
 "score": 0.93,
 "source": "coasterpedia"
-},
-{
-"coaster_id": 1228,
-"reason": "similar name, within 5 km",
-"ref": "way/1343003638",
-"score": 0.93,
-"source": "osm"
 },
 {
 "coaster_id": 1745,
@@ -17504,6 +17499,13 @@
 "ref": "Q1136801",
 "score": 0.88,
 "source": "wikidata"
+},
+{
+"coaster_id": 1914,
+"reason": "similar name, within 5 km",
+"ref": "node/14056234524",
+"score": 0.88,
+"source": "osm"
 },
 {
 "coaster_id": 1922,
@@ -17912,6 +17914,13 @@
 "source": "osm"
 },
 {
+"coaster_id": 869,
+"reason": "similar name, within 5 km",
+"ref": "node/13269919021",
+"score": 0.83,
+"source": "osm"
+},
+{
 "coaster_id": 1320,
 "reason": "similar name, within 5 km",
 "ref": "way/1221886086",
@@ -18152,42 +18161,14 @@
 {
 "coaster_id": 758,
 "reason": "similar name, within 5 km",
-"ref": "way/1038828632",
+"ref": "way/1545742855",
 "score": 0.8,
 "source": "osm"
 },
 {
 "coaster_id": 758,
 "reason": "similar name, within 5 km",
-"ref": "way/1038828634",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 758,
-"reason": "similar name, within 5 km",
-"ref": "way/1038828637",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 758,
-"reason": "similar name, within 5 km",
-"ref": "way/1074576436",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 758,
-"reason": "similar name, within 5 km",
-"ref": "way/1074576437",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 758,
-"reason": "similar name, within 5 km",
-"ref": "way/1074576438",
+"ref": "way/1545742856",
 "score": 0.8,
 "source": "osm"
 },
@@ -18230,6 +18211,27 @@
 "coaster_id": 937,
 "reason": "similar name, within 5 km",
 "ref": "node/2320571441",
+"score": 0.8,
+"source": "osm"
+},
+{
+"coaster_id": 1092,
+"reason": "similar name, within 5 km",
+"ref": "node/14277385639",
+"score": 0.8,
+"source": "osm"
+},
+{
+"coaster_id": 1095,
+"reason": "similar name, within 5 km",
+"ref": "node/14277382769",
+"score": 0.8,
+"source": "osm"
+},
+{
+"coaster_id": 1115,
+"reason": "similar name, within 5 km",
+"ref": "way/961086456",
 "score": 0.8,
 "source": "osm"
 },
