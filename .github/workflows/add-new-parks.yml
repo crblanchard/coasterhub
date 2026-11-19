@@ -1,0 +1,59 @@
+name: Add the ready new parks
+
+# "Add all ticked parks" from /sources/review with the page's defaults, run
+# where the live database is reachable (Carter, 2026-11-19: "add all the new
+# parks please"). Same shape as cutover.yml: export the live database to the
+# runner only (never printed or uploaded: it holds emails and password
+# hashes), run tools/add-new-parks.mjs against it, which drives the real
+# Worker and records its writes, then apply those writes.
+# confirm = ADD applies; anything else is a dry run that only prints counts.
+# Run the Nightly backup action first.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type ADD to add them to the live site (anything else = dry run)'
+        required: false
+        default: ''
+
+concurrency:
+  group: cutover
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Export the live database (kept on the runner only)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if ! npx --yes wrangler@4 d1 export coasterhub --remote --output "$RUNNER_TEMP/live.sql" > "$RUNNER_TEMP/wrangler.log" 2>&1; then
+            tail -n 20 "$RUNNER_TEMP/wrangler.log" | sed -E 's#https?://[^ ]+#[link removed]#g'; echo "::error::export failed"; exit 1
+          fi
+          grep -q "INSERT INTO" "$RUNNER_TEMP/live.sql" || { echo "::error::export has no rows"; exit 1; }
+      - name: Add them to a copy
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" = "ADD" ]; then node tools/add-new-parks.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/add.sql"
+          else node tools/add-new-parks.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/add.sql" --dry; fi
+      - name: Apply to the live database
+        if: ${{ inputs.confirm == 'ADD' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if ! npx --yes wrangler@4 d1 execute coasterhub --remote --yes --file "$RUNNER_TEMP/add.sql" > "$RUNNER_TEMP/apply.log" 2>&1; then
+            tail -n 20 "$RUNNER_TEMP/apply.log" | sed -E 's#https?://[^ ]+#[link removed]#g'; echo "::error::applying failed"; exit 1
+          fi
+          tail -n 4 "$RUNNER_TEMP/apply.log" | sed -E 's#https?://[^ ]+#[link removed]#g'

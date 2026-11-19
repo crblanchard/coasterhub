@@ -89,6 +89,11 @@
   table.mini th,table.mini td{padding:3px 12px 3px 0;text-align:left;border:0;white-space:nowrap;font-weight:400}
   table.mini th{color:var(--muted)}
   .act{display:flex;gap:8px;flex-wrap:wrap}
+  .parkhead{margin:14px 0 2px;padding:10px 14px;border-left:3px solid var(--accent2);background:var(--well);border-radius:0 10px 10px 0}
+  .parkhead b{display:block;font-size:.95rem}
+  .parkhead small{color:var(--muted);font-size:.8rem;line-height:1.7}
+  .parkhead a{color:var(--fg);text-decoration:none;font-weight:600} .parkhead a:hover{color:var(--accent2)}
+  .parkhead .yr{color:var(--muted);font-weight:400}
   .addc .tick{display:inline-flex;gap:8px;align-items:center;cursor:pointer}
   .add-rename{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:4px 8px;font-size:.82rem;margin-left:6px}
   .npf{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:.8rem;color:var(--muted)}
@@ -226,6 +231,17 @@ const fmt = n => Number(n).toLocaleString('en-US');
 const val = (f, v) => v == null ? '–' : esc(v) + (UNITS[f] && /^[\d.]+$/.test(String(v)) ? '<span class="u">' + UNITS[f] + '</span>' : '');
 let D, tab = 'gaps', LIMIT = 100, LIST = [];
 
+// Every coaster already on the site, by park: shown above each park's new
+// coasters so a rename or a duplicate (Thirteen / Th13teen) is easy to spot
+// before anything is added (Carter, 2026-11-19).
+let BYPARK = {};
+CoasterHub.fetchCoasters().then(j => { BYPARK = {}; (j.coasters || []).forEach(c => (BYPARK[c.park] = BYPARK[c.park] || []).push(c)); if (D) render(); }).catch(() => {});
+function parkHead(park) {
+  const cs = (BYPARK[park] || []).slice().sort((a, b) => (!!a.closed - !!b.closed) || a.name.localeCompare(b.name));
+  const one = c => '<a href="' + esc(CoasterHub.coasterHref(c.name, c.park)) + '" target="_blank">' + esc(c.name) + '</a>'
+    + '<span class="yr">' + (c.closed ? ' closed ' + esc(String(c.closed).slice(0, 4)) : (c.yr || c.opened ? ' ' + esc(String(c.yr || c.opened).slice(0, 4)) : '')) + '</span>';
+  return '<div class="parkhead"><b>' + esc(park) + '</b><small>' + (cs.length ? 'Already on the site (' + cs.length + '): ' + cs.map(one).join(' · ') : 'No coasters on the site yet') + '</small></div>';
+}
 function load() { return fetch('/api/cutover/review', { cache: 'no-store' }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(j.error || r.status))); }
 load().then(d => {
   D = d; $('loading').hidden = true; $('ui').hidden = false;
@@ -307,7 +323,7 @@ const VIEW = {
           + (fs.length ? '<table class="mini"><tr><th></th><th>Site</th><th>' + (SRC[c.source] || c.source) + '</th></tr>' + fs.map(k => '<tr><th>' + NAMES[k] + '</th><td>' + val(k, c.site[k]) + '</td><td>' + val(k, c.facts[k]) + '</td></tr>').join('') + '</table>' : '')
           + '<div class="act">' + btn('Same ride: link', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'approve' }, 'yes') + btn('Not the same', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'reject' }, 'no') + '</div></div>';
       }).join('') + '</div>',
-  adds: list => '<div class="cards">' + list.map((a, i) => '<div class="card addc" data-k="' + esc(akey(a)) + '"><div class="one">'
+  adds: list => '<div class="cards">' + list.map((a, i) => (i === 0 || list[i - 1].park !== a.park ? parkHead(a.park) : '') + '<div class="card addc" data-k="' + esc(akey(a)) + '"><div class="one">'
       + '<label class="tick"><input type="checkbox" class="add-tick"' + (ticked(a) ? ' checked' : '') + '> <b>' + esc(RENAME[akey(a)] || a.name) + '</b></label>'
       + (latin(a.name) ? '' : ' <span class="chip bad">not in English</span> <input class="add-rename" placeholder="English name" value="' + esc(RENAME[akey(a)] || '') + '">')
       + '<small>' + esc(a.park) + (a.fair ? ' · travelling fair' : '') + (a.status ? ' · ' + esc(a.status) : '') + '</small>'
@@ -399,7 +415,7 @@ async function bulkAdd() {
 // filtering doesn't lose them; Add all takes each ticked park as its card says.
 const PUNTICK = new Set(), PTICK = new Set(), EDIT = {}, CUNTICK = {};
 const aliveC = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || '') && /operat|construct|open|betrieb/i.test(c.status || '');
-const parkReady = p => p.lat != null && !!p.region && latin(p.park) && !p.taken;
+const parkReady = p => p.lat != null && !!p.region && latin(p.park) && !p.taken && !/^(standalone|travel+ing|none|unknown)$/i.test(p.park.trim()) && !/state ?fair|county ?fair|kermis|kirmes|volksfest/i.test(p.park);
 const parkTicked = p => PUNTICK.has(p.k) ? false : PTICK.has(p.k) ? true : parkReady(p);
 const parkBody = p => {
   const e = EDIT[p.k] || {};

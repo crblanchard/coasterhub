@@ -182,6 +182,9 @@ newp = collections.OrderedDict()
 for r in recs:
     if r['source'] == 'wikidata' or not r.get('park') or r['ref'] in linked[r['source']] or (r['source'], r['ref']) in claimed: continue
     pk = sq(r['park'])
+    # Not parks: Coasterpedia's "Standalone" (a coaster at no park) and
+    # "Traveling"; and fairs wait for their own pass (Carter: parks first).
+    if re.fullmatch(r'standalone|travel+ing|none|unknown', pk) or re.search(r'state ?fair|county ?fair|kermis|kirmes|volksfest|schützenfest', r['park'] or '', re.I): continue
     if not pk or pk in known_parks or any(len(pk) > 6 and len(k) > 6 and (pk in k or k in pk) for k in known_parks): continue
     if r['lat'] is not None and any(pp.get('lat') is not None and km(r['lat'], r['lon'], pp['lat'], pp['lon']) <= 3 for pp in parks.values()): continue
     raw = next((i['raw'] for i in src['items'] if i['source'] == r['source'] and i['ref'] == r['ref']), {})
