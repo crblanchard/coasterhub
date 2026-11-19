@@ -1,0 +1,9 @@
+[
+  {"kind": "add", "park": "Oriental Heritage (Jinan)", "name": "Jungle Trailblazer", "refs": [{"source": "coasterpedia", "ref": "Jungle Trailblazer (Oriental Heritage Shandong)"}, {"source": "dewiki", "ref": "Jungle Trailblazer (Oriental Heritage, Jinan)"}]},
+  {"kind": "add", "park": "Oriental Heritage (Jinan)", "name": "Stress Express", "refs": [{"source": "coasterpedia", "ref": "Stress Express (Oriental Heritage Shandong)"}]},
+  {"kind": "add", "park": "Oriental Heritage (Ningbo)", "name": "Jungle Trailblazer", "refs": [{"source": "coasterpedia", "ref": "Jungle Trailblazer (Oriental Heritage Zhejiang)"}, {"source": "dewiki", "ref": "Jungle Trailblazer (Oriental Heritage, Ningbo)"}]},
+  {"kind": "add", "park": "Oriental Heritage (Wuhu)", "name": "Jungle Trailblazer", "refs": [{"source": "coasterpedia", "ref": "Jungle Trailblazer (Oriental Heritage Anhui)"}, {"source": "dewiki", "ref": "Jungle Trailblazer (Oriental Heritage, Wuhu)"}]},
+  {"kind": "add", "park": "Oriental Heritage (Wuhu)", "name": "Stress Express", "refs": [{"source": "coasterpedia", "ref": "Stress Express (Oriental Heritage Anhui)"}]},
+  {"kind": "add", "park": "Fantawild Adventure (Zhengzhou)", "name": "Terror Twister", "refs": [{"source": "coasterpedia", "ref": "Terror Twister (Fantawild Adventure Zhengzhou)"}]},
+  {"kind": "add", "park": "Fantawild Adventure (Tai'an)", "name": "Vesuvio Volcano", "refs": [{"source": "coasterpedia", "ref": "Vesuvio Volcano (Fantawild Adventure Shandong)"}]}
+]

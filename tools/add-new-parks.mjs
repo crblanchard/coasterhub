@@ -8,7 +8,7 @@
 // the real Worker the same requests the page sends, and records every write
 // as SQL for the workflow to apply to the live database.
 //
-//   node tools/add-new-parks.mjs <dump.sql | copy.db> <out.sql> [--dry]
+//   node tools/add-new-parks.mjs <dump.sql | copy.db> <out.sql> [--dry] [--spec bodies.json]
 import { readFileSync, writeFileSync, copyFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { tmpdir } from "node:os";
@@ -48,6 +48,22 @@ const call = async (method, path, body) => {
   if (!res.ok) throw new Error(j.error || res.status);
   return j;
 };
+
+// --spec <file.json>: send exactly these /api/cutover/apply bodies instead
+// (a hand-made fix, like the Oriental Heritage split in migration 198).
+const si = process.argv.indexOf("--spec");
+if (si > 0) {
+  const bodies = JSON.parse(readFileSync(process.argv[si + 1], "utf8"));
+  let n = 0; const bad = [];
+  for (const b of bodies) {
+    if (dry) { n++; continue; }
+    try { const r = await call("POST", "/api/cutover/apply", b); n += r.done.length || 0; }
+    catch (e) { bad.push((b.name || b.park) + " @ " + b.park + ": " + e.message); }
+  }
+  console.log((dry ? "would send " + n + " requests" : "added " + n + " coasters") + (bad.length ? "\nnot added:\n  " + bad.join("\n  ") : ""));
+  if (!dry) { writeFileSync(out, writes.map(w => w.trim().replace(/;$/, "") + ";").join("\n") + "\n"); console.log(writes.length + " statements -> " + out); }
+  process.exit(0);
+}
 
 const latin = n => !/[^\u0000-ɏḀ-ỿ‐-‧€]/.test(n || "");
 const alive = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || "") && /operat|construct|open|betrieb/i.test(c.status || "");

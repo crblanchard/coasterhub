@@ -16,6 +16,10 @@ on:
         description: 'Type ADD to add them to the live site (anything else = dry run)'
         required: false
         default: ''
+      spec:
+        description: 'Optional: a JSON file of apply bodies to send instead (e.g. tools/open-data/split-198.json)'
+        required: false
+        default: ''
 
 concurrency:
   group: cutover
@@ -44,9 +48,11 @@ jobs:
       - name: Add them to a copy
         env:
           CONFIRM: ${{ inputs.confirm }}
+          SPEC: ${{ inputs.spec }}
         run: |
-          if [ "$CONFIRM" = "ADD" ]; then node tools/add-new-parks.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/add.sql"
-          else node tools/add-new-parks.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/add.sql" --dry; fi
+          extra=""; if [ -n "$SPEC" ]; then case "$SPEC" in tools/open-data/*.json) extra="--spec $SPEC";; *) echo "::error::spec must be tools/open-data/*.json"; exit 1;; esac; fi
+          if [ "$CONFIRM" = "ADD" ]; then node tools/add-new-parks.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/add.sql" $extra
+          else node tools/add-new-parks.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/add.sql" --dry $extra; fi
       - name: Apply to the live database
         if: ${{ inputs.confirm == 'ADD' }}
         env:
