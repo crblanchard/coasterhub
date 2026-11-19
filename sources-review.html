@@ -94,6 +94,7 @@
   .npf{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:.8rem;color:var(--muted)}
   .npf input{margin-left:4px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:5px 8px;font-size:.85rem}
   .npf .np-name{min-width:220px;font-weight:600}
+  .npf .np-tick{width:18px;height:18px;margin:0}
   .npc{display:grid;gap:4px;margin:4px 0}
   .npl{display:flex;gap:8px;align-items:baseline;font-size:.88rem;flex-wrap:wrap}
   .npl small{color:var(--muted);font-size:.78rem}
@@ -213,8 +214,8 @@ const TABS = {
     p: 'At parks already on the site. Untick anything wrong, then add them all at once, or one by one. Each is created with the sources&rsquo; stats and shows on /changes; &ldquo;Leave out&rdquo; means it won&rsquo;t come back. Names not in English are unticked until you give them one. Models are set only where the source&rsquo;s matches one of your own model names.',
     f: [['op', 'Parks: operating or under construction'], ['fair', 'Travelling fairs: operating'], ['closed', 'Closed'], ['unknown', 'Status unknown'], ['multi', 'In two or more sources'], ['', 'Everything']] },
   newParks: { t: 'New parks', h: 'Parks the sources have that the site doesn&rsquo;t',
-    p: 'Each with its coasters from Coasterpedia and Wikipedia. Check the name, region and pin (fix any of them right on the card), tick the coasters to bring in, then add. Nothing goes up until you press Add.',
-    f: [['', 'All'], ['pin', 'Has a map pin'], ['nopin', 'No map pin yet'], ['multi', 'Three or more coasters']] },
+    p: 'Each with its coasters from Coasterpedia and Wikipedia. Check the name, region and pin (fix any of them right on the card) and which coasters to bring in. Then add one park, or tick several and add them all. Parks are ticked by default only when they have a pin, a region and an English name that isn&rsquo;t already a park here. Nothing goes up until you press Add.',
+    f: [['ready', 'Ready: pin, region and name'], ['pin', 'Has a map pin'], ['nopin', 'No map pin yet'], ['multi', 'Three or more coasters'], ['', 'All']] },
   nosource: { t: 'Needs a source', h: 'Coasters still missing stats',
     p: 'Stats that are blank and no open source has. Most-ridden first. Add them to Coasterpedia or Wikidata, citing a park page or news article (not RCDB), and they arrive here on the next Monday refresh.',
     f: [['ridden', 'Ridden by someone here'], ['', 'All'], ['nolink', 'No open source at all']] },
@@ -266,18 +267,19 @@ function rows() {
   if (tab === 'adds') return D.adds.filter(has).sort((a, b) => a.park.localeCompare(b.park) || rank(a) - rank(b) || a.name.localeCompare(b.name))
     .filter(a => f === 'op' ? live(a) && !a.fair : f === 'fair' ? live(a) && a.fair : f === 'multi' ? a.refs.length > 1 : f === 'unknown' ? !a.status : f === 'closed' ? !!a.status && !live(a) : true);
   if (tab === 'newParks') return D.newParks.filter(x => !q || (x.park + ' ' + (x.region || '') + ' ' + x.coasters.map(c => c.name).join(' ')).toLowerCase().includes(q))
-    .filter(x => f === 'pin' ? x.lat != null : f === 'nopin' ? x.lat == null : f === 'multi' ? x.coasters.length >= 3 : true);
+    .filter(x => f === 'ready' ? parkReady(x) : f === 'pin' ? x.lat != null : f === 'nopin' ? x.lat == null : f === 'multi' ? x.coasters.length >= 3 : true);
   return D.nosource.filter(has).filter(x => f === 'ridden' ? x.riders > 0 : f === 'nolink' ? !x.sources.length : true);
 }
 function render() {
   tracker();
   LIST = rows();
   const f = $('filt').value;
-  $('bulk').hidden = !((tab === 'gaps' || tab === 'adds' || (tab === 'matches' && f !== 'done')) && LIST.length);
+  $('bulk').hidden = !((tab === 'gaps' || tab === 'adds' || tab === 'newParks' || (tab === 'matches' && f !== 'done')) && LIST.length);
   $('bulk').textContent = tab === 'gaps' ? 'Use all ' + fmt(LIST.length) + ' shown' : tab === 'adds' ? 'Add all ticked (' + fmt(LIST.filter(ticked).length) + ')'
+    : tab === 'newParks' ? 'Add all ticked parks (' + fmt(LIST.filter(parkTicked).length) + ')'
     : 'Link all near-certain (' + fmt(D.matches.filter(sure).length) + ')';
   $('copy').hidden = tab !== 'nosource';
-  $('count').innerHTML = '<b>' + fmt(LIST.length) + '</b> ' + (tab === 'gaps' || tab === 'changed' ? 'values' : 'coasters');
+  $('count').innerHTML = '<b>' + fmt(LIST.length) + '</b> ' + (tab === 'gaps' || tab === 'changed' ? 'values' : tab === 'newParks' ? 'parks' : 'coasters');
   $('list').innerHTML = LIST.length ? VIEW[tab](LIST.slice(0, LIMIT), f) : '<p class="muted">Nothing here right now.</p>';
   $('more').hidden = LIST.length <= LIMIT;
 }
@@ -316,12 +318,13 @@ const VIEW = {
   newParks: list => '<div class="cards">' + list.map((p, i) => {
     const alive = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || '') && /operat|construct|open|betrieb/i.test(c.status || '');
     return '<div class="card np" data-k="' + esc(p.k) + '">'
-      + '<div class="npf"><label>Park <input class="np-name" value="' + esc(p.park) + '"></label>'
-      + '<label>Region <input class="np-region" placeholder="State, US or country" value="' + esc(p.region || '') + '"></label>'
-      + '<label>Lat <input class="np-lat" value="' + (p.lat ?? '') + '" size="9"></label><label>Lon <input class="np-lon" value="' + (p.lon ?? '') + '" size="9"></label>'
+      + '<div class="npf"><input type="checkbox" class="np-tick" title="Include in Add all ticked parks"' + (parkTicked(p) ? ' checked' : '') + '>'
+      + '<label>Park <input class="np-name" value="' + esc(EDIT[p.k] && EDIT[p.k].park || p.park) + '"></label>'
+      + '<label>Region <input class="np-region" placeholder="State, US or country" value="' + esc(EDIT[p.k] && EDIT[p.k].region != null ? EDIT[p.k].region : (p.region || '')) + '"></label>'
+      + '<label>Lat <input class="np-lat" value="' + esc(EDIT[p.k] && EDIT[p.k].lat != null ? EDIT[p.k].lat : (p.lat ?? '')) + '" size="9"></label><label>Lon <input class="np-lon" value="' + esc(EDIT[p.k] && EDIT[p.k].lon != null ? EDIT[p.k].lon : (p.lon ?? '')) + '" size="9"></label>'
       + (p.lat != null ? '<a class="go" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=' + p.lat + '&mlon=' + p.lon + '#map=15/' + p.lat + '/' + p.lon + '">check the pin ↗</a>' : '<span class="chip bad">no pin yet</span>')
       + (p.taken ? ' <span class="chip bad">a park with this name is already on the site: rename it</span>' : '') + '</div>'
-      + '<div class="npc">' + p.coasters.map((c, j) => '<label class="npl"><input type="checkbox" data-j="' + j + '"' + (alive(c) ? ' checked' : '') + '> <b>' + esc(c.name) + '</b>'
+      + '<div class="npc">' + p.coasters.map((c, j) => '<label class="npl"><input type="checkbox" data-j="' + j + '"' + ((CUNTICK[p.k] && j in CUNTICK[p.k] ? !CUNTICK[p.k][j] : alive(c)) ? ' checked' : '') + '> <b>' + esc(c.name) + '</b>'
         + '<small>' + esc(c.status || 'status unknown') + ' · ' + c.refs.filter(r => LINK[r.source]).map(r => '<a class="go" target="_blank" rel="noopener" href="' + LINK[r.source](r.ref) + '">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ') + '</small></label>').join('') + '</div>'
       + '<div class="act">' + btn('Add park + ticked coasters', { np: 'add', i: i }, 'yes') + btn('Leave out', { np: 'no', i: i }, 'no') + '</div></div>';
   }).join('') + '</div>',
@@ -353,7 +356,7 @@ document.addEventListener('click', e => {
     if (b.dataset.np === 'no') return after(post('/api/cutover/apply', { kind: 'noaddpark', k: p.k, park: p.park }), b);
     const name = card.querySelector('.np-name').value.trim(), region = card.querySelector('.np-region').value.trim();
     const lat = card.querySelector('.np-lat').value.trim(), lon = card.querySelector('.np-lon').value.trim();
-    const picked = [...card.querySelectorAll('.npc input:checked')].map(x => p.coasters[+x.dataset.j]).map(c => ({ name: c.name, refs: c.refs.map(r => ({ source: r.source, ref: r.ref })) }));
+    const picked = [...card.querySelectorAll('.npc input[data-j]:checked')].map(x => p.coasters[+x.dataset.j]).map(c => ({ name: c.name, refs: c.refs.map(r => ({ source: r.source, ref: r.ref })) }));
     if (!picked.length) return alert('Tick at least one coaster.');
     if (!confirm('Add ' + name + (region ? ' (' + region + ')' : '') + ' with ' + picked.length + ' coaster' + (picked.length > 1 ? 's' : '') + '?' + (lat ? '' : '\n\nIt has no map pin yet.'))) return;
     return after(post('/api/cutover/apply', { kind: 'addpark', k: p.k, park: name, region, lat, lon, coasters: picked }), b);
@@ -391,7 +394,49 @@ async function bulkAdd() {
   b.disabled = false;
   D = await load(); render();
 }
+// New parks in bulk (pass 2). A park's card edits (name, region, pin) and
+// coaster ticks are remembered while the page is open, so scrolling or
+// filtering doesn't lose them; Add all takes each ticked park as its card says.
+const PUNTICK = new Set(), PTICK = new Set(), EDIT = {}, CUNTICK = {};
+const aliveC = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || '') && /operat|construct|open|betrieb/i.test(c.status || '');
+const parkReady = p => p.lat != null && !!p.region && latin(p.park) && !p.taken;
+const parkTicked = p => PUNTICK.has(p.k) ? false : PTICK.has(p.k) ? true : parkReady(p);
+const parkBody = p => {
+  const e = EDIT[p.k] || {};
+  const un = CUNTICK[p.k] || {};
+  const coasters = p.coasters.map((c, j) => ({ c, j })).filter(({ c, j }) => j in un ? !un[j] : aliveC(c))
+    .map(({ c }) => ({ name: c.name, refs: c.refs.map(r => ({ source: r.source, ref: r.ref })) }));
+  return { kind: 'addpark', k: p.k, park: (e.park || p.park).trim(), region: e.region != null ? e.region : (p.region || ''),
+           lat: e.lat != null ? e.lat : (p.lat ?? ''), lon: e.lon != null ? e.lon : (p.lon ?? ''), coasters };
+};
+document.addEventListener('change', e => {
+  const card = e.target.closest('.np'); if (!card) return;
+  const k = card.dataset.k, cl = e.target.classList;
+  if (cl.contains('np-tick')) { (e.target.checked ? PTICK : PUNTICK).add(k); (e.target.checked ? PUNTICK : PTICK).delete(k); }
+  else if (cl.contains('np-name') || cl.contains('np-region') || cl.contains('np-lat') || cl.contains('np-lon')) {
+    const f = cl.contains('np-name') ? 'park' : cl.contains('np-region') ? 'region' : cl.contains('np-lat') ? 'lat' : 'lon';
+    (EDIT[k] = EDIT[k] || {})[f] = e.target.value.trim();
+  } else if (e.target.dataset.j != null) { (CUNTICK[k] = CUNTICK[k] || {})[e.target.dataset.j] = !e.target.checked; }
+  if (tab === 'newParks') $('bulk').textContent = 'Add all ticked parks (' + fmt(LIST.filter(parkTicked).length) + ')';
+});
+async function bulkParks() {
+  const list = LIST.filter(parkTicked).map(parkBody).filter(b => b.coasters.length);
+  const n = list.reduce((a, b) => a + b.coasters.length, 0);
+  if (!list.length || !confirm('Add ' + list.length + ' parks with ' + n + ' coasters to the site? Each coaster shows on /changes. This runs in batches and takes a while; keep the page open.')) return;
+  const b = $('bulk'); b.disabled = true;
+  let done = 0; const failed = [];
+  for (let i = 0; i < list.length; i += 3) {
+    b.textContent = 'Adding parks… ' + Math.min(i + 3, list.length) + ' / ' + list.length;
+    for (const one of list.slice(i, i + 3)) {
+      try { await post('/api/cutover/apply', one); done++; } catch (err) { failed.push(one.park + ': ' + err); }
+    }
+  }
+  b.disabled = false;
+  if (failed.length) alert(done + ' parks added. Not added:\n' + failed.slice(0, 15).join('\n') + (failed.length > 15 ? '\n…and ' + (failed.length - 15) + ' more' : ''));
+  D = await load(); render();
+}
 function bulk() {
+  if (tab === 'newParks') return bulkParks();
   if (tab === 'adds') return bulkAdd();
   if (tab === 'gaps') {
     if (!confirm('Fill all ' + LIST.length + ' shown values on the live site?')) return;

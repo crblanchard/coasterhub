@@ -6347,7 +6347,10 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   operating). addOpenCoaster now sets a model only when the source's matches one
   of Carter's existing model names for that manufacturer, else none. Watch for
   codenames: "Project Purple" and Bakunawa are one ride. Pass 2 = New parks in
-  bulk (not built yet); pass 3 = closed coasters.
+  bulk: a tick per park card (on by default when it has a pin, a region and
+  a Latin-script name not already a park here; filter "Ready", 492 of 886 on
+  day one), card edits and coaster ticks remembered while the page is open,
+  "Add all ticked parks" posts one park at a time. Pass 3 = closed coasters.
 - **New parks on /sources/review (2026-11-19)**: suggest-matches.py groups
   open-source coasters (not Wikidata alone) at parks not on the site into
   `open_new_parks` (191): park name, average coordinates, region (Coasterpedia
