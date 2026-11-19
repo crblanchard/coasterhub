@@ -6432,3 +6432,31 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   pull/builder now drops any key or value mentioning RCDB. Grep the generated
   files for `rcdb` after changing a puller: only the `cites_rcdb` column name
   should match.
+
+### New parks, same-name parks, pins, closed coasters (2026-11-19)
+
+- **477 new parks / 832 coasters** went in through `add-new-parks.yml`
+  (confirm ADD): the real Worker against a live export on the runner, its
+  writes applied with wrangler. `spec` input sends hand-made apply bodies
+  instead (`tools/open-data/split-198.json`); `closed: yes` adds closed
+  coasters (only with a closing date) and closed-only parks.
+- **Same-name parks are "Name (Town)"** (Carter: "Oriental Heritage (city
+  name)"). 198 split Oriental Heritage x5 and Fantawild Adventure x3.
+  suggest-matches now names any new park whose name is taken, or shared by
+  two new ones, that way (`source_park` keeps the source's name).
+- **Bug, fixed in 199:** one coaster card could hold two pages from ONE
+  source (two parks of one name, or Butterfly 1993 + 2022 at one park), and
+  addOpenCoaster read the first page's stats. suggest-matches never merges
+  same-source pages now, and splits same-name parks by Coasterpedia's
+  location (towns compared loosely; coordinates on both sides decide alone).
+- **Parks we have** match only when nothing says they're elsewhere (country,
+  30 km): the old loose match dropped ~160 live coasters at other parks
+  called "Central Park"/"Luna Park". Coasterpedia location "Travelling" is a
+  showman: fairs pass, not a park.
+- **Pins:** `tools/open-data/park-pins.py` (in open-data.yml, 45-minute
+  budget, cached in `park-pins.json`): the town from Nominatim as an anchor,
+  then the park's Wikidata P625 within 50 km, then OSM's park, else the town
+  as an ESTIMATE (`how: town`; add-new-parks prints them for
+  missing-parks.md). UA "CoasterHubBot/1.0 (https://coasterhub.org)", 1 req/s.
+- add-new-parks skips a new park within 2 km of one we have (likely an old
+  name, e.g. Marriott's Great America) and lists it.
