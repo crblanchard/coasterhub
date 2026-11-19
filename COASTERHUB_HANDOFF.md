@@ -6335,6 +6335,19 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   "(Old)", years). Picks are open_choices field 'name': source 'manual' for
   ours kept or typed, else the source whose name was taken. Unpicked names
   keep ours at the switch.
+- **Wikipedia joined as a source (2026-11-19)**: `tools/open-data/wikipedia-pull.py`
+  reads every `Infobox roller coaster` (en) and `Infobox Achterbahn` (de)
+  through the API as sources `enwiki` / `dewiki` (ref = article title), between
+  Coasterpedia and Wikidata in OPEN_SOURCE_ORDER. Wikimedia throttles
+  anonymous clients, so the User-Agent is "CoasterHubBot/1.0
+  (https://coasterhub.org)" (Carter approved naming the site; no email), and
+  the sandbox's shared IP still got throttled: the pull runs fine in the
+  Monday GitHub job. First pass: en 888 articles / 684 coasters linked, de 807
+  / 558; about 400 blank stats they can fill (mostly ride times) and 86 new
+  coasters they report (36 operating or under construction, e.g. Bakunawa).
+  English infoboxes carry `rcdb_number`; it is dropped like every RCDB key.
+  ThemeParks.wiki was added and removed the same day ("it doesn't have that
+  much"); api.themeparks.wiki is still on the environment's host list.
 - **/sources is public again (2026-11-19)**: what each source is, its licence
   (Coasterpedia CC BY-SA and OSM ODbL need visible credit; this page gives
   it), and live counts from `/api/sources` (coaster_sources by source and
