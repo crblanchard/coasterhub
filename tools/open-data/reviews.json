@@ -1,1 +1,2942 @@
-[]
+[
+{
+"coaster_id": 8,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 21,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 46,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 60,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 87,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 121,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 186,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 208,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 252,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 271,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 274,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 303,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 335,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 359,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 377,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 389,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 435,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 537,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 546,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 564,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 567,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 651,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 660,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 665,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 678,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 679,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 695,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 697,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 703,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 713,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 731,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 738,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 751,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 752,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 753,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 755,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 756,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 760,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 792,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 793,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 800,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 822,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 823,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 833,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1025,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1027,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1040,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1049,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1053,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1076,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1085,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1086,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1088,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1089,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1102,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1106,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1173,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1222,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1226,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1263,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1279,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1283,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1298,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1322,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1324,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1325,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1326,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1327,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1328,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1330,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1331,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1357,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1366,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1501,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1549,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1590,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1630,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1652,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1696,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1697,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1698,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1699,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1701,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1705,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1759,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1760,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1761,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1763,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1794,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1797,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1799,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1803,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1805,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1824,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1825,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1859,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1872,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1886,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1891,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1893,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1896,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1897,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1900,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1964,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1965,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1970,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1973,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1999,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2007,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2013,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2085,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2141,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2142,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2146,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2161,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2166,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2185,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 2196,
+"decision": "keep",
+"kind": "coaster",
+"ref": "",
+"source": ""
+},
+{
+"coaster_id": 1283,
+"decision": "reject",
+"kind": "match",
+"ref": "Alpenexpress \"Enzian\" (Europa-Park; opened 2024)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 757,
+"decision": "approve",
+"kind": "match",
+"ref": "Avalanche (Timber Falls Adventure Park)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 859,
+"decision": "approve",
+"kind": "match",
+"ref": "Azteka",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1309,
+"decision": "reject",
+"kind": "match",
+"ref": "Azteka",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1471,
+"decision": "approve",
+"kind": "match",
+"ref": "Balancier",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2034,
+"decision": "reject",
+"kind": "match",
+"ref": "Big Dipper (Luna Park Sydney; opened 1935)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2220,
+"decision": "reject",
+"kind": "match",
+"ref": "Big Dipper (Luna Park Sydney; opened 1935)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2030,
+"decision": "approve",
+"kind": "match",
+"ref": "Big Red Boat Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 528,
+"decision": "approve",
+"kind": "match",
+"ref": "Big Thunder Mountain (Tokyo Disneyland)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2074,
+"decision": "approve",
+"kind": "match",
+"ref": "Boule et Bill D\u00e9boulent (opened 2019)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1341,
+"decision": "approve",
+"kind": "match",
+"ref": "Cat-O-Pillar",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1509,
+"decision": "approve",
+"kind": "match",
+"ref": "Caterpillar Coaster (Brean Theme Park)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2097,
+"decision": "approve",
+"kind": "match",
+"ref": "Crazy Twister (Luna Park Tel Aviv)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1488,
+"decision": "approve",
+"kind": "match",
+"ref": "C\u00fa Chulainn Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1,
+"decision": "approve",
+"kind": "match",
+"ref": "Dragon Roller Coaster (Pixieland Amusement Park)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2127,
+"decision": "approve",
+"kind": "match",
+"ref": "El Vig\u00eda",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 920,
+"decision": "approve",
+"kind": "match",
+"ref": "Energu\u015b Roller Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2154,
+"decision": "approve",
+"kind": "match",
+"ref": "Euro Coaster (South Sabahiya Park)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2008,
+"decision": "reject",
+"kind": "match",
+"ref": "Galaxi (Palace Playland)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1293,
+"decision": "approve",
+"kind": "match",
+"ref": "Galaxy (Adventureland New York)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 321,
+"decision": "approve",
+"kind": "match",
+"ref": "Galaxy (Ray Cammack Shows)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2214,
+"decision": "approve",
+"kind": "match",
+"ref": "Grand Huit (Walibi Rh\u00f4ne-Alpes)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 331,
+"decision": "reject",
+"kind": "match",
+"ref": "Hades 360",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 758,
+"decision": "approve",
+"kind": "match",
+"ref": "Hades 360",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1572,
+"decision": "approve",
+"kind": "match",
+"ref": "Heidi - The Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1572,
+"decision": "approve",
+"kind": "match",
+"ref": "Heidi The Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 811,
+"decision": "approve",
+"kind": "match",
+"ref": "Hurricane (Fun Spot America Atlanta)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 638,
+"decision": "approve",
+"kind": "match",
+"ref": "Jurassic World VelociCoaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1467,
+"decision": "approve",
+"kind": "match",
+"ref": "Kid'Z Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1506,
+"decision": "approve",
+"kind": "match",
+"ref": "Kiddi Koasta",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1295,
+"decision": "reject",
+"kind": "match",
+"ref": "Kiddie Roller Coaster (Adventureland)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1746,
+"decision": "approve",
+"kind": "match",
+"ref": "Le Boomerang (La Ronde)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 611,
+"decision": "approve",
+"kind": "match",
+"ref": "Lightning Rod",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1823,
+"decision": "approve",
+"kind": "match",
+"ref": "Lightning Rod",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1694,
+"decision": "approve",
+"kind": "match",
+"ref": "Marienk\u00e4ferexpress",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 467,
+"decision": "approve",
+"kind": "match",
+"ref": "Max & Moritz (Efteling)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 468,
+"decision": "approve",
+"kind": "match",
+"ref": "Max & Moritz (Efteling)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1361,
+"decision": "approve",
+"kind": "match",
+"ref": "Millennium",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1634,
+"decision": "approve",
+"kind": "match",
+"ref": "Movie Park Studio Tour",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1720,
+"decision": "approve",
+"kind": "match",
+"ref": "Nordmann (Kenneth Schwerin)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 937,
+"decision": "approve",
+"kind": "match",
+"ref": "Patrulla Canina",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 272,
+"decision": "approve",
+"kind": "match",
+"ref": "Powder Keg: A Blast into the Wilderness",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 727,
+"decision": "approve",
+"kind": "match",
+"ref": "Pteranodon Flyers",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1336,
+"decision": "approve",
+"kind": "match",
+"ref": "Raven (Paultons Park)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1610,
+"decision": "approve",
+"kind": "match",
+"ref": "Raven (Paultons Park)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2175,
+"decision": "approve",
+"kind": "match",
+"ref": "Roller Coaster (Al-Shallal Theme Park)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1726,
+"decision": "approve",
+"kind": "match",
+"ref": "Roller Coaster (Troisne)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 812,
+"decision": "approve",
+"kind": "match",
+"ref": "Sea Serpent (Fun Spot America Atlanta)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 623,
+"decision": "approve",
+"kind": "match",
+"ref": "Sea Serpent (Fun Spot America Kissimmee)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 625,
+"decision": "approve",
+"kind": "match",
+"ref": "Sea Serpent (Fun Spot America Kissimmee)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 812,
+"decision": "reject",
+"kind": "match",
+"ref": "Sea Serpent (Fun Spot America Kissimmee)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 623,
+"decision": "approve",
+"kind": "match",
+"ref": "Sea Serpent (Fun Spot America Orlando)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 625,
+"decision": "approve",
+"kind": "match",
+"ref": "Sea Serpent (Fun Spot America Orlando)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1357,
+"decision": "reject",
+"kind": "match",
+"ref": "Spinosaurus",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1215,
+"decision": "approve",
+"kind": "match",
+"ref": "Star Wars Hyperspace Mountain",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 389,
+"decision": "reject",
+"kind": "match",
+"ref": "The Coaster (CJ Barrymore's Family Entertainment Center)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 73,
+"decision": "approve",
+"kind": "match",
+"ref": "The Dark Knight Coaster (Six Flags Great Adventure)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 160,
+"decision": "approve",
+"kind": "match",
+"ref": "The Dark Knight Coaster (Six Flags Great America)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 635,
+"decision": "approve",
+"kind": "match",
+"ref": "The Incredible Hulk Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1178,
+"decision": "approve",
+"kind": "match",
+"ref": "The Incredible Hulk Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 500,
+"decision": "approve",
+"kind": "match",
+"ref": "The Ride to Happiness by Tomorrowland",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1342,
+"decision": "approve",
+"kind": "match",
+"ref": "The Wave (Drayton Manor)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1597,
+"decision": "approve",
+"kind": "match",
+"ref": "The Wave (Drayton Manor)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1585,
+"decision": "approve",
+"kind": "match",
+"ref": "Thriller (Manning's Amusement Park)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 632,
+"decision": "approve",
+"kind": "match",
+"ref": "Tig'rr Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1702,
+"decision": "approve",
+"kind": "match",
+"ref": "Timoks Coaster",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 949,
+"decision": "approve",
+"kind": "match",
+"ref": "Tom & Jerry",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 105,
+"decision": "approve",
+"kind": "match",
+"ref": "Top Thrill 2",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1036,
+"decision": "approve",
+"kind": "match",
+"ref": "Top Thrill 2",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1547,
+"decision": "approve",
+"kind": "match",
+"ref": "Twister Roller Coaster (Crealy Adventure Park & Resort)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 955,
+"decision": "approve",
+"kind": "match",
+"ref": "Uncharted: El Enigma de Penitence",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1402,
+"decision": "approve",
+"kind": "match",
+"ref": "Vilde H\u00f8nsejagt",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1862,
+"decision": "approve",
+"kind": "match",
+"ref": "Voyage Dans Le Ciel",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2002,
+"decision": "reject",
+"kind": "match",
+"ref": "WildCat (Cedar Point)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 89,
+"decision": "approve",
+"kind": "match",
+"ref": "Woodstock's Express (Dorney Park & Wildwater Kingdom)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1445,
+"decision": "approve",
+"kind": "match",
+"ref": "node/10182402329",
+"source": "osm"
+},
+{
+"coaster_id": 884,
+"decision": "approve",
+"kind": "match",
+"ref": "node/1061865213",
+"source": "osm"
+},
+{
+"coaster_id": 509,
+"decision": "approve",
+"kind": "match",
+"ref": "node/1088029243",
+"source": "osm"
+},
+{
+"coaster_id": 864,
+"decision": "approve",
+"kind": "match",
+"ref": "node/1088029243",
+"source": "osm"
+},
+{
+"coaster_id": 1634,
+"decision": "approve",
+"kind": "match",
+"ref": "node/11121678606",
+"source": "osm"
+},
+{
+"coaster_id": 1215,
+"decision": "approve",
+"kind": "match",
+"ref": "node/11251453535",
+"source": "osm"
+},
+{
+"coaster_id": 927,
+"decision": "approve",
+"kind": "match",
+"ref": "node/11300388395",
+"source": "osm"
+},
+{
+"coaster_id": 1922,
+"decision": "approve",
+"kind": "match",
+"ref": "node/11393503069",
+"source": "osm"
+},
+{
+"coaster_id": 1455,
+"decision": "approve",
+"kind": "match",
+"ref": "node/11417611034",
+"source": "osm"
+},
+{
+"coaster_id": 1681,
+"decision": "approve",
+"kind": "match",
+"ref": "node/11422276950",
+"source": "osm"
+},
+{
+"coaster_id": 1632,
+"decision": "approve",
+"kind": "match",
+"ref": "node/12136324566",
+"source": "osm"
+},
+{
+"coaster_id": 48,
+"decision": "reject",
+"kind": "match",
+"ref": "node/1223042502",
+"source": "osm"
+},
+{
+"coaster_id": 66,
+"decision": "approve",
+"kind": "match",
+"ref": "node/1223042502",
+"source": "osm"
+},
+{
+"coaster_id": 664,
+"decision": "reject",
+"kind": "match",
+"ref": "node/1223042502",
+"source": "osm"
+},
+{
+"coaster_id": 467,
+"decision": "approve",
+"kind": "match",
+"ref": "node/12747401983",
+"source": "osm"
+},
+{
+"coaster_id": 468,
+"decision": "approve",
+"kind": "match",
+"ref": "node/12747401983",
+"source": "osm"
+},
+{
+"coaster_id": 662,
+"decision": "approve",
+"kind": "match",
+"ref": "node/12859899266",
+"source": "osm"
+},
+{
+"coaster_id": 1732,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13049474738",
+"source": "osm"
+},
+{
+"coaster_id": 1733,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13049474740",
+"source": "osm"
+},
+{
+"coaster_id": 560,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13061871496",
+"source": "osm"
+},
+{
+"coaster_id": 869,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13269919021",
+"source": "osm"
+},
+{
+"coaster_id": 870,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13270606138",
+"source": "osm"
+},
+{
+"coaster_id": 1743,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13325522025",
+"source": "osm"
+},
+{
+"coaster_id": 1468,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13326306513",
+"source": "osm"
+},
+{
+"coaster_id": 1469,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13326306514",
+"source": "osm"
+},
+{
+"coaster_id": 1470,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13326681220",
+"source": "osm"
+},
+{
+"coaster_id": 866,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13584089602",
+"source": "osm"
+},
+{
+"coaster_id": 855,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13819430845",
+"source": "osm"
+},
+{
+"coaster_id": 943,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13841165936",
+"source": "osm"
+},
+{
+"coaster_id": 943,
+"decision": "reject",
+"kind": "match",
+"ref": "node/13841573695",
+"source": "osm"
+},
+{
+"coaster_id": 948,
+"decision": "approve",
+"kind": "match",
+"ref": "node/13841791631",
+"source": "osm"
+},
+{
+"coaster_id": 1914,
+"decision": "approve",
+"kind": "match",
+"ref": "node/14056234524",
+"source": "osm"
+},
+{
+"coaster_id": 1095,
+"decision": "approve",
+"kind": "match",
+"ref": "node/14277382769",
+"source": "osm"
+},
+{
+"coaster_id": 1092,
+"decision": "approve",
+"kind": "match",
+"ref": "node/14277385639",
+"source": "osm"
+},
+{
+"coaster_id": 1214,
+"decision": "approve",
+"kind": "match",
+"ref": "node/14355009864",
+"source": "osm"
+},
+{
+"coaster_id": 1479,
+"decision": "approve",
+"kind": "match",
+"ref": "node/2294013128",
+"source": "osm"
+},
+{
+"coaster_id": 1478,
+"decision": "approve",
+"kind": "match",
+"ref": "node/2294013139",
+"source": "osm"
+},
+{
+"coaster_id": 937,
+"decision": "approve",
+"kind": "match",
+"ref": "node/2320571441",
+"source": "osm"
+},
+{
+"coaster_id": 949,
+"decision": "approve",
+"kind": "match",
+"ref": "node/2409111142",
+"source": "osm"
+},
+{
+"coaster_id": 948,
+"decision": "approve",
+"kind": "match",
+"ref": "node/2410163589",
+"source": "osm"
+},
+{
+"coaster_id": 979,
+"decision": "approve",
+"kind": "match",
+"ref": "node/3735871213",
+"source": "osm"
+},
+{
+"coaster_id": 886,
+"decision": "approve",
+"kind": "match",
+"ref": "node/5505812321",
+"source": "osm"
+},
+{
+"coaster_id": 2063,
+"decision": "approve",
+"kind": "match",
+"ref": "node/5677917381",
+"source": "osm"
+},
+{
+"coaster_id": 329,
+"decision": "approve",
+"kind": "match",
+"ref": "node/6549918057",
+"source": "osm"
+},
+{
+"coaster_id": 326,
+"decision": "approve",
+"kind": "match",
+"ref": "node/6549918058",
+"source": "osm"
+},
+{
+"coaster_id": 328,
+"decision": "approve",
+"kind": "match",
+"ref": "node/6549955214",
+"source": "osm"
+},
+{
+"coaster_id": 861,
+"decision": "approve",
+"kind": "match",
+"ref": "node/6732253511",
+"source": "osm"
+},
+{
+"coaster_id": 477,
+"decision": "approve",
+"kind": "match",
+"ref": "node/693026372",
+"source": "osm"
+},
+{
+"coaster_id": 475,
+"decision": "approve",
+"kind": "match",
+"ref": "node/693044170",
+"source": "osm"
+},
+{
+"coaster_id": 476,
+"decision": "approve",
+"kind": "match",
+"ref": "node/693044170",
+"source": "osm"
+},
+{
+"coaster_id": 926,
+"decision": "approve",
+"kind": "match",
+"ref": "node/7340237438",
+"source": "osm"
+},
+{
+"coaster_id": 1600,
+"decision": "approve",
+"kind": "match",
+"ref": "node/7959490096",
+"source": "osm"
+},
+{
+"coaster_id": 1599,
+"decision": "approve",
+"kind": "match",
+"ref": "node/7959490097",
+"source": "osm"
+},
+{
+"coaster_id": 635,
+"decision": "approve",
+"kind": "match",
+"ref": "node/8248062617",
+"source": "osm"
+},
+{
+"coaster_id": 1178,
+"decision": "approve",
+"kind": "match",
+"ref": "node/8248062617",
+"source": "osm"
+},
+{
+"coaster_id": 528,
+"decision": "approve",
+"kind": "match",
+"ref": "node/854584575",
+"source": "osm"
+},
+{
+"coaster_id": 514,
+"decision": "approve",
+"kind": "match",
+"ref": "node/8682234772",
+"source": "osm"
+},
+{
+"coaster_id": 1735,
+"decision": "approve",
+"kind": "match",
+"ref": "node/8931281684",
+"source": "osm"
+},
+{
+"coaster_id": 1410,
+"decision": "approve",
+"kind": "match",
+"ref": "node/8932233310",
+"source": "osm"
+},
+{
+"coaster_id": 1217,
+"decision": "approve",
+"kind": "match",
+"ref": "node/9054967172",
+"source": "osm"
+},
+{
+"coaster_id": 1175,
+"decision": "approve",
+"kind": "match",
+"ref": "node/9380619164",
+"source": "osm"
+},
+{
+"coaster_id": 1974,
+"decision": "approve",
+"kind": "match",
+"ref": "node/9380619164",
+"source": "osm"
+},
+{
+"coaster_id": 350,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/10693511",
+"source": "osm"
+},
+{
+"coaster_id": 350,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/10694113",
+"source": "osm"
+},
+{
+"coaster_id": 160,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/14097371",
+"source": "osm"
+},
+{
+"coaster_id": 712,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/16353742",
+"source": "osm"
+},
+{
+"coaster_id": 349,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/17255467",
+"source": "osm"
+},
+{
+"coaster_id": 1287,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/17255467",
+"source": "osm"
+},
+{
+"coaster_id": 351,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/17255468",
+"source": "osm"
+},
+{
+"coaster_id": 351,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/17289062",
+"source": "osm"
+},
+{
+"coaster_id": 1361,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/18581529",
+"source": "osm"
+},
+{
+"coaster_id": 509,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/6267961",
+"source": "osm"
+},
+{
+"coaster_id": 864,
+"decision": "approve",
+"kind": "match",
+"ref": "relation/6267961",
+"source": "osm"
+},
+{
+"coaster_id": 495,
+"decision": "approve",
+"kind": "match",
+"ref": "way/101863280",
+"source": "osm"
+},
+{
+"coaster_id": 858,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1094525775",
+"source": "osm"
+},
+{
+"coaster_id": 818,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1100731744",
+"source": "osm"
+},
+{
+"coaster_id": 353,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1100731748",
+"source": "osm"
+},
+{
+"coaster_id": 955,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1105254393",
+"source": "osm"
+},
+{
+"coaster_id": 2097,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1168420567",
+"source": "osm"
+},
+{
+"coaster_id": 1918,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1188745965",
+"source": "osm"
+},
+{
+"coaster_id": 943,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1201354987",
+"source": "osm"
+},
+{
+"coaster_id": 2125,
+"decision": "approve",
+"kind": "match",
+"ref": "way/120419507",
+"source": "osm"
+},
+{
+"coaster_id": 712,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1209297271",
+"source": "osm"
+},
+{
+"coaster_id": 1320,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1221886086",
+"source": "osm"
+},
+{
+"coaster_id": 1493,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1227912069",
+"source": "osm"
+},
+{
+"coaster_id": 1736,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1298986498",
+"source": "osm"
+},
+{
+"coaster_id": 138,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1308449496",
+"source": "osm"
+},
+{
+"coaster_id": 873,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1323711870",
+"source": "osm"
+},
+{
+"coaster_id": 2030,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1343586251",
+"source": "osm"
+},
+{
+"coaster_id": 1745,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1348965025",
+"source": "osm"
+},
+{
+"coaster_id": 950,
+"decision": "approve",
+"kind": "match",
+"ref": "way/135457578",
+"source": "osm"
+},
+{
+"coaster_id": 1440,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1371660451",
+"source": "osm"
+},
+{
+"coaster_id": 120,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1426528614",
+"source": "osm"
+},
+{
+"coaster_id": 1887,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1426528614",
+"source": "osm"
+},
+{
+"coaster_id": 498,
+"decision": "approve",
+"kind": "match",
+"ref": "way/142965541",
+"source": "osm"
+},
+{
+"coaster_id": 499,
+"decision": "approve",
+"kind": "match",
+"ref": "way/142966252",
+"source": "osm"
+},
+{
+"coaster_id": 497,
+"decision": "approve",
+"kind": "match",
+"ref": "way/142993686",
+"source": "osm"
+},
+{
+"coaster_id": 494,
+"decision": "approve",
+"kind": "match",
+"ref": "way/143053098",
+"source": "osm"
+},
+{
+"coaster_id": 496,
+"decision": "approve",
+"kind": "match",
+"ref": "way/143057996",
+"source": "osm"
+},
+{
+"coaster_id": 1856,
+"decision": "approve",
+"kind": "match",
+"ref": "way/143057996",
+"source": "osm"
+},
+{
+"coaster_id": 493,
+"decision": "approve",
+"kind": "match",
+"ref": "way/143058715",
+"source": "osm"
+},
+{
+"coaster_id": 2065,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1493684876",
+"source": "osm"
+},
+{
+"coaster_id": 532,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1516288950",
+"source": "osm"
+},
+{
+"coaster_id": 1460,
+"decision": "approve",
+"kind": "match",
+"ref": "way/153805374",
+"source": "osm"
+},
+{
+"coaster_id": 758,
+"decision": "reject",
+"kind": "match",
+"ref": "way/1545742855",
+"source": "osm"
+},
+{
+"coaster_id": 758,
+"decision": "reject",
+"kind": "match",
+"ref": "way/1545742856",
+"source": "osm"
+},
+{
+"coaster_id": 1393,
+"decision": "approve",
+"kind": "match",
+"ref": "way/163857490",
+"source": "osm"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "way/179322798",
+"source": "osm"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "way/179322799",
+"source": "osm"
+},
+{
+"coaster_id": 1635,
+"decision": "approve",
+"kind": "match",
+"ref": "way/226432705",
+"source": "osm"
+},
+{
+"coaster_id": 357,
+"decision": "approve",
+"kind": "match",
+"ref": "way/259293137",
+"source": "osm"
+},
+{
+"coaster_id": 242,
+"decision": "approve",
+"kind": "match",
+"ref": "way/259293867",
+"source": "osm"
+},
+{
+"coaster_id": 243,
+"decision": "approve",
+"kind": "match",
+"ref": "way/259294803",
+"source": "osm"
+},
+{
+"coaster_id": 886,
+"decision": "approve",
+"kind": "match",
+"ref": "way/284197791",
+"source": "osm"
+},
+{
+"coaster_id": 1673,
+"decision": "approve",
+"kind": "match",
+"ref": "way/291233008",
+"source": "osm"
+},
+{
+"coaster_id": 1442,
+"decision": "approve",
+"kind": "match",
+"ref": "way/302147911",
+"source": "osm"
+},
+{
+"coaster_id": 1439,
+"decision": "approve",
+"kind": "match",
+"ref": "way/302148462",
+"source": "osm"
+},
+{
+"coaster_id": 1217,
+"decision": "approve",
+"kind": "match",
+"ref": "way/302587792",
+"source": "osm"
+},
+{
+"coaster_id": 165,
+"decision": "approve",
+"kind": "match",
+"ref": "way/319246089",
+"source": "osm"
+},
+{
+"coaster_id": 1394,
+"decision": "approve",
+"kind": "match",
+"ref": "way/349690020",
+"source": "osm"
+},
+{
+"coaster_id": 1392,
+"decision": "approve",
+"kind": "match",
+"ref": "way/349690030",
+"source": "osm"
+},
+{
+"coaster_id": 928,
+"decision": "approve",
+"kind": "match",
+"ref": "way/370059176",
+"source": "osm"
+},
+{
+"coaster_id": 365,
+"decision": "approve",
+"kind": "match",
+"ref": "way/405891521",
+"source": "osm"
+},
+{
+"coaster_id": 1506,
+"decision": "approve",
+"kind": "match",
+"ref": "way/446985108",
+"source": "osm"
+},
+{
+"coaster_id": 334,
+"decision": "approve",
+"kind": "match",
+"ref": "way/484841779",
+"source": "osm"
+},
+{
+"coaster_id": 1685,
+"decision": "approve",
+"kind": "match",
+"ref": "way/501614285",
+"source": "osm"
+},
+{
+"coaster_id": 2036,
+"decision": "approve",
+"kind": "match",
+"ref": "way/52873181",
+"source": "osm"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "way/539213054",
+"source": "osm"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "way/539213055",
+"source": "osm"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "way/539213056",
+"source": "osm"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "way/539213057",
+"source": "osm"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "way/539213058",
+"source": "osm"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "way/539213059",
+"source": "osm"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "way/539213060",
+"source": "osm"
+},
+{
+"coaster_id": 863,
+"decision": "approve",
+"kind": "match",
+"ref": "way/541349388",
+"source": "osm"
+},
+{
+"coaster_id": 1418,
+"decision": "approve",
+"kind": "match",
+"ref": "way/584852730",
+"source": "osm"
+},
+{
+"coaster_id": 165,
+"decision": "approve",
+"kind": "match",
+"ref": "way/656889969",
+"source": "osm"
+},
+{
+"coaster_id": 165,
+"decision": "approve",
+"kind": "match",
+"ref": "way/656889971",
+"source": "osm"
+},
+{
+"coaster_id": 165,
+"decision": "approve",
+"kind": "match",
+"ref": "way/656889972",
+"source": "osm"
+},
+{
+"coaster_id": 1465,
+"decision": "approve",
+"kind": "match",
+"ref": "way/674468361",
+"source": "osm"
+},
+{
+"coaster_id": 1463,
+"decision": "approve",
+"kind": "match",
+"ref": "way/674468363",
+"source": "osm"
+},
+{
+"coaster_id": 1538,
+"decision": "approve",
+"kind": "match",
+"ref": "way/697620505",
+"source": "osm"
+},
+{
+"coaster_id": 237,
+"decision": "approve",
+"kind": "match",
+"ref": "way/742044133",
+"source": "osm"
+},
+{
+"coaster_id": 773,
+"decision": "approve",
+"kind": "match",
+"ref": "way/743125016",
+"source": "osm"
+},
+{
+"coaster_id": 774,
+"decision": "reject",
+"kind": "match",
+"ref": "way/743125016",
+"source": "osm"
+},
+{
+"coaster_id": 2001,
+"decision": "approve",
+"kind": "match",
+"ref": "way/744825722",
+"source": "osm"
+},
+{
+"coaster_id": 1183,
+"decision": "approve",
+"kind": "match",
+"ref": "way/754324319",
+"source": "osm"
+},
+{
+"coaster_id": 1613,
+"decision": "approve",
+"kind": "match",
+"ref": "way/788399357",
+"source": "osm"
+},
+{
+"coaster_id": 1686,
+"decision": "approve",
+"kind": "match",
+"ref": "way/795988368",
+"source": "osm"
+},
+{
+"coaster_id": 2069,
+"decision": "approve",
+"kind": "match",
+"ref": "way/825472174",
+"source": "osm"
+},
+{
+"coaster_id": 1610,
+"decision": "approve",
+"kind": "match",
+"ref": "way/828519601",
+"source": "osm"
+},
+{
+"coaster_id": 1334,
+"decision": "approve",
+"kind": "match",
+"ref": "way/828519603",
+"source": "osm"
+},
+{
+"coaster_id": 1337,
+"decision": "approve",
+"kind": "match",
+"ref": "way/828519604",
+"source": "osm"
+},
+{
+"coaster_id": 1340,
+"decision": "approve",
+"kind": "match",
+"ref": "way/828519605",
+"source": "osm"
+},
+{
+"coaster_id": 862,
+"decision": "approve",
+"kind": "match",
+"ref": "way/828531125",
+"source": "osm"
+},
+{
+"coaster_id": 147,
+"decision": "approve",
+"kind": "match",
+"ref": "way/837230501",
+"source": "osm"
+},
+{
+"coaster_id": 611,
+"decision": "approve",
+"kind": "match",
+"ref": "way/837518468",
+"source": "osm"
+},
+{
+"coaster_id": 1823,
+"decision": "approve",
+"kind": "match",
+"ref": "way/837518468",
+"source": "osm"
+},
+{
+"coaster_id": 856,
+"decision": "approve",
+"kind": "match",
+"ref": "way/86168899",
+"source": "osm"
+},
+{
+"coaster_id": 857,
+"decision": "approve",
+"kind": "match",
+"ref": "way/86177332",
+"source": "osm"
+},
+{
+"coaster_id": 854,
+"decision": "approve",
+"kind": "match",
+"ref": "way/86203978",
+"source": "osm"
+},
+{
+"coaster_id": 1542,
+"decision": "approve",
+"kind": "match",
+"ref": "way/865356749",
+"source": "osm"
+},
+{
+"coaster_id": 136,
+"decision": "approve",
+"kind": "match",
+"ref": "way/866462218",
+"source": "osm"
+},
+{
+"coaster_id": 774,
+"decision": "approve",
+"kind": "match",
+"ref": "way/89353401",
+"source": "osm"
+},
+{
+"coaster_id": 1115,
+"decision": "approve",
+"kind": "match",
+"ref": "way/961086456",
+"source": "osm"
+},
+{
+"coaster_id": 1984,
+"decision": "approve",
+"kind": "match",
+"ref": "way/961793008",
+"source": "osm"
+},
+{
+"coaster_id": 1217,
+"decision": "approve",
+"kind": "match",
+"ref": "way/972795634",
+"source": "osm"
+},
+{
+"coaster_id": 1217,
+"decision": "approve",
+"kind": "match",
+"ref": "way/972795635",
+"source": "osm"
+},
+{
+"coaster_id": 1217,
+"decision": "approve",
+"kind": "match",
+"ref": "way/972795636",
+"source": "osm"
+},
+{
+"coaster_id": 492,
+"decision": "approve",
+"kind": "match",
+"ref": "way/975225204",
+"source": "osm"
+},
+{
+"coaster_id": 1916,
+"decision": "approve",
+"kind": "match",
+"ref": "way/992581949",
+"source": "osm"
+},
+{
+"coaster_id": 1846,
+"decision": "approve",
+"kind": "match",
+"ref": "Q10453412",
+"source": "wikidata"
+},
+{
+"coaster_id": 1751,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1136801",
+"source": "wikidata"
+},
+{
+"coaster_id": 1752,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1136801",
+"source": "wikidata"
+},
+{
+"coaster_id": 1180,
+"decision": "approve",
+"kind": "match",
+"ref": "Q118905419",
+"source": "wikidata"
+},
+{
+"coaster_id": 1418,
+"decision": "approve",
+"kind": "match",
+"ref": "Q12010552",
+"source": "wikidata"
+},
+{
+"coaster_id": 1470,
+"decision": "approve",
+"kind": "match",
+"ref": "Q122459691",
+"source": "wikidata"
+},
+{
+"coaster_id": 464,
+"decision": "approve",
+"kind": "match",
+"ref": "Q133460330",
+"source": "wikidata"
+},
+{
+"coaster_id": 465,
+"decision": "approve",
+"kind": "match",
+"ref": "Q133460330",
+"source": "wikidata"
+},
+{
+"coaster_id": 251,
+"decision": "approve",
+"kind": "match",
+"ref": "Q135004002",
+"source": "wikidata"
+},
+{
+"coaster_id": 939,
+"decision": "approve",
+"kind": "match",
+"ref": "Q137709877",
+"source": "wikidata"
+},
+{
+"coaster_id": 272,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1432683",
+"source": "wikidata"
+},
+{
+"coaster_id": 1439,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1436637",
+"source": "wikidata"
+},
+{
+"coaster_id": 608,
+"decision": "approve",
+"kind": "match",
+"ref": "Q14709813",
+"source": "wikidata"
+},
+{
+"coaster_id": 1844,
+"decision": "approve",
+"kind": "match",
+"ref": "Q14711399",
+"source": "wikidata"
+},
+{
+"coaster_id": 977,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1477806",
+"source": "wikidata"
+},
+{
+"coaster_id": 156,
+"decision": "approve",
+"kind": "match",
+"ref": "Q15047492",
+"source": "wikidata"
+},
+{
+"coaster_id": 677,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1509287",
+"source": "wikidata"
+},
+{
+"coaster_id": 1264,
+"decision": "reject",
+"kind": "match",
+"ref": "Q1509287",
+"source": "wikidata"
+},
+{
+"coaster_id": 757,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1602595",
+"source": "wikidata"
+},
+{
+"coaster_id": 22,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1699142",
+"source": "wikidata"
+},
+{
+"coaster_id": 1362,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1710760",
+"source": "wikidata"
+},
+{
+"coaster_id": 903,
+"decision": "approve",
+"kind": "match",
+"ref": "Q18019286",
+"source": "wikidata"
+},
+{
+"coaster_id": 1906,
+"decision": "approve",
+"kind": "match",
+"ref": "Q18354212",
+"source": "wikidata"
+},
+{
+"coaster_id": 399,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1882515",
+"source": "wikidata"
+},
+{
+"coaster_id": 247,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1891206",
+"source": "wikidata"
+},
+{
+"coaster_id": 836,
+"decision": "approve",
+"kind": "match",
+"ref": "Q2182970",
+"source": "wikidata"
+},
+{
+"coaster_id": 41,
+"decision": "approve",
+"kind": "match",
+"ref": "Q22058482",
+"source": "wikidata"
+},
+{
+"coaster_id": 1823,
+"decision": "approve",
+"kind": "match",
+"ref": "Q22073205",
+"source": "wikidata"
+},
+{
+"coaster_id": 484,
+"decision": "approve",
+"kind": "match",
+"ref": "Q2327576",
+"source": "wikidata"
+},
+{
+"coaster_id": 1604,
+"decision": "approve",
+"kind": "match",
+"ref": "Q2327576",
+"source": "wikidata"
+},
+{
+"coaster_id": 350,
+"decision": "approve",
+"kind": "match",
+"ref": "Q23833028",
+"source": "wikidata"
+},
+{
+"coaster_id": 926,
+"decision": "approve",
+"kind": "match",
+"ref": "Q28072222",
+"source": "wikidata"
+},
+{
+"coaster_id": 323,
+"decision": "approve",
+"kind": "match",
+"ref": "Q3036455",
+"source": "wikidata"
+},
+{
+"coaster_id": 475,
+"decision": "approve",
+"kind": "match",
+"ref": "Q319742",
+"source": "wikidata"
+},
+{
+"coaster_id": 476,
+"decision": "approve",
+"kind": "match",
+"ref": "Q319742",
+"source": "wikidata"
+},
+{
+"coaster_id": 1754,
+"decision": "approve",
+"kind": "match",
+"ref": "Q3554352",
+"source": "wikidata"
+},
+{
+"coaster_id": 2002,
+"decision": "reject",
+"kind": "match",
+"ref": "Q3568102",
+"source": "wikidata"
+},
+{
+"coaster_id": 671,
+"decision": "approve",
+"kind": "match",
+"ref": "Q39050117",
+"source": "wikidata"
+},
+{
+"coaster_id": 952,
+"decision": "approve",
+"kind": "match",
+"ref": "Q391332",
+"source": "wikidata"
+},
+{
+"coaster_id": 448,
+"decision": "approve",
+"kind": "match",
+"ref": "Q5034175",
+"source": "wikidata"
+},
+{
+"coaster_id": 1215,
+"decision": "approve",
+"kind": "match",
+"ref": "Q507026",
+"source": "wikidata"
+},
+{
+"coaster_id": 1287,
+"decision": "approve",
+"kind": "match",
+"ref": "Q5305095",
+"source": "wikidata"
+},
+{
+"coaster_id": 73,
+"decision": "approve",
+"kind": "match",
+"ref": "Q583463",
+"source": "wikidata"
+},
+{
+"coaster_id": 509,
+"decision": "approve",
+"kind": "match",
+"ref": "Q586854",
+"source": "wikidata"
+},
+{
+"coaster_id": 864,
+"decision": "approve",
+"kind": "match",
+"ref": "Q586854",
+"source": "wikidata"
+},
+{
+"coaster_id": 905,
+"decision": "approve",
+"kind": "match",
+"ref": "Q636491",
+"source": "wikidata"
+},
+{
+"coaster_id": 1514,
+"decision": "approve",
+"kind": "match",
+"ref": "Q667635",
+"source": "wikidata"
+},
+{
+"coaster_id": 164,
+"decision": "reject",
+"kind": "match",
+"ref": "Q6807346",
+"source": "wikidata"
+},
+{
+"coaster_id": 653,
+"decision": "approve",
+"kind": "match",
+"ref": "Q683601",
+"source": "wikidata"
+},
+{
+"coaster_id": 419,
+"decision": "approve",
+"kind": "match",
+"ref": "Q7296753",
+"source": "wikidata"
+},
+{
+"coaster_id": 632,
+"decision": "approve",
+"kind": "match",
+"ref": "Q7801307",
+"source": "wikidata"
+},
+{
+"coaster_id": 200,
+"decision": "approve",
+"kind": "match",
+"ref": "Q798461",
+"source": "wikidata"
+},
+{
+"coaster_id": 1800,
+"decision": "reject",
+"kind": "match",
+"ref": "Q971592",
+"source": "wikidata"
+},
+{
+"coaster_id": 1801,
+"decision": "reject",
+"kind": "match",
+"ref": "Q971592",
+"source": "wikidata"
+},
+{
+"coaster_id": 859,
+"decision": "approve",
+"kind": "match",
+"ref": "Q98012894",
+"source": "wikidata"
+},
+{
+"coaster_id": 1309,
+"decision": "approve",
+"kind": "match",
+"ref": "Q98012894",
+"source": "wikidata"
+}
+]

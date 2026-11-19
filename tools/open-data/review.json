@@ -12,17 +12,6 @@
 "status": "defunct"
 },
 {
-"name": "Italian Bobs",
-"park": "Adventureland",
-"refs": [
-{
-"ref": "Italian Bobs (Adventureland)",
-"source": "coasterpedia"
-}
-],
-"status": "defunct"
-},
-{
 "name": "Adventure Falls",
 "park": "Adventureland (New York)",
 "refs": [
@@ -95,6 +84,10 @@
 {
 "ref": "Thirteen",
 "source": "coasterpedia"
+},
+{
+"ref": "Thirteen (Alton Towers)",
+"source": "dewiki"
 },
 {
 "ref": "node/11740726738",
@@ -350,12 +343,27 @@
 "status": null
 },
 {
+"name": "Hundeprut Rutsjebanen",
+"park": "BonBon-Land",
+"refs": [
+{
+"ref": "Hundeprut Rutsjebanen",
+"source": "dewiki"
+}
+],
+"status": null
+},
+{
 "name": "Hundeprutterutchebane",
 "park": "BonBon-Land",
 "refs": [
 {
 "ref": "Hundeprutterutchebane",
 "source": "coasterpedia"
+},
+{
+"ref": "Hundeprutterutchebane",
+"source": "enwiki"
 },
 {
 "ref": "Q18207905",
@@ -374,6 +382,21 @@
 }
 ],
 "status": "in storage"
+},
+{
+"name": "Dania Beach Hurricane",
+"park": "Boomers! (Fountain Valley)",
+"refs": [
+{
+"ref": "Dania Beach Hurricane",
+"source": "dewiki"
+},
+{
+"ref": "Dania Beach Hurricane",
+"source": "enwiki"
+}
+],
+"status": "Removed"
 },
 {
 "name": "Dare Devil",
@@ -494,6 +517,14 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Drachen Fire",
+"source": "dewiki"
+},
+{
+"ref": "Drachen Fire",
+"source": "enwiki"
+},
+{
 "ref": "Q1254197",
 "source": "wikidata"
 }
@@ -505,11 +536,15 @@
 "park": "Busch Gardens Williamsburg",
 "refs": [
 {
+"ref": "Glissade (roller coaster)",
+"source": "enwiki"
+},
+{
 "ref": "Q5569937",
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Removed"
 },
 {
 "name": "Time Machine the Coaster",
@@ -532,6 +567,17 @@
 }
 ],
 "status": "defunct"
+},
+{
+"name": "Gulf Coaster",
+"park": "California's Great America",
+"refs": [
+{
+"ref": "Gulf Coaster",
+"source": "enwiki"
+}
+],
+"status": "Removed"
 },
 {
 "name": "Clown Coaster",
@@ -589,6 +635,10 @@
 {
 "ref": "Snoopy's Racing Railway (Canada's Wonderland)",
 "source": "coasterpedia"
+},
+{
+"ref": "Snoopy's Racing Railway",
+"source": "enwiki"
 },
 {
 "ref": "node/14127168711",
@@ -676,6 +726,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Jet Star (Casino Pier)",
+"source": "enwiki"
+},
+{
 "ref": "Q141641971",
 "source": "wikidata"
 }
@@ -711,6 +765,10 @@
 {
 "ref": "Star Jet (Casino Pier)",
 "source": "coasterpedia"
+},
+{
+"ref": "Star Jet",
+"source": "enwiki"
 },
 {
 "ref": "Q30642835",
@@ -805,11 +863,19 @@
 "park": "Cedar Point",
 "refs": [
 {
+"ref": "Disaster Transport",
+"source": "dewiki"
+},
+{
+"ref": "Disaster Transport",
+"source": "enwiki"
+},
+{
 "ref": "Q1228345",
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Removed"
 },
 {
 "name": "High Frolics",
@@ -895,6 +961,25 @@
 {
 "ref": "Switchback Railway (Cedar Point)",
 "source": "coasterpedia"
+}
+],
+"status": "defunct"
+},
+{
+"name": "WildCat",
+"park": "Cedar Point",
+"refs": [
+{
+"ref": "WildCat (Cedar Point)",
+"source": "coasterpedia"
+},
+{
+"ref": "WildCat (Cedar Point)",
+"source": "enwiki"
+},
+{
+"ref": "Q3568102",
+"source": "wikidata"
 }
 ],
 "status": "defunct"
@@ -996,6 +1081,14 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Jack Rabbit (Clementon Park)",
+"source": "dewiki"
+},
+{
+"ref": "Jack Rabbit (Clementon Park)",
+"source": "enwiki"
+},
+{
 "ref": "Q96418654",
 "source": "wikidata"
 }
@@ -1012,17 +1105,6 @@
 }
 ],
 "status": "operating"
-},
-{
-"name": "Mega Blitz",
-"park": "Coney Beach Porthcawl",
-"refs": [
-{
-"ref": "Mega Blitz",
-"source": "coasterpedia"
-}
-],
-"status": "defunct"
 },
 {
 "name": "Scenic Railway",
@@ -1042,6 +1124,10 @@
 {
 "ref": "Toboggan (Conneaut Lake Park)",
 "source": "coasterpedia"
+},
+{
+"ref": "Toboggan (Conneaut Lake Park)",
+"source": "enwiki"
 },
 {
 "ref": "Q7811715",
@@ -1375,6 +1461,10 @@
 "park": "Efteling",
 "refs": [
 {
+"ref": "Bobbaan",
+"source": "dewiki"
+},
+{
 "ref": "Q888394",
 "source": "wikidata"
 }
@@ -1401,6 +1491,14 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Pegasus (Efteling)",
+"source": "dewiki"
+},
+{
+"ref": "Pegasus (Efteling)",
+"source": "enwiki"
+},
+{
 "ref": "Q674369",
 "source": "wikidata"
 }
@@ -1414,6 +1512,28 @@
 {
 "ref": "Q140484881",
 "source": "wikidata"
+}
+],
+"status": null
+},
+{
+"name": "Swiss Bob",
+"park": "Efteling",
+"refs": [
+{
+"ref": "Swiss Bob",
+"source": "enwiki"
+}
+],
+"status": "Removed"
+},
+{
+"name": "Symbolica",
+"park": "Efteling",
+"refs": [
+{
+"ref": "Symbolica",
+"source": "dewiki"
 }
 ],
 "status": null
@@ -1458,6 +1578,10 @@
 {
 "ref": "Mr. Twister",
 "source": "coasterpedia"
+},
+{
+"ref": "Mr. Twister",
+"source": "dewiki"
 }
 ],
 "status": "defunct"
@@ -1480,6 +1604,10 @@
 {
 "ref": "Wildcat (Elitch Gardens)",
 "source": "coasterpedia"
+},
+{
+"ref": "Wildcat (Elitch Gardens)",
+"source": "dewiki"
 }
 ],
 "status": "defunct"
@@ -1801,17 +1929,6 @@
 "status": "operating"
 },
 {
-"name": "Millennium Roller Coaster",
-"park": "Fantasy Island",
-"refs": [
-{
-"ref": "Q1370494",
-"source": "wikidata"
-}
-],
-"status": null
-},
-{
 "name": "Rhombus Rocket",
 "park": "Fantasy Island",
 "refs": [
@@ -1932,6 +2049,10 @@
 {
 "ref": "Dønnervind",
 "source": "coasterpedia"
+},
+{
+"ref": "Dønnervind",
+"source": "dewiki"
 }
 ],
 "status": "operating"
@@ -2026,6 +2147,14 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Do-Dodonpa",
+"source": "dewiki"
+},
+{
+"ref": "Do-Dodonpa",
+"source": "enwiki"
+},
+{
 "ref": "Q30930493",
 "source": "wikidata"
 }
@@ -2061,6 +2190,14 @@
 {
 "ref": "Giant Coaster (Fuji-Q Highland)",
 "source": "coasterpedia"
+},
+{
+"ref": "Giant Coaster (Fuji-Q Highland)",
+"source": "dewiki"
+},
+{
+"ref": "Giant Coaster (Fuji-Q Highland)",
+"source": "enwiki"
 }
 ],
 "status": "defunct"
@@ -2094,6 +2231,14 @@
 {
 "ref": "Moonsault Scramble",
 "source": "coasterpedia"
+},
+{
+"ref": "Moonsault Scramble",
+"source": "dewiki"
+},
+{
+"ref": "Moonsault Scramble",
+"source": "enwiki"
 },
 {
 "ref": "Q1141555",
@@ -2134,6 +2279,17 @@
 }
 ],
 "status": null
+},
+{
+"name": "Spinosaurus",
+"park": "Funland Amusement Park",
+"refs": [
+{
+"ref": "Spinosaurus",
+"source": "coasterpedia"
+}
+],
+"status": "operating"
 },
 {
 "name": "Woody's Children's Roller Coaster",
@@ -2195,6 +2351,10 @@
 "park": "Gröna Lund",
 "refs": [
 {
+"ref": "Berg och dalbanan",
+"source": "dewiki"
+},
+{
 "ref": "Q21037241",
 "source": "wikidata"
 }
@@ -2228,6 +2388,10 @@
 "park": "Gumbuya World",
 "refs": [
 {
+"ref": "TNT (roller coaster)",
+"source": "enwiki"
+},
+{
 "ref": "way/1493309453",
 "source": "osm"
 },
@@ -2236,7 +2400,7 @@
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Operating"
 },
 {
 "name": "Dragon 2 Loop Coaster",
@@ -2276,11 +2440,15 @@
 "park": "Hansa-Park",
 "refs": [
 {
+"ref": "Escape of Novgorod",
+"source": "enwiki"
+},
+{
 "ref": "Q828592",
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Open"
 },
 {
 "name": "Midgard Serpent",
@@ -2292,6 +2460,17 @@
 }
 ],
 "status": null
+},
+{
+"name": "The Oath of Kärnan",
+"park": "Hansa-Park",
+"refs": [
+{
+"ref": "The Oath of Kärnan",
+"source": "enwiki"
+}
+],
+"status": "Operating"
 },
 {
 "name": "Rasender Roland",
@@ -2322,6 +2501,10 @@
 {
 "ref": "Bullet Coaster (Happy Valley Shenzhen)",
 "source": "coasterpedia"
+},
+{
+"ref": "Bullet Coaster",
+"source": "dewiki"
 }
 ],
 "status": "standing but not operating"
@@ -2360,6 +2543,28 @@
 "status": "operating"
 },
 {
+"name": "Crazy Car",
+"park": "Happy Valley",
+"refs": [
+{
+"ref": "Crazy Car",
+"source": "dewiki"
+}
+],
+"status": null
+},
+{
+"name": "Dauling Dragon",
+"park": "Happy Valley",
+"refs": [
+{
+"ref": "Dauling Dragon",
+"source": "dewiki"
+}
+],
+"status": null
+},
+{
 "name": "Expedition of Volcano",
 "park": "Happy Valley",
 "refs": [
@@ -2371,6 +2576,28 @@
 "status": "operating"
 },
 {
+"name": "Extreme Rusher",
+"park": "Happy Valley",
+"refs": [
+{
+"ref": "Extreme Rusher",
+"source": "dewiki"
+}
+],
+"status": null
+},
+{
+"name": "Flight of the Himalayan Eagle Music Roller Coaster",
+"park": "Happy Valley",
+"refs": [
+{
+"ref": "Flight of the Himalayan Eagle Music Roller Coaster",
+"source": "dewiki"
+}
+],
+"status": null
+},
+{
 "name": "Hidden Anaconda",
 "park": "Happy Valley",
 "refs": [
@@ -2380,6 +2607,17 @@
 }
 ],
 "status": "operating"
+},
+{
+"name": "Jerome's Wooden Dragon",
+"park": "Happy Valley",
+"refs": [
+{
+"ref": "Jungle Dragon",
+"source": "dewiki"
+}
+],
+"status": null
 },
 {
 "name": "Jungle Racing",
@@ -2413,6 +2651,17 @@
 }
 ],
 "status": "operating"
+},
+{
+"name": "OCT Thrust SSC1000",
+"park": "Happy Valley",
+"refs": [
+{
+"ref": "OCT Thrust SSC1000",
+"source": "dewiki"
+}
+],
+"status": null
 },
 {
 "name": "Power Splash",
@@ -2470,15 +2719,15 @@
 "status": "operating"
 },
 {
-"name": "Ocean Coaster",
-"park": "Harbour Park",
+"name": "Wooden Coaster – Fireball",
+"park": "Happy Valley",
 "refs": [
 {
-"ref": "Ocean Coaster",
-"source": "coasterpedia"
+"ref": "Wooden Coaster – Fireball",
+"source": "dewiki"
 }
 ],
-"status": "operating"
+"status": null
 },
 {
 "name": "Toboggan",
@@ -2845,6 +3094,17 @@
 "status": null
 },
 {
+"name": "Twisted Twins",
+"park": "Kentucky Kingdom",
+"refs": [
+{
+"ref": "Twisted Twins",
+"source": "dewiki"
+}
+],
+"status": null
+},
+{
 "name": "Galaxi",
 "park": "Kings Dominion",
 "refs": [
@@ -2862,6 +3122,14 @@
 {
 "ref": "HyperSonic XLC",
 "source": "coasterpedia"
+},
+{
+"ref": "HyperSonic XLC",
+"source": "dewiki"
+},
+{
+"ref": "Hypersonic XLC",
+"source": "enwiki"
 },
 {
 "ref": "Q1640820",
@@ -2890,6 +3158,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "The Bat (Kings Island; opened 1993)",
+"source": "enwiki"
+},
+{
 "ref": "Q1364392",
 "source": "wikidata"
 }
@@ -2914,6 +3186,14 @@
 {
 "ref": "King Cobra (Paramount's Kings Island)",
 "source": "coasterpedia"
+},
+{
+"ref": "King Cobra (Achterbahn)",
+"source": "dewiki"
+},
+{
+"ref": "King Cobra (roller coaster)",
+"source": "enwiki"
 },
 {
 "ref": "Q1742012",
@@ -2949,6 +3229,17 @@
 "status": "defunct"
 },
 {
+"name": "Perilous Plunge",
+"park": "Knott's Berry Farm",
+"refs": [
+{
+"ref": "Perilous Plunge",
+"source": "dewiki"
+}
+],
+"status": null
+},
+{
 "name": "Wacky Soap Box Racers",
 "park": "Knott's Berry Farm",
 "refs": [
@@ -2967,6 +3258,10 @@
 "name": "Windjammer Surf Racers",
 "park": "Knott's Berry Farm",
 "refs": [
+{
+"ref": "Windjammer Surf Racers",
+"source": "dewiki"
+},
 {
 "ref": "Q2583642",
 "source": "wikidata"
@@ -3045,11 +3340,15 @@
 "park": "Lake Compounce",
 "refs": [
 {
+"ref": "Green Dragon (Lake Compounce)",
+"source": "enwiki"
+},
+{
 "ref": "Q5602481",
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Removed"
 },
 {
 "name": "Kiddie Coaster",
@@ -3097,6 +3396,14 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Leap the Dips (Lakemont Park)",
+"source": "dewiki"
+},
+{
+"ref": "Leap-The-Dips",
+"source": "enwiki"
+},
+{
 "ref": "node/4801864881",
 "source": "osm"
 },
@@ -3140,6 +3447,10 @@
 {
 "ref": "Toboggan (Lakemont Park)",
 "source": "coasterpedia"
+},
+{
+"ref": "Toboggan (Lakemont Park)",
+"source": "enwiki"
 },
 {
 "ref": "Q7811717",
@@ -3392,6 +3703,14 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Vonkaputous",
+"source": "dewiki"
+},
+{
+"ref": "Vonkaputous",
+"source": "enwiki"
+},
+{
 "ref": "Q1800024",
 "source": "wikidata"
 }
@@ -3638,32 +3957,6 @@
 "status": "under construction"
 },
 {
-"name": "Spinning Coaster",
-"park": "Malibu Jack's",
-"refs": [
-{
-"ref": "Spinning Coaster (Malibu Jack's Elizabethtown)",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-},
-{
-"name": "Twist-N-Shout",
-"park": "Malibu Jack's",
-"refs": [
-{
-"ref": "Twist-N-Shout (Malibu Jack's Lafayette)",
-"source": "coasterpedia"
-},
-{
-"ref": "Twist-N-Shout (Malibu Jack's Louisville)",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-},
-{
 "name": "Bandidos",
 "park": "Mer de Sable",
 "refs": [
@@ -3717,6 +4010,17 @@
 }
 ],
 "status": "operating"
+},
+{
+"name": "Jumbo Jet",
+"park": "Morey's Piers",
+"refs": [
+{
+"ref": "Jumbo Jet (Morey's Piers)",
+"source": "enwiki"
+}
+],
+"status": "Removed"
 },
 {
 "name": "Jumbo Jet (Morey's Piers)",
@@ -3846,6 +4150,10 @@
 {
 "ref": "Cop Car Chase",
 "source": "coasterpedia"
+},
+{
+"ref": "Cop Car Chase",
+"source": "dewiki"
 }
 ],
 "status": "defunct"
@@ -3907,6 +4215,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "White Cyclone",
+"source": "dewiki"
+},
+{
 "ref": "Q917792",
 "source": "wikidata"
 }
@@ -3920,6 +4232,10 @@
 {
 "ref": "Python in Bamboo Forest",
 "source": "coasterpedia"
+},
+{
+"ref": "Python in Bamboo Forest",
+"source": "dewiki"
 }
 ],
 "status": "operating"
@@ -4021,11 +4337,15 @@
 "park": "Oaks Amusement Park",
 "refs": [
 {
+"ref": "Zip (roller coaster)",
+"source": "enwiki"
+},
+{
 "ref": "Q30609867",
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Removed"
 },
 {
 "name": "Smoky Mountain Bobsled",
@@ -4083,6 +4403,17 @@
 "status": "operating"
 },
 {
+"name": "Galaxi",
+"park": "Palace Playland",
+"refs": [
+{
+"ref": "Galaxi (Palace Playland)",
+"source": "coasterpedia"
+}
+],
+"status": "defunct"
+},
+{
 "name": "Gold Rush",
 "park": "Palace Playland",
 "refs": [
@@ -4113,6 +4444,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Cétautomatix",
+"source": "dewiki"
+},
+{
 "ref": "node/12777266663",
 "source": "osm"
 },
@@ -4130,6 +4465,17 @@
 {
 "ref": "way/541086397",
 "source": "osm"
+}
+],
+"status": null
+},
+{
+"name": "La Descente du Nil",
+"park": "Parc Astérix",
+"refs": [
+{
+"ref": "La Descente du Nil",
+"source": "dewiki"
 }
 ],
 "status": null
@@ -4234,12 +4580,45 @@
 "status": null
 },
 {
+"name": "Batman Gotham City Scape",
+"park": "Parque Warner Madrid",
+"refs": [
+{
+"ref": "node/13841165936",
+"source": "osm"
+}
+],
+"status": null
+},
+{
+"name": "Batman Gotham City Scape pre-show",
+"park": "Parque Warner Madrid",
+"refs": [
+{
+"ref": "node/13841573695",
+"source": "osm"
+}
+],
+"status": null
+},
+{
 "name": "Q141069235",
 "park": "Parque Warner Madrid",
 "refs": [
 {
 "ref": "Q141069235",
 "source": "wikidata"
+}
+],
+"status": null
+},
+{
+"name": "Superman Atracción de Acero",
+"park": "Parque Warner Madrid",
+"refs": [
+{
+"ref": "node/13841791631",
+"source": "osm"
 }
 ],
 "status": null
@@ -4317,9 +4696,24 @@
 {
 "ref": "Gebirgsbahn (Phantasialand)",
 "source": "coasterpedia"
+},
+{
+"ref": "Gebirgsbahn (Phantasialand)",
+"source": "dewiki"
 }
 ],
 "status": "defunct"
+},
+{
+"name": "Geister Rikscha",
+"park": "Phantasialand",
+"refs": [
+{
+"ref": "Geister Rikscha",
+"source": "dewiki"
+}
+],
+"status": null
 },
 {
 "name": "Grand Canyon Bahn",
@@ -4330,11 +4724,26 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Grand-Canyon-Bahn",
+"source": "dewiki"
+},
+{
 "ref": "Q1542448",
 "source": "wikidata"
 }
 ],
 "status": "defunct"
+},
+{
+"name": "Phantasialand-Jet",
+"park": "Phantasialand",
+"refs": [
+{
+"ref": "Phantasialand-Jet",
+"source": "dewiki"
+}
+],
+"status": null
 },
 {
 "name": "Q1497026",
@@ -4343,6 +4752,17 @@
 {
 "ref": "Q1497026",
 "source": "wikidata"
+}
+],
+"status": null
+},
+{
+"name": "Silbermine",
+"park": "Phantasialand",
+"refs": [
+{
+"ref": "Silbermine (Phantasialand)",
+"source": "dewiki"
 }
 ],
 "status": null
@@ -4365,6 +4785,10 @@
 {
 "ref": "Corkscrew (Playland)",
 "source": "coasterpedia"
+},
+{
+"ref": "Corkscrew (Playland)",
+"source": "enwiki"
 },
 {
 "ref": "Q5170867",
@@ -4391,6 +4815,10 @@
 {
 "ref": "ThunderVolt",
 "source": "coasterpedia"
+},
+{
+"ref": "ThunderVolt",
+"source": "enwiki"
 },
 {
 "ref": "way/1344039061",
@@ -4618,6 +5046,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Superwirbel",
+"source": "dewiki"
+},
+{
 "ref": "Q2368124",
 "source": "wikidata"
 }
@@ -4675,6 +5107,10 @@
 {
 "ref": "Braus & Saus",
 "source": "coasterpedia"
+},
+{
+"ref": "Braus & Saus",
+"source": "dewiki"
 }
 ],
 "status": "operating"
@@ -4993,6 +5429,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Hoot N Holler",
+"source": "enwiki"
+},
+{
 "ref": "Q5898663",
 "source": "wikidata"
 }
@@ -5030,6 +5470,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Alpen Blitz",
+"source": "enwiki"
+},
+{
 "ref": "Q4734788",
 "source": "wikidata"
 }
@@ -5041,11 +5485,19 @@
 "park": "Six Flags Great Adventure",
 "refs": [
 {
+"ref": "Bakunawa (Achterbahn)",
+"source": "dewiki"
+},
+{
+"ref": "Bakunawa (roller coaster)",
+"source": "enwiki"
+},
+{
 "ref": "Q140739058",
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Under construction"
 },
 {
 "name": "Barrels O' Fun",
@@ -5056,6 +5508,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Barrels O' Fun",
+"source": "enwiki"
+},
+{
 "ref": "Q2783776",
 "source": "wikidata"
 }
@@ -5063,9 +5519,13 @@
 "status": "operating"
 },
 {
-"name": "Batman & Robin: The Chiller",
+"name": "Batman and Robin: The Chiller",
 "park": "Six Flags Great Adventure",
 "refs": [
+{
+"ref": "Batman and Robin: The Chiller",
+"source": "dewiki"
+},
 {
 "ref": "Q167509",
 "source": "wikidata"
@@ -5093,6 +5553,14 @@
 "source": "coasterpedia"
 },
 {
+"ref": "The Great American Scream Machine (Six Flags Great Adventure)",
+"source": "dewiki"
+},
+{
+"ref": "Great American Scream Machine (Six Flags Great Adventure)",
+"source": "enwiki"
+},
+{
 "ref": "Q1334442",
 "source": "wikidata"
 }
@@ -5104,22 +5572,30 @@
 "park": "Six Flags Great Adventure",
 "refs": [
 {
+"ref": "Jumbo Jet (Six Flags Great Adventure)",
+"source": "enwiki"
+},
+{
 "ref": "Q3927849",
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Removed"
 },
 {
 "name": "Lightnin' Loops",
 "park": "Six Flags Great Adventure",
 "refs": [
 {
+"ref": "Lightnin' Loops",
+"source": "enwiki"
+},
+{
 "ref": "Q1959921",
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Relocated to Six Flags America"
 },
 {
 "name": "Lil' Devil Coaster",
@@ -5167,6 +5643,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Rolling Thunder (Six Flags Great Adventure)",
+"source": "dewiki"
+},
+{
 "ref": "Q1139712",
 "source": "wikidata"
 }
@@ -5193,6 +5673,14 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Viper (Six Flags Great Adventure)",
+"source": "dewiki"
+},
+{
+"ref": "Viper (Six Flags Great Adventure)",
+"source": "enwiki"
+},
+{
 "ref": "Q2527563",
 "source": "wikidata"
 }
@@ -5208,6 +5696,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Wild Rider (Six Flags Great Adventure)",
+"source": "enwiki"
+},
+{
 "ref": "Q2597491",
 "source": "wikidata"
 }
@@ -5221,6 +5713,14 @@
 {
 "ref": "ShockWave (Six Flags Great America)",
 "source": "coasterpedia"
+},
+{
+"ref": "Shockwave (Six Flags Great America)",
+"source": "dewiki"
+},
+{
+"ref": "Shockwave (Six Flags Great America)",
+"source": "enwiki"
 },
 {
 "ref": "Q2279724",
@@ -5294,6 +5794,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Flashback (Six Flags Magic Mountain)",
+"source": "enwiki"
+},
+{
 "ref": "Q1427260",
 "source": "wikidata"
 }
@@ -5307,6 +5811,14 @@
 {
 "ref": "Psyclone (Six Flags Magic Mountain)",
 "source": "coasterpedia"
+},
+{
+"ref": "Psyclone",
+"source": "dewiki"
+},
+{
+"ref": "Psyclone (roller coaster)",
+"source": "enwiki"
 },
 {
 "ref": "Q2116105",
@@ -5364,6 +5876,25 @@
 "status": null
 },
 {
+"name": "Superman: El Úlitmo Escape",
+"park": "Six Flags Mexico",
+"refs": [
+{
+"ref": "way/319246089",
+"source": "osm"
+},
+{
+"ref": "way/656889969",
+"source": "osm"
+},
+{
+"ref": "way/656889971",
+"source": "osm"
+}
+],
+"status": null
+},
+{
 "name": "Greyhound",
 "park": "Six Flags New England",
 "refs": [
@@ -5403,6 +5934,10 @@
 {
 "ref": "Quantum Accelerator",
 "source": "coasterpedia"
+},
+{
+"ref": "Quantum Accelerator (roller coaster)",
+"source": "enwiki"
 },
 {
 "ref": "Q130198418",
@@ -5624,6 +6159,10 @@
 {
 "ref": "Half Pipe (Särkänniemi)",
 "source": "coasterpedia"
+},
+{
+"ref": "Half Pipe (roller coaster)",
+"source": "enwiki"
 }
 ],
 "status": "defunct"
@@ -5738,6 +6277,21 @@
 },
 {
 "ref": "way/1268339488",
+"source": "osm"
+}
+],
+"status": null
+},
+{
+"name": "Hades 360",
+"park": "Timber Falls Adventure Park",
+"refs": [
+{
+"ref": "way/1545742855",
+"source": "osm"
+},
+{
+"ref": "way/1545742856",
 "source": "osm"
 }
 ],
@@ -6157,6 +6711,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Cosmic Coaster (Valleyfair)",
+"source": "enwiki"
+},
+{
 "ref": "way/865725421",
 "source": "osm"
 },
@@ -6172,11 +6730,15 @@
 "park": "Valleyfair!",
 "refs": [
 {
+"ref": "Mild Thing",
+"source": "enwiki"
+},
+{
 "ref": "Q6850884",
 "source": "wikidata"
 }
 ],
-"status": null
+"status": "Removed"
 },
 {
 "name": "Ravine Flyer 2",
@@ -6259,6 +6821,10 @@
 {
 "ref": "Vertigo (Walibi Belgium)",
 "source": "coasterpedia"
+},
+{
+"ref": "Vertigo (Achterbahn)",
+"source": "dewiki"
 }
 ],
 "status": "defunct"
@@ -6296,6 +6862,10 @@
 {
 "ref": "Robin Hood",
 "source": "coasterpedia"
+},
+{
+"ref": "Robin Hood (Walibi Holland)",
+"source": "dewiki"
 },
 {
 "ref": "Q1516621",
@@ -6403,6 +6973,10 @@
 {
 "ref": "Super 8er Bahn",
 "source": "coasterpedia"
+},
+{
+"ref": "Super 8er Bahn",
+"source": "dewiki"
 }
 ],
 "status": "defunct"
@@ -6504,6 +7078,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Momonga Standing and Loop Coaster",
+"source": "enwiki"
+},
+{
 "ref": "Q108822228",
 "source": "wikidata"
 }
@@ -6530,6 +7108,10 @@
 "source": "coasterpedia"
 },
 {
+"ref": "Twist Coaster Robin",
+"source": "enwiki"
+},
+{
 "ref": "Q18355292",
 "source": "wikidata"
 }
@@ -6554,6 +7136,10 @@
 {
 "ref": "White Canyon",
 "source": "coasterpedia"
+},
+{
+"ref": "White Canyon (roller coaster)",
+"source": "enwiki"
 },
 {
 "ref": "Q14754866",
@@ -6750,7 +7336,7 @@
 "lat": null,
 "lon": null,
 "name": "Snoopy's Great Race",
-"park": "Universal Studios Japan | Universal Wonderland | Universal Studios Japan",
+"park": "Universal Wonderland | Universal Studios Japan | Universal Studios Japan",
 "ref": "Q106467186"
 },
 {
@@ -7219,14 +7805,14 @@
 "lat": null,
 "lon": null,
 "name": "Half Pipe",
-"park": "Elitch Gardens Theme Park | Särkänniemi",
+"park": "Särkänniemi | Elitch Gardens Theme Park",
 "ref": "Q1135493"
 },
 {
 "lat": null,
 "lon": null,
 "name": "Half Pipe",
-"park": "Elitch Gardens Theme Park | Särkänniemi",
+"park": "Särkänniemi | Elitch Gardens Theme Park",
 "ref": "Q1135493"
 },
 {
@@ -7492,7 +8078,7 @@
 "lat": 52.957282,
 "lon": 6.33441746,
 "name": "Q122460534",
-"park": "Duinen Zathe Amusement Park | Appelscha | Duinen Zathe Amusement Park",
+"park": "Appelscha | Duinen Zathe Amusement Park | Duinen Zathe Amusement Park",
 "ref": "Q122460534"
 },
 {
@@ -8899,7 +9485,7 @@
 "lat": 34.4246,
 "lon": -118.596,
 "name": "Flashback",
-"park": "Six Flags Magic Mountain | Six Flags Over Georgia | Six Flags Great America",
+"park": "Six Flags Over Georgia | Six Flags Magic Mountain | Six Flags Great America",
 "ref": "Q1427260"
 },
 {
@@ -9193,14 +9779,14 @@
 "lat": 28.359417,
 "lon": -81.560694,
 "name": "Rock 'n' Roller Coaster Starring Aerosmith",
-"park": "Disney's Hollywood Studios | Disney Adventure World",
+"park": "Disney Adventure World | Disney's Hollywood Studios",
 "ref": "Q1502476"
 },
 {
 "lat": 28.359417,
 "lon": -81.560694,
 "name": "Rock 'n' Roller Coaster Starring Aerosmith",
-"park": "Disney's Hollywood Studios | Disney Adventure World",
+"park": "Disney Adventure World | Disney's Hollywood Studios",
 "ref": "Q1502476"
 },
 {
@@ -9578,7 +10164,7 @@
 "lat": 51.646944,
 "lon": 5.053611,
 "name": "Python",
-"park": "Efteling | Kaatsheuvel | Efteling",
+"park": "Efteling | Efteling | Kaatsheuvel",
 "ref": "Q15727"
 },
 {
@@ -10852,14 +11438,14 @@
 "lat": 28.4206,
 "lon": -81.58,
 "name": "Seven Dwarfs Mine Train",
-"park": "Magic Kingdom | Shanghai Disneyland Park",
+"park": "Shanghai Disneyland Park | Magic Kingdom",
 "ref": "Q2182970"
 },
 {
 "lat": 28.4206,
 "lon": -81.58,
 "name": "Seven Dwarfs Mine Train",
-"park": "Magic Kingdom | Shanghai Disneyland Park",
+"park": "Shanghai Disneyland Park | Magic Kingdom",
 "ref": "Q2182970"
 },
 {
@@ -12217,14 +12803,14 @@
 "lat": 20.954139,
 "lon": 107.047806,
 "name": "Dragon's Run",
-"park": "Freestyle Music Park | Ocean Park Ha Long",
+"park": "Ocean Park Ha Long | Freestyle Music Park",
 "ref": "Q28563538"
 },
 {
 "lat": 20.954139,
 "lon": 107.047806,
 "name": "Dragon's Run",
-"park": "Freestyle Music Park | Ocean Park Ha Long",
+"park": "Ocean Park Ha Long | Freestyle Music Park",
 "ref": "Q28563538"
 },
 {
@@ -12525,7 +13111,7 @@
 "lat": 33.8153,
 "lon": -117.919,
 "name": "Gadget's Go Coaster",
-"park": "Tokyo Disneyland | Disneyland",
+"park": "Disneyland | Tokyo Disneyland",
 "ref": "Q3094227"
 },
 {
@@ -16325,2118 +16911,480 @@
 ],
 "suggestions": [
 {
-"coaster_id": 147,
+"coaster_id": 465,
 "reason": "tagged with the same Wikidata item",
-"ref": "way/837230501",
+"ref": "way/1434157891",
 "score": 1.0,
 "source": "osm"
 },
 {
-"coaster_id": 365,
+"coaster_id": 1309,
 "reason": "tagged with the same Wikidata item",
-"ref": "way/405891521",
+"ref": "way/1161217979",
 "score": 1.0,
 "source": "osm"
 },
 {
-"coaster_id": 468,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/12747401983",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 477,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/693026372",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 492,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/975225204",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 493,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/143058715",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 494,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/143053098",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 497,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/142993686",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 498,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/142965541",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 499,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/142966252",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 514,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/8682234772",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 532,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/1516288950",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 560,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/13061871496",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 664,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/1223042502",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 712,
-"reason": "tagged with the same Wikidata item",
-"ref": "relation/16353742",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 774,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/89353401",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 861,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/6732253511",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 862,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/828531125",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 863,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/541349388",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 884,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/1061865213",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 886,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/5505812321",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 886,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/284197791",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 948,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/13841791631",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 948,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/2410163589",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 949,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/2409111142",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 955,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/1105254393",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 979,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/3735871213",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 1214,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/14355009864",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 1393,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/163857490",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 1469,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/13326306514",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 1478,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/2294013139",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 1599,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/7959490097",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 1600,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/7959490096",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 1632,
-"reason": "tagged with the same Wikidata item",
-"ref": "node/12136324566",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 1635,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/226432705",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 1856,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/143057996",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 2036,
-"reason": "tagged with the same Wikidata item",
-"ref": "way/52873181",
-"score": 1.0,
-"source": "osm"
-},
-{
-"coaster_id": 41,
+"coaster_id": 5,
 "reason": "similar name, at the park",
-"ref": "Q22058482",
+"ref": "Chip 'n' Dale's Gadgetcoaster",
 "score": 0.99,
-"source": "wikidata"
-},
-{
-"coaster_id": 48,
-"reason": "similar name, within 5 km",
-"ref": "node/1223042502",
-"score": 0.99,
-"source": "osm"
+"source": "enwiki"
 },
 {
 "coaster_id": 66,
-"reason": "similar name, within 5 km",
-"ref": "node/1223042502",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 89,
 "reason": "similar name, at the park",
-"ref": "Woodstock's Express (Dorney Park & Wildwater Kingdom)",
+"ref": "Twisted Colossus",
 "score": 0.99,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 105,
+"coaster_id": 200,
 "reason": "similar name, at the park",
-"ref": "Top Thrill 2",
+"ref": "Backlot Stunt Coaster",
 "score": 0.99,
-"source": "coasterpedia"
+"source": "dewiki"
 },
 {
-"coaster_id": 136,
-"reason": "similar name, within 5 km",
-"ref": "way/866462218",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 242,
-"reason": "similar name, within 5 km",
-"ref": "way/259293867",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 243,
-"reason": "similar name, within 5 km",
-"ref": "way/259294803",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 272,
+"coaster_id": 225,
 "reason": "similar name, at the park",
-"ref": "Powder Keg: A Blast into the Wilderness",
+"ref": "Wild Cat (Hersheypark)",
 "score": 0.99,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 272,
+"coaster_id": 251,
 "reason": "similar name, at the park",
-"ref": "Q1432683",
+"ref": "Double Loop",
 "score": 0.99,
-"source": "wikidata"
+"source": "enwiki"
+},
+{
+"coaster_id": 271,
+"reason": "similar name, at the park",
+"ref": "Fire in the Hole (2024 roller coaster)",
+"score": 0.99,
+"source": "enwiki"
 },
 {
 "coaster_id": 331,
 "reason": "similar name, at the park",
 "ref": "Hades 360",
 "score": 0.99,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 349,
-"reason": "similar name, within 5 km",
-"ref": "relation/17255467",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 350,
-"reason": "similar name, within 5 km",
-"ref": "relation/10693511",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 351,
-"reason": "similar name, within 5 km",
-"ref": "relation/17255468",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 353,
-"reason": "similar name, within 5 km",
-"ref": "way/1100731748",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 357,
-"reason": "similar name, within 5 km",
-"ref": "way/259293137",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 464,
+"coaster_id": 387,
 "reason": "similar name, at the park",
-"ref": "Q133460330",
+"ref": "Steel Vengeance",
 "score": 0.99,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 465,
+"coaster_id": 397,
 "reason": "similar name, at the park",
-"ref": "Q133460330",
+"ref": "Backlot Stunt Coaster",
 "score": 0.99,
-"source": "wikidata"
+"source": "dewiki"
 },
 {
-"coaster_id": 484,
+"coaster_id": 425,
 "reason": "similar name, at the park",
-"ref": "Q2327576",
+"ref": "Wildcat's Revenge",
 "score": 0.99,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 495,
-"reason": "similar name, within 5 km",
-"ref": "way/101863280",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 496,
-"reason": "similar name, within 5 km",
-"ref": "way/143057996",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 509,
-"reason": "similar name, within 5 km",
-"ref": "node/1088029243",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 509,
-"reason": "similar name, within 5 km",
-"ref": "relation/6267961",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 509,
+"coaster_id": 571,
 "reason": "similar name, at the park",
-"ref": "Q586854",
+"ref": "Iron Gwazi",
 "score": 0.99,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
 "coaster_id": 611,
 "reason": "similar name, at the park",
 "ref": "Lightning Rod",
 "score": 0.99,
-"source": "coasterpedia"
+"source": "dewiki"
 },
 {
-"coaster_id": 623,
+"coaster_id": 611,
 "reason": "similar name, at the park",
-"ref": "Sea Serpent (Fun Spot America Kissimmee)",
+"ref": "Lightning Rod (roller coaster)",
 "score": 0.99,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 623,
+"coaster_id": 950,
 "reason": "similar name, at the park",
-"ref": "Sea Serpent (Fun Spot America Orlando)",
+"ref": "El Diablo – Tren de la Mina",
 "score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 625,
-"reason": "similar name, at the park",
-"ref": "Sea Serpent (Fun Spot America Kissimmee)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 625,
-"reason": "similar name, at the park",
-"ref": "Sea Serpent (Fun Spot America Orlando)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 677,
-"reason": "similar name, within 5 km",
-"ref": "Q1509287",
-"score": 0.99,
-"source": "wikidata"
-},
-{
-"coaster_id": 727,
-"reason": "similar name, at the park",
-"ref": "Pteranodon Flyers",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 758,
-"reason": "similar name, at the park",
-"ref": "Hades 360",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 812,
-"reason": "similar name, at the park",
-"ref": "Sea Serpent (Fun Spot America Atlanta)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 864,
-"reason": "similar name, within 5 km",
-"ref": "node/1088029243",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 864,
-"reason": "similar name, within 5 km",
-"ref": "relation/6267961",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 864,
-"reason": "similar name, at the park",
-"ref": "Q586854",
-"score": 0.99,
-"source": "wikidata"
-},
-{
-"coaster_id": 939,
-"reason": "similar name, at the park",
-"ref": "Q137709877",
-"score": 0.99,
-"source": "wikidata"
+"source": "dewiki"
 },
 {
 "coaster_id": 1036,
 "reason": "similar name, at the park",
 "ref": "Top Thrill 2",
 "score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1264,
-"reason": "similar name, within 5 km",
-"ref": "Q1509287",
-"score": 0.99,
-"source": "wikidata"
-},
-{
-"coaster_id": 1283,
-"reason": "similar name, at the park",
-"ref": "Alpenexpress \"Enzian\" (Europa-Park; opened 2024)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1287,
-"reason": "similar name, within 5 km",
-"ref": "Q5305095",
-"score": 0.99,
-"source": "wikidata"
-},
-{
-"coaster_id": 1336,
-"reason": "similar name, at the park",
-"ref": "Raven (Paultons Park)",
-"score": 0.99,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
 "coaster_id": 1342,
 "reason": "similar name, at the park",
-"ref": "The Wave (Drayton Manor)",
+"ref": "Shockwave (Drayton Manor Park)",
 "score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1361,
-"reason": "similar name, at the park",
-"ref": "Millennium",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1439,
-"reason": "similar name, within 5 km",
-"ref": "way/302148462",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 1439,
-"reason": "similar name, within 5 km",
-"ref": "Q1436637",
-"score": 0.99,
-"source": "wikidata"
-},
-{
-"coaster_id": 1440,
-"reason": "similar name, within 5 km",
-"ref": "way/1371660451",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 1442,
-"reason": "similar name, within 5 km",
-"ref": "way/302147911",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 1470,
-"reason": "similar name, at the park",
-"ref": "Q122459691",
-"score": 0.99,
-"source": "wikidata"
-},
-{
-"coaster_id": 1479,
-"reason": "similar name, within 5 km",
-"ref": "node/2294013128",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 1506,
-"reason": "similar name, at the park",
-"ref": "Kiddi Koasta",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1597,
-"reason": "similar name, at the park",
-"ref": "The Wave (Drayton Manor)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1604,
-"reason": "similar name, at the park",
-"ref": "Q2327576",
-"score": 0.99,
-"source": "wikidata"
-},
-{
-"coaster_id": 1610,
-"reason": "similar name, at the park",
-"ref": "Raven (Paultons Park)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1634,
-"reason": "similar name, at the park",
-"ref": "Movie Park Studio Tour",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1685,
-"reason": "similar name, within 5 km",
-"ref": "way/501614285",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 1686,
-"reason": "similar name, within 5 km",
-"ref": "way/795988368",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 1743,
-"reason": "similar name, within 5 km",
-"ref": "node/13325522025",
-"score": 0.99,
-"source": "osm"
+"source": "dewiki"
 },
 {
 "coaster_id": 1823,
 "reason": "similar name, at the park",
 "ref": "Lightning Rod",
 "score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1916,
-"reason": "similar name, within 5 km",
-"ref": "way/992581949",
-"score": 0.99,
-"source": "osm"
-},
-{
-"coaster_id": 2002,
-"reason": "similar name, at the park",
-"ref": "WildCat (Cedar Point)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 2002,
-"reason": "similar name, within 5 km",
-"ref": "Q3568102",
-"score": 0.99,
-"source": "wikidata"
-},
-{
-"coaster_id": 2008,
-"reason": "similar name, within 5 km",
-"ref": "Galaxi (Palace Playland)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 2034,
-"reason": "similar name, at the park",
-"ref": "Big Dipper (Luna Park Sydney; opened 1935)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 2154,
-"reason": "similar name, at the park",
-"ref": "Euro Coaster (South Sabahiya Park)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 2220,
-"reason": "similar name, at the park",
-"ref": "Big Dipper (Luna Park Sydney; opened 1935)",
-"score": 0.99,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 943,
-"reason": "similar name, within 5 km",
-"ref": "node/13841165936",
-"score": 0.98,
-"source": "osm"
-},
-{
-"coaster_id": 943,
-"reason": "similar name, within 5 km",
-"ref": "way/1201354987",
-"score": 0.98,
-"source": "osm"
-},
-{
-"coaster_id": 1418,
-"reason": "similar name, at the park",
-"ref": "Q12010552",
-"score": 0.98,
-"source": "wikidata"
-},
-{
-"coaster_id": 1467,
-"reason": "similar name, at the park",
-"ref": "Kid'Z Coaster",
-"score": 0.97,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1634,
-"reason": "similar name, within 5 km",
-"ref": "node/11121678606",
-"score": 0.97,
-"source": "osm"
-},
-{
-"coaster_id": 611,
-"reason": "similar name, within 5 km",
-"ref": "way/837518468",
-"score": 0.96,
-"source": "osm"
-},
-{
-"coaster_id": 1357,
-"reason": "similar name, within 5 km",
-"ref": "Spinosaurus",
-"score": 0.96,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1506,
-"reason": "similar name, within 5 km",
-"ref": "way/446985108",
-"score": 0.96,
-"source": "osm"
+"source": "dewiki"
 },
 {
 "coaster_id": 1823,
-"reason": "similar name, within 5 km",
-"ref": "way/837518468",
-"score": 0.96,
-"source": "osm"
+"reason": "similar name, at the park",
+"ref": "Lightning Rod (roller coaster)",
+"score": 0.99,
+"source": "enwiki"
 },
 {
 "coaster_id": 1906,
 "reason": "similar name, at the park",
-"ref": "Q18354212",
+"ref": "EuroFighter (Zoosafari)",
 "score": 0.96,
-"source": "wikidata"
+"source": "dewiki"
 },
 {
-"coaster_id": 120,
-"reason": "carries a former name, nearby",
-"ref": "way/1426528614",
-"score": 0.95,
-"source": "osm"
-},
-{
-"coaster_id": 138,
-"reason": "similar name, within 5 km",
-"ref": "way/1308449496",
-"score": 0.95,
-"source": "osm"
-},
-{
-"coaster_id": 165,
-"reason": "similar name, within 5 km",
-"ref": "way/319246089",
-"score": 0.95,
-"source": "osm"
-},
-{
-"coaster_id": 165,
-"reason": "similar name, within 5 km",
-"ref": "way/656889969",
-"score": 0.95,
-"source": "osm"
-},
-{
-"coaster_id": 165,
-"reason": "similar name, within 5 km",
-"ref": "way/656889971",
-"score": 0.95,
-"source": "osm"
-},
-{
-"coaster_id": 165,
-"reason": "similar name, within 5 km",
-"ref": "way/656889972",
-"score": 0.95,
-"source": "osm"
-},
-{
-"coaster_id": 251,
-"reason": "similar name, within 5 km",
-"ref": "Q135004002",
-"score": 0.95,
-"source": "wikidata"
-},
-{
-"coaster_id": 399,
+"coaster_id": 1906,
 "reason": "similar name, at the park",
-"ref": "Q1882515",
-"score": 0.95,
-"source": "wikidata"
+"ref": "Eurofighter (Zoosafari Fasanolandia)",
+"score": 0.96,
+"source": "enwiki"
 },
 {
-"coaster_id": 866,
-"reason": "similar name, within 5 km",
-"ref": "node/13584089602",
+"coaster_id": 293,
+"reason": "carries a former name, at the park",
+"ref": "Backlot Stunt Coaster",
 "score": 0.95,
-"source": "osm"
+"source": "dewiki"
 },
 {
-"coaster_id": 950,
-"reason": "similar name, within 5 km",
-"ref": "way/135457578",
-"score": 0.95,
-"source": "osm"
-},
-{
-"coaster_id": 1361,
-"reason": "similar name, within 5 km",
-"ref": "relation/18581529",
-"score": 0.95,
-"source": "osm"
-},
-{
-"coaster_id": 1402,
+"coaster_id": 514,
 "reason": "similar name, at the park",
-"ref": "Vilde Hønsejagt",
+"ref": "Le Vol d’Icare",
 "score": 0.95,
-"source": "coasterpedia"
+"source": "dewiki"
 },
 {
-"coaster_id": 1702,
+"coaster_id": 1751,
 "reason": "similar name, at the park",
-"ref": "Timoks Coaster",
-"score": 0.95,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1746,
-"reason": "similar name, at the park",
-"ref": "Le Boomerang (La Ronde)",
-"score": 0.95,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 2069,
-"reason": "similar name, within 5 km",
-"ref": "way/825472174",
-"score": 0.95,
-"source": "osm"
-},
-{
-"coaster_id": 2214,
-"reason": "similar name, at the park",
-"ref": "Grand Huit (Walibi Rhône-Alpes)",
-"score": 0.95,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1460,
-"reason": "similar name, within 5 km",
-"ref": "way/153805374",
-"score": 0.94,
-"source": "osm"
-},
-{
-"coaster_id": 1470,
-"reason": "similar name, within 5 km",
-"ref": "node/13326681220",
-"score": 0.94,
-"source": "osm"
-},
-{
-"coaster_id": 1572,
-"reason": "similar name, at the park",
-"ref": "Heidi - The Coaster",
-"score": 0.94,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1572,
-"reason": "similar name, at the park",
-"ref": "Heidi The Coaster",
-"score": 0.94,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1681,
-"reason": "similar name, within 5 km",
-"ref": "node/11422276950",
-"score": 0.94,
-"source": "osm"
-},
-{
-"coaster_id": 2063,
-"reason": "similar name, within 5 km",
-"ref": "node/5677917381",
-"score": 0.94,
-"source": "osm"
-},
-{
-"coaster_id": 856,
-"reason": "similar name, within 5 km",
-"ref": "way/86168899",
+"ref": "Le Monstre",
 "score": 0.93,
-"source": "osm"
+"source": "dewiki"
 },
 {
-"coaster_id": 955,
+"coaster_id": 1752,
 "reason": "similar name, at the park",
-"ref": "Uncharted: El Enigma de Penitence",
+"ref": "Le Monstre",
 "score": 0.93,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1745,
-"reason": "similar name, within 5 km",
-"ref": "way/1348965025",
-"score": 0.93,
-"source": "osm"
+"source": "dewiki"
 },
 {
 "coaster_id": 1754,
 "reason": "similar name, at the park",
-"ref": "Q3554352",
+"ref": "Le Vampire",
 "score": 0.93,
-"source": "wikidata"
-},
-{
-"coaster_id": 1918,
-"reason": "similar name, within 5 km",
-"ref": "way/1188745965",
-"score": 0.93,
-"source": "osm"
-},
-{
-"coaster_id": 2074,
-"reason": "similar name, at the park",
-"ref": "Boule et Bill Déboulent (opened 2019)",
-"score": 0.93,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 854,
-"reason": "similar name, within 5 km",
-"ref": "way/86203978",
-"score": 0.92,
-"source": "osm"
-},
-{
-"coaster_id": 870,
-"reason": "similar name, within 5 km",
-"ref": "node/13270606138",
-"score": 0.92,
-"source": "osm"
-},
-{
-"coaster_id": 1468,
-"reason": "similar name, within 5 km",
-"ref": "node/13326306513",
-"score": 0.92,
-"source": "osm"
+"source": "enwiki"
 },
 {
 "coaster_id": 467,
 "reason": "similar name, at the park",
 "ref": "Max & Moritz (Efteling)",
 "score": 0.91,
-"source": "coasterpedia"
+"source": "dewiki"
+},
+{
+"coaster_id": 467,
+"reason": "similar name, at the park",
+"ref": "Max & Moritz (roller coaster)",
+"score": 0.91,
+"source": "enwiki"
 },
 {
 "coaster_id": 468,
 "reason": "similar name, at the park",
 "ref": "Max & Moritz (Efteling)",
 "score": 0.91,
-"source": "coasterpedia"
+"source": "dewiki"
 },
 {
-"coaster_id": 857,
-"reason": "similar name, within 5 km",
-"ref": "way/86177332",
-"score": 0.91,
-"source": "osm"
-},
-{
-"coaster_id": 873,
-"reason": "similar name, within 5 km",
-"ref": "way/1323711870",
-"score": 0.91,
-"source": "osm"
-},
-{
-"coaster_id": 1465,
-"reason": "similar name, within 5 km",
-"ref": "way/674468361",
-"score": 0.91,
-"source": "osm"
-},
-{
-"coaster_id": 1846,
+"coaster_id": 468,
 "reason": "similar name, at the park",
-"ref": "Q10453412",
+"ref": "Max & Moritz (roller coaster)",
 "score": 0.91,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 200,
+"coaster_id": 1453,
+"reason": "similar name, at the park",
+"ref": "Die heiße Fahrt",
+"score": 0.91,
+"source": "dewiki"
+},
+{
+"coaster_id": 48,
 "reason": "one of several candidates",
-"ref": "Q798461",
+"ref": "Twisted Colossus",
 "score": 0.9,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 812,
+"coaster_id": 105,
 "reason": "one of several candidates",
-"ref": "Sea Serpent (Fun Spot America Kissimmee)",
+"ref": "Top Thrill 2",
 "score": 0.9,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 836,
+"coaster_id": 108,
 "reason": "one of several candidates",
-"ref": "Q2182970",
+"ref": "Steel Vengeance",
 "score": 0.9,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 855,
-"reason": "similar name, within 5 km",
-"ref": "node/13819430845",
-"score": 0.9,
-"source": "osm"
-},
-{
-"coaster_id": 859,
+"coaster_id": 225,
 "reason": "one of several candidates",
-"ref": "Azteka",
+"ref": "Wildcat's Revenge",
 "score": 0.9,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 859,
+"coaster_id": 664,
 "reason": "one of several candidates",
-"ref": "Q98012894",
+"ref": "Twisted Colossus",
 "score": 0.9,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 1309,
+"coaster_id": 758,
 "reason": "one of several candidates",
-"ref": "Azteka",
+"ref": "Hades 360",
 "score": 0.9,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 1309,
+"coaster_id": 1245,
 "reason": "one of several candidates",
-"ref": "Q98012894",
+"ref": "Iron Gwazi",
 "score": 0.9,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 1455,
-"reason": "similar name, within 5 km",
-"ref": "node/11417611034",
-"score": 0.9,
-"source": "osm"
-},
-{
-"coaster_id": 1800,
+"coaster_id": 1246,
 "reason": "one of several candidates",
-"ref": "Q971592",
+"ref": "Iron Gwazi",
 "score": 0.9,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 1801,
+"coaster_id": 1597,
 "reason": "one of several candidates",
-"ref": "Q971592",
+"ref": "Shockwave (Drayton Manor Park)",
 "score": 0.9,
-"source": "wikidata"
+"source": "dewiki"
 },
 {
-"coaster_id": 1823,
-"reason": "one of several candidates",
-"ref": "Q22073205",
-"score": 0.9,
-"source": "wikidata"
-},
-{
-"coaster_id": 858,
-"reason": "similar name, within 5 km",
-"ref": "way/1094525775",
+"coaster_id": 1217,
+"reason": "similar name, at the park",
+"ref": "The Great Scenic Railway",
 "score": 0.89,
-"source": "osm"
+"source": "enwiki"
 },
 {
-"coaster_id": 1394,
-"reason": "similar name, within 5 km",
-"ref": "way/349690020",
-"score": 0.89,
-"source": "osm"
-},
-{
-"coaster_id": 1410,
-"reason": "similar name, within 5 km",
-"ref": "node/8932233310",
-"score": 0.89,
-"source": "osm"
-},
-{
-"coaster_id": 1293,
+"coaster_id": 1214,
 "reason": "similar name, at the park",
-"ref": "Galaxy (Adventureland New York)",
+"ref": "Indiana Jones and the Temple of Peril",
 "score": 0.88,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 1751,
-"reason": "similar name, within 5 km",
-"ref": "Q1136801",
-"score": 0.88,
-"source": "wikidata"
-},
-{
-"coaster_id": 1752,
-"reason": "similar name, within 5 km",
-"ref": "Q1136801",
-"score": 0.88,
-"source": "wikidata"
-},
-{
-"coaster_id": 1914,
-"reason": "similar name, within 5 km",
-"ref": "node/14056234524",
-"score": 0.88,
-"source": "osm"
-},
-{
-"coaster_id": 1922,
-"reason": "similar name, within 5 km",
-"ref": "node/11393503069",
-"score": 0.88,
-"source": "osm"
-},
-{
-"coaster_id": 2125,
-"reason": "similar name, within 5 km",
-"ref": "way/120419507",
-"score": 0.88,
-"source": "osm"
-},
-{
-"coaster_id": 2127,
+"coaster_id": 376,
 "reason": "similar name, at the park",
-"ref": "El Vigía",
-"score": 0.88,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 528,
-"reason": "similar name, at the park",
-"ref": "Big Thunder Mountain (Tokyo Disneyland)",
-"score": 0.87,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1,
-"reason": "similar name, at the park",
-"ref": "Dragon Roller Coaster (Pixieland Amusement Park)",
+"ref": "Wild West Express Coaster",
 "score": 0.86,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 467,
-"reason": "similar name, within 5 km",
-"ref": "node/12747401983",
-"score": 0.86,
-"source": "osm"
+"source": "enwiki"
 },
 {
 "coaster_id": 1215,
 "reason": "similar name, at the park",
 "ref": "Star Wars Hyperspace Mountain",
 "score": 0.86,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 1215,
+"coaster_id": 17,
 "reason": "similar name, at the park",
-"ref": "Q507026",
-"score": 0.86,
-"source": "wikidata"
-},
-{
-"coaster_id": 1295,
-"reason": "similar name, at the park",
-"ref": "Kiddie Roller Coaster (Adventureland)",
-"score": 0.86,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1463,
-"reason": "similar name, within 5 km",
-"ref": "way/674468363",
-"score": 0.86,
-"source": "osm"
-},
-{
-"coaster_id": 1542,
-"reason": "similar name, within 5 km",
-"ref": "way/865356749",
-"score": 0.86,
-"source": "osm"
-},
-{
-"coaster_id": 1613,
-"reason": "similar name, within 5 km",
-"ref": "way/788399357",
-"score": 0.86,
-"source": "osm"
-},
-{
-"coaster_id": 22,
-"reason": "similar name, at the park",
-"ref": "Q1699142",
+"ref": "Star Wars Hyperspace Mountain",
 "score": 0.85,
-"source": "wikidata"
+"source": "dewiki"
 },
 {
 "coaster_id": 73,
 "reason": "similar name, at the park",
-"ref": "The Dark Knight Coaster (Six Flags Great Adventure)",
+"ref": "The Dark Knight Coaster",
 "score": 0.85,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 160,
+"coaster_id": 189,
 "reason": "similar name, at the park",
-"ref": "The Dark Knight Coaster (Six Flags Great America)",
+"ref": "Ride of Steel",
 "score": 0.85,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 164,
+"coaster_id": 365,
 "reason": "similar name, at the park",
-"ref": "Q6807346",
+"ref": "Coney Island Cyclone",
 "score": 0.85,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 247,
+"coaster_id": 425,
 "reason": "similar name, at the park",
-"ref": "Q1891206",
+"ref": "Wild Cat (Hersheypark)",
 "score": 0.85,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 321,
+"coaster_id": 475,
 "reason": "similar name, at the park",
-"ref": "Galaxy (Ray Cammack Shows)",
+"ref": "Winja’s Fear & Winja’s Force",
 "score": 0.85,
-"source": "coasterpedia"
+"source": "dewiki"
 },
 {
-"coaster_id": 389,
+"coaster_id": 476,
 "reason": "similar name, at the park",
-"ref": "The Coaster (CJ Barrymore's Family Entertainment Center)",
+"ref": "Winja’s Fear & Winja’s Force",
 "score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 419,
-"reason": "similar name, within 5 km",
-"ref": "Q7296753",
-"score": 0.85,
-"source": "wikidata"
-},
-{
-"coaster_id": 448,
-"reason": "similar name, at the park",
-"ref": "Q5034175",
-"score": 0.85,
-"source": "wikidata"
-},
-{
-"coaster_id": 500,
-"reason": "similar name, at the park",
-"ref": "The Ride to Happiness by Tomorrowland",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 608,
-"reason": "similar name, at the park",
-"ref": "Q14709813",
-"score": 0.85,
-"source": "wikidata"
-},
-{
-"coaster_id": 632,
-"reason": "similar name, at the park",
-"ref": "Tig'rr Coaster",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 632,
-"reason": "similar name, at the park",
-"ref": "Q7801307",
-"score": 0.85,
-"source": "wikidata"
+"source": "dewiki"
 },
 {
 "coaster_id": 635,
 "reason": "similar name, at the park",
 "ref": "The Incredible Hulk Coaster",
 "score": 0.85,
-"source": "coasterpedia"
+"source": "dewiki"
 },
 {
-"coaster_id": 638,
+"coaster_id": 635,
 "reason": "similar name, at the park",
-"ref": "Jurassic World VelociCoaster",
+"ref": "The Incredible Hulk Coaster",
 "score": 0.85,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 653,
+"coaster_id": 757,
 "reason": "similar name, at the park",
-"ref": "Q683601",
+"ref": "HellCat (Timber Falls Adventure Park)",
 "score": 0.85,
-"source": "wikidata"
-},
-{
-"coaster_id": 671,
-"reason": "similar name, at the park",
-"ref": "Q39050117",
-"score": 0.85,
-"source": "wikidata"
+"source": "dewiki"
 },
 {
 "coaster_id": 757,
 "reason": "similar name, at the park",
 "ref": "Avalanche (Timber Falls Adventure Park)",
 "score": 0.85,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 811,
+"coaster_id": 774,
 "reason": "similar name, at the park",
-"ref": "Hurricane (Fun Spot America Atlanta)",
+"ref": "Airplane Coaster",
 "score": 0.85,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
-"coaster_id": 903,
+"coaster_id": 774,
 "reason": "similar name, at the park",
-"ref": "Q18019286",
+"ref": "Wooden Roller Coaster (Playland)",
 "score": 0.85,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 905,
+"coaster_id": 896,
 "reason": "similar name, at the park",
-"ref": "Q636491",
+"ref": "Pegasus – Die YoungStar Achterbahn",
 "score": 0.85,
-"source": "wikidata"
+"source": "dewiki"
 },
 {
-"coaster_id": 920,
+"coaster_id": 897,
 "reason": "similar name, at the park",
-"ref": "Energuś Roller Coaster",
+"ref": "Wasserachterbahn Poseidon",
 "score": 0.85,
-"source": "coasterpedia"
+"source": "dewiki"
 },
 {
 "coaster_id": 926,
 "reason": "similar name, at the park",
-"ref": "Q28072222",
+"ref": "Mayan (roller coaster)",
 "score": 0.85,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
-"coaster_id": 937,
+"coaster_id": 929,
 "reason": "similar name, at the park",
-"ref": "Patrulla Canina",
+"ref": "Devil's Loop",
 "score": 0.85,
-"source": "coasterpedia"
+"source": "enwiki"
 },
 {
 "coaster_id": 949,
 "reason": "similar name, at the park",
-"ref": "Tom & Jerry",
+"ref": "Tom & Jerry (roller coaster)",
 "score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 952,
-"reason": "similar name, at the park",
-"ref": "Q391332",
-"score": 0.85,
-"source": "wikidata"
-},
-{
-"coaster_id": 977,
-"reason": "similar name, at the park",
-"ref": "Q1477806",
-"score": 0.85,
-"source": "wikidata"
+"source": "enwiki"
 },
 {
 "coaster_id": 1178,
 "reason": "similar name, at the park",
 "ref": "The Incredible Hulk Coaster",
 "score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1337,
-"reason": "similar name, within 5 km",
-"ref": "way/828519604",
-"score": 0.85,
-"source": "osm"
-},
-{
-"coaster_id": 1341,
-"reason": "similar name, at the park",
-"ref": "Cat-O-Pillar",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1471,
-"reason": "similar name, at the park",
-"ref": "Balancier",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1488,
-"reason": "similar name, at the park",
-"ref": "Cú Chulainn Coaster",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1509,
-"reason": "similar name, at the park",
-"ref": "Caterpillar Coaster (Brean Theme Park)",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1547,
-"reason": "similar name, at the park",
-"ref": "Twister Roller Coaster (Crealy Adventure Park & Resort)",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1585,
-"reason": "similar name, at the park",
-"ref": "Thriller (Manning's Amusement Park)",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1694,
-"reason": "similar name, at the park",
-"ref": "Marienkäferexpress",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1720,
-"reason": "similar name, at the park",
-"ref": "Nordmann (Kenneth Schwerin)",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1726,
-"reason": "similar name, at the park",
-"ref": "Roller Coaster (Troisne)",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 1732,
-"reason": "similar name, within 5 km",
-"ref": "node/13049474738",
-"score": 0.85,
-"source": "osm"
-},
-{
-"coaster_id": 1735,
-"reason": "similar name, within 5 km",
-"ref": "node/8931281684",
-"score": 0.85,
-"source": "osm"
-},
-{
-"coaster_id": 1862,
-"reason": "similar name, at the park",
-"ref": "Voyage Dans Le Ciel",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 2030,
-"reason": "similar name, at the park",
-"ref": "Big Red Boat Coaster",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 2097,
-"reason": "similar name, at the park",
-"ref": "Crazy Twister (Luna Park Tel Aviv)",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 2175,
-"reason": "similar name, at the park",
-"ref": "Roller Coaster (Al-Shallal Theme Park)",
-"score": 0.85,
-"source": "coasterpedia"
-},
-{
-"coaster_id": 943,
-"reason": "similar name, within 5 km",
-"ref": "node/13841573695",
-"score": 0.84,
-"source": "osm"
-},
-{
-"coaster_id": 1217,
-"reason": "similar name, within 5 km",
-"ref": "node/9054967172",
-"score": 0.84,
-"source": "osm"
-},
-{
-"coaster_id": 869,
-"reason": "similar name, within 5 km",
-"ref": "node/13269919021",
-"score": 0.83,
-"source": "osm"
-},
-{
-"coaster_id": 1320,
-"reason": "similar name, within 5 km",
-"ref": "way/1221886086",
-"score": 0.83,
-"source": "osm"
-},
-{
-"coaster_id": 528,
-"reason": "similar name, within 5 km",
-"ref": "node/854584575",
-"score": 0.82,
-"source": "osm"
-},
-{
-"coaster_id": 1538,
-"reason": "similar name, within 5 km",
-"ref": "way/697620505",
-"score": 0.82,
-"source": "osm"
-},
-{
-"coaster_id": 773,
-"reason": "similar name, within 5 km",
-"ref": "way/743125016",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1215,
-"reason": "similar name, within 5 km",
-"ref": "node/11251453535",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "way/179322798",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "way/179322799",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "way/539213054",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "way/539213055",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "way/539213056",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "way/539213057",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "way/539213058",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "way/539213059",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "way/539213060",
-"score": 0.81,
-"source": "osm"
-},
-{
-"coaster_id": 73,
-"reason": "similar name, within 5 km",
-"ref": "Q583463",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 156,
-"reason": "similar name, within 5 km",
-"ref": "Q15047492",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 160,
-"reason": "similar name, within 5 km",
-"ref": "relation/14097371",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 237,
-"reason": "similar name, within 5 km",
-"ref": "way/742044133",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 323,
-"reason": "similar name, within 5 km",
-"ref": "Q3036455",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 326,
-"reason": "similar name, within 5 km",
-"ref": "node/6549918058",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 328,
-"reason": "similar name, within 5 km",
-"ref": "node/6549955214",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 329,
-"reason": "similar name, within 5 km",
-"ref": "node/6549918057",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 334,
-"reason": "similar name, within 5 km",
-"ref": "way/484841779",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 350,
-"reason": "similar name, within 5 km",
-"ref": "relation/10694113",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 350,
-"reason": "similar name, within 5 km",
-"ref": "Q23833028",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 351,
-"reason": "similar name, within 5 km",
-"ref": "relation/17289062",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 475,
-"reason": "similar name, within 5 km",
-"ref": "node/693044170",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 475,
-"reason": "similar name, within 5 km",
-"ref": "Q319742",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 476,
-"reason": "similar name, within 5 km",
-"ref": "node/693044170",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 476,
-"reason": "similar name, within 5 km",
-"ref": "Q319742",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 635,
-"reason": "similar name, within 5 km",
-"ref": "node/8248062617",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 662,
-"reason": "similar name, within 5 km",
-"ref": "node/12859899266",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 712,
-"reason": "similar name, within 5 km",
-"ref": "way/1209297271",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 757,
-"reason": "similar name, within 5 km",
-"ref": "Q1602595",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 758,
-"reason": "similar name, within 5 km",
-"ref": "way/1545742855",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 758,
-"reason": "similar name, within 5 km",
-"ref": "way/1545742856",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 774,
-"reason": "similar name, within 5 km",
-"ref": "way/743125016",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 818,
-"reason": "similar name, within 5 km",
-"ref": "way/1100731744",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 926,
-"reason": "similar name, within 5 km",
-"ref": "node/7340237438",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 927,
-"reason": "similar name, within 5 km",
-"ref": "node/11300388395",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 928,
-"reason": "similar name, within 5 km",
-"ref": "way/370059176",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 937,
-"reason": "similar name, within 5 km",
-"ref": "node/2320571441",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1092,
-"reason": "similar name, within 5 km",
-"ref": "node/14277385639",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1095,
-"reason": "similar name, within 5 km",
-"ref": "node/14277382769",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1115,
-"reason": "similar name, within 5 km",
-"ref": "way/961086456",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1175,
-"reason": "similar name, within 5 km",
-"ref": "node/9380619164",
-"score": 0.8,
-"source": "osm"
+"source": "dewiki"
 },
 {
 "coaster_id": 1178,
-"reason": "similar name, within 5 km",
-"ref": "node/8248062617",
-"score": 0.8,
-"source": "osm"
+"reason": "similar name, at the park",
+"ref": "The Incredible Hulk Coaster",
+"score": 0.85,
+"source": "enwiki"
 },
 {
-"coaster_id": 1180,
+"coaster_id": 1179,
+"reason": "similar name, at the park",
+"ref": "The Big Bad Wolf",
+"score": 0.85,
+"source": "dewiki"
+},
+{
+"coaster_id": 1661,
+"reason": "similar name, at the park",
+"ref": "Flyvende Ørn",
+"score": 0.85,
+"source": "enwiki"
+},
+{
+"coaster_id": 1361,
 "reason": "similar name, within 5 km",
-"ref": "Q118905419",
+"ref": "Q1370494",
 "score": 0.8,
 "source": "wikidata"
-},
-{
-"coaster_id": 1183,
-"reason": "similar name, within 5 km",
-"ref": "way/754324319",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1217,
-"reason": "similar name, within 5 km",
-"ref": "way/302587792",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1217,
-"reason": "similar name, within 5 km",
-"ref": "way/972795634",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1217,
-"reason": "similar name, within 5 km",
-"ref": "way/972795635",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1217,
-"reason": "similar name, within 5 km",
-"ref": "way/972795636",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1287,
-"reason": "similar name, within 5 km",
-"ref": "relation/17255467",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1334,
-"reason": "similar name, within 5 km",
-"ref": "way/828519603",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1340,
-"reason": "similar name, within 5 km",
-"ref": "way/828519605",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1362,
-"reason": "similar name, within 5 km",
-"ref": "Q1710760",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 1392,
-"reason": "similar name, within 5 km",
-"ref": "way/349690030",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1418,
-"reason": "similar name, within 5 km",
-"ref": "way/584852730",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1445,
-"reason": "similar name, within 5 km",
-"ref": "node/10182402329",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1493,
-"reason": "similar name, within 5 km",
-"ref": "way/1227912069",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1514,
-"reason": "similar name, within 5 km",
-"ref": "Q667635",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 1610,
-"reason": "similar name, within 5 km",
-"ref": "way/828519601",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1673,
-"reason": "similar name, within 5 km",
-"ref": "way/291233008",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1733,
-"reason": "similar name, within 5 km",
-"ref": "node/13049474740",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1736,
-"reason": "similar name, within 5 km",
-"ref": "way/1298986498",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1844,
-"reason": "similar name, within 5 km",
-"ref": "Q14711399",
-"score": 0.8,
-"source": "wikidata"
-},
-{
-"coaster_id": 1887,
-"reason": "similar name, within 5 km",
-"ref": "way/1426528614",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1974,
-"reason": "similar name, within 5 km",
-"ref": "node/9380619164",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 1984,
-"reason": "similar name, within 5 km",
-"ref": "way/961793008",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 2001,
-"reason": "similar name, within 5 km",
-"ref": "way/744825722",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 2030,
-"reason": "similar name, within 5 km",
-"ref": "way/1343586251",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 2065,
-"reason": "similar name, within 5 km",
-"ref": "way/1493684876",
-"score": 0.8,
-"source": "osm"
-},
-{
-"coaster_id": 2097,
-"reason": "similar name, within 5 km",
-"ref": "way/1168420567",
-"score": 0.8,
-"source": "osm"
 }
 ]
 }
