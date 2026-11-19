@@ -1519,6 +1519,64 @@ async function setOpenReview(env, acct, b) {
   return json({ ok: true, decision });
 }
 
+// Cutover readiness (/open-cutover, 2026-11-19): every coaster in one bucket,
+// as the switch to the open dataset would treat it.
+//   ready     an open source (or a fair ride), every stat the site shows now
+//             covered by an open value or a pick, nothing waiting on review
+//   verify    an open source, but it would lose stats, has a mismatch to
+//             choose, or has a suggested link pending
+//   ridden    no open source and someone has ridden it (any location of a
+//             relocated ride): Carter sources these by hand so no list changes
+//   unridden  no open source, nobody has ridden it: flagged, not removed
+async function getOpenReadiness(env) {
+  const { cs, fair, linked, open, chose } = await openTables(env);
+  const q = sql => env.DB.prepare(sql).all().then(r => r.results).catch(() => []);
+  const [rides, same, users, sugg, reviews] = await Promise.all([
+    q("SELECT DISTINCT coaster_id, user_slug FROM rides"),
+    q("SELECT coaster, ride FROM same_ride"),
+    q("SELECT slug, name FROM users"),
+    q("SELECT DISTINCT source, ref, coaster_id FROM open_suggestions"),
+    q("SELECT kind, source, ref, coaster_id, decision FROM open_reviews"),
+  ]);
+  const uname = new Map(users.map(u => [u.slug, u.name || u.slug]));
+  const home = new Map(same.map(s => [s.coaster, s.ride]));
+  const riders = new Map();
+  for (const r of rides) {
+    const g = home.get(r.coaster_id) || r.coaster_id;
+    if (!riders.has(g)) riders.set(g, new Set());
+    riders.get(g).add(r.user_slug);
+  }
+  const decided = new Set(reviews.filter(r => r.kind === "match").map(r => r.source + "|" + r.ref + "|" + r.coaster_id));
+  const pending = new Map();
+  for (const s of sugg) if (!decided.has(s.source + "|" + s.ref + "|" + s.coaster_id)) pending.set(s.coaster_id, (pending.get(s.coaster_id) || 0) + 1);
+  const keep = new Map(reviews.filter(r => r.kind === "coaster").map(r => [r.coaster_id, r.decision]));
+  const loseBy = {};
+  for (const f of OPEN_FIELDS) loseBy[f] = { site: 0, lose: 0 };
+  const totals = { ready: 0, verify: 0, ridden: 0, unridden: 0 };
+  const rows = cs.map(c => {
+    const o = open.get(c.id) || {}, ls = Object.keys(linked.get(c.id) || {}), isFair = fair.has(c.park);
+    const rs = [...(riders.get(home.get(c.id) || c.id) || [])];
+    const lose = [];
+    let mism = 0;
+    for (const f of OPEN_FIELDS) {
+      if (openBlank(c[f])) continue;
+      loseBy[f].site++;
+      const src = o[f] || {}, ch = chose.get(c.id + "|" + f);
+      const covered = isFair || ch || Object.values(src).some(v => !v[1]);
+      if (!covered) { lose.push(f); loseBy[f].lose++; }
+      if (openMismatch(f, c[f], src, ch)) mism++;
+    }
+    let state;
+    if (!ls.length && !isFair) state = rs.length ? "ridden" : "unridden";
+    else state = lose.length || mism || pending.get(c.id) ? "verify" : "ready";
+    totals[state]++;
+    return { id: c.id, name: c.name, park: c.park, closed: c.closed || null, state, sources: ls, fair: isFair ? 1 : 0,
+             lose, mismatches: mism, pending: pending.get(c.id) || 0, keep: keep.get(c.id) || null,
+             riders: rs.length, who: state === "ridden" ? rs.map(s => uname.get(s) || s).sort() : undefined };
+  });
+  return { total: cs.length, totals, loseBy, fieldOrder: OPEN_FIELDS, rows };
+}
+
 // A pick where the sources disagree: which source's value is right for this
 // coaster and field, in the parallel dataset only. source 'site' takes the
 // current value; anything else takes that source's open_facts value now.
@@ -2601,6 +2659,11 @@ export default {
         try { await env.DB.prepare("SELECT 1 FROM open_links LIMIT 1").first(); }
         catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
         return json(await getOpenCleanup(env));
+      }
+      if (request.method === "GET" && path === "/api/open-readiness") {
+        try { await env.DB.prepare("SELECT 1 FROM open_links LIMIT 1").first(); }
+        catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
+        return json(await getOpenReadiness(env));
       }
       if (request.method === "GET" && path === "/api/open-review") {
         try { await env.DB.prepare("SELECT 1 FROM open_suggestions LIMIT 1").first(); }

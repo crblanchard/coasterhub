@@ -6279,6 +6279,16 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   **The switch itself is not built yet**: when Carter says the new dataset is
   ready, it becomes the data the site reads and the RCDB-derived values are
   kept as a backup only. Ask him how before building it.
+- **Cutover dashboard (/open-cutover, /api/open-readiness), 2026-11-19.**
+  Every coaster in one bucket, as the switch would treat it: ready (open
+  source, every current stat covered by an open value or a pick, nothing
+  pending), verify (would lose stats / mismatch / suggestion pending),
+  ridden (no open source but someone has ridden it, any location of a
+  relocation; lists who, with Copy list, because Carter sources these by hand
+  so nobody's list changes), unridden (flagged). A per-field "would be lost"
+  table, and "keep current" on a row writes `open_choices` source 'site' for
+  each field no source has. First live-ish numbers (dev snapshot): 916 ready,
+  774 verify, 70 ridden-no-match (152 credits), 308 unridden.
 - **RCDB IDs hide in URLs and tags.** Wikidata's "described at URL" (P973) held
   45 rcdb.com/NNNN.htm links, and some OSM coasters carry `rcdb_id` /
   `ref:rcdb` tags; all were removed (D1 rows deleted 2026-11-18) and every

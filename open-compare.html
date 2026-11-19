@@ -113,6 +113,7 @@
 <script src="/app.js?v=20261118a"></script>
 <script>
 CoasterHub.initNav('sources');
+const Q0 = new URLSearchParams(location.search).get('q');
 const NAMES = { manu: 'Maker', model: 'Model', type: 'Type', h: 'Height', s: 'Speed', l: 'Length',
   inv: 'Inv', dur: 'Duration', opened: 'Opened', closed: 'Closed' };
 const UNITS = { h: ' ft', l: ' ft', s: ' mph', dur: ' s' };
@@ -148,6 +149,7 @@ load().then(d => {
   $('loading').hidden = true; $('ui').hidden = false;
   try { const s = JSON.parse(localStorage.getItem('ch_opencmp2') || '{}'); ['show', 'src', 'field'].forEach(k => { if (s[k] != null) $(k).value = s[k]; }); } catch (e) {}
   ['q', 'show', 'src', 'field'].forEach(id => $(id).addEventListener(id === 'q' ? 'input' : 'change', () => { LIMIT = 300; render(); }));
+  if (Q0) { $('q').value = Q0; $('show').value = 'pick'; $('src').value = ''; $('field').value = ''; }
   $('more').onclick = () => { LIMIT += 300; render(); };
   document.addEventListener('click', e => { if (!$('picker').hidden && !e.target.closest('#picker') && !e.target.closest('td.pickable')) $('picker').hidden = true; });
   render();
