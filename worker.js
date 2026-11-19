@@ -1479,15 +1479,42 @@ async function getCutover(env) {
     }
   }
   const nsDone = nosource.filter(r => r.done).length;
+
+  // 5. Names (2026-11-19, the last step before the switch): every linked
+  // coaster whose source calls it something else, to keep ours or take
+  // theirs. Not listed: the same name once spelled alike, or a source name
+  // ours already contains ("YoY" in "YoY - Chill", "Wildcat" in "Wildcat
+  // (Old)"), so racing sides, "(Old)" and years never come up.
+  const names = [];
+  for (const c of cs) {
+    const ls = linked.get(c.id);
+    if (!ls) continue;
+    // A leading "The" is not a different name: the site leaves it off.
+    const nsq = s => openSquash(String(s).replace(/^\s*the\s+/i, ""));
+    const ours = nsq(c.name), seen = new Set(), opts = [];
+    for (const s of Object.keys(ls).sort((a, b) => (OPEN_SOURCE_ORDER[a] ?? 9) - (OPEN_SOURCE_ORDER[b] ?? 9))) {
+      const n = (item.get(s + "|" + ls[s]) || {}).name;
+      if (!n || /^Q\d+$/.test(n)) continue;
+      const k = nsq(n);
+      if (!k || k === ours || ours.includes(k) || seen.has(k)) continue;
+      seen.add(k); opts.push({ source: s, name: n });
+    }
+    if (!opts.length) continue;
+    const ch = chose.get(c.id + "|name");
+    names.push({ id: c.id, name: c.name, park: c.park, closed: c.closed || null, options: opts, pick: ch ? ch[1] : null, by: ch ? ch[0] : null });
+  }
+  names.sort((a, b) => a.park.localeCompare(b.park) || a.name.localeCompare(b.name));
+
   return {
     tracker: {
       going: { done: gDone, total: going.length },
       changes: { done: decided.length, total: decided.length + changes.length },
       mismatch: { done: mDone, total: mTotal },
       nosource: { done: nsDone, total: nosource.length },
+      names: { done: names.filter(n => n.pick).length, total: names.length },
     },
     unverified, fields: OPEN_FIELDS,
-    going, changes, decided, mismatches: mism, nosource, leaveOut,
+    going, changes, decided, mismatches: mism, nosource, leaveOut, names,
   };
 }
 
@@ -1550,7 +1577,7 @@ const OPEN_SOURCE_ORDER = { coasterpedia: 0, wikidata: 1, osm: 2 };
 async function setOpenChoice(env, acct, id, field, source, typed) {
   const isName = field === "name";
   if (!OPEN_FIELDS.includes(field) && !isName) return err(400, "unknown field");
-  if (isName && source && source !== "manual") return err(400, "a name is typed by hand");
+  if (isName && source && source !== "manual" && !OPEN_SOURCE_ORDER.hasOwnProperty(source)) return err(400, "unknown source");
   try { await env.DB.prepare("SELECT 1 FROM open_choices LIMIT 1").first(); }
   catch (e) { return err(503, "run migrations/190-open-choices.sql first"); }
   if (!source) {
@@ -1558,7 +1585,14 @@ async function setOpenChoice(env, acct, id, field, source, typed) {
     return json({ ok: true, pick: null });
   }
   let value;
-  if (isName) {
+  if (isName && source !== "manual") {
+    // A source's own name for the coaster it is linked to.
+    const row = await env.DB.prepare(
+      "SELECT i.name FROM open_links l JOIN open_items i ON i.source = l.source AND i.ref = l.ref WHERE l.coaster_id = ? AND l.source = ?").bind(id, source).first();
+    if (!row || !row.name) return err(404, "that source has no name here");
+    value = row.name;
+  } else if (isName) {
+    // Ours kept, or one typed by hand.
     value = String(typed || "").replace(/\s+/g, " ").trim().slice(0, 120);
     if (!value) return err(400, "name required");
   } else if (source === "site" || source === "manual") {

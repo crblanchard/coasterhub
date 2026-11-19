@@ -22,7 +22,9 @@
      total and only ever going up, over the list for the chosen one. It
      replaced /sources, /open-compare, /open-cleanup, /open-review and
      /open-cutover. Unlisted. */
-  .tracker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 10px}
+  .tracker{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:4px 0 10px}
+  .typeit{display:inline-flex;gap:4px;align-items:center;margin-top:4px}
+  .typeit input{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:4px 8px;font-size:.8rem;width:170px}
   .tracker button{text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--fg);display:grid;gap:4px}
   .tracker button.on{border-color:var(--accent2);box-shadow:0 0 0 1px var(--accent2) inset}
   .tracker .tt{font-size:.82rem;font-weight:600}
@@ -51,7 +53,8 @@
     table.mm td.st{min-width:0}
     button.val{display:block;margin:0 0 4px}
   }
-  @media (max-width:760px){ .tracker{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:980px){ .tracker{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:640px){ .tracker{grid-template-columns:repeat(2,1fr)} }
   /* Shared pieces: lists, chips, review cards, the controls row. */
   h2{font-size:1.15rem;margin:30px 0 6px}
   td.f{font-weight:600} td.num,th.num{text-align:right;font-variant-numeric:tabular-nums} td.diff{color:var(--bad)}
@@ -188,6 +191,9 @@ const TABS = {
   nosource: { t: '4. No open source', h: 'Ridden coasters with no open source',
     p: 'Coasters riders have on their lists that no open source covers. Find each one on Coasterpedia or Wikidata (citing a park page or news article, not RCDB), or keep it to enter by hand, so nobody&rsquo;s list changes at the switch.',
     f: [['todo', 'To find'], ['done', 'Found or kept'], ['', 'All'], ['out', 'Not ridden: leaving out']] },
+  names: { t: '5. Names', h: 'Names: old or new',
+    p: 'The last step. Linked coasters whose source calls them something else: keep the name on the site now, take the source&rsquo;s, or type one. Racing sides, &ldquo;(Old)&rdquo; and years are left alone.',
+    f: [['todo', 'To choose'], ['done', 'Chosen'], ['', 'All']] },
 };
 const $ = id => document.getElementById(id);
 const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -243,6 +249,7 @@ function rows() {
     return D.changes.filter(has).filter(c => f === 'sure' ? sure(c) : f === 'look' ? !sure(c) : true);
   }
   if (tab === 'mismatch') return D.mismatches.filter(has).filter(m => f === 'todo' ? m.state === 'manual' : f ? m.state === f : true);
+  if (tab === 'names') return D.names.filter(has).filter(r => f === 'todo' ? !r.pick : f === 'done' ? r.pick : true);
   if (f === 'out') return D.leaveOut.filter(has);
   return D.nosource.filter(has).filter(r => f === 'todo' ? !r.done : f === 'done' ? r.done : true).sort((a, b) => b.riders - a.riders || a.park.localeCompare(b.park));
 }
@@ -301,6 +308,16 @@ const VIEW = {
         : '<span class="chip">' + esc(m.by) + ': ' + val(m.field, m.use) + '</span>') + '</td></tr>';
   }).join('') + '</tbody></table></div>',
 
+  names: list => '<div class="tbl-wrap"><table class="mm"><thead><tr><th>Coaster</th><th>Name in the new dataset (click to choose)</th><th></th></tr></thead><tbody>' + list.map(r => {
+    const chosen = n => r.pick != null && r.pick === n;
+    const opts = [['manual', r.name, 'Site now']].concat(r.options.map(o => [o.source, o.name, SRC[o.source] || o.source]));
+    const typed = r.pick != null && !opts.some(([, n]) => n === r.pick);
+    return '<tr><td class="nm">' + coaster(r) + '</td><td class="vals">'
+      + opts.map(([s, n, lab]) => btn('<i>' + lab + '</i> ' + esc(n), { nm: r.id, ns: s, nv: n }, 'val' + (chosen(n) ? ' on' : ''))).join('')
+      + '<span class="typeit"><input type="text" placeholder="or type a name" value="' + (typed ? esc(r.pick) : '') + '">' + btn('Save', { nmtype: r.id }, 'small') + '</span></td>'
+      + '<td class="st">' + (r.pick != null ? '<span class="chip ok">' + (typed ? 'typed' : 'chosen') + '</span> ' + btn('undo', { clearname: r.id }, 'link') : '<span class="chip bad">to choose</span>') + '</td></tr>';
+  }).join('') + '</tbody></table></div>',
+
   nosource: (list, f) => f === 'out'
     ? '<div class="tbl-wrap"><table><thead><tr><th>Coaster</th><th></th></tr></thead><tbody>' + list.map(r => '<tr><td class="nm">' + coaster(r) + '</td><td class="todo">'
         + (r.pending ? jump('changes', r.name, 'match to check') + ' ' : '') + btn('Keep it', { k: 'coaster', s: '', r: '', c: r.id, d: 'keep' }, 'small') + '</td></tr>').join('') + '</tbody></table></div>'
@@ -337,6 +354,12 @@ document.addEventListener('click', e => {
     return after(post('/api/open-choice', { id: +b.dataset.savename, field: 'name', source: 'manual', value: v }), b);
   }
   if (b.dataset.clearname) return after(post('/api/open-choice', { id: +b.dataset.clearname, field: 'name', source: null }), b);
+  if (b.dataset.nm) return after(post('/api/open-choice', { id: +b.dataset.nm, field: 'name', source: b.dataset.ns, value: b.dataset.nv }), b);
+  if (b.dataset.nmtype) {
+    const v = b.closest('.typeit').querySelector('input').value.trim();
+    if (!v) return;
+    return after(post('/api/open-choice', { id: +b.dataset.nmtype, field: 'name', source: 'manual', value: v }), b);
+  }
   if (b.dataset.pick !== undefined) return after(post('/api/open-choice', { id: +b.dataset.id, field: b.dataset.f, source: b.dataset.pick || null }), b);
   if (b.dataset.k) return after(post('/api/open-review', { kind: b.dataset.k, source: b.dataset.s, ref: b.dataset.r, coaster_id: +b.dataset.c, decision: b.dataset.d || null }), b);
 });

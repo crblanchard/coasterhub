@@ -6327,10 +6327,14 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   updated); stats no open source has also go in as manual. Links to Wikidata /
   Coasterpedia are untouched by picks. /cutover's Going in tab filters "Has
   manual values" for his clean-up after launch.
-  **Open question (asked 2026-11-19, no answer yet):** should a linked coaster
-  take Coasterpedia's name in the new dataset by default (special names like
-  "(Old)", years and racing sides protected, differences listed to switch
-  back), or keep ours by default? Today it keeps ours unless typed by hand.
+  **Names are settled in step 5 of /cutover** (Carter, 2026-11-19: "before i
+  push make a final step where i look at old name and new name if something
+  was linked and i can choose"). Listed: linked coasters whose source name
+  differs from ours. Not listed: same name once squashed, a leading "The",
+  or a source name ours already contains (racing sides like "YoY - Chill",
+  "(Old)", years). Picks are open_choices field 'name': source 'manual' for
+  ours kept or typed, else the source whose name was taken. Unpicked names
+  keep ours at the switch.
 - **RCDB IDs hide in URLs and tags.** Wikidata's "described at URL" (P973) held
   45 rcdb.com/NNNN.htm links, and some OSM coasters carry `rcdb_id` /
   `ref:rcdb` tags; all were removed (D1 rows deleted 2026-11-18) and every
