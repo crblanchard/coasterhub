@@ -6335,6 +6335,13 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   "(Old)", years). Picks are open_choices field 'name': source 'manual' for
   ours kept or typed, else the source whose name was taken. Unpicked names
   keep ours at the switch.
+- **THE SWITCH RAN 2026-11-19 ~02:40 UTC**, from the `cutover.yml` Action
+  (export live D1 -> tools/cutover-run.mjs runs the real Worker's switch on a
+  copy and records its writes -> wrangler applies them; backup tables first).
+  A full backup went to the private backups repo just before. Result: 2,067 ->
+  1,861 coasters (206 retired), 483 -> 450 parks (33 hidden), 39 renamed
+  (Tonnerre de Zeus and Psyke Underground skipped: the new name was taken at
+  the park), 13,041 coaster_sources rows, 0 orphaned rides or rankings.
 - **THE SWITCH (built 2026-11-19).** /cutover's "Switch the site to the new
   dataset" panel: Preview (POST /api/cutover/switch {dry:true}) then Switch
   now (typed SWITCH). `runCutover` refuses a second run once

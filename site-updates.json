@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-19T02:45:00Z",
+   "text": "Coaster Hub's coaster data now comes from open sources (Coasterpedia, Wikidata and OpenStreetMap) instead of RCDB, so some stats are blank until an open source fills them in. Coasters that no open source covers and nobody here had ridden were retired; every rider's credits and rankings are unchanged."
+  },
+  {
    "at": "2026-11-18T00:04:23Z",
    "text": "Profiles have a card for this year so far: new credits, rides, park days, parks, your biggest day and most-visited park. Coaster pages show their stats in a band across the page, with relocated rides listing their Past locations as a timeline."
   },
