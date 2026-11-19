@@ -7,7 +7,7 @@
 -- Texas becomes "Peppa Pig Theme Park (North Richland Hills)", Florida goes in
 -- as "Peppa Pig Theme Park (Winter Haven)" (pin from its coaster's page); its
 -- coaster is added through the Worker afterwards
--- (tools/open-data/split-201.json). Guarded; a second run does nothing.
+-- (tools/open-data/split-202.json). Guarded; a second run does nothing.
 
 INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'park_renamed', 'Peppa Pig Theme Park (North Richland Hills)', 1, json_object('from', 'Peppa Pig Theme Park') WHERE EXISTS (SELECT 1 FROM parks WHERE name = 'Peppa Pig Theme Park') AND NOT EXISTS (SELECT 1 FROM parks WHERE name = 'Peppa Pig Theme Park (North Richland Hills)');
 UPDATE parks SET name = 'Peppa Pig Theme Park (North Richland Hills)' WHERE name = 'Peppa Pig Theme Park';
