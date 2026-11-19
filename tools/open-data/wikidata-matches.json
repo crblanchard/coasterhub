@@ -1,9 +1,19 @@
 {
 "ambiguous": [
 {
+"coaster_id": 200,
+"method": "name+park",
+"qid": "Q798461"
+},
+{
 "coaster_id": 1264,
 "method": "name+coords",
 "qid": "Q1509287"
+},
+{
+"coaster_id": 836,
+"method": "name+park",
+"qid": "Q2182970"
 }
 ],
 "matches": {
@@ -2907,25 +2917,6 @@
 "method": "name+park",
 "osm": "1192181640",
 "qid": "Q1547136"
-},
-"200": {
-"captainCoaster": null,
-"facts": {
-"manu": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Premier Rides"
-},
-"type": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Steel"
-}
-},
-"label": "Backlot Stunt Coaster",
-"method": "approved",
-"osm": "661288732",
-"qid": "Q798461"
 },
 "201": {
 "captainCoaster": null,
@@ -10999,6 +10990,14 @@
 "osm": null,
 "qid": "Q574000"
 },
+"792": {
+"captainCoaster": null,
+"facts": {},
+"label": "Nopuko Air Coaster",
+"method": "approved",
+"osm": null,
+"qid": "Q112659284"
+},
 "795": {
 "captainCoaster": null,
 "facts": {
@@ -11345,13 +11344,23 @@
 "osm": null,
 "qid": "Q1226661"
 },
-"836": {
+"827": {
 "captainCoaster": null,
 "facts": {
+"h": {
+"cites_rcdb": true,
+"prec": null,
+"v": 213.0
+},
+"l": {
+"cites_rcdb": true,
+"prec": null,
+"v": 3179.0
+},
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Vekoma"
+"v": "Bolliger & Mabillard"
 },
 "type": {
 "cites_rcdb": false,
@@ -11359,10 +11368,48 @@
 "v": "Steel"
 }
 },
-"label": "Seven Dwarfs Mine Train",
+"label": "Diving Coaster",
+"method": "name+coords",
+"osm": null,
+"qid": "Q3032292"
+},
+"828": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Family Inverted Coaster",
+"method": "name+coords",
+"osm": null,
+"qid": "Q28224486"
+},
+"833": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Sky Scrapper",
 "method": "approved",
-"osm": "1313242613",
-"qid": "Q2182970"
+"osm": null,
+"qid": "Q2333157"
 },
 "837": {
 "captainCoaster": null,
@@ -11401,6 +11448,20 @@
 "method": "approved",
 "osm": "1161217979",
 "qid": "Q98012894"
+},
+"860": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Fjord Explorer",
+"method": "name+coords",
+"osm": null,
+"qid": "Q125684938"
 },
 "861": {
 "captainCoaster": null,
@@ -14933,35 +14994,6 @@
 "method": "name+park",
 "osm": null,
 "qid": "Q2229119"
-},
-"1223": {
-"captainCoaster": null,
-"facts": {
-"closed": {
-"cites_rcdb": false,
-"prec": "day",
-"v": "2019-09-02"
-},
-"manu": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Vekoma"
-},
-"opened": {
-"cites_rcdb": false,
-"prec": "day",
-"v": "1999-07-29"
-},
-"type": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Steel"
-}
-},
-"label": "Rock 'n' Roller Coaster Starring Aerosmith",
-"method": "name+park",
-"osm": null,
-"qid": "Q1502476"
 },
 "1224": {
 "captainCoaster": null,
@@ -21477,6 +21509,290 @@
 "method": "name+park",
 "osm": null,
 "qid": "Q122460543"
+},
+"3071": {
+"captainCoaster": null,
+"facts": {
+"h": {
+"cites_rcdb": true,
+"prec": null,
+"v": 14.8
+},
+"l": {
+"cites_rcdb": true,
+"prec": null,
+"v": 413.4
+},
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Zierer"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "1993"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Hundeprutterutchebane",
+"method": "name+park",
+"osm": null,
+"qid": "Q18207905"
+},
+"3099": {
+"captainCoaster": null,
+"facts": {},
+"label": "TNT",
+"method": "name+park",
+"osm": null,
+"qid": "Q137049593"
+},
+"3101": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "MACK Rides"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Bakunawa",
+"method": "name+park",
+"osm": null,
+"qid": "Q140739058"
+},
+"3104": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "S&S Worldwide"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Crazy Bird",
+"method": "name+park",
+"osm": null,
+"qid": "Q17986714"
+},
+"3106": {
+"captainCoaster": null,
+"facts": {
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "2012"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Hidden Anaconda",
+"method": "name+park",
+"osm": null,
+"qid": "Q106573817"
+},
+"3113": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Kiddie Coaster",
+"method": "name+coords",
+"osm": null,
+"qid": "Q6404685"
+},
+"3135": {
+"captainCoaster": null,
+"facts": {
+"h": {
+"cites_rcdb": false,
+"prec": null,
+"v": 45.9
+},
+"l": {
+"cites_rcdb": false,
+"prec": null,
+"v": 1378.0
+},
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Gerstlauer"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "2025-08-18"
+},
+"s": {
+"cites_rcdb": false,
+"prec": null,
+"v": 28.0
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "C\u00e9tautomatix",
+"method": "name+park",
+"osm": null,
+"qid": "Q135790425"
+},
+"3137": {
+"captainCoaster": null,
+"facts": {},
+"label": "ThunderVolt",
+"method": "name+park",
+"osm": null,
+"qid": "Q131553469"
+},
+"3140": {
+"captainCoaster": null,
+"facts": {
+"h": {
+"cites_rcdb": false,
+"prec": null,
+"v": 57.4
+},
+"l": {
+"cites_rcdb": false,
+"prec": null,
+"v": 2116.1
+},
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Gerstlauer"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "2026-03-22"
+},
+"s": {
+"cites_rcdb": false,
+"prec": null,
+"v": 34.2
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "100% Wolf",
+"method": "name+park",
+"osm": null,
+"qid": "Q140129284"
+},
+"3151": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Zierer"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Hoot N Holler",
+"method": "name+park",
+"osm": null,
+"qid": "Q5898663"
+},
+"3153": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Zamperla"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Frankie\u2019s Mine Train",
+"method": "name+coords",
+"osm": null,
+"qid": "Q5491104"
+},
+"3155": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Quantum Accelerator",
+"method": "name+park",
+"osm": null,
+"qid": "Q130198418"
+},
+"3158": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "SBF Visa"
+}
+},
+"label": "Havana Spinning Adventure",
+"method": "name+coords",
+"osm": null,
+"qid": "Q122460559"
+},
+"3167": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Zamperla"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Cosmic Coaster",
+"method": "name+coords",
+"osm": "865725421",
+"qid": "Q5174058"
 }
 },
 "records": {
@@ -26053,7 +26369,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Roller Coaster Corporation of America"
+"v": "TOGO"
 },
 "type": {
 "cites_rcdb": false,
@@ -36188,7 +36504,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Dinn Corporation"
+"v": "Intamin"
 },
 "opened": {
 "cites_rcdb": false,

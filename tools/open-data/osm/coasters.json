@@ -38,8 +38,8 @@
 "name": "Pikajuna",
 "start_date": "1990",
 "tourism": "attraction",
-"wikidata": "Q110469156",
-"wikipedia": "en:Pikajuna"
+"wikidata": "Q65242484",
+"wikipedia": "fi:Pikajuna Suomessa"
 },
 "type": "node"
 },
@@ -89,7 +89,6 @@
 "lon": 7.722643,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "MACK Rides",
 "min_age": "4",
 "min_height": "1.00",
 "name": "Alpenexpress „Enzian“",
@@ -229,10 +228,7 @@
 "lon": 5.0524387,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "1.1",
 "manufacturer": "Great Coasters International",
-"minimum_height_requirement": "1.1",
 "name": "Joris en de Draak",
 "roller_coaster:type": "wooden_coaster",
 "start_date": "2010-07-01",
@@ -240,7 +236,7 @@
 "url": "https://www.eftepedia.nl/lemma/Joris_en_de_Draak",
 "website": "https://www.efteling.com/nl/park/attracties/joris-en-de-draak",
 "wikidata": "Q1130871",
-"wikimedia_commons": "Category:Joris en de Draak",
+"wikimedia_commons": "Category:Joris_en_de_Draak",
 "wikipedia": "nl:Joris en de Draak"
 },
 "type": "node"
@@ -252,13 +248,12 @@
 "tags": {
 "attraction": "roller_coaster",
 "manufacturer": "KumbaK;Intamin Amusement Rides",
-"minimum_height_requirement": "1.2",
 "name": "De Vliegende Hollander",
 "start_date": "2007-04-01",
 "url": "https://www.eftepedia.nl/lemma/De_Vliegende_Hollander",
 "website": "https://www.efteling.com/nl/park/attracties/de-vliegende-hollander",
 "wikidata": "Q636333",
-"wikimedia_commons": "Category:De Vliegende Hollander",
+"wikimedia_commons": "Category:De_Vliegende_Hollander",
 "wikipedia": "nl:De Vliegende Hollander (Efteling)"
 },
 "type": "node"
@@ -270,12 +265,10 @@
 "tags": {
 "attraction": "roller_coaster",
 "fee": "no",
-"minimum_height_requirement": "1.4",
 "name": "Goudurix",
 "operator": "Parc Astérix",
 "ref": "43",
 "tourism": "attraction",
-"website": "https://www.parcasterix.fr/attractions/sensations-fortes/goudurix",
 "wikidata": "Q828509",
 "wikipedia": "fr:Goudurix"
 },
@@ -362,7 +355,9 @@
 "lat": 60.1879532,
 "lon": 24.9402433,
 "tags": {
+"alt_name": "Linnunrata",
 "alt_name:en": "Space Express",
+"alt_name:fi": "Linnunrata",
 "attraction": "roller_coaster",
 "attraction:maxheight": "195",
 "attraction:minheight": "120",
@@ -371,10 +366,7 @@
 "loc_name": "Fågeli",
 "min_age": "6",
 "min_age:conditional": "0 @ \"escorted\"",
-"name": "Linnunrata",
-"name:fi": "Linnunrata",
-"old_name": "Linnunrata eXtra",
-"operator": "Lasten Päivän Säätiö sr",
+"name": "Linnunrata eXtra",
 "source": "survey",
 "start_date": "2006",
 "tourism": "attraction",
@@ -402,10 +394,9 @@
 "duration": "00:03:40",
 "name": "Big Thunder Mountain",
 "source": "survey",
-"subject:wikidata": "Q859406",
-"subject:wikipedia": "fr:Big Thunder Mountain",
 "website": "https://www.disneylandparis.fr/attractions/parc-disneyland/big-thunder-mountain/",
-"wheelchair": "limited"
+"wheelchair": "limited",
+"wikidata": "Q859406"
 },
 "type": "node"
 },
@@ -418,10 +409,10 @@
 "duration": "00:01:30",
 "name": "Casey Jr. – le Petit Train du Cirque",
 "source": "survey",
-"subject:wikidata": "Q2521960",
-"subject:wikipedia": "fr:Casey Jr Circus Train#Disneyland Paris",
 "website": "https://www.disneylandparis.fr/attractions/parc-disneyland/casey-jr-le-petit-train-du-cirque/",
-"wheelchair": "limited"
+"wheelchair": "limited",
+"wikidata": "Q2521960",
+"wikipedia": "fr:Casey Jr Circus Train#Disneyland Paris"
 },
 "type": "node"
 },
@@ -474,14 +465,12 @@
 "tags": {
 "attraction": "roller_coaster",
 "fee": "no",
-"minimum_height_requirement": "1.2",
 "name": "Tonnerre 2 Zeus",
 "old_name": "Tonnerre de Zeus",
 "operator": "Parc Astérix",
 "ref": "38",
-"website": "https://www.parcasterix.fr/attractions/sensations-fortes/tonnerre-2-zeus",
+"tourism": "attraction",
 "wikidata": "Q586854",
-"wikimedia_commons": "Category:Tonnerre_de_Zeus",
 "wikipedia": "fr:Tonnerre 2 Zeus"
 },
 "type": "node"
@@ -528,8 +517,8 @@
 },
 {
 "id": 1207178486,
-"lat": 32.7563742,
-"lon": -97.0730201,
+"lat": 32.7563642,
+"lon": -97.0730177,
 "tags": {
 "attraction": "roller_coaster",
 "name": "New Texas Giant",
@@ -889,10 +878,9 @@
 "lon": 2.5667073,
 "tags": {
 "attraction": "roller_coaster",
-"minimum_height_requirement": "1.3",
+"min_height": "1.3",
 "name": "Oziris",
 "ref": "41",
-"website": "https://www.parcasterix.fr/attractions/sensations-fortes/oziris",
 "wikidata": "Q2043001",
 "wikipedia": "fr:OzIris"
 },
@@ -904,7 +892,6 @@
 "lon": 7.721562,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "MACK Rides",
 "min_age": "6",
 "min_height": "1.2",
 "name": "Schweizer Bobbahn",
@@ -929,7 +916,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "colour": "gray",
-"manufacturer": "Bolliger & Mabillard",
 "material": "steel",
 "min_age": "11",
 "min_height": "1.40",
@@ -1053,46 +1039,6 @@
 "tourism": "attraction",
 "wikidata": "Q2444215",
 "wikipedia": "es:Tornado (Parque de Atracciones de Madrid)"
-},
-"type": "node"
-},
-{
-"id": 1936367558,
-"lat": 50.5663559,
-"lon": 12.3977831,
-"tags": {
-"attraction": "roller_coaster",
-"construction:tourism": "attraction",
-"manufacturer": "MACK Rides",
-"manufacturer:wikidata": "Q566832",
-"manufacturer:wikipedia": "de:Mack Rides",
-"name": "Launched Water Coaster Donnervind",
-"opening_date": "2026"
-},
-"type": "node"
-},
-{
-"id": 1975235176,
-"lat": 37.3252516,
-"lon": -121.8645626,
-"tags": {
-"attraction": "roller_coaster",
-"attraction:minheight:escorted": "0",
-"minimum_height_requirement": "42\"",
-"name": "Danny the Dragon",
-"wheelchair": "yes"
-},
-"type": "node"
-},
-{
-"id": 1975235181,
-"lat": 37.3259756,
-"lon": -121.8639433,
-"tags": {
-"attraction": "roller_coaster",
-"attraction:minheight:escorted": "36\"",
-"minimum_height_requirement": "40\"",
-"name": "Pacific Fruit Express"
 },
 "type": "node"
 },
@@ -1410,19 +1356,6 @@
 "type": "node"
 },
 {
-"id": 2458247429,
-"lat": 51.4614584,
-"lon": -0.6501816,
-"tags": {
-"attraction": "roller_coaster",
-"minimum_height_requirement": "0.9",
-"minimum_height_requirement:unaccompanied": "1.3",
-"name": "Dragon's Apprentice",
-"website": "https://www.legoland.co.uk/explore/theme-park/rides-attractions/dragons-apprentice/"
-},
-"type": "node"
-},
-{
 "id": 2476520893,
 "lat": 14.0948738,
 "lon": 120.938435,
@@ -1580,8 +1513,7 @@
 "email": "office@dallisman.at",
 "name": "Wilde Maus",
 "phone": "+43 699 1 729 15 15",
-"wheelchair": "yes",
-"wikimedia_commons": "Category:Wilde Maus (Prater)"
+"wheelchair": "yes"
 },
 "type": "node"
 },
@@ -1651,6 +1583,15 @@
 "type": "node"
 },
 {
+"id": 3288212187,
+"lat": 42.6487587,
+"lon": 77.1933597,
+"tags": {
+"attraction": "roller_coaster"
+},
+"type": "node"
+},
+{
 "id": 3394418495,
 "lat": 33.8446407,
 "lon": -118.0000058,
@@ -1690,7 +1631,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "manufacturer": "Bolliger & Mabillard",
-"minimum_height_requirement": "1.32",
 "name": "Baron 1898",
 "operator": "Efteling",
 "roller_coaster:type": "dive_coaster",
@@ -1712,8 +1652,13 @@
 "entrance": "yes",
 "min_age": "7",
 "min_height": "1.3",
+"name": "blue fire Megacoaster",
 "roller_coaster": "entrance",
-"wheelchair": "limited"
+"website:de": "https://www.europapark.de/de/freizeitpark/attraktionen/blue-fire-megacoaster-powered-nord-stream-2",
+"website:en": "https://www.europapark.de/en/theme-park/attractions/blue-fire-megacoaster-powered-nord-stream-2",
+"wheelchair": "limited",
+"wikidata": "Q477897",
+"wikipedia": "de:Blue Fire Megacoaster"
 },
 "type": "node"
 },
@@ -1807,6 +1752,17 @@
 "attraction": "roller_coaster",
 "name": "The Bat",
 "wikidata": "Q4868452"
+},
+"type": "node"
+},
+{
+"id": 3659636659,
+"lat": 40.9868636,
+"lon": -111.8935264,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Jet Star 2",
+"wikidata": "Q18152677"
 },
 "type": "node"
 },
@@ -1944,7 +1900,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Octonauts Rollercoaster",
-"name:etymology:wikidata": "Q1215265",
 "wikidata": "Q24996970"
 },
 "type": "node"
@@ -2054,14 +2009,13 @@
 "tags": {
 "attraction": "roller_coaster",
 "manufacturer": "Vekoma Rides Manufacturing B.V.",
-"minimum_height_requirement": "1.2",
 "name": "Python",
 "start_date": "1981-04-12",
 "tourism": "attraction",
 "url": "https://www.eftepedia.nl/lemma/Python",
 "website": "https://www.efteling.com/nl/park/attracties/python",
 "wikidata": "Q15727",
-"wikimedia_commons": "Category:Python (Efteling)",
+"wikimedia_commons": "Category:Python_(Efteling)",
 "wikipedia": "nl:Python (Efteling)"
 },
 "type": "node"
@@ -2114,10 +2068,8 @@
 "lon": -0.3164186,
 "tags": {
 "attraction": "roller_coaster",
-"minimum_height_requirement": "1.1",
-"minimum_height_requirement:unaccompanied": "1.3",
 "name": "Vampire",
-"website": "https://www.chessington.com/explore/theme-park-zoo/rides-attractions/vampire/",
+"tourism": "attraction",
 "wikidata": "Q2509682"
 },
 "type": "node"
@@ -2176,8 +2128,7 @@
 "lon": 16.4009932,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Boomerang",
-"wikimedia_commons": "Category:Boomerang (Prater)"
+"name": "Boomerang"
 },
 "type": "node"
 },
@@ -2339,7 +2290,7 @@
 "lon": -74.4327167,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Medusa",
+"name": "Bizzaro",
 "tourism": "attraction"
 },
 "type": "node"
@@ -2350,7 +2301,6 @@
 "lon": -47.010799,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "Montezum",
 "tourism": "attraction",
 "wikidata": "Q6905507",
@@ -2403,8 +2353,9 @@
 "lon": 135.4305396,
 "tags": {
 "attraction": "roller_coaster",
-"name": "The Flying Dinosaur",
+"name": "ザ・フライング・ダイナソー",
 "name:en": "The Flying Dinosaur",
+"name:es": "The Flying Dinosaur",
 "name:ja": "ザ・フライング・ダイナソー",
 "wikidata": "Q25110043",
 "wikimedia_commons": "Category:The Flying Dinosaur",
@@ -2481,6 +2432,18 @@
 "attraction": "roller_coaster",
 "name": "1066",
 "tourism": "attraction"
+},
+"type": "node"
+},
+{
+"id": 4977171660,
+"lat": 47.4844078,
+"lon": 12.427653,
+"tags": {
+"attraction": "roller_coaster",
+"description": "(als Achterbahn, da passender Tag nicht vorhanden)",
+"name": "Mountaincart St. Johann",
+"opening_hours": "Mo-Su 10:00-16:30"
 },
 "type": "node"
 },
@@ -2579,13 +2542,10 @@
 "lon": 2.5739237,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.3",
-"minimum_height_requirement": "1",
 "name": "Pégase Express",
 "tourism": "attraction",
 "wheelchair": "yes",
 "wikidata": "Q24933660",
-"wikimedia_commons": "Category:Pégase_Express",
 "wikipedia": "fr:Pégase Express"
 },
 "type": "node"
@@ -2651,6 +2611,16 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Shongololo"
+},
+"type": "node"
+},
+{
+"id": 5310945038,
+"lat": 28.40707,
+"lon": -81.4631044,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Super Grover's Box Car Derby"
 },
 "type": "node"
 },
@@ -2881,9 +2851,8 @@
 "lon": -83.3207805,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Marsh Mayhem",
-"tourism": "attraction",
-"wikimedia_commons": "File:Marsh Mayhem entrance, Wild Adventures.jpg"
+"name": "Go Bananas",
+"tourism": "attraction"
 },
 "type": "node"
 },
@@ -2894,8 +2863,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Boomerang",
-"tourism": "attraction",
-"wikimedia_commons": "File:Boomerang entrance, Wild Adventures.jpg"
+"tourism": "attraction"
 },
 "type": "node"
 },
@@ -2940,6 +2908,17 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Twisted Typhoon",
+"tourism": "attraction"
+},
+"type": "node"
+},
+{
+"id": 5647998462,
+"lat": 30.7193921,
+"lon": -83.3245678,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Safari Jeeps",
 "tourism": "attraction"
 },
 "type": "node"
@@ -3081,26 +3060,6 @@
 "type": "node"
 },
 {
-"id": 5737190676,
-"lat": 52.3892345,
-"lon": 6.4381062,
-"tags": {
-"attraction": "roller_coaster",
-"comment": "Start_date: althans, in het Avonturenpark. Old_name: die in het pretpark Isla Mágica, in Sevilla.",
-"manufacturer": "Zamperla",
-"name": "Drakennest",
-"note": "Disk'o is geen bestaande OSM tag",
-"old_name": "Ciklón",
-"source:geometry": "PDOK aerial imagery",
-"start_date": "2017",
-"tourism": "attraction",
-"website": "https://www.avonturenpark.nl/attraction-detail/drakennest",
-"wikidata": "Q122459966",
-"wikipedia": "nl:Drakennest"
-},
-"type": "node"
-},
-{
 "id": 5744765931,
 "lat": 13.9930483,
 "lon": 100.674969,
@@ -3145,8 +3104,8 @@
 },
 {
 "id": 5784956519,
-"lat": 51.4002378,
-"lon": 5.9841486,
+"lat": 51.4002663,
+"lon": 5.9840735,
 "tags": {
 "attraction": "roller_coaster",
 "height": "40",
@@ -3261,17 +3220,9 @@
 "lon": 6.8881789,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "Vekoma Rides Manufacturing B.V.",
-"maximum_height_requirement": "2.05",
-"minimum_height_requirement": "0.95",
 "name": "Tweestryd",
-"operator": "Wildlands Adventure Zoo Emmen",
-"start_date": "2018-03-19",
 "tourism": "attraction",
-"website": "https://www.wildlands.nl/dagprogramma/tweestryd",
-"wheelchair": "limited",
-"wikidata": "Q48540252",
-"wikipedia": "nl:Tweestryd"
+"wheelchair": "limited"
 },
 "type": "node"
 },
@@ -3408,11 +3359,6 @@
 "lon": 4.5871445,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "1",
-"height": "21",
-"length": "564",
-"minimum_height_requirement": "1",
 "name": "Tiki-Waka",
 "tourism": "attraction"
 },
@@ -3476,7 +3422,7 @@
 "lon": -83.544454,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Rocky Top Mountain Coaster",
+"name": "Rocky Top Mountain Coaser",
 "roller_coaster": "station"
 },
 "type": "node"
@@ -3678,6 +3624,17 @@
 "type": "node"
 },
 {
+"id": 6698979460,
+"lat": 48.2623239,
+"lon": 7.7182569,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Blue Fire Megacoaster",
+"operator": "Europa-Park"
+},
+"type": "node"
+},
+{
 "id": 6727865928,
 "lat": 49.7605757,
 "lon": 11.4111372,
@@ -3861,9 +3818,6 @@
 "lon": 4.5941233,
 "tags": {
 "attraction": "roller_coaster",
-"height": "36",
-"length": "285",
-"minimum_height_requirement": "1.3",
 "name": "Cobra",
 "tourism": "attraction"
 },
@@ -4263,14 +4217,11 @@
 "lon": 2.5681569,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.3",
 "fee": "no",
-"minimum_height_requirement": "1.2",
 "name": "Trace du Hourra",
 "operator": "Parc Astérix",
 "ref": "42",
 "tourism": "attraction",
-"website": "https://www.parcasterix.fr/attractions/sensations-fortes/trace-du-hourra",
 "wheelchair": "limited",
 "wheelchair:description:en": "wheelchair accessible, but you need to be able to walk a few steps with help from staff.",
 "wheelchair:description:fr": "accessible en fauteuil, mais il faut marcher quelques pas avec de l'aide.",
@@ -4378,7 +4329,7 @@
 "tourism": "attraction",
 "wheelchair": "no",
 "wikidata": "Q82516305",
-"wikipedia": "de:Volldampf (Achterbahn)"
+"wikipedia": "de:Volldampf (Erlebnispark Tripsdrill)"
 },
 "type": "node"
 },
@@ -4477,7 +4428,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "length": "2900 ft",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48 inches",
 "name": "Ravine Flyer 2",
 "operator": "Waldameer Park & Water World"
 },
@@ -4632,6 +4583,15 @@
 "type": "node"
 },
 {
+"id": 8484372204,
+"lat": 36.6402836,
+"lon": 101.7603245,
+"tags": {
+"attraction": "roller_coaster"
+},
+"type": "node"
+},
+{
 "id": 8549776663,
 "lat": 54.8328616,
 "lon": 18.2036291,
@@ -4686,15 +4646,11 @@
 "lon": 2.5738783,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.3",
-"minimum_height_requirement": "1",
 "name": "Le Vol d'Icare",
 "tourism": "attraction",
-"website": "https://www.parcasterix.fr/attractions/famille/vol-dicare",
 "wheelchair": "limited",
 "wheelchair:description:fr": "accessible en fauteuil mais il faut pouvoir marcher quelques pas accompagné.e",
 "wikidata": "Q2500496",
-"wikimedia_commons": "Category:Le_Vol_d'Icare",
 "wikipedia": "fr:Le Vol d'Icare (Parc Astérix)"
 },
 "type": "node"
@@ -4705,8 +4661,6 @@
 "lon": 2.5674581,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"minimum_height_requirement": "0.9",
 "name": "SOS Tournevis",
 "ref": "16",
 "tourism": "attraction",
@@ -4749,9 +4703,22 @@
 "type": "node"
 },
 {
+"id": 8813081537,
+"lat": 42.9292629,
+"lon": -78.3860792,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Predator",
+"tourism": "attraction",
+"wikidata": "Q2108259",
+"wikipedia": "en:Predator (roller coaster)"
+},
+"type": "node"
+},
+{
 "id": 8813081541,
-"lat": 42.9259982,
-"lon": -78.3825322,
+"lat": 42.9259988,
+"lon": -78.3825427,
 "tags": {
 "attraction": "roller_coaster",
 "name": "Mind Eraser",
@@ -4792,7 +4759,6 @@
 "minimum_height_requirement": "1.30",
 "name": "Gold Rush",
 "start_date": "2017-04-13",
-"tourism": "attraction",
 "website": "https://www.slagharen.com/attractiepark/attracties/gold-rush",
 "wikidata": "Q28033288",
 "wikimedia_commons": "Category:Gold_Rush_(Slagharen)",
@@ -4995,8 +4961,8 @@
 },
 {
 "id": 8958949627,
-"lat": 32.1663311,
-"lon": 118.990404,
+"lat": 32.1663652,
+"lon": 118.9904469,
 "tags": {
 "attraction": "roller_coaster",
 "name": "坏蛋小飞车",
@@ -5052,14 +5018,11 @@
 "lon": 7.7241075,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "MACK Rides",
-"min_height": "1",
 "name": "Arthur",
 "tourism": "attraction",
 "website:de": "https://www.europapark.de/de/freizeitpark/attraktionen/arthur",
 "wheelchair": "yes",
-"wikidata": "Q14475699",
-"wikipedia": "de:Arthur_(Europa-Park)"
+"wikidata": "Q14475699"
 },
 "type": "node"
 },
@@ -5090,6 +5053,17 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Comet"
+},
+"type": "node"
+},
+{
+"id": 9080965232,
+"lat": 43.1804302,
+"lon": 10.548609,
+"tags": {
+"attraction": "roller_coaster",
+"name": "TopoZorro Explorer",
+"operator": "Parco Divertimenti Cavallino Matto"
 },
 "type": "node"
 },
@@ -5322,6 +5296,16 @@
 "type": "node"
 },
 {
+"id": 9297009753,
+"lat": 42.9272493,
+"lon": -78.3821374,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Hoot-n-Holler"
+},
+"type": "node"
+},
+{
 "id": 9308453941,
 "lat": 34.8054579,
 "lon": 135.6384449,
@@ -5529,18 +5513,16 @@
 "tags": {
 "attraction": "roller_coaster",
 "fee": "no",
-"minimum_height_requirement": "1.3",
+"min_height": "1.3",
 "name": "Toutatis",
 "operator": "Parc Astérix",
 "operator:wikipedia": "fr:Parc Astérix",
 "start_date": "2023-04-05",
 "tourism": "attraction",
-"website": "https://www.parcasterix.fr/attractions/sensations-fortes/toutatis",
 "wheelchair": "yes",
 "wheelchair:description:en": "Wheelchair users must transfer to the ride vehicle.",
 "wheelchair:description:fr": "Transfert du fauteuil au train.",
 "wikidata": "Q99509434",
-"wikimedia_commons": "Category:Toutatis_(roller_coaster)",
 "wikipedia": "fr:Toutatis (Parc Astérix)"
 },
 "type": "node"
@@ -5551,17 +5533,6 @@
 "lon": 116.2962927,
 "tags": {
 "attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 9533788240,
-"lat": 28.4731467,
-"lon": -81.4703192,
-"tags": {
-"attraction": "roller_coaster",
-"name": "The High in the Sky Seuss Trolley Train Ride!",
-"website": "https://www.universalorlando.com/web/en/us/things-to-do/rides-attractions/high-in-the-sky-seuss-trolley-train-ride"
 },
 "type": "node"
 },
@@ -5832,12 +5803,11 @@
 "tags": {
 "attraction": "roller_coaster",
 "attraction:minheight": "4'",
-"check_date": "2026-07-17",
 "material": "wood",
 "name": "Excalibur",
 "operator": "Funtown Splashtown USA",
 "roller_coaster": "station",
-"start_date": "1998-06",
+"start_date": "1998",
 "wikidata": "Q1383421",
 "wikipedia": "en:Excalibur (Funtown Splashtown USA)"
 },
@@ -5921,8 +5891,8 @@
 "lon": 16.3987647,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "yes",
 "name": "Volare",
+"tourism": "attraction",
 "wikimedia_commons": "Category:Volare (roller coaster)"
 },
 "type": "node"
@@ -6499,8 +6469,7 @@
 "minimum_height_requirement": "1.10 m",
 "name": "Movie Park Studio Tour",
 "operator": "Movie Park Germany",
-"tourism": "attraction",
-"wheelchair": "no"
+"tourism": "attraction"
 },
 "type": "node"
 },
@@ -6585,21 +6554,28 @@
 "type": "node"
 },
 {
+"id": 11194877287,
+"lat": 48.2628196,
+"lon": 7.7187142,
+"tags": {
+"attraction": "roller_coaster",
+"name": "blue fire Megacoaster"
+},
+"type": "node"
+},
+{
 "id": 11194939924,
 "lat": 48.2650297,
 "lon": 7.7201581,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "MACK Rides",
-"maxheight": "1.95",
+"max_height": "1.95",
 "min_age": "8",
 "min_height": "1.3",
 "name": "Euro-Mir",
 "name:de": "Euro-Mir",
 "name:en": "Space Station Mir",
-"name:fr": "Station spatiale Mir",
-"start_date": "12-06-1997",
-"website": "https://www.europapark.de/en/theme-park/attractions/euro-mir"
+"name:fr": "Station spatiale Mir"
 },
 "type": "node"
 },
@@ -6623,6 +6599,7 @@
 "duration": "00:02:18",
 "name": "Star Wars Hyperspace Mountain",
 "operator": "Euro Disney",
+"tourism": "attraction",
 "website": "https://www.disneylandparis.fr/attractions/parc-disneyland/space-mountain-mission-2/",
 "wheelchair": "no",
 "wikidata": "Q125670165",
@@ -6644,6 +6621,16 @@
 "wheelchair": "no",
 "wikidata": "Q1142089",
 "wikipedia": "fr:Crush's Coaster"
+},
+"type": "node"
+},
+{
+"id": 11263964311,
+"lat": 45.6040903,
+"lon": 9.5387541,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Gold River"
 },
 "type": "node"
 },
@@ -6717,8 +6704,8 @@
 },
 {
 "id": 11380781665,
-"lat": 47.9071921,
-"lon": -116.7081807,
+"lat": 47.9071768,
+"lon": -116.7081847,
 "tags": {
 "attraction": "roller_coaster",
 "name": "Cork Screw",
@@ -6859,6 +6846,30 @@
 "type": "node"
 },
 {
+"id": 11417700186,
+"lat": 48.2612284,
+"lon": 7.7189905,
+"tags": {
+"attraction": "roller_coaster",
+"name": "WODAN - Timburcoaster",
+"tourism": "attraction",
+"wheelchair": "no"
+},
+"type": "node"
+},
+{
+"id": 11417701991,
+"lat": 48.2622421,
+"lon": 7.7188928,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Blue Fire Megacoaster",
+"tourism": "attraction",
+"wheelchair": "no"
+},
+"type": "node"
+},
+{
 "id": 11422246587,
 "lat": 49.1343945,
 "lon": 2.5663684,
@@ -6900,9 +6911,6 @@
 "lon": 2.5962898,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "0.9",
-"minimum_height_requirement": "0.9",
 "name": "LikeMe coaster",
 "tourism": "attraction"
 },
@@ -6975,7 +6983,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "龙的传说",
-"name:ru": "Легенда о драконе",
 "tourism": "attraction"
 },
 "type": "node"
@@ -7002,6 +7009,15 @@
 "id": 11508518991,
 "lat": 55.2026078,
 "lon": -6.6540965,
+"tags": {
+"attraction": "roller_coaster"
+},
+"type": "node"
+},
+{
+"id": 11625080858,
+"lat": 48.2652339,
+"lon": 25.9303103,
 "tags": {
 "attraction": "roller_coaster"
 },
@@ -7066,15 +7082,12 @@
 },
 {
 "id": 11648907998,
-"lat": 48.2677259,
-"lon": 7.7190811,
+"lat": 48.2676246,
+"lon": 7.7190033,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "MACK Rides",
 "name": "Pegasus",
-"tourism": "attraction",
-"wikidata": "Q874106",
-"wikipedia": "de:Pegasus – Die YoungStar Achterbahn"
+"tourism": "attraction"
 },
 "type": "node"
 },
@@ -7129,14 +7142,8 @@
 "lon": 2.9476151,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "1",
-"height": "21",
-"length": "660",
-"minimum_height_requirement": "1",
 "name": "Wakala",
-"operator": "Bellewaerde Park",
-"start_date": "2020"
+"operator": "Bellewaerde Park"
 },
 "type": "node"
 },
@@ -7304,7 +7311,6 @@
 "attraction": "roller_coaster",
 "colour": "brown",
 "fee": "no",
-"manufacturer": "MACK Rides",
 "material": "steel",
 "min_age": "8",
 "min_height": "1.30",
@@ -7312,10 +7318,19 @@
 "opening_date": "2024",
 "roller_coaster:type": "launch_coaster",
 "start_date": "2024-04-26",
-"website": "https://www.europapark.de/en/theme-park/attractions/voltron-nevera-powered-rimac",
 "wikidata": "Q121359119",
 "wikimedia_commons": "Category:Voltron (Europa-Park)",
 "wikipedia": "de:Voltron_Nevera"
+},
+"type": "node"
+},
+{
+"id": 11930549531,
+"lat": 12.8328419,
+"lon": 77.4012128,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Recoil"
 },
 "type": "node"
 },
@@ -7414,36 +7429,7 @@
 "lon": 7.7210778,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "MACK Rides",
-"name": "Atlantica SuperSplash",
-"wikidata": "Q319652",
-"wikipedia": "de:Atlantica SuperSplash"
-},
-"type": "node"
-},
-{
-"id": 12020145169,
-"lat": 48.2669111,
-"lon": 7.7190635,
-"tags": {
-"attraction": "roller_coaster",
-"manufacturer": "MACK Rides",
-"name": "Poseidon",
-"wikidata": "Q319452",
-"wikipedia": "de:Wasserachterbahn Poseidon"
-},
-"type": "node"
-},
-{
-"id": 12020513769,
-"lat": 48.2677007,
-"lon": 7.7203189,
-"tags": {
-"attraction": "roller_coaster",
-"manufacturer": "Bolliger & Mabillard",
-"name": "Silver Star",
-"wikidata": "Q527688",
-"wikipedia": "de:Silver Star (Europa-Park)"
+"name": "Atlantica SuperSplash"
 },
 "type": "node"
 },
@@ -7480,15 +7466,14 @@
 "lon": 13.1247193,
 "tags": {
 "attraction": "roller_coaster",
-"check_date": "2026-08-20",
 "name": "Erdbeer-Raupenbahn"
 },
 "type": "node"
 },
 {
 "id": 12066237454,
-"lat": 52.3896184,
-"lon": 6.4371434,
+"lat": 52.3896282,
+"lon": 6.4372359,
 "tags": {
 "attraction": "roller_coaster",
 "comment": "Het Doolhof bevond zich hier en werd opgevolgd door RidderStrijd.",
@@ -7606,7 +7591,7 @@
 "operator": "Movie Park Germany",
 "roller_coaster:type": "wooden_coaster",
 "tourism": "attraction",
-"wheelchair": "yes",
+"wheelchair": "no",
 "wikidata": "Q320094",
 "wikipedia": "de:Bandit (Movie Park Germany)"
 },
@@ -7743,7 +7728,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "MotoGee",
-"operator": "Särkänniemen huvipuisto",
 "tourism": "attraction"
 },
 "type": "node"
@@ -7755,7 +7739,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Hype",
-"operator": "Särkänniemen huvipuisto",
 "tourism": "attraction"
 },
 "type": "node"
@@ -7815,9 +7798,6 @@
 "lon": 2.5963637,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "0.9",
-"minimum_height_requirement": "0.9",
 "name": "K3 Roller Skater",
 "tourism": "attraction"
 },
@@ -8006,10 +7986,7 @@
 "lon": -0.3188924,
 "tags": {
 "attraction": "roller_coaster",
-"maximum_height_requirement": "1.95",
-"minimum_height_requirement": "1.2",
-"name": "Dragon's Fury",
-"website": "https://www.chessington.com/explore/theme-park-zoo/rides-attractions/dragons-fury/",
+"name": "Dragons_Fury",
 "wikidata": "Q1255147"
 },
 "type": "node"
@@ -8020,12 +7997,19 @@
 "lon": -0.3177883,
 "tags": {
 "attraction": "roller_coaster",
-"maximum_height_requirement": "1.96",
-"minimum_height_requirement": "1.4",
 "name": "Rattlesnake",
-"website": "https://www.chessington.com/explore/theme-park-zoo/rides-attractions/rattlesnake/",
 "wikidata": "Q7295985",
 "wikipedia": "en:Rattlesnake (roller coaster)"
+},
+"type": "node"
+},
+{
+"id": 12631844891,
+"lat": 51.34918,
+"lon": -0.3178006,
+"tags": {
+"attraction": "roller_coaster",
+"name": "World of PAW Patrol - Coming 2026"
 },
 "type": "node"
 },
@@ -8060,30 +8044,11 @@
 "type": "node"
 },
 {
-"id": 12738488560,
-"lat": 50.6973623,
-"lon": 4.5891616,
-"tags": {
-"attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "1",
-"height": "15",
-"length": "925",
-"minimum_height_requirement": "1",
-"name": "Mecalodon",
-"start_date": "2025",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
 "id": 12747401983,
 "lat": 51.6480718,
 "lon": 5.047389,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.3",
-"attraction:minheight:escorted": "0.9",
 "manufacturer": "MACK Rides",
 "minimum_height_requirement": "0.90",
 "name": "Max & Moritz",
@@ -8092,7 +8057,7 @@
 "url": "https://www.eftepedia.nl/lemma/Max_%26_Moritz",
 "website": "https://www.efteling.com/nl/park/attracties/max-moritz",
 "wikidata": "Q59799476",
-"wikimedia_commons": "Category:Max & Moritz (Efteling)",
+"wikimedia_commons": "Category:Max_&_Moritz_(Efteling)",
 "wikipedia": "nl:Max & Moritz (Efteling)"
 },
 "type": "node"
@@ -8114,7 +8079,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "fee": "no",
-"minimum_height_requirement": "1",
+"min_height": "1",
 "name": "Cétautomatix",
 "operator": "Parc Astérix",
 "operator:wikipedia": "fr:Parc Astérix",
@@ -8166,8 +8131,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "fee": "no",
-"max_age": "99",
-"min_age": "3",
 "name": "FirleFranz",
 "wikidata": "Q118221226",
 "wikipedia": "de:Firlefranz"
@@ -8216,8 +8179,7 @@
 "attraction": "roller_coaster",
 "indoor": "yes",
 "name": "Tabalugas Achterbahn",
-"tourism": "attraction",
-"wheelchair": "no"
+"tourism": "attraction"
 },
 "type": "node"
 },
@@ -8233,11 +8195,10 @@
 },
 {
 "id": 12927124634,
-"lat": 53.4854226,
-"lon": 8.6096935,
+"lat": 53.485454,
+"lon": 8.6097448,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "Knollis Hafenflitzer"
 },
 "type": "node"
@@ -8362,12 +8323,12 @@
 },
 {
 "id": 12995090397,
-"lat": 40.2924439,
-"lon": -76.6555684,
+"lat": 40.2924638,
+"lon": -76.6555691,
 "tags": {
 "attraction": "roller_coaster",
 "name": "Wildcat's Revenge",
-"roller_coaster:type": "hybrid_coaster",
+"roller_coaster:type": "wooden_coaster",
 "tourism": "attraction",
 "wikidata": "Q2570460"
 },
@@ -8393,6 +8354,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Kingdom Coaster",
+"tourism": "attraction",
 "wikidata": "Q6412474",
 "wikipedia": "en:Kingdom Coaster"
 },
@@ -8400,13 +8362,12 @@
 },
 {
 "id": 13002208309,
-"lat": 40.0286542,
-"lon": -76.2183789,
+"lat": 40.0286018,
+"lon": -76.2185599,
 "tags": {
 "attraction": "roller_coaster",
-"maxheight": "6' 3\"",
-"maxweight": "300 lbs",
-"name": "Merlin's Mayhem"
+"name": "Joust Family Coaster",
+"tourism": "attraction"
 },
 "type": "node"
 },
@@ -8797,14 +8758,10 @@
 },
 {
 "id": 13269919021,
-"lat": 49.4215013,
-"lon": 1.982307,
+"lat": 49.4214906,
+"lon": 1.9823143,
 "tags": {
-"attraction": "roller_coaster",
-"manufacturer": "Dal Rides",
-"minimum_height_requirement": "0.90",
-"name": "La Pomme",
-"website": "https://www.parcsaintpaul.fr/attraction-details/la-pomme/"
+"attraction": "roller_coaster"
 },
 "type": "node"
 },
@@ -8814,10 +8771,7 @@
 "lon": 1.9803779,
 "tags": {
 "attraction": "roller_coaster",
-"minimum_height_requirement": "1.10",
-"name": "Wood Express",
-"operator": "The Gravity Group",
-"website": "https://www.parcsaintpaul.fr/attraction-details/wood/"
+"name": "Wood Express"
 },
 "type": "node"
 },
@@ -8827,10 +8781,7 @@
 "lon": 1.9805315,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "Zamperla",
-"minimum_height_requirement": "1.05",
-"name": "La Souris Verte",
-"website": "https://www.parcsaintpaul.fr/attraction-details/la-grande-roue/"
+"name": "La souris verte"
 },
 "type": "node"
 },
@@ -8840,10 +8791,7 @@
 "lon": 1.9840495,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "Zamperla",
-"minimum_height_requirement": "1",
-"name": "Mini-Mouse Cartoon",
-"website": "https://www.parcsaintpaul.fr/attraction-details/mini-mouse-cartoon/"
+"name": "Le Mini-Mouse Cartoon"
 },
 "type": "node"
 },
@@ -8972,19 +8920,18 @@
 },
 {
 "id": 13325522025,
-"lat": 48.3243346,
-"lon": 6.7303483,
+"lat": 48.3243269,
+"lon": 6.7303284,
 "tags": {
 "attraction": "roller_coaster",
 "colour": "red",
 "fee": "no",
 "material": "steel",
-"minimum_height_requirement": "95 cm",
+"min_height": "0.95",
 "name": "Fireline Redwood",
+"opening_date": "2026-07-04",
 "roller_coaster": "station",
 "roller_coaster:type": "boomerang",
-"start_date": "2026-07-04",
-"website": "https://www.fraispertuis-city.fr/dans-le-parc/fireline-redwood/",
 "wheelchair": "yes"
 },
 "type": "node"
@@ -9119,7 +9066,6 @@
 "manufacturer": "Zierer",
 "maxspeed": "39",
 "name": "Donderstenen",
-"note": "'Tourism attraction' is strikt genomen een overbodige tag, maar overal in pretparken toch bewust toegevoegd, omdat zonder die tag de naam niet rendert in standaard OSM en dan wordt het een park waarop vrijwel geen enkele attractienaam is te zien.",
 "roller_coaster:type": "wild_mouse",
 "source:geometry": "PDOK aerial imagery",
 "start_date": "2005-04-09",
@@ -9132,20 +9078,19 @@
 },
 {
 "id": 13410364136,
-"lat": 52.3911017,
-"lon": 6.4348617,
+"lat": 52.3910679,
+"lon": 6.4347868,
 "tags": {
 "attraction": "roller_coaster",
+"comment": "Baanvorm symbolisch;voor videoverkenning te donker.",
 "manufacturer": "Vekoma Rides Manufacturing B.V.",
 "minimum_height_requirement": "1.00",
 "name": "Rioolrat",
-"note": "Baanvorm symbolisch;voor videoverkenning te donker.",
 "start_date": "1996",
-"tourism": "attraction",
 "website": "https://www.avonturenpark.nl/attraction-detail/rioolrat",
 "wheelchair": "no",
 "wikidata": "Q2912636",
-"wikimedia_commons": "File:Rioolrat at Hellendoorn (3830881681).jpg",
+"wikimedia_commons": "File:Rioolrat_at_Hellendoorn_(3830881681).jpg",
 "wikipedia": "nl:Rioolrat (achtbaan)"
 },
 "type": "node"
@@ -9211,19 +9156,6 @@
 "lon": 120.9456675,
 "tags": {
 "attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 13584089602,
-"lat": 49.4211951,
-"lon": 1.9837403,
-"tags": {
-"attraction": "roller_coaster",
-"manufacturer": "Vekoma Rides Manufacturing B.V.",
-"minimum_height_requirement": "1",
-"name": "L'Aérotrain",
-"website": "https://www.parcsaintpaul.fr/attraction-details/laerotrain/"
 },
 "type": "node"
 },
@@ -9418,7 +9350,6 @@
 "min_height": "0.90",
 "name": "Mine Train",
 "start_date": "2001",
-"tourism": "attraction",
 "website": "https://www.slagharen.com/attractiepark/attracties/mine-train",
 "wikidata": "Q2123873",
 "wikipedia": "nl:Mine Train (Slagharen)"
@@ -9512,6 +9443,19 @@
 "type": "node"
 },
 {
+"id": 13881135295,
+"lat": 54.0753726,
+"lon": 10.779862,
+"tags": {
+"attraction": "roller_coaster",
+"fixme": "Schienenverlauf und Wege einzeichnen",
+"minimum_height_requirement": "90 cm",
+"name": "Cornwall Coaster",
+"wheelchair": "no"
+},
+"type": "node"
+},
+{
 "id": 13892859401,
 "lat": 31.9262741,
 "lon": 117.1341533,
@@ -9533,555 +9477,36 @@
 "type": "node"
 },
 {
-"id": 13907162330,
-"lat": 30.8878598,
-"lon": 121.0942008,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Rollercoaster"
-},
-"type": "node"
-},
-{
-"id": 13916815252,
-"lat": 49.2282218,
-"lon": 6.1594517,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Anaconda"
-},
-"type": "node"
-},
-{
-"id": 13917343027,
-"lat": 40.0295928,
-"lon": -76.2174836,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Joust"
-},
-"type": "node"
-},
-{
-"id": 13928257360,
-"lat": 52.2267161,
-"lon": 5.9152362,
-"tags": {
-"attraction": "roller_coaster",
-"manufacturer": "Vekoma Rides Manufacturing B.V.",
-"minimum_height_requirement": "0.95",
-"name": "Jul's Rollerskates",
-"operator": "Julianatoren",
-"website": "https://www.julianatoren.nl/pretpark/attracties/juls-rollerskates/",
-"wikidata": "Q122460551",
-"wikipedia": "nl:Jul's Rollerskates"
-},
-"type": "node"
-},
-{
-"id": 13928257387,
-"lat": 52.2269994,
-"lon": 5.9157779,
-"tags": {
-"attraction": "roller_coaster",
-"manufacturer": "SBF-VISA Group",
-"minimum_height_requirement": "0.95",
-"name": "Texas Twister",
-"operator": "Julianatoren",
-"website": "https://www.julianatoren.nl/pretpark/attracties/texas-twister/",
-"wikidata": "Q124288852",
-"wikipedia": "nl:Texas Twister"
-},
-"type": "node"
-},
-{
-"id": 13942249500,
-"lat": 49.1815321,
-"lon": -0.4214571,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Valkyrie",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 13942286302,
-"lat": -7.8289135,
-"lon": 110.4399465,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Cyclone Coaster"
-},
-"type": "node"
-},
-{
-"id": 13956276661,
-"lat": 47.5877946,
-"lon": -120.6752077,
-"tags": {
-"attraction": "roller_coaster",
-"fee": "yes",
-"name": "Tumwater Twister",
-"operator": "Leavenworth Adventure Park"
-},
-"type": "node"
-},
-{
-"id": 13960521493,
-"lat": 61.5059446,
-"lon": 23.7484024,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Konect",
-"operator": "Särkänniemen huvipuisto",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 13984587354,
-"lat": 23.4312535,
-"lon": 113.2380456,
-"tags": {
-"attraction": "roller_coaster",
-"name": "双龙飞舞"
-},
-"type": "node"
-},
-{
-"id": 13989236618,
-"lat": 32.7550377,
-"lon": -97.0723065,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Tormenta Rampaging Run",
-"operator": "Six Flags over Texas",
-"operator:wikidata": "Q127324768",
-"start_date": "2026-07-09",
-"wikidata": "Q136469159",
-"wikipedia": "en:Tormenta Rampaging Run"
-},
-"type": "node"
-},
-{
-"id": 13990573352,
-"lat": 42.9276857,
-"lon": -78.3828587,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Rolling Thunder",
-"website": "https://www.sixflags.com/darienlake/attractions/rolling-thunder"
-},
-"type": "node"
-},
-{
-"id": 14004367185,
-"lat": 56.6355429,
-"lon": 47.8906501,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 14006847721,
-"lat": 42.9304204,
-"lon": -78.3844445,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Boomerang",
-"tourism": "attraction",
-"website": "https://www.sixflags.com/darienlake/attractions/boomerang"
-},
-"type": "node"
-},
-{
-"id": 14015580087,
-"lat": 47.906463,
-"lon": -116.7075189,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Stunt Pilot",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 14015623925,
-"lat": 47.9044788,
-"lon": -116.7107557,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Aftershock",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 14047397035,
-"lat": 52.2782603,
-"lon": 76.9474793,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 14047397036,
-"lat": 52.2782106,
-"lon": 76.9479669,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 14049454031,
-"lat": 51.4926216,
-"lon": 6.875478,
-"tags": {
-"attraction": "roller_coaster",
-"check_date": "2026-07-26",
-"description": "1ne Person bringt die kleine 1 Personenkiste mit Muskelkraft auf ca 1,40 Meter wo sie dann von alleine die kleine Runde dreht aud am Startpunkt automatisch stoppt",
-"fee": "no",
-"name": "Knollis Mais Express",
-"reservation": "no",
-"roller_coaster:type": "wild_mouse",
-"tourism": "attraction",
-"wheelchair": "no"
-},
-"type": "node"
-},
-{
-"id": 14056234524,
-"lat": 33.5798734,
-"lon": -7.6897688,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Le serpent",
-"survey:date": "2026-07-28"
-},
-"type": "node"
-},
-{
-"id": 14071379377,
-"lat": 57.1241767,
-"lon": 24.6593618,
-"tags": {
-"attraction": "roller_coaster",
-"fee": "yes",
-"name": "Rodeļu trase"
-},
-"type": "node"
-},
-{
-"id": 14073358914,
-"lat": 51.5006623,
-"lon": 5.4380111,
-"tags": {
-"attraction": "roller_coaster",
-"manufacturer": "Zierer",
-"name": "Tyfoon",
-"operator": "Attractiepark DippieDoe",
-"start_date": "2011-04-20",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 14073359038,
-"lat": 51.4999665,
-"lon": 5.4348694,
-"tags": {
-"attraction": "roller_coaster",
-"manufacturer": "SBF Visa",
-"name": "Dolle Pier",
-"operator": "Attractiepark DippieDoe",
-"start_date": "2018-03-30",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 14085179113,
-"lat": 48.2648032,
-"lon": 7.7197108,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Euro-Mir",
-"operator": "Europa-Park"
-},
-"type": "node"
-},
-{
-"id": 14101197182,
-"lat": 51.1524204,
-"lon": 13.1250465,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Bettys Beerchen Boomerang"
-},
-"type": "node"
-},
-{
-"id": 14127168711,
-"lat": 43.8443696,
-"lon": -79.5457675,
-"tags": {
-"attraction": "roller_coaster",
-"fee": "no",
-"name": "Snoopy's Racing Railway",
-"opening_hours": "Mo-Su 10:00-22:00",
-"operator": "Canada's Wonderland"
-},
-"type": "node"
-},
-{
-"id": 14131249864,
-"lat": 48.26535,
-"lon": 7.7189258,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Voltron Nevera Block"
-},
-"type": "node"
-},
-{
-"id": 14134505195,
-"lat": 44.0903992,
-"lon": 12.5154089,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 14135060800,
-"lat": 40.6813352,
-"lon": 46.3234941,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 14143424290,
-"lat": 16.7990882,
-"lon": 96.1406695,
-"tags": {
-"attraction": "roller_coaster",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 14158153640,
-"lat": 45.6063126,
-"lon": 9.535746,
-"tags": {
-"attraction": "roller_coaster",
-"fixme": "Creare tracciato",
-"name": "Vroom"
-},
-"type": "node"
-},
-{
-"id": 14208928811,
-"lat": 39.7013588,
-"lon": 141.1906943,
-"tags": {
-"attraction": "roller_coaster",
-"name": "ポップスピンコースター"
-},
-"type": "node"
-},
-{
-"id": 14208928816,
-"lat": 39.7013354,
-"lon": 141.1900003,
-"tags": {
-"attraction": "roller_coaster",
-"name": "ドラゴンコースター"
-},
-"type": "node"
-},
-{
-"id": 14249754095,
-"lat": 48.2672374,
-"lon": 7.7209482,
-"tags": {
-"attraction": "roller_coaster",
-"contact:website:de": "https://www.europapark.de/de/freizeitpark/attraktionen/madame-freudenreich-curiosites",
-"contact:website:en": "https://www.europapark.de/en/theme-park/attractions/madame-freudenreich-curiosites",
-"contact:website:fr": "https://www.europapark.de/fr/parc-de-loisirs/attractions/madame-freudenreich-curiosites",
-"contact:website:it": "https://www.europapark.de/nl/attractiepark/attracties/madame-freudenreich-curiosites",
-"manufacturer": "MACK Rides",
-"name": "Madame Freudenreich Curiosités",
-"wikidata": "Q141641329"
-},
-"type": "node"
-},
-{
-"id": 14276380871,
-"lat": 52.6210381,
-"lon": 13.5473169,
-"tags": {
-"attraction": "roller_coaster",
-"charge": "Tageskarte oder Jahreskarte",
-"description": "Klompi ist ein Family Launch Coaster im Holland-Park bei Berlin. Die Familienachterbahn bietet auf 245 Metern Strecke vier Beschleunigungen, zwei Runden und Geschwindigkeiten bis 50 km/h. Fahrspaß für Kinder ab 90 cm Körpergröße in Begleitung.",
-"fee": "yes",
-"name": "Family Launch Coaster \"Klompi\"",
-"opening_hours": "Mo-Su 10:00-17:30",
-"operator": "Holland-Park"
-},
-"type": "node"
-},
-{
-"id": 14277382769,
-"lat": 39.2744777,
-"lon": -74.5741452,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Wild Waves Coaster",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 14277385639,
-"lat": 39.2746703,
-"lon": -74.5744544,
-"tags": {
-"attraction": "roller_coaster",
-"name": "GaleForce Roller Coaster",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 14332298501,
-"lat": 51.349414,
-"lon": -0.318059,
-"tags": {
-"attraction": "roller_coaster",
-"minimum_height_requirement": "0.9",
-"minimum_height_requirement:unaccompanied": "1.1",
-"name": "Chase's Mountain Mission",
-"website": "https://www.chessington.com/explore/theme-park-zoo/rides-attractions/chases-mountain-mission/"
-},
-"type": "node"
-},
-{
-"id": 14349493945,
-"lat": 50.002599,
-"lon": 19.3982799,
-"tags": {
-"attraction": "roller_coaster",
-"construction": "yes",
-"name": "Rokan",
-"tourism": "attraction"
-},
-"type": "node"
-},
-{
-"id": 14355009864,
-"lat": 48.8720694,
-"lon": 2.7718663,
-"tags": {
-"addr:city": "Chessy",
-"addr:place": "Adventureland",
-"addr:postcode": "77700",
-"attraction": "roller_coaster",
-"fee": "no",
-"name": "Indiana Jones™ and the Temple of Peril",
-"name:en": "Indiana Jones™ and the Temple of Peril",
-"name:fr": "Indiana Jones™ et le Temple du Péril",
-"operator": "Euro Disney Associés S.A.S.",
-"size": "140",
-"source": "survey;local knowledge;aerial imagery;osm notes",
-"website": "https://www.disneylandparis.com/fr-fr/attractions/parc-disneyland/indiana-jones-et-le-temple-du-peril/",
-"wheelchair": "no",
-"wikidata": "Q1571282",
-"wikipedia": "fr:Indiana Jones et le Temple du Péril"
-},
-"type": "node"
-},
-{
-"id": 14360150325,
-"lat": 51.7967008,
-"lon": 8.497145,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 14377972639,
-"lat": 28.5773283,
-"lon": 115.7804276,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 14377972640,
-"lat": 28.5805391,
-"lon": 115.7800007,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 14377972641,
-"lat": 28.5819766,
-"lon": 115.7781997,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
-"id": 14377972642,
-"lat": 28.5810924,
-"lon": 115.7851774,
-"tags": {
-"attraction": "roller_coaster",
-"name": "龙飞凤舞"
-},
-"type": "node"
-},
-{
-"id": 14377972643,
-"lat": 28.5781042,
-"lon": 115.7829482,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "node"
-},
-{
 "id": 3535771,
 "lat": 48.2624592,
-"lon": 7.7183437,
+"lon": 7.7183465,
 "tags": {
 "attraction": "roller_coaster",
 "colour": "blue",
-"manufacturer": "MACK Rides",
 "material": "steel",
 "min_age": "7",
 "min_height": "1.30",
-"name": "blue fire Megacoaster",
-"operator": "Europa-Park",
-"site": "attraction",
+"name": "blue fire MEGACOASTER",
 "type": "site",
-"website": "https://www.europapark.de/en/theme-park/attractions/blue-fire-megacoaster",
-"wheelchair": "limited",
 "wikidata": "Q477897",
 "wikimedia_commons": "Category:Blue_fire",
-"wikipedia": "de:Blue Fire Megacoaster"
+"wikipedia": "Blue Fire"
+},
+"type": "relation"
+},
+{
+"id": 3566937,
+"lat": 28.4724463,
+"lon": -81.4737923,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Flight of the Hippogriff",
+"old_name": "The Flying Unicorn",
+"route": "ride_path",
+"tourism": "attraction",
+"type": "route",
+"wikidata": "Q3073731",
+"wikipedia": "en:Flight of the Hippogriff"
 },
 "type": "relation"
 },
@@ -10095,7 +9520,7 @@
 "building": "yes",
 "contact:website": "https://disneyworld.disney.go.com/attractions/animal-kingdom/expedition-everest/",
 "lightning_lane": "yes",
-"minimum_height_requirement": "44\"",
+"minimum_height_requirement": "44in (113cm)",
 "name": "Expedition Everest: Legend of the Forbidden Mountain",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -10187,15 +9612,10 @@
 "lon": 7.7194203,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "Great Coasters International",
 "material": "wood",
-"min_height": "1.2",
 "name": "WODAN - Timburcoaster",
 "roller_coaster:type": "wooden_coaster",
-"site": "attraction",
 "type": "site",
-"website": "https://www.europapark.de/en/theme-park/attractions/wodan-timburcoaster",
-"wheelchair": "no",
 "wikidata": "Q443680",
 "wikipedia": "de:Wodan – Timburcoaster"
 },
@@ -10275,15 +9695,10 @@
 "lon": 2.5977952,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "0.96",
 "building": "yes",
-"min_age": "3",
-"minimum_height_requirement": "0.96",
-"name": "Draconis",
+"name": "De Draak",
 "tourism": "attraction",
-"type": "multipolygon",
-"wheelchair": "no"
+"type": "multipolygon"
 },
 "type": "relation"
 },
@@ -10442,16 +9857,13 @@
 "lon": 7.7232253,
 "tags": {
 "attraction": "roller_coaster",
-"manufacturer": "ART Engineering",
 "min_age": "4",
 "min_height": "1.00",
 "name": "Ba-a-a Express",
 "start_date": "2016",
 "type": "site",
 "website:de": "https://www.europapark.de/de/freizeitpark/attraktionen/ba-express",
-"wheelchair": "no",
-"wikidata": "Q28493695",
-"wikipedia": "de:Ba-a-a_Express"
+"wheelchair": "no"
 },
 "type": "relation"
 },
@@ -10562,11 +9974,9 @@
 "lon": -106.588004,
 "tags": {
 "attraction": "roller_coaster",
-"material": "wood",
 "name": "The New Mexico Rattler",
 "tourism": "attraction",
-"type": "multipolygon",
-"wikidata": "Q19332764"
+"type": "multipolygon"
 },
 "type": "relation"
 },
@@ -10707,7 +10117,7 @@
 "attraction:minheight:escorted": "0.90",
 "capacity": "18",
 "dog": "no",
-"manufacturer": "SBF-VISA Group",
+"manufacturer": "SBF Visa",
 "manufacturer:wikidata": "Q765935",
 "maxspeed": "35",
 "min_age": "2",
@@ -10731,28 +10141,6 @@
 "attraction": "roller_coaster",
 "building": "yes",
 "tourism": "attraction",
-"type": "multipolygon"
-},
-"type": "relation"
-},
-{
-"id": 21162196,
-"lat": 43.6170537,
-"lon": -89.7881506,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Hades 360",
-"type": "multipolygon"
-},
-"type": "relation"
-},
-{
-"id": 21303989,
-"lat": null,
-"lon": null,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Taron",
 "type": "multipolygon"
 },
 "type": "relation"
@@ -10877,6 +10265,28 @@
 "type": "way"
 },
 {
+"id": 40362832,
+"lat": 48.8720798,
+"lon": 2.7718493,
+"tags": {
+"addr:city": "Chessy",
+"addr:place": "Adventureland",
+"addr:postcode": "77700",
+"attraction": "roller_coaster",
+"name": "Indiana Jones™ and the Temple of Peril",
+"name:en": "Indiana Jones™ and the Temple of Peril",
+"name:fr": "Indiana Jones™ et le Temple du Péril",
+"operator": "Euro Disney Associés S.A.S.",
+"size": "140",
+"source": "survey;local knowledge;aerial imagery;osm notes",
+"website": "https://www.disneylandparis.com/fr-fr/attractions/parc-disneyland/indiana-jones-et-le-temple-du-peril/",
+"wheelchair": "no",
+"wikidata": "Q1571282",
+"wikipedia": "fr:Indiana Jones et le Temple du Péril"
+},
+"type": "way"
+},
+{
 "id": 41815510,
 "lat": 51.4033063,
 "lon": -0.5133133,
@@ -10904,7 +10314,7 @@
 "attraction": "roller_coaster",
 "name": "Sky Scream",
 "tourism": "attraction",
-"website": "https://www.plopsa.com/de/plopsaland-deutschland/attraktionen/sky-scream",
+"website": "https://www.holidaypark.de/de/attraktion/sky-scream",
 "wheelchair": "no",
 "wikidata": "Q16320856",
 "wikipedia": "de:Sky Scream"
@@ -11080,7 +10490,7 @@
 "attraction": "roller_coaster",
 "building": "yes",
 "layer": "2",
-"name": "Future Lost Mine Mayhem",
+"name": "Motocoaster",
 "roller_coaster": "station",
 "tourism": "attraction",
 "website": "https://www.dreamworld.com.au/rides-and-attractions/motocoaster/",
@@ -11146,9 +10556,6 @@
 "lon": 4.5909045,
 "tags": {
 "attraction": "roller_coaster",
-"height": "28",
-"length": "1035",
-"minimum_height_requirement": "1.2",
 "name": "Loup Garou",
 "name:fr": "Loup Garou",
 "name:nl": "Weerwolf",
@@ -11158,15 +10565,23 @@
 "type": "way"
 },
 {
+"id": 71444746,
+"lat": 50.6992169,
+"lon": 4.5870277,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Calamity Mine",
+"tourism": "attraction",
+"wikidata": "Q253534"
+},
+"type": "way"
+},
+{
 "id": 71447398,
 "lat": 50.702258,
 "lon": 4.5918375,
 "tags": {
 "attraction": "roller_coaster",
-"height": "33",
-"length": "689",
-"maximum_height_requirement": "1.95",
-"minimum_height_requirement": "1.3",
 "name": "Vampire",
 "name:fr": "Vampire",
 "name:nl": "Vampier",
@@ -11361,20 +10776,6 @@
 "type": "way"
 },
 {
-"id": 84086778,
-"lat": 51.4616831,
-"lon": -0.6510814,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"minimum_height_requirement": "1",
-"minimum_height_requirement:unaccompanied": "1.3",
-"name": "The Dragon",
-"website": "https://www.legoland.co.uk/explore/theme-park/rides-attractions/the-dragon/"
-},
-"type": "way"
-},
-{
 "id": 86168899,
 "lat": 48.8789901,
 "lon": 2.2650283,
@@ -11515,7 +10916,6 @@
 "tags": {
 "area": "yes",
 "attraction": "roller_coaster",
-"manufacturer": "MACK Rides",
 "maxheight": "1.95",
 "min_age": "8",
 "min_height": "1.30",
@@ -11525,8 +10925,7 @@
 "toilets:wheelchair": "no",
 "website:de": "https://www.europapark.de/de/freizeitpark/attraktionen/euro-mir",
 "wheelchair": "no",
-"wikidata": "Q466829",
-"wikipedia": "de:Euro-Mir"
+"wikidata": "Q466829"
 },
 "type": "way"
 },
@@ -11602,6 +11001,30 @@
 "type": "way"
 },
 {
+"id": 104655706,
+"lat": 32.7566993,
+"lon": -97.0730654,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"name": "Texas Giant",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 104655708,
+"lat": 32.7565902,
+"lon": -97.07293,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"roller_coaster": "track",
+"tunnel": "yes"
+},
+"type": "way"
+},
+{
 "id": 104658895,
 "lat": 32.7555873,
 "lon": -97.0673333,
@@ -11649,14 +11072,37 @@
 "type": "way"
 },
 {
+"id": 104763009,
+"lat": 32.7582885,
+"lon": -97.0664786,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"roller_coaster": "track",
+"tunnel": "yes"
+},
+"type": "way"
+},
+{
+"id": 104763010,
+"lat": 32.7580157,
+"lon": -97.0661025,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 105283838,
 "lat": 38.5170959,
 "lon": -90.6768022,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "Screamin' Eagle",
-"operator": "Mid America Adventure",
+"operator": "Six Flags St. Louis",
+"source": "Bing",
 "tourism": "attraction"
 },
 "type": "way"
@@ -11667,9 +11113,8 @@
 "lon": -90.6776936,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "MR. FREEZE: Reverse Blast",
-"operator": "Mid America Adventure",
+"operator": "Six Flags St. Louis",
 "tourism": "attraction"
 },
 "type": "way"
@@ -11681,11 +11126,11 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
+"image": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Balder_rollercoaster.jpg",
 "name": "Balder",
 "operator": "Liseberg",
 "tourism": "attraction",
-"wheelchair": "yes",
-"wikimedia_commons": "File:Balder_rollercoaster.jpg"
+"wheelchair": "yes"
 },
 "type": "way"
 },
@@ -11696,7 +11141,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"check_date": "2026-08-25",
+"check_date": "2026-05-13",
 "name": "Iron Dragon",
 "roller_coaster": "station",
 "source": "Bing",
@@ -11747,8 +11192,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"check_date": "2026-09-25",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Gemini",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -11792,8 +11236,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"check_date": "2026-09-25",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Magnum XL-200",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -11823,7 +11266,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Corkscrew",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -11850,7 +11293,6 @@
 "lon": -82.6814658,
 "tags": {
 "attraction": "roller_coaster",
-"check_date": "2026-08-25",
 "oneway": "yes",
 "roller_coaster": "track",
 "source": "Bing"
@@ -11964,7 +11406,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "36\"",
+"minimum_height_requirement": "36in  (91cm)",
 "name": "Woodstock Express",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -11986,7 +11428,7 @@
 "building": "yes",
 "layer": "1",
 "manufacturer": "Vekoma Rides Manufacturing B.V.",
-"minimum_height_requirement": "35\"",
+"minimum_height_requirement": "35in (89cm)",
 "name": "Chip ‘n’ Dale’s GADGETcoaster",
 "old_name": "Gadget's Go Coaster",
 "roller_coaster": "station",
@@ -12105,8 +11547,8 @@
 "contact:yelp": "http://www.yelp.com/biz/goofys-sky-school-disneyland",
 "layer": "2",
 "lightning_lane": "yes",
-"manufacturer": "MACK Rides",
-"minimum_height_requirement": "42\"",
+"manufacturer": "Mack Rides",
+"minimum_height_requirement": "42in (107cm)",
 "name": "Goofy's Sky School",
 "old_name": "Mulholland Madness",
 "tourism": "attraction",
@@ -12144,11 +11586,12 @@
 "addr:place": "Prater",
 "addr:postcode": "1020",
 "attraction": "roller_coaster",
+"email": "info@liliputbahn.com",
 "name": "Dizzy Mouse",
 "phone": "+43 1 726 82 36",
 "source": "Bing",
-"wheelchair": "no",
-"wikimedia_commons": "Category:Dizzy Mouse (Prater)"
+"website": "http://www.liliputbahn.com/",
+"wheelchair": "no"
 },
 "type": "way"
 },
@@ -12244,6 +11687,18 @@
 "type": "way"
 },
 {
+"id": 116779236,
+"lat": 29.452264,
+"lon": -98.6966033,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"name": "Great White",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 116779237,
 "lat": 29.4567206,
 "lon": -98.6988841,
@@ -12251,6 +11706,19 @@
 "attraction": "roller_coaster",
 "name": "Super Grover's Box Car Derby",
 "roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 116779238,
+"lat": 29.4540804,
+"lon": -98.695118,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Steel Eel",
+"roller_coaster": "track",
+"wikidata": "Q1471807",
+"wikipedia": "en:Steel Eel"
 },
 "type": "way"
 },
@@ -12405,7 +11873,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"layer": "-2",
 "name": "Colossos-Kampf der Giganten",
 "tourism": "attraction",
 "wikidata": "Q449936",
@@ -12672,7 +12139,6 @@
 "lon": -122.6627285,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Zoom Coaster",
 "tourism": "attraction",
 "wheelchair": "limited"
 },
@@ -12687,6 +12153,17 @@
 "attraction": "roller_coaster",
 "name": "Poltergeist",
 "wikidata": "Q679065"
+},
+"type": "way"
+},
+{
+"id": 150720970,
+"lat": 40.0296801,
+"lon": -76.2175642,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Joust Family Coaster",
+"roller_coaster": "track"
 },
 "type": "way"
 },
@@ -12733,10 +12210,8 @@
 "lon": 8.8958578,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Splash",
 "source": "HiRes aerial imagery",
-"tourism": "attraction",
-"wheelchair": "no"
+"tourism": "attraction"
 },
 "type": "way"
 },
@@ -12746,10 +12221,8 @@
 "lon": 8.8958705,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Splash",
 "source": "HiRes aerial imagery",
-"tourism": "attraction",
-"wheelchair": "no"
+"tourism": "attraction"
 },
 "type": "way"
 },
@@ -12761,6 +12234,18 @@
 "attraction": "roller_coaster",
 "building": "roof",
 "name": "Comet",
+"source": "cadastre-dgi-fr source : Direction Générale des Impôts - Cadastre. Mise à jour : 2012"
+},
+"type": "way"
+},
+{
+"id": 158995669,
+"lat": 49.228222,
+"lon": 6.1594515,
+"tags": {
+"attraction": "roller_coaster",
+"building": "yes",
+"name": "Anaconda",
 "source": "cadastre-dgi-fr source : Direction Générale des Impôts - Cadastre. Mise à jour : 2012"
 },
 "type": "way"
@@ -12891,10 +12376,7 @@
 "lon": 2.5979201,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.4",
-"attraction:minheight:escorted": "1.25",
 "building": "yes",
-"minimum_height_requirement": "1.25",
 "name": "Anubis The Ride",
 "tourism": "attraction",
 "wikidata": "Q612257"
@@ -12933,7 +12415,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Wild Thing",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -12949,14 +12431,9 @@
 "lon": 2.9573864,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "1",
 "building": "yes",
 "layer": "1",
-"length": "500",
-"minimum_height_requirement": "1",
 "name": "Huracan",
-"start_date": "2013",
 "tourism": "attraction",
 "wikidata": "Q3947495"
 },
@@ -13166,8 +12643,8 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"maximum_height_requirement": "76\"",
-"minimum_height_requirement": "44\"",
+"maximum_height_requirement": "76in (193cm)",
+"minimum_height_requirement": "44in (112cm)",
 "name": "Silver Streak",
 "tourism": "attraction",
 "website": "https://www.canadaswonderland.com/play/rides/silver-streak",
@@ -13182,7 +12659,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Wilde Beast",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -13199,7 +12676,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"minimum_height_requirement": "44\"",
+"minimum_height_requirement": "44in (112cm)",
 "name": "The Fly",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -13214,8 +12691,8 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"maximum_height_requirement": "80\"",
-"minimum_height_requirement": "54\"",
+"maximum_height_requirement": "80in (203cm)",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Behemoth",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -13232,7 +12709,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Mighty Canadian Minebuster",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -13249,7 +12726,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Vortex",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -13266,7 +12743,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "40\"",
+"minimum_height_requirement": "40in (102cm)",
 "name": "Ghoster Coaster",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -13285,7 +12762,7 @@
 "building": "roof",
 "lightning_lane": "yes",
 "manufacturer": "Intamin Amusement Rides",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Incredicoaster",
 "note": "This attraction does not operate during performances of World of Color.",
 "old_name": "California Screamin'",
@@ -13393,9 +12870,7 @@
 "lon": -90.6749352,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "Boomerang",
-"operator": "Mid America Adventure",
 "tourism": "attraction"
 },
 "type": "way"
@@ -13570,13 +13045,12 @@
 },
 {
 "id": 221049331,
-"lat": 48.2674439,
-"lon": 7.720833,
+"lat": 48.2674464,
+"lon": 7.7208064,
 "tags": {
 "area": "yes",
 "attraction": "roller_coaster",
 "building": "yes",
-"manufacturer": "MACK Rides",
 "min_age": "6",
 "min_height": "1.20",
 "name": "Eurosat - CanCan Coaster",
@@ -13587,6 +13061,21 @@
 "wheelchair": "limited",
 "wikidata": "Q63196746",
 "wikipedia": "de:Eurosat – CanCan Coaster"
+},
+"type": "way"
+},
+{
+"id": 222736620,
+"lat": 33.8458689,
+"lon": -117.9990093,
+"tags": {
+"attraction": "roller_coaster",
+"building": "yes",
+"name": "Montezooma's Revenge",
+"roller_coaster": "station",
+"tourism": "attraction",
+"website": "https://www.knotts.com/rides-experiences/montezoomas-revenge",
+"wikidata": "Q3322684"
 },
 "type": "way"
 },
@@ -13635,6 +13124,18 @@
 "type": "way"
 },
 {
+"id": 230543144,
+"lat": 57.2710357,
+"lon": 9.6482308,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Pindsvinet",
+"railway": "narrow_gauge",
+"tourism": "attraction"
+},
+"type": "way"
+},
+{
 "id": 230867664,
 "lat": 54.0743321,
 "lon": 10.781533,
@@ -13649,27 +13150,12 @@
 },
 {
 "id": 230912996,
-"lat": 38.9828113,
-"lon": -74.8127354,
+"lat": 38.9828105,
+"lon": -74.8127345,
 "tags": {
 "attraction": "roller_coaster",
-"layer": "2",
 "name": "The Great White",
 "roller_coaster": "track"
-},
-"type": "way"
-},
-{
-"id": 230913065,
-"lat": 38.9858415,
-"lon": -74.8091934,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"name": "Rollie's Coaster",
-"roller_coaster": "station",
-"tourism": "attraction",
-"wikidata": "Q14705861"
 },
 "type": "way"
 },
@@ -13692,7 +13178,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "54\"",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Talon",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -13710,7 +13196,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "44\"",
+"minimum_height_requirement": "44in (112cm)",
 "name": "Wild Mouse",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -13728,7 +13214,7 @@
 "alt_name": "Hydra",
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "54\"",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Hydra: The Revenge",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -13784,12 +13270,14 @@
 },
 {
 "id": 235158854,
-"lat": 37.8368107,
-"lon": -77.4391649,
+"lat": 37.8374005,
+"lon": -77.4397814,
 "tags": {
 "attraction": "roller_coaster",
+"building": "yes",
 "name": "Pantherian",
 "old_name": "Intimidator 305",
+"roller_coaster": "station",
 "tourism": "attraction",
 "website": "https://www.kingsdominion.com/rides-experiences/pantherian",
 "wikidata": "Q954833",
@@ -13919,13 +13407,12 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"minimum_height_requirement": "54\"",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Thunder Striker",
 "roller_coaster": "station",
 "tourism": "attraction",
 "website": "https://www.carowinds.com/rides-experiences/thunder-striker",
-"wikidata": "Q1671491",
-"wikipedia": "en:Thunder Striker"
+"wikipedia": "en:Intimidator (roller coaster)"
 },
 "type": "way"
 },
@@ -13976,10 +13463,10 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Carolina Cyclone",
 "tourism": "attraction",
-"website": "https://www.sixflags.com/carowinds/attractions/carolina-cyclone",
+"website": "https://www.carowinds.com/play/rides/carolina-cyclone",
 "wikipedia": "en:Carolina Cyclone"
 },
 "type": "way"
@@ -13991,7 +13478,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Flying Cobras",
 "tourism": "attraction",
 "website": "https://www.carowinds.com/play/rides/the-flying-cobras",
@@ -14006,8 +13493,8 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"maximum_height_requirement": "76\"",
-"minimum_height_requirement": "44\"",
+"maximum_height_requirement": "76in (193cm)",
+"minimum_height_requirement": "44in (112cm)",
 "name": "Kiddy Hawk",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14023,7 +13510,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "40\"",
+"minimum_height_requirement": "40in (102cm)",
 "name": "Woodstock Express",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14039,7 +13526,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "40\"",
+"minimum_height_requirement": "40in (102cm)",
 "name": "Wilderness Run",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14248,6 +13735,18 @@
 "type": "way"
 },
 {
+"id": 260525133,
+"lat": 51.461055,
+"lon": -0.6505259,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"name": "Dragon",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 261946117,
 "lat": 35.4155212,
 "lon": 138.6511532,
@@ -14288,7 +13787,7 @@
 "height": "3",
 "lightning_lane": "yes",
 "manufacturer": "Dynamic Structures",
-"minimum_height_requirement": "40\"",
+"minimum_height_requirement": "40in (102cm)",
 "name": "Big Thunder Mountain Railroad",
 "old_name": "Conestoge Wagons;Mule Pack;Rainbow Ridge Mule Pack;Pack Mules Through Nature's Wonderlnad;Western Mine Train Through Nature's Wonderland, Stage Coach;Discovery Bay;Painted Desert",
 "short_name": "BTMRR",
@@ -14361,7 +13860,6 @@
 "attraction": "roller_coaster",
 "building": "yes",
 "manufacturer": "Vekoma Rides Manufacturing B.V.",
-"minimum_height_requirement": "1.2",
 "name": "Vogel Rok",
 "ref:bag": "0809100000017622",
 "roof:material": "tar_paper",
@@ -14370,8 +13868,26 @@
 "start_date": "1998",
 "website": "https://www.efteling.com/nl/park/attracties/vogel-rok",
 "wikidata": "Q586556",
-"wikimedia_commons": "Category:Vogel Rok",
+"wikimedia_commons": "Category:Vogel_Rok",
 "wikipedia": "nl:Vogel Rok"
+},
+"type": "way"
+},
+{
+"id": 279668053,
+"lat": 51.6477133,
+"lon": 5.0519658,
+"tags": {
+"attraction": "roller_coaster",
+"building": "yes",
+"manufacturer": "KumbaK;Intamin Amusement Rides",
+"name": "De Vliegende Hollander",
+"ref:bag": "0809100000017610",
+"roller_coaster": "water_coaster",
+"roof:material": "tar_paper",
+"source": "BAG",
+"source:date": "2015-09-04",
+"start_date": "2006"
 },
 "type": "way"
 },
@@ -14409,8 +13925,8 @@
 },
 {
 "id": 284197792,
-"lat": 49.0373706,
-"lon": 9.0542022,
+"lat": 49.0373676,
+"lon": 9.0542085,
 "tags": {
 "attraction": "roller_coaster",
 "name": "Karacho",
@@ -14430,7 +13946,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Steel Force",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14448,7 +13964,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Thunder Hawk",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14456,6 +13972,17 @@
 "wheelchair": "yes",
 "wikidata": "Q2429902",
 "wikipedia": "en:Thunderhawk (Dorney Park)"
+},
+"type": "way"
+},
+{
+"id": 286007553,
+"lat": 32.7558663,
+"lon": -97.0690973,
+"tags": {
+"attraction": "roller_coaster",
+"level": "-1",
+"roller_coaster": "track"
 },
 "type": "way"
 },
@@ -14480,7 +14007,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"minimum_height_requirement": "36\"",
+"minimum_height_requirement": "36in (91cm)",
 "name": "Woodstock Express",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14492,12 +14019,12 @@
 },
 {
 "id": 290457653,
-"lat": 39.1714617,
-"lon": -94.485389,
+"lat": 39.1714605,
+"lon": -94.4853876,
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Mamba",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14507,7 +14034,7 @@
 },
 {
 "id": 290457655,
-"lat": 39.174241,
+"lat": 39.1742404,
 "lon": -94.4841002,
 "tags": {
 "attraction": "roller_coaster",
@@ -14522,12 +14049,12 @@
 },
 {
 "id": 290457659,
-"lat": 39.1732646,
-"lon": -94.4851874,
+"lat": 39.1732612,
+"lon": -94.4851835,
 "tags": {
 "attraction": "roller_coaster",
-"building": "roof",
-"minimum_height_requirement": "48\"",
+"building": "yes",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Boomerang",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14537,12 +14064,12 @@
 },
 {
 "id": 290457664,
-"lat": 39.1727673,
-"lon": -94.4891464,
+"lat": 39.1727697,
+"lon": -94.4891463,
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Timberwolf",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14557,7 +14084,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "54\"",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Patriot",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -14656,7 +14183,7 @@
 "building": "yes",
 "building:colour": "white",
 "lightning_lane": "yes",
-"minimum_height_requirement": "44\"",
+"minimum_height_requirement": "44in (113cm)",
 "name": "Space Mountain",
 "roof:shape": "cone",
 "roof:type": "cone",
@@ -14675,7 +14202,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "lightning_lane": "yes",
-"minimum_height_requirement": "35\"",
+"minimum_height_requirement": "35in (89cm)",
 "name": "The Barnstormer",
 "tourism": "attraction",
 "website": "https://disneyworld.disney.go.com/attractions/magic-kingdom/barnstormer-starring-great-goofini/",
@@ -14723,7 +14250,6 @@
 "area": "yes",
 "attraction": "roller_coaster",
 "building": "yes",
-"manufacturer": "MACK Rides",
 "min_age": "6",
 "min_height": "1.20",
 "name": "Matterhorn-Blitz",
@@ -15106,7 +14632,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "43\"",
+"minimum_height_requirement": "43in (109cm)",
 "name": "Spinning Dragons",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -15173,16 +14699,6 @@
 "type": "way"
 },
 {
-"id": 319352566,
-"lat": 35.4550305,
-"lon": 139.634274,
-"tags": {
-"attraction": "roller_coaster",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
 "id": 319352568,
 "lat": 35.4552104,
 "lon": 139.6369332,
@@ -15233,11 +14749,7 @@
 "lon": 2.9566527,
 "tags": {
 "attraction": "roller_coaster",
-"height": "32",
-"length": "267",
-"minimum_height_requirement": "1.3",
 "name": "Boomerang",
-"start_date": "1984",
 "tourism": "attraction",
 "wikidata": "Q2910479"
 },
@@ -15250,7 +14762,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "lightning_lane": "yes",
-"minimum_height_requirement": "40\"",
+"minimum_height_requirement": "40in (102cm)",
 "name": "Big Thunder Mountain Railroad",
 "short_name": "BTMRR",
 "tourism": "attraction",
@@ -15268,8 +14780,7 @@
 "attraction": "roller_coaster",
 "building": "yes",
 "name": "Götterblitz",
-"tourism": "attraction",
-"wheelchair": "no"
+"tourism": "attraction"
 },
 "type": "way"
 },
@@ -15292,13 +14803,14 @@
 "type": "way"
 },
 {
-"id": 334732520,
-"lat": 38.1973634,
-"lon": -85.7472094,
+"id": 334628044,
+"lat": 48.2152349,
+"lon": 16.4011167,
 "tags": {
 "attraction": "roller_coaster",
-"lojic:bgnum": "235352",
-"name": "MIdnight Showdown"
+"bridge": "yes",
+"layer": "1",
+"roller_coaster": "track"
 },
 "type": "way"
 },
@@ -15321,7 +14833,7 @@
 "lon": 139.7154418,
 "tags": {
 "attraction": "roller_coaster",
-"layer": "1",
+"lay": "1",
 "oneway": "yes",
 "roller_coaster": "track"
 },
@@ -15329,8 +14841,8 @@
 },
 {
 "id": 349690018,
-"lat": 55.7761854,
-"lon": 12.5727199,
+"lat": 55.7761845,
+"lon": 12.5727069,
 "tags": {
 "attraction": "roller_coaster",
 "name": "Svæveflyveren",
@@ -15406,13 +14918,12 @@
 "attraction": "roller_coaster",
 "building": "yes",
 "lightning_lane": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in. (122cm)",
 "name": "Rock ’n’ Roller Coaster Starring The Muppets",
 "short_name": "RNRC",
 "tourism": "attraction",
 "website": "https://disneyworld.disney.go.com/attractions/hollywood-studios/rock-and-roller-coaster-starring-muppets/",
-"wikidata": "Q1502476",
-"wikipedia": "en:Rock 'n' Roller Coaster"
+"wikidata": "Q139394198"
 },
 "type": "way"
 },
@@ -16056,6 +15567,15 @@
 "type": "way"
 },
 {
+"id": 421512658,
+"lat": 51.3475843,
+"lon": -0.3175489,
+"tags": {
+"attraction": "roller_coaster"
+},
+"type": "way"
+},
+{
 "id": 426016069,
 "lat": 51.3851815,
 "lon": 1.3776051,
@@ -16297,7 +15817,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "The Bat",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -16417,12 +15937,11 @@
 },
 {
 "id": 485067314,
-"lat": -23.097136,
-"lon": -47.0119917,
+"lat": -23.0971433,
+"lon": -47.011988,
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"fee": "no",
 "name": "Vurang",
 "roof:shape": "pyramidal",
 "tourism": "attraction"
@@ -16446,12 +15965,10 @@
 },
 {
 "id": 487895469,
-"lat": -23.0958489,
-"lon": -47.0122079,
+"lat": -23.0958311,
+"lon": -47.012112,
 "tags": {
 "attraction": "roller_coaster",
-"building": "yes",
-"fee": "no",
 "name": "Katapul",
 "tourism": "attraction"
 },
@@ -16517,6 +16034,31 @@
 "type": "way"
 },
 {
+"id": 494900386,
+"lat": 35.0315994,
+"lon": 136.7298333,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"name": "スチールドラゴン2000",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 494912191,
+"lat": 35.0302764,
+"lon": 136.7348148,
+"tags": {
+"attraction": "roller_coaster",
+"name": "ホワイトサイクロン",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 494990219,
 "lat": 35.0296944,
 "lon": 136.7313451,
@@ -16529,11 +16071,54 @@
 "type": "way"
 },
 {
+"id": 495001710,
+"lat": 35.0311901,
+"lon": 136.7338987,
+"tags": {
+"attraction": "roller_coaster",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 495001717,
+"lat": 35.0287357,
+"lon": 136.7326614,
+"tags": {
+"attraction": "roller_coaster",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 495001719,
 "lat": 35.0285973,
 "lon": 136.7324046,
 "tags": {
 "attraction": "roller_coaster",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 495001734,
+"lat": 35.0284524,
+"lon": 136.7319232,
+"tags": {
+"attraction": "roller_coaster",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 495001752,
+"lat": 35.0296158,
+"lon": 136.7308758,
+"tags": {
+"attraction": "roller_coaster",
+"name": "ジェットコースター",
+"oneway": "yes",
 "roller_coaster": "track"
 },
 "type": "way"
@@ -16656,6 +16241,42 @@
 "type": "way"
 },
 {
+"id": 502795383,
+"lat": 35.0295654,
+"lon": 136.7313834,
+"tags": {
+"attraction": "roller_coaster",
+"name": "ジェットコースター",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 502795384,
+"lat": 35.02955,
+"lon": 136.7318843,
+"tags": {
+"attraction": "roller_coaster",
+"name": "ジェットコースター",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 502795385,
+"lat": 35.0295845,
+"lon": 136.7314397,
+"tags": {
+"attraction": "roller_coaster",
+"name": "ジェットコースター",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 508546002,
 "lat": 25.0804035,
 "lon": 55.3206149,
@@ -16713,6 +16334,25 @@
 "name": "Th13teen",
 "note": "Approximate Route",
 "roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 521164624,
+"lat": 35.4867039,
+"lon": 138.780979,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"manufacturer": "三精テクノロジーズ",
+"manufacturer:wikidata": "Q11356940",
+"name": "ド・ドドンパ",
+"name:en": "Do-Dodonpa",
+"name:fr": "Do-Dodonpa",
+"start_date": "2017-07-15",
+"wikidata": "Q30930493",
+"wikimedia_commons": "Category:Do-Dodonpa",
+"wikipedia": "ja:ド・ドドンパ"
 },
 "type": "way"
 },
@@ -16995,13 +16635,11 @@
 {
 "id": 541086397,
 "lat": 49.1319007,
-"lon": 2.5735471,
+"lon": 2.5735493,
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"description": "https://demo.f4map.com/#lat=49.1319013&lon=2.5737272&zoom=20&camera.phi=-135.688",
-"layer": "1",
-"minimum_height_requirement": "1.2",
+"layer": "2",
 "name": "Discobélix (36)",
 "ref": "36",
 "source": "cadastre-dgi-fr source : Direction Générale des Impôts - Cadastre. Mise à jour : 2016"
@@ -17021,17 +16659,28 @@
 "type": "way"
 },
 {
+"id": 541739589,
+"lat": -8.0321983,
+"lon": -34.8734509,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Montanha Russa",
+"tourism": "attraction"
+},
+"type": "way"
+},
+{
 "id": 543823785,
 "lat": 35.1054712,
 "lon": -80.9424747,
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"minimum_height_requirement": "54\"",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Fury 325",
 "roller_coaster": "station",
 "tourism": "attraction",
-"website": "https://www.sixflags.com/carowinds/attractions/fury-325",
+"website": "https://www.carowinds.com/play/rides/fury-325",
 "wikipedia": "en:Fury 325"
 },
 "type": "way"
@@ -17062,19 +16711,6 @@
 "lon": 44.0487423,
 "tags": {
 "attraction": "roller_coaster"
-},
-"type": "way"
-},
-{
-"id": 549806744,
-"lat": 28.4070792,
-"lon": -81.4631384,
-"tags": {
-"attraction": "roller_coaster",
-"building": "roof",
-"layer": "1",
-"name": "Super Grover's Box Car Derby",
-"roller_coaster": "station"
 },
 "type": "way"
 },
@@ -17710,9 +17346,7 @@
 "lon": -90.6735858,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "BATMAN: The Ride",
-"operator": "Mid America Adventure",
 "tourism": "attraction"
 },
 "type": "way"
@@ -17724,9 +17358,7 @@
 "tags": {
 "alt_name": "Ninja: The Black Belt of Roller Coasters",
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "Ninja",
-"operator": "Mid America Adventure",
 "tourism": "attraction"
 },
 "type": "way"
@@ -17875,6 +17507,18 @@
 "type": "way"
 },
 {
+"id": 588467443,
+"lat": 47.8600276,
+"lon": 7.2992036,
+"tags": {
+"attraction": "roller_coaster",
+"building": "yes",
+"name": "Le Serpent",
+"roller_coaster": "station"
+},
+"type": "way"
+},
+{
 "id": 589585553,
 "lat": 50.7996043,
 "lon": 6.8834039,
@@ -17926,8 +17570,7 @@
 "lon": -78.3834185,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Motocoaster",
-"website": "https://www.sixflags.com/darienlake/attractions/motocoaster"
+"name": "Motor Coaster"
 },
 "type": "way"
 },
@@ -17968,6 +17611,30 @@
 "tags": {
 "attraction": "roller_coaster",
 "layer": "1",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 603559507,
+"lat": 32.7564384,
+"lon": -97.0732354,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"name": "Texas Giant",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 603559508,
+"lat": 32.7572112,
+"lon": -97.0729336,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"name": "Texas Giant",
 "roller_coaster": "track"
 },
 "type": "way"
@@ -18017,6 +17684,30 @@
 "type": "way"
 },
 {
+"id": 603559513,
+"lat": 32.7569787,
+"lon": -97.0729213,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"name": "Texas Giant",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 603559514,
+"lat": 32.756979,
+"lon": -97.0730265,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"name": "Texas Giant",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 603591718,
 "lat": 32.7558352,
 "lon": -97.0759437,
@@ -18052,9 +17743,19 @@
 "type": "way"
 },
 {
+"id": 603620528,
+"lat": 32.7558534,
+"lon": -97.0692092,
+"tags": {
+"attraction": "roller_coaster",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 605022979,
-"lat": 42.930418,
-"lon": -78.3831019,
+"lat": 42.9304288,
+"lon": -78.3831306,
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
@@ -18187,12 +17888,68 @@
 "type": "way"
 },
 {
+"id": 613613464,
+"lat": 29.4520721,
+"lon": -98.696471,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Great White",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 613613465,
+"lat": 29.4521101,
+"lon": -98.6964498,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Great White",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 613613466,
+"lat": 29.4523909,
+"lon": -98.6967093,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Great White",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 613613467,
 "lat": 29.4518716,
 "lon": -98.6962994,
 "tags": {
 "attraction": "roller_coaster",
 "layer": "-1",
+"name": "Great White",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 613613468,
+"lat": 29.4519617,
+"lon": -98.6962942,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"name": "Great White",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 613613469,
+"lat": 29.4519932,
+"lon": -98.6964037,
+"tags": {
+"attraction": "roller_coaster",
 "name": "Great White",
 "roller_coaster": "track"
 },
@@ -18318,6 +18075,19 @@
 "name:en": "T Express",
 "name:ko": "T익스프레스",
 "roller_coaster:type": "wooden"
+},
+"type": "way"
+},
+{
+"id": 616159634,
+"lat": 57.2710245,
+"lon": 9.6481082,
+"tags": {
+"attraction": "roller_coaster",
+"level": "1",
+"name": "Pindsvinet",
+"railway": "narrow_gauge",
+"tourism": "attraction"
 },
 "type": "way"
 },
@@ -18553,6 +18323,83 @@
 "lon": 44.1400348,
 "tags": {
 "attraction": "roller_coaster"
+},
+"type": "way"
+},
+{
+"id": 640152442,
+"lat": 32.7584471,
+"lon": -97.0670675,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 640152443,
+"lat": 32.7582025,
+"lon": -97.066611,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 640152444,
+"lat": 32.7580979,
+"lon": -97.0664671,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 640152445,
+"lat": 32.7579867,
+"lon": -97.0663072,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 640152446,
+"lat": 32.7579465,
+"lon": -97.0663728,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 640152447,
+"lat": 32.7578725,
+"lon": -97.0662207,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 640152448,
+"lat": 32.7579589,
+"lon": -97.0662351,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "-1",
+"roller_coaster": "track"
 },
 "type": "way"
 },
@@ -19026,7 +18873,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "42\"",
+"minimum_height_requirement": "42in (107cm)",
 "name": "Pipe Scream",
 "roller_coaster": "station",
 "website": "https://www.cedarpoint.com/play/rides/pipe-scream"
@@ -19054,6 +18901,18 @@
 "layer": "3",
 "roller_coaster": "track",
 "source": "Bing"
+},
+"type": "way"
+},
+{
+"id": 651747991,
+"lat": 40.0296456,
+"lon": -76.2176903,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"name": "Joust",
+"roller_coaster": "track"
 },
 "type": "way"
 },
@@ -19479,9 +19338,9 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"maximum_height_requirement": "78\"",
-"minimum_height_requirement": "52\"",
-"name": "The Daredeviler",
+"maximum_height_requirement": "78in (198cm)",
+"minimum_height_requirement": "52in (132cm)",
+"name": "DareDeviler",
 "roller_coaster": "station",
 "tourism": "attraction",
 "website": "https://www.canadaswonderland.com/play/rides/flight-deck",
@@ -19497,7 +19356,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Dragon Fyre",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -19519,17 +19378,120 @@
 "type": "way"
 },
 {
+"id": 666211682,
+"lat": 35.0287357,
+"lon": 136.7326044,
+"tags": {
+"attraction": "roller_coaster",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 666211683,
+"lat": 35.0304687,
+"lon": 136.7348758,
+"tags": {
+"attraction": "roller_coaster",
+"name": "ホワイトサイクロン",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 666211684,
+"lat": 35.0299618,
+"lon": 136.7346854,
+"tags": {
+"attraction": "roller_coaster",
+"name": "ホワイトサイクロン",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 666211685,
+"lat": 35.0307184,
+"lon": 136.7346452,
+"tags": {
+"attraction": "roller_coaster",
+"name": "ホワイトサイクロン",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 666211686,
+"lat": 35.0312768,
+"lon": 136.7338664,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "1",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 666211687,
+"lat": 35.0284299,
+"lon": 136.7319721,
+"tags": {
+"attraction": "roller_coaster",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 666211688,
+"lat": 35.0284535,
+"lon": 136.7319131,
+"tags": {
+"attraction": "roller_coaster",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 666211689,
+"lat": 35.0311667,
+"lon": 136.7297783,
+"tags": {
+"attraction": "roller_coaster",
+"layer": "2",
+"name": "スチールドラゴン2000",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
+"id": 666211690,
+"lat": 35.0309273,
+"lon": 136.7265556,
+"tags": {
+"attraction": "roller_coaster",
+"name": "スチールドラゴン2000",
+"oneway": "yes",
+"roller_coaster": "track"
+},
+"type": "way"
+},
+{
 "id": 668700368,
 "lat": 35.1052722,
 "lon": -80.9437525,
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Hurler",
 "roller_coaster": "station",
 "tourism": "attraction",
-"website": "https://www.sixflags.com/carowinds/attractions/hurler",
+"website": "https://www.carowinds.com/play/rides/hurler",
 "wikipedia": "en:Hurler (roller coaster)"
 },
 "type": "way"
@@ -19542,8 +19504,8 @@
 "attraction": "roller_coaster",
 "building": "yes",
 "layer": "2",
-"maximum_height_requirement": "54\"",
-"minimum_height_requirement": "44\"",
+"maximum_height_requirement": "54in (137cm)",
+"minimum_height_requirement": "44in (112cm)",
 "name": "Ricochet",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -19559,7 +19521,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Carolina Goldrusher",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -19601,11 +19563,10 @@
 "tags": {
 "access": "customers",
 "attraction": "roller_coaster",
-"manufacturer": "SBF-VISA Group",
-"name": "GJ Mining Co.",
-"operator": "Drouwenerzand Attractiepark",
-"start_date": "2026-04-11",
-"tourism": "attraction"
+"name": "Spinning Coaster",
+"tourism": "attraction",
+"wikidata": "Q15882229",
+"wikipedia": "nl:Spinning Coaster (Drouwenerzand)"
 },
 "type": "way"
 },
@@ -19616,11 +19577,11 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "54\"",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Vortex",
 "roller_coaster": "station",
 "tourism": "attraction",
-"website": "https://www.sixflags.com/carowinds/attractions/vortex",
+"website": "https://www.carowinds.com/play/rides/vortex",
 "wikipedia": "en:Vortex (Carowinds)"
 },
 "type": "way"
@@ -19783,7 +19744,7 @@
 "lon": -82.6790085,
 "tags": {
 "attraction": "roller_coaster",
-"check_date": "2026-08-25",
+"check_date": "2026-05-13",
 "layer": "2",
 "name": "Gatekeeper",
 "oneway": "yes",
@@ -19798,8 +19759,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"check_date": "2026-08-25",
-"minimum_height_requirement": "52\"",
+"minimum_height_requirement": "52in (132cm)",
 "name": "Gatekeeper",
 "roof:shape": "gabled",
 "tourism": "attraction",
@@ -19842,13 +19802,12 @@
 "attraction": "roller_coaster",
 "building": "yes",
 "lightning_lane": "yes",
-"minimum_height_requirement": "38\"",
+"minimum_height_requirement": "38in (97cm)",
 "name": "Slinky Dog Dash",
 "roller_coaster": "station",
 "short_name": "SDD",
 "tourism": "attraction",
 "website": "https://disneyworld.disney.go.com/attractions/hollywood-studios/slinky-dog-dash/",
-"wikidata": "Q35006966",
 "wikipedia": "en:Slinky Dog Dash"
 },
 "type": "way"
@@ -19917,6 +19876,20 @@
 "tourism": "attraction",
 "wikidata": "Q6649788",
 "wikipedia": "en:Little Dipper (Six Flags Great America)"
+},
+"type": "way"
+},
+{
+"id": 686921579,
+"lat": 42.3682212,
+"lon": -87.9352969,
+"tags": {
+"attraction": "roller_coaster",
+"building": "yes",
+"name": "Whizzer",
+"tourism": "attraction",
+"wikidata": "Q1899239",
+"wikipedia": "en:Whizzer (roller coaster)"
 },
 "type": "way"
 },
@@ -20079,6 +20052,18 @@
 "roller_coaster": "station",
 "roof:shape": "gabled",
 "tourism": "attraction"
+},
+"type": "way"
+},
+{
+"id": 697620494,
+"lat": 51.3839623,
+"lon": 1.3788061,
+"tags": {
+"attraction": "roller_coaster",
+"building": "yes",
+"fee": "yes",
+"name": "Pinball X"
 },
 "type": "way"
 },
@@ -21289,24 +21274,6 @@
 "type": "way"
 },
 {
-"id": 740670633,
-"lat": 50.6976575,
-"lon": 4.5905496,
-"tags": {
-"attraction": "roller_coaster",
-"attraction:minheight": "1.4",
-"attraction:minheight:escorted": "1.3",
-"building": "yes",
-"layer": "1",
-"minimum_height_requirement": "1.3",
-"name": "Turbine",
-"roller_coaster": "station",
-"start_date": "1982",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
 "id": 742001941,
 "lat": 34.0082272,
 "lon": -118.497656,
@@ -21349,9 +21316,7 @@
 "lon": -90.6739883,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "River King Mine Train",
-"operator": "Mid America Adventure",
 "tourism": "attraction"
 },
 "type": "way"
@@ -21399,8 +21364,8 @@
 },
 {
 "id": 744552217,
-"lat": 44.9042817,
-"lon": 37.3237835,
+"lat": 44.904273,
+"lon": 37.323386,
 "tags": {
 "attraction": "roller_coaster",
 "name": "Дикая мышь",
@@ -21498,31 +21463,12 @@
 "type": "way"
 },
 {
-"id": 762088429,
-"lat": 50.6989273,
-"lon": 4.5873385,
-"tags": {
-"attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "1",
-"building": "yes",
-"minimum_height_requirement": "1",
-"name": "Calamity Mine",
-"roller_coaster": "station",
-"tourism": "attraction",
-"wikidata": "Q253534"
-},
-"type": "way"
-},
-{
 "id": 762916435,
 "lat": 50.6992508,
 "lon": 4.5906176,
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"length": "217",
-"minimum_height_requirement": "1.2",
 "name": "Pulsar",
 "tourism": "attraction"
 },
@@ -21722,12 +21668,22 @@
 "check_date": "2025-12-24",
 "layer": "4",
 "lightning_lane": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "TRON Lightcycle / Run",
 "panoramax": "5bd39ef9-5039-4d46-a3e8-d0151936e69c",
 "tourism": "attraction",
 "website": "https://disneyworld.disney.go.com/attractions/magic-kingdom/tron-lightcycle-run/",
 "wikidata": "Q123594444"
+},
+"type": "way"
+},
+{
+"id": 807663375,
+"lat": 28.0529709,
+"lon": -80.6231597,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Family Coaster"
 },
 "type": "way"
 },
@@ -21864,6 +21820,16 @@
 "type": "way"
 },
 {
+"id": 823406184,
+"lat": 57.2792377,
+"lon": -3.814088,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Runaway Timber Train"
+},
+"type": "way"
+},
+{
 "id": 823909512,
 "lat": -27.908314,
 "lon": 153.3133351,
@@ -21871,7 +21837,7 @@
 "attraction": "roller_coaster",
 "building": "yes",
 "fee": "no",
-"manufacturer": "MACK Rides",
+"manufacturer": "Mack Rides",
 "name": "DC Rivals HyperCoaster",
 "operator": "Village Roadshow Theme Parks",
 "roller_coaster": "station",
@@ -21920,11 +21886,14 @@
 },
 {
 "id": 828032614,
-"lat": 43.6202122,
-"lon": -79.3722773,
+"lat": 43.6201504,
+"lon": -79.372275,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Toronto Island Mine Coaster"
+"building": "roof",
+"building:levels": "1",
+"name": "Toronto Island Mine Coaster",
+"roller_coaster": "station"
 },
 "type": "way"
 },
@@ -22095,6 +22064,32 @@
 "type": "way"
 },
 {
+"id": 837230503,
+"lat": 29.4541398,
+"lon": -98.6970546,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Wave Breaker: The Rescue Coaster",
+"operator": "SeaWorld San Antonio",
+"wikidata": "Q28126845",
+"wikipedia": "en:Wave Breaker: The Rescue Coaster"
+},
+"type": "way"
+},
+{
+"id": 837230507,
+"lat": 29.4541496,
+"lon": -98.6964414,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Wave Breaker: The Rescue Coaster",
+"operator": "SeaWorld San Antonio",
+"wikidata": "Q28126845",
+"wikipedia": "en:Wave Breaker: The Rescue Coaster"
+},
+"type": "way"
+},
+{
 "id": 837518468,
 "lat": 35.7941887,
 "lon": -83.535517,
@@ -22117,8 +22112,8 @@
 },
 {
 "id": 839197575,
-"lat": 39.1726655,
-"lon": -94.4886391,
+"lat": 39.1726641,
+"lon": -94.4886418,
 "tags": {
 "attraction": "roller_coaster",
 "minimum_height_requirement": "none",
@@ -22257,7 +22252,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "54\"",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Raptor",
 "tourism": "attraction",
 "website": "https://www.cedarpoint.com/play/rides/raptor",
@@ -22441,12 +22436,10 @@
 "lon": -82.6927391,
 "tags": {
 "attraction": "roller_coaster",
-"height": "32",
 "layer": "0",
 "name": "Maverick",
 "oneway": "yes",
 "roller_coaster": "track",
-"roller_coaster:track": "lift_hill",
 "tunnel": "yes"
 },
 "type": "way"
@@ -22503,7 +22496,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"check_date": "2026-08-25",
 "height_requirement": "48in-78in (122cm-198cm)",
 "name": "Millennium Force",
 "roller_coaster": "station",
@@ -22522,7 +22514,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "36\"",
+"minimum_height_requirement": "36in (91cm)",
 "name": "Wilderness Run",
 "tourism": "attraction",
 "website": "https://www.cedarpoint.com/play/rides/wilderness-run"
@@ -22654,8 +22646,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"check_date": "2026-08-25",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Cedar Creek Mine Ride",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -22666,14 +22657,11 @@
 },
 {
 "id": 843536654,
-"lat": 51.4652173,
-"lon": -0.6513805,
+"lat": 51.4650982,
+"lon": -0.6514524,
 "tags": {
 "attraction": "roller_coaster",
-"minimum_height_requirement": "0.9",
-"minimum_height_requirement:unaccompanied": "1.3",
-"name": "DUPLO Dino Coaster",
-"website": "https://www.legoland.co.uk/explore/theme-park/rides-attractions/duplo-dino-coaster/"
+"name": "DUPLO Dino Coaster"
 },
 "type": "way"
 },
@@ -22722,7 +22710,6 @@
 "barrier": "fence",
 "fee": "no",
 "length": "483",
-"max_age": "99",
 "maxspeed": "80",
 "min_age": "8",
 "min_height": "140",
@@ -22740,7 +22727,7 @@
 "access": "no",
 "attraction": "roller_coaster",
 "building": "roof",
-"check_date": "2026-08-25",
+"check_date": "2026-05-13",
 "height_requirement": "52in-78in (132cm-198cm)",
 "name": "Top Thrill 2",
 "roller_coaster": "station",
@@ -22921,11 +22908,11 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "52\"",
+"minimum_height_requirement": "52in (132cm)",
 "name": "Copperhead Strike",
 "roller_coaster": "station",
 "tourism": "attraction",
-"website": "https://www.sixflags.com/carowinds/attractions/copperhead-strike",
+"website": "https://www.carowinds.com/play/rides/copperhead-strike",
 "wikipedia": "en:Copperhead Strike"
 },
 "type": "way"
@@ -22937,7 +22924,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "High Roller",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -22954,7 +22941,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Corkscrew",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -22971,8 +22958,8 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"maximum_height_requirement": "78\"",
-"minimum_height_requirement": "52\"",
+"maximum_height_requirement": "78in (198cm)",
+"minimum_height_requirement": "52in (132cm)",
 "name": "Steel Venom",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -22989,7 +22976,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Renegade",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -23006,7 +22993,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Excalibur",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -23079,7 +23066,7 @@
 "lon": -93.4591646,
 "tags": {
 "attraction": "roller_coaster",
-"minimum_height_requirement": "44\"",
+"minimum_height_requirement": "44in (112cm)",
 "name": "Mad Mouse",
 "tourism": "attraction",
 "website": "https://www.valleyfair.com/play/rides/mad-mouse",
@@ -23181,21 +23168,6 @@
 "attraction": "roller_coaster",
 "oneway": "yes",
 "roller_coaster": "track"
-},
-"type": "way"
-},
-{
-"id": 875643234,
-"lat": 50.6984286,
-"lon": 4.5919638,
-"tags": {
-"attraction": "roller_coaster",
-"attraction:minheight": "1.2",
-"attraction:minheight:escorted": "0.9",
-"length": "190",
-"minimum_height_requirement": "0.9",
-"name": "Fun Pilot",
-"tourism": "attraction"
 },
 "type": "way"
 },
@@ -23354,16 +23326,6 @@
 "type": "way"
 },
 {
-"id": 878824534,
-"lat": 38.1969606,
-"lon": -85.7441298,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Flying Fox"
-},
-"type": "way"
-},
-{
 "id": 878824543,
 "lat": 38.1940935,
 "lon": -85.7469275,
@@ -23437,11 +23399,11 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "54\"",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Afterburn",
 "roller_coaster": "station",
 "tourism": "attraction",
-"website": "https://www.sixflags.com/carowinds/attractions/afterburn",
+"website": "https://www.carowinds.com/play/rides/afterburn",
 "wikipedia": "en:Afterburn (roller coaster)"
 },
 "type": "way"
@@ -23775,8 +23737,8 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"maximum_height_requirement": "77\"",
-"minimum_height_requirement": "52\"",
+"maximum_height_requirement": "77in (196cm)",
+"minimum_height_requirement": "52in (132cm)",
 "name": "Yukon Striker",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -23819,7 +23781,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"minimum_height_requirement": "40\"",
+"minimum_height_requirement": "40in (102cm)",
 "name": "Thunder Run",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -23836,7 +23798,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "48\"",
+"minimum_height_requirement": "48in (122cm)",
 "name": "Backlot Stunt Coaster",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -23892,8 +23854,8 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "roof",
-"maximum_height_requirement": "80\"",
-"minimum_height_requirement": "54\"",
+"maximum_height_requirement": "80in (203cm)",
+"minimum_height_requirement": "54in (137cm)",
 "name": "Leviathan",
 "roller_coaster": "station",
 "tourism": "attraction",
@@ -24178,9 +24140,7 @@
 "lon": -90.6770003,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "American Thunder",
-"operator": "Mid America Adventure",
 "tourism": "attraction"
 },
 "type": "way"
@@ -24215,7 +24175,7 @@
 },
 {
 "id": 929382636,
-"lat": 33.7695126,
+"lat": 33.7695125,
 "lon": -84.5462162,
 "tags": {
 "attraction": "roller_coaster",
@@ -24433,6 +24393,18 @@
 "type": "way"
 },
 {
+"id": 947543283,
+"lat": 36.6698176,
+"lon": -93.3418568,
+"tags": {
+"attraction": "roller_coaster",
+"building": "yes",
+"name": "Powderkeg",
+"website": "https://www.silverdollarcity.com/theme-park/attractions/rides/PowderKeg"
+},
+"type": "way"
+},
+{
 "id": 948457189,
 "lat": 36.6689991,
 "lon": -93.3377651,
@@ -24495,6 +24467,19 @@
 "type": "way"
 },
 {
+"id": 957417177,
+"lat": 49.9631191,
+"lon": 6.6148909,
+"tags": {
+"area": "yes",
+"attraction": "roller_coaster",
+"fee": "no",
+"name": "Pferdereitbahn",
+"tourism": "attraction"
+},
+"type": "way"
+},
+{
 "id": 958278096,
 "lat": 30.3734831,
 "lon": -87.6570429,
@@ -24515,18 +24500,6 @@
 "name": "Rollin’ Thunder",
 "operator": "OWA",
 "roller_coaster:type": "dive_coaster"
-},
-"type": "way"
-},
-{
-"id": 961086456,
-"lat": 47.9068965,
-"lon": -116.7058595,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"name": "Tiny Toot Roller Coaster",
-"tourism": "attraction"
 },
 "type": "way"
 },
@@ -24585,6 +24558,31 @@
 "type": "way"
 },
 {
+"id": 963903153,
+"lat": 57.2710041,
+"lon": 9.6480121,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Pindsvinet",
+"railway": "narrow_gauge",
+"tourism": "attraction"
+},
+"type": "way"
+},
+{
+"id": 963903154,
+"lat": 57.2709774,
+"lon": 9.6482227,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Pindsvinet",
+"railway": "narrow_gauge",
+"tourism": "attraction",
+"tunnel": "building_passage"
+},
+"type": "way"
+},
+{
 "id": 965319870,
 "lat": 50.7051412,
 "lon": -3.4168318,
@@ -24604,16 +24602,6 @@
 "type": "way"
 },
 {
-"id": 968114848,
-"lat": 53.1182233,
-"lon": -1.5647359,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Log Coaster"
-},
-"type": "way"
-},
-{
 "id": 968606456,
 "lat": 35.717185,
 "lon": -83.5109223,
@@ -24627,6 +24615,21 @@
 "building": "retail",
 "name": "Ripley's Mountain Coaster",
 "phone": "+1-865-430-7800",
+"tourism": "attraction"
+},
+"type": "way"
+},
+{
+"id": 968606464,
+"lat": 35.7200326,
+"lon": -83.5098498,
+"tags": {
+"addr:housenumber": "306",
+"addr:postcode": "37738",
+"addr:street": "Parkway",
+"attraction": "roller_coaster",
+"building": "yes",
+"name": "Moonshine Mountain Coaster",
 "tourism": "attraction"
 },
 "type": "way"
@@ -24752,6 +24755,17 @@
 "type": "way"
 },
 {
+"id": 975781967,
+"lat": 51.5007917,
+"lon": 5.4378985,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Tyfoon",
+"tourism": "attraction"
+},
+"type": "way"
+},
+{
 "id": 976705225,
 "lat": 48.2674306,
 "lon": 7.7204455,
@@ -24785,7 +24799,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"minimum_height_requirement": "1.3",
 "name": "The Ride to Happiness",
 "operator": "Plopsaland",
 "tourism": "attraction"
@@ -24851,16 +24864,10 @@
 "lat": 43.1818492,
 "lon": 10.5477558,
 "tags": {
-"access": "customers",
 "area": "yes",
 "attraction": "roller_coaster",
-"attraction:minheight:escorted": "1.30 m",
-"fee": "yes",
-"height": "17 m",
-"minimum_height_requirement": "1.10 m",
 "name": "Project 1",
-"operator": "Cavallino Matto",
-"website": "https://www.cavallinomatto.it/index.php/project1/"
+"operator": "Parco Divertimenti Cavallino Matto"
 },
 "type": "way"
 },
@@ -25517,6 +25524,52 @@
 "type": "way"
 },
 {
+"id": 1038828631,
+"lat": 43.6170717,
+"lon": -89.7893222,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Hades 360",
+"roller_coaster": "track",
+"tunnel": "no"
+},
+"type": "way"
+},
+{
+"id": 1038828632,
+"lat": 43.6169494,
+"lon": -89.7863719,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Hades 360",
+"roller_coaster": "track",
+"tunnel": "no"
+},
+"type": "way"
+},
+{
+"id": 1038828634,
+"lat": 43.616602,
+"lon": -89.7874298,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Hades 360",
+"tunnel": "yes"
+},
+"type": "way"
+},
+{
+"id": 1038828637,
+"lat": 43.6165661,
+"lon": -89.7873721,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Hades 360",
+"tunnel": "yes"
+},
+"type": "way"
+},
+{
 "id": 1038871250,
 "lat": 35.0042729,
 "lon": 104.6715727,
@@ -25611,11 +25664,9 @@
 "lat": 53.5439745,
 "lon": -6.4612384,
 "tags": {
-"area": "yes",
 "attraction": "roller_coaster",
-"manufacturer": "SBF-VISA Group",
-"name": "Ladybird Loop",
-"website": "https://www.emeraldpark.ie/attraction/lady-bird-loop/"
+"manufacturer": "SBF VISA group",
+"name": "Ladybird Loop"
 },
 "type": "way"
 },
@@ -25708,23 +25759,21 @@
 "attraction": "roller_coaster",
 "fee": "no",
 "name": "Eifel Blitz",
-"operator": "Eifelpark",
-"tourism": "attraction"
+"operator": "Eifelpark"
 },
 "type": "way"
 },
 {
 "id": 1062555959,
-"lat": 49.9630193,
-"lon": 6.6129127,
+"lat": 49.9630092,
+"lon": 6.6129251,
 "tags": {
 "attraction": "roller_coaster",
 "fee": "no",
 "name": "Käpt’n Jacks Wilde Maus",
 "operator": "Eifelpark",
 "source_ref": "https://www.eifelpark.de/attraktionen/achterbahn-kaeptn-jacks-wilde-maus/",
-"start_date": "2017-04-08",
-"tourism": "attraction"
+"start_date": "2017-04-08"
 },
 "type": "way"
 },
@@ -25770,6 +25819,17 @@
 "attraction": "roller_coaster",
 "name": "Butterfly",
 "wheelchair": "no"
+},
+"type": "way"
+},
+{
+"id": 1062912745,
+"lat": 50.0936684,
+"lon": -5.2580476,
+"tags": {
+"attraction": "roller_coaster",
+"name": "The Hornet",
+"operator": "Flambards"
 },
 "type": "way"
 },
@@ -25900,6 +25960,42 @@
 "type": "way"
 },
 {
+"id": 1074576436,
+"lat": 43.6169178,
+"lon": -89.7862338,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Hades 360",
+"roller_coaster": "track",
+"tunnel": "no"
+},
+"type": "way"
+},
+{
+"id": 1074576437,
+"lat": 43.6172308,
+"lon": -89.7892631,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Hades 360",
+"roller_coaster": "track",
+"tunnel": "no"
+},
+"type": "way"
+},
+{
+"id": 1074576438,
+"lat": 43.6171238,
+"lon": -89.789438,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Hades 360",
+"roller_coaster": "track",
+"tunnel": "no"
+},
+"type": "way"
+},
+{
 "id": 1074576439,
 "lat": 43.6161174,
 "lon": -89.7894201,
@@ -26026,22 +26122,6 @@
 "type": "way"
 },
 {
-"id": 1081798276,
-"lat": 50.6971047,
-"lon": 4.5851054,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"fee": "no",
-"maximum_height_requirement": "1.95",
-"minimum_height_requirement": "1.3",
-"name": "Kondaa",
-"roller_coaster": "station",
-"start_date": "2021-05"
-},
-"type": "way"
-},
-{
 "id": 1083697417,
 "lat": 41.4406044,
 "lon": -81.7576121,
@@ -26122,9 +26202,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"check_date": "2026-07-17",
-"name": "Wild Mouse",
-"operator": "Funtown Splashtown USA"
+"name": "Wild Mouse"
 },
 "type": "way"
 },
@@ -26312,22 +26390,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1105254393,
-"lat": 41.0895691,
-"lon": 1.1550833,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"height": "20",
-"layer": "1",
-"name": "Uncharted: El Enigma de Penitence",
-"website": "https://www.portaventuraworld.com/atracciones/uncharted",
-"wikidata": "Q123892097",
-"wikipedia": "Uncharted: El Enigma de Penitence"
 },
 "type": "way"
 },
@@ -26808,10 +26870,6 @@
 "attraction": "roller_coaster",
 "name": "テンテコマイ",
 "name:en": "Tentekomai",
-"name:es": "Tentekomai",
-"name:ja": "テンテコマイ",
-"name:ja-Hira": "てんてこまい",
-"name:ja-Latn": "Tentekomai",
 "tourism": "attraction"
 },
 "type": "way"
@@ -26837,7 +26895,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Morgawr",
-"name:kw": "Morgowr",
 "tourism": "attraction"
 },
 "type": "way"
@@ -26948,7 +27005,8 @@
 "lon": 34.7983552,
 "tags": {
 "area": "yes",
-"attraction": "roller_coaster"
+"attraction": "roller_coaster",
+"tourism": "attraction"
 },
 "type": "way"
 },
@@ -26978,6 +27036,7 @@
 "name": "קרייזי טוויסטר",
 "name:en": "Crazy Twister",
 "name:he": "קרייזי טוויסטר",
+"tourism": "attraction",
 "website": "https://www.lunapark.co.il/?categoryId=72522&itemId=149645"
 },
 "type": "way"
@@ -27005,6 +27064,7 @@
 "name": "רכבת הרים",
 "name:en": "Roller Coaster",
 "name:he": "רכבת הרים",
+"tourism": "attraction",
 "website": "https://www.lunapark.co.il/?categoryId=72522&itemId=149615"
 },
 "type": "way"
@@ -27018,6 +27078,7 @@
 "name": "אנקונדה",
 "name:en": "Anaconda",
 "name:he": "אנקונדה",
+"tourism": "attraction",
 "website": "https://www.lunapark.co.il/?categoryId=72522&itemId=149631"
 },
 "type": "way"
@@ -27258,19 +27319,6 @@
 "type": "way"
 },
 {
-"id": 1195579665,
-"lat": 35.0322769,
-"lon": 136.7300485,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"name": "アクロバット",
-"name:en": "Acrobat",
-"roller_coaster": "station"
-},
-"type": "way"
-},
-{
 "id": 1199600109,
 "lat": 45.5748645,
 "lon": 12.8260017,
@@ -27469,13 +27517,12 @@
 },
 {
 "id": 1210442953,
-"lat": 38.5158694,
-"lon": -90.6785206,
+"lat": 38.5158922,
+"lon": -90.6785513,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "Rookie Racer",
-"operator": "Mid America Adventure",
+"operator": "Six Flags St. Louis",
 "tourism": "attraction"
 },
 "type": "way"
@@ -28178,7 +28225,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Avengers Assemble: Flight Force",
-"wikidata": "Q140199236",
+"wikidata": "Q111708685",
 "wikipedia": "fr:Avengers Assemble: Flight Force"
 },
 "type": "way"
@@ -28408,7 +28455,6 @@
 "lat": 34.1408777,
 "lon": -118.3562843,
 "tags": {
-"air_conditioning": "yes",
 "attraction": "roller_coaster",
 "building": "yes",
 "name": "Revenge of the Mummy - The Ride",
@@ -28424,11 +28470,8 @@
 "lon": 2.5968599,
 "tags": {
 "attraction": "roller_coaster",
-"attraction:minheight": "1.4",
-"attraction:minheight:escorted": "1.2",
 "building": "yes",
 "layer": "1",
-"minimum_height_requirement": "1.2",
 "name": "Heidi The Ride",
 "tourism": "attraction"
 },
@@ -28613,7 +28656,7 @@
 "tags": {
 "attraction": "roller_coaster",
 "lightning_lane": "yes",
-"minimum_height_requirement": "38\"",
+"minimum_height_requirement": "38in (97cm)",
 "name": "Seven Dwarfs Mine Train",
 "start_date": "May 28th, 2014",
 "tourism": "yes",
@@ -28794,7 +28837,8 @@
 "lon": -118.3551268,
 "tags": {
 "attraction": "roller_coaster",
-"name": "Fast & Furious: Hollywood Drift",
+"building": "construction",
+"name": "Fast & Furious: Hollywood Drift-2026",
 "roller_coaster": "station",
 "tourism": "attraction"
 },
@@ -28854,24 +28898,33 @@
 "lat": 47.5203069,
 "lon": 19.0854522,
 "tags": {
+"addr:city": "Budapest",
+"addr:conscriptionnumber": "29753",
+"addr:housenumber": "14-16",
+"addr:postcode": "1146",
+"addr:street": "Állatkerti körút",
 "architect": "Dragon Ervin",
-"architect:wikidata": "Q141176030",
 "attraction": "roller_coaster",
-"disused:tourism": "attraction",
+"building": "yes",
+"description": "Ipari műemlék.",
 "height": "17",
 "heritage": "2",
 "length": "971",
 "material": "wood",
 "name": "Hullámvasút",
+"name:de": "Achterbahn",
+"name:en": "roller-coaster",
+"official_name": "Régi Hullámvasút",
 "old_name": "Hegyivasút",
 "ref": "Műemléki azonosító: 11299",
-"roller_coaster:type": "wooden_coaster",
 "source:height": "https://hvg.hu/itthon/20060714hvas",
 "start_date": "1922",
+"status": "closed",
+"tourism": "attraction",
 "url:muemlekem": "https://muemlekem.hu/muemlek/show/11299",
-"wikidata": "Q1125032",
-"wikimedia_commons": "Category:Hullámvasút",
-"wikipedia": "hu:Hullámvasút (Budapest)"
+"wheelchair": "no",
+"wikidata": "Q27923943",
+"wikimedia_commons": "Category:Hullámvasút"
 },
 "type": "way"
 },
@@ -29105,21 +29158,6 @@
 "type": "way"
 },
 {
-"id": 1366358472,
-"lat": 51.347143,
-"lon": -0.3175546,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"maximum_height_requirement": "1.95",
-"minimum_height_requirement": "1.2",
-"name": "Mandrill Mayhem",
-"roller_coaster": "station",
-"website": "https://www.chessington.com/explore/theme-park-zoo/rides-attractions/mandrill-mayhem/"
-},
-"type": "way"
-},
-{
 "id": 1371660451,
 "lat": 48.9029498,
 "lon": 9.6544709,
@@ -29148,7 +29186,6 @@
 "lon": -0.6483876,
 "tags": {
 "attraction": "roller_coaster",
-"minimum_height_requirement": "1.2",
 "name": "Autumn's Riding Adventure",
 "website": "https://www.legoland.co.uk/explore/theme-park/rides-attractions/autumns-riding-adventure/"
 },
@@ -29217,12 +29254,11 @@
 {
 "id": 1376617962,
 "lat": 38.5155005,
-"lon": -90.6788918,
+"lon": -90.678893,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "The Boss",
-"operator": "Mid America Adventure",
+"operator": "Six Flags St. Louis",
 "tourism": "attraction"
 },
 "type": "way"
@@ -29233,9 +29269,7 @@
 "lon": -90.6767045,
 "tags": {
 "attraction": "roller_coaster",
-"fee": "no",
 "name": "Pandemonium",
-"operator": "Mid America Adventure",
 "tourism": "attraction"
 },
 "type": "way"
@@ -29428,8 +29462,8 @@
 },
 {
 "id": 1409518036,
-"lat": 37.8393607,
-"lon": -77.4397589,
+"lat": 37.8393954,
+"lon": -77.4401167,
 "tags": {
 "attraction": "roller_coaster",
 "fixme": "Needs a proper mapping when Sat Imagery available",
@@ -29709,13 +29743,21 @@
 "type": "way"
 },
 {
+"id": 1447312467,
+"lat": 46.6348012,
+"lon": 126.9502991,
+"tags": {
+"attraction": "roller_coaster"
+},
+"type": "way"
+},
+{
 "id": 1449439958,
 "lat": 41.4820651,
 "lon": -82.680455,
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"check_date": "2026-08-25",
 "name": "Wild Mouse",
 "tourism": "attraction"
 },
@@ -29728,7 +29770,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "building": "yes",
-"check_date": "2026-08-25",
 "layer": "4",
 "name": "Siren's Curse",
 "type": "building"
@@ -29969,8 +30010,8 @@
 },
 {
 "id": 1481985069,
-"lat": 43.3492784,
-"lon": -73.690274,
+"lat": 43.3493073,
+"lon": -73.6903061,
 "tags": {
 "attraction": "roller_coaster",
 "name": "Flashback",
@@ -29982,13 +30023,12 @@
 {
 "id": 1481985070,
 "lat": 43.3518074,
-"lon": -73.6860118,
+"lon": -73.6860175,
 "tags": {
 "attraction": "roller_coaster",
 "fee": "no",
 "name": "The Comet",
-"operator": "Enchanted Parks",
-"website": "https://greatescapeparks.enchantedparks.com/rides-and-experiences/attractions/comet/",
+"operator": "Six Flags",
 "wikidata": "Q2410399"
 },
 "type": "way"
@@ -30261,15 +30301,14 @@
 "type": "way"
 },
 {
-"id": 1508004675,
-"lat": 32.7566419,
-"lon": -97.0690444,
+"id": 1508004676,
+"lat": 32.7567436,
+"lon": -97.0685415,
 "tags": {
 "attraction": "roller_coaster",
-"building": "yes",
-"layer": "1",
 "name": "Aquaman: Power Wave",
-"roller_coaster": "station"
+"roller_coaster": "track",
+"tourism": "attraction"
 },
 "type": "way"
 },
@@ -30321,6 +30360,16 @@
 "type": "way"
 },
 {
+"id": 1512060356,
+"lat": 41.051426,
+"lon": 28.7716238,
+"tags": {
+"attraction": "roller_coaster",
+"name": "Pilot Akademi (Roller Coaster)"
+},
+"type": "way"
+},
+{
 "id": 1516149759,
 "lat": 55.6735885,
 "lon": 12.5708268,
@@ -30337,10 +30386,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Zokkon",
-"name:es": "Zokkon",
-"name:ja": "Zokkon",
-"name:ja-Hira": "ぞっこん",
-"name:ja-Latn": "Zokkon",
 "wikidata": "Q119156676",
 "wikipedia": "ja:ZOKKON"
 },
@@ -30352,15 +30397,7 @@
 "lon": 138.7797939,
 "tags": {
 "attraction": "roller_coaster",
-"name": "高飛車",
-"name:es": "Takabisha",
-"name:ja": "高飛車",
-"name:ja-Hira": "たかびしゃ",
-"name:ja-Latn": "Takabisha",
-"start_date": "2011-07-16",
-"wikidata": "Q508159",
-"wikimedia_commons": "Category:Takabisha",
-"wikipedia": "ja:高飛車 (コースター)"
+"name": "Takabisha"
 },
 "type": "way"
 },
@@ -30370,13 +30407,7 @@
 "lon": 138.7809364,
 "tags": {
 "attraction": "roller_coaster",
-"name": "ええじゃないか",
-"name:en": "Eejanaika",
-"name:es": "Eejanaika",
-"name:fr": "Eejanaika",
-"name:ja": "ええじゃないか",
-"name:ja-Hira": "ええじゃないか",
-"name:ja-Latn": "Eejanaika",
+"name": "Eejanaika",
 "wikidata": "Q1295262",
 "wikipedia": "ja:ええじゃないか (コースター)"
 },
@@ -30389,10 +30420,6 @@
 "tags": {
 "attraction": "roller_coaster",
 "name": "Fujiyama",
-"name:es": "Fujiyama",
-"name:ja": "Fujiyama",
-"name:ja-Hira": "ふじやま",
-"name:ja-Latn": "Fujiyama",
 "wikidata": "Q788077",
 "wikipedia": "en:Fujiyama (roller coaster)"
 },
@@ -30426,465 +30453,6 @@
 "attraction": "roller_coaster",
 "name": "Crazy Coaster",
 "tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1525509201,
-"lat": 60.8855989,
-"lon": 26.7776085,
-"tags": {
-"attraction": "roller_coaster",
-"fee": "yes",
-"name": "Pohjolan Express",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1525612721,
-"lat": 42.3664369,
-"lon": -87.9367218,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Raging Bull",
-"operator": "Six Flags Great America",
-"wikidata": "Q1536832"
-},
-"type": "way"
-},
-{
-"id": 1525612723,
-"lat": 42.364749,
-"lon": -87.9351801,
-"tags": {
-"attraction": "roller_coaster",
-"name": "American Eagle",
-"wikidata": "Q464043"
-},
-"type": "way"
-},
-{
-"id": 1525612724,
-"lat": 42.3676148,
-"lon": -87.9373196,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Viper",
-"operator": "Six Flags Great America",
-"wikidata": "Q917156"
-},
-"type": "way"
-},
-{
-"id": 1525612725,
-"lat": 42.3679913,
-"lon": -87.9357189,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Whizzer",
-"operator": "Six Flags Great America",
-"wikidata": "Q1899239"
-},
-"type": "way"
-},
-{
-"id": 1525612726,
-"lat": 42.3661017,
-"lon": -87.9349793,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Demon",
-"operator": "Six Flags Great America",
-"wikidata": "Q1186433"
-},
-"type": "way"
-},
-{
-"id": 1525612727,
-"lat": 42.3668225,
-"lon": -87.9346485,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Wrath of Rakshasa",
-"operator": "Six Flags Great America",
-"wikidata": "Q130130645"
-},
-"type": "way"
-},
-{
-"id": 1525612735,
-"lat": 42.3656553,
-"lon": -87.9336454,
-"tags": {
-"attraction": "roller_coaster",
-"name": "X-Flight",
-"operator": "Six Flags Great America",
-"wikidata": "Q2597318"
-},
-"type": "way"
-},
-{
-"id": 1526063341,
-"lat": 54.0754499,
-"lon": 10.7798074,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"layer": "3",
-"minimum_height_requirement": "90 cm",
-"name": "Cornwall Coaster",
-"roller_coaster": "station",
-"wheelchair": "no"
-},
-"type": "way"
-},
-{
-"id": 1527123650,
-"lat": 49.2272577,
-"lon": 6.1584074,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Caïcos Expédition",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1528624091,
-"lat": 30.1330506,
-"lon": -97.6450807,
-"tags": {
-"attraction": "roller_coaster",
-"fixme": "Estimated footrpint",
-"minimum_height_requirement": "54\"",
-"name": "Circuit Breaker"
-},
-"type": "way"
-},
-{
-"id": 1528624092,
-"lat": 30.137457,
-"lon": -97.640838,
-"tags": {
-"attraction": "roller_coaster",
-"fixme": "Refine boundary when imagery updates",
-"minimum_height_requirement": "48\"",
-"name": "Palindrome"
-},
-"type": "way"
-},
-{
-"id": 1528845487,
-"lat": 42.6487227,
-"lon": 77.1933034,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "way"
-},
-{
-"id": 1528964311,
-"lat": 10.3378801,
-"lon": 103.8561979,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Cơn thịnh nộ của Zeus",
-"name:en": "The Wrath of Zeus"
-},
-"type": "way"
-},
-{
-"id": 1528964334,
-"lat": 10.3370374,
-"lon": 103.855629,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Chiến binh đại bàng"
-},
-"type": "way"
-},
-{
-"id": 1532966113,
-"lat": 44.0432821,
-"lon": 42.7789232,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "way"
-},
-{
-"id": 1533600275,
-"lat": 12.832349,
-"lon": 77.400037,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Garuda Glide"
-},
-"type": "way"
-},
-{
-"id": 1537156842,
-"lat": 12.832727,
-"lon": 77.4012118,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Recoil"
-},
-"type": "way"
-},
-{
-"id": 1540957236,
-"lat": 42.5751489,
-"lon": 3.0361483,
-"tags": {
-"attraction": "roller_coaster"
-},
-"type": "way"
-},
-{
-"id": 1545742855,
-"lat": 43.6168823,
-"lon": -89.786278,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Hades 360"
-},
-"type": "way"
-},
-{
-"id": 1545742856,
-"lat": 43.6171529,
-"lon": -89.7893414,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Hades 360"
-},
-"type": "way"
-},
-{
-"id": 1546918329,
-"lat": 45.6949646,
-"lon": 5.8886245,
-"tags": {
-"attraction": "roller_coaster",
-"fee": "yes",
-"roller_coaster": "kiddie",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1547051141,
-"lat": 55.8959079,
-"lon": 11.6078793,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Rally 88 (88)"
-},
-"type": "way"
-},
-{
-"id": 1547051144,
-"lat": 55.8960163,
-"lon": 11.6085306,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Cykelmyggen (107)"
-},
-"type": "way"
-},
-{
-"id": 1548010027,
-"lat": 54.793234,
-"lon": 18.4104513,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Tajfun",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1548566061,
-"lat": 47.85959,
-"lon": 7.2981008,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Pierre de tonnerre",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1549326271,
-"lat": 47.8598795,
-"lon": 7.299113,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Le Serpent",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1552196330,
-"lat": 41.9603545,
-"lon": 123.4200656,
-"tags": {
-"attraction": "roller_coaster",
-"fee": "yes"
-},
-"type": "way"
-},
-{
-"id": 1552432353,
-"lat": 41.9595581,
-"lon": 123.4175193,
-"tags": {
-"attraction": "roller_coaster",
-"fee": "yes"
-},
-"type": "way"
-},
-{
-"id": 1553541696,
-"lat": 35.0327183,
-"lon": 136.7332477,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"name": "スチールドラゴン2000",
-"name:en": "Steel Dragon 2000",
-"roller_coaster": "station"
-},
-"type": "way"
-},
-{
-"id": 1553542420,
-"lat": 35.0293132,
-"lon": 136.7341969,
-"tags": {
-"attraction": "roller_coaster",
-"building": "yes",
-"name": "ホワイトサイクロン",
-"name:en": "Hakugei",
-"roller_coaster": "station"
-},
-"type": "way"
-},
-{
-"id": 1558347878,
-"lat": 50.1095401,
-"lon": 14.4260337,
-"tags": {
-"attraction": "roller_coaster",
-"fee": "yes",
-"name": "Cyklon",
-"opening_hours": "Mo closed, Tu-Th 13:00-21:00, Fr 13:00-22:00, Sa-Su 13:00-22:00",
-"operator": "Jaroslav Štaubert",
-"website": "https://www.facebook.com/rollercoastercyklon"
-},
-"type": "way"
-},
-{
-"id": 1559099036,
-"lat": 44.0229231,
-"lon": 4.970563,
-"tags": {
-"attraction": "roller_coaster",
-"minimum_height_requirement": "1.05",
-"name": "Kyûbi Unchained",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1559206982,
-"lat": 51.7266407,
-"lon": -3.5549583,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Tower Coaster"
-},
-"type": "way"
-},
-{
-"id": 1563910534,
-"lat": 29.6998053,
-"lon": 118.2947973,
-"tags": {
-"area": "yes",
-"attraction": "roller_coaster",
-"tourism": "attraction"
-},
-"type": "way"
-},
-{
-"id": 1571588189,
-"lat": 50.0018215,
-"lon": 19.4002499,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Burning Engine",
-"ref": "177",
-"tourism": "attraction",
-"website": "https://energylandia.pl/atrakcje/aqualantis/burning-engine/"
-},
-"type": "way"
-},
-{
-"id": 1572080593,
-"lat": 52.9902761,
-"lon": -1.8935536,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Bluey the Ride: Here Come the Grannies!",
-"name:etymology:wikidata": "Q39071378"
-},
-"type": "way"
-},
-{
-"id": 1572318436,
-"lat": 51.6261722,
-"lon": 0.2359693,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Doggy Dog Roller Coaster",
-"website": "https://omdfarm.co.uk/rides-and-attractions/7"
-},
-"type": "way"
-},
-{
-"id": 1575079016,
-"lat": 51.4654751,
-"lon": -0.6518739,
-"tags": {
-"attraction": "roller_coaster",
-"minimum_height_requirement": "1.05",
-"minimum_height_requirement:unaccompanied": "1.3",
-"name": "Minifigure Speedway",
-"website": "https://www.legoland.co.uk/explore/theme-park/rides-attractions/minifigure-speedway/"
-},
-"type": "way"
-},
-{
-"id": 1578302793,
-"lat": 45.6404499,
-"lon": 8.6194016,
-"tags": {
-"attraction": "roller_coaster",
-"name": "Bruco verde"
-},
-"type": "way"
-},
-{
-"id": 1578302798,
-"lat": 45.6399766,
-"lon": 8.6194806,
-"tags": {
-"attraction": "roller_coaster",
-"name": "TNT Train"
 },
 "type": "way"
 }

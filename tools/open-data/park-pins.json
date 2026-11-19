@@ -1,0 +1,4002 @@
+{
+"4D Farm|Cullman": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 34.12895,
+"lon": -86.70876,
+"state": "Alabama"
+},
+"Aberdeen Beach Amusements|Aberdeen, Grampian, Scotland": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 51.5426,
+"lon": 0.69988,
+"state": "England"
+},
+"Action City Fun Center|Eau Claire": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 44.81135,
+"lon": -91.49849,
+"state": "Wisconsin"
+},
+"Action Park|Vernon": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 37.86399,
+"lon": -94.38002,
+"state": "Missouri"
+},
+"Adlabs Imagica|Adlabs Imagica": {
+"at": "2026-11-19",
+"country": "India",
+"how": "town",
+"lat": 18.76616,
+"lon": 73.27999,
+"state": "Maharashtra"
+},
+"Adventureland|Addison": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.9317,
+"lon": -87.98896,
+"state": "Illinois"
+},
+"Adventureland|Farmingdale": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q4033432",
+"lat": 40.7524,
+"lon": -73.4207,
+"state": "New York"
+},
+"Adventureland|Sahara Center, Sharjah": {
+"at": "2026-11-19",
+"country": "United Arab Emirates",
+"how": "town",
+"lat": 25.2988,
+"lon": 55.37162,
+"state": "Sharjah Emirate"
+},
+"Adventurers Family Entertainment Center|Baton Rouge": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 30.44942,
+"lon": -91.18697,
+"state": "Louisiana"
+},
+"Agorix Temapark|Antalya, Antalya": {
+"at": "2026-11-19",
+"country": "Turkey",
+"how": "town",
+"lat": 36.88657,
+"lon": 30.70302,
+"state": null
+},
+"Akita Plaza|Akita Plaza": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 39.71742,
+"lon": 140.12637,
+"state": null
+},
+"Al-Sha'ab Leisure Park|Salmiya, Hawalli": {
+"at": "2026-11-19",
+"country": "Kuwait",
+"how": "town",
+"lat": 29.33278,
+"lon": 48.06849,
+"state": "Hawalli Governorate"
+},
+"Alabama Splash Adventure|Alabama Splash Adventure": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 33.38003,
+"lon": -86.99907,
+"state": "Alabama"
+},
+"Alcyon Park|Pitman": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q34805237",
+"lat": 39.72861,
+"lon": -75.14528,
+"state": "New Jersey"
+},
+"Alley Cats|Hurst": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 32.81881,
+"lon": -97.20689,
+"state": "Texas"
+},
+"Amazing World|Wanjiang, Dongguan, Guangdong": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 23.04983,
+"lon": 113.7333,
+"state": "Guangdong"
+},
+"American Adventures|Marietta": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 33.95285,
+"lon": -84.54961,
+"state": "Georgia"
+},
+"American Park|Belo Horizonte, Minas Gerais": {
+"at": "2026-11-19",
+"country": "Brazil",
+"how": "town",
+"lat": -19.92273,
+"lon": -43.94509,
+"state": "Minas Gerais"
+},
+"Amigoland|Grau-du-Roi, Occitanie": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 43.54258,
+"lon": 4.13421,
+"state": "Occitania"
+},
+"Ankara Luna Park|Ankara, Ankara": {
+"at": "2026-11-19",
+"country": "Turkey",
+"how": "town",
+"lat": 39.92078,
+"lon": 32.85405,
+"state": null
+},
+"Anna's Hoeve|Hilversum": {
+"at": "2026-11-19",
+"country": "Netherlands",
+"how": "wikidata Q13134619",
+"lat": 52.21926,
+"lon": 5.21027,
+"state": "North Holland"
+},
+"Aqua Park|Takanawa, Minato, Tokyo": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "wikidata Q3055859",
+"lat": 35.62806,
+"lon": 139.73528,
+"state": null
+},
+"Atlantic Splash Adventure|Hammonds Plains, Nova Scotia": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "osm",
+"lat": 44.74188,
+"lon": -63.74579,
+"state": "Nova Scotia"
+},
+"Au Paradis des Enfants|Trappes, Île-de-France": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 48.78235,
+"lon": 2.00706,
+"state": "Ile-de-France"
+},
+"Babylon Park|Belgrade": {
+"at": "2026-11-19",
+"country": "Serbia",
+"how": "town",
+"lat": 44.81533,
+"lon": 20.44566,
+"state": null
+},
+"Babylon Park|Camden Town, Greater London, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "osm",
+"lat": 51.54221,
+"lon": -0.14498,
+"state": "England"
+},
+"Babylon Park|Leganés, Madrid, Community of Madrid": {
+"at": "2026-11-19",
+"country": "Spain",
+"how": "town",
+"lat": 40.32819,
+"lon": -3.76527,
+"state": "Community of Madrid"
+},
+"Bali Safari|Gianyar, Bali": {
+"at": "2026-11-19",
+"country": "Indonesia",
+"how": "wikidata Q4850846",
+"lat": -8.581,
+"lon": 115.3441,
+"state": "Bali"
+},
+"Barry's Amusements|Portrush, Antrim, Northern Ireland": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "osm",
+"lat": 55.20353,
+"lon": -6.65395,
+"state": "Northern Ireland"
+},
+"Base Régionale de Loisirs d'Étampes|Étampes, Île-de-France": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 48.42159,
+"lon": 2.15598,
+"state": "Ile-de-France"
+},
+"Battersea Funfair|Battersea, Greater London, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 51.47079,
+"lon": -0.17221,
+"state": "England"
+},
+"Bayrampaşa Şehir Parkı|Istanbul, Istanbul": {
+"at": "2026-11-19",
+"country": "Turkey",
+"how": "osm",
+"lat": 41.06192,
+"lon": 28.88704,
+"state": null
+},
+"Beihai Park|Beijing": {
+"at": "2026-11-19",
+"country": "China",
+"how": "wikidata Q133650",
+"lat": 39.92444,
+"lon": 116.38306,
+"state": null
+},
+"Belle Isle Park|Oklahoma City": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 35.47299,
+"lon": -97.51705,
+"state": "Oklahoma"
+},
+"Belle Vue Park|Manchester, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.44246,
+"lon": -2.23245,
+"state": "England"
+},
+"Belli's Mini-Freizeitpark|Roggwil, Bern": {
+"at": "2026-11-19",
+"country": "Switzerland",
+"how": "osm",
+"lat": 47.24922,
+"lon": 7.82187,
+"state": "Bern"
+},
+"Bendix Woods County Park|New Carlisle": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.93601,
+"lon": -84.02509,
+"state": "Ohio"
+},
+"Bergen Beach|Brooklyn": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q2842591",
+"lat": 40.6203,
+"lon": -73.9067,
+"state": "New York"
+},
+"Berjaya Times Square Theme Park|Kuala Lumpur, Kuala Lumpur": {
+"at": "2026-11-19",
+"country": "Malaysia",
+"how": "wikidata Q2998295",
+"lat": 3.14222,
+"lon": 101.71056,
+"state": null
+},
+"Bertrand Island|Mount Arlington": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q49632839",
+"lat": 40.92722,
+"lon": -74.65,
+"state": "New Jersey"
+},
+"Bibi & Tina Freizeitpark|Wustermark, Brandenburg": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "town",
+"lat": 52.53998,
+"lon": 12.95386,
+"state": "Brandenburg"
+},
+"Bid'A Parc|Bidart, Nouvelle-Aquitaine": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 43.43277,
+"lon": -1.59459,
+"state": "Nouvelle-Aquitaine"
+},
+"Billybird Park Hemelrijk|Volkel, North Brabant": {
+"at": "2026-11-19",
+"country": "Netherlands",
+"how": "wikidata Q2785435",
+"lat": 51.637,
+"lon": 5.67234,
+"state": "North Brabant"
+},
+"Biwako Tower|Otsu, Shiga": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 35.01779,
+"lon": 135.85481,
+"state": null
+},
+"Blackpool New Fairground Company|Blackpool, Lancashire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.81794,
+"lon": -3.05098,
+"state": "England"
+},
+"Boardwalk Fun Park|Boardwalk Fun Park": {
+"at": "2026-11-19",
+"country": null,
+"how": "wikidata Q4931452",
+"lat": 32.761,
+"lon": -96.997,
+"state": null
+},
+"Boblo Island|Amherstburg, Ontario": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "wikidata Q4935834",
+"lat": 42.0939,
+"lon": -83.1175,
+"state": "Ontario"
+},
+"Bommelwereld|Groenlo, Gelderland": {
+"at": "2026-11-19",
+"country": "Netherlands",
+"how": "wikidata Q136404867",
+"lat": 52.04167,
+"lon": 6.62778,
+"state": "Gelderland"
+},
+"Bondinhos Canela|Canela, Rio Grande do Sul": {
+"at": "2026-11-19",
+"country": "Brazil",
+"how": "osm",
+"lat": -29.30797,
+"lon": -50.84898,
+"state": "Rio Grande do Sul"
+},
+"Boomers|Upland": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 34.10745,
+"lon": -117.65118,
+"state": "California"
+},
+"Boreal|Soda Springs": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.65461,
+"lon": -111.60381,
+"state": "Idaho"
+},
+"Boys Land|Khamis Mushait, 'Asir": {
+"at": "2026-11-19",
+"country": "Saudi Arabia",
+"how": "town",
+"lat": 18.3,
+"lon": 42.73333,
+"state": "'Asir Province"
+},
+"Brean Leisure Park|Brean, Somerset, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q4959732",
+"lat": 51.2857,
+"lon": -3.00966,
+"state": "England"
+},
+"Britannia Pier|Great Yarmouth, Norfolk, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q45843906",
+"lat": 52.60813,
+"lon": 1.74008,
+"state": "England"
+},
+"Buckeye Lake Amusement Park|Buckeye Lake": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.93347,
+"lon": -82.48256,
+"state": "Ohio"
+},
+"Buckroe Beach Park|Hampton": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 37.04163,
+"lon": -76.29066,
+"state": "Virginia"
+},
+"Buffalo Bill's Hotel and Casino|Buffalo Bill's Hotel and Casino": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Butlin's Bognor Regis|Bognor Regis, West Sussex, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 50.7835,
+"lon": -0.67307,
+"state": "England"
+},
+"Butlin's Clacton|Clacton-on-Sea, Essex, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q5002718",
+"lat": 51.7812,
+"lon": 1.1388,
+"state": "England"
+},
+"Butlin's Filey|Filey, North Yorkshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 54.20969,
+"lon": -0.28884,
+"state": "England"
+},
+"Butlin's Grand Parade Amusement Park|Skegness, Lincolnshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.14375,
+"lon": 0.3429,
+"state": "England"
+},
+"Butlin's Littlehampton|Littlehampton, West Sussex, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 50.80958,
+"lon": -0.54244,
+"state": "England"
+},
+"Butlin's Minehead|Minehead, Somerset, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q5002723",
+"lat": 51.2061,
+"lon": -3.45917,
+"state": "England"
+},
+"Butlin's Pwllheli|Pwllheli, Gwynedd, Wales": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q5002720",
+"lat": 52.90573,
+"lon": -4.33339,
+"state": "Wales"
+},
+"Butlin's Skegness|Skegness, Lincolnshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q5002727",
+"lat": 53.18,
+"lon": 0.35,
+"state": "England"
+},
+"Cacau Show Megastore Itapevi|Itapevi, São Paulo": {
+"at": "2026-11-19",
+"country": "Brazil",
+"how": "town",
+"lat": -23.54888,
+"lon": -46.93389,
+"state": "São Paulo"
+},
+"Canadian National Exhibition|Toronto, Ontario": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "wikidata Q857399",
+"lat": 43.63333,
+"lon": -79.41667,
+"state": "Ontario"
+},
+"Cannon Hill Park|Birmingham, West Midlands, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q15207157",
+"lat": 52.453,
+"lon": -1.901,
+"state": "England"
+},
+"Carnival Celebration|": {
+"at": "2026-11-19",
+"country": "Denmark",
+"how": "town",
+"lat": 56.16759,
+"lon": 10.22637,
+"state": "Central Denmark Region"
+},
+"Carnival City|Johannesburg, Gauteng": {
+"at": "2026-11-19",
+"country": "South Africa",
+"how": "town",
+"lat": -26.205,
+"lon": 28.04972,
+"state": "Gauteng"
+},
+"Carnival Jubilee|": {
+"at": "2026-11-19",
+"country": "Denmark",
+"how": "town",
+"lat": 56.16759,
+"lon": 10.22637,
+"state": "Central Denmark Region"
+},
+"Casino de la Arrabassada|Barcelona, Barcelona, Catalonia": {
+"at": "2026-11-19",
+"country": "Spain",
+"how": "town",
+"lat": 41.38258,
+"lon": 2.17707,
+"state": "Catalonia"
+},
+"Casper's Scare School|Eqaila, Al Ahmadi": {
+"at": "2026-11-19",
+"country": "Kuwait",
+"how": "town",
+"lat": 29.17093,
+"lon": 48.10257,
+"state": "Ahmadi Governorate"
+},
+"Castle Fun Center|Chester": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.98293,
+"lon": -75.76524,
+"state": "Pennsylvania"
+},
+"Central Park|Kharkiv, Kharkiv": {
+"at": "2026-11-19",
+"country": "Ukraine",
+"how": "osm",
+"lat": 50.02043,
+"lon": 36.24606,
+"state": "Kharkiv Oblast"
+},
+"Centreville Amusement Park|Toronto, Ontario": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "wikidata Q5062718",
+"lat": 43.6203,
+"lon": -79.3737,
+"state": "Ontario"
+},
+"Ch'ti Parc|Avion, Hauts-de-France": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 50.41632,
+"lon": 2.83142,
+"state": "Hauts-de-France"
+},
+"Chakazoolu Indoor Theme Park|Sanabis": {
+"at": "2026-11-19",
+"country": "Bahrain",
+"how": "town",
+"lat": 26.2262,
+"lon": 50.54524,
+"state": "Capital Governorate"
+},
+"Chester Park|Cincinnati": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.10128,
+"lon": -84.51274,
+"state": "Ohio"
+},
+"Children's World|Ashgabat": {
+"at": "2026-11-19",
+"country": "Turkmenistan",
+"how": "osm",
+"lat": 37.92197,
+"lon": 58.372,
+"state": null
+},
+"Chimelong Qingyuan International Forest Resort|Qingcheng, Qingyuan, Guangdong": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 23.6999,
+"lon": 113.05719,
+"state": "Guangdong"
+},
+"China Hiin City|Xiangshan, Ningbo, Zhejiang": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 29.47984,
+"lon": 121.86494,
+"state": "Zhejiang"
+},
+"Chipperfield's Amusement Park|Weymouth, Dorset, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 50.60963,
+"lon": -2.45434,
+"state": "England"
+},
+"Chippewa Park|Thunder Bay, Ontario": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "wikidata Q5101673",
+"lat": 48.3333,
+"lon": -89.2111,
+"state": "Ontario"
+},
+"Chistyakovskaya Roshcha|Krasnodar": {
+"at": "2026-11-19",
+"country": "Russia",
+"how": "town",
+"lat": 45.03515,
+"lon": 38.97724,
+"state": "Krasnodar Krai"
+},
+"City Park|Kabul, Kabul": {
+"at": "2026-11-19",
+"country": "Afghanistan",
+"how": "town",
+"lat": 34.52695,
+"lon": 69.18506,
+"state": "Kabul Province"
+},
+"Columbia Gardens|Butte": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.65193,
+"lon": -121.58584,
+"state": "California"
+},
+"Como Town|St. Paul": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 44.98139,
+"lon": -93.15443,
+"state": "Minnesota"
+},
+"Coney Island|Brooklyn": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q628201",
+"lat": 40.575,
+"lon": -73.9825,
+"state": "New York"
+},
+"Coney Island|Cincinnati": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q5159586",
+"lat": 39.0543,
+"lon": -84.42,
+"state": "Ohio"
+},
+"Coney Park|Kingston, Saint Andrew": {
+"at": "2026-11-19",
+"country": "Jamaica",
+"how": "town",
+"lat": 17.98417,
+"lon": -76.80575,
+"state": null
+},
+"Coney Park|Trujillo, Trujillo, La Libertad": {
+"at": "2026-11-19",
+"country": "Peru",
+"how": "town",
+"lat": -8.11168,
+"lon": -79.02877,
+"state": "La Libertad"
+},
+"Conklin Shows|": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "town",
+"lat": 61.06669,
+"lon": -107.99171,
+"state": null
+},
+"Crab Island Children's Theme Park|Chaoyang, Beijing": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 39.92045,
+"lon": 116.43691,
+"state": null
+},
+"Cranmore Mountain Adventure Park|North Conway": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 44.03778,
+"lon": -71.12382,
+"state": "New Hampshire"
+},
+"Crealy Adventure Park & Resort|Exeter, Devon, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 50.72561,
+"lon": -3.52692,
+"state": "England"
+},
+"Crescent Park|Riverside": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 33.97321,
+"lon": -117.37309,
+"state": "California"
+},
+"Crystal Beach Park|Crystal Beach, Ontario": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "wikidata Q92327193",
+"lat": 42.86303,
+"lon": -79.06029,
+"state": "Ontario"
+},
+"Crystal Beach|Crystal Beach, Ontario": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "wikidata Q1142330",
+"lat": 42.8675,
+"lon": -79.05917,
+"state": "Ontario"
+},
+"Dalad Xiangshawan Tourist Area|Dalad Banner, Ordos, Nei Mongol": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 40.40924,
+"lon": 110.0259,
+"state": "Inner Mongolia"
+},
+"Discovery World|": {
+"at": "2026-11-19",
+"country": null,
+"how": "osm",
+"lat": 43.03691,
+"lon": -87.89614,
+"state": null
+},
+"Disney Adventure|": {
+"at": "2026-11-19",
+"country": "Denmark",
+"how": "town",
+"lat": 56.16759,
+"lon": 10.22637,
+"state": "Central Denmark Region"
+},
+"Disney’s California Adventure Park|": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Disney’s Epcot|": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Dixieland Park|Jacksonville": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 30.32622,
+"lon": -81.65792,
+"state": "Florida"
+},
+"Dogpatch USA|Dogpatch": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 37.7607,
+"lon": -122.3892,
+"state": "California"
+},
+"Doha Quest|Doha, Doha": {
+"at": "2026-11-19",
+"country": "Qatar",
+"how": "osm",
+"lat": 25.28467,
+"lon": 51.51744,
+"state": "Doha"
+},
+"Doling Park|Springfield": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.79902,
+"lon": -89.64396,
+"state": "Illinois"
+},
+"Dominion Park|Montréal, Québec": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "wikidata Q3363808",
+"lat": 45.57725,
+"lon": -73.51489,
+"state": "Quebec"
+},
+"Don Quijote|Roppongi, Minato, Tokyo": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 35.66246,
+"lon": 139.7335,
+"state": null
+},
+"Dreamland|Brooklyn": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.6526,
+"lon": -73.94972,
+"state": "New York"
+},
+"Dreamwood|Yalta, Crimea": {
+"at": "2026-11-19",
+"country": "Ukraine",
+"how": "town",
+"lat": 44.49879,
+"lon": 34.16894,
+"state": "Autonomous Republic of Crimea"
+},
+"Dubai Hills Mall|Dubai, Dubai": {
+"at": "2026-11-19",
+"country": "United Arab Emirates",
+"how": "wikidata Q55610055",
+"lat": 25.10125,
+"lon": 55.23795,
+"state": "Dubai Emirate"
+},
+"Durban Amusement Park|Durban, KwaZulu-Natal": {
+"at": "2026-11-19",
+"country": "South Africa",
+"how": "town",
+"lat": -29.86181,
+"lon": 31.00991,
+"state": "KwaZulu-Natal"
+},
+"Ebbw Vale Garden Festival|Ebbw Vale, Blaenau Gwent, Wales": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q5331565",
+"lat": 51.749,
+"lon": -3.194,
+"state": "Wales"
+},
+"Edgewater Park|Detroit": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.33155,
+"lon": -83.04664,
+"state": "Michigan"
+},
+"El Mundo de los Niños|": {
+"at": "2026-11-19",
+"country": "Spain",
+"how": "town",
+"lat": 39.32607,
+"lon": -4.83798,
+"state": null
+},
+"Eldridge Park|Elmira": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q5354182",
+"lat": 42.1151,
+"lon": -76.8168,
+"state": "New York"
+},
+"Electric Park|Waterloo": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.49827,
+"lon": -92.33287,
+"state": "Iowa"
+},
+"Elise's Family Fun Center|Winnie": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 29.82428,
+"lon": -94.32216,
+"state": "Texas"
+},
+"Episodia Gliwice|Gliwice, Silezië": {
+"at": "2026-11-19",
+"country": "Poland",
+"how": "town",
+"lat": 50.29411,
+"lon": 18.66573,
+"state": "Silesian Voivodeship"
+},
+"Escape Theme Park|Pasir Ris": {
+"at": "2026-11-19",
+"country": "Singapore",
+"how": "town",
+"lat": 1.37862,
+"lon": 103.94832,
+"state": null
+},
+"Espace San Bernardo|Montvalezan, Auvergne-Rhône-Alpes": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q3058156",
+"lat": 45.67217,
+"lon": 6.8933,
+"state": "Auvergne-Rhône-Alpes"
+},
+"Expo '35|Brussels": {
+"at": "2026-11-19",
+"country": "Belgium",
+"how": "town",
+"lat": 50.84674,
+"lon": 4.35249,
+"state": null
+},
+"FTE Ahrend|": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "town",
+"lat": 51.16382,
+"lon": 10.44783,
+"state": null
+},
+"Fair Park|Nashville": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 36.16228,
+"lon": -86.7743,
+"state": "Tennessee"
+},
+"Family Park Calp|Calp, Alicante, Valencian Community": {
+"at": "2026-11-19",
+"country": "Spain",
+"how": "osm",
+"lat": 38.64362,
+"lon": 0.06104,
+"state": "Valencian Community"
+},
+"Family Park|Rome, Lazio": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "osm",
+"lat": 41.8836,
+"lon": 12.42489,
+"state": "Lazio"
+},
+"Fantasiland|Barranquilla, Atlántico": {
+"at": "2026-11-19",
+"country": "Colombia",
+"how": "town",
+"lat": 11.01019,
+"lon": -74.82318,
+"state": "Atlántico"
+},
+"Fantasy Farm Amusement Park|Middletown": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.56232,
+"lon": -72.65091,
+"state": "Connecticut"
+},
+"Fantasy Island (UK amusement park)|Fantasy Island (UK amusement park)": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Fantasy Island|Grand Island": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.92427,
+"lon": -98.33868,
+"state": "Nebraska"
+},
+"Fantawild Adventure|Jinghu, Wuhu, Anhui": {
+"at": "2026-11-19",
+"country": "China",
+"how": "wikidata Q5434367",
+"lat": 31.37943,
+"lon": 118.37254,
+"state": "Anhui"
+},
+"Fantawild Dreamland|Tong'an, Xiamen, Fujian": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 24.72612,
+"lon": 118.14679,
+"state": "Fujian"
+},
+"Fantawild Dreamland|Zhongmu, Zhengzhou, Henan": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 34.72077,
+"lon": 113.98183,
+"state": "Henan"
+},
+"Fast Lane Entertainment|Lowell": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.64144,
+"lon": -71.30853,
+"state": "Massachusetts"
+},
+"Feria Nacional de San Marcos|Feria Nacional de San Marcos": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Fermy Land|Orcet, Auvergne-Rhône-Alpes": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 45.7067,
+"lon": 3.17459,
+"state": "Auvergne-Rhône-Alpes"
+},
+"Fiesta Parc|Vic-la-Gardiole, Occitanie": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 43.48983,
+"lon": 3.78762,
+"state": "Occitania"
+},
+"Flippolino|Kirchen, Rhineland-Palatinate": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "osm",
+"lat": 50.80297,
+"lon": 7.87116,
+"state": "Rhineland-Palatinate"
+},
+"Flumserberg|Quarten, St. Gallen": {
+"at": "2026-11-19",
+"country": "Switzerland",
+"how": "wikidata Q693610",
+"lat": 47.0931,
+"lon": 9.28561,
+"state": "St. Gallen"
+},
+"Fontaine Ferry Park|Louisville": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q5465107",
+"lat": 38.26424,
+"lon": -85.82691,
+"state": "Kentucky"
+},
+"Forest Park Highlands Amusement Park|St. Louis": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 38.62541,
+"lon": -90.19001,
+"state": "Missouri"
+},
+"Formosa Fun Coast|New Taipei City": {
+"at": "2026-11-19",
+"country": "Taiwan",
+"how": "wikidata Q10891944",
+"lat": 25.14472,
+"lon": 121.39028,
+"state": null
+},
+"Foton World Fantasia|Muscat": {
+"at": "2026-11-19",
+"country": "Oman",
+"how": "town",
+"lat": 23.61236,
+"lon": 58.59381,
+"state": "Muscat Governorate"
+},
+"Foton World|Sharjah, Sharjah": {
+"at": "2026-11-19",
+"country": "United Arab Emirates",
+"how": "town",
+"lat": 25.34615,
+"lon": 55.42106,
+"state": "Sharjah Emirate"
+},
+"Fraser's Million Dollar Pier|Venice": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q122965173",
+"lat": 33.997,
+"lon": -118.4827,
+"state": "California"
+},
+"Freedom Land U.S.A|Bronx": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.84665,
+"lon": -73.87859,
+"state": "New York"
+},
+"Freizeitpark Lochmühle|Wehrheim, Hesse": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "wikidata Q1454992",
+"lat": 50.2839,
+"lon": 8.58361,
+"state": "Hesse"
+},
+"Fun -n- Games Park|Tonawanda": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 43.02068,
+"lon": -78.87838,
+"state": "New York"
+},
+"Fun City|Halland, Varberg": {
+"at": "2026-11-19",
+"country": "Sweden",
+"how": "town",
+"lat": 57.08241,
+"lon": 12.27827,
+"state": null
+},
+"Fun City|Mumbai, Maharashtra": {
+"at": "2026-11-19",
+"country": "India",
+"how": "osm",
+"lat": 18.91825,
+"lon": 72.8322,
+"state": "Maharashtra"
+},
+"Fun Forest Amusement Park|Seattle": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 47.60383,
+"lon": -122.33006,
+"state": "Washington"
+},
+"Fun Lab|Istanbul, Istanbul": {
+"at": "2026-11-19",
+"country": "Turkey",
+"how": "town",
+"lat": 41.00638,
+"lon": 28.97587,
+"state": null
+},
+"Fun Oasis|Riyadh, Ar Riyadh": {
+"at": "2026-11-19",
+"country": "Saudi Arabia",
+"how": "town",
+"lat": 24.63892,
+"lon": 46.71601,
+"state": "Riyadh Region"
+},
+"Fun Pier|Wildwood": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 38.58069,
+"lon": -90.63144,
+"state": "Missouri"
+},
+"Fun Spot Amusement Park & Zoo|Fun Spot Amusement Park & Zoo": {
+"at": "2026-11-19",
+"country": null,
+"how": "wikidata Q5508689",
+"lat": 41.6765,
+"lon": -85.0298,
+"state": null
+},
+"Funabashi Health Center|Funabashi, Chiba": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "wikidata Q11614124",
+"lat": 35.68567,
+"lon": 139.99014,
+"state": null
+},
+"Funcoast World|Skegness, Lincolnshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.14375,
+"lon": 0.3429,
+"state": "England"
+},
+"Funland Amusement Park|North Little Rock": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q5509324",
+"lat": 34.8003,
+"lon": -92.303,
+"state": "Arkansas"
+},
+"Funland Hayling Island|Hayling Island, Hampshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "osm",
+"lat": 50.78515,
+"lon": -0.9878,
+"state": "England"
+},
+"Funland Theme Park|Weston-Super-Mare, Somerset, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 51.34719,
+"lon": -2.97789,
+"state": "England"
+},
+"Funland|Berastagi, North Sumatra": {
+"at": "2026-11-19",
+"country": "Indonesia",
+"how": "osm",
+"lat": 3.20307,
+"lon": 98.52435,
+"state": "North Sumatra"
+},
+"Funny-World|Kappel, Baden-Württemberg": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "wikidata Q1474750",
+"lat": 48.2938,
+"lon": 7.73238,
+"state": "Baden-Württemberg"
+},
+"Funtown Pier|Seaside Park": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.92678,
+"lon": -74.07638,
+"state": "New Jersey"
+},
+"Funway|Knoxville": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 35.96039,
+"lon": -83.92103,
+"state": "Tennessee"
+},
+"Fushimi Momoyama Castle Land|Kyoto, Kyoto": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "wikidata Q11381116",
+"lat": 34.93947,
+"lon": 135.77681,
+"state": null
+},
+"Future World|Rangsit": {
+"at": "2026-11-19",
+"country": "Thailand",
+"how": "town",
+"lat": 13.98745,
+"lon": 100.61007,
+"state": null
+},
+"Fyns Tivoli|Odense, Syddanmark": {
+"at": "2026-11-19",
+"country": "Denmark",
+"how": "town",
+"lat": 55.39972,
+"lon": 10.38521,
+"state": "Region of Southern Denmark"
+},
+"Fårup Sommarland|Fårup Sommarland": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"GAST Conference & Wellness City Resort|Debiri, Tigray": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Gagarin Park|Yuzhno-Sakhalinsk, Sakhalin": {
+"at": "2026-11-19",
+"country": "Russia",
+"how": "town",
+"lat": 46.95743,
+"lon": 142.72744,
+"state": "Sakhalin Oblast"
+},
+"Galaxy Amusement Park|Kiev": {
+"at": "2026-11-19",
+"country": "Ukraine",
+"how": "town",
+"lat": 50.45003,
+"lon": 30.52414,
+"state": null
+},
+"Galaxy Park (Bolivia)|Santa Cruz de la Sierra, Santa Cruz": {
+"at": "2026-11-19",
+"country": "Bolivia",
+"how": "town",
+"lat": -17.78342,
+"lon": -63.18209,
+"state": "Santa Cruz"
+},
+"Galaxy Park|Santa Cruz de la Sierra, Santa Cruz": {
+"at": "2026-11-19",
+"country": "Bolivia",
+"how": "town",
+"lat": -17.78342,
+"lon": -63.18209,
+"state": "Santa Cruz"
+},
+"Gatti's Pizza|Abilene": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 32.45362,
+"lon": -99.73113,
+"state": "Texas"
+},
+"Ghost Town on the River|Louisville": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 38.25424,
+"lon": -85.75941,
+"state": "Kentucky"
+},
+"Global Village|Dubai, Dubai": {
+"at": "2026-11-19",
+"country": "United Arab Emirates",
+"how": "wikidata Q5570759",
+"lat": 25.06875,
+"lon": 55.30626,
+"state": "Dubai Emirate"
+},
+"Golden City|Venyovsky, Tula": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Goldrush Junction|Pigeon Forge": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 35.78842,
+"lon": -83.55433,
+"state": "Tennessee"
+},
+"Gorky Park|Moscow": {
+"at": "2026-11-19",
+"country": "Russia",
+"how": "wikidata Q126877",
+"lat": 55.73135,
+"lon": 37.60464,
+"state": "Moscow"
+},
+"Granada Studios Tour|Granada Studios Tour": {
+"at": "2026-11-19",
+"country": null,
+"how": "wikidata Q5594106",
+"lat": 53.47833,
+"lon": -2.2575,
+"state": null
+},
+"Granada Studios|Manchester, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q5594105",
+"lat": 53.4789,
+"lon": -2.25581,
+"state": "England"
+},
+"Great Escape by Enchanted Parks|Great Escape by Enchanted Parks": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Grünbergflitzer Gmunden|Gmunden, Upper Austria": {
+"at": "2026-11-19",
+"country": "Austria",
+"how": "town",
+"lat": 47.91859,
+"lon": 13.8003,
+"state": "Upper Austria"
+},
+"Guangzhou Joypolis|Zengcheng, Guangzhou, Guangdong": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 23.3473,
+"lon": 113.77029,
+"state": "Guangdong"
+},
+"Guangzhou Sunac Land|Huadu, Guangzhou, Guangdong": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 23.46124,
+"lon": 113.2142,
+"state": "Guangdong"
+},
+"Halmstad Äventyrsland|Halmstad, Halland": {
+"at": "2026-11-19",
+"country": "Sweden",
+"how": "town",
+"lat": 56.67398,
+"lon": 12.85748,
+"state": null
+},
+"Hangzhou Children's Park|Xihu, Hangzhou, Zhejiang": {
+"at": "2026-11-19",
+"country": "China",
+"how": "osm",
+"lat": 30.21803,
+"lon": 120.12888,
+"state": "Zhejiang"
+},
+"Happiness Expert|Xiangfang, Harbin, Heilongjiang": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 45.70618,
+"lon": 126.65691,
+"state": "Heilongjiang"
+},
+"Happy Land|Adana, Adana": {
+"at": "2026-11-19",
+"country": "Turkey",
+"how": "town",
+"lat": 36.98636,
+"lon": 35.32529,
+"state": null
+},
+"Happy Valley Beijing|Happy Valley Beijing": {
+"at": "2026-11-19",
+"country": "China",
+"how": "wikidata Q3127206",
+"lat": 39.86642,
+"lon": 116.48863,
+"state": null
+},
+"Happyland|Santo Domingo, Distrito Nacional": {
+"at": "2026-11-19",
+"country": "Dominican Republic",
+"how": "osm",
+"lat": 18.50653,
+"lon": -69.85698,
+"state": "Distrito Nacional"
+},
+"Happylon Magic Park|Moscow, Moscow": {
+"at": "2026-11-19",
+"country": "Russia",
+"how": "town",
+"lat": 55.75054,
+"lon": 37.61748,
+"state": "Moscow"
+},
+"Hasbro City|Naucalpan": {
+"at": "2026-11-19",
+"country": "Mexico",
+"how": "town",
+"lat": 19.47884,
+"lon": -99.2328,
+"state": "State of Mexico"
+},
+"Hastings Pier|Hastings, East Sussex, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q5680420",
+"lat": 50.8522,
+"lon": 0.57264,
+"state": "England"
+},
+"Haunted Trails Joliet|Joliet": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 41.54995,
+"lon": -88.08862,
+"state": "Illinois"
+},
+"Hofis Erlebnispark|Dasing, Bavaria": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "osm",
+"lat": 48.39897,
+"lon": 11.07342,
+"state": "Bavaria"
+},
+"Holiday World|Maspalomas, Las Palmas, Canaries": {
+"at": "2026-11-19",
+"country": "Spain",
+"how": "osm",
+"lat": 27.76113,
+"lon": -15.59383,
+"state": "Canary Islands"
+},
+"Holly Springs Farm|Garrison": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.14422,
+"lon": -92.14419,
+"state": "Iowa"
+},
+"Holnemvolt Park|": {
+"at": "2026-11-19",
+"country": null,
+"how": "osm",
+"lat": 47.51973,
+"lon": 19.08134,
+"state": null
+},
+"Hope Bank Pleasure Grounds|Honley, West Yorkshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.60823,
+"lon": -1.78087,
+"state": "England"
+},
+"Hossoland|Brojce, Zachodniopomorskie": {
+"at": "2026-11-19",
+"country": "Poland",
+"how": "wikidata Q118278025",
+"lat": 53.95156,
+"lon": 15.38884,
+"state": "West Pomeranian Voivodeship"
+},
+"Hull Zoological Gardens|Kingston upon Hull, East Riding of Yorkshire, England, United Kingdom": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 52.53102,
+"lon": -1.26491,
+"state": "England"
+},
+"Idora Park|Youngstown": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q5989523",
+"lat": 41.07222,
+"lon": -80.685,
+"state": "Ohio"
+},
+"In The Game Funtrackers|Corpus Christi": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 27.76353,
+"lon": -97.40332,
+"state": "Texas"
+},
+"Inselsberg Funpark|Brotterode, Thuringia": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "osm",
+"lat": 50.84328,
+"lon": 10.47914,
+"state": "Thuringia"
+},
+"Island of Adventure|": {
+"at": "2026-11-19",
+"country": null,
+"how": "osm",
+"lat": 39.0857,
+"lon": -94.84957,
+"state": null
+},
+"Jacquou Parc|Le Bugue, Nouvelle-Aquitaine": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q118530818",
+"lat": 44.98938,
+"lon": 0.88847,
+"state": "Nouvelle-Aquitaine"
+},
+"Jeddah Promenade|Jeddah, Makkah": {
+"at": "2026-11-19",
+"country": "Saudi Arabia",
+"how": "town",
+"lat": 21.55044,
+"lon": 39.17424,
+"state": "Makkah Region"
+},
+"Joy Land|Baghdad": {
+"at": "2026-11-19",
+"country": "Iraq",
+"how": "osm",
+"lat": 33.32671,
+"lon": 44.30401,
+"state": "Baghdad Governorate"
+},
+"Joypolis H. Factory|Naka, Yokohama, Kanagawa": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 35.46073,
+"lon": 139.50874,
+"state": null
+},
+"Jungle Jim's Playland|Shawnee": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.02737,
+"lon": -95.76275,
+"state": "Kansas"
+},
+"Kaatach|Tyresö, Stockholm": {
+"at": "2026-11-19",
+"country": "Sweden",
+"how": "osm",
+"lat": 59.24694,
+"lon": 18.24675,
+"state": null
+},
+"Kamper Park|Hattiesburg": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q49509279",
+"lat": 31.32333,
+"lon": -89.31583,
+"state": "Mississippi"
+},
+"Kappapia|Takasaki, Gunma": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 36.3221,
+"lon": 139.00328,
+"state": null
+},
+"Kariya-shi Kotsu Jido Yuen|Kariya, Aichi": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 34.97468,
+"lon": 137.00279,
+"state": null
+},
+"Karls Erlebnis-Dorf Rövershagen|Rövershagen, Mecklenburg-Western Pomerania": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "wikidata Q117744732",
+"lat": 54.161,
+"lon": 12.231,
+"state": "Mecklenburg-Vorpommern"
+},
+"Kaydeross Park|Saratoga Springs": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q34840001",
+"lat": 43.04722,
+"lon": -73.73139,
+"state": "New York"
+},
+"Kennedy Space Center|Merritt Island": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q48821",
+"lat": 28.52472,
+"lon": -80.64861,
+"state": "Florida"
+},
+"Kentucky Shores Family Fun Center|Gilbertsville": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.47147,
+"lon": -75.32573,
+"state": "New York"
+},
+"Kid City|South Jakarta, Jakarta": {
+"at": "2026-11-19",
+"country": "Indonesia",
+"how": "town",
+"lat": -6.28387,
+"lon": 106.80483,
+"state": null
+},
+"Kid Parc|Gujan-Mestras, Nouvelle-Aquitaine": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 44.6361,
+"lon": -1.0714,
+"state": "Nouvelle-Aquitaine"
+},
+"Kid's Inn|Kid's Inn": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "town",
+"lat": 49.51718,
+"lon": 8.35333,
+"state": "Rhineland-Palatinate"
+},
+"Kid's World|Long Branch": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q6404405",
+"lat": 40.3025,
+"lon": -73.9795,
+"state": "New Jersey"
+},
+"Kiddieland|Pittsburg": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 34.93271,
+"lon": -95.76259,
+"state": "Oklahoma"
+},
+"Kids 'N Action|Brooklyn": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.6526,
+"lon": -73.94972,
+"state": "New York"
+},
+"Kids Corner Varna|Varna, Varna": {
+"at": "2026-11-19",
+"country": "Bulgaria",
+"how": "town",
+"lat": 43.20739,
+"lon": 27.91667,
+"state": "Varna"
+},
+"Kinderstad Heerlen|Heerlen, Limburg": {
+"at": "2026-11-19",
+"country": "Netherlands",
+"how": "wikidata Q79090136",
+"lat": 50.8922,
+"lon": 5.9644,
+"state": "Limburg"
+},
+"Kinkuna Country Fun Park and Zoo|Lakes Entrance, Victoria": {
+"at": "2026-11-19",
+"country": "Australia",
+"how": "town",
+"lat": -37.8778,
+"lon": 148.00239,
+"state": "Victoria"
+},
+"Kintetsu Ayameike|Nara, Nara": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 34.68081,
+"lon": 135.81894,
+"state": null
+},
+"Koaland|Menton, Provence-Alpes-Côte d'Azur": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 43.76833,
+"lon": 7.48927,
+"state": "Provence-Alpes-Côte d'Azur"
+},
+"Korakuen Yuenchi|Bunkyo, Tokyo": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 35.70803,
+"lon": 139.75231,
+"state": null
+},
+"Kurpfalz Park|Wachenheim, Rhineland-Palatinate": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "wikidata Q1265654",
+"lat": 49.4134,
+"lon": 8.1052,
+"state": "Rhineland-Palatinate"
+},
+"Kursaal Amusement Park|Southend On Sea, Essex, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 51.53882,
+"lon": 0.71281,
+"state": "England"
+},
+"L'Île aux Géants|Dissay, Nouvelle-Aquitaine": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 46.70547,
+"lon": 0.40168,
+"state": "Nouvelle-Aquitaine"
+},
+"La Coccinelle|Gujan-Mestras, Nouvelle-Aquitaine": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 44.62143,
+"lon": -1.10493,
+"state": "Nouvelle-Aquitaine"
+},
+"La Feria Chapultepec Mágico|La Feria Chapultepec Mágico": {
+"at": "2026-11-19",
+"country": null,
+"how": "wikidata Q1811321",
+"lat": 19.41561,
+"lon": -99.19578,
+"state": null
+},
+"La Norma Ski Resort|Villarodin-Bourget, Auvergne-Rhône-Alpes": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 45.21392,
+"lon": 6.69673,
+"state": "Auvergne-Rhône-Alpes"
+},
+"Lagolandia|Castel Gandolfo, Lazio": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "osm",
+"lat": 41.75849,
+"lon": 12.65269,
+"state": "Lazio"
+},
+"Lake Michigan Park|Muskegon": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 43.23418,
+"lon": -86.24839,
+"state": "Michigan"
+},
+"Lakeside Park|Dayton": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 39.74306,
+"lon": -84.25173,
+"state": "Ohio"
+},
+"Lakeside Park|Salem": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 44.93916,
+"lon": -123.03312,
+"state": "Oregon"
+},
+"Lakeview Park|Battle Creek": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.31925,
+"lon": -85.18243,
+"state": "Michigan"
+},
+"Lakeview Park|Royersford": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.18417,
+"lon": -75.53779,
+"state": "Pennsylvania"
+},
+"Lakewood Park|Atlanta": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 33.70372,
+"lon": -84.39243,
+"state": "Georgia"
+},
+"Legend City|Phoenix": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q14680542",
+"lat": 33.447,
+"lon": -111.958,
+"state": "Arizona"
+},
+"Legoland Shanghai|Jinshan, Shanghai": {
+"at": "2026-11-19",
+"country": "China",
+"how": "wikidata Q21817068",
+"lat": 30.88694,
+"lon": 121.09418,
+"state": "Shanghai"
+},
+"Legoland Shenzhen|Shenzhen, Guangdong": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 22.54457,
+"lon": 114.05454,
+"state": "Guangdong"
+},
+"Legoland parks worldwide|Legoland parks worldwide": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Les Carroz|Arâches-la-Frasse, Auvergne-Rhône-Alpes": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q3079691",
+"lat": 46.025,
+"lon": 6.64361,
+"state": "Auvergne-Rhône-Alpes"
+},
+"Les Menuires|Les Belleville, Auvergne-Rhône-Alpes": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q1414722",
+"lat": 45.32361,
+"lon": 6.5375,
+"state": "Auvergne-Rhône-Alpes"
+},
+"Les Orres|Les Orres, Provence-Alpes-Côte d'Azur": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q1086670",
+"lat": 44.51389,
+"lon": 6.55083,
+"state": "Provence-Alpes-Côte d'Azur"
+},
+"Lincoln Park|North Dartmouth": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.63899,
+"lon": -70.97032,
+"state": "Massachusetts"
+},
+"Llandudno Pier|Llandudno, Conwy, Wales": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q6661256",
+"lat": 53.3293,
+"lon": -3.82803,
+"state": "Wales"
+},
+"Long Branch Park|Syracuse": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q6672424",
+"lat": 43.1175,
+"lon": -76.2439,
+"state": "New York"
+},
+"Loos Parc|Loos-en-Gohelle, Hauts-de-France": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 50.44778,
+"lon": 2.79796,
+"state": "Hauts-de-France"
+},
+"Luges d'Été La Schlucht|Col de la Schlucht, Grand Est": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 48.06417,
+"lon": 7.02266,
+"state": "Great East"
+},
+"Luna Farm|Bologna, Emilia-Romagna": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "osm",
+"lat": 44.51479,
+"lon": 11.4102,
+"state": "Emilia-Romagna"
+},
+"Luna Park Roma|Rome, Lazio": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "osm",
+"lat": 41.83651,
+"lon": 12.47627,
+"state": "Lazio"
+},
+"Luna Park di Tirrenia|Pisa, Tuscany": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "osm",
+"lat": 43.62648,
+"lon": 10.29406,
+"state": "Tuscany"
+},
+"Lunapark Riccione|Riccione, Emilia-Romagna": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "town",
+"lat": 43.99827,
+"lon": 12.64744,
+"state": "Emilia-Romagna"
+},
+"Lunapark Riccione|Turin, Piedmont": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "town",
+"lat": 45.06776,
+"lon": 7.68249,
+"state": "Piedmont"
+},
+"MGM Grand Adventures Theme Park|MGM Grand Adventures Theme Park": {
+"at": "2026-11-19",
+"country": null,
+"how": "wikidata Q2019207",
+"lat": 36.1067,
+"lon": -115.165,
+"state": null
+},
+"MOİ Park|Istanbul, Istanbul": {
+"at": "2026-11-19",
+"country": "Turkey",
+"how": "town",
+"lat": 41.00638,
+"lon": 28.97587,
+"state": null
+},
+"Magic Castle|Cape Town, Western Cape": {
+"at": "2026-11-19",
+"country": "South Africa",
+"how": "town",
+"lat": -33.92883,
+"lon": 18.41722,
+"state": "Western Cape"
+},
+"Magic City|Chilonzor, Tashkent": {
+"at": "2026-11-19",
+"country": "Uzbekistan",
+"how": "town",
+"lat": 41.27436,
+"lon": 69.20497,
+"state": null
+},
+"Magic Harbor|Surfside Beach": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 28.95071,
+"lon": -95.28743,
+"state": "Texas"
+},
+"Magic Park Verden|Verden, Lower Saxony": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "wikidata Q1884087",
+"lat": 52.9342,
+"lon": 9.27111,
+"state": "Lower Saxony"
+},
+"Magic Springs and Crystal Falls|Magic Springs and Crystal Falls": {
+"at": "2026-11-19",
+"country": null,
+"how": "wikidata Q2372906",
+"lat": 34.5194,
+"lon": -93.0169,
+"state": null
+},
+"Magic World|Hyères, Provence-Alpes-Côte d'Azur": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 43.08315,
+"lon": 6.1411,
+"state": "Provence-Alpes-Côte d'Azur"
+},
+"Mainstay Farm|Cleburne": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 33.6507,
+"lon": -85.50174,
+"state": "Alabama"
+},
+"Majaland Gdańsk|Gdańsk, Pomorskie": {
+"at": "2026-11-19",
+"country": "Poland",
+"how": "wikidata Q110553707",
+"lat": 54.40881,
+"lon": 18.47363,
+"state": "Pomeranian Voivodeship"
+},
+"Malibu Jack's|Elizabethtown": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 37.7315,
+"lon": -85.89018,
+"state": "Kentucky"
+},
+"Malibu Jack's|Lafayette": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 30.22622,
+"lon": -92.01782,
+"state": "Louisiana"
+},
+"Malibu Jack's|Louisville": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 38.25424,
+"lon": -85.75941,
+"state": "Kentucky"
+},
+"Mardi Gras|": {
+"at": "2026-11-19",
+"country": "Denmark",
+"how": "town",
+"lat": 56.16759,
+"lon": 10.22637,
+"state": "Central Denmark Region"
+},
+"Mariebergsskogen|Karlstad, Västra Götaland": {
+"at": "2026-11-19",
+"country": "Sweden",
+"how": "town",
+"lat": 58.84667,
+"lon": 11.978,
+"state": null
+},
+"Marineland of Canada|Marineland of Canada": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "wikidata Q1043956",
+"lat": 43.0656,
+"lon": -79.0725,
+"state": "Ontario"
+},
+"Markstein Grand-Ballon|Oderen, Grand Est": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 47.90968,
+"lon": 6.97561,
+"state": "Great East"
+},
+"Marleybrook House|Preston, Kent, Englan": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "osm",
+"lat": 51.31141,
+"lon": 1.22535,
+"state": "England"
+},
+"Marriott's Great America|Gurnee": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.3703,
+"lon": -87.90202,
+"state": "Illinois"
+},
+"Marriott's Great America|Santa Clara": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 37.23333,
+"lon": -121.68463,
+"state": "California"
+},
+"Massanutten Family Adventure Park|Massanutten": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 38.41401,
+"lon": -78.72804,
+"state": "Virginia"
+},
+"Mattel City|Glendale": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 34.14694,
+"lon": -118.24785,
+"state": "California"
+},
+"Maui's Indoor Theme Park|Owensboro": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 37.77422,
+"lon": -87.11333,
+"state": "Kentucky"
+},
+"Mediterraneo Marine Park|Tul Il-Kosta, Naxxar": {
+"at": "2026-11-19",
+"country": "Malta",
+"how": "wikidata Q2506733",
+"lat": 35.9393,
+"lon": 14.4577,
+"state": null
+},
+"Mega Science Center|Batu, East Java": {
+"at": "2026-11-19",
+"country": "Indonesia",
+"how": "town",
+"lat": -7.87117,
+"lon": 112.52695,
+"state": "East Java"
+},
+"Mega Speelstad|Wechelderzande, Antwerp, Flemish Region": {
+"at": "2026-11-19",
+"country": "Belgium",
+"how": "wikidata Q3304238",
+"lat": 51.2621,
+"lon": 4.79506,
+"state": "Antwerp"
+},
+"Mehliskopf|Forbach, Baden-Württemberg": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "wikidata Q1917268",
+"lat": 48.6492,
+"lon": 8.24028,
+"state": "Baden-Württemberg"
+},
+"Meli Park|Adinkerke-De Panne, West Flanders, Flemish Region": {
+"at": "2026-11-19",
+"country": "Belgium",
+"how": "wikidata Q3305037",
+"lat": 51.08135,
+"lon": 2.60159,
+"state": "West Flanders"
+},
+"Memphis' Incredible Pizza Company|Cordova": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 60.54434,
+"lon": -145.75951,
+"state": "Alaska"
+},
+"Meyer's Lake Park|Canton": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.79855,
+"lon": -81.37495,
+"state": "Ohio"
+},
+"Miami Beach Amusement Park|Aberavon, Neath Port Talbot, Wales": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 51.60014,
+"lon": -3.79549,
+"state": "Wales"
+},
+"Mid America Adventure|Mid America Adventure": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q261618",
+"lat": 38.51281,
+"lon": -90.67505,
+"state": "Missouri"
+},
+"Millsprings Amusement Park|Paducah": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 37.08339,
+"lon": -88.60005,
+"state": "Kentucky"
+},
+"Mirapolis|Courdimanche, Île-de-France": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q667541",
+"lat": 49.055,
+"lon": 1.99917,
+"state": "Ile-de-France"
+},
+"Moku Sphere|Yubei, Chongqing": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 29.85091,
+"lon": 106.78717,
+"state": "Chongqing"
+},
+"Moon Toon|Jeddah, Makkah": {
+"at": "2026-11-19",
+"country": "Saudi Arabia",
+"how": "town",
+"lat": 21.55044,
+"lon": 39.17424,
+"state": "Makkah Region"
+},
+"Motor World|Virginia Beach": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 36.84966,
+"lon": -75.97608,
+"state": "Virginia"
+},
+"Mount Olympus Water & Theme Park|": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Mount Tom Ski Area|Holyoke": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q14715730",
+"lat": 42.2513,
+"lon": -72.6381,
+"state": "Massachusetts"
+},
+"Movieland Park|Lago di Garda, Veneto": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "town",
+"lat": 45.66243,
+"lon": 10.68616,
+"state": null
+},
+"Myrtle Beach Grand Prix|North Myrtle Beach": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 33.82784,
+"lon": -78.68003,
+"state": "South Carolina"
+},
+"Myrtle Beach Pavilion|Myrtle Beach": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q3331644",
+"lat": 33.6925,
+"lon": -78.8816,
+"state": "South Carolina"
+},
+"NEB's Fun World|Oshawa, Ontario": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "osm",
+"lat": 43.93554,
+"lon": -78.86024,
+"state": "Ontario"
+},
+"Nantong Adventure Land|Gangzha, Nantong, Jiangsu": {
+"at": "2026-11-19",
+"country": "China",
+"how": "osm",
+"lat": 32.0422,
+"lon": 120.85401,
+"state": "Jiangsu"
+},
+"Natural World Amusement Park|Yangon, Yangon": {
+"at": "2026-11-19",
+"country": "Myanmar",
+"how": "town",
+"lat": 16.79671,
+"lon": 96.16099,
+"state": "Yangon"
+},
+"Neo Geo World Tokyo Bayside|Odaiba, Minato, Tokyo": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 35.62753,
+"lon": 139.77147,
+"state": null
+},
+"Nickel's Midway Pier|Wildwood": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 38.58069,
+"lon": -90.63144,
+"state": "Missouri"
+},
+"Nitro Zone|Dowagiac": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.98247,
+"lon": -86.10888,
+"state": "Michigan"
+},
+"North Parade Amusement Park|Skegness, Lincolnshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.14375,
+"lon": 0.3429,
+"state": "England"
+},
+"O'Gliss Park|Le Bernard, Pays de la Loire": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q56033897",
+"lat": 46.45552,
+"lon": -1.42066,
+"state": "Pays de la Loire"
+},
+"OCT East|OCT East": {
+"at": "2026-11-19",
+"country": "China",
+"how": "wikidata Q10871008",
+"lat": 22.63,
+"lon": 114.285,
+"state": "Guangdong"
+},
+"Oasi Park|Rome, Lazio": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "osm",
+"lat": 41.86106,
+"lon": 12.56345,
+"state": "Lazio"
+},
+"Oasis at Lakeport|Osage Beach": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q126364984",
+"lat": 38.135,
+"lon": -92.65,
+"state": "Missouri"
+},
+"Ocean Beach Fun Fair|Rhyl, Denbighshire, Wales": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.32074,
+"lon": -3.49073,
+"state": "Wales"
+},
+"Ocean View Amusement Park|Norfolk": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q2013413",
+"lat": 36.9541,
+"lon": -76.2507,
+"state": "Virginia"
+},
+"Ocean View Pavilion|Jacksonville Beach": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 30.29469,
+"lon": -81.39314,
+"state": "Florida"
+},
+"Old Chicago|Bolingbrook": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q7083647",
+"lat": 41.67917,
+"lon": -88.07111,
+"state": "Illinois"
+},
+"Old Indiana Fun-n-Water Park|Thorntown": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.12948,
+"lon": -86.60667,
+"state": "Indiana"
+},
+"Old Orchard Beach|Old Orchard Beach": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q388977",
+"lat": 43.51361,
+"lon": -70.38528,
+"state": "Maine"
+},
+"Olentangy Park|Columbus": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q7086391",
+"lat": 40.0204,
+"lon": -83.0143,
+"state": "Ohio"
+},
+"Onederland|Karachi, Sindh": {
+"at": "2026-11-19",
+"country": "Pakistan",
+"how": "town",
+"lat": 24.85468,
+"lon": 67.02071,
+"state": "Sindh"
+},
+"Ontario Beach Park|Rochester": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q96482958",
+"lat": 43.25923,
+"lon": -77.60778,
+"state": "New York"
+},
+"Orange Hub|Forsan Central Mall, Abu Dhabi": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Ostdeutsche Austellung 1911|Ostdeutsche Austellung 1911": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Oyama Yuenchi|Oyama, Tochigi": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 36.31554,
+"lon": 139.8007,
+"state": null
+},
+"Pacific Ocean Park|Santa Monica": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q1294658",
+"lat": 33.998,
+"lon": -118.482,
+"state": "California"
+},
+"Paperopolis|Bellaria - Igea Marina, Emilia-Romagna": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "osm",
+"lat": 44.13246,
+"lon": 12.48048,
+"state": "Emilia-Romagna"
+},
+"Paradise of Dreams|Oran, Oran": {
+"at": "2026-11-19",
+"country": "Algeria",
+"how": "town",
+"lat": 35.70444,
+"lon": -0.6503,
+"state": "Oran"
+},
+"Paragon Park|Hull": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 43.18976,
+"lon": -96.13388,
+"state": "Iowa"
+},
+"Parc d'attractions Odet Loisirs|Elliant, Brittany": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 47.99514,
+"lon": -3.89054,
+"state": "Brittany"
+},
+"Parc de Procé|": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 46.60335,
+"lon": 1.88833,
+"state": null
+},
+"Parc de la Toison d'Or|Dijon, Bourgogne-Franche-Comté": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q3364227",
+"lat": 47.35511,
+"lon": 5.05502,
+"state": "Bourgogne – Franche-Comté"
+},
+"Parc de loisirs du Hautacam|Beaucens, Occitanie": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 42.97184,
+"lon": -0.00874,
+"state": "Occitania"
+},
+"Parc des Dunes|": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 46.60335,
+"lon": 1.88833,
+"state": null
+},
+"Parc des Naudières|Sautron, Pays de la Loire": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q133932822",
+"lat": 47.26815,
+"lon": -1.6971,
+"state": "Pays de la Loire"
+},
+"Parco Giochi Mondobimbo|Florence, Tuscany": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "town",
+"lat": 43.7698,
+"lon": 11.25564,
+"state": "Tuscany"
+},
+"Parco Giochi Santa Fe|Bellaria - Igea Marina, Emilia-Romagna": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "town",
+"lat": 44.14211,
+"lon": 12.46969,
+"state": "Emilia-Romagna"
+},
+"Parco Pitagora|Camaiore, Tuscany": {
+"at": "2026-11-19",
+"country": "Italy",
+"how": "osm",
+"lat": 43.89916,
+"lon": 10.23165,
+"state": "Tuscany"
+},
+"Park Mirakulum|Central Bohemian": {
+"at": "2026-11-19",
+"country": "Czechia",
+"how": "wikidata Q107363677",
+"lat": 50.23953,
+"lon": 14.86006,
+"state": null
+},
+"Park Rozrywki Kyrnica Morska|Krynica Morska, Pomorskie": {
+"at": "2026-11-19",
+"country": "Poland",
+"how": "town",
+"lat": 54.38944,
+"lon": 19.53507,
+"state": "Pomeranian Voivodeship"
+},
+"Parque Acuatico Rey Park|Pajonal, Guayas": {
+"at": "2026-11-19",
+"country": "Ecuador",
+"how": "town",
+"lat": -1.89364,
+"lon": -80.01743,
+"state": "Guayas"
+},
+"Parque Guanabara|Belo Horizonte, Minas Gerais": {
+"at": "2026-11-19",
+"country": "Brazil",
+"how": "osm",
+"lat": -19.85993,
+"lon": -43.97877,
+"state": "Minas Gerais"
+},
+"Parque Japonés|Buenos Aires, Buenos Aires": {
+"at": "2026-11-19",
+"country": "Argentina",
+"how": "osm",
+"lat": -34.35281,
+"lon": -58.79798,
+"state": "Buenos Aires"
+},
+"Parque de la Ciudad|Buenos Aires, Buenos Aires": {
+"at": "2026-11-19",
+"country": "Argentina",
+"how": "wikidata Q5844073",
+"lat": -34.6699,
+"lon": -58.4551,
+"state": "Buenos Aires"
+},
+"Paul Boyton's Sea Lion Park|Brooklyn": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.6526,
+"lon": -73.94972,
+"state": "New York"
+},
+"Pavilion Fun Park|Clacton-on-sea, Essex, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "osm",
+"lat": 51.78754,
+"lon": 1.15522,
+"state": "England"
+},
+"People's Choice Family Fun Center|Waukegan": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.36023,
+"lon": -87.83182,
+"state": "Illinois"
+},
+"Peter Pan's Playground|Brighton, East Sussex, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 50.78866,
+"lon": 0.30629,
+"state": "England"
+},
+"Petticoat Junction|Panama City": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 30.15865,
+"lon": -85.66029,
+"state": "Florida"
+},
+"Pirat' Parc|Gruissan, Occitanie": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 43.11765,
+"lon": 3.11079,
+"state": "Occitania"
+},
+"Play DXB Dubai Mall|Dubai": {
+"at": "2026-11-19",
+"country": "United Arab Emirates",
+"how": "town",
+"lat": 25.07428,
+"lon": 55.18856,
+"state": "Dubai Emirate"
+},
+"Playland at the Beach|San Francisco": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 37.78794,
+"lon": -122.40752,
+"state": "California"
+},
+"Plaza de Juegos|Córdoba City, Córdoba": {
+"at": "2026-11-19",
+"country": "Argentina",
+"how": "town",
+"lat": -34.59402,
+"lon": -58.43021,
+"state": "Autonomous City of Buenos Aires"
+},
+"Pleasure Beach Blackpool|Blackpool, Lancashire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "osm",
+"lat": 53.79069,
+"lon": -3.05547,
+"state": "England"
+},
+"Plopsa Indoor Coevorden|Dalen, Coevorden, Drenthe": {
+"at": "2026-11-19",
+"country": "Netherlands",
+"how": "wikidata Q74498",
+"lat": 52.67865,
+"lon": 6.77388,
+"state": "Drenthe"
+},
+"Plopsa Indoor Hasselt|Hasselt, Limburg, Flemish Region": {
+"at": "2026-11-19",
+"country": "Belgium",
+"how": "wikidata Q971808",
+"lat": 50.93417,
+"lon": 5.36167,
+"state": "Limburg"
+},
+"Pokeyland|Féy, Grand Est": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 49.02184,
+"lon": 6.1023,
+"state": "Great East"
+},
+"Pola Park|Santa Pola, Alicante, Valencian Community": {
+"at": "2026-11-19",
+"country": "Spain",
+"how": "osm",
+"lat": 38.19666,
+"lon": -0.57511,
+"state": "Valencian Community"
+},
+"Pontchartrain Beach|New Orleans": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q7228085",
+"lat": 30.032,
+"lon": -90.062,
+"state": "Louisiana"
+},
+"PowerLand|": {
+"at": "2026-11-19",
+"country": null,
+"how": "osm",
+"lat": 53.45154,
+"lon": 14.54052,
+"state": null
+},
+"Prater|Vienna, Vienna": {
+"at": "2026-11-19",
+"country": "Austria",
+"how": "wikidata Q264752",
+"lat": 48.21611,
+"lon": 16.39556,
+"state": null
+},
+"Prishtina Park|Pristina, Pristina": {
+"at": "2026-11-19",
+"country": "Kosovo",
+"how": "osm",
+"lat": 42.56777,
+"lon": 21.14371,
+"state": null
+},
+"Puritas Springs|Cleveland": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q49546890",
+"lat": 41.43672,
+"lon": -81.83708,
+"state": "Ohio"
+},
+"Race World|Pigeon Forge": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 35.78842,
+"lon": -83.55433,
+"state": "Tennessee"
+},
+"Ramona Park|Grand Rapids": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q7289927",
+"lat": 42.95001,
+"lon": -85.61556,
+"state": "Michigan"
+},
+"Ravensburger Spieleland|Meckenbeuren, Baden-Württemberg": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "wikidata Q2133667",
+"lat": 47.71139,
+"lon": 9.59528,
+"state": "Baden-Württemberg"
+},
+"Redcar Amusement Park|Redcar, North Yorkshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 54.6179,
+"lon": -1.06879,
+"state": "England"
+},
+"Revere Beach|Revere": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q2146799",
+"lat": 42.40784,
+"lon": -70.99084,
+"state": "Massachusetts"
+},
+"Revere Beach|Suffolk": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.88323,
+"lon": -72.8578,
+"state": "New York"
+},
+"Rides At Adventure Cove|Rides At Adventure Cove": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.15494,
+"lon": -83.11844,
+"state": "Ohio"
+},
+"Riverside Park|Agawam": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 42.03909,
+"lon": -72.61363,
+"state": "Massachusetts"
+},
+"Riverview Park|Des Moines": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q7338763",
+"lat": 41.622,
+"lon": -93.629,
+"state": "Iowa"
+},
+"Robotland|Masanhappo-gu, Changwon, Gyeongsangnam-do": {
+"at": "2026-11-19",
+"country": "South Korea",
+"how": "town",
+"lat": 35.19697,
+"lon": 128.56736,
+"state": null
+},
+"Rocca al Mare Tivoli|Tallinn, Harju": {
+"at": "2026-11-19",
+"country": "Estonia",
+"how": "town",
+"lat": 59.43724,
+"lon": 24.75727,
+"state": null
+},
+"Rockaways' Playland|Rockaway Beach": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 45.6136,
+"lon": -123.94315,
+"state": "Oregon"
+},
+"Rocky Glen Park|Rocky Glen Park": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q49552849",
+"lat": 40.69028,
+"lon": -89.65972,
+"state": "Illinois"
+},
+"Rocky Glen|Moosic": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.35341,
+"lon": -75.73825,
+"state": "Pennsylvania"
+},
+"Rocky Point Park|Warwikc": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.78373,
+"lon": -100.44588,
+"state": null
+},
+"Rocky Springs Park|Lancaster": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q49552928",
+"lat": 40.02417,
+"lon": -76.27278,
+"state": "Pennsylvania"
+},
+"Rocolinos Kinderwelt|Eschweiler, North Rhine-Westphalia": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "osm",
+"lat": 50.82094,
+"lon": 6.29318,
+"state": "North Rhine-Westphalia"
+},
+"Rodelbahn Pradaschier|Churwalden, Grisons": {
+"at": "2026-11-19",
+"country": "Switzerland",
+"how": "osm",
+"lat": 46.77867,
+"lon": 9.54136,
+"state": "Grisons"
+},
+"Rose Island Amusement Park|Charlestown": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.37787,
+"lon": -71.062,
+"state": "Massachusetts"
+},
+"Royal Adelaide Show|Adelaide, South Australia": {
+"at": "2026-11-19",
+"country": "Australia",
+"how": "town",
+"lat": -34.92818,
+"lon": 138.59993,
+"state": "South Australia"
+},
+"Royaume des Enfants Draveil|Draveil, Île-de-France": {
+"at": "2026-11-19",
+"country": "France",
+"how": "osm",
+"lat": 48.69344,
+"lon": 2.40618,
+"state": "Ile-de-France"
+},
+"Rukan Hiihtokeskus|Kuusamo": {
+"at": "2026-11-19",
+"country": "Finland",
+"how": "town",
+"lat": 65.96456,
+"lon": 29.18833,
+"state": "North Ostrobothnia"
+},
+"Safari Land|Villa Park": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.88931,
+"lon": -87.97784,
+"state": "Illinois"
+},
+"Safari Park|Esenyurt, Istanbul, Istanbul": {
+"at": "2026-11-19",
+"country": "Turkey",
+"how": "town",
+"lat": 41.03429,
+"lon": 28.68011,
+"state": null
+},
+"Saigon Zoo And Botanical Garden|Ho Chi Minh City": {
+"at": "2026-11-19",
+"country": "Vietnam",
+"how": "wikidata Q3162430",
+"lat": 10.78806,
+"lon": 106.70472,
+"state": null
+},
+"Saltair|Magna": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q12068092",
+"lat": 40.747,
+"lon": -112.188,
+"state": "Utah"
+},
+"San Antonio's Incredible Pizza Company|San Antonio": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 29.4246,
+"lon": -98.49514,
+"state": "Texas"
+},
+"Sans Souci Park|Hanover Township": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.13317,
+"lon": -84.53691,
+"state": "Michigan"
+},
+"Sans Souci|Chicago": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.87556,
+"lon": -87.62442,
+"state": "Illinois"
+},
+"Santa's Village AZoosment Park|Dundee": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.57906,
+"lon": -91.54685,
+"state": "Iowa"
+},
+"Saratoga Resort|Lehi": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q122540448",
+"lat": 40.34884,
+"lon": -111.90577,
+"state": "Utah"
+},
+"Sauble Beach Fun World|Sauble Beach, Ontario": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "town",
+"lat": 44.62985,
+"lon": -81.26486,
+"state": "Ontario"
+},
+"Savin Rock|West Haven": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q20011458",
+"lat": 41.257,
+"lon": -72.95,
+"state": "Connecticut"
+},
+"Schnepf Farms|Queen Creek": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "osm",
+"lat": 33.2251,
+"lon": -111.59126,
+"state": "Arizona"
+},
+"Science City|Kolkata, West Bengal": {
+"at": "2026-11-19",
+"country": "India",
+"how": "wikidata Q7433497",
+"lat": 22.54056,
+"lon": 88.39583,
+"state": "West Bengal"
+},
+"Sea Lion Park|Sea Lion Park": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.86742,
+"lon": -87.61323,
+"state": "Illinois"
+},
+"Sea World (Australia)|Sea World (Australia)": {
+"at": "2026-11-19",
+"country": "Australia",
+"how": "town",
+"lat": -27.9584,
+"lon": 153.42531,
+"state": "Queensland"
+},
+"SeaWorld Abu Dhabi|Abu Dhabi, Abu Dhabi": {
+"at": "2026-11-19",
+"country": "United Arab Emirates",
+"how": "wikidata Q28004709",
+"lat": 24.48567,
+"lon": 54.61854,
+"state": "Abu Dhabi Emirate"
+},
+"Seaburn Fun Park|Sunderland, Tyne & Wear, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 54.90585,
+"lon": -1.38287,
+"state": "England"
+},
+"Seccaium Park|Bucyrus": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q49559292",
+"lat": 40.76639,
+"lon": -82.88389,
+"state": "Ohio"
+},
+"Sendai Highland|Sendai, Miyagi": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 38.26776,
+"lon": 140.86915,
+"state": null
+},
+"Sesquicentennial Exposition|Sesquicentennial Exposition": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Seven Islands Resort|Grand Ledge": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 42.75244,
+"lon": -84.74636,
+"state": "Michigan"
+},
+"Shanghai Joypolis|Putuo, Shanghai": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 31.25133,
+"lon": 121.39123,
+"state": "Shanghai"
+},
+"Shellpot Park|Wilmington": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.73833,
+"lon": -75.55275,
+"state": "Delaware"
+},
+"Shengming Universal City|Yubei, Chongqing": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 29.85091,
+"lon": 106.78717,
+"state": "Chongqing"
+},
+"Sherman's Amusement Park|Caroga Lake": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 43.13413,
+"lon": -74.4819,
+"state": "New York"
+},
+"Shipley Glen Pleasure Grounds|Shipley, West Yorkshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.83218,
+"lon": -1.77798,
+"state": "England"
+},
+"Silver Beach Amusement Park|Saint Joseph": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.76861,
+"lon": -94.84663,
+"state": "Missouri"
+},
+"Sir Goony's Fun Zone|Chattanooga": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 35.04572,
+"lon": -85.30949,
+"state": "Tennessee"
+},
+"Six Gun Territory|Ocala": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q29641514",
+"lat": 29.20985,
+"lon": -82.06895,
+"state": "Florida"
+},
+"Six Gun Territory|Philadelphia": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.95272,
+"lon": -75.16353,
+"state": "Pennsylvania"
+},
+"Six Gun Territory|Willow Grove": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.1507,
+"lon": -75.11623,
+"state": "Pennsylvania"
+},
+"Ski- und Rodelarena Wasserkuppe|Gersfeld, Hesse": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "town",
+"lat": 50.44977,
+"lon": 9.89437,
+"state": "Hesse"
+},
+"Sky Fantasia|Kowloon, Hong Kong": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 22.30493,
+"lon": 114.1616,
+"state": null
+},
+"SkyPlex|Skyplex": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 26.54657,
+"lon": -81.75437,
+"state": "Florida"
+},
+"Skytropolis Indoor Theme Park|Genting Highlands, Pahang": {
+"at": "2026-11-19",
+"country": "Malaysia",
+"how": "wikidata Q108803598",
+"lat": 3.42469,
+"lon": 101.79519,
+"state": "Pahang"
+},
+"Smile Park|Marrakesh, Marrakesh-Safi": {
+"at": "2026-11-19",
+"country": "Morocco",
+"how": "osm",
+"lat": 31.45813,
+"lon": -7.86431,
+"state": "Marrakech-Safi"
+},
+"Sommerrodelbahn Erbeskopf|Deuselbach, Rhineland-Palatinate": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "town",
+"lat": 49.75348,
+"lon": 7.05355,
+"state": "Rhineland-Palatinate"
+},
+"Sommerrodelbahn Gutach|Gutach, Baden-Württemberg": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "osm",
+"lat": 48.26526,
+"lon": 8.20205,
+"state": "Baden-Württemberg"
+},
+"Southport Pleasureland|Southport, Mserseyside, England": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Sparky’s|Riyadh, Ar Riyadh": {
+"at": "2026-11-19",
+"country": "Saudi Arabia",
+"how": "town",
+"lat": 24.63892,
+"lon": 46.71601,
+"state": "Riyadh Region"
+},
+"Speelstad Oranje|Oranje, Drenthe": {
+"at": "2026-11-19",
+"country": "Netherlands",
+"how": "town",
+"lat": 52.90802,
+"lon": 6.44423,
+"state": "Drenthe"
+},
+"Spelen bij Beelen|Rotterdam, Zuid-Holland": {
+"at": "2026-11-19",
+"country": "Netherlands",
+"how": "osm",
+"lat": 51.89444,
+"lon": 4.47375,
+"state": "South Holland"
+},
+"Sportland Pier|Wildwood": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 38.58069,
+"lon": -90.63144,
+"state": "Missouri"
+},
+"Spring Grove Park|Springfield": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.79902,
+"lon": -89.64396,
+"state": "Illinois"
+},
+"Springfield Fun Park|St. Columb, Cornwall, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 50.42434,
+"lon": -5.02352,
+"state": "England"
+},
+"Springlake Park|Oklahoma City": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q49564899",
+"lat": 35.51194,
+"lon": -97.47806,
+"state": "Oklahoma"
+},
+"St. Louis' Incredible Pizza Company|St. Louis": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 38.62541,
+"lon": -90.19001,
+"state": "Missouri"
+},
+"Star City|Pasay, Metro Manila": {
+"at": "2026-11-19",
+"country": "Philippines",
+"how": "osm",
+"lat": 14.55574,
+"lon": 120.98575,
+"state": null
+},
+"Starland Sportsplex & Fun Park|Hanover": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 43.70235,
+"lon": -72.28922,
+"state": "New Hampshire"
+},
+"Steeplechase Park|Brooklyn": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q741612",
+"lat": 40.57417,
+"lon": -73.98056,
+"state": "New York"
+},
+"Storyland|Cebu City, Cebu": {
+"at": "2026-11-19",
+"country": "Philippines",
+"how": "town",
+"lat": 10.32856,
+"lon": 123.90088,
+"state": null
+},
+"Stratosphere Las Vegas|": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Stratosphere Tower|Las Vegas": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 36.16743,
+"lon": -115.14841,
+"state": "Nevada"
+},
+"Summit Beach Park|Akron": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.08306,
+"lon": -81.51848,
+"state": "Ohio"
+},
+"Sunnyside Amusement Park|Toronto, Ontario": {
+"at": "2026-11-19",
+"country": "Canada",
+"how": "wikidata Q3503945",
+"lat": 43.6379,
+"lon": -79.4508,
+"state": "Ontario"
+},
+"Syndicat Mixte des Monts Jura|Mijoux, Auvergne-Rhône-Alpes": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 46.36622,
+"lon": 5.99607,
+"state": "Auvergne-Rhône-Alpes"
+},
+"Takarazuka Garden Fields|Takarazuka, Hyogo": {
+"at": "2026-11-19",
+"country": "Japan",
+"how": "town",
+"lat": 34.80047,
+"lon": 135.36087,
+"state": null
+},
+"The Great Escape Fun Park|Queensbury": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 43.36185,
+"lon": -73.66525,
+"state": "New York"
+},
+"Thrillz Indoor Adventure Amusement Park|Doraville": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 33.89816,
+"lon": -84.28326,
+"state": "Georgia"
+},
+"Ticiland|Stein am Rhein, Schaffhausen": {
+"at": "2026-11-19",
+"country": "Switzerland",
+"how": "osm",
+"lat": 47.65326,
+"lon": 8.85524,
+"state": "Schaffhausen"
+},
+"Tir Prince Fun Park|Towyn, Gwynedd, Wales": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 52.58611,
+"lon": -4.08559,
+"state": "Wales"
+},
+"Tivoli Mokia Finland|Hauho, Kanta-Häme": {
+"at": "2026-11-19",
+"country": "Finland",
+"how": "town",
+"lat": 61.17516,
+"lon": 24.56492,
+"state": "Kanta-Häme"
+},
+"Tolchester Beach Park|Tolchester Beach Park": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.21747,
+"lon": -76.23939,
+"state": "Maryland"
+},
+"Tooty Town|Al-Hofuf, Eastern Province": {
+"at": "2026-11-19",
+"country": "Saudi Arabia",
+"how": "town",
+"lat": 25.36966,
+"lon": 49.58652,
+"state": "Eastern Province"
+},
+"Trampoline Trier|Trier, Rhineland-Palatinate": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "osm",
+"lat": 49.72909,
+"lon": 6.61607,
+"state": "Rhineland-Palatinate"
+},
+"Trampoline am See|Böckingen, Baden-Württemberg": {
+"at": "2026-11-19",
+"country": "Germany",
+"how": "town",
+"lat": 49.1337,
+"lon": 9.19326,
+"state": "Baden-Württemberg"
+},
+"Tricky Track - Station du Lac Blanc|Le Bonhomme, Grand Est": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 48.17251,
+"lon": 7.11399,
+"state": "Great East"
+},
+"Tōbu Dōbutsu Kōen|": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Uncle Bernie's Amusement Park|Fort Laurderadale": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 39.78373,
+"lon": -100.44588,
+"state": null
+},
+"Universal Orlando Resort|": {
+"at": "2026-11-19",
+"country": null,
+"how": "wikidata Q778011",
+"lat": 28.47432,
+"lon": -81.47001,
+"state": null
+},
+"Utah Fun Dome|Murray": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 34.78519,
+"lon": -84.73523,
+"state": "Georgia"
+},
+"Venice Park|Venice Park": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q122565733",
+"lat": 39.37651,
+"lon": -74.44515,
+"state": "New Jersey"
+},
+"Venice Pier|Venice": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 33.99504,
+"lon": -118.46689,
+"state": "California"
+},
+"Vertical Endeavors|Duluth": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 46.78383,
+"lon": -92.10527,
+"state": "Minnesota"
+},
+"Village Theme Park|Kuwait City": {
+"at": "2026-11-19",
+"country": "Kuwait",
+"how": "town",
+"lat": 29.37965,
+"lon": 47.97342,
+"state": "Capital Governorate"
+},
+"VinWonders Grand Park|District 9, Ho Chi Minh": {
+"at": "2026-11-19",
+"country": "Vietnam",
+"how": "town",
+"lat": 10.77386,
+"lon": 106.70566,
+"state": null
+},
+"Vollmar's Park|Bowling Green": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 36.99292,
+"lon": -86.44287,
+"state": "Kentucky"
+},
+"Výstaviště Praha|Výstaviště Praha": {
+"at": "2026-11-19",
+"country": "Czechia",
+"how": "wikidata Q1389717",
+"lat": 50.10472,
+"lon": 14.43083,
+"state": null
+},
+"Walton Pier|Walton-on-the-Naze, Essex, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "wikidata Q138544659",
+"lat": 51.84638,
+"lon": 1.27197,
+"state": "England"
+},
+"Walygator Parc|Walygator Parc": {
+"at": "2026-11-19",
+"country": "France",
+"how": "wikidata Q975724",
+"lat": 49.22471,
+"lon": 6.15974,
+"state": "Great East"
+},
+"Warner Bros. World Abu Dhabi|Abu Dhabi, Abu Dhabi": {
+"at": "2026-11-19",
+"country": "United Arab Emirates",
+"how": "wikidata Q30590075",
+"lat": 24.49197,
+"lon": 54.60002,
+"state": "Abu Dhabi Emirate"
+},
+"Wedgewood Village|Oklahoma City": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q7979185",
+"lat": 35.54,
+"lon": -97.5936,
+"state": "Oklahoma"
+},
+"West End Amusement Park|Morecambe, Lancashire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 54.07211,
+"lon": -2.86509,
+"state": "England"
+},
+"West Point Park|West Point": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.39127,
+"lon": -73.96588,
+"state": "New York"
+},
+"West View Park|West View, Pennsylvania, United States": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 40.96999,
+"lon": -77.72788,
+"state": "Pennsylvania"
+},
+"White City|Bellingham": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 48.7544,
+"lon": -122.47884,
+"state": "Washington"
+},
+"White City|Louisville": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 38.25424,
+"lon": -85.75941,
+"state": "Kentucky"
+},
+"Willow Grove Park|Philadelphia": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q3569131",
+"lat": 40.1392,
+"lon": -75.1211,
+"state": "Pennsylvania"
+},
+"Willow Mill Park|Mechanicsburg": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q49581458",
+"lat": 40.25889,
+"lon": -77.04111,
+"state": "Pennsylvania"
+},
+"Windsor Safari Park|Windsor, Berkshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 51.50706,
+"lon": -1.53412,
+"state": "England"
+},
+"WonderPark|Bayamón": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 18.34496,
+"lon": -66.16837,
+"state": "Puerto Rico"
+},
+"WonderPark|Carolina": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 18.36406,
+"lon": -65.95267,
+"state": "Puerto Rico"
+},
+"Wonderla Amusement Park Chennai|Illalur, Tamil Nadu": {
+"at": "2026-11-19",
+"country": "India",
+"how": "osm",
+"lat": 12.74266,
+"lon": 80.17421,
+"state": "Tamil Nadu"
+},
+"Wonderland Amusement Park|Kallang": {
+"at": "2026-11-19",
+"country": "Singapore",
+"how": "town",
+"lat": 1.31113,
+"lon": 103.86654,
+"state": null
+},
+"Wonderland City|Sydney, New South Wales": {
+"at": "2026-11-19",
+"country": "Australia",
+"how": "wikidata Q8031897",
+"lat": -33.8999,
+"lon": 151.271,
+"state": "New South Wales"
+},
+"Wonderland Park (Texas)|Wonderland Park (Texas)": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 35.2427,
+"lon": -101.83303,
+"state": "Texas"
+},
+"Wonderland Park|Wonderland Park": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.46524,
+"lon": -2.20921,
+"state": "England"
+},
+"Wonderland|Cleethorpes, Lincolnshire, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 53.55721,
+"lon": -0.029,
+"state": "England"
+},
+"Woodland Beach|Ashtabula": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "town",
+"lat": 41.86479,
+"lon": -80.78413,
+"state": "Ohio"
+},
+"World in Miniature|Truro, Cornwall, England": {
+"at": "2026-11-19",
+"country": "United Kingdom",
+"how": "town",
+"lat": 50.26332,
+"lon": -5.05181,
+"state": "England"
+},
+"Wowstock Happy Island|Hunchun, Yanbian, Jilin": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 42.98993,
+"lon": 130.46433,
+"state": "Jilin"
+},
+"Wurstelprater|Wurstelprater": {
+"at": "2026-11-19",
+"country": "Austria",
+"how": "wikidata Q3487269",
+"lat": 48.2147,
+"lon": 16.4022,
+"state": null
+},
+"X-Site|Muntinlupa, Metro Manila": {
+"at": "2026-11-19",
+"country": "Philippines",
+"how": "osm",
+"lat": 14.41771,
+"lon": 121.04157,
+"state": null
+},
+"Xavier Lapère (Travelling)|France": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 50.10246,
+"lon": 2.72475,
+"state": "Hauts-de-France"
+},
+"Xiaoyaojin Park|Luyang, Hefei, Anhui": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 31.88055,
+"lon": 117.25924,
+"state": "Anhui"
+},
+"Xishuangbanna Theme Park|Xishuangbanna Theme Park": {
+"at": "2026-11-19",
+"country": null,
+"how": "none",
+"lat": null,
+"lon": null,
+"state": null
+},
+"Yakutov Park|Ufa, Bashkortostan": {
+"at": "2026-11-19",
+"country": "Russia",
+"how": "town",
+"lat": 54.72614,
+"lon": 55.9475,
+"state": "Bashkortostan"
+},
+"Zatorland|Zator, Małopolskie": {
+"at": "2026-11-19",
+"country": "Poland",
+"how": "wikidata Q140385943",
+"lat": 49.98854,
+"lon": 19.4419,
+"state": "Lesser Poland Voivodeship"
+},
+"Zhoukou Dino Park|Huaiyang District, Zhoukou City, Henan Province": {
+"at": "2026-11-19",
+"country": "China",
+"how": "town",
+"lat": 33.80833,
+"lon": 114.91194,
+"state": "Henan"
+},
+"iPlay America|Freehold": {
+"at": "2026-11-19",
+"country": "United States",
+"how": "wikidata Q114869438",
+"lat": 40.24028,
+"lon": -74.28083,
+"state": "New Jersey"
+},
+"Ô Parc|Bannay, Centre-Val de Loire": {
+"at": "2026-11-19",
+"country": "France",
+"how": "town",
+"lat": 47.38701,
+"lon": 2.88581,
+"state": "Centre-Val de Loire"
+},
+"Đại Nam Văn Hiến|Đại Nam Văn Hiến": {
+"at": "2026-11-19",
+"country": "Vietnam",
+"how": "wikidata Q8079949",
+"lat": 11.04333,
+"lon": 106.6325,
+"state": null
+}
+}
