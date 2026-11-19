@@ -6335,6 +6335,22 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   "(Old)", years). Picks are open_choices field 'name': source 'manual' for
   ours kept or typed, else the source whose name was taken. Unpicked names
   keep ours at the switch.
+- **/cutover after the switch = "Coaster data", the weekly review page
+  (2026-11-19).** `/api/cutover/review` (`getPostLaunch`) lists: gaps (a live
+  stat blank that an open source has), changed (the best open source
+  disagrees with a live value it did not supply), new matches (pending
+  suggestions; approving uses /api/open-review as before), new coasters
+  (open_adds at our parks; "Add to the site" creates the row from
+  open_record_facts, Coasterpedia first, with open_links, coaster_sources and a
+  coaster_added activity row), and needs a source (live coasters with stats
+  blank and no open value, most-ridden first). Approvals go to POST
+  /api/cutover/apply and WRITE TO THE LIVE coasters; "skip"/"keep site" is
+  remembered in open_reviews kind 'value' (ref = field|value), so a value only
+  returns if the source changes it. The Monday open-data refresh fills these
+  lists: that is the "new things to review each week" Carter asked for. The
+  Switch panel and the pre-switch steps are gone from the page (the switch
+  endpoints still exist and refuse to run twice). /changes: 193 rows about
+  retired coasters removed (197), backed up in activity_retired_backup.
 - **THE SWITCH RAN 2026-11-19 ~02:40 UTC**, from the `cutover.yml` Action
   (export live D1 -> tools/cutover-run.mjs runs the real Worker's switch on a
   copy and records its writes -> wrangler applies them; backup tables first).
