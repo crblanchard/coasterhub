@@ -6335,6 +6335,19 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   "(Old)", years). Picks are open_choices field 'name': source 'manual' for
   ours kept or typed, else the source whose name was taken. Unpicked names
   keep ours at the switch.
+- **New parks on /sources/review (2026-11-19)**: suggest-matches.py groups
+  open-source coasters (not Wikidata alone) at parks not on the site into
+  `open_new_parks` (191): park name, average coordinates, region (Coasterpedia
+  country/state as "State, US" or the country), coasters with their refs.
+  Same-name parks split by distance (30 km). Only parks with a coaster
+  operating or being built; "standing but not operating" counts as closed
+  (Carter's rule: operating or closed, nothing between). Carter: "let me check
+  before they go up" - every card is editable (name, region, lat/lon, which
+  coasters) and nothing is created until he presses Add (POST
+  /api/cutover/apply kind 'addpark', which inserts the park then each ticked
+  coaster via addOpenCoaster with a coaster_added row; 'noaddpark' leaves it
+  out for good, open_reviews kind 'park', ref = k). First run: 886 parks,
+  1,486 coasters. No park_added activity kind exists; the coaster rows carry it.
 - **Wikipedia joined as a source (2026-11-19)**: `tools/open-data/wikipedia-pull.py`
   reads every `Infobox roller coaster` (en) and `Infobox Achterbahn` (de)
   through the API as sources `enwiki` / `dewiki` (ref = article title), between

@@ -162,8 +162,64 @@ for p, r in sorted(cands, key=lambda x: (x[0], sq(x[1]['name']), x[1]['source'])
 uniq = [dict(park=p, name=rs[0]['name'], status=next((r['status'] for r in rs if r['status']), None),
              refs=[dict(source=r['source'], ref=r['ref']) for r in rs]) for (p, _), rs in groups.items()]
 
+# New parks (2026-11-19): open-source coasters at parks that are not on the
+# site at all, grouped by park, with the park's coordinates (average of its
+# coasters') and region. Carter checks each before anything goes up. Only
+# parks with at least one coaster operating or being built; Wikidata alone
+# names no park, so it only joins a park another source names.
+REGION = {'usa': 'US', 'unitedstates': 'US', 'unitedstatesofamerica': 'US', 'uk': 'United Kingdom', 'england': 'United Kingdom',
+          'scotland': 'United Kingdom', 'wales': 'United Kingdom', 'uae': 'United Arab Emirates', 'peoplesrepublicofchina': 'China'}
+def region_of(raw):
+    c = (raw.get('country') or raw.get('land') or '').strip()
+    st = (raw.get('state') or raw.get('bundesland') or '').strip()
+    k = REGION.get(sq(c), c)
+    if k == 'US': return (st + ', US') if st else None
+    return k or None
+known_parks = set()
+for p in parks: known_parks |= park_names(p)
+claimed = {(r['source'], r['ref']) for g in uniq for r in g['refs']} | suggested_refs
+newp = collections.OrderedDict()
+for r in recs:
+    if r['source'] == 'wikidata' or not r.get('park') or r['ref'] in linked[r['source']] or (r['source'], r['ref']) in claimed: continue
+    pk = sq(r['park'])
+    if not pk or pk in known_parks or any(len(pk) > 6 and len(k) > 6 and (pk in k or k in pk) for k in known_parks): continue
+    if r['lat'] is not None and any(pp.get('lat') is not None and km(r['lat'], r['lon'], pp['lat'], pp['lon']) <= 3 for pp in parks.values()): continue
+    raw = next((i['raw'] for i in src['items'] if i['source'] == r['source'] and i['ref'] == r['ref']), {})
+    # Same name, different park ("Greenland", "VinWonders" are several): split
+    # by country, and by distance when both sides have coordinates.
+    key = (pk,)
+    n = 0
+    while key + (n,) in newp:
+        gg = newp[key + (n,)]
+        if r['lat'] is None or not gg['lats'] or km(r['lat'], r['lon'], gg['lats'][0], gg['lons'][0]) <= 30: break
+        n += 1
+    g = newp.setdefault(key + (n,), dict(park=r['park'], coasters=collections.OrderedDict(), lats=[], lons=[], regions=collections.Counter()))
+    if r['lat'] is not None: g['lats'].append(r['lat']); g['lons'].append(r['lon'])
+    rg = region_of(raw)
+    if rg: g['regions'][rg] += 1
+    k = sq(r['name'])
+    c = g['coasters'].setdefault(k, dict(name=r['name'], status=r.get('status') or raw.get('status'), refs=[]))
+    c['refs'].append(dict(source=r['source'], ref=r['ref']))
+    if not c['status'] and raw.get('status'): c['status'] = raw['status']
+new_parks = []
+# "Standing but not operating" is closed here: the site records a ride as
+# operating or closed, nothing in between (Carter's rule).
+_alive = re.compile(r'operat|construct|open|betrieb', re.I)
+class _Alive:
+    def search(self, v): return None if re.search(r'not operat|nicht in betrieb|sbno', v or '', re.I) else _alive.search(v or '')
+alive = _Alive()
+for g in newp.values():
+    cs = list(g['coasters'].values())
+    if not any(alive.search(c['status'] or '') for c in cs): continue
+    new_parks.append(dict(park=g['park'], lat=round(sum(g['lats']) / len(g['lats']), 5) if g['lats'] else None,
+                          lon=round(sum(g['lons']) / len(g['lons']), 5) if g['lons'] else None,
+                          region=g['regions'].most_common(1)[0][0] if g['regions'] else None,
+                          coasters=sorted(cs, key=lambda c: (not alive.search(c['status'] or ''), c['name']))))
+new_parks.sort(key=lambda p: (-sum(1 for c in p['coasters'] if alive.search(c['status'] or '')), p['park']))
+print('new parks', len(new_parks), 'with', sum(len(p['coasters']) for p in new_parks), 'coasters')
+
 out = dict(suggestions=sorted(sugg.values(), key=lambda s: (-s['score'], s['coaster_id'], s['source'], s['ref'])),
-           adds=uniq,
+           adds=uniq, new_parks=new_parks,
            records=[dict(ref=r['ref'], name=r['name'], park=r['park'], lat=r['lat'], lon=r['lon']) for r in recs if r['source'] == 'wikidata'])
 json.dump(out, open('tools/open-data/review.json', 'w'), ensure_ascii=False, sort_keys=True, indent=0)
 print('suggestions', len(out['suggestions']), collections.Counter(s['reason'].split(',')[0] for s in out['suggestions']))

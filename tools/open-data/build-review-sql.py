@@ -39,6 +39,8 @@ CREATE TABLE IF NOT EXISTS open_items (source TEXT NOT NULL, ref TEXT NOT NULL, 
 CREATE TABLE IF NOT EXISTS open_record_facts (source TEXT NOT NULL, ref TEXT NOT NULL, field TEXT NOT NULL, value TEXT, prec TEXT, cites_rcdb INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (source, ref, field));
 CREATE TABLE IF NOT EXISTS open_suggestions (source TEXT NOT NULL, ref TEXT NOT NULL, coaster_id INTEGER NOT NULL, score REAL, reason TEXT, PRIMARY KEY (source, ref, coaster_id));
 CREATE TABLE IF NOT EXISTS open_adds (park TEXT NOT NULL, name TEXT NOT NULL, status TEXT, refs TEXT, PRIMARY KEY (park, name));
+CREATE TABLE IF NOT EXISTS open_new_parks (k TEXT PRIMARY KEY, park TEXT NOT NULL, lat REAL, lon REAL, region TEXT, coasters TEXT);
+DELETE FROM open_new_parks;
 DELETE FROM open_items WHERE source = 'wikidata';
 DELETE FROM open_record_facts;
 DELETE FROM open_suggestions;
@@ -54,6 +56,12 @@ for c in chunks(facts, 300):
 for c in chunks(rv['suggestions']):
     print("INSERT OR REPLACE INTO open_suggestions (source, ref, coaster_id, score, reason) VALUES %s;"
           % ','.join('(%s,%s,%d,%s,%s)' % (q(s['source']), q(s['ref']), s['coaster_id'], s['score'], q(s['reason'])) for s in c))
+# Parks not on the site, with their open-source coasters (k: name plus the
+# first coaster's ref, since two parks can share a name).
+for c in chunks(rv.get('new_parks', []), 100):
+    print("INSERT OR REPLACE INTO open_new_parks (k, park, lat, lon, region, coasters) VALUES %s;"
+          % ','.join('(%s,%s,%s,%s,%s,%s)' % (q(p['park'] + '|' + p['coasters'][0]['refs'][0]['source'] + ':' + p['coasters'][0]['refs'][0]['ref']), q(p['park']),
+                                            n(p['lat']), n(p['lon']), q(p['region']), q(json.dumps(p['coasters'], ensure_ascii=False, sort_keys=True))) for p in c))
 for c in chunks(rv['adds']):
     print("INSERT OR REPLACE INTO open_adds (park, name, status, refs) VALUES %s;"
           % ','.join('(%s,%s,%s,%s)' % (q(a['park']), q(a['name']), q(a['status']), q(json.dumps(a['refs'], sort_keys=True))) for a in c))

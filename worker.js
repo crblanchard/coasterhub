@@ -1654,7 +1654,7 @@ async function getPostLaunch(env) {
   const q = (sql, ...b) => env.DB.prepare(sql).bind(...b).all().then(r => r.results).catch(() => []);
   const [srcRows, reviews, adds, rides, same, items, cut] = await Promise.all([
     q("SELECT coaster_id, field, source FROM coaster_sources"),
-    q("SELECT kind, source, ref, coaster_id, decision FROM open_reviews WHERE kind IN ('value', 'add')"),
+    q("SELECT kind, source, ref, coaster_id, decision FROM open_reviews WHERE kind IN ('value', 'add', 'park')"),
     q("SELECT park, name, status, refs FROM open_adds ORDER BY park, name"),
     q("SELECT DISTINCT coaster_id, user_slug FROM rides"),
     q("SELECT coaster, ride FROM same_ride"),
@@ -1690,9 +1690,15 @@ async function getPostLaunch(env) {
   const item = new Map(items.map(i => [i.source + "|" + i.ref, i.name]));
   const addList = adds.map(a => ({ ...a, refs: JSON.parse(a.refs || "[]").map(r => ({ ...r, name: item.get(r.source + "|" + r.ref) || null })) }))
     .filter(a => a.refs.length && !addDone.has(a.refs[0].source + "|" + a.refs[0].ref) && !here.has(openSquash(a.name) + "|" + a.park));
-  return { fields: OPEN_FIELDS, gaps, changed, matches: cut.changes, decided: cut.decided, adds: addList, nosource,
+  // Parks not on the site, with their coasters, for Carter to check first.
+  const parkDone = new Set(reviews.filter(r => r.kind === "park").map(r => r.ref));
+  const parkNames = new Set((await q("SELECT name FROM parks")).map(p => p.name.toLowerCase()));
+  const newParks = (await q("SELECT k, park, lat, lon, region, coasters FROM open_new_parks")).filter(p => !parkDone.has(p.k))
+    .map(p => ({ ...p, taken: parkNames.has(p.park.toLowerCase()) ? 1 : 0, coasters: JSON.parse(p.coasters || "[]")
+      .map(c => ({ ...c, refs: c.refs.map(r => ({ ...r, name: item.get(r.source + "|" + r.ref) || null })) })) }));
+  return { fields: OPEN_FIELDS, gaps, changed, matches: cut.changes, decided: cut.decided, adds: addList, nosource, newParks,
            counts: { gaps: gaps.length, changed: changed.length, matches: cut.changes.length,
-                     adds: addList.filter(a => !a.status || /operat|construct/i.test(a.status)).length, nosource: nosource.length } };
+                     adds: addList.filter(a => !a.status || (/operat|construct/i.test(a.status) && !/not operat/i.test(a.status))).length, newParks: newParks.length, nosource: nosource.length } };
 }
 
 // /sources (2026-11-19): where every stat on the site comes from, live.
@@ -1757,36 +1763,66 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
         if (!park || !name) return err(400, "park and name required");
         if (!await env.DB.prepare("SELECT 1 FROM parks WHERE name = ?").bind(park).first()) return err(404, "no such park");
         if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(park, name).first()) return err(409, name + " is already at " + park);
-        const facts = {};
-        const sorted = refs.slice().sort((a, b2) => (OPEN_SOURCE_ORDER[a.source] ?? 9) - (OPEN_SOURCE_ORDER[b2.source] ?? 9));
-        for (const r of sorted) {
-          for (const fr of (await env.DB.prepare("SELECT field, value, prec, cites_rcdb FROM open_record_facts WHERE source = ? AND ref = ?").bind(r.source, r.ref).all()).results)
-            if (!facts[fr.field] && !openBlank(fr.value)) facts[fr.field] = { ...fr, source: r.source, ref: r.ref };
-        }
-        const nid = ((await env.DB.prepare("SELECT MAX(id) AS m FROM coasters").first()) || {}).m + 1;
-        const g = k => facts[k] ? facts[k].value : null, num = k => facts[k] ? +facts[k].value : null;
-        const opened = g("opened"), closed = g("closed");
-        await env.DB.prepare(
-          "INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)")
-          .bind(nid, name, park, g("type"), g("manu"), g("model"), num("h"), num("s"), num("l"), num("inv"), num("dur"),
-                opened ? +String(opened).slice(0, 4) : null, opened, opened ? (facts.opened.prec || precOf(opened)) : null,
-                closed, closed ? (facts.closed.prec || precOf(closed)) : null).run();
-        const st = [];
-        for (const r of refs) {
-          st.push(env.DB.prepare("INSERT OR REPLACE INTO open_links (coaster_id, source, ref, method, added) VALUES (?, ?, ?, 'added', ?)").bind(nid, r.source, r.ref, day));
-          st.push(env.DB.prepare("INSERT OR REPLACE INTO open_facts (coaster_id, field, value, prec, source, ref, cites_rcdb, retrieved) SELECT ?, field, value, prec, source, ref, cites_rcdb, ? FROM open_record_facts WHERE source = ? AND ref = ?").bind(nid, day, r.source, r.ref));
-        }
-        for (const [k, fx] of Object.entries(facts))
-          st.push(env.DB.prepare("INSERT OR REPLACE INTO coaster_sources (coaster_id, field, source, ref) VALUES (?, ?, ?, ?)").bind(nid, k, fx.source, fx.ref));
-        await env.DB.batch(st);
-        await recordActivity(env, "coaster_added", { actor: acct ? acct.slug : null, subject: name, detail: { id: nid, park } });
-        out.push({ id: nid, name });
+        out.push(await addOpenCoaster(env, acct, park, name, refs, day));
       }
       await env.DB.prepare("INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES ('add', ?, ?, 0, ?, ?, ?, ?)")
         .bind(refs[0].source, refs[0].ref, x.kind === "add" ? "approve" : "reject", (x.name || "") + " @ " + (x.park || ""), by, new Date().toISOString()).run();
+    } else if (x.kind === "addpark" || x.kind === "noaddpark") {
+      // A park not on the site, checked by Carter first: its name, region and
+      // coordinates as he leaves them on the card, and the coasters he ticked.
+      const k = String(x.k || "");
+      if (!k) return err(400, "k required");
+      if (x.kind === "addpark") {
+        const park = String(x.park || "").trim(), region = String(x.region || "").trim() || null;
+        const lat = x.lat === "" || x.lat == null ? null : +x.lat, lon = x.lon === "" || x.lon == null ? null : +x.lon;
+        if (!park) return err(400, "park name required");
+        if ((lat != null && !(lat >= -90 && lat <= 90)) || (lon != null && !(lon >= -180 && lon <= 180))) return err(400, "coordinates out of range");
+        if (await env.DB.prepare("SELECT 1 FROM parks WHERE lower(name) = lower(?)").bind(park).first()) return err(409, park + " is already a park on the site; give this one another name");
+        const cs = (Array.isArray(x.coasters) ? x.coasters : []).filter(c => c && String(c.name || "").trim() && Array.isArray(c.refs) && c.refs.length);
+        if (!cs.length) return err(400, "tick at least one coaster");
+        await env.DB.prepare("INSERT INTO parks (name, lat, lon, region, travel) VALUES (?, ?, ?, ?, 0)").bind(park, lat, lon, region).run();
+        for (const c of cs) {
+          const name = String(c.name).trim();
+          if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(park, name).first()) continue;
+          out.push(await addOpenCoaster(env, acct, park, name, c.refs.filter(r => r && r.source && r.ref), day));
+        }
+      }
+      await env.DB.prepare("INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES ('park', '', ?, 0, ?, ?, ?, ?)")
+        .bind(k, x.kind === "addpark" ? "approve" : "reject", String(x.park || ""), by, new Date().toISOString()).run();
     } else return err(400, "unknown kind");
   }
   return afterWrite(ctx, env, request, json({ ok: true, done: out }));
+}
+
+// A coaster created from open-source records (Coasterpedia first): stats from
+// open_record_facts, its links and facts, where each value came from, and a
+// coaster_added row for /changes. The caller has checked the park exists and
+// the name is free there.
+async function addOpenCoaster(env, acct, park, name, refs, day) {
+  const facts = {};
+  const sorted = refs.slice().sort((a, b) => (OPEN_SOURCE_ORDER[a.source] ?? 9) - (OPEN_SOURCE_ORDER[b.source] ?? 9));
+  for (const r of sorted) {
+    for (const fr of (await env.DB.prepare("SELECT field, value, prec, cites_rcdb FROM open_record_facts WHERE source = ? AND ref = ?").bind(r.source, r.ref).all()).results)
+      if (!facts[fr.field] && !openBlank(fr.value)) facts[fr.field] = { ...fr, source: r.source, ref: r.ref };
+  }
+  const nid = ((await env.DB.prepare("SELECT MAX(id) AS m FROM coasters").first()) || {}).m + 1;
+  const g = k => facts[k] ? facts[k].value : null, num = k => facts[k] ? +facts[k].value : null;
+  const opened = g("opened"), closed = g("closed");
+  await env.DB.prepare(
+    "INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)")
+    .bind(nid, name, park, g("type"), g("manu"), g("model"), num("h"), num("s"), num("l"), num("inv"), num("dur"),
+          opened ? +String(opened).slice(0, 4) : null, opened, opened ? (facts.opened.prec || precOf(opened)) : null,
+          closed, closed ? (facts.closed.prec || precOf(closed)) : null).run();
+  const st = [];
+  for (const r of refs) {
+    st.push(env.DB.prepare("INSERT OR REPLACE INTO open_links (coaster_id, source, ref, method, added) VALUES (?, ?, ?, 'added', ?)").bind(nid, r.source, r.ref, day));
+    st.push(env.DB.prepare("INSERT OR REPLACE INTO open_facts (coaster_id, field, value, prec, source, ref, cites_rcdb, retrieved) SELECT ?, field, value, prec, source, ref, cites_rcdb, ? FROM open_record_facts WHERE source = ? AND ref = ?").bind(nid, day, r.source, r.ref));
+  }
+  for (const [k, fx] of Object.entries(facts))
+    st.push(env.DB.prepare("INSERT OR REPLACE INTO coaster_sources (coaster_id, field, source, ref) VALUES (?, ?, ?, ?)").bind(nid, k, fx.source, fx.ref));
+  if (st.length) await env.DB.batch(st);
+  await recordActivity(env, "coaster_added", { actor: acct ? acct.slug : null, subject: name, detail: { id: nid, park } });
+  return { id: nid, name, park };
 }
 
 // Decisions on /cutover. Changes only the open dataset: open_reviews, and for

@@ -424770,6 +424770,13 @@
 "status": "linked"
 },
 {
+"coaster_id": 1199,
+"method": "name+coords",
+"ref": "way/1387301790",
+"source": "osm",
+"status": "linked"
+},
+{
 "coaster_id": 144,
 "method": "name+coords",
 "ref": "way/1387304829",
@@ -426495,13 +426502,6 @@
 "coaster_id": 1230,
 "method": "name+coords",
 "ref": "way/635510434",
-"source": "osm",
-"status": "linked"
-},
-{
-"coaster_id": 1199,
-"method": "name+coords",
-"ref": "way/645190306",
 "source": "osm",
 "status": "linked"
 },
