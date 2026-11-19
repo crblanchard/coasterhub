@@ -1,5 +1,54 @@
 [
 {
+"coaster_id": 0,
+"decision": "approve",
+"kind": "add",
+"ref": "Jungle Trailblazer (Oriental Heritage Anhui)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "add",
+"ref": "Jungle Trailblazer (Oriental Heritage Shandong)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "add",
+"ref": "Jungle Trailblazer (Oriental Heritage Zhejiang)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "add",
+"ref": "Stress Express (Oriental Heritage Anhui)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "add",
+"ref": "Stress Express (Oriental Heritage Shandong)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "add",
+"ref": "Terror Twister (Fantawild Adventure Zhengzhou)",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "add",
+"ref": "Vesuvio Volcano (Fantawild Adventure Shandong)",
+"source": "coasterpedia"
+},
+{
 "coaster_id": 8,
 "decision": "keep",
 "kind": "coaster",
@@ -1351,6 +1400,461 @@
 "source": "coasterpedia"
 },
 {
+"coaster_id": 200,
+"decision": "approve",
+"kind": "match",
+"ref": "Backlot Stunt Coaster",
+"source": "dewiki"
+},
+{
+"coaster_id": 293,
+"decision": "approve",
+"kind": "match",
+"ref": "Backlot Stunt Coaster",
+"source": "dewiki"
+},
+{
+"coaster_id": 397,
+"decision": "approve",
+"kind": "match",
+"ref": "Backlot Stunt Coaster",
+"source": "dewiki"
+},
+{
+"coaster_id": 1453,
+"decision": "approve",
+"kind": "match",
+"ref": "Die hei\u00dfe Fahrt",
+"source": "dewiki"
+},
+{
+"coaster_id": 950,
+"decision": "approve",
+"kind": "match",
+"ref": "El Diablo \u2013 Tren de la Mina",
+"source": "dewiki"
+},
+{
+"coaster_id": 1906,
+"decision": "approve",
+"kind": "match",
+"ref": "EuroFighter (Zoosafari)",
+"source": "dewiki"
+},
+{
+"coaster_id": 757,
+"decision": "approve",
+"kind": "match",
+"ref": "HellCat (Timber Falls Adventure Park)",
+"source": "dewiki"
+},
+{
+"coaster_id": 1751,
+"decision": "approve",
+"kind": "match",
+"ref": "Le Monstre",
+"source": "dewiki"
+},
+{
+"coaster_id": 1752,
+"decision": "approve",
+"kind": "match",
+"ref": "Le Monstre",
+"source": "dewiki"
+},
+{
+"coaster_id": 514,
+"decision": "approve",
+"kind": "match",
+"ref": "Le Vol d\u2019Icare",
+"source": "dewiki"
+},
+{
+"coaster_id": 611,
+"decision": "approve",
+"kind": "match",
+"ref": "Lightning Rod",
+"source": "dewiki"
+},
+{
+"coaster_id": 1823,
+"decision": "approve",
+"kind": "match",
+"ref": "Lightning Rod",
+"source": "dewiki"
+},
+{
+"coaster_id": 467,
+"decision": "approve",
+"kind": "match",
+"ref": "Max & Moritz (Efteling)",
+"source": "dewiki"
+},
+{
+"coaster_id": 468,
+"decision": "approve",
+"kind": "match",
+"ref": "Max & Moritz (Efteling)",
+"source": "dewiki"
+},
+{
+"coaster_id": 896,
+"decision": "approve",
+"kind": "match",
+"ref": "Pegasus \u2013 Die YoungStar Achterbahn",
+"source": "dewiki"
+},
+{
+"coaster_id": 1342,
+"decision": "approve",
+"kind": "match",
+"ref": "Shockwave (Drayton Manor Park)",
+"source": "dewiki"
+},
+{
+"coaster_id": 1597,
+"decision": "approve",
+"kind": "match",
+"ref": "Shockwave (Drayton Manor Park)",
+"source": "dewiki"
+},
+{
+"coaster_id": 17,
+"decision": "approve",
+"kind": "match",
+"ref": "Star Wars Hyperspace Mountain",
+"source": "dewiki"
+},
+{
+"coaster_id": 1179,
+"decision": "approve",
+"kind": "match",
+"ref": "The Big Bad Wolf",
+"source": "dewiki"
+},
+{
+"coaster_id": 635,
+"decision": "approve",
+"kind": "match",
+"ref": "The Incredible Hulk Coaster",
+"source": "dewiki"
+},
+{
+"coaster_id": 1178,
+"decision": "approve",
+"kind": "match",
+"ref": "The Incredible Hulk Coaster",
+"source": "dewiki"
+},
+{
+"coaster_id": 897,
+"decision": "approve",
+"kind": "match",
+"ref": "Wasserachterbahn Poseidon",
+"source": "dewiki"
+},
+{
+"coaster_id": 475,
+"decision": "approve",
+"kind": "match",
+"ref": "Winja\u2019s Fear & Winja\u2019s Force",
+"source": "dewiki"
+},
+{
+"coaster_id": 476,
+"decision": "approve",
+"kind": "match",
+"ref": "Winja\u2019s Fear & Winja\u2019s Force",
+"source": "dewiki"
+},
+{
+"coaster_id": 774,
+"decision": "approve",
+"kind": "match",
+"ref": "Airplane Coaster",
+"source": "enwiki"
+},
+{
+"coaster_id": 757,
+"decision": "approve",
+"kind": "match",
+"ref": "Avalanche (Timber Falls Adventure Park)",
+"source": "enwiki"
+},
+{
+"coaster_id": 5,
+"decision": "approve",
+"kind": "match",
+"ref": "Chip 'n' Dale's Gadgetcoaster",
+"source": "enwiki"
+},
+{
+"coaster_id": 365,
+"decision": "approve",
+"kind": "match",
+"ref": "Coney Island Cyclone",
+"source": "enwiki"
+},
+{
+"coaster_id": 929,
+"decision": "approve",
+"kind": "match",
+"ref": "Devil's Loop",
+"source": "enwiki"
+},
+{
+"coaster_id": 251,
+"decision": "approve",
+"kind": "match",
+"ref": "Double Loop",
+"source": "enwiki"
+},
+{
+"coaster_id": 1906,
+"decision": "approve",
+"kind": "match",
+"ref": "Eurofighter (Zoosafari Fasanolandia)",
+"source": "enwiki"
+},
+{
+"coaster_id": 271,
+"decision": "reject",
+"kind": "match",
+"ref": "Fire in the Hole (2024 roller coaster)",
+"source": "enwiki"
+},
+{
+"coaster_id": 1661,
+"decision": "approve",
+"kind": "match",
+"ref": "Flyvende \u00d8rn",
+"source": "enwiki"
+},
+{
+"coaster_id": 331,
+"decision": "approve",
+"kind": "match",
+"ref": "Hades 360",
+"source": "enwiki"
+},
+{
+"coaster_id": 758,
+"decision": "reject",
+"kind": "match",
+"ref": "Hades 360",
+"source": "enwiki"
+},
+{
+"coaster_id": 1214,
+"decision": "approve",
+"kind": "match",
+"ref": "Indiana Jones and the Temple of Peril",
+"source": "enwiki"
+},
+{
+"coaster_id": 571,
+"decision": "approve",
+"kind": "match",
+"ref": "Iron Gwazi",
+"source": "enwiki"
+},
+{
+"coaster_id": 1245,
+"decision": "reject",
+"kind": "match",
+"ref": "Iron Gwazi",
+"source": "enwiki"
+},
+{
+"coaster_id": 1246,
+"decision": "reject",
+"kind": "match",
+"ref": "Iron Gwazi",
+"source": "enwiki"
+},
+{
+"coaster_id": 1754,
+"decision": "approve",
+"kind": "match",
+"ref": "Le Vampire",
+"source": "enwiki"
+},
+{
+"coaster_id": 611,
+"decision": "approve",
+"kind": "match",
+"ref": "Lightning Rod (roller coaster)",
+"source": "enwiki"
+},
+{
+"coaster_id": 1823,
+"decision": "approve",
+"kind": "match",
+"ref": "Lightning Rod (roller coaster)",
+"source": "enwiki"
+},
+{
+"coaster_id": 467,
+"decision": "approve",
+"kind": "match",
+"ref": "Max & Moritz (roller coaster)",
+"source": "enwiki"
+},
+{
+"coaster_id": 468,
+"decision": "approve",
+"kind": "match",
+"ref": "Max & Moritz (roller coaster)",
+"source": "enwiki"
+},
+{
+"coaster_id": 926,
+"decision": "approve",
+"kind": "match",
+"ref": "Mayan (roller coaster)",
+"source": "enwiki"
+},
+{
+"coaster_id": 189,
+"decision": "approve",
+"kind": "match",
+"ref": "Ride of Steel",
+"source": "enwiki"
+},
+{
+"coaster_id": 1215,
+"decision": "approve",
+"kind": "match",
+"ref": "Star Wars Hyperspace Mountain",
+"source": "enwiki"
+},
+{
+"coaster_id": 108,
+"decision": "reject",
+"kind": "match",
+"ref": "Steel Vengeance",
+"source": "enwiki"
+},
+{
+"coaster_id": 387,
+"decision": "approve",
+"kind": "match",
+"ref": "Steel Vengeance",
+"source": "enwiki"
+},
+{
+"coaster_id": 73,
+"decision": "approve",
+"kind": "match",
+"ref": "The Dark Knight Coaster",
+"source": "enwiki"
+},
+{
+"coaster_id": 1217,
+"decision": "approve",
+"kind": "match",
+"ref": "The Great Scenic Railway",
+"source": "enwiki"
+},
+{
+"coaster_id": 635,
+"decision": "approve",
+"kind": "match",
+"ref": "The Incredible Hulk Coaster",
+"source": "enwiki"
+},
+{
+"coaster_id": 1178,
+"decision": "approve",
+"kind": "match",
+"ref": "The Incredible Hulk Coaster",
+"source": "enwiki"
+},
+{
+"coaster_id": 949,
+"decision": "approve",
+"kind": "match",
+"ref": "Tom & Jerry (roller coaster)",
+"source": "enwiki"
+},
+{
+"coaster_id": 105,
+"decision": "reject",
+"kind": "match",
+"ref": "Top Thrill 2",
+"source": "enwiki"
+},
+{
+"coaster_id": 1036,
+"decision": "approve",
+"kind": "match",
+"ref": "Top Thrill 2",
+"source": "enwiki"
+},
+{
+"coaster_id": 48,
+"decision": "reject",
+"kind": "match",
+"ref": "Twisted Colossus",
+"source": "enwiki"
+},
+{
+"coaster_id": 66,
+"decision": "approve",
+"kind": "match",
+"ref": "Twisted Colossus",
+"source": "enwiki"
+},
+{
+"coaster_id": 664,
+"decision": "reject",
+"kind": "match",
+"ref": "Twisted Colossus",
+"source": "enwiki"
+},
+{
+"coaster_id": 225,
+"decision": "reject",
+"kind": "match",
+"ref": "Wild Cat (Hersheypark)",
+"source": "enwiki"
+},
+{
+"coaster_id": 425,
+"decision": "reject",
+"kind": "match",
+"ref": "Wild Cat (Hersheypark)",
+"source": "enwiki"
+},
+{
+"coaster_id": 376,
+"decision": "approve",
+"kind": "match",
+"ref": "Wild West Express Coaster",
+"source": "enwiki"
+},
+{
+"coaster_id": 225,
+"decision": "reject",
+"kind": "match",
+"ref": "Wildcat's Revenge",
+"source": "enwiki"
+},
+{
+"coaster_id": 425,
+"decision": "approve",
+"kind": "match",
+"ref": "Wildcat's Revenge",
+"source": "enwiki"
+},
+{
+"coaster_id": 774,
+"decision": "approve",
+"kind": "match",
+"ref": "Wooden Roller Coaster (Playland)",
+"source": "enwiki"
+},
+{
 "coaster_id": 1445,
 "decision": "approve",
 "kind": "match",
@@ -1897,6 +2401,13 @@
 "source": "osm"
 },
 {
+"coaster_id": 1309,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1161217979",
+"source": "osm"
+},
+{
 "coaster_id": 2097,
 "decision": "approve",
 "kind": "match",
@@ -2055,6 +2566,13 @@
 "decision": "approve",
 "kind": "match",
 "ref": "way/143058715",
+"source": "osm"
+},
+{
+"coaster_id": 465,
+"decision": "approve",
+"kind": "match",
+"ref": "way/1434157891",
 "source": "osm"
 },
 {
@@ -2611,6 +3129,13 @@
 "source": "wikidata"
 },
 {
+"coaster_id": 1361,
+"decision": "approve",
+"kind": "match",
+"ref": "Q1370494",
+"source": "wikidata"
+},
+{
 "coaster_id": 939,
 "decision": "approve",
 "kind": "match",
@@ -2937,6 +3462,3989 @@
 "decision": "approve",
 "kind": "match",
 "ref": "Q98012894",
+"source": "wikidata"
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "ABpark|coasterpedia:Caterpillar (ABpark)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Aden Park|coasterpedia:Looping Star (Aden Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Adhari Park|coasterpedia:Himalaya (Adhari Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Adventure Coast Southport|coasterpedia:Odin's Little Dragon Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Adventure Park Geelong|coasterpedia:Crazy Coaster (Adventure Park Geelong)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Adventure Waterpark Desaru Coast|coasterpedia:Kraken's Revenge (Adventure Waterpark Desaru Coast)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Airway Fun Center|coasterpedia:Spinning Coaster (Airway Fun Center)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Al Qasba|coasterpedia:Dragon Mini Train",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Al Zawraa Land|coasterpedia:Death Rail",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Allou! Fun Park|coasterpedia:Big Apple (Allou! Fun Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Allwetterrodelbahn Wei\u00dfenfels|coasterpedia:Schoene Aussicht",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Alpe d'Huez|coasterpedia:Luge sur rail des Bergers",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Alpyland Mottarone|coasterpedia:Alpine Coaster (Alpyland Mottarone)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Amusementspark Tivoli|coasterpedia:Achtbaan (Amusementspark Tivoli)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Anapa Park Jungle|coasterpedia:Euro-Star",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Animaparc|coasterpedia:Far West Express",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Anjo World|coasterpedia:Pharaoh (Anjo World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Antibes Land|coasterpedia:Pomme (Antibes Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Aquashow Family Park|coasterpedia:Flash Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Argenpark|coasterpedia:Super 8 (Argenpark)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Arzo Sports & Fun Park|coasterpedia:Orient Express (Arzo Sports & Fun Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Askari Islands of Fun|coasterpedia:Millennium Force (Askari Islands of Fun)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Atallah Happy Land Park|coasterpedia:Apple Coaster (Atallah Happy Land Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Atlantis Land|coasterpedia:Dark Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Atlas Resort|coasterpedia:Train (Atlas Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Attractiepark Kabelbaan Valkenburg|coasterpedia:Rodelbaan (Attractiepark Kabelbaan Valkenburg)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Aussie World|coasterpedia:Bug Run",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Avonturenpark Hellendoorn|coasterpedia:Balagos - Flying Flame",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Azadi Park|coasterpedia:Pepsi-Cola Loop",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "BLVD World|coasterpedia:Sky Loop (BLVD World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "BON Luxury Theme Park|coasterpedia:Ashara: Goddess of Fire",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Babylandia|coasterpedia:Brucomela (Babylandia)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Baghdad Island|coasterpedia:Roller Coaster (Baghdad Island)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Barmouth Amusement Park|coasterpedia:Caterpiller (Barmouth Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Bay Beach Amusement Park|coasterpedia:Zippin Pippin (Bay Beach Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Bayside Fun Park|coasterpedia:Crazy Caterpillar (Bayside Fun Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Beihai Garden Expo|coasterpedia:Roller Coaster (Beihai Garden Expo)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Beijing Shijingshan Amusement Park|coasterpedia:Crazy Skateboard (Beijing Shijingshan Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Beitost\u00f8len Resort|coasterpedia:Bobbane",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Bengtson's Pumpkin Farm|coasterpedia:Barnyard Dance",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Benyland|coasterpedia:Cork Screw",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "BergTierPark Blindham|coasterpedia:Seifenkiste (BergTierPark Blindham)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Beto Carrero World|coasterpedia:Jacar\u00e9 Dum-Dum",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Big Rivers Waterpark & Adventures|coasterpedia:High Voltage (Big Rivers Waterpark & Adventures)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Blue Mountain|coasterpedia:Ridge Runner Mountain Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Boudewijn Seapark|coasterpedia:Angry Octopus",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Brazilian Park Washuzan Highland|coasterpedia:Chupy Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Brazillian Park Washuzan Highland|coasterpedia:Pink Typhoon Standing Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Bromley|coasterpedia:Alpine Slide (Bromley)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Br\u00e6ndesg\u00e5rdshaven|coasterpedia:Marieh\u00f8nen (Br\u00e6ndesg\u00e5rdshaven)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Bundoran Adventure Park|coasterpedia:Crazy Mouse (Wilmot)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Bushkill Park|coasterpedia:Little Stingray (Bushkill Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Cacau Park|coasterpedia:Dreams",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Camden Park|coasterpedia:Big Dipper (Camden Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Carousel Gardens Amusement Park|coasterpedia:Ladybug Roller Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Carthage Land|coasterpedia:King Kong (Carthage Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Casela World of Adventures|coasterpedia:Tulawaka",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Cedar Valley's Wild Frontier Fun Park|coasterpedia:Black Widow (Cedar Valley's Wild Frontier Fun Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Chapelco Ski Resort|coasterpedia:Alpine Slide (Chapelco Ski Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Chelyuskintsev Park|coasterpedia:Jumbo Jet (Chelyuskintsev Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Chestnut Mountain Resort|coasterpedia:Alpine Slide (Chestnut Mountain Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Children's Grand Park|coasterpedia:Family Coaster (Children's Grand Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Children's Park East|coasterpedia:Family Coaster (Children's Park East)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Chimelong Ocean Kingdom|coasterpedia:Jungle Coaster (Chimelong Ocean Kingdom)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Chimelong Paradise|coasterpedia:Circus Roller Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Chongqing Sunac Land|coasterpedia:Legendary Twin Dragon",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Chuanlord Holiday Manor|coasterpedia:Jungle Squirrels",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Chudo Park|coasterpedia:Caterpillar (Chudo Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Churpfalzpark|coasterpedia:Marienk\u00e4fer Hochbahn",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Cigoland|coasterpedia:Train de la Mine (Cigoland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Cinecitt\u00e0 World|coasterpedia:Aktium",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Cita-Parc|coasterpedia:Requin Express\u2019",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "City Forum|coasterpedia:City Spinner",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Clacton Pier|coasterpedia:Looping Star (Clacton Pier)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Clifton Fun Park|coasterpedia:Go Gator (Clifton Fun Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Cobac Parc|coasterpedia:Corsaire",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Coco Park|coasterpedia:Roller Coaster (Coco Park Morocco)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Codona's Amusement Park|coasterpedia:Apple Coaster (Codona's Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Colourful Yunnan Paradise|coasterpedia:Launch Coaster (Colourful Yunnan Paradise)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Cool Runnings Toboggan Family Park|coasterpedia:Cool Runnings",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Corin Forest|coasterpedia:Alpine Slide (Corin Forest)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Cotaland|coasterpedia:Circuit Breaker",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Country Mercantile|coasterpedia:Roller Coaster (Country Mercantile)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Crystal Mountain|coasterpedia:Crystal Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Cultus Lake Adventure Park|coasterpedia:Blastin' Barrels",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Curry's Fun Park Portrush|coasterpedia:Crazy Caterpillar (Curry's Fun Park Portrush)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Curry's Fun Park Salthill|coasterpedia:Wacky Worm (Paul Curry)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Czorsztyn-ski Kluszkowce|coasterpedia:Kolejka G\u00f3rska (Czorsztyn-ski Kluszkowce)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Daft\u00f6Land|coasterpedia:Skutan",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Daguan Park|coasterpedia:4 Ring Roller Coaster (Daguan Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dai Nam Wonderland|coasterpedia:Roller Coaster (Dai Nam Wonderland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dalmaland Fun Park|coasterpedia:Alien (Dalmaland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dazaifu Amusement Park|coasterpedia:Train Coaster (Dazaifu Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Delphin Aqua Serenity|coasterpedia:Apple Worm Train (Delphin Aqua Serenity)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Delphin Be Grand Resort|coasterpedia:Apple Worm Train (Delphin Be Grand Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dennlys Parc|coasterpedia:Furio",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dewberry Farm|coasterpedia:Gold Rush (Dewberry Farm)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Didi'Land|coasterpedia:Drakkar (Didi'Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "DippieDoe Attractiepark|coasterpedia:Dolle Pier",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Discoveryland|coasterpedia:Crazy Cobra",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Diverland|coasterpedia:Monta\u00f1a Rusa (Diverland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Divo Ostrov|coasterpedia:Big Roller Coaster (Divo Ostrov)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Domaine des Planards|coasterpedia:Butterfly (Domaine des Planards)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dragon Park|coasterpedia:Dragon's Run",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dream Island|coasterpedia:Dream Grand Prix",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dream Park|coasterpedia:Dark Ride (Dream Park Egypt)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Drouwenerzand Attractiepark|coasterpedia:GJ Mining Co.",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dudley Zoo and Castle|coasterpedia:Kiddies Coaster (Dudley Zoo)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Dunia Fantasi|coasterpedia:Alap Alap",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "E-DA Theme Park|coasterpedia:Big Air (E-DA Theme Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Eden Park|coasterpedia:Brucomela (Eden Park Roma)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Eifelpark|coasterpedia:Eifel Blitz",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Eis Greissler Manufaktur|coasterpedia:Bucklbahn",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "El Malahy|coasterpedia:Dragon Force (El Malahy)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Enakyo Wonderland|coasterpedia:Camel Coaster (Enakyo Wonderland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Enchanted Island|coasterpedia:Dragon Wagon (Enchanted Island)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Enchanted Kingdom|coasterpedia:Roller Skater (Enchanted Kingdom)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Erlebnisfelsen Pottenstein|coasterpedia:Frankenbob",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Erlebnispark Schloss Thurn|coasterpedia:Butterfly (Erlebnispark Schloss Thurn; opened 1993)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Erlebnispark Steinau|coasterpedia:Erli's Seifenkiste",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Erlebniswelt Seilbahnen Thale|coasterpedia:Boderitt",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Erse Park Uetze|coasterpedia:Familienachterbahn (Erse Park Uetze)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "EuroPark Milano Idroscalo|coasterpedia:Bruco Mela (EuroPark Milano Idroscalo)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fabrikus World|coasterpedia:Brucomela (Fabrikus World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Family Park Skazka|coasterpedia:Caterpillar (Family Park Skazka)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fancy City|coasterpedia:Canal Peak",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fanta Park Glorious Orient|coasterpedia:Fighter Jet (Fanta Park Glorious Orient Ganzhou)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fantasy Forest at the Flushing Meadows Carousel|coasterpedia:Corona Cobra Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fantasy Kingdom|coasterpedia:Roller Coaster (Fantasy Kingdom)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fantasy Valley|coasterpedia:DaVinci Ride",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fantawild Adventure|coasterpedia:Stress Express (Fantawild Adventure)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fantawild Adventure|coasterpedia:Terror Twister (Fantawild Adventure Zhengzhou)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fantawild Adventure|coasterpedia:Vesuvio Volcano (Fantawild Adventure Shandong)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fantawild Asian Legend|coasterpedia:Jungle Trailblazer (Fantawild Asian Legend)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fantawild Land|coasterpedia:Cloud Shuttle (Fantawild Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fantawild Wonderland|coasterpedia:Cloud Shuttle (Fantawild Wonderland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Festilandia - Sould Park|coasterpedia:Fiesta Express (Festilandia Sould Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Festyland|coasterpedia:1066",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fiabilandia|coasterpedia:Miniera d'Oro Del West",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Flamingo World|coasterpedia:Crazy Worm (Flamingo World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Floraland Continent Park|coasterpedia:Boomerang (Floraland Continent Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Formosan Aboriginal Culture Village|coasterpedia:Armada Invencible",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fort Hays Chuckwagon|coasterpedia:Buffalo Hunt",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Freizeitpark Ruhpolding|coasterpedia:Gipfelst\u00fcrmer",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fuli Ocean Happy World|coasterpedia:Whale Breaking the Sky Roller Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Fun Park Sunny Beach|coasterpedia:Galaxy Coaster (Fun Park Sunny Beach)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Funfields Themepark|coasterpedia:Alpine Toboggan Slide (Funfields Themepark)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Funtimes Fun Park|coasterpedia:Serial Serpent",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Furuvik|coasterpedia:Draken (Furuvik)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "F\u00e9\u00e9ryland|coasterpedia:Grand Prix de F\u00e9eryland",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Garmisch-Partenkirchen|coasterpedia:Sommerrodelbahn (Garmisch-Partenkirchen)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Gateway Resort|coasterpedia:Mad Mouse (Gateway Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Genting SkyWorlds|coasterpedia:Acorn Adventure",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Gingko Lake Amusement Park|coasterpedia:Bullet Train (Gingko Lake Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Gldani Park|coasterpedia:Happy Train",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Glorious Fantasyland|coasterpedia:Ali Baba (Glorious Fantasyland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Glorious Orient|coasterpedia:Fighter Jet (Glorious Orient Jining)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Gold Reef City|coasterpedia:Anaconda (Gold Reef City)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Granada Luxury Belek|coasterpedia:Speedy Gonzales (Granada Luxury Belek)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Granja Villa|coasterpedia:Cuy Loco (Granja Villa)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Greenland|coasterpedia:Gao",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Gulliver's Kingdom|coasterpedia:Log Coaster (Gulliver's Kingdom)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Gulliver's Land|coasterpedia:Crazy Mouse (Gulliver's Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Gulliver's Valley Resort|coasterpedia:Grand Prix Racers (Gulliver's Valley Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Gulliver's World|coasterpedia:Antelope",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "G\u00f3rka Szcz\u0119\u015bliwicka|coasterpedia:Zje\u017cd\u017calnia Grawitacyjna (G\u00f3rka Szcz\u0119\u015bliwicka)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Haailand Resort & Theme Park|coasterpedia:Rail Chaser",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Haikara't Yokocho|coasterpedia:Family Banana Coaster (Haikara't Yokocho)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hamanako Pal Pal|coasterpedia:Mega Coaster \u201cFour Dimensions\u201d",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hannibal Park|coasterpedia:Mini 8",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Happy World|coasterpedia:Children's Coaster (Happy World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Harbour Park|coasterpedia:Ocean Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Harmonyland|coasterpedia:Hello Kitty Angel Coaster (Harmonyland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Harvest Tyme Pumpkin Patch|coasterpedia:Miner Mike (Harvest Tyme Pumpkin Patch)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hasenhorn Rodelbahn|coasterpedia:Hasenhorn Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Haunted Trails Burbank|coasterpedia:Miner Mike (Haunted Trails Burbank)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hawally Park|coasterpedia:Family Coaster (Hawally Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hefei Sunac Land|coasterpedia:Soaring with Dragon",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Heritage Park|coasterpedia:Family Roller Coaster (Heritage Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hili Fun City|coasterpedia:Twister Mountain (Hili Fun City)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hirakata Park|coasterpedia:Crazy Mouse (Hirakata Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hitachi Seaside Park|coasterpedia:Wood Land Jet Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hokkaido Greenland|coasterpedia:Dragon King",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hopi Hari|coasterpedia:Katapul",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hot Go Park - Happy Jungle World|coasterpedia:Time Travel",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hotel Atlantis Ikutama|coasterpedia:Roller Coaster (Hotel Atlantis Ikutama)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Huachang Dragon Valley|coasterpedia:Dragon Race (Huachang Dragon Valley)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Huis Ten Bosch|coasterpedia:Panorama Rush",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Hunderfossen Eventyrpark|coasterpedia:Fyr & Flamme",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "H\u00f2n D\u00e1u Resort|coasterpedia:Alpen Express (H\u00f2n D\u00e1u Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Ikoma Skyland|coasterpedia:Spinning Coaster (Ikoma Skyland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Imagicaa|coasterpedia:Chhota Bheem The Ride",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Imster Bergbahnen|coasterpedia:Alpine Coaster (Imster Bergbahnen)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Indianapolis Zoo|coasterpedia:Kombo",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Isla M\u00e1gica|coasterpedia:Jaguar (Isla M\u00e1gica)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Izu Granpal Park|coasterpedia:Kids Coaster (Izu Granpal Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Jaderpark|coasterpedia:Holzwurm-Achterbahn",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Jagdm\u00e4rchenpark Hirschalm|coasterpedia:Familienachterbahn (Jagdm\u00e4rchenpark Hirschalm)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Jamuna Future Park|coasterpedia:Roller Coaster (Jamuna Future Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Janfusun Fancyworld|coasterpedia:Diving Machine G5",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Japan Monkey Park|coasterpedia:Go! Go! Banana Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Jawa Timur Park 1|coasterpedia:Gold Mining Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Jawa Timur Park 2|coasterpedia:Animal Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Jiminy Peak Mountain Resort|coasterpedia:Alpine Slide (Jiminy Peak Mountain Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Jinan Sunac Land|coasterpedia:Wooden Dragons Roller Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Jolly Roger at the Pier|coasterpedia:Looping Star (Jolly Roger at the Pier)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Julianatoren|coasterpedia:Jul's RollerSkates",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Jungle Park|coasterpedia:Bob (Jungle Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "JuraPark Solec|coasterpedia:Family Coaster (JuraPark Solec)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kadrioru Karussell|coasterpedia:Dino Rong",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kaeson Youth Park|coasterpedia:Inertia Airplane Car",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kamine Park|coasterpedia:See Through Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kampung Willys Kang Cuya|coasterpedia:Mini Willys Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Karls Erlebnis-Dorf D\u00f6beln|coasterpedia:Bettys Beerchen Boomerang (Karls Erlebnis-Dorf D\u00f6beln)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Karls Erlebnis-Dorf Elstal|coasterpedia:Bettys Beerchen Boomerang (Karls Erlebnis-Dorf Elstal)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Karls Erlebnis-Dorf Oberhausen|coasterpedia:Erdbeer-Raupenbahn (Karls Erlebnis-Dorf Oberhausen)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kiddie Park|coasterpedia:Dragon Coaster (Kiddie Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kijima Kogen|coasterpedia:Dragon (Kijima Kogen)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kingoland|coasterpedia:Apollo Steamrocket",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kneippbyn|coasterpedia:Kalkracet",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Knightly's Fun Park|coasterpedia:Gold Mine Express (Knightly's Fun Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Knowsley Safari Park|coasterpedia:Rattlesnake (Knowsley Safari Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Knuthenborg Safaripark|coasterpedia:Kampala Express",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Koala Park|coasterpedia:Family Coaster (Koala Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kobe Fruit and Flower Park|coasterpedia:Hurry Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kongeparken|coasterpedia:Bukkerittet",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kotor Cable Car|coasterpedia:Alpine Coaster (Kotor Cable Car)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Kuwait Magic|coasterpedia:Spinning Coaster (Kuwait Magic)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "La Bresse Hohneck|coasterpedia:Schlitte Mountain",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "La Luge Alpine du Plan Inclin\u00e9|coasterpedia:Luge Alpine",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "La Sambuy|coasterpedia:Luge (La Sambuy)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lac de Caniel|coasterpedia:Luge d'\u00e9t\u00e9 (Lac de Caniel)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lagunasia|coasterpedia:Aqua Wind",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lake George Expedition Park|coasterpedia:Caldwell's Krazy Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Land Of Make Believe|coasterpedia:Thriller (Land Of Make Believe)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Land of Legends Theme Park|coasterpedia:Family Coaster (Land of Legends Theme Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lark Ranch|coasterpedia:Jett Star",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lazarevskoye Park|coasterpedia:Roller Coaster (Lazarevskoye Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Le Fleury|coasterpedia:Bayou Express",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Legoland Japan|coasterpedia:Dragon (Legoland Japan)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Legoland Korea|coasterpedia:Dragon (Legoland Korea)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Legoland Malaysia|coasterpedia:Dragon (Legoland Malaysia)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Leisure Island Fun Park|coasterpedia:Go Gator (Leisure Island Fun Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Leisure World|coasterpedia:Junior Coaster (Leisure World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Leofoo Village Theme Park|coasterpedia:Little Rattler",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Leolandia|coasterpedia:Mine Train (Leolandia)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Les Portes du Mont-Blanc|coasterpedia:Luge 4S",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lewa Adventure|coasterpedia:Crazy Mining Cart",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lihpao Land|coasterpedia:Gravity Max",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lilleputthammer|coasterpedia:Berg- og dalbane",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lina World|coasterpedia:Hello Kitty Angel Coaster (Lina World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lion Park Resort|coasterpedia:Gwazi (Lion Park Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Llandudno Snowsports Centre|coasterpedia:Toboggan (Llandudno Snowsports Centre)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Loca Joy Holiday Theme Park|coasterpedia:Crazy Coaster (Loca Joy Holiday Theme Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lompi Family Park|coasterpedia:Family Coaster (Lompi Family Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Loro Parque|coasterpedia:Orca Tren",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Luneur Park|coasterpedia:Brucomela (Luneur Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Lutsen Mountains|coasterpedia:Alpine Slide (Lutsen Mountains)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "M&D's Scotland's Theme Park|coasterpedia:Big Apple (M&D's Scotland's Theme Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "MGM Dizzee World|coasterpedia:Roller Coaster (MGM Dizzee World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "MW's Amusement Park|coasterpedia:Family Coaster (MW's Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mack's Amusements|coasterpedia:Little Dipper (Mack's Amusements)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Magic Park Land|coasterpedia:Formula 1 (Magic Park Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "MagicLand|coasterpedia:Cagliostro",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Magikland|coasterpedia:Montanha M\u00e1gica",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Majaland Kownaty|coasterpedia:Wilko\u0142ak",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mammoth Valley Park|coasterpedia:Alpine Slide (Mammoth Valley Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mampato|coasterpedia:Happy Mountain (Mampato Lo Barnechea)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mangyongdae Funfair|coasterpedia:Double Loop Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Maniototo Adventure Park|coasterpedia:Gold Rush Luge",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Marah Land|coasterpedia:Nissi Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mayakovsky Park|coasterpedia:Cyclon (Mayakovsky Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mc-Play Kinderland|coasterpedia:Achterbahn (Mc-Play Kinderland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mellors Group|coasterpedia:Apple Coaster (Mellors Group)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Memphis Kiddie Park|coasterpedia:Little Dipper (Memphis Kiddie Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Meryal|coasterpedia:Alghazal",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Midlothian Sports Centre|coasterpedia:Alpine Coaster (Midlothian Sports Centre)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Midway State Park|coasterpedia:Little Dipper (Midway State Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mini Mundi|coasterpedia:Achtbaan (Mini Mundi)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Miroku no Sato|coasterpedia:Music Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Misty Mountain|coasterpedia:Long Tom Toboggan",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Modern Woodmen Park|coasterpedia:Genesis Kidz Koaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mojmela Aqua Funland|coasterpedia:Super Train (Mojmela Aqua Funland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mol\u00e9son|coasterpedia:Bob-Luge",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Monte Tamaro|coasterpedia:Coaster Bob",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mountain Creek Waterpark|coasterpedia:Alpine Mountain Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mt. Hood Adventure Park|coasterpedia:Alpine Slide (Mt. Hood Adventure Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mtatsminda Park|coasterpedia:American Mountains",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mundo Petapa|coasterpedia:Moto Bala",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mysterious Island|coasterpedia:Skycar",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Mystic Mountain|coasterpedia:Bobsled (Mystic Mountain)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "M\u00e4rchenwald im Isartal|coasterpedia:Oachkatzl",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Nagoya Higashiyama Zoo|coasterpedia:Slope Shooter",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Nasu Highland Park|coasterpedia:Batflyer (Nasu Highland Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "National Amusement Park|coasterpedia:Toirog Zam",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Naturlandia|coasterpedia:Tobotronc",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Neo Geo Family|coasterpedia:Super Coaster (Neo Geo Family, Barueri)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "New Palace and Adventureland|coasterpedia:Runaway Train (New Palace and Adventureland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Newton's Attic|coasterpedia:G-Force (Newton's Attic)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Nicolandia Center Park|coasterpedia:Colossu's Loop",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Nokkakivi Park|coasterpedia:Cyclon (Nokkakivi Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Novosibirsk Central Park|coasterpedia:Galaxi (Novosibirsk Central Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "OK Corral|coasterpedia:Gold Rush (OK Corral)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Oktoberfest|enwiki:Olympia Looping",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Oktyabrskiy Park|coasterpedia:Hoverla (Oktyabrskiy Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Old MacDonald's Farm & Fun Park|coasterpedia:Doggy Dog (Old MacDonald's Farm)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "OrheiLand|coasterpedia:Roller Coaster (OrheiLand)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Oriental Heritage|coasterpedia:Big Top",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Oriental Heritage|coasterpedia:Jungle Trailblazer (Oriental Heritage Shandong)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Oriental Heritage|coasterpedia:Jungle Trailblazer (Oriental Heritage Zhejiang)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Oriental Legend|coasterpedia:Flying Dragon (Oriental Legend)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "PPS Park Platja d'Aro|coasterpedia:Cicl\u00f3n (PPS Park Platja d'Aro)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Panorama Park|coasterpedia:Fichtenflitzer",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Pap\u00e9a Parc|coasterpedia:Chenille (Pap\u00e9a Parc)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Paradise Pier|coasterpedia:Rolling Thunder (Paradise Pier)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parc Babyland|coasterpedia:Roller Castor",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parc d'Attractions Marseillan-Plage|coasterpedia:Gotham",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parc d'Olhain|coasterpedia:Luge (Parc d'Olhain)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parc du Bocasse|coasterpedia:Jurassic Twister",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parc du Petit Prince|coasterpedia:Pierre de Tonnerre",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parco Junior|coasterpedia:Roller Dragon",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Park Topolya|coasterpedia:Roller Coaster (Park Topolya)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parken Zoo|coasterpedia:Dragon (Parken Zoo)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parque Borunda|coasterpedia:Gusi",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parque Congo|coasterpedia:Lumumba",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parque Espana-Shima Spain Village|coasterpedia:Gran Montserrat",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parque Mutirama|coasterpedia:Mini Montanha Happy Mountain",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parque Rod\u00f3|coasterpedia:Gusano Mancana",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parque da M\u00f4nica|coasterpedia:Montanha Russa do Astronauta",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parque de Atracciones de Zaragoza|coasterpedia:Mina (Parque de Atracciones de Zaragoza)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Parque \u00cdtalo Americano|coasterpedia:Python (Parque Italo Americano)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Paul Bunyan Land|coasterpedia:Roller Coaster (Paul Bunyan Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Pavilion Park|coasterpedia:Myrtle Turtle",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Pembrey Country Park & Beach|coasterpedia:Toboggan (Pembrey Country Park & Beach)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Pena Aventura Park|coasterpedia:Alpine Coaster (Pena Aventura Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Peppa Pig Theme Park|coasterpedia:Daddy Pig's Roller Coaster (Texas)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Petrovskiy Sad|coasterpedia:Underwater World (Petrovskiy Sad)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Pettitts Animal Adventure Park|coasterpedia:Crazy Caterpillar (Pettitts Animal Adventure Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Piper's Funfair|coasterpedia:Corey the Caterpillar",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Pleasurelands|coasterpedia:Runaway Train (Pleasurelands)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Plose Ski Resort|coasterpedia:Plosebob",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Plymouth Snowsports Centre|coasterpedia:Cresta Toboggan Run (Plymouth Snowsports Centre)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Porto Europa|coasterpedia:Pinestar",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Quancheng Euro Park|coasterpedia:Battle of Blue Fire",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Queens Land|coasterpedia:Alpen Blitz (Queens Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Rabkoland|coasterpedia:Ma\u0142y Wiking",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Rainbow Park|coasterpedia:Sea Dragon (Rainbow Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Rainbow's End|coasterpedia:Choco Express",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Rakutenchi|coasterpedia:Jet Coaster (Rakutenchi)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Rani Bagh Fun Land|coasterpedia:Achterbahn (Schwarzwald Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Rasti-Land|coasterpedia:Achterbahn (Rasti-Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Remlinger Farms|coasterpedia:Mine-Twister",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Revolution Park|coasterpedia:Tajfun",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Rhyl Children's Village|coasterpedia:Nessi (Rhyl Children's Village)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Ricochet Canyon|coasterpedia:Rattling Iron Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Robin Hill Country Park|coasterpedia:Toboggan (Robin Hill Country Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Robin Hoods Wheelgate Park|coasterpedia:High Hazel Mini Mine Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Romon U-Park|coasterpedia:Dragon Legend",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Rungna People's Pleasure Ground|coasterpedia:Kwansong Tancha (Rungna People's Pleasure Ground)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Rusutsu Resort|coasterpedia:Corkscrew (Rusutsu Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "R\u00e9gie des Saisies|coasterpedia:Mountain Twister",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Saint Fran\u00e7ois Longchamp|coasterpedia:Com\u00e8te",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sandspit Cavendish Beach|coasterpedia:Cyclone (Sandspit Cavendish Beach)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sandwell Valley Amusements|coasterpedia:Crazy Caterpillar (Sandwell Valley Amusements)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Santa's Land|coasterpedia:Rudicoaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sanya Haichang Fantasy Town|coasterpedia:Shark Coaster (Sanya Haichang Fantasy Town)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sanya Silk Road Happy World|coasterpedia:Rush Out of Coconut Grove Village",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Schloss Dankern|coasterpedia:Achterbahn (Schloss Dankern)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Schlosshotel Lacknerhof|coasterpedia:Lucky Flitzer",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Seibuen Yuenchi|coasterpedia:Astro Boy Lunar Tours",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Semnoz|coasterpedia:Luge d'\u00e9t\u00e9 (Semnoz)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sendaviva|coasterpedia:Bobsleigh (Sendaviva)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Seoul Land|coasterpedia:Black Hole 2000",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Serengeti-Park|coasterpedia:Batukai-Racer",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Seven Springs Mountain Resort|coasterpedia:Alpine Slide (Seven Springs Mountain Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sherbakov Culture & Leisure Park|coasterpedia:Kiddie Coaster (Sherbakov Culture & Leisure Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Shibamasa World|coasterpedia:Pirates Island Typhoon",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Shibukawa Skyland|coasterpedia:Navel Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Shimizu Marina Circus|coasterpedia:Spinning Coaster (Shimizu Marina Circus)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Shinhwa Theme Park|coasterpedia:Dancing Oscar",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Siam Park City|coasterpedia:Boomerang (Siam Park City)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Silk Road Paradise|coasterpedia:Aurora Flying Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Skallywag Bay Theme Park|coasterpedia:Pieces of 8",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sky Ranch Tagaytay|coasterpedia:Log Coaster (Sky Ranch Tagaytay)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "SkyPark Baytik|coasterpedia:Boomerang (SkyPark Baytik)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sochi Park|coasterpedia:Drifter (Sochi Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sokolniki Park|coasterpedia:Corsair Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sommerland Sj\u00e6lland|coasterpedia:Cykelmyggen",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Speelpark Oud Valkeveen|coasterpedia:Drakenbaan",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "St. Louis Union Station|coasterpedia:Loco Motion (St. Louis Union Station)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Station de M\u00e9tabief|coasterpedia:Luge des Cimes (M\u00e9tabief)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Steamboat Springs Alpine Slide|coasterpedia:Steamboat Howler",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Steel Pier|coasterpedia:Crazy Crab",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Steinwasen Park|coasterpedia:Coasterbahn",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Storybook Land|coasterpedia:Bubbles The Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Stricker's Grove|coasterpedia:Teddy Bear (Stricker's Grove)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sueno Hotels Beach Side|coasterpedia:Dragon (Sueno Hotels Beach Side)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sun World Hon Thom Nature Park|coasterpedia:Roaring Timbers",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sunac Land Chengdu|coasterpedia:Family Thriller",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sunny Beach Park|coasterpedia:Roller Coaster (Sunny Beach Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sunway Lagoon|coasterpedia:Wild Chase Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Super Besse|coasterpedia:Luge d'\u00e9t\u00e9 (Super Besse)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Super Slide Amusement Park|coasterpedia:Runaway Train (Super Slide Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Superland|coasterpedia:Kumba (Superland)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Suzhou Yangcheng Peninsula Theme Park|coasterpedia:Heaven's Wing",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Suzuka Circuit|coasterpedia:Adventure Drive",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Swadlincote Snowsports Centre|coasterpedia:Toboggan (Swadlincote Snowsports Centre)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sweets Hotel Ikebukuro|coasterpedia:Mini Coaster (Sweets Hotel Ikebukuro)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Sylvan Beach Amusement Park|coasterpedia:Galaxi (Sylvan Beach Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Taesongsan Funfair|coasterpedia:Kwansong Tancha (Taesongsan Funfair)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tale Park|coasterpedia:Gold Mine Coaster (Tale Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Taolin Happy World|coasterpedia:4 Ring Roller Coaster (Taolin Happy World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tata Park|coasterpedia:Unknown (Tata Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tatrabob Tatranska Lomnica|coasterpedia:Tatrabob",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tatzmania L\u00f6ffingen|coasterpedia:African Spin",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Taunus Wunderland|coasterpedia:Gobbi Express",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Terra M\u00edtica|coasterpedia:Alucinakis",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tetysblu Theme Park|coasterpedia:Blu Power",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Thamaghra Parc|coasterpedia:Family Coaster (Thamaghra Parc)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "The Big Banana Fun Park|coasterpedia:Toboggan (The Big Banana Fun Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "The Funplex Mount Laurel|coasterpedia:FunCoaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tier- und Freizeitpark Th\u00fcle|coasterpedia:Drachen-Achterbahn",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tierpark Essehof|coasterpedia:Achterbahn (Tierpark Essehof)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tipazia Parc|coasterpedia:Caterpilar (Tipazia Parc)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tivoli World|coasterpedia:Monta\u00f1a Rusa Infantil (Tivoli World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Toboggan Hill Park|coasterpedia:Toboggan (Toboggan Hill Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tochinoki Family Land|coasterpedia:Jet Coaster (Tochinoki Family Land)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tojoko Toy Kingdom|coasterpedia:Hill Billy Rail Road Texas Bronco",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tokyo German Village|coasterpedia:Butaten Kids Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tolk-Schau|coasterpedia:Familien-Achterbahn",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tosselilla|coasterpedia:Forza",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tramore Amusement Park|coasterpedia:Fun Mouse (Jonathan Perks)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Trampolino Familien- und Freizeitpark|coasterpedia:Boomerang (Trampolino Familien- und Freizeitpark)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Trans Studio Bandung|coasterpedia:Racing Coaster (Trans Studio Bandung)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Trans Studio Mini Pekalogan|coasterpedia:Crazy Taxi India",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Traumland auf der B\u00e4renh\u00f6hle|coasterpedia:Wichtelexpress",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Treasure Island Amusement Park|coasterpedia:Dragon Roller Coaster (Treasure Island Amusement Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Trimper's Rides|coasterpedia:Tidal Wave (Trimper's Rides)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Turkmenbashi Fairy Tale World|coasterpedia:Rolling Hills",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tuscora Park|coasterpedia:Little Dipper (Tuscora Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tweetsie Railroad|coasterpedia:Barrels of Fun (Tweetsie Railroad)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Twinlakes Park|coasterpedia:Buffalo Stampede",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Tykkim\u00e4ki|coasterpedia:Pohjolan Express",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Universal Kids Resort|coasterpedia:Jurassic World: Cretaceous Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Utah Olympic Park|coasterpedia:Alpine Slide (Utah Olympic Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Utsunomiya Zoo|coasterpedia:Jet Coaster (Utsunomiya Zoo)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Vala's Pumpkin Patch|coasterpedia:Tim's Runaway Grain Wagons",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Vauhtipuisto|coasterpedia:Herra Lohik\u00e4\u00e4rme",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Verkeers- en Attractiepark Duinen Zathe|coasterpedia:London City Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Vesuviuslandia Park|coasterpedia:Safari Tour (Vesuviuslandia Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "ViaSea|coasterpedia:Family Coaster (ViaSea)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Vialand|coasterpedia:K\u00fc\u00e7\u00fck Madenciler",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Victory Park|coasterpedia:Caterpillar (Victory Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "VinWonders V\u0169 Y\u00ean|coasterpedia:Warrior Challenge",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "VinWonders|coasterpedia:Desert Twister",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "VulQano Park|coasterpedia:Kr\u00e1katon",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Walter World|coasterpedia:Montanha Russa (Walter World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Watermouth Castle|coasterpedia:Thunder Luge Toboggan Run",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Wicksteed Park|coasterpedia:Clown Coaster (Wicksteed Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Wildlife World|coasterpedia:Family Roller Coaster (Wildlife World)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Window on China Theme Park|coasterpedia:Laser Blaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Winnoland|coasterpedia:B\u00fbche Dansante",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Wisp Resort|coasterpedia:Mountain Coaster (Wisp Resort)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Wonderla Amusement Park Bangalore|coasterpedia:Garuda Glide",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Wonderla Amusement Park Hyderabad|coasterpedia:Recoil (Wonderla Talangana)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Wonderla Amusement Park Kochi|coasterpedia:Recoil (Wonderla Kochi)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Woodlands Family Theme Park|coasterpedia:Tornado Toboggan Run",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Wuhan Zhongshan Park|coasterpedia:Boomerang (Wuhan Zhongshan Park)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Xetulul|coasterpedia:Avalancha",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Xiyou World of Adventure|coasterpedia:Buddhism Boundless",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Xuzhou Paradise|coasterpedia:Bravest Warrior Roller Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Yancheng Chun-Qiu Land|coasterpedia:Speed Roller Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Yellowstone Bear World|coasterpedia:Log Roller Coaster",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "YesterLand Farm|coasterpedia:Fort YesterLand",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "York's Wild Kingdom|coasterpedia:Wacky Mouse",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Zahroor Park|coasterpedia:Taxi",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Zigong Fantawild Dinosaur Kingdom|coasterpedia:Fire Mountain",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Zoo Debrecen|coasterpedia:Family Coaster (Zoo Debrecen)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "Zoomarine|coasterpedia:Draky (Zoomarine)",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "\u00c1cqua Lokos|coasterpedia:Inversa",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "\u00d6lands Djur & N\u00f6jespark|coasterpedia:\u00c4ppelmasken",
+"source": ""
+},
+{
+"coaster_id": 0,
+"decision": "approve",
+"kind": "park",
+"ref": "\u0110\u1ea7m Sen Park|coasterpedia:Spinning Coaster (\u0110\u1ea7m Sen Park)",
+"source": ""
+},
+{
+"coaster_id": 513,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|100",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 888,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|100",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 892,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|140",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 890,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|215",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 934,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|24",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1867,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|480",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 893,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|5",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1427,
+"decision": "skip",
+"kind": "value",
+"ref": "h|116.5",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1371,
+"decision": "skip",
+"kind": "value",
+"ref": "h|151.6",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1628,
+"decision": "skip",
+"kind": "value",
+"ref": "h|193.6",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 568,
+"decision": "skip",
+"kind": "value",
+"ref": "h|25.0",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1520,
+"decision": "skip",
+"kind": "value",
+"ref": "h|36.1",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1519,
+"decision": "skip",
+"kind": "value",
+"ref": "h|42.7",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 898,
+"decision": "skip",
+"kind": "value",
+"ref": "h|65.6",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 502,
+"decision": "skip",
+"kind": "value",
+"ref": "h|98.4",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 797,
+"decision": "skip",
+"kind": "value",
+"ref": "l|2350.0",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 891,
+"decision": "skip",
+"kind": "value",
+"ref": "l|262.5",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1599,
+"decision": "skip",
+"kind": "value",
+"ref": "l|2624.7",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 517,
+"decision": "skip",
+"kind": "value",
+"ref": "l|2723.1",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1036,
+"decision": "skip",
+"kind": "value",
+"ref": "l|2800.0",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 375,
+"decision": "skip",
+"kind": "value",
+"ref": "l|330.0",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 477,
+"decision": "skip",
+"kind": "value",
+"ref": "l|4274.9",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1867,
+"decision": "skip",
+"kind": "value",
+"ref": "l|5279.9",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1427,
+"decision": "skip",
+"kind": "value",
+"ref": "l|935.0",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1391,
+"decision": "skip",
+"kind": "value",
+"ref": "l|983.9",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 624,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Chance Rides",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 748,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Chance Rides",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 181,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|D.P.V. Rides",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 869,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|DAL Amusement Rides",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1597,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Giovanola",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 807,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Marvin M. Black Co.",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 92,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Morgan",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 198,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Taft Attractions",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2190,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Taft Attractions",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1497,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Tubular Edgington",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1867,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1909",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1177,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1972-04-29",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 540,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1978-07-02",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 392,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1986",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 538,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1989",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 238,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1998-12-08",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1178,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1999-05-28",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 181,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2000",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1458,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2000",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1036,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2003-05-04",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1942,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2008-03-14",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1628,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2012-06-06",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 669,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2013-03-06",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 1596,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2021-06-04",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 369,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2021-07-02",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 2035,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2021-12-15",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 854,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2025-03-22",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 884,
+"decision": "skip",
+"kind": "value",
+"ref": "s|28.6",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 895,
+"decision": "skip",
+"kind": "value",
+"ref": "s|37.3",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 863,
+"decision": "skip",
+"kind": "value",
+"ref": "s|52.8",
+"source": "coasterpedia"
+},
+{
+"coaster_id": 469,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|2",
+"source": "dewiki"
+},
+{
+"coaster_id": 472,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|2",
+"source": "dewiki"
+},
+{
+"coaster_id": 1437,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|80",
+"source": "dewiki"
+},
+{
+"coaster_id": 15,
+"decision": "skip",
+"kind": "value",
+"ref": "h|80.1",
+"source": "dewiki"
+},
+{
+"coaster_id": 244,
+"decision": "skip",
+"kind": "value",
+"ref": "h|80.1",
+"source": "dewiki"
+},
+{
+"coaster_id": 207,
+"decision": "skip",
+"kind": "value",
+"ref": "l|33684.4",
+"source": "dewiki"
+},
+{
+"coaster_id": 469,
+"decision": "skip",
+"kind": "value",
+"ref": "l|6.6",
+"source": "dewiki"
+},
+{
+"coaster_id": 472,
+"decision": "skip",
+"kind": "value",
+"ref": "l|6.6",
+"source": "dewiki"
+},
+{
+"coaster_id": 1355,
+"decision": "skip",
+"kind": "value",
+"ref": "l|846.5",
+"source": "dewiki"
+},
+{
+"coaster_id": 1437,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Maurer AG",
+"source": "dewiki"
+},
+{
+"coaster_id": 2037,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Maurer AG",
+"source": "dewiki"
+},
+{
+"coaster_id": 12,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|WED Enterprises",
+"source": "dewiki"
+},
+{
+"coaster_id": 692,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|WED Enterprises",
+"source": "dewiki"
+},
+{
+"coaster_id": 15,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1959",
+"source": "dewiki"
+},
+{
+"coaster_id": 244,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1959",
+"source": "dewiki"
+},
+{
+"coaster_id": 1847,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2023-04-23",
+"source": "dewiki"
+},
+{
+"coaster_id": 1342,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|100",
+"source": "enwiki"
+},
+{
+"coaster_id": 1375,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|60",
+"source": "enwiki"
+},
+{
+"coaster_id": 1623,
+"decision": "skip",
+"kind": "value",
+"ref": "dur|60",
+"source": "enwiki"
+},
+{
+"coaster_id": 1342,
+"decision": "skip",
+"kind": "value",
+"ref": "h|120.0",
+"source": "enwiki"
+},
+{
+"coaster_id": 396,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Canada's Wonderland Canada's Wonderland Rides",
+"source": "enwiki"
+},
+{
+"coaster_id": 238,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Custom Coasters International",
+"source": "enwiki"
+},
+{
+"coaster_id": 286,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Gravitykraft",
+"source": "enwiki"
+},
+{
+"coaster_id": 156,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Rocky Mountain Construction",
+"source": "enwiki"
+},
+{
+"coaster_id": 813,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Rocky Mountain Construction",
+"source": "enwiki"
+},
+{
+"coaster_id": 393,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Taft Broadcasting",
+"source": "enwiki"
+},
+{
+"coaster_id": 1936,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|1976",
+"source": "enwiki"
+},
+{
+"coaster_id": 1224,
+"decision": "skip",
+"kind": "value",
+"ref": "s|37.7",
+"source": "enwiki"
+},
+{
+"coaster_id": 1342,
+"decision": "skip",
+"kind": "value",
+"ref": "s|56.0",
+"source": "enwiki"
+},
+{
+"coaster_id": 611,
+"decision": "skip",
+"kind": "value",
+"ref": "manu|Rocky Mountain Construction",
+"source": "wikidata"
+},
+{
+"coaster_id": 611,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2016-06-13",
+"source": "wikidata"
+},
+{
+"coaster_id": 467,
+"decision": "skip",
+"kind": "value",
+"ref": "opened|2020",
 "source": "wikidata"
 }
 ]

@@ -9884,6 +9884,14 @@
 "osm": "96577063",
 "qid": "Q841577"
 },
+"645": {
+"captainCoaster": null,
+"facts": {},
+"label": "Primordial",
+"method": "name+coords",
+"osm": null,
+"qid": "Q124054150"
+},
 "649": {
 "captainCoaster": null,
 "facts": {
@@ -14047,6 +14055,20 @@
 "osm": null,
 "qid": "Q885896"
 },
+"1047": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Iron Menace",
+"method": "name+coords",
+"osm": null,
+"qid": "Q121832695"
+},
 "1050": {
 "captainCoaster": null,
 "facts": {
@@ -15496,6 +15518,20 @@
 "osm": null,
 "qid": "Q106610857"
 },
+"1336": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Raven",
+"method": "name+coords",
+"osm": null,
+"qid": "Q138798970"
+},
 "1338": {
 "captainCoaster": null,
 "facts": {
@@ -15509,6 +15545,14 @@
 "method": "name+park",
 "osm": null,
 "qid": "Q138940592"
+},
+"1343": {
+"captainCoaster": null,
+"facts": {},
+"label": "Gold Rush",
+"method": "name+coords",
+"osm": null,
+"qid": "Q128996138"
 },
 "1344": {
 "captainCoaster": null,
@@ -15595,6 +15639,25 @@
 "method": "name+park",
 "osm": null,
 "qid": "Q130735411"
+},
+"1361": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Vekoma"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Millennium Roller Coaster",
+"method": "approved",
+"osm": null,
+"qid": "Q1370494"
 },
 "1362": {
 "captainCoaster": null,
@@ -20785,6 +20848,635 @@
 "method": "name+coords",
 "osm": null,
 "qid": "Q57522641"
+},
+"2228": {
+"captainCoaster": null,
+"facts": {},
+"label": "Ultra Twister Megaton",
+"method": "name+coords",
+"osm": null,
+"qid": "Q1917138"
+},
+"2231": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "MACK Rides"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "2016-01-01"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Flash",
+"method": "name+park",
+"osm": null,
+"qid": "Q23005748"
+},
+"2241": {
+"captainCoaster": null,
+"facts": {
+"h": {
+"cites_rcdb": false,
+"prec": null,
+"v": 114.8
+},
+"l": {
+"cites_rcdb": false,
+"prec": null,
+"v": 2460.6
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "2011"
+},
+"s": {
+"cites_rcdb": false,
+"prec": null,
+"v": 59.0
+}
+},
+"label": "Shock",
+"method": "name+park",
+"osm": null,
+"qid": "Q2279695"
+},
+"2251": {
+"captainCoaster": null,
+"facts": {},
+"label": "Palindrome",
+"method": "name+coords",
+"osm": null,
+"qid": "Q130213969"
+},
+"2267": {
+"captainCoaster": null,
+"facts": {},
+"label": "Tower of Terror",
+"method": "name+coords",
+"osm": null,
+"qid": "Q2446903"
+},
+"2285": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Parrot Coaster",
+"method": "name+coords",
+"osm": null,
+"qid": "Q5463484"
+},
+"2289": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Circus Roller Coaster",
+"method": "name+coords",
+"osm": null,
+"qid": "Q1230513"
+},
+"2296": {
+"captainCoaster": null,
+"facts": {},
+"label": "Race of the Future",
+"method": "name+park",
+"osm": null,
+"qid": "Q131466659"
+},
+"2297": {
+"captainCoaster": null,
+"facts": {},
+"label": "Shred The Sewers",
+"method": "name+park",
+"osm": null,
+"qid": "Q131430980"
+},
+"2316": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Intamin"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "1992"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Jupiter",
+"method": "name+park",
+"osm": null,
+"qid": "Q3190121"
+},
+"2344": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Vekoma"
+}
+},
+"label": "Balagos \u2013 Flying Flame",
+"method": "name+park",
+"osm": null,
+"qid": "Q137557115"
+},
+"2345": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Donderstenen",
+"method": "name+park",
+"osm": null,
+"qid": "Q3271872"
+},
+"2347": {
+"captainCoaster": null,
+"facts": {},
+"label": "Rioolrat",
+"method": "name+park",
+"osm": null,
+"qid": "Q2912636"
+},
+"2397": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Roller Coaster Corporation of America"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Montezum",
+"method": "name+park",
+"osm": null,
+"qid": "Q6905507"
+},
+"2413": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Roller Coaster",
+"method": "name+park",
+"osm": null,
+"qid": "Q109278483"
+},
+"2441": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "National Amusement Devices"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "1958"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Big Dipper",
+"method": "name+park",
+"osm": "4600209025",
+"qid": "Q106696223"
+},
+"2462": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Dragon's Run",
+"method": "name+coords",
+"osm": null,
+"qid": "Q28563538"
+},
+"2475": {
+"captainCoaster": null,
+"facts": {
+"closed": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "1991"
+},
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Vekoma"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "1985"
+}
+},
+"label": "Space Shuttle Max",
+"method": "name+park",
+"osm": null,
+"qid": "Q7572494"
+},
+"2486": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Soquet"
+}
+},
+"label": "1066",
+"method": "name+park",
+"osm": null,
+"qid": "Q99528885"
+},
+"2497": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Arrow Dynamics"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Zimerman",
+"method": "name+coords",
+"osm": null,
+"qid": "Q85848105"
+},
+"2535": {
+"captainCoaster": null,
+"facts": {},
+"label": "Pioneer",
+"method": "name+park",
+"osm": null,
+"qid": "Q131417584"
+},
+"2541": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "1997"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Pyrenees",
+"method": "name+park",
+"osm": null,
+"qid": "Q601002"
+},
+"2585": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Intamin"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "2002"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Avalancha",
+"method": "name+park",
+"osm": null,
+"qid": "Q106696203"
+},
+"2623": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Roller Coaster",
+"method": "name+coords",
+"osm": null,
+"qid": "Q7361011"
+},
+"2625": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "SBF Visa"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Dolle Pier",
+"method": "name+park",
+"osm": null,
+"qid": "Q122460554"
+},
+"2665": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Diving Machine G5",
+"method": "name+coords",
+"osm": null,
+"qid": "Q1230679"
+},
+"2666": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "2001"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Insane Speed",
+"method": "name+coords",
+"osm": null,
+"qid": "Q3151498"
+},
+"2678": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Vekoma"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Svalbard Ekspressen",
+"method": "name+park",
+"osm": null,
+"qid": "Q39057817"
+},
+"2683": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Zierer"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "month",
+"v": "2020-08"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Bayou Express",
+"method": "name+park",
+"osm": null,
+"qid": "Q96481409"
+},
+"2742": {
+"captainCoaster": null,
+"facts": {},
+"label": "Goldrusher",
+"method": "name+park",
+"osm": null,
+"qid": "Q131466492"
+},
+"2793": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Gravity Group"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Zippin Pippin",
+"method": "name+park",
+"osm": "3707492298",
+"qid": "Q8072661"
+},
+"2809": {
+"captainCoaster": null,
+"facts": {
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "1972"
+}
+},
+"label": "Jumbo Jet",
+"method": "name+coords",
+"osm": null,
+"qid": "Q141642074"
+},
+"2881": {
+"captainCoaster": null,
+"facts": {},
+"label": "Jul's Rollerskates",
+"method": "name+park",
+"osm": null,
+"qid": "Q122460551"
+},
+"2915": {
+"captainCoaster": null,
+"facts": {
+"h": {
+"cites_rcdb": false,
+"prec": null,
+"v": 72.2
+},
+"l": {
+"cites_rcdb": false,
+"prec": null,
+"v": 2027.6
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Wilko\u0142ak",
+"method": "name+park",
+"osm": null,
+"qid": "Q63565803"
+},
+"2922": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Allan Herschell"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Little Dipper",
+"method": "name+coords",
+"osm": null,
+"qid": "Q6649785"
+},
+"2946": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Maurer S\u00f6hne"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Olympia Looping",
+"method": "name+coords",
+"osm": null,
+"qid": "Q847155"
+},
+"3000": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Zamperla"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Drakenbaan",
+"method": "name+park",
+"osm": null,
+"qid": "Q122460543"
 }
 },
 "records": {
@@ -22513,6 +23205,7 @@
 "v": "Steel"
 }
 },
+"Q120882691": {},
 "Q121359119": {
 "h": {
 "cites_rcdb": false,
@@ -22539,6 +23232,13 @@
 "prec": null,
 "v": 62.1
 },
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"Q121832695": {
 "type": {
 "cites_rcdb": false,
 "prec": null,
@@ -23050,6 +23750,7 @@
 "v": 1312.3
 }
 },
+"Q124054150": {},
 "Q124135045": {},
 "Q124187222": {
 "manu": {
@@ -23311,6 +24012,7 @@
 },
 "Q128218343": {},
 "Q1283422": {},
+"Q128996138": {},
 "Q1294688": {
 "manu": {
 "cites_rcdb": false,
@@ -24344,6 +25046,13 @@
 },
 "Q1385492": {},
 "Q1385523": {},
+"Q138798970": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
 "Q138940592": {
 "opened": {
 "cites_rcdb": false,
@@ -24368,6 +25077,7 @@
 "v": "Wood"
 }
 },
+"Q139073042": {},
 "Q139394198": {
 "dur": {
 "cites_rcdb": false,
@@ -24710,6 +25420,7 @@
 "v": "Wood"
 }
 },
+"Q141305978": {},
 "Q1415640": {
 "h": {
 "cites_rcdb": true,
@@ -25342,7 +26053,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "TOGO"
+"v": "Roller Coaster Corporation of America"
 },
 "type": {
 "cites_rcdb": false,
@@ -31254,6 +31965,7 @@
 "v": "Wood"
 }
 },
+"Q30686674": {},
 "Q3073731": {
 "type": {
 "cites_rcdb": false,
@@ -33509,7 +34221,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Sartori Rides"
+"v": "Sartori"
 },
 "opened": {
 "cites_rcdb": true,
@@ -34609,6 +35321,7 @@
 "v": "Steel"
 }
 },
+"Q60785614": {},
 "Q60845759": {
 "closed": {
 "cites_rcdb": false,
@@ -35475,7 +36188,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Intamin"
+"v": "Dinn Corporation"
 },
 "opened": {
 "cites_rcdb": false,
@@ -35517,6 +36230,7 @@
 "v": "Steel"
 }
 },
+"Q6745853": {},
 "Q677430": {
 "manu": {
 "cites_rcdb": false,

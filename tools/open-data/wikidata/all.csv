@@ -1547,6 +1547,7 @@ http://www.wikidata.org/entity/Q12060067,P580,1955-01-01T00:00:00Z,,,,9,http://w
 http://www.wikidata.org/entity/Q12060067,P582,2008-01-01T00:00:00Z,,,,9,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q12060067,P625,Point(-76.5027 40.8801),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q12060067,P646,/m/0f6xh0,,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q120882691,P31,http://www.wikidata.org/entity/Q3322352,dual-tracked roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q121359119,P131,http://www.wikidata.org/entity/Q632924,Rust,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q121359119,P131,http://www.wikidata.org/entity/Q632924,Rust,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q121359119,P137,http://www.wikidata.org/entity/Q25394571,Europa-Park GmbH & Co Mack KG,,,,http://wikiba.se/ontology#NormalRank,false
@@ -1585,6 +1586,8 @@ http://www.wikidata.org/entity/Q121359119,P625,Point(7.7194092 48.2659638),,,,,h
 http://www.wikidata.org/entity/Q121359119,P625,Point(7.7194092 48.2659638),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q121359119,P859,http://www.wikidata.org/entity/Q7334368,Rimac Automobili,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q121359119,P859,http://www.wikidata.org/entity/Q7334368,Rimac Automobili,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q121832695,P31,http://www.wikidata.org/entity/Q2389789,steel roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q121832695,P625,Point(-75.5373 40.5772),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1218623,P131,http://www.wikidata.org/entity/Q269397,Klotten,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1218623,P17,http://www.wikidata.org/entity/Q183,Germany,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1218623,P18,http://commons.wikimedia.org/wiki/Special:FilePath/Klotten%20HeisseFahrt.jpg,,,,,http://wikiba.se/ontology#NormalRank,false
@@ -2026,6 +2029,10 @@ http://www.wikidata.org/entity/Q123980470,P2048,25.0,,25.0,http://www.wikidata.o
 http://www.wikidata.org/entity/Q123980470,P31,http://www.wikidata.org/entity/Q204832,roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q123980470,P373,Gozimba,,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q123980470,P495,http://www.wikidata.org/entity/Q39,Switzerland,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q124054150,P17,http://www.wikidata.org/entity/Q30,United States,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q124054150,P31,http://www.wikidata.org/entity/Q204832,roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q124054150,P373,Primordial (roller coaster),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q124054150,P625,Point(-111.892839 40.988704),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q124135045,P31,http://www.wikidata.org/entity/Q1265865,enclosed roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q124135045,P625,Point(54.607 24.4838),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q124187222,P17,http://www.wikidata.org/entity/Q55,Netherlands,,,,http://wikiba.se/ontology#NormalRank,false
@@ -2270,6 +2277,9 @@ http://www.wikidata.org/entity/Q1283422,P18,http://commons.wikimedia.org/wiki/Sp
 http://www.wikidata.org/entity/Q1283422,P2671,/g/121kvsd2,,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1283422,P31,http://www.wikidata.org/entity/Q204832,roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1283422,P625,Point(150.30136389 -33.72901667),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q128996138,P31,http://www.wikidata.org/entity/Q204832,roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q128996138,P373,Gold Rush (Drayton Manor),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q128996138,P625,Point(-1.713831 52.610723),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1294688,P11693,12583439141,,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1294688,P131,http://www.wikidata.org/entity/Q1400,Pennsylvania,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1294688,P17,http://www.wikidata.org/entity/Q30,United States,,,,http://wikiba.se/ontology#NormalRank,false
@@ -3150,6 +3160,8 @@ http://www.wikidata.org/entity/Q1385523,P2671,/g/122_rww9,,,,,http://wikiba.se/o
 http://www.wikidata.org/entity/Q1385523,P31,http://www.wikidata.org/entity/Q204832,roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1385523,P361,http://www.wikidata.org/entity/Q702179,Heide Park,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1385523,P625,Point(9.87691 53.0232),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q138798970,P31,http://www.wikidata.org/entity/Q2389789,steel roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q138798970,P625,Point(-1.557086 50.947327),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q138940592,P1619,2026-05-16T00:00:00Z,,,,11,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q138940592,P17,http://www.wikidata.org/entity/Q145,United Kingdom,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q138940592,P276,http://www.wikidata.org/entity/Q3372842,Paultons Park,,,,http://wikiba.se/ontology#NormalRank,false
@@ -3166,6 +3178,8 @@ http://www.wikidata.org/entity/Q1390319,P31,http://www.wikidata.org/entity/Q9735
 http://www.wikidata.org/entity/Q1390319,P373,Prowler (roller coaster),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1390319,P625,Point(-94.4837 39.1744),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1390319,P646,/m/04jhk36,,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q139073042,P31,http://www.wikidata.org/entity/Q7465804,inverted roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q139073042,P625,Point(-98.6964 29.4549),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q139394198,P10664,http://www.wikidata.org/entity/Q2488513,Love Rollercoaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q139394198,P10664,http://www.wikidata.org/entity/Q2553905,Walking on Sunshine,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q139394198,P10664,http://www.wikidata.org/entity/Q3437675,Rock! Rock!,,,,http://wikiba.se/ontology#NormalRank,false
@@ -3392,6 +3406,8 @@ http://www.wikidata.org/entity/Q141251885,P373,Wildcat (Hersheypark),,,,,http://
 http://www.wikidata.org/entity/Q141251885,P3999,2022-07-31T00:00:00Z,,,,11,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q141251885,P4839,"Entity[""AmusementParkRide"", ""Hersheypark::Wildcat""]",,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q141251885,P625,Point(-76.655805555 40.2925),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q141305978,P31,http://www.wikidata.org/entity/Q517842,mine train roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q141305978,P5817,http://www.wikidata.org/entity/Q811683,proposed building or structure,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1415640,P131,http://www.wikidata.org/entity/Q493826,Lyngby-Taarbæk Municipality,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1415640,P1619,2009-04-09T00:00:00Z,,,,11,http://wikiba.se/ontology#NormalRank,true
 http://www.wikidata.org/entity/Q1415640,P17,http://www.wikidata.org/entity/Q35,Denmark,,,,http://wikiba.se/ontology#NormalRank,false
@@ -9682,6 +9698,9 @@ http://www.wikidata.org/entity/Q30646742,P31,http://www.wikidata.org/entity/Q973
 http://www.wikidata.org/entity/Q30646742,P580,1902-01-01T00:00:00Z,,,,9,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q30646742,P582,1907-01-01T00:00:00Z,,,,9,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q30646742,P625,Point(-73.98 40.575),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q30686674,P17,http://www.wikidata.org/entity/Q30,United States,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q30686674,P2671,/g/11c71c6xtf,,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q30686674,P31,http://www.wikidata.org/entity/Q204832,roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q3073731,P131,http://www.wikidata.org/entity/Q812,Florida,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q3073731,P138,http://www.wikidata.org/entity/Q15298195,hippogriff in the Harry Potter universe,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q3073731,P17,http://www.wikidata.org/entity/Q30,United States,,,,http://wikiba.se/ontology#NormalRank,false
@@ -12801,6 +12820,8 @@ http://www.wikidata.org/entity/Q60770886,P2671,/g/11g_rld8yf,,,,,http://wikiba.s
 http://www.wikidata.org/entity/Q60770886,P276,http://www.wikidata.org/entity/Q3016111,Six Flags Darien Lake,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q60770886,P31,http://www.wikidata.org/entity/Q2389789,steel roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q60770886,P625,Point(-78.3849 42.9294),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q60785614,P2671,/g/11gnrltn7n,,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q60785614,P31,http://www.wikidata.org/entity/Q923991,water coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q60845759,P131,http://www.wikidata.org/entity/Q608207,Sandusky,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q60845759,P156,http://www.wikidata.org/entity/Q1787446,Steel Vengeance,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q60845759,P1619,1991-05-11T00:00:00Z,,,,11,http://wikiba.se/ontology#NormalRank,false
@@ -13736,6 +13757,11 @@ http://www.wikidata.org/entity/Q674404,P941,http://www.wikidata.org/entity/Q7901
 http://www.wikidata.org/entity/Q674404,P941,http://www.wikidata.org/entity/Q79015,Superman,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q674404,P941,http://www.wikidata.org/entity/Q79015,Superman,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q674404,P941,http://www.wikidata.org/entity/Q79015,Superman,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q6745853,P131,http://www.wikidata.org/entity/Q1415,Indiana,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q6745853,P17,http://www.wikidata.org/entity/Q30,United States,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q6745853,P31,http://www.wikidata.org/entity/Q923991,water coaster,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q6745853,P625,Point(-86.9122 38.1238),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q6745853,P646,/m/0h3md3f,,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q677430,P11693,1223071796,,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q677430,P131,http://www.wikidata.org/entity/Q99,California,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q677430,P17,http://www.wikidata.org/entity/Q30,United States,,,,http://wikiba.se/ontology#NormalRank,false
