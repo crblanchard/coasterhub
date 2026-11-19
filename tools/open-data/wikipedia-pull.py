@@ -2,7 +2,8 @@
 """Pull every roller coaster infobox from English and German Wikipedia
 (CC BY-SA 4.0) into tools/open-data/wikipedia/<lang>.jsonl, one line per
 article: {"title", "pageid", "revid", "params": {every infobox parameter}}
-(2026-11-19, Carter: "wiki and themeparks.wiki please").
+(2026-11-19; ThemeParks.wiki was tried the same day and dropped: "it doesn't
+have that much").
 
   en  Template:Infobox roller coaster  (height_ft/_m, speed_mph/_kmh ...)
   de  Vorlage:Infobox Achterbahn       (HÖHE, LÄNGE in m, GESCHWINDIGKEIT km/h)
