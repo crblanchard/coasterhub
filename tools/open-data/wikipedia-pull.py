@@ -99,14 +99,14 @@ for lang in (sys.argv[1:] or list(LANGS)):
         time.sleep(1)
     print(lang, len(titles), 'articles', file=sys.stderr)
     rows = []
-    for i in range(0, len(titles), 50):
-        j = get(lang, dict(action='query', prop='revisions', rvprop='content|ids', rvslots='main', titles='|'.join(titles[i:i + 50])))
+    for i in range(0, len(titles), 20):   # small batches, two seconds apart: Wikimedia throttles bursts
+        j = get(lang, dict(action='query', prop='revisions', rvprop='content|ids', rvslots='main', titles='|'.join(titles[i:i + 20])))
         for p in j['query']['pages']:
             if 'revisions' not in p: continue
             r = p['revisions'][0]
             box = infobox(r['slots']['main'].get('content', ''), tpl)
             if box: rows.append({'title': p['title'], 'pageid': p['pageid'], 'revid': r['revid'], 'params': box})
-        time.sleep(1)
+        time.sleep(2)
     if len(rows) < 200: raise SystemExit('%s: only %d infoboxes, refusing to replace the last pull' % (lang, len(rows)))
     rows.sort(key=lambda r: r['pageid'])
     out = 'tools/open-data/wikipedia/%s.jsonl' % lang
