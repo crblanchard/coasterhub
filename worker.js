@@ -1361,7 +1361,7 @@ function openMismatchState(field, site, bySrc, choice) {
     for (let j = i + 1; j < vals.length; j++) if (!openAgree(field, vals[i][1], vals[j][1])) { differ = true; break; }
   if (!differ) return null;
   if (choice) {
-    const now = choice[0] === "site" ? site : (bySrc[choice[0]] || [])[0];
+    const now = choice[0] === "site" || choice[0] === "manual" ? site : (bySrc[choice[0]] || [])[0];
     if (String(now) === String(choice[1])) return { state: "picked", use: choice[1], by: choice[0] };
   }
   const opens = Object.keys(bySrc).map(s => [s, bySrc[s][0]]);
@@ -1386,7 +1386,8 @@ function openMismatchState(field, site, bySrc, choice) {
 //            fixed starting list (open_launch_baseline); done = a source
 //            found, or kept to enter by hand
 // Stats no open source has carry over from the current data, marked
-// unverified (Carter chose that over blanks). Models always carry over.
+// with the source "manual", never RCDB (Carter chose that over blanks).
+// Models always carry over.
 async function getCutover(env) {
   const { cs, fair, linked, open, chose } = await openTables(env);
   const q = (sql, ...b) => env.DB.prepare(sql).bind(...b).all().then(r => r.results).catch(() => []);
@@ -1454,7 +1455,10 @@ async function getCutover(env) {
         if (st.state !== null) mism.push({ id: c.id, name: c.name, park: c.park, field: f, site: openBlank(c[f]) ? null : c[f],
           src: Object.fromEntries(Object.entries(src).map(([s, v]) => [s, v[0]])), state: st.state, use: st.use ?? null, by: st.by || null });
       }
-      if (!OPEN_KEEP[f] && !isFair && !openBlank(c[f]) && !Object.values(src).some(v => !v[1]) && !chose.get(c.id + "|" + f)) gaps++;
+      // A 'manual' value in the new dataset: the current one carried over
+      // because no open source has it, or the current one chosen by hand.
+      const ch = chose.get(c.id + "|" + f);
+      if (!OPEN_KEEP[f] && !isFair && !openBlank(c[f]) && ((!ch && !Object.values(src).some(v => !v[1])) || (ch && (ch[0] === "manual" || ch[0] === "site")))) gaps++;
     }
     if (hasOpen || kept) {
       const pend = pendingBy.get(c.id) || 0;
@@ -1557,10 +1561,14 @@ async function setOpenChoice(env, acct, id, field, source, typed) {
   if (isName) {
     value = String(typed || "").replace(/\s+/g, " ").trim().slice(0, 120);
     if (!value) return err(400, "name required");
-  } else if (source === "site") {
+  } else if (source === "site" || source === "manual") {
+    // The current value, recorded as 'manual': the new dataset names no RCDB
+    // source, ever (Carter, 2026-11-19: "'manual' can be a fine entry. just
+    // don't want to link to rcdb"). He reviews the manual ones after launch.
     const row = await env.DB.prepare("SELECT * FROM coasters WHERE id = ?").bind(id).first();
     if (!row) return err(404, "no such coaster");
     value = row[field];
+    source = "manual";
   } else {
     const row = await env.DB.prepare("SELECT value FROM open_facts WHERE coaster_id = ? AND field = ? AND source = ?").bind(id, field, source).first();
     if (!row) return err(404, "that source has no value here");

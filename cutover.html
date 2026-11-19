@@ -177,8 +177,8 @@ const LINK = {
 };
 const TABS = {
   going: { t: '1. Going in', h: 'Coasters going in',
-    p: 'Every coaster going into the new dataset. Ready means nothing is left to settle for it. Stats no open source has carry over from the current data, marked unverified.',
-    f: [['todo', 'Not ready yet'], ['ready', 'Ready'], ['gaps', 'Has unverified stats'], ['', 'All']] },
+    p: 'Every coaster going into the new dataset. Ready means nothing is left to settle for it. Stats no open source has, and values you keep as they are now, go in with the source &ldquo;manual&rdquo; (never RCDB), to clean up later.',
+    f: [['todo', 'Not ready yet'], ['ready', 'Ready'], ['gaps', 'Has manual values'], ['', 'All']] },
   changes: { t: '2. Changes to check', h: 'Changes to check',
     p: 'Matches the automatic matching wasn&rsquo;t sure about. Approve if the open-source record is the same ride; its stats then join the new dataset.',
     f: [['todo', 'To decide'], ['sure', 'Near-certain'], ['look', 'Needs a look'], ['done', 'Decided']] },
@@ -219,7 +219,7 @@ function go(t, first, keepFilter) {
   try { localStorage.setItem('ch_cut', t); } catch (e) {}
   if (!first) history.replaceState(null, '', location.pathname + location.search + '#' + t);
   $('tab-h').textContent = TABS[t].h;
-  $('tab-p').innerHTML = TABS[t].p + (t === 'going' && D.unverified ? ' <b>' + fmt(D.unverified) + '</b> stats would carry over unverified right now.' : '');
+  $('tab-p').innerHTML = TABS[t].p + (t === 'going' && D.unverified ? ' <b>' + fmt(D.unverified) + '</b> values are manual right now.' : '');
   if (!keepFilter) $('filt').innerHTML = TABS[t].f.map(([v, l]) => '<option value="' + v + '">' + l + '</option>').join('');
   LIMIT = 100; render();
 }
@@ -270,7 +270,7 @@ const VIEW = {
     const todo = [];
     if (r.manual) todo.push(jump('mismatch', r.name, r.manual + ' to choose'));
     if (r.pending) todo.push(jump('changes', r.name, 'match to check'));
-    if (r.gaps) todo.push('<span class="chip">' + r.gaps + ' unverified</span>');
+    if (r.gaps) todo.push('<span class="chip">' + r.gaps + ' manual</span>');
     return '<tr><td class="nm">' + coaster(r) + '</td><td>' + (r.sources.map(s => SRC[s] || s).join(', ') || (r.fair ? 'Fair ride' : r.kept ? 'Kept by hand' : ''))
       + '</td><td class="todo">' + (r.ready ? '<span class="chip ok">ready</span> ' : '') + todo.join(' ') + '</td></tr>';
   }).join('') + '</tbody></table></div>',
@@ -296,8 +296,8 @@ const VIEW = {
   mismatch: list => '<div class="tbl-wrap"><table class="mm"><thead><tr><th>Coaster</th><th>Values (click to choose)</th><th>Settled</th></tr></thead><tbody>' + list.map(m => {
     const opts = (m.site != null ? [['site', m.site]] : []).concat(Object.entries(m.src));
     return '<tr><td class="nm"><span class="fld">' + NAMES[m.field] + '</span>' + coaster(m) + '</td><td class="vals">' + opts.map(([s, v]) =>
-        btn('<i>' + (SRC[s] || s) + '</i> ' + val(m.field, v), { pick: s, id: m.id, f: m.field }, 'val' + (m.state === 'picked' && m.by === s ? ' on' : ''))).join('')
-      + '</td><td class="st">' + (m.state === 'manual' ? '<span class="chip bad">to choose</span>' : m.state === 'picked' ? '<span class="chip ok">chosen</span> ' + btn('undo', { pick: '', id: m.id, f: m.field }, 'link')
+        btn('<i>' + (SRC[s] || s) + '</i> ' + val(m.field, v), { pick: s, id: m.id, f: m.field }, 'val' + (m.state === 'picked' && (m.by === s || (s === 'site' && m.by === 'manual')) ? ' on' : ''))).join('')
+      + '</td><td class="st">' + (m.state === 'manual' ? '<span class="chip bad">to choose</span>' : m.state === 'picked' ? '<span class="chip ok">chosen' + (m.by === 'manual' ? ' · manual' : '') + '</span> ' + btn('undo', { pick: '', id: m.id, f: m.field }, 'link')
         : '<span class="chip">' + esc(m.by) + ': ' + val(m.field, m.use) + '</span>') + '</td></tr>';
   }).join('') + '</tbody></table></div>',
 

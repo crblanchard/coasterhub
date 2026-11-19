@@ -6319,6 +6319,18 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   list of what is new since the last run (new suggested links, new coasters
   the sources have at our parks, new mismatches, values that changed) to
   approve or not. Not built yet: build it with the switch.
+- **"manual" is the source for current values, never RCDB (2026-11-19).**
+  Carter: "for the 'site now' values when i choose them please still link to
+  wikidata/coasterpedia as necessary. for those specifically 'manual' can be a
+  fine entry. just don't want to link to rcdb". A "Site now" pick or "keep
+  current" stores open_choices.source = 'manual' (the 6 older 'site' rows were
+  updated); stats no open source has also go in as manual. Links to Wikidata /
+  Coasterpedia are untouched by picks. /cutover's Going in tab filters "Has
+  manual values" for his clean-up after launch.
+  **Open question (asked 2026-11-19, no answer yet):** should a linked coaster
+  take Coasterpedia's name in the new dataset by default (special names like
+  "(Old)", years and racing sides protected, differences listed to switch
+  back), or keep ours by default? Today it keeps ours unless typed by hand.
 - **RCDB IDs hide in URLs and tags.** Wikidata's "described at URL" (P973) held
   45 rcdb.com/NNNN.htm links, and some OSM coasters carry `rcdb_id` /
   `ref:rcdb` tags; all were removed (D1 rows deleted 2026-11-18) and every
