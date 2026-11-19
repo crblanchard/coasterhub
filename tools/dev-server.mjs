@@ -96,6 +96,9 @@ for (const f of SCHEMA) {
   const sql = readFileSync(p, "utf8");
   try { db.exec(sql); db.exec(sql); }
   catch (e) { console.error("! " + f + " failed: " + e.message); process.exit(1); }
+  // parks.travel (migration 130, an ALTER that cannot run twice) before
+  // anything that reads it, such as 193.
+  if (f === "000-base-schema.sql") { try { db.exec("ALTER TABLE parks ADD COLUMN travel INTEGER NOT NULL DEFAULT 0"); } catch (e) {} }
 }
 
 if (seeding) seed();

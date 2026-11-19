@@ -1426,8 +1426,11 @@ async function getCutover(env) {
     const c = byId.get(s.coaster_id), it = item.get(s.source + "|" + s.ref) || {};
     return { source: s.source, ref: s.ref, coaster_id: s.coaster_id, score: s.score, reason: s.reason,
              name: c.name, park: c.park, closed: c.closed || null, recName: it.name || null, recPark: it.park || null,
-             site: pick(c, SHOWF), facts: rf[s.source + "|" + s.ref] || {} };
-  }).sort((a, b) => b.score - a.score || a.park.localeCompare(b.park));
+             site: pick(c, SHOWF), facts: rf[s.source + "|" + s.ref] || {},
+             newName: (chose.get(c.id + "|name") || [])[1] || null };
+  // Coasterpedia first, then Wikidata, then OSM (Carter, 2026-11-19: the
+  // Coasterpedia ones "are more accurate"); strongest first within each.
+  }).sort((a, b) => (OPEN_SOURCE_ORDER[a.source] ?? 9) - (OPEN_SOURCE_ORDER[b.source] ?? 9) || b.score - a.score || a.park.localeCompare(b.park));
   const decided = reviews.filter(r => r.kind === "match").map(r => {
     const c = byId.get(r.coaster_id) || {}, it = item.get(r.source + "|" + r.ref) || {};
     return { source: r.source, ref: r.ref, coaster_id: r.coaster_id, decision: r.decision, at: r.at, name: c.name, park: c.park, recName: it.name || null };
@@ -1537,9 +1540,13 @@ async function setOpenReview(env, acct, b) {
 // A pick where the sources disagree: which source's value is right for this
 // coaster and field, in the parallel dataset only. source 'site' takes the
 // current value; anything else takes that source's open_facts value now.
-// source null clears the pick.
-async function setOpenChoice(env, acct, id, field, source) {
-  if (!OPEN_FIELDS.includes(field)) return err(400, "unknown field");
+// source null clears the pick. field 'name' with source 'manual' and a value
+// is the coaster's name in the new dataset, typed by hand (2026-11-19).
+const OPEN_SOURCE_ORDER = { coasterpedia: 0, wikidata: 1, osm: 2 };
+async function setOpenChoice(env, acct, id, field, source, typed) {
+  const isName = field === "name";
+  if (!OPEN_FIELDS.includes(field) && !isName) return err(400, "unknown field");
+  if (isName && source && source !== "manual") return err(400, "a name is typed by hand");
   try { await env.DB.prepare("SELECT 1 FROM open_choices LIMIT 1").first(); }
   catch (e) { return err(503, "run migrations/190-open-choices.sql first"); }
   if (!source) {
@@ -1547,7 +1554,10 @@ async function setOpenChoice(env, acct, id, field, source) {
     return json({ ok: true, pick: null });
   }
   let value;
-  if (source === "site") {
+  if (isName) {
+    value = String(typed || "").replace(/\s+/g, " ").trim().slice(0, 120);
+    if (!value) return err(400, "name required");
+  } else if (source === "site") {
     const row = await env.DB.prepare("SELECT * FROM coasters WHERE id = ?").bind(id).first();
     if (!row) return err(404, "no such coaster");
     value = row[field];
@@ -2877,7 +2887,7 @@ export default {
         let b; try { b = await request.json(); } catch (e) { return err(400, "bad JSON"); }
         const id = +b.id;
         if (!id) return err(400, "id required");
-        return setOpenChoice(env, acct, id, String(b.field || ""), b.source ? String(b.source) : null);
+        return setOpenChoice(env, acct, id, String(b.field || ""), b.source ? String(b.source) : null, b.value);
       }
       // A decision on /open-review. Admins only; open dataset only.
       if (request.method === "POST" && path === "/api/open-review") {

@@ -43,6 +43,8 @@
   button.small{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:8px;padding:3px 9px;font-size:.76rem;cursor:pointer;margin-left:4px}
   button.link{border:0;background:none;color:var(--accent2);font-size:.78rem;cursor:pointer;padding:0}
   td.st{white-space:normal;min-width:120px}
+  .rename{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.82rem;color:var(--muted)}
+  .rename input{margin-left:6px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:5px 8px;font-size:.85rem;min-width:300px;max-width:100%}
   .fld{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:2px}
   @media (max-width:560px){
     table.mm td.nm{min-width:110px}
@@ -280,9 +282,14 @@ const VIEW = {
     : '<div class="cards">' + list.map(c => {
         const fs = ['manu', 'h', 's', 'l', 'inv', 'opened', 'closed'].filter(k => c.site[k] != null || c.facts[k] != null);
         return '<div class="card"><div class="pair"><div><span class="lab">On the site</span>' + coaster(c) + '</div><div class="arrow">↔</div>'
-          + '<div><span class="lab">' + (SRC[c.source] || c.source) + '</span><a href="' + LINK[c.source](c.ref) + '" target="_blank" rel="noopener">' + esc(c.recName || c.ref) + '</a><small>' + esc(c.recPark || '') + '</small></div></div>'
+          + '<div><span class="lab">' + (SRC[c.source] || c.source) + '</span><b>' + esc(c.recName || c.ref) + '</b><small>' + esc(c.recPark || '')
+          + (c.recPark ? ' · ' : '') + '<a class="go" href="' + LINK[c.source](c.ref) + '" target="_blank" rel="noopener">view on ' + (SRC[c.source] || c.source) + ' ↗</a></small></div></div>'
           + '<div class="why">' + esc(c.reason) + ' · ' + Math.round(c.score * 100) + '% match</div>'
           + (fs.length ? '<table class="mini"><tr><th></th><th>Site now</th><th>' + (SRC[c.source] || c.source) + '</th></tr>' + fs.map(k => '<tr><th>' + NAMES[k] + '</th><td>' + val(k, c.site[k]) + '</td><td>' + val(k, c.facts[k]) + '</td></tr>').join('') + '</table>' : '')
+          // OSM names are whatever a mapper typed: let the name in the new dataset be set by hand.
+          + (c.source === 'osm' ? '<div class="rename"><label>Name in new dataset <input type="text" value="' + esc(c.newName || c.name) + '" data-orig="' + esc(c.newName || c.name) + '"></label>'
+              + (c.recName && c.recName !== (c.newName || c.name) ? btn('use “' + esc(c.recName) + '”', { usename: c.recName }, 'small') : '')
+              + btn('Save name', { savename: c.coaster_id }, 'small') + (c.newName ? ' <span class="chip ok">name set</span> ' + btn('reset', { clearname: c.coaster_id }, 'link') : '') + '</div>' : '')
           + '<div class="act">' + btn('Same ride: link', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'approve' }, 'yes') + btn('Not the same', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'reject' }, 'no') + '</div></div>';
       }).join('') + '</div>',
 
@@ -323,6 +330,13 @@ document.addEventListener('click', e => {
   const j = e.target.closest('a[data-jump]');
   if (j) { e.preventDefault(); $('q').value = j.dataset.q; go(j.dataset.jump); scrollTo({ top: $('tab-h').offsetTop - 80, behavior: 'instant' }); return; }
   const b = e.target.closest('#list button'); if (!b) return;
+  if (b.dataset.usename !== undefined) { b.closest('.rename').querySelector('input').value = b.dataset.usename; return; }
+  if (b.dataset.savename) {
+    const v = b.closest('.rename').querySelector('input').value.trim();
+    if (!v) return;
+    return after(post('/api/open-choice', { id: +b.dataset.savename, field: 'name', source: 'manual', value: v }), b);
+  }
+  if (b.dataset.clearname) return after(post('/api/open-choice', { id: +b.dataset.clearname, field: 'name', source: null }), b);
   if (b.dataset.pick !== undefined) return after(post('/api/open-choice', { id: +b.dataset.id, field: b.dataset.f, source: b.dataset.pick || null }), b);
   if (b.dataset.k) return after(post('/api/open-review', { kind: b.dataset.k, source: b.dataset.s, ref: b.dataset.r, coaster_id: +b.dataset.c, decision: b.dataset.d || null }), b);
 });
