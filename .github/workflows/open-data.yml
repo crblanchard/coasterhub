@@ -34,6 +34,7 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
 
@@ -78,6 +79,10 @@ jobs:
           python3 -I tools/open-data/build-sources-sql.py > migrations/189-open-data-sources.sql
           # The checks behind /open-review: suggested links, coasters to add.
           python3 -I tools/open-data/suggest-matches.py
+          # Pins for new parks no source places (Wikidata, OpenStreetMap, else
+          # the town as an estimate), then the checks again to use them.
+          if python3 -I tools/open-data/park-pins.py --minutes 45; then python3 -I tools/open-data/suggest-matches.py
+          else echo "::warning::park pins failed; using last week's"; fi
           python3 -I tools/open-data/build-review-sql.py > migrations/191-open-data-review.sql
           echo "FILES=migrations/187-open-data-wikidata.sql migrations/188-open-data-wikidata-raw.sql migrations/189-open-data-sources.sql migrations/191-open-data-review.sql" >> "$GITHUB_ENV"
 

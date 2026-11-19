@@ -65,6 +65,23 @@ if (si > 0) {
   process.exit(0);
 }
 
+// --closed (Carter, 2026-11-19: "link up ... 3"): closed coasters too, and
+// parks whose coasters are all closed. A closed one goes in only with a
+// closing date (otherwise it would read as operating); one that never opened
+// never does. Those left out are listed.
+const closedToo = process.argv.includes("--closed");
+const dead = c => /defunct|not operat|nicht in betrieb|sbno|storage|closed|removed|demolish/i.test(c.status || "");
+const hasClosed = c => c.refs.some(r => db.prepare("SELECT 1 FROM open_record_facts WHERE source = ? AND ref = ? AND field = 'closed' AND value IS NOT NULL AND value <> ''").get(r.source, r.ref));
+const km = (a, b, c, d) => { const r = Math.PI / 180; return 6371 * Math.acos(Math.max(-1, Math.min(1, Math.sin(a*r)*Math.sin(c*r) + Math.cos(a*r)*Math.cos(c*r)*Math.cos((b-d)*r)))); };
+const livePark = db.prepare("SELECT name, lat, lon FROM parks WHERE lat IS NOT NULL").all();
+// How each pin was found (tools/open-data/park-pins.py), to list the estimates.
+let PINHOW = {};
+try {
+  const rv = JSON.parse(readFileSync("tools/open-data/review.json", "utf8"));
+  for (const p of rv.new_parks || []) if (p.pin) PINHOW[p.park + "|" + p.coasters[0].refs[0].source + ":" + p.coasters[0].refs[0].ref] = p.pin;
+} catch {}
+const noDate = [], nearOld = [], estimated = [];
+
 const latin = n => !/[^\u0000-ɏḀ-ỿ‐-‧€]/.test(n || "");
 const alive = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || "") && /operat|construct|open|betrieb/i.test(c.status || "");
 const review = await call("GET", "/api/cutover/review");
@@ -73,7 +90,12 @@ const ready = review.newParks.filter(p => p.lat != null && p.region && latin(p.p
 let parks = 0, coasters = 0;
 const failed = [], seen = new Set();
 for (const p of ready) {
-  const cs = p.coasters.filter(alive).map(c => ({ name: c.name, refs: c.refs.map(r => ({ source: r.source, ref: r.ref })) }));
+  const keep = c => alive(c) || (closedToo && dead(c) && (hasClosed(c) || (noDate.push(c.name + " @ " + p.park), false)));
+  // A pin within 2 km of a park we have is most likely that park under an old
+  // name (Marriott's Great America): listed, not added.
+  const by = p.lat != null && livePark.find(q => km(p.lat, p.lon, q.lat, q.lon) <= 2);
+  if (by) { nearOld.push(p.park + " -> " + by.name); continue; }
+  const cs = p.coasters.filter(keep).map(c => ({ name: c.name, refs: c.refs.map(r => ({ source: r.source, ref: r.ref })) }));
   if (!cs.length) continue;
   // Two ready parks with one name (VinWonders): the first goes in, the next
   // waits for a name on the page.
@@ -83,8 +105,12 @@ for (const p of ready) {
   try {
     const r = await call("POST", "/api/cutover/apply", { kind: "addpark", k: p.k, park: p.park, region: p.region, lat: p.lat, lon: p.lon, coasters: cs });
     parks++; coasters += r.done.length;
+    if (PINHOW[p.k] === "town") estimated.push(p.park + " (" + p.region + ")");
   } catch (e) { failed.push(p.park + ": " + e.message); }
 }
 console.log((dry ? "would add " : "added ") + parks + " parks with " + coasters + " coasters (of " + ready.length + " ready, " + review.newParks.length + " listed)");
 if (failed.length) console.log("not added (" + failed.length + "):\n  " + failed.join("\n  "));
+if (nearOld.length) console.log("within 2 km of a park we have, not added (" + nearOld.length + "):\n  " + nearOld.join("\n  "));
+if (noDate.length) console.log("closed with no closing date, not added (" + noDate.length + "):\n  " + noDate.join("\n  "));
+if (estimated.length) console.log("pins ESTIMATED at the town (" + estimated.length + "):\n  " + estimated.join("\n  "));
 if (!dry) { writeFileSync(out, writes.map(w => w.trim().replace(/;$/, "") + ";").join("\n") + "\n"); console.log(writes.length + " statements -> " + out); }

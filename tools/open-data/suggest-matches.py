@@ -182,7 +182,29 @@ def region_of(raw):
     return k or None
 known_parks = set()
 for p in parks: known_parks |= park_names(p)
+# A park name we have is only OUR park when nothing says it is somewhere
+# else: "Central Park", "Familypark" and "Luna Park" are each several parks,
+# and the loose match used to drop 160-odd live coasters at parks that are
+# not on the site at all (2026-11-19).
+park_by_name = collections.defaultdict(list)
+for p in parks:
+    for n in park_names(p): park_by_name[n].append(p)
+def is_known(r, pk):
+    cand = list(park_by_name.get(pk, []))
+    if len(pk) > 6: cand += [p for k, ps in park_by_name.items() if len(k) > 6 and k != pk and (pk in k or k in pk) for p in ps]
+    for p in cand:
+        pp = parks.get(p) or {}
+        if other_country(r, p): continue
+        if r['lat'] is not None and pp.get('lat') is not None and km(r['lat'], r['lon'], pp['lat'], pp['lon']) > 30: continue
+        return True
+    return False
+# Pins looked up for parks no source gives coordinates for
+# (tools/open-data/park-pins.py: Wikidata, then OpenStreetMap, then the town
+# as an estimate), keyed by park name and Coasterpedia location.
+PINS = json.load(open('tools/open-data/park-pins.json')) if os.path.exists('tools/open-data/park-pins.json') else {}
 claimed = {(r['source'], r['ref']) for g in uniq for r in g['refs']} | suggested_refs
+def same_town(a, b):
+    return a == b or (min(len(a), len(b)) >= 4 and (a in b or b in a)) or difflib.SequenceMatcher(None, a, b).ratio() >= 0.85
 newp = collections.OrderedDict()
 for r in recs:
     if r['source'] == 'wikidata' or not r.get('park') or r['ref'] in linked[r['source']] or (r['source'], r['ref']) in claimed: continue
@@ -190,7 +212,7 @@ for r in recs:
     # Not parks: Coasterpedia's "Standalone" (a coaster at no park) and
     # "Traveling"; and fairs wait for their own pass (Carter: parks first).
     if re.fullmatch(r'standalone|travel+ing|none|unknown', pk) or re.search(r'state ?fair|county ?fair|kermis|kirmes|volksfest|schützenfest', r['park'] or '', re.I): continue
-    if not pk or pk in known_parks or any(len(pk) > 6 and len(k) > 6 and (pk in k or k in pk) for k in known_parks): continue
+    if not pk or is_known(r, pk): continue
     if r['lat'] is not None and any(pp.get('lat') is not None and km(r['lat'], r['lon'], pp['lat'], pp['lon']) <= 3 for pp in parks.values()): continue
     raw = next((i['raw'] for i in src['items'] if i['source'] == r['source'] and i['ref'] == r['ref']), {})
     # Same name, different park ("Greenland", "VinWonders" are several): split
@@ -198,21 +220,34 @@ for r in recs:
     # Coasterpedia's location ("Tong'an, Xiamen, Fujian") splits them too, for
     # pages with no coordinates: Oriental Heritage is five parks, and before
     # this the ones without a pin all joined the first (fixed in 198).
+    # Two locations are one place when they share a town ("Gijang, Busan" and
+    # "Busan"); a 3-part location's last part is the province, which does not
+    # count ("..., Fujian" twice can be two cities).
     key = (pk,)
-    loc = sq(raw.get('location') or '') or None
+    # A "location" that is just the park's name says nothing. Coordinates on
+    # both sides decide on their own (30 km); otherwise the towns do, spelled
+    # loosely ("Gijang"/"Gijang-gun", "Cincinnati"/"Cincinatti").
+    parts = [sq(x) for x in (raw.get('location') or '').split(',') if sq(x)]
+    loc = frozenset(parts[:-1] if len(parts) >= 3 else parts) or None
+    if loc and (pk in loc or loc == {pk}): loc = None
     n = 0
     while key + (n,) in newp:
         gg = newp[key + (n,)]
-        if (loc is None or not gg['locs'] or loc in gg['locs']) and \
-           (r['lat'] is None or not gg['lats'] or km(r['lat'], r['lon'], gg['lats'][0], gg['lons'][0]) <= 30): break
+        if r['lat'] is not None and gg['lats']:
+            if km(r['lat'], r['lon'], gg['lats'][0], gg['lons'][0]) <= 30: break
+        elif loc is None or not gg['locs'] or any(same_town(a, b) for l in gg['locs'] for a in loc for b in l): break
         n += 1
-    g = newp.setdefault(key + (n,), dict(park=r['park'], coasters=collections.OrderedDict(), lats=[], lons=[], regions=collections.Counter(), locs=set()))
+    g = newp.setdefault(key + (n,), dict(park=r['park'], coasters=collections.OrderedDict(), lats=[], lons=[], regions=collections.Counter(), locs=set(), location=None, country=None))
     if loc: g['locs'].add(loc)
+    if raw.get('location') and not g['location']: g['location'] = raw['location']
+    if (raw.get('country') or r.get('country')) and not g['country']: g['country'] = raw.get('country') or r.get('country')
     if r['lat'] is not None: g['lats'].append(r['lat']); g['lons'].append(r['lon'])
     rg = region_of(raw)
     if rg: g['regions'][rg] += 1
     k = sq(r['name'])
     while k in g['coasters'] and any(x['source'] == r['source'] for x in g['coasters'][k]['refs']): k += '#'
+    # A ride that never opened is left out (Carter's rule).
+    if re.search(r'cancel', r.get('status') or raw.get('status') or '', re.I): continue
     c = g['coasters'].setdefault(k, dict(name=r['name'], status=r.get('status') or raw.get('status'), refs=[]))
     c['refs'].append(dict(source=r['source'], ref=r['ref']))
     if not c['status'] and raw.get('status'): c['status'] = raw['status']
@@ -223,13 +258,40 @@ _alive = re.compile(r'operat|construct|open|betrieb', re.I)
 class _Alive:
     def search(self, v): return None if re.search(r'not operat|nicht in betrieb|sbno', v or '', re.I) else _alive.search(v or '')
 alive = _Alive()
+# Parks whose coasters are all closed are listed too, flagged closed_only
+# (Carter, 2026-11-19: "eventually want to do closed ... everything on
+# coasterpedia").
 for g in newp.values():
     cs = list(g['coasters'].values())
-    if not any(alive.search(c['status'] or '') for c in cs): continue
-    new_parks.append(dict(park=g['park'], lat=round(sum(g['lats']) / len(g['lats']), 5) if g['lats'] else None,
-                          lon=round(sum(g['lons']) / len(g['lons']), 5) if g['lons'] else None,
-                          region=g['regions'].most_common(1)[0][0] if g['regions'] else None,
+    # Coasterpedia's location "Travelling": a showman, not a park (fairs pass).
+    if not cs or re.fullmatch(r'\s*travel+ing\s*', g['location'] or '', re.I): continue
+    lat = round(sum(g['lats']) / len(g['lats']), 5) if g['lats'] else None
+    lon = round(sum(g['lons']) / len(g['lons']), 5) if g['lons'] else None
+    pin, region = None, g['regions'].most_common(1)[0][0] if g['regions'] else None
+    if lat is None:
+        hit = PINS.get(g['park'] + '|' + (g['location'] or ''))
+        if hit and hit.get('lat') is not None:
+            lat, lon, pin = hit['lat'], hit['lon'], hit['how']
+            # A US park needs its state; the geocoder knows it.
+            if hit.get('country') == 'United States' and hit.get('state') and (region is None or region == 'US'): region = hit['state'] + ', US'
+            elif region is None and hit.get('country') and hit['country'] != 'United States': region = REGION.get(sq(hit['country']), hit['country'])
+    new_parks.append(dict(park=g['park'], lat=lat, lon=lon, pin=pin, location=g['location'], country=g['country'],
+                          closed_only=not any(alive.search(c['status'] or '') for c in cs),
+                          region=region,
                           coasters=sorted(cs, key=lambda c: (not alive.search(c['status'] or ''), c['name']))))
+# A name already on the site, or shared by two new parks, gets its town
+# ("Oriental Heritage (Xiamen)", Carter 2026-11-20), as its name; the
+# review page and tools/add-new-parks.mjs use it (source_park keeps the
+# source's own name, which park-pins.json is keyed on).
+def town_of(loc):
+    ps = [x.strip() for x in (loc or '').split(',') if x.strip()]
+    return ps[1] if len(ps) >= 3 else ps[0] if ps else None
+taken = {p.lower() for p in parks}
+cnt = collections.Counter(p['park'].lower() for p in new_parks)
+for p in new_parks:
+    if p['park'].lower() in taken or cnt[p['park'].lower()] > 1:
+        t = town_of(p['location'])
+        if t and sq(t) not in sq(p['park']): p['source_park'], p['park'] = p['park'], p['park'] + ' (' + t + ')'
 new_parks.sort(key=lambda p: (-sum(1 for c in p['coasters'] if alive.search(c['status'] or '')), p['park']))
 print('new parks', len(new_parks), 'with', sum(len(p['coasters']) for p in new_parks), 'coasters')
 

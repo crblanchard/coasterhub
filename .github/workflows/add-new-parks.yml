@@ -16,6 +16,10 @@ on:
         description: 'Type ADD to add them to the live site (anything else = dry run)'
         required: false
         default: ''
+      closed:
+        description: 'Also add closed coasters and closed-only parks (yes/no)'
+        required: false
+        default: 'no'
       spec:
         description: 'Optional: a JSON file of apply bodies to send instead (e.g. tools/open-data/split-198.json)'
         required: false
@@ -49,8 +53,9 @@ jobs:
         env:
           CONFIRM: ${{ inputs.confirm }}
           SPEC: ${{ inputs.spec }}
+          CLOSED: ${{ inputs.closed }}
         run: |
-          extra=""; if [ -n "$SPEC" ]; then case "$SPEC" in tools/open-data/*.json) extra="--spec $SPEC";; *) echo "::error::spec must be tools/open-data/*.json"; exit 1;; esac; fi
+          extra=""; [ "$CLOSED" = "yes" ] && extra="--closed"; if [ -n "$SPEC" ]; then case "$SPEC" in tools/open-data/*.json) extra="$extra --spec $SPEC";; *) echo "::error::spec must be tools/open-data/*.json"; exit 1;; esac; fi
           if [ "$CONFIRM" = "ADD" ]; then node tools/add-new-parks.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/add.sql" $extra
           else node tools/add-new-parks.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/add.sql" --dry $extra; fi
       - name: Apply to the live database
