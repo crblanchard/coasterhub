@@ -12,6 +12,15 @@ Carter's own coordinates (134); 16 more were looked up from Wikipedia / USGS
 - E-World (Daegu; by 83 Tower) — 166
 - Oriental Heritage (Wuhu) (Jiujiang district, by Huizhou Rd / Chizhushan E Rd; no source had a pin) — 198
 - Tom Foolerys Adventure Park (Round Rock) (at the Kalahari resort, Round Rock TX; no source had a pin) — 200
+- Coco Park (Douar Alaoui) (Morocco; pinned at Fès) — 202
+- Dream Park (Amman) (Jordan; pinned at the city) — 202
+- Eden Park (Rome) (pinned at the city) — 202
+- Fantasy Island (Canvey Island) (Essex; pinned at the island) — 202
+- Fantawild Land (Xiaogan) (Hubei; pinned at the city) — 202
+- Happy World (Nanjing) (Pukou district) — 202
+- MagicLand (Krasnoyarsk) (pinned at the city) — 202
+- VinWonders (Nha Trang) (Hòn Tre island) — 202
+- VinWonders (Phú Quốc) (north Phú Quốc) — 202
 - Zygo Park (Nice, 1987-1991) — 166
 
 Travelling fairs (Butler Amusements, the "… Family" operators, Oscar Bruch …)

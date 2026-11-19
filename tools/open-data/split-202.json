@@ -1,0 +1,4 @@
+[
+  {"kind": "add", "park": "Peppa Pig Theme Park (Winter Haven)", "name": "Daddy Pig's Roller Coaster", "refs": [{"source": "coasterpedia", "ref": "Daddy Pig's Roller Coaster (Florida)"}]},
+  {"kind": "add", "park": "Fantawild Land (Xiaogan)", "name": "Puppy Coaster", "refs": [{"source": "coasterpedia", "ref": "Puppy Coaster (Fantawild Land Hubei)"}]}
+]
