@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<!-- Add to home screen (2026-09-27): opens full-screen with its own icon. See site.webmanifest. -->
+<link rel="manifest" href="/site.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coaster Hub">
+<base href="/">
+<title>Sources — Coaster Hub</title>
+<meta name="description" content="Where Coaster Hub&rsquo;s coaster data comes from: Coasterpedia, Wikidata and OpenStreetMap, with live counts of every stat from each.">
+<link rel="stylesheet" href="/style.css?v=20261118a">
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
+<link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png?v=20260924b" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260924b">
+<meta property="og:title" content="Sources — Coaster Hub">
+<meta property="og:description" content="Where Coaster Hub&rsquo;s coaster data comes from: Coasterpedia, Wikidata and OpenStreetMap, with live counts of every stat from each.">
+<meta property="og:image" content="https://coasterhub.org/og-image.png?v=4">
+<style>
+  /* /sources (2026-11-19): where Coaster Hub's coaster data comes from, with
+     live counts from coaster_sources (/api/sources). Public: Coasterpedia's
+     CC BY-SA and OpenStreetMap's ODbL both ask for visible credit, and this is
+     where it is given. The weekly review lives at /sources/review (unlisted). */
+  .src{max-width:860px}
+  .src h2{font-size:1.2rem;margin:34px 0 8px}
+  .src p{line-height:1.6;margin:0 0 12px}
+  .src .muted{color:var(--muted);font-size:.92rem}
+  .tiles3{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:4px 0 8px}
+  .tiles3 div{padding:14px 16px;border-left:1px solid var(--line)}
+  .tiles3 div:first-child{border-left:0}
+  .tiles3 b{display:block;font-size:1.6rem;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;line-height:1.15}
+  .tiles3 span{color:var(--muted);font-size:.85rem}
+  .bar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--well);margin:12px 0 6px}
+  .bar i{display:block;height:100%}
+  .legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.85rem;color:var(--muted)}
+  .legend em{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .cards{display:grid;gap:12px;margin:8px 0}
+  .card{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--panel)}
+  .card h3{margin:0 0 4px;font-size:1.05rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .card h3 em{display:inline-block;width:12px;height:12px;border-radius:4px}
+  .card h3 .lic{font-size:.72rem;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+  .card p{font-size:.94rem;margin:6px 0}
+  .card .nums{font-size:.9rem;color:var(--muted)}
+  .card .nums b{color:var(--fg);font-variant-numeric:tabular-nums}
+  .card a{color:var(--accent2)}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  table{border-collapse:collapse;width:100%;font-size:.88rem}
+  thead th{background:var(--well);color:var(--muted);text-align:right;padding:9px 10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.68rem;border-bottom:1px solid var(--line);white-space:nowrap}
+  thead th:first-child{text-align:left}
+  tbody td{padding:9px 10px;border-bottom:1px solid var(--soft);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tbody td:first-child{text-align:left;font-weight:600}
+  tbody tr:last-child td{border-bottom:0}
+  td.z{color:var(--muted)}
+  @media (max-width:560px){ .tiles3 div{padding:12px} .tiles3 b{font-size:1.25rem} }
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260924b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="riders">Home</a>
+    <a href="/explore" data-nav="explore">Explore</a>
+    <a href="/log" data-nav="log" class="navlog">+ Log</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/account" data-nav="profile">Me</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+<section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
+  <h1 class="wide">Sources</h1>
+  <p>Where the coaster data on Coaster Hub comes from.</p>
+</div></section>
+
+<section class="block" style="padding-top:22px"><div class="container src">
+  <p>Every coaster stat on Coaster Hub (height, speed, length, inversions, ride time, maker, model, opening and closing dates) comes from open data that anyone can reuse, or was entered by hand. Each value records which source it came from. The open sources are checked again every week, so new and corrected information arrives on its own.</p>
+
+  <div id="loading" class="muted">Loading the counts…</div>
+  <div id="ui" hidden>
+    <div class="tiles3">
+      <div><b id="t-stats"></b><span>stats on the site</span></div>
+      <div><b id="t-open"></b><span>from open sources</span></div>
+      <div><b id="t-manual"></b><span>entered by hand</span></div>
+    </div>
+    <div class="bar" id="bar"></div>
+    <div class="legend" id="legend"></div>
+
+    <h2>The sources</h2>
+    <div class="cards" id="cards"></div>
+
+    <h2>Stat by stat</h2>
+    <p class="muted">How many coasters have each stat, and where those values came from.</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr id="fhead"></tr></thead>
+      <tbody id="fbody"></tbody>
+    </table></div>
+    <p class="muted" id="refreshed" style="margin-top:12px"></p>
+  </div>
+
+  <h2>Spotted something wrong or missing?</h2>
+  <p>The best fix helps everyone: correct it on <a href="https://coasterpedia.net" style="color:var(--accent2)">Coasterpedia</a> or <a href="https://www.wikidata.org" style="color:var(--accent2)">Wikidata</a>, citing the park&rsquo;s own page or a news article, and it reaches Coaster Hub with the next weekly update.</p>
+</div></section>
+
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/sources">Sources</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
+</div></footer>
+
+<script src="/app.js?v=20261118a"></script>
+<script>
+document.getElementById('y').textContent = new Date().getFullYear();
+CoasterHub.initNav('sources');
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n || 0).toLocaleString('en-US');
+const pct = (a, b) => b ? Math.round(a * 100 / b) : 0;
+const NAMES = { manu: 'Maker', model: 'Model', type: 'Steel / wood', h: 'Height', s: 'Speed', l: 'Length',
+  inv: 'Inversions', dur: 'Ride time', opened: 'Opened', closed: 'Closed' };
+// The colours read as one system: open sources in the site's blues and teals,
+// hand-entered in the warm accent, fair rides in a neutral.
+const S = [
+  { k: 'coasterpedia', name: 'Coasterpedia', color: 'var(--accent2)', lic: 'CC BY-SA 4.0', url: 'https://coasterpedia.net',
+    about: 'A wiki about roller coasters written by enthusiasts, with an information box for each ride. The main source for most stats here.',
+    credit: 'Content from Coasterpedia is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0</a> licence.' },
+  { k: 'wikidata', name: 'Wikidata', color: '#2e9b8f', lic: 'CC0', url: 'https://www.wikidata.org',
+    about: 'The free knowledge base behind Wikipedia. Used where Coasterpedia has no value, and to confirm the ones it has.',
+    credit: 'Wikidata is released into the public domain (<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>).' },
+  { k: 'osm', name: 'OpenStreetMap', color: '#7a8fc2', lic: 'ODbL', url: 'https://www.openstreetmap.org',
+    about: 'The free, volunteer-made map of the world. Mostly where a coaster is, with an occasional stat.',
+    credit: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, available under the Open Database Licence.' },
+  { k: 'fair', name: 'Travelling fairs', color: 'var(--line)', lic: 'entered by hand',
+    about: 'Coasters that tour with fairs and showmen, entered by hand from the fairs&rsquo; own listings.' },
+  { k: 'manual', name: 'Entered by hand', color: 'var(--accent)', lic: 'manual',
+    about: 'Values kept from before the open data, or typed in by hand where no open source has them yet: mostly models, steel or wood, and closing dates. Each one will be linked to the park&rsquo;s official page or a similar source.' },
+];
+fetch('/api/sources').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
+  $('loading').hidden = true; $('ui').hidden = false;
+  const total = Object.values(d.bySource).reduce((a, b) => a + b, 0);
+  const openN = (d.bySource.coasterpedia || 0) + (d.bySource.wikidata || 0) + (d.bySource.osm || 0);
+  $('t-stats').textContent = fmt(total);
+  $('t-open').textContent = fmt(openN) + ' (' + pct(openN, total) + '%)';
+  $('t-manual').textContent = fmt(d.bySource.manual) + ' (' + pct(d.bySource.manual, total) + '%)';
+  $('bar').innerHTML = S.map(s => '<i style="background:' + s.color + ';width:' + ((d.bySource[s.k] || 0) * 100 / (total || 1)) + '%" title="' + s.name + '"></i>').join('');
+  $('legend').innerHTML = S.filter(s => d.bySource[s.k]).map(s => '<span><em style="background:' + s.color + '"></em>' + s.name + ' · ' + fmt(d.bySource[s.k]) + '</span>').join('');
+  $('cards').innerHTML = S.map(s => '<div class="card"><h3><em style="background:' + s.color + '"></em>'
+    + (s.url ? '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.name + '</a>' : s.name) + '<span class="lic">' + s.lic + '</span></h3>'
+    + '<p>' + s.about + '</p>'
+    + '<p class="nums"><b>' + fmt(d.bySource[s.k]) + '</b> stats on the site' + (d.linked[s.k] ? ' · <b>' + fmt(d.linked[s.k]) + '</b> coasters linked' : '') + '</p>'
+    + (s.credit ? '<p class="nums">' + s.credit + '</p>' : '') + '</div>').join('');
+  const cols = S.filter(s => d.bySource[s.k]);
+  const SHORT = { coasterpedia: 'Coasterpedia', wikidata: 'Wikidata', osm: 'OSM', fair: 'Fairs', manual: 'By hand' };
+  $('fhead').innerHTML = '<th>Stat</th><th>Coasters</th>' + cols.map(s => '<th>' + SHORT[s.k] + '</th>').join('');
+  $('fbody').innerHTML = d.fieldOrder.map(f => { const x = d.fields[f];
+    return '<tr><td>' + NAMES[f] + '</td><td>' + fmt(x.filled) + ' <span class="z">(' + pct(x.filled, d.coasters) + '%)</span></td>'
+      + cols.map(s => '<td' + (x.bySource[s.k] ? '' : ' class="z"') + '>' + (x.bySource[s.k] ? fmt(x.bySource[s.k]) : '–') + '</td>').join('') + '</tr>'; }).join('');
+  if (d.refreshed) $('refreshed').textContent = 'Open sources last checked ' + d.refreshed + '. ' + fmt(d.coasters) + ' coasters on the site.';
+}).catch(() => { $('loading').textContent = 'The counts could not be loaded right now.'; });
+</script>
+</body>
+</html>

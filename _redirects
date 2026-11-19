@@ -93,10 +93,12 @@
 # site — served straight from coasters.html, so it has no rule.)
 /user/:name/coasters  /user/:name/credits?view=list  301
 
-# The open-dataset dashboards (2026-11-18/19) became one page, /cutover
-# (2026-11-19). The old addresses settle on it.
-/sources              /cutover      301
-/open-compare         /cutover      301
-/open-cleanup         /cutover      301
-/open-review          /cutover      301
-/open-cutover         /cutover      301
+# The open-dataset dashboards (2026-11-18/19) became /cutover, and after the
+# switch /cutover's weekly review moved to /sources/review; /sources itself is
+# the public page about where the data comes from (2026-11-19).
+/sources/review       /sources-review 200
+/cutover              /sources/review 301
+/open-compare         /sources/review 301
+/open-cleanup         /sources/review 301
+/open-review          /sources/review 301
+/open-cutover         /sources/review 301

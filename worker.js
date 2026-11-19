@@ -1695,6 +1695,31 @@ async function getPostLaunch(env) {
                      adds: addList.filter(a => !a.status || /operat|construct/i.test(a.status)).length, nosource: nosource.length } };
 }
 
+// /sources (2026-11-19): where every stat on the site comes from, live.
+// coaster_sources says, per coaster and field, which source supplied the value
+// shown (written by the switch and by every approval since). "manual" is a
+// value kept from before or typed by hand; Carter means to give those an
+// official park page as their source later.
+async function getSourcesSummary(env) {
+  const q = (sql) => env.DB.prepare(sql).all().then(r => r.results).catch(() => []);
+  const [byField, coasters, links, refreshed] = await Promise.all([
+    q("SELECT s.field, s.source, COUNT(*) AS n FROM coaster_sources s JOIN coasters c ON c.id = s.coaster_id GROUP BY s.field, s.source"),
+    env.DB.prepare("SELECT COUNT(*) AS n, " + OPEN_FIELDS.map(f => "SUM(" + f + " IS NOT NULL AND " + f + " <> '') AS " + f).join(", ") + " FROM coasters").first(),
+    q("SELECT l.source, COUNT(DISTINCT l.coaster_id) AS n FROM open_links l JOIN coasters c ON c.id = l.coaster_id GROUP BY l.source"),
+    env.DB.prepare("SELECT MAX(retrieved) AS d FROM open_facts").first().catch(() => null),
+  ]);
+  const fields = {};
+  for (const f of OPEN_FIELDS) fields[f] = { filled: coasters ? +coasters[f] || 0 : 0, bySource: {} };
+  const bySource = {};
+  for (const r of byField) {
+    if (!fields[r.field]) continue;
+    fields[r.field].bySource[r.source] = r.n;
+    bySource[r.source] = (bySource[r.source] || 0) + r.n;
+  }
+  return { coasters: coasters ? coasters.n : 0, fieldOrder: OPEN_FIELDS, fields, bySource,
+           linked: Object.fromEntries(links.map(l => [l.source, l.n])), refreshed: refreshed ? refreshed.d : null };
+}
+
 // Approvals after the switch. These write to the live site.
 //   {kind:'value', id, field, source}   take that source's value for the coaster
 //   {kind:'skip', id, field, source, value}  leave the site's as it is
@@ -2897,6 +2922,12 @@ export default {
       // switch. Read only; nothing the site shows reads these tables yet.
       // After the switch: what to review (read only). Approvals go to POST
       // /api/cutover/apply, which writes to the live coasters (admins).
+      // /sources: counts of where the live stats come from. Public, cached.
+      if (request.method === "GET" && path === "/api/sources") {
+        try { await env.DB.prepare("SELECT 1 FROM coaster_sources LIMIT 1").first(); }
+        catch (e) { return err(503, "the switch has not run yet"); }
+        return edgePut(ctx, request, json(await getSourcesSummary(env), 200, LIST_CACHE));
+      }
       if (request.method === "GET" && path === "/api/cutover/review") {
         try { await env.DB.prepare("SELECT 1 FROM coaster_sources LIMIT 1").first(); }
         catch (e) { return err(503, "the switch has not run yet"); }

@@ -274,7 +274,8 @@ createServer(async (req, res) => {
   if (p === "/home" || p === "/riders") { res.writeHead(301, { location: "/" }); res.end(); return; }
   if (p === "/database") { res.writeHead(301, { location: "/qc" }); res.end(); return; }
   if (p === "/rankings/all") { res.writeHead(301, { location: "/rankings" }); res.end(); return; }
-  if (["/sources", "/open-compare", "/open-cleanup", "/open-review", "/open-cutover"].includes(p)) { res.writeHead(301, { location: "/cutover" }); res.end(); return; }
+  if (["/cutover", "/open-compare", "/open-cleanup", "/open-review", "/open-cutover"].includes(p)) { res.writeHead(301, { location: "/sources/review" }); res.end(); return; }
+  if (p === "/sources/review") p = "/sources-review.html";
   if (p === "/qc/models") p = "/qc-models.html";
   // A park page, and a coaster at it. Two placeholders where the rider rules
   // have one, and the longer match has to be tested first for the same reason

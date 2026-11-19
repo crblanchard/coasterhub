@@ -6335,6 +6335,14 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   "(Old)", years). Picks are open_choices field 'name': source 'manual' for
   ours kept or typed, else the source whose name was taken. Unpicked names
   keep ours at the switch.
+- **/sources is public again (2026-11-19)**: what each source is, its licence
+  (Coasterpedia CC BY-SA and OSM ODbL need visible credit; this page gives
+  it), and live counts from `/api/sources` (coaster_sources by source and
+  field). Linked in every footer and the sitemap. Carter wants the 'manual'
+  values linked to official park pages later: that needs a ref per value
+  (coaster_sources.ref is there for it). The weekly review moved from /cutover
+  to **/sources/review** (sources-review.html; /cutover and the older
+  addresses 301 there).
 - **/cutover after the switch = "Coaster data", the weekly review page
   (2026-11-19).** `/api/cutover/review` (`getPostLaunch`) lists: gaps (a live
   stat blank that an open source has), changed (the best open source
