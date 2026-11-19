@@ -1,0 +1,78 @@
+name: Switch to the open dataset
+
+# THE SWITCH (2026-11-19), run here because nothing else that can reach the
+# live database can run worker.js. Carter: "You can just do it ... But PLEASE
+# back stuff up!!"
+#
+#   1. Export the whole live database (wrangler d1 export), the same export the
+#      nightly backup takes, to the runner only: this repo is public and its
+#      logs and artifacts are too, and the export holds emails and password
+#      hashes, so it is never printed or uploaded. Run the Nightly backup
+#      action first for a copy in the private backups repo.
+#   2. tools/cutover-run.mjs runs the real Worker's switch against that export
+#      in node:sqlite and records every write as SQL. The first statements are
+#      the switch's own backups: CREATE TABLE <table>_rcdb_backup AS SELECT ...
+#   3. Apply that SQL to the live database.
+#
+# dry = true stops after step 2 and only prints the summary. The switch refuses
+# to run twice (coasters_rcdb_backup exists). migrations/194 undoes it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type SWITCH to change the live database (anything else = dry run)'
+        required: false
+        default: ''
+
+concurrency:
+  group: cutover
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  switch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Export the live database (kept on the runner only)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if ! npx --yes wrangler@4 d1 export coasterhub --remote --output "$RUNNER_TEMP/live.sql" > "$RUNNER_TEMP/wrangler.log" 2>&1; then
+            tail -n 20 "$RUNNER_TEMP/wrangler.log" | sed -E 's#https?://[^ ]+#[link removed]#g'
+            echo "::error::export failed"; exit 1
+          fi
+          grep -q "INSERT INTO" "$RUNNER_TEMP/live.sql" || { echo "::error::export has no rows"; exit 1; }
+          echo "Export: $(wc -c < "$RUNNER_TEMP/live.sql") bytes"
+
+      - name: Run the switch on a copy
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" = "SWITCH" ]; then
+            node tools/cutover-run.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/switch.sql"
+          else
+            node tools/cutover-run.mjs "$RUNNER_TEMP/live.sql" "$RUNNER_TEMP/switch.sql" --dry
+          fi
+
+      - name: Apply it to the live database
+        if: ${{ inputs.confirm == 'SWITCH' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          head -n 9 "$RUNNER_TEMP/switch.sql"
+          if ! npx --yes wrangler@4 d1 execute coasterhub --remote --yes --file "$RUNNER_TEMP/switch.sql" > "$RUNNER_TEMP/apply.log" 2>&1; then
+            tail -n 20 "$RUNNER_TEMP/apply.log" | sed -E 's#https?://[^ ]+#[link removed]#g'
+            echo "::error::applying the switch failed"; exit 1
+          fi
+          tail -n 6 "$RUNNER_TEMP/apply.log" | sed -E 's#https?://[^ ]+#[link removed]#g'
