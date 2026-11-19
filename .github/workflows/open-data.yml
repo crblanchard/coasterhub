@@ -103,7 +103,10 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -qm "Open dataset: weekly Wikidata refresh"
-            git pull -q --rebase origin main && git push -q origin HEAD:main
+            # A refresh that finished meanwhile touched the same generated
+            # files: this run is the newer, so its copy wins (2026-11-19: a
+            # run lost 50 minutes of park pins to a rebase conflict).
+            git pull -q --rebase -X theirs origin main && git push -q origin HEAD:main
           fi
 
       - name: Pick the file
