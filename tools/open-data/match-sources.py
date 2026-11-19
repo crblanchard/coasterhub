@@ -210,6 +210,17 @@ by = collections.defaultdict(lambda: collections.defaultdict(list))   # source -
 for it in items:
     for n in it['names']: by[it['source']][n].append(it)
 
+# A chain's parks share a name ("Peppa Pig Theme Park" is Florida and Texas,
+# "Happy Valley" seven cities): a record is NOT at our park when its
+# coordinates are 30+ km away, or when our park carries its town ("Happy
+# Valley (Wuhan)") and the record's location names another (2026-11-19).
+def town_in(park):
+    m = re.search(r'\(([^)]+)\)\s*$', park or '')
+    return sq(m.group(1)) if m else None
+def elsewhere(it, park, pk):
+    if it['lat'] is not None and pk.get('lat') is not None and km(it['lat'], it['lon'], pk['lat'], pk['lon']) > 30: return True
+    t, loc = town_in(park), sq((it.get('raw') or {}).get('location') or '')
+    return bool(t and loc and t not in loc and sq(base(park)) in it['parks'])
 found = collections.defaultdict(list)   # (source, ref) -> [(coaster, method)]
 for c in coasters:
     names = {sq(c['name']), sq(base(c['name']))} | {sq(n) for n in alias_by_c.get(c['id'], [])}
@@ -219,6 +230,7 @@ for c in coasters:
         best = None
         for n in names:
             for it in by[src].get(n, []):
+                if elsewhere(it, c['park'], pk): continue
                 if it['parks'] & pnames or any(p in x or x in p for p in pnames for x in it['parks'] if len(x) > 5 and len(p) > 5):
                     best = (it, 'name+park'); break
                 if it['lat'] is not None and pk.get('lat') is not None and km(it['lat'], it['lon'], pk['lat'], pk['lon']) <= 3:

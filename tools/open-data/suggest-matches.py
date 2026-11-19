@@ -57,7 +57,7 @@ for i in src['items']:
     names = [i['name']] + [v for k, v in raw.items() if re.fullmatch(r'name\d|old_name|alt_name|name:en', k)]
     recs.append(dict(source=i['source'], ref=i['ref'], name=i['name'], names=[n for n in names if n], park=i['park'],
                      parks={sq(i['park'])} - {''} if i['park'] else set(), lat=i['lat'], lon=i['lon'],
-                     wikidata=raw.get('wikidata'), status=raw.get('status'), country=raw.get('country')))
+                     wikidata=raw.get('wikidata'), status=raw.get('status'), country=raw.get('country'), location=raw.get('location')))
 
 # ---- what is linked already -------------------------------------------------
 linked = collections.defaultdict(dict)        # source -> ref -> coaster ids
@@ -95,7 +95,17 @@ CC = {'usa': 'us', 'unitedstates': 'us', 'unitedstatesofamerica': 'us', 'uk': 'u
 def country(v):
     if not v: return None
     v = sq(v.split(',')[-1]); return CC.get(v, v)
+# A chain's parks carry their town ("Happy Valley (Wuhan)"): a record whose
+# location names another town is at another of them (2026-11-19).
+def other_town(r, p):
+    m = re.search(r'\(([^)]+)\)\s*$', p)
+    loc = sq(r.get('location') or '')
+    return bool(m and loc and sq(m.group(1)) not in loc and sq(re.sub(r'\s*\([^)]*\)\s*$', '', p)) in r['parks'])
+def chain_park(r, p):
+    m = re.search(r'\(([^)]+)\)\s*$', p)
+    return bool(m and sq(m.group(1)) in sq(r.get('location') or '') and sq(re.sub(r'\s*\([^)]*\)\s*$', '', p)) in r['parks'])
 def other_country(r, p):
+    if other_town(r, p): return True
     a, b = country(r.get('country')), country((parks.get(p) or {}).get('region'))
     return bool(a and b and a != b)
 def at_park(r, p):
@@ -143,7 +153,7 @@ for r in recs:
         # Stricter than for suggestions: the park's own name exactly, or
         # within 2 km ("Luna Park" must not take Luna Park Cap d'Agde's rides).
         far = r['lat'] is not None and pk.get('lat') is not None and km(r['lat'], r['lon'], pk['lat'], pk['lon']) > 30
-        if r['parks'] & park_names(p) and not far and not other_country(r, p): d = 0
+        if (r['parks'] & park_names(p) or chain_park(r, p)) and not far and not other_country(r, p): d = 0
         elif r['lat'] is not None and pk.get('lat') is not None:
             d = km(r['lat'], r['lon'], pk['lat'], pk['lon'])
             if d > 2: continue
@@ -283,14 +293,18 @@ for g in newp.values():
 # ("Oriental Heritage (Xiamen)", Carter 2026-11-20), as its name; the
 # review page and tools/add-new-parks.mjs use it (source_park keeps the
 # source's own name, which park-pins.json is keyed on).
-def town_of(loc):
+def town_of(loc, country=None):
+    # "District, City, Province" -> City; in China, Korea and Japan a 2-part
+    # location is "District, City" too ("Songjiang, Shanghai" -> Shanghai).
     ps = [x.strip() for x in (loc or '').split(',') if x.strip()]
-    return ps[1] if len(ps) >= 3 else ps[0] if ps else None
+    if len(ps) >= 3: return ps[1]
+    if len(ps) == 2 and sq(country or '') in ('china', 'peoplesrepublicofchina', 'southkorea', 'korea', 'japan', 'taiwan'): return ps[1]
+    return ps[0] if ps else None
 taken = {p.lower() for p in parks}
 cnt = collections.Counter(p['park'].lower() for p in new_parks)
 for p in new_parks:
     if p['park'].lower() in taken or cnt[p['park'].lower()] > 1:
-        t = town_of(p['location'])
+        t = town_of(p['location'], p.get('country'))
         if t and sq(t) not in sq(p['park']): p['source_park'], p['park'] = p['park'], p['park'] + ' (' + t + ')'
 new_parks.sort(key=lambda p: (-sum(1 for c in p['coasters'] if alive.search(c['status'] or '')), p['park']))
 print('new parks', len(new_parks), 'with', sum(len(p['coasters']) for p in new_parks), 'coasters')

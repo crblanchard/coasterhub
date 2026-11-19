@@ -11,6 +11,7 @@ Carter's own coordinates (134); 16 more were looked up from Wikipedia / USGS
 - Playcenter São Paulo (closed 2012; site by the Marginal Tietê) — 164
 - E-World (Daegu; by 83 Tower) — 166
 - Oriental Heritage (Wuhu) (Jiujiang district, by Huizhou Rd / Chizhushan E Rd; no source had a pin) — 198
+- Tom Foolerys Adventure Park (Round Rock) (at the Kalahari resort, Round Rock TX; no source had a pin) — 200
 - Zygo Park (Nice, 1987-1991) — 166
 
 Travelling fairs (Butler Amusements, the "… Family" operators, Oscar Bruch …)
