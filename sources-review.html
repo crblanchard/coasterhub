@@ -88,7 +88,8 @@
   table.mini{font-size:.8rem;border-collapse:collapse;width:auto}
   table.mini th,table.mini td{padding:3px 12px 3px 0;text-align:left;border:0;white-space:nowrap;font-weight:400}
   table.mini th{color:var(--muted)}
-  .act{display:flex;gap:8px;flex-wrap:wrap}
+  .act{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .act select.same-as{max-width:220px}
   .parkhead{margin:14px 0 2px;padding:10px 14px;border-left:3px solid var(--accent2);background:var(--well);border-radius:0 10px 10px 0}
   .parkhead b{display:block;font-size:.95rem}
   .parkhead small{color:var(--muted);font-size:.8rem;line-height:1.7}
@@ -242,6 +243,26 @@ function parkHead(park) {
     + '<span class="yr">' + (c.closed ? ' closed ' + esc(String(c.closed).slice(0, 4)) : (c.yr || c.opened ? ' ' + esc(String(c.yr || c.opened).slice(0, 4)) : '')) + '</span>';
   return '<div class="parkhead"><b>' + esc(park) + '</b><small>' + (cs.length ? 'Already on the site (' + cs.length + '): ' + cs.map(one).join(' · ') : 'No coasters on the site yet') + '</small></div>';
 }
+// "Same ride as..." on a New coasters card (Carter, 2026-11-19: "allow me to
+// link it to another coaster ... thirteen and th13teen at Alton Towers are
+// the same"): links every source page on the card to that coaster, and the
+// card leaves the list.
+function sameAs(a) {
+  const cs = (BYPARK[a.park] || []).slice().sort((x, y) => x.name.localeCompare(y.name));
+  if (!cs.length) return '';
+  return '<select class="same-as" data-refs="' + esc(JSON.stringify(a.refs.map(r => ({ source: r.source, ref: r.ref })))) + '" data-name="' + esc(a.name) + '">'
+    + '<option value="">Same ride as…</option>' + cs.map(c => '<option value="' + c.id + '">' + esc(c.name) + (c.closed ? ' (closed ' + esc(String(c.closed).slice(0, 4)) + ')' : '') + '</option>').join('') + '</select>';
+}
+document.addEventListener('change', e => {
+  const s = e.target.closest('select.same-as'); if (!s || !s.value) return;
+  const label = s.options[s.selectedIndex].textContent, refs = JSON.parse(s.dataset.refs);
+  if (!confirm(s.dataset.name + ' is the same ride as ' + label + '?\n\nIts source pages will be linked to ' + label + ' and nothing new is added.')) { s.value = ''; return; }
+  const cid = +s.value;
+  const many = refs.map(r => ({ kind: 'match', source: r.source, ref: r.ref, coaster_id: cid, decision: 'approve' }))
+    .concat([{ kind: 'add', source: refs[0].source, ref: refs[0].ref, decision: 'reject', note: 'same ride as #' + cid }]);
+  s.disabled = true;
+  after(post('/api/open-review', { many }), null).finally(() => { s.disabled = false; });
+});
 function load() { return fetch('/api/cutover/review', { cache: 'no-store' }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(j.error || r.status))); }
 load().then(d => {
   D = d; $('loading').hidden = true; $('ui').hidden = false;
@@ -330,7 +351,8 @@ const VIEW = {
       + '<div class="why">' + a.refs.filter(r => LINK[r.source]).map(r => '<a class="go" href="' + LINK[r.source](r.ref) + '" target="_blank" rel="noopener">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ')
       + (a.refs.every(r => r.source === 'osm') ? ' · <span class="bad">only in OpenStreetMap, which sometimes labels water rides and play equipment as coasters</span>' : '') + '</div></div>'
       + '<div class="act">' + btn('Add to the site', { a: 'add', park: a.park, name: RENAME[akey(a)] || a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'yes')
-      + btn('Leave out', { a: 'noadd', park: a.park, name: a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'no') + '</div></div>').join('') + '</div>',
+      + btn('Leave out', { a: 'noadd', park: a.park, name: a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'no')
+      + sameAs(a) + '</div></div>').join('') + '</div>',
   newParks: list => '<div class="cards">' + list.map((p, i) => {
     const alive = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || '') && /operat|construct|open|betrieb/i.test(c.status || '');
     return '<div class="card np" data-k="' + esc(p.k) + '">'
