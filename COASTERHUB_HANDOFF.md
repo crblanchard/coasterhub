@@ -6460,3 +6460,13 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   missing-parks.md). UA "CoasterHubBot/1.0 (https://coasterhub.org)", 1 req/s.
 - add-new-parks skips a new park within 2 km of one we have (likely an old
   name, e.g. Marriott's Great America) and lists it.
+- **Closed pass done (2026-11-19 evening):** add-new-parks closed=yes added
+  562 parks / 808 coasters (1,504 parks, 3,615 coasters after). 203 cleaned
+  up: one park under two source names (Sea World / Sea World (Australia)
+  etc.), old names of our parks (Marriott's Great America), a showman.
+  Checks worth re-running after any big add: new parks within 1.2 km of
+  another; coasters whose source coordinates are 15+ km from the pin; a
+  park whose coasters' Coasterpedia locations disagree (202's comments).
+  add-new-parks now also skips a same-name park within 30 km and holds a
+  chain park with no town in its name. open-data.yml's commit uses
+  `-X theirs` after a run lost its pins to a rebase conflict.
