@@ -98,6 +98,9 @@ def country(v):
 # A chain's parks carry their town ("Happy Valley (Wuhan)"): a record whose
 # location names another town is at another of them (2026-11-19).
 def other_town(r, p):
+    # Coordinates on both sides decide on their own ("Adventureland (Iowa)"
+    # names a state, and its rides say "Altoona").
+    if r.get('lat') is not None and (parks.get(p) or {}).get('lat') is not None: return False
     m = re.search(r'\(([^)]+)\)\s*$', p)
     loc = sq(r.get('location') or '')
     return bool(m and loc and sq(m.group(1)) not in loc and sq(re.sub(r'\s*\([^)]*\)\s*$', '', p)) in r['parks'])

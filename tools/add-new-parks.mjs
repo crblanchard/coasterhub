@@ -81,6 +81,15 @@ try {
   for (const p of rv.new_parks || []) if (p.pin) PINHOW[p.park + "|" + p.coasters[0].refs[0].source + ":" + p.coasters[0].refs[0].ref] = p.pin;
 } catch {}
 const noDate = [], nearOld = [], estimated = [];
+// Chains: a new park whose name (less any "(Town)") is one we have is that
+// park when it lies within 30 km of it ("Adventureland (Altoona)" is
+// Adventureland (Iowa)), and needs its town in its name otherwise
+// ("Fantawild Adventure" at Wuhu) (2026-11-19).
+const base = n => String(n || "").replace(/\s*\([^)]*\)\s*$/, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const liveByBase = {};
+for (const q of db.prepare("SELECT name, lat, lon FROM parks").all()) (liveByBase[base(q.name)] = liveByBase[base(q.name)] || []).push(q);
+let SRCNAME = {};
+try { for (const p of JSON.parse(readFileSync("tools/open-data/review.json", "utf8")).new_parks || []) SRCNAME[p.park + "|" + p.coasters[0].refs[0].source + ":" + p.coasters[0].refs[0].ref] = p.source_park; } catch {}
 
 const latin = n => !/[^\u0000-ɏḀ-ỿ‐-‧€]/.test(n || "");
 const alive = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || "") && /operat|construct|open|betrieb/i.test(c.status || "");
@@ -95,6 +104,10 @@ for (const p of ready) {
   // name (Marriott's Great America): listed, not added.
   const by = p.lat != null && livePark.find(q => km(p.lat, p.lon, q.lat, q.lon) <= 2);
   if (by) { nearOld.push(p.park + " -> " + by.name); continue; }
+  const same = [...new Set([base(p.park), base(SRCNAME[p.k])])].flatMap(b => liveByBase[b] || []);
+  const sameNear = same.find(q => q.lat == null || p.lat == null || km(p.lat, p.lon, q.lat, q.lon) <= 30);
+  if (sameNear) { nearOld.push(p.park + " -> " + sameNear.name + " (same name)"); continue; }
+  if (same.length && !/\([^)]+\)\s*$/.test(p.park)) { failed.push(p.park + ": shares a name with " + same[0].name + "; needs its town in the name"); continue; }
   const cs = p.coasters.filter(keep).map(c => ({ name: c.name, refs: c.refs.map(r => ({ source: r.source, ref: r.ref })) }));
   if (!cs.length) continue;
   // Two ready parks with one name (VinWonders): the first goes in, the next
