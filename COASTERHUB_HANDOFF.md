@@ -6293,6 +6293,32 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   instances because a lot of those were manual from me anyways"). `OPEN_KEEP`
   in worker.js: a kept field never counts as lost and never blocks "ready";
   the switch must copy it from the current data. ~92 coasters moved to ready.
+- **/cutover is the one page now (2026-11-19).** It replaced /sources,
+  /open-compare, /open-cleanup, /open-review and /open-cutover (all 301 to it,
+  in _redirects and tools/dev-server.mjs); their GET endpoints became one,
+  `/api/cutover` (`getCutover`). The POSTs stay: /api/open-review (one decision,
+  or `{many: [...]}` for "Approve all near-certain") and /api/open-choice.
+  A tracker of four categories, each done/total, built to only go up:
+  1. Going in: coasters with an open source, a fair ride, or kept by hand;
+     done = no manual mismatch and no pending suggestion.
+  2. Changes to check: suggested links; total = pending + already decided, so
+     decided ones never drop out after a refresh regenerates open_suggestions.
+  3. Mismatches: `openMismatchState` settles by rule (2+ open sources agree ->
+     theirs; one source within 15% / same year -> keep the site's) or by pick;
+     the rest are manual. Maker aliases (`OPEN_MAKER_SAME`: Maurer
+     Söhne/Rides/AG, S&S/Sansei, RMC, PTC, Miler, Arrow Development/Huss/
+     Dynamics per Carter...) and 2-letter typos agree.
+  4. No open source: the fixed starting list `open_launch_baseline` (193; 124
+     ridden coasters on 2026-11-19); done = gained a source or kept by hand.
+  Carter's policies: stats no open source has carry over unverified (not
+  blank); models always carry over; unridden no-source coasters are left out
+  at the switch unless kept. Totals can grow when an approval brings in new
+  values that disagree; that is new information, not lost progress.
+  "To add" (open_adds, 562) is not on the page: growth for after launch.
+  **After the switch (Carter, 2026-11-19):** the weekly job should hand him a
+  list of what is new since the last run (new suggested links, new coasters
+  the sources have at our parks, new mismatches, values that changed) to
+  approve or not. Not built yet: build it with the switch.
 - **RCDB IDs hide in URLs and tags.** Wikidata's "described at URL" (P973) held
   45 rcdb.com/NNNN.htm links, and some OSM coasters carry `rcdb_id` /
   `ref:rcdb` tags; all were removed (D1 rows deleted 2026-11-18) and every

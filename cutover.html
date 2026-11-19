@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coaster Hub">
+<base href="/">
+<title>Cutover — Coaster Hub</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/style.css?v=20261118a">
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
+<link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260924b">
+<style>
+  /* /cutover (2026-11-19): the one page for getting the open dataset ready
+     to switch to. A tracker of four categories (coasters going in, changes
+     to check, mismatches, ridden coasters with no open source), each done /
+     total and only ever going up, over the list for the chosen one. It
+     replaced /sources, /open-compare, /open-cleanup, /open-review and
+     /open-cutover. Unlisted. */
+  .tracker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 10px}
+  .tracker button{text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--fg);display:grid;gap:4px}
+  .tracker button.on{border-color:var(--accent2);box-shadow:0 0 0 1px var(--accent2) inset}
+  .tracker .tt{font-size:.82rem;font-weight:600}
+  .tracker b{font-size:1.5rem;font-variant-numeric:tabular-nums;line-height:1.1}
+  .tracker b small{font-size:.9rem;color:var(--muted);font-weight:500}
+  .tracker .bar{display:block;height:7px;border-radius:999px;background:var(--well);overflow:hidden}
+  .tracker .bar i{display:block;height:100%;background:var(--accent2);border-radius:999px}
+  .tracker .full .bar i{background:var(--good,#2e9b5f)}
+  .tracker .pc{font-size:.76rem;color:var(--muted)}
+  .overall{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted);margin:0 0 6px}
+  .overall .obar{flex:1;height:5px;border-radius:999px;background:var(--well);overflow:hidden}
+  .overall .obar i{display:block;height:100%;background:var(--accent)}
+  td.vals{white-space:normal}
+  button.val{display:inline-block;margin:2px 4px 2px 0;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:9px;padding:4px 9px;font-size:.8rem;cursor:pointer}
+  button.val i{font-style:normal;color:var(--muted);font-size:.72rem;margin-right:3px}
+  button.val:hover{border-color:var(--accent2)}
+  button.val.on{border-color:var(--accent2);background:color-mix(in srgb,var(--accent2) 12%,transparent);font-weight:600}
+  button.small{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:8px;padding:3px 9px;font-size:.76rem;cursor:pointer;margin-left:4px}
+  button.link{border:0;background:none;color:var(--accent2);font-size:.78rem;cursor:pointer;padding:0}
+  td.st{white-space:normal;min-width:120px}
+  .fld{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:2px}
+  @media (max-width:560px){
+    table.mm td.nm{min-width:110px}
+    table.mm td.st{min-width:0}
+    button.val{display:block;margin:0 0 4px}
+  }
+  @media (max-width:760px){ .tracker{grid-template-columns:repeat(2,1fr)} }
+  /* Shared pieces: lists, chips, review cards, the controls row. */
+  h2{font-size:1.15rem;margin:30px 0 6px}
+  td.f{font-weight:600} td.num,th.num{text-align:right;font-variant-numeric:tabular-nums} td.diff{color:var(--bad)}
+  td.who{white-space:normal;max-width:420px} td.todo{white-space:normal}
+  .chip{display:inline-block;font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--muted);margin:1px 0}
+  .chip.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+  .chip.ok{color:var(--accent2)}
+  a.go{color:var(--accent2);font-size:.8rem}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:9px 13px;cursor:pointer}
+  .intro{color:var(--muted);font-size:.9rem;line-height:1.5;margin:0 0 14px;max-width:760px}
+  .cards{display:grid;gap:10px}
+  .card{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--panel);display:grid;gap:8px}
+  .card small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+  .card a{color:var(--fg);font-weight:600;text-decoration:none} .card a:hover{color:var(--accent2)}
+  .pair{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start}
+  .pair .arrow{color:var(--muted);padding-top:16px}
+  .lab{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:2px}
+  .src{font-size:.7rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-left:4px;font-weight:500}
+  .why{font-size:.8rem;color:var(--muted)}
+  table.mini{font-size:.8rem;border-collapse:collapse;width:auto}
+  table.mini th,table.mini td{padding:3px 12px 3px 0;text-align:left;border:0;white-space:nowrap;font-weight:400}
+  table.mini th{color:var(--muted)}
+  .act{display:flex;gap:8px;flex-wrap:wrap}
+  .act button{border-radius:10px;padding:8px 13px;font-size:.85rem;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--fg)}
+  .act .yes{background:var(--accent2);border-color:var(--accent2);color:#fff}
+  .act button:disabled{opacity:.5}
+  @media (max-width:560px){ .pair{grid-template-columns:1fr} .pair .arrow{display:none} }
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 14px}
+  .controls input[type=search],.controls select{background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:9px 12px;border-radius:10px;font-size:.9rem}
+  .controls input[type=search]{min-width:220px;flex:1}
+  .count{color:var(--muted);font-size:.85rem;margin-bottom:10px}
+  .count b{color:var(--accent2)}
+  .key{color:var(--muted);font-size:.82rem;margin:0 0 12px;display:flex;flex-wrap:wrap;gap:4px 16px}
+  .key .w{display:inline}
+  .key[hidden]{display:none}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  table{border-collapse:collapse;width:100%;font-size:.8rem}
+  thead th{position:sticky;top:0;background:var(--well);color:var(--muted);text-align:left;padding:9px 10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.66rem;border-bottom:1px solid var(--line);white-space:nowrap}
+  tbody td{padding:7px 10px;border-bottom:1px solid var(--soft);vertical-align:top;white-space:nowrap}
+  tbody tr:hover{background:var(--tint)}
+  td.nm{font-weight:600;white-space:normal;min-width:150px}
+  td.nm small{display:block;font-weight:400;color:var(--muted)}
+  td a{color:inherit;text-decoration:none} td a:hover{color:var(--accent2);text-decoration:underline}
+  .w{display:block;color:var(--accent2);font-size:.92em}
+  .w.rc{color:var(--muted)}
+  td.differ{background:color-mix(in srgb,var(--bad) 12%,transparent)}
+  td.differ .w{color:var(--bad)}
+  td.new{background:color-mix(in srgb,var(--accent2) 12%,transparent)}
+  .muted{color:var(--muted)}
+  .tag{display:inline-block;font-size:.66rem;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:4px;font-weight:500}
+  #more{margin:14px 0 0;background:transparent;border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:9px 14px;cursor:pointer}
+  #loading{color:var(--muted);padding:30px 0}
+  .sv.chosen,.w.chosen{font-weight:700}
+  .sv.chosen::after,.w.chosen::after{content:" \2713";color:var(--accent2)}
+  .w i{font-style:normal;font-size:.78em;opacity:.75;margin-right:2px}
+  .w.off{color:var(--bad)}
+  .u{color:var(--muted);font-size:.85em}
+  td.pickable{cursor:pointer}
+  td.picked{background:color-mix(in srgb,var(--accent2) 8%,transparent)}
+  td.differ .w{color:inherit} td.differ .w.off{color:var(--bad)}
+  a.unsure{color:var(--muted);font-style:italic}
+  .picker{position:fixed;z-index:50;width:250px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+  .picker .pt{font-size:.78rem;color:var(--muted);margin:0 0 8px}
+  .picker button{display:block;width:100%;text-align:left;background:transparent;border:1px solid var(--line);color:var(--fg);border-radius:9px;padding:8px 10px;margin:0 0 6px;cursor:pointer;font-size:.85rem}
+  .picker button:hover{border-color:var(--accent2)}
+  .picker button.on{border-color:var(--accent2);background:color-mix(in srgb,var(--accent2) 10%,transparent)}
+  .picker button.clr{color:var(--muted)}
+  .picker .pmsg{font-size:.78rem;color:var(--bad)}
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260924b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="riders">Home</a>
+    <a href="/explore" data-nav="explore">Explore</a>
+    <a href="/log" data-nav="log" class="navlog">+ Log</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/account" data-nav="profile">Me</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+
+<section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
+  <h1 class="wide">Cutover</h1>
+  <p>Getting the new open dataset ready. Nothing here changes the live site until the switch.</p>
+</div></section>
+
+<section class="block" style="padding-top:22px"><div class="container">
+  <div id="loading">Loading…</div>
+  <div id="ui" hidden>
+    <div class="tracker" id="tracker"></div>
+    <div class="overall"><div class="obar"><i id="obar"></i></div><span id="otext"></span></div>
+
+    <h2 id="tab-h"></h2>
+    <p class="intro" id="tab-p"></p>
+    <div class="controls">
+      <input id="q" type="search" placeholder="Search coaster or park…">
+      <select id="filt"></select>
+      <button id="bulk" class="ghost" hidden></button>
+      <button id="copy" class="ghost" hidden>Copy list</button>
+    </div>
+    <div class="count" id="count"></div>
+    <div id="list"></div>
+    <button id="more" hidden>Show more</button>
+  </div>
+</div></section>
+
+<script src="/app.js?v=20261118a"></script>
+<script>
+CoasterHub.initNav('sources');
+const NAMES = { manu: 'Maker', model: 'Model', type: 'Steel / wood', h: 'Height', s: 'Speed', l: 'Length',
+  inv: 'Inversions', dur: 'Duration', opened: 'Opened', closed: 'Closed' };
+const UNITS = { h: ' ft', l: ' ft', s: ' mph', dur: ' s' };
+const SRC = { site: 'Site now', wikidata: 'Wikidata', coasterpedia: 'Coasterpedia', osm: 'OpenStreetMap' };
+const LINK = {
+  wikidata: r => 'https://www.wikidata.org/wiki/' + r,
+  coasterpedia: r => 'https://coasterpedia.net/wiki/' + encodeURIComponent(r.replace(/ /g, '_')),
+  osm: r => 'https://www.openstreetmap.org/' + r,
+};
+const TABS = {
+  going: { t: '1. Going in', h: 'Coasters going in',
+    p: 'Every coaster going into the new dataset. Ready means nothing is left to settle for it. Stats no open source has carry over from the current data, marked unverified.',
+    f: [['todo', 'Not ready yet'], ['ready', 'Ready'], ['gaps', 'Has unverified stats'], ['', 'All']] },
+  changes: { t: '2. Changes to check', h: 'Changes to check',
+    p: 'Matches the automatic matching wasn&rsquo;t sure about. Approve if the open-source record is the same ride; its stats then join the new dataset.',
+    f: [['todo', 'To decide'], ['sure', 'Near-certain'], ['look', 'Needs a look'], ['done', 'Decided']] },
+  mismatch: { t: '3. Mismatches', h: 'Mismatches',
+    p: 'Values that disagree between the site now and the open sources. The rule settles most: two sources agreeing win, and a small difference keeps the current value. Click a value to choose it instead.',
+    f: [['todo', 'To choose'], ['auto', 'Settled by the rule'], ['picked', 'Chosen by you'], ['', 'All']] },
+  nosource: { t: '4. No open source', h: 'Ridden coasters with no open source',
+    p: 'Coasters riders have on their lists that no open source covers. Find each one on Coasterpedia or Wikidata (citing a park page or news article, not RCDB), or keep it to enter by hand, so nobody&rsquo;s list changes at the switch.',
+    f: [['todo', 'To find'], ['done', 'Found or kept'], ['', 'All'], ['out', 'Not ridden: leaving out']] },
+};
+const $ = id => document.getElementById(id);
+const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = n => Number(n).toLocaleString('en-US');
+const pct = (a, b) => b ? Math.floor(a * 100 / b) : 100;
+const val = (f, v) => v == null ? '–' : esc(v) + (UNITS[f] && /^[\d.]+$/.test(String(v)) ? '<span class="u">' + UNITS[f] + '</span>' : '');
+const sure = c => /Wikidata item/.test(c.reason) || c.score >= 0.95;
+let D, tab = 'changes', LIMIT = 100, LIST = [];
+
+function load() { return fetch('/api/cutover', { cache: 'no-store' }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(j.error || r.status))); }
+load().then(d => {
+  D = d;
+  $('loading').hidden = true; $('ui').hidden = false;
+  const h = location.hash.slice(1);
+  try { tab = TABS[h] ? h : (localStorage.getItem('ch_cut') || 'changes'); } catch (e) { tab = TABS[h] ? h : 'changes'; }
+  if (!TABS[tab]) tab = 'changes';
+  const q0 = new URLSearchParams(location.search).get('q'); if (q0) $('q').value = q0;
+  $('tracker').onclick = e => { const b = e.target.closest('button'); if (b) go(b.dataset.t); };
+  $('q').oninput = () => { LIMIT = 100; render(); };
+  $('filt').onchange = () => { LIMIT = 100; render(); };
+  $('more').onclick = () => { LIMIT += 100; render(); };
+  $('copy').onclick = copy;
+  $('bulk').onclick = bulk;
+  go(tab, true);
+}).catch(e => { $('loading').textContent = 'Could not load' + (typeof e === 'string' ? ': ' + e : '.'); });
+
+function go(t, first, keepFilter) {
+  tab = t;
+  try { localStorage.setItem('ch_cut', t); } catch (e) {}
+  if (!first) history.replaceState(null, '', location.pathname + location.search + '#' + t);
+  $('tab-h').textContent = TABS[t].h;
+  $('tab-p').innerHTML = TABS[t].p + (t === 'going' && D.unverified ? ' <b>' + fmt(D.unverified) + '</b> stats would carry over unverified right now.' : '');
+  if (!keepFilter) $('filt').innerHTML = TABS[t].f.map(([v, l]) => '<option value="' + v + '">' + l + '</option>').join('');
+  LIMIT = 100; render();
+}
+
+function tracker() {
+  const T = D.tracker;
+  $('tracker').innerHTML = Object.keys(TABS).map(k => { const x = T[k], p = pct(x.done, x.total);
+    return '<button data-t="' + k + '" class="' + (k === tab ? 'on' : '') + (x.done >= x.total ? ' full' : '') + '"><span class="tt">' + TABS[k].t + '</span>'
+      + '<b>' + fmt(x.done) + ' <small>/ ' + fmt(x.total) + '</small></b><span class="bar"><i style="width:' + p + '%"></i></span><span class="pc">' + p + '% done</span></button>'; }).join('');
+  const d = Object.values(T).reduce((n, x) => n + x.done, 0), t = Object.values(T).reduce((n, x) => n + x.total, 0);
+  $('obar').style.width = pct(d, t) + '%';
+  $('otext').innerHTML = '<b>' + pct(d, t) + '%</b> of everything ready for the switch';
+}
+
+function rows() {
+  const q = $('q').value.trim().toLowerCase(), f = $('filt').value;
+  const has = x => !q || ((x.name || '') + ' ' + (x.park || '') + ' ' + (x.recName || '')).toLowerCase().includes(q);
+  if (tab === 'going') return D.going.filter(has).filter(r => f === 'todo' ? !r.ready : f === 'ready' ? r.ready : f === 'gaps' ? r.gaps : true);
+  if (tab === 'changes') {
+    if (f === 'done') return D.decided.filter(has).sort((a, b) => String(b.at).localeCompare(String(a.at)));
+    return D.changes.filter(has).filter(c => f === 'sure' ? sure(c) : f === 'look' ? !sure(c) : true);
+  }
+  if (tab === 'mismatch') return D.mismatches.filter(has).filter(m => f === 'todo' ? m.state === 'manual' : f ? m.state === f : true);
+  if (f === 'out') return D.leaveOut.filter(has);
+  return D.nosource.filter(has).filter(r => f === 'todo' ? !r.done : f === 'done' ? r.done : true).sort((a, b) => b.riders - a.riders || a.park.localeCompare(b.park));
+}
+
+function render() {
+  tracker();
+  LIST = rows();
+  const f = $('filt').value;
+  const nSure = D.changes.filter(sure).length;
+  $('bulk').hidden = !(tab === 'changes' && f !== 'done' && nSure);
+  $('bulk').textContent = 'Approve all near-certain (' + fmt(nSure) + ')';
+  $('copy').hidden = tab !== 'nosource';
+  $('count').innerHTML = '<b>' + fmt(LIST.length) + '</b> ' + (tab === 'mismatch' ? 'values' : tab === 'changes' && f !== 'done' ? 'to decide' : 'coasters');
+  $('list').innerHTML = LIST.length ? VIEW[tab](LIST.slice(0, LIMIT), f) : '<p class="muted">Nothing here.</p>';
+  $('more').hidden = LIST.length <= LIMIT;
+}
+
+const coaster = r => '<a href="' + esc(CoasterHub.coasterHref(r.name, r.park)) + '">' + esc(r.name) + '</a><small>' + esc(r.park)
+  + (r.closed !== undefined ? ' · ' + (r.closed ? 'closed ' + esc(String(r.closed).slice(0, 4)) : 'operating') : '') + '</small>';
+const jump = (t, name, label) => '<a class="go" href="?q=' + encodeURIComponent(name) + '#' + t + '" data-jump="' + t + '" data-q="' + esc(name) + '">' + label + '</a>';
+const btn = (label, data, cls) => '<button class="' + (cls || '') + '" ' + Object.entries(data).map(([k, v]) => 'data-' + k + '="' + esc(v) + '"').join(' ') + '>' + label + '</button>';
+
+const VIEW = {
+  going: list => '<div class="tbl-wrap"><table><thead><tr><th>Coaster</th><th>Sources</th><th>Status</th></tr></thead><tbody>' + list.map(r => {
+    const todo = [];
+    if (r.manual) todo.push(jump('mismatch', r.name, r.manual + ' to choose'));
+    if (r.pending) todo.push(jump('changes', r.name, 'match to check'));
+    if (r.gaps) todo.push('<span class="chip">' + r.gaps + ' unverified</span>');
+    return '<tr><td class="nm">' + coaster(r) + '</td><td>' + (r.sources.map(s => SRC[s] || s).join(', ') || (r.fair ? 'Fair ride' : r.kept ? 'Kept by hand' : ''))
+      + '</td><td class="todo">' + (r.ready ? '<span class="chip ok">ready</span> ' : '') + todo.join(' ') + '</td></tr>';
+  }).join('') + '</tbody></table></div>',
+
+  changes: (list, f) => f === 'done'
+    ? '<div class="cards">' + list.map(r => '<div class="card"><div class="one"><b>' + esc(r.name) + '</b> ↔ ' + esc(r.recName || r.ref) + ' <span class="src">' + (SRC[r.source] || r.source) + '</span>'
+        + '<small>' + esc(r.park) + ' · ' + (r.decision === 'approve' ? 'linked' : 'not the same ride') + (r.at ? ' · ' + esc(String(r.at).slice(0, 10)) : '') + '</small></div>'
+        + '<div class="act">' + btn('Undo', { k: 'match', s: r.source, r: r.ref, c: r.coaster_id, d: '' }, 'no') + '</div></div>').join('') + '</div>'
+    : '<div class="cards">' + list.map(c => {
+        const fs = ['manu', 'h', 's', 'l', 'inv', 'opened', 'closed'].filter(k => c.site[k] != null || c.facts[k] != null);
+        return '<div class="card"><div class="pair"><div><span class="lab">On the site</span>' + coaster(c) + '</div><div class="arrow">↔</div>'
+          + '<div><span class="lab">' + (SRC[c.source] || c.source) + '</span><a href="' + LINK[c.source](c.ref) + '" target="_blank" rel="noopener">' + esc(c.recName || c.ref) + '</a><small>' + esc(c.recPark || '') + '</small></div></div>'
+          + '<div class="why">' + esc(c.reason) + ' · ' + Math.round(c.score * 100) + '% match</div>'
+          + (fs.length ? '<table class="mini"><tr><th></th><th>Site now</th><th>' + (SRC[c.source] || c.source) + '</th></tr>' + fs.map(k => '<tr><th>' + NAMES[k] + '</th><td>' + val(k, c.site[k]) + '</td><td>' + val(k, c.facts[k]) + '</td></tr>').join('') + '</table>' : '')
+          + '<div class="act">' + btn('Same ride: link', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'approve' }, 'yes') + btn('Not the same', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'reject' }, 'no') + '</div></div>';
+      }).join('') + '</div>',
+
+  mismatch: list => '<div class="tbl-wrap"><table class="mm"><thead><tr><th>Coaster</th><th>Values (click to choose)</th><th>Settled</th></tr></thead><tbody>' + list.map(m => {
+    const opts = (m.site != null ? [['site', m.site]] : []).concat(Object.entries(m.src));
+    return '<tr><td class="nm"><span class="fld">' + NAMES[m.field] + '</span>' + coaster(m) + '</td><td class="vals">' + opts.map(([s, v]) =>
+        btn('<i>' + (SRC[s] || s) + '</i> ' + val(m.field, v), { pick: s, id: m.id, f: m.field }, 'val' + (m.state === 'picked' && m.by === s ? ' on' : ''))).join('')
+      + '</td><td class="st">' + (m.state === 'manual' ? '<span class="chip bad">to choose</span>' : m.state === 'picked' ? '<span class="chip ok">chosen</span> ' + btn('undo', { pick: '', id: m.id, f: m.field }, 'link')
+        : '<span class="chip">' + esc(m.by) + ': ' + val(m.field, m.use) + '</span>') + '</td></tr>';
+  }).join('') + '</tbody></table></div>',
+
+  nosource: (list, f) => f === 'out'
+    ? '<div class="tbl-wrap"><table><thead><tr><th>Coaster</th><th></th></tr></thead><tbody>' + list.map(r => '<tr><td class="nm">' + coaster(r) + '</td><td class="todo">'
+        + (r.pending ? jump('changes', r.name, 'match to check') + ' ' : '') + btn('Keep it', { k: 'coaster', s: '', r: '', c: r.id, d: 'keep' }, 'small') + '</td></tr>').join('') + '</tbody></table></div>'
+    : '<div class="tbl-wrap"><table><thead><tr><th>Coaster</th><th class="num">Riders</th><th>Who</th><th>Track it down</th></tr></thead><tbody>' + list.map(r => {
+        const qn = encodeURIComponent(r.name + ' ' + r.park);
+        const act = r.done
+          ? '<span class="chip ok">' + (r.sources.length ? 'found: ' + r.sources.map(s => SRC[s] || s).join(', ') : 'kept by hand') + '</span>' + (r.kept ? ' ' + btn('undo', { k: 'coaster', s: '', r: '', c: r.id, d: '' }, 'link') : '')
+          : (r.pending ? jump('changes', r.name, 'match to check') + ' · ' : '')
+            + '<a class="go" target="_blank" rel="noopener" href="https://coasterpedia.net/w/index.php?search=' + encodeURIComponent(r.name) + '">Coasterpedia</a> · '
+            + '<a class="go" target="_blank" rel="noopener" href="https://www.wikidata.org/w/index.php?search=' + encodeURIComponent(r.name) + '">Wikidata</a> · '
+            + '<a class="go" target="_blank" rel="noopener" href="https://duckduckgo.com/?q=' + qn + '+roller+coaster">web</a> '
+            + btn('Keep (enter by hand)', { k: 'coaster', s: '', r: '', c: r.id, d: 'keep' }, 'small');
+        return '<tr><td class="nm">' + coaster(r) + '</td><td class="num">' + r.riders + '</td><td class="who">' + esc(r.who.join(', ')) + '</td><td class="todo">' + act + '</td></tr>';
+      }).join('') + '</tbody></table></div>',
+};
+
+function post(url, body) {
+  return fetch(url, { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+    .then(r => r.json().then(j => r.ok ? j : Promise.reject(j.error || r.status)));
+}
+function after(p, b) {
+  if (b) b.disabled = true;
+  return p.then(load).then(d => { D = d; render(); })
+    .catch(err => { if (b) b.disabled = false; alert(err === 'admins only' ? 'Sign in as an admin to make changes.' : 'Could not save: ' + err); });
+}
+document.addEventListener('click', e => {
+  const j = e.target.closest('a[data-jump]');
+  if (j) { e.preventDefault(); $('q').value = j.dataset.q; go(j.dataset.jump); scrollTo({ top: $('tab-h').offsetTop - 80, behavior: 'instant' }); return; }
+  const b = e.target.closest('#list button'); if (!b) return;
+  if (b.dataset.pick !== undefined) return after(post('/api/open-choice', { id: +b.dataset.id, field: b.dataset.f, source: b.dataset.pick || null }), b);
+  if (b.dataset.k) return after(post('/api/open-review', { kind: b.dataset.k, source: b.dataset.s, ref: b.dataset.r, coaster_id: +b.dataset.c, decision: b.dataset.d || null }), b);
+});
+function bulk() {
+  const list = D.changes.filter(sure);
+  if (!list.length || !confirm('Link all ' + list.length + ' near-certain matches? Each can be undone under Decided.')) return;
+  after(post('/api/open-review', { many: list.map(c => ({ kind: 'match', source: c.source, ref: c.ref, coaster_id: c.coaster_id, decision: 'approve' })) }), $('bulk'));
+}
+function copy() {
+  const t = LIST.map(r => r.name + ' — ' + r.park + (r.closed ? ' (closed ' + String(r.closed).slice(0, 4) + ')' : '') + (r.who ? ': ' + r.who.join(', ') : '')).join('\n');
+  navigator.clipboard.writeText(t).then(() => { $('copy').textContent = 'Copied'; setTimeout(() => $('copy').textContent = 'Copy list', 1500); });
+}
+</script>
+</body>
+</html>

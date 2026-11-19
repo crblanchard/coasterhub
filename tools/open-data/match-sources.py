@@ -40,8 +40,10 @@ MONTHS = {m: i + 1 for i, m in enumerate(['january', 'february', 'march', 'april
 def date(v):
     """'March 26, 1994' / '19 March 2005' / 'May 1998' / '2017' / '2017-05-03' -> (value, prec)."""
     v = (v or '').strip()
-    m = re.match(r'^(\d{4})-(\d\d)(?:-(\d\d))?', v)
+    # An ISO date, with a real month: "1948-1949" is a span, not month 19.
+    m = re.match(r'^(\d{4})-(0[1-9]|1[0-2])(?:-(0[1-9]|[12]\d|3[01]))?(?!\d)', v)
     if m: return (m.group(0), 'day' if m.group(3) else 'month')
+    if re.match(r'^\d{4}\s*[-–]\s*\d{2,4}$', v): return (v[:4], 'year')
     t = re.sub(r'[,.]', ' ', v.lower()).split()
     mon = next((MONTHS[w] for w in t if w in MONTHS), None)
     yr = next((w for w in t if re.fullmatch(r'(18|19|20)\d\d', w)), None)

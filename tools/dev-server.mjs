@@ -89,7 +89,7 @@ const SCHEMA = ["000-base-schema.sql", "003-accounts.sql", "007-password-resets.
                 "017-model-triage.sql", "018-merge-orphans.sql", "023-same-ride.sql", "084-reports-blocks.sql", "085-push-tokens.sql", "087-recaps.sql",
                 "187-open-data-wikidata.sql", "188-open-data-wikidata-raw.sql",
                 "189-open-data-sources.sql", "190-open-choices.sql",
-                "191-open-data-review.sql", "192-open-reviews.sql"];
+                "191-open-data-review.sql", "192-open-reviews.sql", "193-open-launch-baseline.sql"];
 for (const f of SCHEMA) {
   const p = join(ROOT, "migrations", f);
   if (!existsSync(p)) { console.warn("! missing migration " + f); continue; }
@@ -271,6 +271,7 @@ createServer(async (req, res) => {
   if (p === "/home" || p === "/riders") { res.writeHead(301, { location: "/" }); res.end(); return; }
   if (p === "/database") { res.writeHead(301, { location: "/qc" }); res.end(); return; }
   if (p === "/rankings/all") { res.writeHead(301, { location: "/rankings" }); res.end(); return; }
+  if (["/sources", "/open-compare", "/open-cleanup", "/open-review", "/open-cutover"].includes(p)) { res.writeHead(301, { location: "/cutover" }); res.end(); return; }
   if (p === "/qc/models") p = "/qc-models.html";
   // A park page, and a coaster at it. Two placeholders where the rider rules
   // have one, and the longer match has to be tested first for the same reason

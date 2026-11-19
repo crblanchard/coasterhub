@@ -1276,7 +1276,40 @@ function openAgree(field, a, b) {
     return x.slice(0, n) === y.slice(0, n);
   }
   const x = openSquash(a), y = openSquash(b);
-  return x === y || (x.length > 3 && y.length > 3 && (x.includes(y) || y.includes(x)));
+  if (x === y || (x.length > 3 && y.length > 3 && (x.includes(y) || y.includes(x)))) return true;
+  if (field === "manu") { const g = OPEN_MAKER_SAME.get(x); if (g && g === OPEN_MAKER_SAME.get(y)) return true; }
+  return (field === "manu" || field === "type") && openNear(x, y);
+}
+// One company under its several names (renames, legal names, parents), so a
+// maker spelled another way is not a mismatch. Arrow Development / Arrow
+// Huss / Arrow Dynamics count as one (Carter, 2026-11-19: "arrow development
+// and arrow dynamics are the same").
+const OPEN_MAKER_SAME = new Map([
+  // Keys as openSquash spells them: lower case, no accents, letters and digits only.
+  ["arrowdynamics", "arrowdevelopment", "arrowhuss", "arrowdevelopmentcompany"],
+  ["maurer", "maurerrides", "maurersohne", "maurersoehne", "maurerag"],
+  ["ssworldwide", "sspowersports", "sansei", "sanseitechnologies", "sssansei", "sssanseitechnologies"],
+  ["rockymountainconstruction", "rockymountaincoasters", "rmc"],
+  ["philadelphiatobogganco", "philadelphiatoboggancoasters", "philadelphiatoboggancompany", "philadelphiatoboggancoastersinc", "ptc"],
+  ["efmiler", "efmilerindustries", "efmilerindustriesinc", "milermanufacturing", "milercoastercompany", "milercoaster"],
+  ["customcoastersinternational", "cci"], ["greatcoastersinternational", "gci"],
+  ["gravitygroup", "thegravitygroup"], ["bolligermabillard", "bm"],
+  ["zamperla", "antoniozamperla", "zamperlaspa"], ["intamin", "intaminag", "intaminamusementrides"],
+  ["vekoma", "vekomarides", "vekomaridesmanufacturing", "vekomaridesmanufacturingbv"],
+  ["mackrides", "mack", "mackridesgmbh"], ["dinncorporation", "dinn"], ["chancerides", "chancemorgan", "chance"],
+  ["premierrides", "premier"], ["gerstlauer", "gerstlauerelektro", "gerstlauerametimesgmbh"],
+].flatMap((names, i) => names.map(n => [n, i + 1])));
+// Small typos ("Philidelphia", "Widsom") are the same name: an edit distance
+// of at most 2 on names of 8+ letters.
+function openNear(x, y) {
+  if (x.length < 8 || y.length < 8 || Math.abs(x.length - y.length) > 2) return false;
+  let prev = Array.from({ length: y.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= x.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= y.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (x[i - 1] === y[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[y.length] <= 2;
 }
 const openBlank = v => v == null || v === "";
 
@@ -1308,207 +1341,173 @@ async function openTables(env) {
   return { cs, fair, linked, open, chose, sources };
 }
 
-// Does this field need a pick? Two values (site or any source) that disagree
-// and no pick yet, or a pick whose source has since changed its value.
-function openMismatch(field, site, bySrc, choice) {
-  if (OPEN_NO_PICK[field]) return false;
+// A field where the values disagree, and how it stands (2026-11-19):
+//   null      no disagreement
+//   'picked'  Carter chose a value, and that source still has it
+//   'auto'    settled by the rule, with .use = the value the switch takes:
+//             two or more open sources agree with each other -> theirs;
+//             one open source a little off the site (numbers within 15%,
+//             dates in the same year) -> the site's
+//   'manual'  everything else: on /cutover's mismatch list
+// Model names never count (each source names models its own way; models
+// carry over anyway, OPEN_KEEP).
+function openMismatchState(field, site, bySrc, choice) {
+  if (OPEN_NO_PICK[field]) return null;
   const vals = [];
   if (!openBlank(site)) vals.push(["site", site]);
   for (const s in bySrc) vals.push([s, bySrc[s][0]]);
   let differ = false;
   for (let i = 0; i < vals.length && !differ; i++)
     for (let j = i + 1; j < vals.length; j++) if (!openAgree(field, vals[i][1], vals[j][1])) { differ = true; break; }
-  if (!differ) return false;
-  if (!choice) return true;
-  const now = choice[0] === "site" ? site : (bySrc[choice[0]] || [])[0];
-  return String(now) !== String(choice[1]);
+  if (!differ) return null;
+  if (choice) {
+    const now = choice[0] === "site" ? site : (bySrc[choice[0]] || [])[0];
+    if (String(now) === String(choice[1])) return { state: "picked", use: choice[1], by: choice[0] };
+  }
+  const opens = Object.keys(bySrc).map(s => [s, bySrc[s][0]]);
+  if (opens.length >= 2 && opens.every(([, v]) => openAgree(field, opens[0][1], v)))
+    return { state: "auto", use: opens[0][1], by: "sources agree" };
+  if (opens.length === 1 && !openBlank(site)) {
+    const v = opens[0][1];
+    const num = field === "h" || field === "s" || field === "l" || field === "dur";
+    if (num && +site && +v && Math.abs(+site - +v) / Math.max(+site, +v) <= 0.15) return { state: "auto", use: site, by: "small difference" };
+    if ((field === "opened" || field === "closed") && String(site).slice(0, 4) === String(v).slice(0, 4)) return { state: "auto", use: site, by: "same year" };
+  }
+  return { state: "manual" };
 }
 
-async function getOpenCoverage(env) {
+// /cutover (2026-11-19): the one page for getting the open dataset ready to
+// switch to. Four categories, each with a done/total that only goes up:
+//   going    coasters going into the new dataset (an open source, a fair
+//            ride, or kept by hand); done = nothing left to settle
+//   changes  suggested links to approve or reject; done = decided
+//   mismatch values that disagree; done = settled by the rule or picked
+//   nosource coasters someone has ridden that no open source covers, from the
+//            fixed starting list (open_launch_baseline); done = a source
+//            found, or kept to enter by hand
+// Stats no open source has carry over from the current data, marked
+// unverified (Carter chose that over blanks). Models always carry over.
+async function getCutover(env) {
   const { cs, fair, linked, open, chose } = await openTables(env);
-  const fields = {};
-  for (const f of OPEN_FIELDS) fields[f] = { current: 0, fair: 0, open: 0, agree: 0, differ: 0, openOnly: 0, toPick: 0, picked: 0, bySource: {} };
-  const bySource = {};
-  const hist = { open: OPEN_FIELDS.map(() => 0).concat(0), current: OPEN_FIELDS.map(() => 0).concat(0) };
-  let total = 0, fairN = 0, linkedN = 0, openN = 0, toPick = 0;
-  for (const c of cs) {
-    total++;
-    const isFair = fair.has(c.park), ls = linked.get(c.id), o = open.get(c.id) || {};
-    if (isFair) fairN++;
-    if (ls) { linkedN++; for (const s in ls) bySource[s] = (bySource[s] || 0) + 1; }
-    if (isFair || ls) openN++;
-    let nOpen = 0, nCur = 0;
-    for (const f of OPEN_FIELDS) {
-      const F = fields[f], cur = c[f], src = o[f] || {};
-      const clean = Object.keys(src).filter(s => !src[s][1]);
-      for (const s of Object.keys(src)) F.bySource[s] = (F.bySource[s] || 0) + 1;
-      if (!openBlank(cur)) { F.current++; nCur++; if (isFair) F.fair++; }
-      if ((isFair && !openBlank(cur)) || clean.length) { F.open++; nOpen++; }
-      if (clean.length) {
-        if (openBlank(cur)) F.openOnly++;
-        else if (clean.every(s => openAgree(f, cur, src[s][0]))) F.agree++;
-        else F.differ++;
-      }
-      const ch = chose.get(c.id + "|" + f);
-      if (ch) F.picked++;
-      if (openMismatch(f, cur, src, ch)) { F.toPick++; toPick++; }
-    }
-    hist.open[nOpen]++; hist.current[nCur]++;
-  }
-  // Every record each source holds, matched or not (188 for Wikidata, 189 for the rest).
-  const raw = {};
-  try {
-    raw.wikidata = await env.DB.prepare(
-      "SELECT (SELECT COUNT(*) FROM wd_items) AS items, (SELECT COUNT(*) FROM wd_claims) AS fields, " +
-      "(SELECT COUNT(*) FROM wd_items i WHERE NOT EXISTS (SELECT 1 FROM wd_matches m WHERE m.qid = i.qid)) AS unmatched, " +
-      "(SELECT COUNT(DISTINCT coaster_id) FROM wd_matches WHERE status = 'ambiguous') AS ambiguous").first();
-  } catch (e) {}
-  try {
-    const { results } = await env.DB.prepare(
-      "SELECT i.source, COUNT(*) AS items, (SELECT COUNT(*) FROM open_raw r WHERE r.source = i.source) AS fields, " +
-      "SUM(NOT EXISTS (SELECT 1 FROM open_matches m WHERE m.source = i.source AND m.ref = i.ref)) AS unmatched, " +
-      "(SELECT COUNT(DISTINCT coaster_id) FROM open_matches m WHERE m.source = i.source AND m.status = 'ambiguous') AS ambiguous " +
-      "FROM open_items i GROUP BY i.source").all();
-    for (const r of results) raw[r.source] = r;
-  } catch (e) {}
-  return { total, fair: fairN, linked: linkedN, open: openN, rcdbOnly: total - openN, toPick,
-           sources: bySource, fields, hist, fieldOrder: OPEN_FIELDS, raw };
-}
-
-// Per coaster: [id, name, park, fair, {source: ref}, {field: {site, src, pick, mismatch}}, ambiguous]
-// with only the fields where some side has a value; and the records no
-// coaster here matches, from every source.
-async function getOpenCompare(env) {
-  const { cs, fair, linked, open, chose, sources } = await openTables(env);
-  const q = sql => env.DB.prepare(sql).all().then(r => r.results).catch(() => []);
-  const amb = new Map();
-  for (const a of await q("SELECT coaster_id, 'wikidata' AS source, qid AS ref FROM wd_matches WHERE status = 'ambiguous' UNION ALL SELECT coaster_id, source, ref FROM open_matches WHERE status = 'ambiguous'")) {
-    if (!amb.has(a.coaster_id)) amb.set(a.coaster_id, {});
-    amb.get(a.coaster_id)[a.source] = a.ref;
-  }
-  const rows = cs.map(c => {
-    const o = open.get(c.id) || {}, v = {};
-    for (const f of OPEN_FIELDS) {
-      const site = openBlank(c[f]) ? null : c[f], src = o[f] || {};
-      if (site == null && !Object.keys(src).length) continue;
-      const ch = chose.get(c.id + "|" + f) || null;
-      v[f] = { site, src, pick: ch, mismatch: openMismatch(f, site, src, ch) ? 1 : 0 };
-    }
-    return [c.id, c.name, c.park, fair.has(c.park) ? 1 : 0, linked.get(c.id) || {}, v, amb.get(c.id) || null];
-  });
-  const unmatched = [
-    ...(await q(
-      "SELECT 'wikidata' AS source, i.qid AS ref, i.label AS name, i.description, " +
-      "(SELECT GROUP_CONCAT(COALESCE(value_label, value), ' | ') FROM wd_claims c WHERE c.qid = i.qid AND c.pid IN ('P361','P276')) AS park, " +
-      "(SELECT value_label FROM wd_claims c WHERE c.qid = i.qid AND c.pid = 'P17' LIMIT 1) AS country, " +
-      "(SELECT MIN(substr(value, 1, 4)) FROM wd_claims c WHERE c.qid = i.qid AND c.pid IN ('P1619','P571','P729')) AS opened " +
-      "FROM wd_items i WHERE NOT EXISTS (SELECT 1 FROM wd_matches m WHERE m.qid = i.qid)")),
-    ...(await q(
-      "SELECT i.source, i.ref, i.name, NULL AS description, i.park, " +
-      "(SELECT v FROM open_raw r WHERE r.source = i.source AND r.ref = i.ref AND r.k = 'country') AS country, " +
-      "(SELECT v FROM open_raw r WHERE r.source = i.source AND r.ref = i.ref AND r.k IN ('opened', 'start_date') LIMIT 1) AS opened " +
-      "FROM open_items i WHERE NOT EXISTS (SELECT 1 FROM open_matches m WHERE m.source = i.source AND m.ref = i.ref)")),
-  ];
-  return { fields: OPEN_FIELDS, noPick: Object.keys(OPEN_NO_PICK), sources, rows, unmatched };
-}
-
-// The cleanup table (2026-11-18): per coaster, (a) does any open source have
-// it, (b) how many stats it has on the site and from open sources, (c) how
-// many riders have it — counting every location of a relocated ride. RCDB-only
-// coasters nobody has ridden are the removal candidates, operating or not:
-// RCDB should not be how one got on the site in the first place. Read only:
-// removing one is a separate, deliberate step.
-async function getOpenCleanup(env) {
-  const { cs, fair, linked, open } = await openTables(env);
-  const q = sql => env.DB.prepare(sql).all().then(r => r.results).catch(() => []);
-  const [rides, same] = await Promise.all([
+  const q = (sql, ...b) => env.DB.prepare(sql).bind(...b).all().then(r => r.results).catch(() => []);
+  const [rides, same, users, sugg, reviews, base, items] = await Promise.all([
     q("SELECT DISTINCT coaster_id, user_slug FROM rides"),
     q("SELECT coaster, ride FROM same_ride"),
+    q("SELECT slug, name FROM users"),
+    q("SELECT source, ref, coaster_id, score, reason FROM open_suggestions"),
+    q("SELECT kind, source, ref, coaster_id, decision, at FROM open_reviews"),
+    q("SELECT coaster_id, riders FROM open_launch_baseline"),
+    q("SELECT source, ref, name, park FROM open_items"),
   ]);
+  const byId = new Map(cs.map(c => [c.id, c]));
+  const uname = new Map(users.map(u => [u.slug, u.name || u.slug]));
   const home = new Map(same.map(s => [s.coaster, s.ride]));
-  const riders = new Map();       // group (home id, or own id) -> Set of riders
+  const riders = new Map();
   for (const r of rides) {
     const g = home.get(r.coaster_id) || r.coaster_id;
     if (!riders.has(g)) riders.set(g, new Set());
     riders.get(g).add(r.user_slug);
   }
-  const STATS = ["h", "s", "l", "inv", "dur"];
-  const rows = cs.map(c => {
-    const o = open.get(c.id) || {}, ls = linked.get(c.id) || {};
-    const site = STATS.filter(f => !openBlank(c[f])).length;
-    const openStats = STATS.filter(f => o[f] && Object.values(o[f]).some(v => !v[1])).length;
-    const n = (riders.get(home.get(c.id) || c.id) || new Set()).size;
-    const isFair = fair.has(c.park), hasOpen = isFair || Object.keys(ls).length > 0;
-    return [c.id, c.name, c.park, c.closed || null, Object.keys(ls), isFair ? 1 : 0, site, openStats, n,
-            !hasOpen && n === 0 ? 1 : 0];
-  });
-  return { stats: STATS.length, rows };
-}
-
-// The review dashboard (/open-review, 2026-11-18): links the strict matchers
-// did not make, open-source coasters to add, and the removal flags, each with
-// any decision already taken. Everything here is the open dataset only; the
-// live site reads none of it until the one-time switch.
-async function getOpenReview(env) {
-  const q = (sql, ...b) => env.DB.prepare(sql).bind(...b).all().then(r => r.results).catch(() => []);
-  const [sugg, adds, reviews, items, cleanup] = await Promise.all([
-    q("SELECT s.source, s.ref, s.coaster_id, s.score, s.reason, c.name, c.park, c.closed FROM open_suggestions s JOIN coasters c ON c.id = s.coaster_id ORDER BY s.score DESC, c.park, c.name"),
-    q("SELECT park, name, status, refs FROM open_adds ORDER BY park, name"),
-    q("SELECT kind, source, ref, coaster_id, decision, note, by, at FROM open_reviews"),
-    q("SELECT source, ref, name, park FROM open_items"),
-    getOpenCleanup(env).catch(() => ({ rows: [] })),
-  ]);
+  const ridersOf = id => [...(riders.get(home.get(id) || id) || [])];
   const item = new Map(items.map(i => [i.source + "|" + i.ref, i]));
-  // Stats for the records in play, so a suggestion can be judged side by side.
-  const want = new Set(sugg.map(s => s.source + "|" + s.ref));
+  const mrev = new Map(reviews.filter(r => r.kind === "match").map(r => [r.source + "|" + r.ref + "|" + r.coaster_id, r]));
+  const keep = new Map(reviews.filter(r => r.kind === "coaster").map(r => [r.coaster_id, r.decision]));
+
+  // 2. Changes: suggested links, pending and decided.
+  const pendingSugg = sugg.filter(s => !mrev.has(s.source + "|" + s.ref + "|" + s.coaster_id) && byId.has(s.coaster_id));
+  const pendingBy = new Map();
+  for (const s of pendingSugg) pendingBy.set(s.coaster_id, (pendingBy.get(s.coaster_id) || 0) + 1);
   const rf = {};
-  for (const f of await q("SELECT source, ref, field, value FROM open_record_facts WHERE source || '|' || ref IN (SELECT source || '|' || ref FROM open_suggestions)")) {
-    const k = f.source + "|" + f.ref;
-    if (want.has(k)) (rf[k] = rf[k] || {})[f.field] = f.value;
+  for (const f of await q("SELECT r.source, r.ref, r.field, r.value FROM open_record_facts r JOIN open_suggestions s ON s.source = r.source AND s.ref = r.ref"))
+    (rf[f.source + "|" + f.ref] = rf[f.source + "|" + f.ref] || {})[f.field] = f.value;
+  const SHOWF = ["manu", "h", "s", "l", "inv", "opened", "closed"];
+  const pick = (c, fs) => { const o = {}; for (const f of fs) if (!openBlank(c[f])) o[f] = c[f]; return o; };
+  const changes = pendingSugg.map(s => {
+    const c = byId.get(s.coaster_id), it = item.get(s.source + "|" + s.ref) || {};
+    return { source: s.source, ref: s.ref, coaster_id: s.coaster_id, score: s.score, reason: s.reason,
+             name: c.name, park: c.park, closed: c.closed || null, recName: it.name || null, recPark: it.park || null,
+             site: pick(c, SHOWF), facts: rf[s.source + "|" + s.ref] || {} };
+  }).sort((a, b) => b.score - a.score || a.park.localeCompare(b.park));
+  const decided = reviews.filter(r => r.kind === "match").map(r => {
+    const c = byId.get(r.coaster_id) || {}, it = item.get(r.source + "|" + r.ref) || {};
+    return { source: r.source, ref: r.ref, coaster_id: r.coaster_id, decision: r.decision, at: r.at, name: c.name, park: c.park, recName: it.name || null };
+  });
+
+  // 1, 3, 4 walk the coasters once.
+  const going = [], mism = [], nosource = [], leaveOut = [];
+  let mTotal = 0, mDone = 0, gDone = 0, unverified = 0;
+  const baseIds = new Map(base.map(b => [b.coaster_id, b.riders]));
+  for (const c of cs) {
+    const o = open.get(c.id) || {}, ls = Object.keys(linked.get(c.id) || {}), isFair = fair.has(c.park);
+    const hasOpen = ls.length > 0 || isFair, kept = keep.get(c.id) === "keep";
+    let manual = 0, gaps = 0;
+    for (const f of OPEN_FIELDS) {
+      const src = o[f] || {};
+      const st = openMismatchState(f, c[f], src, chose.get(c.id + "|" + f));
+      if (st) {
+        mTotal++;
+        if (st.state !== "manual") mDone++;
+        else manual++;
+        if (st.state !== null) mism.push({ id: c.id, name: c.name, park: c.park, field: f, site: openBlank(c[f]) ? null : c[f],
+          src: Object.fromEntries(Object.entries(src).map(([s, v]) => [s, v[0]])), state: st.state, use: st.use ?? null, by: st.by || null });
+      }
+      if (!OPEN_KEEP[f] && !isFair && !openBlank(c[f]) && !Object.values(src).some(v => !v[1]) && !chose.get(c.id + "|" + f)) gaps++;
+    }
+    if (hasOpen || kept) {
+      const pend = pendingBy.get(c.id) || 0;
+      const ready = !manual && !pend;
+      if (ready) gDone++;
+      if (gaps) unverified += gaps;
+      going.push({ id: c.id, name: c.name, park: c.park, closed: c.closed || null, sources: ls, fair: isFair ? 1 : 0, kept: kept && !hasOpen ? 1 : 0,
+                   ready: ready ? 1 : 0, manual, pending: pend, gaps });
+    }
+    if (baseIds.has(c.id)) {
+      const rs = ridersOf(c.id);
+      nosource.push({ id: c.id, name: c.name, park: c.park, closed: c.closed || null, riders: rs.length || baseIds.get(c.id),
+                      who: rs.map(s => uname.get(s) || s).sort(), sources: ls, kept: kept ? 1 : 0, done: hasOpen || kept ? 1 : 0,
+                      pending: pendingBy.get(c.id) || 0 });
+    } else if (!hasOpen && !kept && !ridersOf(c.id).length) {
+      leaveOut.push({ id: c.id, name: c.name, park: c.park, closed: c.closed || null, pending: pendingBy.get(c.id) || 0,
+                      decision: keep.get(c.id) || null });
+    }
   }
-  const ids = [...new Set(sugg.map(s => s.coaster_id))];
-  const site = {};
-  for (let i = 0; i < ids.length; i += 90) {
-    const part = ids.slice(i, i + 90);
-    for (const c of await q("SELECT id, " + OPEN_FIELDS.join(", ") + " FROM coasters WHERE id IN (" + part.map(() => "?").join(",") + ")", ...part)) site[c.id] = c;
-  }
+  const nsDone = nosource.filter(r => r.done).length;
   return {
-    fields: OPEN_FIELDS,
-    suggestions: sugg.map(s => ({ ...s, record: item.get(s.source + "|" + s.ref) || null, facts: rf[s.source + "|" + s.ref] || {}, site: site[s.coaster_id] || {} })),
-    adds: adds.map(a => ({ ...a, refs: JSON.parse(a.refs || "[]").map(r => ({ ...r, name: (item.get(r.source + "|" + r.ref) || {}).name || null })) })),
-    flags: cleanup.rows.filter(r => r[9]).map(r => ({ id: r[0], name: r[1], park: r[2], closed: r[3], siteStats: r[6] })),
-    reviews,
+    tracker: {
+      going: { done: gDone, total: going.length },
+      changes: { done: decided.length, total: decided.length + changes.length },
+      mismatch: { done: mDone, total: mTotal },
+      nosource: { done: nsDone, total: nosource.length },
+    },
+    unverified, fields: OPEN_FIELDS,
+    going, changes, decided, mismatches: mism, nosource, leaveOut,
   };
 }
 
-// One decision. Changes only the open dataset: open_reviews, and for a match
-// the coaster's open_links / open_facts for that source, copied from
+// Decisions on /cutover. Changes only the open dataset: open_reviews, and for
+// a match the coaster's open_links / open_facts for that source, copied from
 // open_record_facts so the effect shows at once. decision null undoes.
-async function setOpenReview(env, acct, b) {
+// Several at once: { many: [ {kind, source, ref, coaster_id, decision}, ... ] }.
+function openReviewStmts(env, acct, b) {
   const kind = String(b.kind || ""), source = String(b.source || ""), ref = String(b.ref || ""), cid = +b.coaster_id || 0;
   const decision = b.decision ? String(b.decision) : null;
   const ok = { match: ["approve", "reject"], add: ["approve", "reject"], coaster: ["keep", "remove"] };
-  if (!ok[kind] || (decision && !ok[kind].includes(decision))) return err(400, "bad kind or decision");
-  try { await env.DB.prepare("SELECT 1 FROM open_reviews LIMIT 1").first(); }
-  catch (e) { return err(503, "run migrations/192-open-reviews.sql first"); }
-  const stmts = [];
-  const unlink = () => {
-    stmts.push(env.DB.prepare("DELETE FROM open_facts WHERE coaster_id = ? AND source = ? AND ref = ?").bind(cid, source, ref));
-    stmts.push(env.DB.prepare("DELETE FROM open_links WHERE coaster_id = ? AND source = ? AND ref = ?").bind(cid, source, ref));
-  };
+  if (!ok[kind] || (decision && !ok[kind].includes(decision))) return null;
+  if (kind === "match" && (!cid || !source || !ref)) return null;
+  const day = new Date().toISOString().slice(0, 10), stmts = [];
   if (kind === "match") {
-    if (!cid || !source || !ref) return err(400, "coaster_id, source and ref required");
     if (decision === "approve") {
       // This coaster's previous link in this source gives way.
       stmts.push(env.DB.prepare("DELETE FROM open_facts WHERE coaster_id = ? AND source = ?").bind(cid, source));
       stmts.push(env.DB.prepare("DELETE FROM open_links WHERE coaster_id = ? AND source = ?").bind(cid, source));
-      stmts.push(env.DB.prepare("INSERT INTO open_links (coaster_id, source, ref, method, added) VALUES (?, ?, ?, 'approved', ?)").bind(cid, source, ref, new Date().toISOString().slice(0, 10)));
+      stmts.push(env.DB.prepare("INSERT INTO open_links (coaster_id, source, ref, method, added) VALUES (?, ?, ?, 'approved', ?)").bind(cid, source, ref, day));
       stmts.push(env.DB.prepare(
         "INSERT OR REPLACE INTO open_facts (coaster_id, field, value, prec, source, ref, cites_rcdb, retrieved) " +
-        "SELECT ?, field, value, prec, source, ref, cites_rcdb, ? FROM open_record_facts WHERE source = ? AND ref = ?")
-        .bind(cid, new Date().toISOString().slice(0, 10), source, ref));
+        "SELECT ?, field, value, prec, source, ref, cites_rcdb, ? FROM open_record_facts WHERE source = ? AND ref = ?").bind(cid, day, source, ref));
     } else {
-      unlink();   // reject, or undo an approval: the next refresh re-matches as normal
+      // Reject, or undo an approval: the next refresh re-matches as normal.
+      stmts.push(env.DB.prepare("DELETE FROM open_facts WHERE coaster_id = ? AND source = ? AND ref = ?").bind(cid, source, ref));
+      stmts.push(env.DB.prepare("DELETE FROM open_links WHERE coaster_id = ? AND source = ? AND ref = ?").bind(cid, source, ref));
     }
   }
   if (decision) {
@@ -1519,66 +1518,20 @@ async function setOpenReview(env, acct, b) {
   } else {
     stmts.push(env.DB.prepare("DELETE FROM open_reviews WHERE kind = ? AND source = ? AND ref = ? AND coaster_id = ?").bind(kind, source, ref, cid));
   }
-  await env.DB.batch(stmts);
-  return json({ ok: true, decision });
+  return stmts;
 }
-
-// Cutover readiness (/open-cutover, 2026-11-19): every coaster in one bucket,
-// as the switch to the open dataset would treat it.
-//   ready     an open source (or a fair ride), every stat the site shows now
-//             covered by an open value or a pick, nothing waiting on review
-//   verify    an open source, but it would lose stats, has a mismatch to
-//             choose, or has a suggested link pending
-//   ridden    no open source and someone has ridden it (any location of a
-//             relocated ride): Carter sources these by hand so no list changes
-//   unridden  no open source, nobody has ridden it: flagged, not removed
-async function getOpenReadiness(env) {
-  const { cs, fair, linked, open, chose } = await openTables(env);
-  const q = sql => env.DB.prepare(sql).all().then(r => r.results).catch(() => []);
-  const [rides, same, users, sugg, reviews] = await Promise.all([
-    q("SELECT DISTINCT coaster_id, user_slug FROM rides"),
-    q("SELECT coaster, ride FROM same_ride"),
-    q("SELECT slug, name FROM users"),
-    q("SELECT DISTINCT source, ref, coaster_id FROM open_suggestions"),
-    q("SELECT kind, source, ref, coaster_id, decision FROM open_reviews"),
-  ]);
-  const uname = new Map(users.map(u => [u.slug, u.name || u.slug]));
-  const home = new Map(same.map(s => [s.coaster, s.ride]));
-  const riders = new Map();
-  for (const r of rides) {
-    const g = home.get(r.coaster_id) || r.coaster_id;
-    if (!riders.has(g)) riders.set(g, new Set());
-    riders.get(g).add(r.user_slug);
+async function setOpenReview(env, acct, b) {
+  try { await env.DB.prepare("SELECT 1 FROM open_reviews LIMIT 1").first(); }
+  catch (e) { return err(503, "run migrations/192-open-reviews.sql first"); }
+  const list = Array.isArray(b.many) ? b.many.slice(0, 500) : [b];
+  const stmts = [];
+  for (const one of list) {
+    const s = openReviewStmts(env, acct, one);
+    if (!s) return err(400, "bad decision");
+    stmts.push(...s);
   }
-  const decided = new Set(reviews.filter(r => r.kind === "match").map(r => r.source + "|" + r.ref + "|" + r.coaster_id));
-  const pending = new Map();
-  for (const s of sugg) if (!decided.has(s.source + "|" + s.ref + "|" + s.coaster_id)) pending.set(s.coaster_id, (pending.get(s.coaster_id) || 0) + 1);
-  const keep = new Map(reviews.filter(r => r.kind === "coaster").map(r => [r.coaster_id, r.decision]));
-  const loseBy = {};
-  for (const f of OPEN_FIELDS) loseBy[f] = { site: 0, lose: 0 };
-  const totals = { ready: 0, verify: 0, ridden: 0, unridden: 0 };
-  const rows = cs.map(c => {
-    const o = open.get(c.id) || {}, ls = Object.keys(linked.get(c.id) || {}), isFair = fair.has(c.park);
-    const rs = [...(riders.get(home.get(c.id) || c.id) || [])];
-    const lose = [];
-    let mism = 0;
-    for (const f of OPEN_FIELDS) {
-      if (openBlank(c[f])) continue;
-      loseBy[f].site++;
-      const src = o[f] || {}, ch = chose.get(c.id + "|" + f);
-      const covered = OPEN_KEEP[f] || isFair || ch || Object.values(src).some(v => !v[1]);
-      if (!covered) { lose.push(f); loseBy[f].lose++; }
-      if (openMismatch(f, c[f], src, ch)) mism++;
-    }
-    let state;
-    if (!ls.length && !isFair) state = rs.length ? "ridden" : "unridden";
-    else state = lose.length || mism || pending.get(c.id) ? "verify" : "ready";
-    totals[state]++;
-    return { id: c.id, name: c.name, park: c.park, closed: c.closed || null, state, sources: ls, fair: isFair ? 1 : 0,
-             lose, mismatches: mism, pending: pending.get(c.id) || 0, keep: keep.get(c.id) || null,
-             riders: rs.length, who: state === "ridden" ? rs.map(s => uname.get(s) || s).sort() : undefined };
-  });
-  return { total: cs.length, totals, loseBy, fieldOrder: OPEN_FIELDS, keep: Object.keys(OPEN_KEEP), rows };
+  await env.DB.batch(stmts);
+  return json({ ok: true, count: list.length });
 }
 
 // A pick where the sources disagree: which source's value is right for this
@@ -2641,38 +2594,13 @@ export default {
         if (!await haveClones(env)) return json({ groups: [] }, 200, LIST_CACHE);
         return edgePut(ctx, request, json({ groups: await getClones(env) }, 200, LIST_CACHE));
       }
-      // How much of the coaster data stands on open sources (2026-11-18). The
-      // site's stats came from RCDB screenshots; open_links / open_facts
-      // (migration 187) hold a parallel set from Wikidata, kept beside the
-      // current values until it is complete enough to swap. Fair coasters
-      // never came from RCDB, so they count as open already. /sources draws it.
-      if (request.method === "GET" && path === "/api/open-coverage") {
-        try { await env.DB.prepare("SELECT 1 FROM open_facts LIMIT 1").first(); }
-        catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
-        return json(await getOpenCoverage(env));
-      }
-      // The two datasets side by side, per coaster, for /open-compare: the
-      // live value and the open one for every field, plus the Wikidata
-      // coasters that match nothing here yet.
-      if (request.method === "GET" && path === "/api/open-compare") {
-        try { await env.DB.prepare("SELECT 1 FROM wd_items LIMIT 1").first(); }
-        catch (e) { return err(503, "run migrations/188-open-data-wikidata-raw.sql first"); }
-        return json(await getOpenCompare(env));
-      }
-      if (request.method === "GET" && path === "/api/open-cleanup") {
-        try { await env.DB.prepare("SELECT 1 FROM open_links LIMIT 1").first(); }
-        catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
-        return json(await getOpenCleanup(env));
-      }
-      if (request.method === "GET" && path === "/api/open-readiness") {
-        try { await env.DB.prepare("SELECT 1 FROM open_links LIMIT 1").first(); }
-        catch (e) { return err(503, "run migrations/187-open-data-wikidata.sql first"); }
-        return json(await getOpenReadiness(env));
-      }
-      if (request.method === "GET" && path === "/api/open-review") {
-        try { await env.DB.prepare("SELECT 1 FROM open_suggestions LIMIT 1").first(); }
-        catch (e) { return err(503, "run migrations/191-open-data-review.sql first"); }
-        return json(await getOpenReview(env));
+      // /cutover's data (2026-11-19): the open dataset being built beside the
+      // live one, in the four categories worked through before the
+      // switch. Read only; nothing the site shows reads these tables yet.
+      if (request.method === "GET" && path === "/api/cutover") {
+        try { await env.DB.prepare("SELECT 1 FROM open_launch_baseline LIMIT 1").first(); }
+        catch (e) { return err(503, "run migrations/193-open-launch-baseline.sql first"); }
+        return json(await getCutover(env));
       }
       // ---- summaries (2026-09-25) ------------------------------------------
       // One request where pages used to make one per rider. The home page

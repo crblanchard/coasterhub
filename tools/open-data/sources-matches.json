@@ -60467,10 +60467,10 @@
 {
 "coaster_id": 1269,
 "field": "opened",
-"prec": "month",
+"prec": "year",
 "ref": "Super Roller Coaster (China Dinosaurs Park)",
 "source": "coasterpedia",
-"value": "2017-20"
+"value": "2017"
 },
 {
 "coaster_id": 1269,
@@ -71979,10 +71979,10 @@
 {
 "coaster_id": 1530,
 "field": "opened",
-"prec": "month",
+"prec": "year",
 "ref": "Big Apple (Ocean Beach Pleasure Park)",
 "source": "coasterpedia",
-"value": "1999-20"
+"value": "1999"
 },
 {
 "coaster_id": 1530,
@@ -81803,10 +81803,10 @@
 {
 "coaster_id": 1788,
 "field": "closed",
-"prec": "month",
+"prec": "year",
 "ref": "Thriller (Arnolds Park)",
 "source": "coasterpedia",
-"value": "1948-19"
+"value": "1948"
 },
 {
 "coaster_id": 1788,
@@ -92491,10 +92491,10 @@
 {
 "coaster_id": 2079,
 "field": "closed",
-"prec": "month",
+"prec": "year",
 "ref": "Hvin & Hyl Rutsch",
 "source": "coasterpedia",
-"value": "2007-20"
+"value": "2007"
 },
 {
 "coaster_id": 2079,
@@ -95219,10 +95219,10 @@
 {
 "coaster_id": 2201,
 "field": "opened",
-"prec": "month",
+"prec": "year",
 "ref": "Wacky Worm (Live Oak Canyon Farm)",
 "source": "coasterpedia",
-"value": "2025-20"
+"value": "2025"
 },
 {
 "coaster_id": 2201,
@@ -276600,8 +276600,8 @@ null
 },
 "coasterpedia|Aerial Subway": {
 "closed": [
-"1910-19",
-"month"
+"1910",
+"year"
 ],
 "inv": [
 0,
@@ -276618,8 +276618,8 @@ null
 },
 "coasterpedia|Aero Dips (Euclid Beach Park)": {
 "closed": [
-"1964-19",
-"month"
+"1964",
+"year"
 ],
 "inv": [
 0,
@@ -283114,8 +283114,8 @@ null
 null
 ],
 "opened": [
-"1999-20",
-"month"
+"1999",
+"year"
 ],
 "type": [
 "Steel",
@@ -287542,8 +287542,8 @@ null
 },
 "coasterpedia|Broken Roller Coaster": {
 "closed": [
-"2018-20",
-"month"
+"2018",
+"year"
 ],
 "manu": [
 "Jinma Rides",
@@ -287888,8 +287888,8 @@ null
 null
 ],
 "opened": [
-"2004-20",
-"month"
+"2004",
+"year"
 ],
 "type": [
 "Steel",
@@ -288066,8 +288066,8 @@ null
 null
 ],
 "opened": [
-"1997-20",
-"month"
+"1997",
+"year"
 ],
 "type": [
 "Steel",
@@ -288446,8 +288446,8 @@ null
 null
 ],
 "opened": [
-"2003-20",
-"month"
+"2003",
+"year"
 ],
 "type": [
 "Steel",
@@ -290037,8 +290037,8 @@ null
 null
 ],
 "opened": [
-"2020-20",
-"month"
+"2020",
+"year"
 ],
 "type": [
 "Steel",
@@ -290059,8 +290059,8 @@ null
 null
 ],
 "opened": [
-"2011-20",
-"month"
+"2011",
+"year"
 ],
 "type": [
 "Steel",
@@ -290197,8 +290197,8 @@ null
 null
 ],
 "opened": [
-"2013-20",
-"month"
+"2013",
+"year"
 ],
 "type": [
 "Steel",
@@ -290767,8 +290767,8 @@ null
 },
 "coasterpedia|Chenille (Koaland)": {
 "closed": [
-"2025-20",
-"month"
+"2025",
+"year"
 ],
 "inv": [
 0,
@@ -290885,8 +290885,8 @@ null
 null
 ],
 "opened": [
-"2022-20",
-"month"
+"2022",
+"year"
 ],
 "type": [
 "Steel",
@@ -293815,8 +293815,8 @@ null
 },
 "coasterpedia|Comet Jr. (Myrtle Beach Pavilion)": {
 "closed": [
-"1966-19",
-"month"
+"1966",
+"year"
 ],
 "inv": [
 0,
@@ -294695,8 +294695,8 @@ null
 null
 ],
 "opened": [
-"2013-20",
-"month"
+"2013",
+"year"
 ],
 "s": [
 18.6,
@@ -300429,8 +300429,8 @@ null
 null
 ],
 "opened": [
-"2004-20",
-"month"
+"2004",
+"year"
 ],
 "type": [
 "Steel",
@@ -300819,8 +300819,8 @@ null
 null
 ],
 "opened": [
-"2016-20",
-"month"
+"2016",
+"year"
 ],
 "type": [
 "Steel",
@@ -303503,8 +303503,8 @@ null
 null
 ],
 "opened": [
-"2010-20",
-"month"
+"2010",
+"year"
 ],
 "type": [
 "Steel",
@@ -304511,8 +304511,8 @@ null
 null
 ],
 "opened": [
-"2007-20",
-"month"
+"2007",
+"year"
 ],
 "type": [
 "Steel",
@@ -309735,8 +309735,8 @@ null
 },
 "coasterpedia|Figure 8 (State Fair of Texas)": {
 "closed": [
-"1919-19",
-"month"
+"1919",
+"year"
 ],
 "opened": [
 "1905",
@@ -312423,8 +312423,8 @@ null
 },
 "coasterpedia|Force One Coaster": {
 "closed": [
-"2019-20",
-"month"
+"2019",
+"year"
 ],
 "h": [
 14.8,
@@ -313563,8 +313563,8 @@ null
 null
 ],
 "opened": [
-"1968-19",
-"month"
+"1968",
+"year"
 ],
 "type": [
 "Steel",
@@ -314639,8 +314639,8 @@ null
 null
 ],
 "opened": [
-"1985-19",
-"month"
+"1985",
+"year"
 ],
 "type": [
 "Steel",
@@ -316302,6 +316302,10 @@ null
 ]
 },
 "coasterpedia|Gliding Dragon (Water Garden)": {
+"closed": [
+"2022",
+"year"
+],
 "inv": [
 0,
 null
@@ -318351,8 +318355,8 @@ null
 },
 "coasterpedia|Grand 8": {
 "closed": [
-"2008-20",
-"month"
+"2008",
+"year"
 ],
 "inv": [
 0,
@@ -321839,8 +321843,8 @@ null
 },
 "coasterpedia|Highway Boat": {
 "closed": [
-"2019-20",
-"month"
+"2019",
+"year"
 ],
 "inv": [
 0,
@@ -323361,8 +323365,8 @@ null
 },
 "coasterpedia|Hvin & Hyl Rutsch": {
 "closed": [
-"2007-20",
-"month"
+"2007",
+"year"
 ],
 "h": [
 20.0,
@@ -325233,8 +325237,8 @@ null
 },
 "coasterpedia|Italian Bobs (Adventureland)": {
 "closed": [
-"1974-19",
-"month"
+"1974",
+"year"
 ],
 "inv": [
 0,
@@ -325689,8 +325693,8 @@ null
 null
 ],
 "opened": [
-"2016-20",
-"month"
+"2016",
+"year"
 ],
 "s": [
 23.6,
@@ -328237,8 +328241,8 @@ null
 },
 "coasterpedia|Jurassic Adventure": {
 "closed": [
-"2009-20",
-"month"
+"2009",
+"year"
 ],
 "inv": [
 0,
@@ -332127,8 +332131,8 @@ null
 null
 ],
 "opened": [
-"2012-20",
-"month"
+"2012",
+"year"
 ],
 "type": [
 "Steel",
@@ -334069,8 +334073,8 @@ null
 null
 ],
 "opened": [
-"1953-19",
-"month"
+"1953",
+"year"
 ],
 "type": [
 "Steel",
@@ -334915,8 +334919,8 @@ null
 },
 "coasterpedia|Loop-de-Loop": {
 "closed": [
-"1904-19",
-"month"
+"1904",
+"year"
 ],
 "inv": [
 1,
@@ -338207,8 +338211,8 @@ null
 },
 "coasterpedia|Mariehønen (Tivoli Gardens)": {
 "closed": [
-"1993-19",
-"month"
+"1993",
+"year"
 ],
 "inv": [
 0,
@@ -339741,8 +339745,8 @@ null
 null
 ],
 "opened": [
-"1966-19",
-"month"
+"1966",
+"year"
 ],
 "type": [
 "Steel",
@@ -342495,8 +342499,8 @@ null
 },
 "coasterpedia|Monster Mouse (Legend City)": {
 "closed": [
-"1973-19",
-"month"
+"1973",
+"year"
 ],
 "manu": [
 "Allan Herschell",
@@ -342551,8 +342555,8 @@ null
 null
 ],
 "opened": [
-"2011-20",
-"month"
+"2011",
+"year"
 ],
 "type": [
 "Steel",
@@ -343131,8 +343135,8 @@ null
 null
 ],
 "opened": [
-"2007-20",
-"month"
+"2007",
+"year"
 ],
 "type": [
 "Steel",
@@ -344941,8 +344945,8 @@ null
 null
 ],
 "opened": [
-"2018-20",
-"month"
+"2018",
+"year"
 ],
 "type": [
 "Steel",
@@ -346303,8 +346307,8 @@ null
 },
 "coasterpedia|Ocean Train Coaster": {
 "closed": [
-"2020-20",
-"month"
+"2020",
+"year"
 ],
 "dur": [
 44,
@@ -351723,8 +351727,8 @@ null
 },
 "coasterpedia|Racing (Meli Park)": {
 "closed": [
-"1993-94",
-"month"
+"1993",
+"year"
 ],
 "inv": [
 0,
@@ -353273,8 +353277,8 @@ null
 null
 ],
 "opened": [
-"2015-20",
-"month"
+"2015",
+"year"
 ],
 "type": [
 "Steel",
@@ -356387,8 +356391,8 @@ null
 },
 "coasterpedia|Roller Coaster (Flint Park)": {
 "closed": [
-"1957-19",
-"month"
+"1957",
+"year"
 ],
 "opened": [
 "1954",
@@ -356657,8 +356661,8 @@ null
 null
 ],
 "opened": [
-"2024-20",
-"month"
+"2024",
+"year"
 ],
 "type": [
 "Steel",
@@ -357071,8 +357075,8 @@ null
 },
 "coasterpedia|Roller Coaster (Phoenix Island Playground)": {
 "closed": [
-"2013-20",
-"month"
+"2013",
+"year"
 ],
 "inv": [
 1,
@@ -357083,8 +357087,8 @@ null
 null
 ],
 "opened": [
-"2008-20",
-"month"
+"2008",
+"year"
 ],
 "type": [
 "Steel",
@@ -357251,8 +357255,8 @@ null
 null
 ],
 "opened": [
-"2011-20",
-"month"
+"2011",
+"year"
 ],
 "type": [
 "Steel",
@@ -357313,8 +357317,8 @@ null
 null
 ],
 "opened": [
-"1906-19",
-"month"
+"1906",
+"year"
 ],
 "type": [
 "Wood",
@@ -358303,8 +358307,8 @@ null
 },
 "coasterpedia|Round the Treetops": {
 "closed": [
-"1930-19",
-"month"
+"1930",
+"year"
 ],
 "opened": [
 "1912",
@@ -358585,8 +358589,8 @@ null
 },
 "coasterpedia|Runaway Mine Train (Atlantic Splash Adventure)": {
 "closed": [
-"2025-20",
-"month"
+"2025",
+"year"
 ],
 "h": [
 42.7,
@@ -360941,8 +360945,8 @@ null
 },
 "coasterpedia|Scenic Railway (Euclid Beach Park)": {
 "closed": [
-"1936-19",
-"month"
+"1936",
+"year"
 ],
 "inv": [
 0,
@@ -361635,8 +361639,8 @@ null
 null
 ],
 "opened": [
-"2008-20",
-"month"
+"2008",
+"year"
 ],
 "type": [
 "Steel",
@@ -363979,8 +363983,8 @@ null
 null
 ],
 "opened": [
-"2001-20",
-"month"
+"2001",
+"year"
 ],
 "type": [
 "Steel",
@@ -365411,8 +365415,8 @@ null
 },
 "coasterpedia|Slope Car": {
 "closed": [
-"2005-20",
-"month"
+"2005",
+"year"
 ],
 "dur": [
 149,
@@ -366725,8 +366729,8 @@ null
 },
 "coasterpedia|Space Trip (Beijing Shijingshan Amusement Park)": {
 "closed": [
-"2010-20",
-"month"
+"2010",
+"year"
 ],
 "dur": [
 85,
@@ -372137,8 +372141,8 @@ null
 null
 ],
 "opened": [
-"2017-20",
-"month"
+"2017",
+"year"
 ],
 "type": [
 "Steel",
@@ -372211,8 +372215,8 @@ null
 },
 "coasterpedia|Super Sonic": {
 "closed": [
-"1989-20",
-"month"
+"1989",
+"year"
 ],
 "inv": [
 0,
@@ -373439,8 +373443,8 @@ null
 },
 "coasterpedia|Switchback Railway (Euclid Beach Park)": {
 "closed": [
-"1903-19",
-"month"
+"1903",
+"year"
 ],
 "inv": [
 0,
@@ -377383,8 +377387,8 @@ null
 },
 "coasterpedia|Thriller (Arnolds Park)": {
 "closed": [
-"1948-19",
-"month"
+"1948",
+"year"
 ],
 "h": [
 73.0,
@@ -378537,8 +378541,8 @@ null
 },
 "coasterpedia|Tickler (Luna Park; opened 1908)": {
 "closed": [
-"1923-19",
-"month"
+"1923",
+"year"
 ],
 "manu": [
 "W.F. Mangels Company",
@@ -380749,8 +380753,8 @@ null
 },
 "coasterpedia|Tokaido (EuroPark Milano Idroscalo)": {
 "closed": [
-"2007-20",
-"month"
+"2007",
+"year"
 ],
 "h": [
 23.0,
@@ -381037,8 +381041,8 @@ null
 },
 "coasterpedia|Top (Luna Park)": {
 "closed": [
-"1920-19",
-"month"
+"1920",
+"year"
 ],
 "manu": [
 "Spiral Wheel Operating Corporation",
@@ -381707,8 +381711,8 @@ null
 },
 "coasterpedia|Tornado (Victory Park)": {
 "closed": [
-"2013-20",
-"month"
+"2013",
+"year"
 ],
 "inv": [
 0,
@@ -388698,8 +388702,8 @@ null
 null
 ],
 "opened": [
-"2025-20",
-"month"
+"2025",
+"year"
 ],
 "type": [
 "Steel",
@@ -389536,8 +389540,8 @@ null
 null
 ],
 "opened": [
-"2012-20",
-"month"
+"2012",
+"year"
 ],
 "type": [
 "Steel",
@@ -391486,8 +391490,8 @@ null
 null
 ],
 "opened": [
-"1971-19",
-"month"
+"1971",
+"year"
 ],
 "type": [
 "Steel",
@@ -391728,8 +391732,8 @@ null
 },
 "coasterpedia|Wild Mouse (Kariya-shi Kotsu Jido Yuen)": {
 "closed": [
-"2006-20",
-"month"
+"2006",
+"year"
 ],
 "inv": [
 0,
@@ -392862,8 +392866,8 @@ null
 null
 ],
 "opened": [
-"2007-20",
-"month"
+"2007",
+"year"
 ],
 "type": [
 "Steel",
@@ -400107,5 +400111,5 @@ null
 "osm|way/998037877": {},
 "osm|way/998037878": {}
 },
-"retrieved": "2026-11-18"
+"retrieved": "2026-11-19"
 }
