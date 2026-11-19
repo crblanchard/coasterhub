@@ -156,11 +156,16 @@ for r in recs:
     cands.append((best[0], r))
 # One ride, several sources: group by park and squashed name, one entry each,
 # listing every source that has it.
+# Two records from ONE source with one name at one park are two rides
+# (Butterfly at Schloss Thurn, 1993 and 2022), never one: the second gets its
+# own entry. Merged, the add read the wrong page's stats (fixed in 199).
 groups = collections.OrderedDict()
 for p, r in sorted(cands, key=lambda x: (x[0], sq(x[1]['name']), x[1]['source'])):
-    groups.setdefault((p, sq(r['name'])), []).append(r)
+    n = 0
+    while any(x['source'] == r['source'] for x in groups.get((p, sq(r['name']), n), [])): n += 1
+    groups.setdefault((p, sq(r['name']), n), []).append(r)
 uniq = [dict(park=p, name=rs[0]['name'], status=next((r['status'] for r in rs if r['status']), None),
-             refs=[dict(source=r['source'], ref=r['ref']) for r in rs]) for (p, _), rs in groups.items()]
+             refs=[dict(source=r['source'], ref=r['ref']) for r in rs]) for (p, _, _), rs in groups.items()]
 
 # New parks (2026-11-19): open-source coasters at parks that are not on the
 # site at all, grouped by park, with the park's coordinates (average of its
@@ -190,17 +195,24 @@ for r in recs:
     raw = next((i['raw'] for i in src['items'] if i['source'] == r['source'] and i['ref'] == r['ref']), {})
     # Same name, different park ("Greenland", "VinWonders" are several): split
     # by country, and by distance when both sides have coordinates.
+    # Coasterpedia's location ("Tong'an, Xiamen, Fujian") splits them too, for
+    # pages with no coordinates: Oriental Heritage is five parks, and before
+    # this the ones without a pin all joined the first (fixed in 198).
     key = (pk,)
+    loc = sq(raw.get('location') or '') or None
     n = 0
     while key + (n,) in newp:
         gg = newp[key + (n,)]
-        if r['lat'] is None or not gg['lats'] or km(r['lat'], r['lon'], gg['lats'][0], gg['lons'][0]) <= 30: break
+        if (loc is None or not gg['locs'] or loc in gg['locs']) and \
+           (r['lat'] is None or not gg['lats'] or km(r['lat'], r['lon'], gg['lats'][0], gg['lons'][0]) <= 30): break
         n += 1
-    g = newp.setdefault(key + (n,), dict(park=r['park'], coasters=collections.OrderedDict(), lats=[], lons=[], regions=collections.Counter()))
+    g = newp.setdefault(key + (n,), dict(park=r['park'], coasters=collections.OrderedDict(), lats=[], lons=[], regions=collections.Counter(), locs=set()))
+    if loc: g['locs'].add(loc)
     if r['lat'] is not None: g['lats'].append(r['lat']); g['lons'].append(r['lon'])
     rg = region_of(raw)
     if rg: g['regions'][rg] += 1
     k = sq(r['name'])
+    while k in g['coasters'] and any(x['source'] == r['source'] for x in g['coasters'][k]['refs']): k += '#'
     c = g['coasters'].setdefault(k, dict(name=r['name'], status=r.get('status') or raw.get('status'), refs=[]))
     c['refs'].append(dict(source=r['source'], ref=r['ref']))
     if not c['status'] and raw.get('status'): c['status'] = raw['status']
