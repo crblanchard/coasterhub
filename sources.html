@@ -93,6 +93,7 @@
 
     <h2>The sources</h2>
     <div class="cards" id="cards"></div>
+    <p class="muted">Also used: <a href="https://themeparks.wiki" style="color:var(--accent2)">ThemeParks.wiki</a>, which lists the rides about 200 parks show in their own apps. It supplies no stats; it confirms new coasters and flags ones a park no longer lists.</p>
 
     <h2>Stat by stat</h2>
     <p class="muted">How many coasters have each stat, and where those values came from.</p>
@@ -127,6 +128,12 @@ const S = [
   { k: 'coasterpedia', name: 'Coasterpedia', color: 'var(--accent2)', lic: 'CC BY-SA 4.0', url: 'https://coasterpedia.net',
     about: 'A wiki about roller coasters written by enthusiasts, with an information box for each ride. The main source for most stats here.',
     credit: 'Content from Coasterpedia is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0</a> licence.' },
+  { k: 'enwiki', name: 'Wikipedia (English)', color: '#5b6fd6', lic: 'CC BY-SA 4.0', url: 'https://en.wikipedia.org',
+    about: 'The roller coaster infoboxes on English Wikipedia. Used where Coasterpedia has no value.',
+    credit: 'Text from Wikipedia is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0</a> licence.' },
+  { k: 'dewiki', name: 'Wikipedia (German)', color: '#8a6fd6', lic: 'CC BY-SA 4.0', url: 'https://de.wikipedia.org',
+    about: 'German Wikipedia&rsquo;s coaster infoboxes, strongest for parks in Germany and the rest of Europe.',
+    credit: 'Text from Wikipedia is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0</a> licence.' },
   { k: 'wikidata', name: 'Wikidata', color: '#2e9b8f', lic: 'CC0', url: 'https://www.wikidata.org',
     about: 'The free knowledge base behind Wikipedia. Used where Coasterpedia has no value, and to confirm the ones it has.',
     credit: 'Wikidata is released into the public domain (<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>).' },
@@ -141,7 +148,7 @@ const S = [
 fetch('/api/sources').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
   $('loading').hidden = true; $('ui').hidden = false;
   const total = Object.values(d.bySource).reduce((a, b) => a + b, 0);
-  const openN = (d.bySource.coasterpedia || 0) + (d.bySource.wikidata || 0) + (d.bySource.osm || 0);
+  const openN = ['coasterpedia', 'enwiki', 'dewiki', 'wikidata', 'osm'].reduce((n, k) => n + (d.bySource[k] || 0), 0);
   $('t-stats').textContent = fmt(total);
   $('t-open').textContent = fmt(openN) + ' (' + pct(openN, total) + '%)';
   $('t-manual').textContent = fmt(d.bySource.manual) + ' (' + pct(d.bySource.manual, total) + '%)';
@@ -153,7 +160,7 @@ fetch('/api/sources').then(r => r.ok ? r.json() : Promise.reject(r.status)).then
     + '<p class="nums"><b>' + fmt(d.bySource[s.k]) + '</b> stats on the site' + (d.linked[s.k] ? ' · <b>' + fmt(d.linked[s.k]) + '</b> coasters linked' : '') + '</p>'
     + (s.credit ? '<p class="nums">' + s.credit + '</p>' : '') + '</div>').join('');
   const cols = S.filter(s => d.bySource[s.k]);
-  const SHORT = { coasterpedia: 'Coasterpedia', wikidata: 'Wikidata', osm: 'OSM', fair: 'Fairs', manual: 'By hand' };
+  const SHORT = { coasterpedia: 'Coasterpedia', enwiki: 'Wikipedia EN', dewiki: 'Wikipedia DE', wikidata: 'Wikidata', osm: 'OSM', fair: 'Fairs', manual: 'By hand' };
   $('fhead').innerHTML = '<th>Stat</th><th>Coasters</th>' + cols.map(s => '<th>' + SHORT[s.k] + '</th>').join('');
   $('fbody').innerHTML = d.fieldOrder.map(f => { const x = d.fields[f];
     return '<tr><td>' + NAMES[f] + '</td><td>' + fmt(x.filled) + ' <span class="z">(' + pct(x.filled, d.coasters) + '%)</span></td>'

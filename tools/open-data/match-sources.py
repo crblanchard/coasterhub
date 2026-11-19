@@ -37,6 +37,10 @@ def num(v):
 
 MONTHS = {m: i + 1 for i, m in enumerate(['january', 'february', 'march', 'april', 'may', 'june', 'july',
           'august', 'september', 'october', 'november', 'december'])}
+# German Wikipedia writes "18. Juni 2001".
+MONTHS.update({m: i + 1 for i, m in enumerate(['januar', 'februar', 'märz', 'april', 'mai', 'juni', 'juli',
+               'august', 'september', 'oktober', 'november', 'dezember'])})
+MONTHS['jänner'] = 1
 def date(v):
     """'March 26, 1994' / '19 March 2005' / 'May 1998' / '2017' / '2017-05-03' -> (value, prec)."""
     v = (v or '').strip()
@@ -142,7 +146,64 @@ def osm_items():
                           names={sq(n) for n in names if n}, parks=set(),
                           lat=e.get('lat'), lon=e.get('lon'), raw=t, facts=f))
 
-cp_items(); osm_items()
+def wiki_items():
+    """English and German Wikipedia infoboxes (2026-11-19): sources 'enwiki'
+    and 'dewiki', ref = the article title."""
+    def dnum(v):
+        # German decimals use a comma ("53,5"); English uses it for thousands.
+        v = str(v or '')
+        if re.search(r'\d,\d{1,2}(?!\d)', v) and '.' not in v: v = v.replace(',', '.')
+        return num(v)
+    for lang, src in (('en', 'enwiki'), ('de', 'dewiki')):
+        p = 'tools/open-data/wikipedia/%s.jsonl' % lang
+        if not os.path.exists(p): continue
+        for line in open(p):
+            r = json.loads(line)
+            b = {k: re.sub(r'\s+', ' ', v) for k, v in r['params'].items() if 'rcdb' not in k and 'rcdb' not in v.lower()}
+            title = r['title']
+            f = {}
+            if lang == 'en':
+                name = b.get('name') or re.sub(r'\s*\([^)]*\)$', '', title)
+                park = b.get('location')
+                def metric(base, factor):
+                    for k, conv in ((base + '_ft', 1), (base + '_mph', 1), (base + '_m', factor), (base + '_kmh', 0.621371), (base + '_km/h', 0.621371)):
+                        if num(b.get(k)) is not None: return round(num(b[k]) * conv, 1)
+                    return None
+                for k, fld in (('height', 'h'), ('length', 'l')):
+                    v = metric(k, 3.28084)
+                    if v is not None: f[fld] = v
+                v = metric('speed', 1)
+                if v is not None: f['s'] = v
+                if num(b.get('inversions')) is not None: f['inv'] = int(num(b['inversions']))
+                if b.get('duration') and secs(b['duration']): f['dur'] = secs(b['duration'])
+                for k, fld in (('opened', 'opened'), ('closed', 'closed'), ('closing_date', 'closed')):
+                    d = date(b.get(k))
+                    if d and fld not in f: f[fld] = d
+                if b.get('manufacturer'): f['manu'] = maker(b['manufacturer'])
+                if b.get('model'): f['model'] = b['model']
+                t = (b.get('type') or '').lower()
+            else:
+                name = b.get('name') or re.sub(r'\s*\([^)]*\)$', '', title)
+                park = b.get('freizeitpark') or b.get('park')
+                for k, fld, conv in (('höhe', 'h', 3.28084), ('länge', 'l', 3.28084), ('geschwindigkeit', 's', 0.621371)):
+                    if dnum(b.get(k)) is not None: f[fld] = round(dnum(b[k]) * conv, 1)
+                if dnum(b.get('inversionen')) is not None: f['inv'] = int(dnum(b['inversionen']))
+                if b.get('fahrzeit') and secs(b['fahrzeit']): f['dur'] = secs(b['fahrzeit'])
+                for k, fld in (('eröffnung', 'opened'), ('schließung', 'closed'), ('schliessung', 'closed')):
+                    d = date(b.get(k))
+                    if d and fld not in f: f[fld] = d
+                if b.get('hersteller'): f['manu'] = maker(b['hersteller'])
+                if b.get('modell'): f['model'] = b['modell']
+                t = (b.get('typ') or '').lower().replace('stahl', 'steel').replace('holz', 'wood')
+            if 'wood' in t and 'steel' not in t: f['type'] = 'Wood'
+            elif 'steel' in t or 'hybrid' in t: f['type'] = 'Steel'
+            names = [name, title, re.sub(r'\s*\([^)]*\)$', '', title)] + [x.strip() for x in re.split(r'[;,]', b.get('previousnames', '')) if x.strip()]
+            names = [re.sub(r'\s*\(\d{4}.*\)$', '', n) for n in names]
+            items.append(dict(source=src, ref=title, name=name, park=park,
+                              names={sq(n) for n in names if n}, parks={sq(park or '')} - {''},
+                              lat=None, lon=None, raw=b, facts=f))
+
+cp_items(); osm_items(); wiki_items()
 
 # ---- matching ------------------------------------------------------------
 by = collections.defaultdict(lambda: collections.defaultdict(list))   # source -> squashed name -> items

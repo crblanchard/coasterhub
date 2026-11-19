@@ -25,7 +25,7 @@
      total and only ever going up, over the list for the chosen one. It
      replaced /sources, /open-compare, /open-cleanup, /open-review and
      /open-cutover. Unlisted. */
-  .tracker{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:4px 0 10px}
+  .tracker{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:4px 0 10px}
   .typeit{display:inline-flex;gap:4px;align-items:center;margin-top:4px}
   .typeit input{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:4px 8px;font-size:.8rem;width:170px}
   .tracker button{text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--fg);display:grid;gap:4px}
@@ -64,7 +64,7 @@
     table.mm td.st{min-width:0}
     button.val{display:block;margin:0 0 4px}
   }
-  @media (max-width:980px){ .tracker{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:1100px){ .tracker{grid-template-columns:repeat(3,1fr)} }
   @media (max-width:640px){ .tracker{grid-template-columns:repeat(2,1fr)} }
   /* Shared pieces: lists, chips, review cards, the controls row. */
   h2{font-size:1.15rem;margin:30px 0 6px}
@@ -183,11 +183,13 @@ CoasterHub.initNav('sources');
 const NAMES = { manu: 'Maker', model: 'Model', type: 'Steel / wood', h: 'Height', s: 'Speed', l: 'Length',
   inv: 'Inversions', dur: 'Duration', opened: 'Opened', closed: 'Closed' };
 const UNITS = { h: ' ft', l: ' ft', s: ' mph', dur: ' s' };
-const SRC = { manual: 'Manual', fair: 'Fair ride', wikidata: 'Wikidata', coasterpedia: 'Coasterpedia', osm: 'OpenStreetMap' };
+const SRC = { manual: 'Manual', fair: 'Fair ride', wikidata: 'Wikidata', coasterpedia: 'Coasterpedia', osm: 'OpenStreetMap', enwiki: 'Wikipedia (EN)', dewiki: 'Wikipedia (DE)', themeparks: 'Park app' };
 const LINK = {
   wikidata: r => 'https://www.wikidata.org/wiki/' + r,
   coasterpedia: r => 'https://coasterpedia.net/wiki/' + encodeURIComponent(r.replace(/ /g, '_')),
   osm: r => 'https://www.openstreetmap.org/' + r,
+  enwiki: r => 'https://en.wikipedia.org/wiki/' + encodeURIComponent(r.replace(/ /g, '_')),
+  dewiki: r => 'https://de.wikipedia.org/wiki/' + encodeURIComponent(r.replace(/ /g, '_')),
 };
 const TABS = {
   gaps: { t: 'Fill gaps', h: 'Stats the sources now have',
@@ -202,6 +204,9 @@ const TABS = {
   adds: { t: 'New coasters', h: 'Coasters the sources have that the site doesn&rsquo;t',
     p: 'At parks already on the site. Add one and it is created with the sources&rsquo; stats and shows on /changes; leave it out and it won&rsquo;t come back.',
     f: [['op', 'Operating or under construction'], ['multi', 'In two or more sources'], ['', 'Any status'], ['closed', 'Closed']] },
+  status: { t: 'Status check', h: 'Operating coasters the park no longer lists',
+    p: 'The park&rsquo;s own app (via ThemeParks.wiki) doesn&rsquo;t list these, though the site has them as operating. Some just aren&rsquo;t in the app (kiddie coasters often aren&rsquo;t); others have closed.',
+    f: [['', 'All']] },
   nosource: { t: 'Needs a source', h: 'Coasters still missing stats',
     p: 'Stats that are blank and no open source has. Most-ridden first. Add them to Coasterpedia or Wikidata, citing a park page or news article (not RCDB), and they arrive here on the next Monday refresh.',
     f: [['ridden', 'Ridden by someone here'], ['', 'All'], ['nolink', 'No open source at all']] },
@@ -248,6 +253,7 @@ function rows() {
   // Best-sourced first: several sources, then Coasterpedia/Wikidata, OSM-only (often mislabelled) last.
   const rank = a => -(a.refs.filter(r => r.source !== 'osm').length * 2 + a.refs.length);
   if (tab === 'adds') return D.adds.filter(has).sort((a, b) => rank(a) - rank(b) || a.park.localeCompare(b.park)).filter(a => f === 'op' ? !a.status || /operat|construct/i.test(a.status) : f === 'multi' ? a.refs.length > 1 : f === 'closed' ? /defunct|not operating|closed|removed|relocated/i.test(a.status || '') : true);
+  if (tab === 'status') return D.status.filter(has);
   return D.nosource.filter(has).filter(x => f === 'ridden' ? x.riders > 0 : f === 'nolink' ? !x.sources.length : true);
 }
 function render() {
@@ -286,10 +292,13 @@ const VIEW = {
           + '<div class="act">' + btn('Same ride: link', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'approve' }, 'yes') + btn('Not the same', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'reject' }, 'no') + '</div></div>';
       }).join('') + '</div>',
   adds: list => '<div class="cards">' + list.map(a => '<div class="card"><div class="one"><b>' + esc(a.name) + '</b><small>' + esc(a.park) + (a.status ? ' · ' + esc(a.status) : '') + '</small>'
-      + '<div class="why">' + a.refs.map(r => '<a class="go" href="' + LINK[r.source](r.ref) + '" target="_blank" rel="noopener">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ')
-      + (a.refs.every(r => r.source === 'osm') ? ' · <span class="bad">only in OpenStreetMap, which sometimes labels water rides and play equipment as coasters</span>' : '') + '</div></div>'
+      + '<div class="why">' + a.refs.filter(r => LINK[r.source]).map(r => '<a class="go" href="' + LINK[r.source](r.ref) + '" target="_blank" rel="noopener">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ')
+      + (a.refs.some(r => r.source === 'themeparks') ? ' · <span class="chip ok">listed in the park&rsquo;s app</span>' : '')
+      + (a.refs.every(r => r.source === 'osm' || r.source === 'themeparks') ? ' · <span class="bad">only in OpenStreetMap, which sometimes labels water rides and play equipment as coasters</span>' : '') + '</div></div>'
       + '<div class="act">' + btn('Add to the site', { a: 'add', park: a.park, name: a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'yes')
       + btn('Leave out', { a: 'noadd', park: a.park, name: a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'no') + '</div></div>').join('') + '</div>',
+  status: list => '<div class="tbl-wrap"><table><thead><tr><th>Coaster</th><th></th></tr></thead><tbody>' + list.map(r =>
+    '<tr><td class="nm">' + coaster(r) + '</td><td class="todo">' + btn('Still open', { a: 'stillopen', id: r.id }, 'small') + btn('Closed', { a: 'closed', id: r.id }, 'small yes') + '</td></tr>').join('') + '</tbody></table></div>',
   nosource: list => '<div class="tbl-wrap"><table><thead><tr><th>Coaster</th><th>Missing</th><th class="num">Riders</th><th>Find it</th></tr></thead><tbody>' + list.map(r =>
     '<tr><td class="nm">' + coaster(r) + '</td><td class="todo">' + r.missing.map(f => NAMES[f].toLowerCase()).join(', ') + (r.sources.length ? '' : ' <span class="chip">no open source</span>') + '</td><td class="num">' + r.riders + '</td><td class="todo">'
     + '<a class="go" target="_blank" rel="noopener" href="https://coasterpedia.net/w/index.php?search=' + encodeURIComponent(r.name) + '">Coasterpedia</a> · '
@@ -314,6 +323,12 @@ function payload(b) {
 document.addEventListener('click', e => {
   const b = e.target.closest('#list button'); if (!b) return;
   if (b.dataset.a) {
+    if (b.dataset.a === 'closed') {
+      const d = prompt('When did ' + (b.closest('tr').querySelector('.nm a') || {}).textContent + ' close? (YYYY, YYYY-MM or YYYY-MM-DD; blank = this year)', '');
+      if (d === null) return;
+      const x = payload(b); x.date = d.trim();
+      return after(post('/api/cutover/apply', x), b);
+    }
     if (b.dataset.a === 'add' && !confirm('Add ' + b.dataset.name + ' at ' + b.dataset.park + ' to the site?')) return;
     return after(post('/api/cutover/apply', payload(b)), b);
   }

@@ -72,6 +72,10 @@ jobs:
           # tools/open-data/osm/coasters.json is used again.
           python3 -I tools/open-data/coasterpedia-pull.py
           bash tools/open-data/osm-pull.sh || echo "::warning::OSM pull failed; reusing the last one"
+          # Wikipedia, English and German (CC BY-SA), and ThemeParks.wiki (ride
+          # names from the parks' apps). Either failing reuses last week's copy.
+          python3 -I tools/open-data/wikipedia-pull.py en de || echo "::warning::Wikipedia pull failed; reusing the last one"
+          python3 -I tools/open-data/themeparks-pull.py || echo "::warning::ThemeParks.wiki pull failed; reusing the last one"
           python3 -I tools/open-data/match-sources.py
           python3 -I tools/open-data/build-sources-sql.py > migrations/189-open-data-sources.sql
           # The checks behind /open-review: suggested links, coasters to add.

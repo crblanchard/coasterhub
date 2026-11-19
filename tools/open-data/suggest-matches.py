@@ -20,7 +20,7 @@ tools/open-data/review.json:
 
 Decisions already made (reviews.json) are not suggested again.
 Run from the repo root after the matchers."""
-import collections, csv, difflib, json, math, os, re, unicodedata
+import collections, csv, datetime, difflib, json, math, os, re, unicodedata
 
 def sq(s):
     s = unicodedata.normalize('NFKD', s or '').encode('ascii', 'ignore').decode().lower()
@@ -162,8 +162,57 @@ for p, r in sorted(cands, key=lambda x: (x[0], sq(x[1]['name']), x[1]['source'])
 uniq = [dict(park=p, name=rs[0]['name'], status=next((r['status'] for r in rs if r['status']), None),
              refs=[dict(source=r['source'], ref=r['ref']) for r in rs]) for (p, _), rs in groups.items()]
 
+# ThemeParks.wiki (2026-11-19): the rides each big park lists in its own app.
+# It cannot tell a coaster from a carousel and has no stats, so it never adds
+# anything by itself. It (a) confirms a coaster to add when the park lists a
+# ride of that name, and (b) flags an operating coaster here that the park no
+# longer lists ("may have closed").
+tp_path = 'tools/open-data/themeparks/parks.json'
+status_check, tp_items = [], []
+if os.path.exists(tp_path):
+    tparks = json.load(open(tp_path))['parks']
+    def tp_park(tp):
+        k = sq(tp['name'])
+        for p in parks:
+            if k in park_names(p): return p
+        best = None
+        for p, pk in parks.items():
+            if tp['lat'] is None or pk.get('lat') is None: continue
+            d = km(tp['lat'], tp['lon'], pk['lat'], pk['lon'])
+            if d <= 2.5 and (best is None or d < best[1]): best = (p, d)
+        return best[0] if best else None
+    by_park_tp = {}
+    for tp in tparks:
+        p = tp_park(tp)
+        if not p: continue
+        by_park_tp.setdefault(p, []).extend(tp['rides'])
+        for r in tp['rides']: tp_items.append(dict(ref=r['id'], name=r['name'], park=p, lat=r['lat'], lon=r['lon']))
+    def listed(names, rides):
+        for r in rides:
+            k = sq(re.sub(r'\s*\(.*\)$', '', r['name']))
+            if not k: continue
+            for n in names:
+                if not n: continue
+                if n == k or (len(n) >= 5 and len(k) >= 5 and (n in k or k in n)) or difflib.SequenceMatcher(None, n, k).ratio() >= 0.88:
+                    return r
+        return None
+    # (a) confirm coasters to add
+    for a in uniq:
+        r = listed({sq(a['name'])}, by_park_tp.get(a['park'], []))
+        if r: a['refs'].append(dict(source='themeparks', ref=r['id']))
+    # (b) operating coasters the park does not list
+    this_year = datetime.date.today().year
+    for c in coasters:
+        rides = by_park_tp.get(c['park'])
+        if not rides or c.get('closed'): continue
+        if (c.get('yr') or 0) > this_year or str(c.get('opened') or '')[:10] > datetime.date.today().isoformat(): continue
+        names = {sq(c['name']), sq(re.sub(r'\s*\([^)]*\)$', '', c['name']))} | {sq(n) for n in alias_by_c.get(c['id'], [])}
+        if not listed(names, rides): status_check.append(dict(coaster_id=c['id'], park=c['park']))
+    print('themeparks: parks matched', len(by_park_tp), 'adds confirmed', sum(1 for a in uniq if any(r['source'] == 'themeparks' for r in a['refs'])),
+          'status check', len(status_check))
+
 out = dict(suggestions=sorted(sugg.values(), key=lambda s: (-s['score'], s['coaster_id'], s['source'], s['ref'])),
-           adds=uniq,
+           adds=uniq, status_check=status_check, tp_items=tp_items,
            records=[dict(ref=r['ref'], name=r['name'], park=r['park'], lat=r['lat'], lon=r['lon']) for r in recs if r['source'] == 'wikidata'])
 json.dump(out, open('tools/open-data/review.json', 'w'), ensure_ascii=False, sort_keys=True, indent=0)
 print('suggestions', len(out['suggestions']), collections.Counter(s['reason'].split(',')[0] for s in out['suggestions']))

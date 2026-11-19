@@ -9,6 +9,9 @@
   open_adds         (park, name, status, refs)  open-source coasters at our
                     parks that match none of ours, to add to the open dataset
 
+  open_status_check (coaster_id, park, why)  operating coasters the park's app
+                    no longer lists (ThemeParks.wiki)
+
 Decisions live in open_reviews (migration 192), which this never touches.
 Usage: python3 -I tools/open-data/build-review-sql.py > migrations/NNN-open-data-review.sql"""
 import json
@@ -39,7 +42,9 @@ CREATE TABLE IF NOT EXISTS open_items (source TEXT NOT NULL, ref TEXT NOT NULL, 
 CREATE TABLE IF NOT EXISTS open_record_facts (source TEXT NOT NULL, ref TEXT NOT NULL, field TEXT NOT NULL, value TEXT, prec TEXT, cites_rcdb INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (source, ref, field));
 CREATE TABLE IF NOT EXISTS open_suggestions (source TEXT NOT NULL, ref TEXT NOT NULL, coaster_id INTEGER NOT NULL, score REAL, reason TEXT, PRIMARY KEY (source, ref, coaster_id));
 CREATE TABLE IF NOT EXISTS open_adds (park TEXT NOT NULL, name TEXT NOT NULL, status TEXT, refs TEXT, PRIMARY KEY (park, name));
-DELETE FROM open_items WHERE source = 'wikidata';
+CREATE TABLE IF NOT EXISTS open_status_check (coaster_id INTEGER PRIMARY KEY, park TEXT, why TEXT);
+DELETE FROM open_items WHERE source IN ('wikidata', 'themeparks');
+DELETE FROM open_status_check;
 DELETE FROM open_record_facts;
 DELETE FROM open_suggestions;
 DELETE FROM open_adds;""" % day)
@@ -48,6 +53,14 @@ def chunks(rows, size=250):
 for c in chunks(rv['records']):
     print("INSERT OR REPLACE INTO open_items (source, ref, name, park, lat, lon, retrieved) VALUES %s;"
           % ','.join("('wikidata',%s,%s,%s,%s,%s,%s)" % (q(r['ref']), q(r['name']), q(r['park']), n(r['lat']), n(r['lon']), q(day)) for r in c))
+# ThemeParks.wiki rides, by the park they matched: names only (see suggest-matches.py).
+for c in chunks(rv.get('tp_items', []), 250):
+    print("INSERT OR REPLACE INTO open_items (source, ref, name, park, lat, lon, retrieved) VALUES %s;"
+          % ','.join("('themeparks',%s,%s,%s,%s,%s,%s)" % (q(r['ref']), q(r['name']), q(r['park']), n(r['lat']), n(r['lon']), q(day)) for r in c))
+# Operating coasters the park's own app does not list.
+for c in chunks(rv.get('status_check', []), 250):
+    print("INSERT OR REPLACE INTO open_status_check (coaster_id, park, why) SELECT v.column1, v.column2, v.column3 FROM (VALUES %s) v WHERE EXISTS (SELECT 1 FROM coasters c WHERE c.id = v.column1);"
+          % ','.join("(%d,%s,'not listed in the park''s app')" % (s['coaster_id'], q(s['park'])) for s in c))
 for c in chunks(facts, 300):
     print("INSERT OR REPLACE INTO open_record_facts (source, ref, field, value, prec, cites_rcdb) VALUES %s;"
           % ','.join('(%s,%s,%s,%s,%s,%d)' % (q(a), q(b), q(k), q(v), q(p), rc) for a, b, k, v, p, rc in c))
