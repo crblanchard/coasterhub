@@ -6335,6 +6335,23 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   "(Old)", years). Picks are open_choices field 'name': source 'manual' for
   ours kept or typed, else the source whose name was taken. Unpicked names
   keep ours at the switch.
+- **THE SWITCH (built 2026-11-19).** /cutover's "Switch the site to the new
+  dataset" panel: Preview (POST /api/cutover/switch {dry:true}) then Switch
+  now (typed SWITCH). `runCutover` refuses a second run once
+  `coasters_rcdb_backup` exists; `migrations/194-cutover-restore.sql` undoes it.
+  Carter's rules, in his words where he gave them: removed = no open source,
+  nobody has ridden it, not kept (22 alpine/mountain coasters kept: "Keep all
+  the alpine/mountain coasters"); RCDB-only stats go BLANK ("start using rcdb
+  as a backup to see what rides have no stats") for height, speed, length,
+  inversions, duration, maker, exact opening date; model, steel/wood, closing
+  date and yr stay (blanking closing dates would make closed rides look open);
+  a value already agreeing with an open source within 5% stays as written;
+  parks left empty are hidden (deleted, in parks_rcdb_backup). Renames add a
+  coaster_aliases row with note 'cutover'. Provenance of every live value is
+  in `coaster_sources (coaster_id, field, source, ref)`. No per-coaster
+  activity rows (hundreds would bury /changes); one site update instead.
+  After it runs: start Sync static JSON, and the weekly open-data job keeps
+  going. The "new things to review each week" list is still to build.
 - **RCDB IDs hide in URLs and tags.** Wikidata's "described at URL" (P973) held
   45 rcdb.com/NNNN.htm links, and some OSM coasters carry `rcdb_id` /
   `ref:rcdb` tags; all were removed (D1 rows deleted 2026-11-18) and every

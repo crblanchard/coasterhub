@@ -1518,6 +1518,124 @@ async function getCutover(env) {
   };
 }
 
+// THE SWITCH (2026-11-19). Makes the open dataset the live one, once, from the
+// "Switch" panel on /cutover (admins). dry = true answers with what it would
+// do and writes nothing. Carter's rules for it:
+//   - Removed: coasters with no open source that nobody has ridden, unless
+//     kept (the "Not ridden: leaving out" list). Never a ridden one.
+//   - Stats only RCDB had go BLANK (height, speed, length, inversions,
+//     duration, maker, exact opening date): "start using rcdb as a backup to
+//     see what rides have no stats". Kept as they are: model (often entered
+//     by hand), steel/wood, closing date and opening year (blanking those
+//     would make closed rides look open and break Under construction).
+//   - A value comes from, in order: Carter's pick; the open sources
+//     (Coasterpedia, then Wikidata, then OSM), where the current value is
+//     kept if it already agrees within the 5% rule (so nothing churns by a
+//     rounding), else the source's; fair rides keep theirs (never RCDB).
+//   - Names: his pick in step 5, the old name filed as a former name.
+//   - Parks left with no coasters are hidden (deleted; kept in the backup).
+// Everything as it was goes into coasters_rcdb_backup / parks_rcdb_backup and
+// friends first: RCDB is the backup, and migrations/194 restores from it.
+// Where each live value came from lands in coaster_sources.
+const CUTOVER_BLANK = ["h", "s", "l", "inv", "dur", "manu", "opened"];
+const precOf = v => { const n = String(v || "").length; return n >= 10 ? "day" : n === 7 ? "month" : n === 4 ? "year" : null; };
+async function runCutover(env, acct, dry) {
+  const backed = await env.DB.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'coasters_rcdb_backup'").first();
+  if (backed) return err(409, "already switched (coasters_rcdb_backup exists); migrations/194 undoes it");
+  const cut = await getCutover(env);
+  const removeIds = new Set(cut.leaveOut.map(r => r.id));
+  const { cs, fair, open, chose } = await openTables(env);
+  const full = new Map((await env.DB.prepare("SELECT * FROM coasters").all()).results.map(c => [c.id, c]));
+  const factPrec = new Map((await env.DB.prepare("SELECT coaster_id, field, source, prec FROM open_facts WHERE field IN ('opened', 'closed')").all())
+    .results.map(r => [r.coaster_id + "|" + r.field + "|" + r.source, r.prec]));
+  const SRC_ORDER = ["coasterpedia", "wikidata", "osm"];
+  const updates = [], sources = [], renames = [], collisions = [];
+  const stat = { removed: removeIds.size, blanked: {}, changed: {}, kept: {}, renamed: 0 };
+  for (const f of OPEN_FIELDS) { stat.blanked[f] = 0; stat.changed[f] = 0; stat.kept[f] = 0; }
+  const taken = new Set(cs.filter(c => !removeIds.has(c.id)).map(c => openSquash(c.name) + "|" + c.park));
+  for (const c of cs) {
+    if (removeIds.has(c.id)) continue;
+    const row = full.get(c.id), o = open.get(c.id) || {}, set = {};
+    for (const f of OPEN_FIELDS) {
+      const cur = row[f], ch = chose.get(c.id + "|" + f);
+      let val = cur, src = "manual", ref = null, prec;
+      if (ch) { val = ch[1]; src = ch[0] === "site" ? "manual" : ch[0]; prec = precOf(val); }
+      else if (CUTOVER_BLANK.includes(f)) {
+        const bySrc = o[f] || {};
+        const s = SRC_ORDER.find(k => bySrc[k]);
+        if (fair.has(c.park)) { src = "fair"; }
+        else if (s) {
+          src = s;
+          if (openBlank(cur) || !openAgree(f, cur, bySrc[s][0])) {
+            val = bySrc[s][0];
+            prec = factPrec.get(c.id + "|" + f + "|" + s) || precOf(val);
+          }
+        } else { val = null; src = null; }
+      }
+      if (src === null) { if (!openBlank(cur)) stat.blanked[f]++; }
+      else if (String(val ?? "") !== String(cur ?? "")) stat.changed[f]++;
+      else stat.kept[f]++;
+      if (String(val ?? "") !== String(cur ?? "")) {
+        const num = f === "h" || f === "s" || f === "l" || f === "inv" || f === "dur";
+        set[f] = val == null || val === "" ? null : num ? +val : String(val);
+        if (f === "opened") set.openedPrec = set[f] == null ? null : (prec || precOf(set[f]));
+        if (f === "closed") set.closedPrec = set[f] == null ? null : (prec || precOf(set[f]));
+      }
+      if (src && !openBlank(val)) sources.push([c.id, f, src, ref]);
+    }
+    const nm = chose.get(c.id + "|name");
+    if (nm && nm[1] && nm[1] !== row.name) {
+      const key = openSquash(nm[1]) + "|" + c.park;
+      if (taken.has(key) && openSquash(nm[1]) !== openSquash(row.name)) collisions.push({ id: c.id, from: row.name, to: nm[1], park: c.park });
+      else { set.name = nm[1]; renames.push([c.id, row.name, nm[1]]); taken.add(key); stat.renamed++; }
+    }
+    if (Object.keys(set).length) updates.push([c.id, set]);
+  }
+  // Parks left with nothing on them.
+  const keepParks = new Set(cs.filter(c => !removeIds.has(c.id)).map(c => c.park));
+  const allParks = (await env.DB.prepare("SELECT name FROM parks").all()).results.map(p => p.name);
+  const hideParks = allParks.filter(p => !keepParks.has(p));
+  stat.parksHidden = hideParks.length;
+  stat.coastersAfter = cs.length - removeIds.size;
+  stat.updated = updates.length;
+  stat.collisions = collisions;
+  if (dry) return json({ dry: true, ...stat, removedList: cut.leaveOut.map(r => r.name + " (" + r.park + ")"), hiddenParks: hideParks });
+
+  // 1. The backup: every table the switch touches, as it is now.
+  const backup = ["coasters", "parks", "coaster_aliases", "same_ride", "clone_members", "rankings", "rider_category_members", "category_skipped", "model_skipped"];
+  for (const t of backup) {
+    try { await env.DB.prepare("CREATE TABLE " + t + "_rcdb_backup AS SELECT * FROM " + t).run(); } catch (e) { /* table not on this deployment */ }
+  }
+  // 2. Where every live value comes from.
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS coaster_sources (coaster_id INTEGER NOT NULL, field TEXT NOT NULL, source TEXT NOT NULL, ref TEXT, PRIMARY KEY (coaster_id, field))").run();
+  const linkRef = new Map();
+  for (const l of (await env.DB.prepare("SELECT coaster_id, source, ref FROM open_links").all()).results) linkRef.set(l.coaster_id + "|" + l.source, l.ref);
+  const run = async stmts => { for (let i = 0; i < stmts.length; i += 200) await env.DB.batch(stmts.slice(i, i + 200)); };
+  await run(sources.map(([id, f, s]) => env.DB.prepare("INSERT OR REPLACE INTO coaster_sources (coaster_id, field, source, ref) VALUES (?, ?, ?, ?)").bind(id, f, s, linkRef.get(id + "|" + s) || null)));
+  // 3. The values.
+  await run(updates.map(([id, set]) => {
+    const cols = Object.keys(set);
+    return env.DB.prepare("UPDATE coasters SET " + cols.map(k => k + " = ?").join(", ") + " WHERE id = ?").bind(...cols.map(k => set[k]), id);
+  }));
+  // 4. Renames keep the old name as a former name, so old links and lists still find it.
+  await run(renames.map(([id, from]) => env.DB.prepare("INSERT OR IGNORE INTO coaster_aliases (coaster_id, former_name, note, added) VALUES (?, ?, 'cutover', ?)").bind(id, from, new Date().toISOString().slice(0, 10))));
+  // 5. The removed coasters, and every row keyed by them.
+  const ids = [...removeIds];
+  const del = [];
+  for (const id of ids) {
+    del.push(env.DB.prepare("DELETE FROM coasters WHERE id = ?").bind(id));
+    del.push(env.DB.prepare("DELETE FROM coaster_aliases WHERE coaster_id = ?").bind(id));
+  }
+  await run(del);
+  for (const [t, col] of KEYED_BY_COASTER) {
+    try { await run(ids.map(id => env.DB.prepare("DELETE FROM " + t + " WHERE " + col + " = ?").bind(id))); } catch (e) {}
+  }
+  await tidySameRide(env);
+  // 6. Parks with nothing left.
+  await run(hideParks.map(p => env.DB.prepare("DELETE FROM parks WHERE name = ? AND NOT EXISTS (SELECT 1 FROM coasters WHERE park = ?)").bind(p, p)));
+  return json({ dry: false, ...stat });
+}
+
 // Decisions on /cutover. Changes only the open dataset: open_reviews, and for
 // a match the coaster's open_links / open_facts for that source, copied from
 // open_record_facts so the effect shows at once. decision null undoes.
@@ -2930,6 +3048,14 @@ export default {
         const id = +b.id;
         if (!id) return err(400, "id required");
         return setOpenChoice(env, acct, id, String(b.field || ""), b.source ? String(b.source) : null, b.value);
+      }
+      // The switch to the open dataset (/cutover's Switch panel). Admins only.
+      // {dry: true} previews; {dry: false, confirm: "SWITCH"} does it, once.
+      if (request.method === "POST" && path === "/api/cutover/switch") {
+        if (!adminOk(request, env, acct)) return err(401, "admins only");
+        let b; try { b = await request.json(); } catch (e) { return err(400, "bad JSON"); }
+        if (!b.dry && b.confirm !== "SWITCH") return err(400, "confirm required");
+        return runCutover(env, acct, !!b.dry);
       }
       // A decision on /open-review. Admins only; open dataset only.
       if (request.method === "POST" && path === "/api/open-review") {

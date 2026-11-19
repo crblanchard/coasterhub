@@ -38,6 +38,14 @@
   .overall .obar{flex:1;height:5px;border-radius:999px;background:var(--well);overflow:hidden}
   .overall .obar i{display:block;height:100%;background:var(--accent)}
   td.vals{white-space:normal}
+  .switch{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px dashed var(--accent2);border-radius:14px;padding:12px 14px;margin:14px 0 4px}
+  .switch small{display:block;color:var(--muted);font-size:.82rem;margin-top:2px}
+  .swout{border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:8px 0 0;background:var(--panel)}
+  .swout h3{font-size:1rem;margin:0 0 6px}
+  .swout ul{margin:0 0 10px;padding-left:20px;font-size:.9rem;line-height:1.6}
+  .swout li.bad{color:var(--bad)}
+  .swout details{font-size:.85rem;margin:4px 0}
+  .swout details p{color:var(--muted);line-height:1.6}
   button.val{display:inline-block;margin:2px 4px 2px 0;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:9px;padding:4px 9px;font-size:.8rem;cursor:pointer}
   button.val i{font-style:normal;color:var(--muted);font-size:.72rem;margin-right:3px}
   button.val:hover{border-color:var(--accent2)}
@@ -151,6 +159,11 @@
   <div id="ui" hidden>
     <div class="tracker" id="tracker"></div>
     <div class="overall"><div class="obar"><i id="obar"></i></div><span id="otext"></span></div>
+    <div class="switch" id="switch">
+      <div><b>Switch the site to the new dataset</b><small>Preview first: nothing changes until you confirm. Everything as it is now is saved as the RCDB backup.</small></div>
+      <button id="sw-preview" class="ghost">Preview the switch</button>
+    </div>
+    <div class="swout" id="swout" hidden></div>
 
     <h2 id="tab-h"></h2>
     <p class="intro" id="tab-p"></p>
@@ -368,6 +381,42 @@ function bulk() {
   if (!list.length || !confirm('Link all ' + list.length + ' near-certain matches? Each can be undone under Decided.')) return;
   after(post('/api/open-review', { many: list.map(c => ({ kind: 'match', source: c.source, ref: c.ref, coaster_id: c.coaster_id, decision: 'approve' })) }), $('bulk'));
 }
+// The switch: a dry run that shows exactly what would change, then the real
+// one behind a typed confirmation. The Worker refuses a second run.
+const FN = { h: 'heights', s: 'speeds', l: 'lengths', inv: 'inversion counts', dur: 'durations', manu: 'makers', opened: 'opening dates', closed: 'closing dates', type: 'steel/wood', model: 'models' };
+function swSummary(r) {
+  const blank = Object.entries(r.blanked).filter(([, n]) => n).map(([f, n]) => fmt(n) + ' ' + FN[f]).join(', ') || 'none';
+  const changed = Object.entries(r.changed).filter(([, n]) => n).map(([f, n]) => fmt(n) + ' ' + FN[f]).join(', ') || 'none';
+  return '<ul><li><b>' + fmt(r.removed) + '</b> coasters removed (no open source, nobody&rsquo;s ridden, not kept)</li>'
+    + '<li><b>' + fmt(r.parksHidden) + '</b> parks hidden (no coasters left)</li>'
+    + '<li><b>' + fmt(r.coastersAfter) + '</b> coasters on the site afterwards; <b>' + fmt(r.updated) + '</b> of them get new values</li>'
+    + '<li>Blanked (only RCDB had them): ' + blank + '</li>'
+    + '<li>Changed to the open-source value or your pick: ' + changed + '</li>'
+    + '<li><b>' + fmt(r.renamed) + '</b> renamed (old names kept as former names)</li>'
+    + (r.collisions && r.collisions.length ? '<li class="bad">Not renamed, the name is taken at that park: ' + r.collisions.map(c => esc(c.from) + ' → ' + esc(c.to) + ' (' + esc(c.park) + ')').join('; ') + '</li>' : '')
+    + '</ul>';
+}
+$('sw-preview').onclick = () => {
+  const b = $('sw-preview'); b.disabled = true; b.textContent = 'Working…';
+  post('/api/cutover/switch', { dry: true }).then(r => {
+    b.disabled = false; b.textContent = 'Preview again';
+    $('swout').hidden = false;
+    $('swout').innerHTML = '<h3>What the switch would do</h3>' + swSummary(r)
+      + '<details><summary>Coasters removed (' + fmt(r.removedList.length) + ')</summary><p>' + r.removedList.map(esc).join(' · ') + '</p></details>'
+      + '<details><summary>Parks hidden (' + fmt(r.hiddenParks.length) + ')</summary><p>' + r.hiddenParks.map(esc).join(' · ') + '</p></details>'
+      + '<div class="act"><button class="yes" id="sw-go">Switch now</button></div>';
+    $('sw-go').onclick = go2;
+  }).catch(err => { b.disabled = false; b.textContent = 'Preview the switch'; alert(err === 'admins only' ? 'Sign in as an admin.' : 'Could not preview: ' + err); });
+};
+function go2() {
+  if (prompt('This switches the live site to the new dataset. Type SWITCH to go ahead.') !== 'SWITCH') return;
+  const b = $('sw-go'); b.disabled = true; b.textContent = 'Switching… (this takes a minute)';
+  post('/api/cutover/switch', { dry: false, confirm: 'SWITCH' }).then(r => {
+    $('swout').innerHTML = '<h3>Switched ✓</h3>' + swSummary(r) + '<p>The site now runs on the new dataset. The old values are in the RCDB backup tables.</p>';
+    $('sw-preview').hidden = true;
+  }).catch(err => { b.disabled = false; b.textContent = 'Switch now'; alert('The switch stopped: ' + err); });
+}
+
 function copy() {
   const t = LIST.map(r => r.name + ' — ' + r.park + (r.closed ? ' (closed ' + String(r.closed).slice(0, 4) + ')' : '') + (r.who ? ': ' + r.who.join(', ') : '')).join('\n');
   navigator.clipboard.writeText(t).then(() => { $('copy').textContent = 'Copied'; setTimeout(() => $('copy').textContent = 'Copy list', 1500); });
