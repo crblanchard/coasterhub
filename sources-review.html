@@ -186,7 +186,7 @@
 <script src="/app.js?v=20261118a"></script>
 <script>
 CoasterHub.initNav('sources');
-const NAMES = { manu: 'Maker', model: 'Model', type: 'Steel / wood', h: 'Height', s: 'Speed', l: 'Length',
+const NAMES = { manu: 'Manufacturer', model: 'Model', type: 'Steel / wood', h: 'Height', s: 'Speed', l: 'Length',
   inv: 'Inversions', dur: 'Duration', opened: 'Opened', closed: 'Closed' };
 const UNITS = { h: ' ft', l: ' ft', s: ' mph', dur: ' s' };
 const SRC = { manual: 'Manual', fair: 'Fair ride', wikidata: 'Wikidata', coasterpedia: 'Coasterpedia', osm: 'OpenStreetMap', enwiki: 'Wikipedia (EN)', dewiki: 'Wikipedia (DE)' };
@@ -200,10 +200,10 @@ const LINK = {
 const TABS = {
   gaps: { t: 'Fill gaps', h: 'Stats the sources now have',
     p: 'A stat that is blank on the site, which an open source has. Use it, or skip it (a skipped value comes back only if the source changes it).',
-    f: [['', 'All fields'], ['h', 'Height'], ['s', 'Speed'], ['l', 'Length'], ['inv', 'Inversions'], ['dur', 'Duration'], ['manu', 'Maker'], ['opened', 'Opened']] },
+    f: [['', 'All fields'], ['h', 'Height'], ['s', 'Speed'], ['l', 'Length'], ['inv', 'Inversions'], ['dur', 'Duration'], ['manu', 'Manufacturer'], ['opened', 'Opened']] },
   changed: { t: 'Values that changed', h: 'Where a source now says something else',
     p: 'The site has a value, and the best open source disagrees with it. Keep the site&rsquo;s, or take the source&rsquo;s.',
-    f: [['', 'All fields'], ['h', 'Height'], ['s', 'Speed'], ['l', 'Length'], ['inv', 'Inversions'], ['dur', 'Duration'], ['manu', 'Maker'], ['opened', 'Opened']] },
+    f: [['', 'All fields'], ['h', 'Height'], ['s', 'Speed'], ['l', 'Length'], ['inv', 'Inversions'], ['dur', 'Duration'], ['manu', 'Manufacturer'], ['opened', 'Opened']] },
   matches: { t: 'New matches', h: 'Suggested matches',
     p: 'Records the matching thinks are a coaster on the site. Linking one brings its stats into Fill gaps and Values that changed.',
     f: [['todo', 'To decide'], ['done', 'Decided']] },
