@@ -16279,54 +16279,6 @@
 {
 "coasters": [
 {
-"name": "Calafell Slide",
-"refs": [
-{
-"ref": "Calafell Slide",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-},
-{
-"name": "Jacko's Coaster",
-"refs": [
-{
-"ref": "Jacko's Coaster",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-},
-{
-"name": "Blue Flash",
-"refs": [
-{
-"ref": "Blue Flash (All the Bright Places)",
-"source": "coasterpedia"
-}
-],
-"status": "defunct"
-},
-{
-"name": "Raptor",
-"refs": [
-{
-"ref": "Raptor (Fred Grubb)",
-"source": "coasterpedia"
-}
-],
-"status": "cancelled"
-}
-],
-"lat": 41.19901,
-"lon": 1.57678,
-"park": "Standalone",
-"region": "Ohio, US"
-},
-{
-"coasters": [
-{
 "name": "Crazy Crab",
 "refs": [
 {
@@ -16843,48 +16795,6 @@
 {
 "coasters": [
 {
-"name": "Classic Coaster",
-"refs": [
-{
-"ref": "Classic Coaster (Washington State Fair)",
-"source": "coasterpedia"
-},
-{
-"ref": "Classic Coaster",
-"source": "dewiki"
-}
-],
-"status": "operating"
-},
-{
-"name": "Wildcat",
-"refs": [
-{
-"ref": "Wildcat (Washington State Fair)",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-},
-{
-"name": "Rainier Rush",
-"refs": [
-{
-"ref": "Rainier Rush",
-"source": "coasterpedia"
-}
-],
-"status": "defunct"
-}
-],
-"lat": 47.18265,
-"lon": -122.2982,
-"park": "Washington State Fair",
-"region": "Washington, US"
-},
-{
-"coasters": [
-{
 "name": "Laser Blaster",
 "refs": [
 {
@@ -17313,24 +17223,6 @@
 "lon": null,
 "park": "Alabama Splash Adventure",
 "region": null
-},
-{
-"coasters": [
-{
-"name": "Aftershock",
-"refs": [
-{
-"ref": "Aftershock (Golden Wheel Amusements)",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-}
-],
-"lat": 61.57898,
-"lon": -149.1368,
-"park": "Alaska State Fairgrounds",
-"region": "Alaska, US"
 },
 {
 "coasters": [
@@ -21795,24 +21687,6 @@
 "lon": 135.67886,
 "park": "Ikoma Skyland",
 "region": "Japan"
-},
-{
-"coasters": [
-{
-"name": "Crazy Mouse",
-"refs": [
-{
-"ref": "Crazy Mouse (Illinois State Fair)",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-}
-],
-"lat": null,
-"lon": null,
-"park": "Illinois State Fair",
-"region": "Illinois, US"
 },
 {
 "coasters": [
@@ -26519,24 +26393,6 @@
 {
 "coasters": [
 {
-"name": "Safari",
-"refs": [
-{
-"ref": "Safari (Saunders County Fairgrounds)",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-}
-],
-"lat": 41.20371,
-"lon": -96.61252,
-"park": "Saunders County Fairgrounds",
-"region": "Nebraska, US"
-},
-{
-"coasters": [
-{
 "name": "Achterbahn",
 "refs": [
 {
@@ -27065,42 +26921,6 @@
 "lon": -90.21007,
 "park": "St. Louis Union Station",
 "region": "Missouri, US"
-},
-{
-"coasters": [
-{
-"name": "Chiemgau Coaster",
-"refs": [
-{
-"ref": "Chiemgau Coaster",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-}
-],
-"lat": 47.76614,
-"lon": 12.63922,
-"park": "Standalone",
-"region": "Germany"
-},
-{
-"coasters": [
-{
-"name": "Luge d'été",
-"refs": [
-{
-"ref": "Luge d'été (Monte-Dore)",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-}
-],
-"lat": 45.56803,
-"lon": 2.81036,
-"park": "Standalone",
-"region": "France"
 },
 {
 "coasters": [
@@ -28133,24 +27953,6 @@
 "lon": 9.21675,
 "park": "Traumland auf der Bärenhöhle",
 "region": "Germany"
-},
-{
-"coasters": [
-{
-"name": "American Flyer",
-"refs": [
-{
-"ref": "American Flyer (Dominican Republic)",
-"source": "coasterpedia"
-}
-],
-"status": "operating"
-}
-],
-"lat": null,
-"lon": null,
-"park": "Traveling",
-"region": "Dominican Republic"
 },
 {
 "coasters": [
