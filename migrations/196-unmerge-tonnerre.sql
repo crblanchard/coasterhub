@@ -17,3 +17,10 @@ DELETE FROM activity WHERE id = 2002 AND kind = 'coaster_merged' AND subject = '
 INSERT OR REPLACE INTO open_links (coaster_id, source, ref, method, added) VALUES (864, 'wikidata', 'Q586854', 'approved', '2026-11-19'), (864, 'osm', 'relation/6267961', 'approved', '2026-11-19');
 INSERT OR REPLACE INTO open_facts (coaster_id, field, value, prec, source, ref, cites_rcdb, retrieved) SELECT 864, field, value, prec, source, ref, cites_rcdb, '2026-11-19' FROM open_record_facts WHERE (source = 'wikidata' AND ref = 'Q586854') OR (source = 'osm' AND ref = 'relation/6267961');
 INSERT OR REPLACE INTO coaster_sources (coaster_id, field, source, ref) VALUES (864, 'type', 'wikidata', 'Q586854'), (864, 'manu', 'wikidata', 'Q586854'), (864, 'h', 'wikidata', 'Q586854'), (864, 's', 'wikidata', 'Q586854'), (864, 'l', 'wikidata', 'Q586854'), (864, 'opened', 'wikidata', 'Q586854');
+-- Then (same request): gaps on one row filled from the other's open-source
+-- value. Tonnerre de Zeus takes Tonnerre 2 Zeus's Coasterpedia inversions (0)
+-- and duration (125 s) and its model; Tonnerre 2 Zeus's steel/wood credits
+-- Wikidata, which says the same. Height, length and opening differ between
+-- the sources and both are open, so each row keeps its own.
+UPDATE coasters SET inv = 0, dur = 125, model = 'CCI Wood' WHERE id = 864 AND inv IS NULL AND dur IS NULL AND model IS NULL;
+INSERT OR REPLACE INTO coaster_sources (coaster_id, field, source, ref) VALUES (864, 'inv', 'coasterpedia', 'Tonnerre 2 Zeus'), (864, 'dur', 'coasterpedia', 'Tonnerre 2 Zeus'), (864, 'model', 'manual', NULL), (509, 'type', 'wikidata', 'Q586854');
