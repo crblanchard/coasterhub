@@ -1688,7 +1688,9 @@ async function getPostLaunch(env) {
   // Coasters to add: not decided yet, and not already on the site under that name.
   const here = new Set(cs.map(c => openSquash(c.name) + "|" + c.park));
   const item = new Map(items.map(i => [i.source + "|" + i.ref, i.name]));
-  const addList = adds.map(a => ({ ...a, refs: JSON.parse(a.refs || "[]").map(r => ({ ...r, name: item.get(r.source + "|" + r.ref) || null })) }))
+  // Travelling fairs are flagged: Carter brings traditional parks in first.
+  const fairPark = new Set((await q("SELECT name FROM parks WHERE travel = 1")).map(p => p.name));
+  const addList = adds.map(a => ({ ...a, fair: fairPark.has(a.park) ? 1 : 0, refs: JSON.parse(a.refs || "[]").map(r => ({ ...r, name: item.get(r.source + "|" + r.ref) || null })) }))
     .filter(a => a.refs.length && !addDone.has(a.refs[0].source + "|" + a.refs[0].ref) && !here.has(openSquash(a.name) + "|" + a.park));
   // Parks not on the site, with their coasters, for Carter to check first.
   const parkDone = new Set(reviews.filter(r => r.kind === "park").map(r => r.ref));
@@ -1698,7 +1700,7 @@ async function getPostLaunch(env) {
       .map(c => ({ ...c, refs: c.refs.map(r => ({ ...r, name: item.get(r.source + "|" + r.ref) || null })) })) }));
   return { fields: OPEN_FIELDS, gaps, changed, matches: cut.changes, decided: cut.decided, adds: addList, nosource, newParks,
            counts: { gaps: gaps.length, changed: changed.length, matches: cut.changes.length,
-                     adds: addList.filter(a => !a.status || (/operat|construct/i.test(a.status) && !/not operat/i.test(a.status))).length, newParks: newParks.length, nosource: nosource.length } };
+                     adds: addList.filter(a => !a.fair && !!a.status && /operat|construct/i.test(a.status) && !/not operat/i.test(a.status)).length, newParks: newParks.length, nosource: nosource.length } };
 }
 
 // /sources (2026-11-19): where every stat on the site comes from, live.
@@ -1808,9 +1810,21 @@ async function addOpenCoaster(env, acct, park, name, refs, day) {
   const nid = ((await env.DB.prepare("SELECT MAX(id) AS m FROM coasters").first()) || {}).m + 1;
   const g = k => facts[k] ? facts[k].value : null, num = k => facts[k] ? +facts[k].value : null;
   const opened = g("opened"), closed = g("closed");
+  // The model only in Carter's own spelling: an existing model of the same
+  // manufacturer that the source's name matches ("Boomerang" -> "Vekoma
+  // Boomerang"); otherwise none, rather than a new near-duplicate spelling.
+  let model = null;
+  if (g("model") && g("manu")) {
+    const want = openSquash(g("model"));
+    const have = (await env.DB.prepare("SELECT model, COUNT(*) AS n FROM coasters WHERE manu = ? AND model IS NOT NULL GROUP BY model ORDER BY n DESC").bind(g("manu")).all()).results;
+    const hit = have.find(m => openSquash(m.model) === want) || have.find(m => want.length >= 4 && openSquash(m.model).endsWith(want))
+             || have.find(m => want.length >= 4 && openSquash(m.model).includes(want));
+    if (hit) model = hit.model;
+  }
+  if (!model) delete facts.model;
   await env.DB.prepare(
     "INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, laps, yr, opened, openedPrec, closed, closedPrec) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)")
-    .bind(nid, name, park, g("type"), g("manu"), g("model"), num("h"), num("s"), num("l"), num("inv"), num("dur"),
+    .bind(nid, name, park, g("type"), g("manu"), model, num("h"), num("s"), num("l"), num("inv"), num("dur"),
           opened ? +String(opened).slice(0, 4) : null, opened, opened ? (facts.opened.prec || precOf(opened)) : null,
           closed, closed ? (facts.closed.prec || precOf(closed)) : null).run();
   const st = [];

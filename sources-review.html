@@ -89,6 +89,8 @@
   table.mini th,table.mini td{padding:3px 12px 3px 0;text-align:left;border:0;white-space:nowrap;font-weight:400}
   table.mini th{color:var(--muted)}
   .act{display:flex;gap:8px;flex-wrap:wrap}
+  .addc .tick{display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+  .add-rename{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:4px 8px;font-size:.82rem;margin-left:6px}
   .npf{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:.8rem;color:var(--muted)}
   .npf input{margin-left:4px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:5px 8px;font-size:.85rem}
   .npf .np-name{min-width:220px;font-weight:600}
@@ -208,8 +210,8 @@ const TABS = {
     p: 'Records the matching thinks are a coaster on the site. Linking one brings its stats into Fill gaps and Values that changed.',
     f: [['todo', 'To decide'], ['done', 'Decided']] },
   adds: { t: 'New coasters', h: 'Coasters the sources have that the site doesn&rsquo;t',
-    p: 'At parks already on the site. Add one and it is created with the sources&rsquo; stats and shows on /changes; leave it out and it won&rsquo;t come back.',
-    f: [['op', 'Operating or under construction'], ['multi', 'In two or more sources'], ['', 'Any status'], ['closed', 'Closed']] },
+    p: 'At parks already on the site. Untick anything wrong, then add them all at once, or one by one. Each is created with the sources&rsquo; stats and shows on /changes; &ldquo;Leave out&rdquo; means it won&rsquo;t come back. Names not in English are unticked until you give them one. Models are set only where the source&rsquo;s matches one of your own model names.',
+    f: [['op', 'Parks: operating or under construction'], ['fair', 'Travelling fairs: operating'], ['closed', 'Closed'], ['unknown', 'Status unknown'], ['multi', 'In two or more sources'], ['', 'Everything']] },
   newParks: { t: 'New parks', h: 'Parks the sources have that the site doesn&rsquo;t',
     p: 'Each with its coasters from Coasterpedia and Wikipedia. Check the name, region and pin (fix any of them right on the card), tick the coasters to bring in, then add. Nothing goes up until you press Add.',
     f: [['', 'All'], ['pin', 'Has a map pin'], ['nopin', 'No map pin yet'], ['multi', 'Three or more coasters']] },
@@ -258,7 +260,11 @@ function rows() {
   if (tab === 'matches') return (f === 'done' ? D.decided : D.matches).filter(has);
   // Best-sourced first: several sources, then Coasterpedia/Wikidata, OSM-only (often mislabelled) last.
   const rank = a => -(a.refs.filter(r => r.source !== 'osm').length * 2 + a.refs.length);
-  if (tab === 'adds') return D.adds.filter(has).sort((a, b) => rank(a) - rank(b) || a.park.localeCompare(b.park)).filter(a => f === 'op' ? !a.status || (/operat|construct/i.test(a.status) && !/not operat/i.test(a.status)) : f === 'multi' ? a.refs.length > 1 : f === 'closed' ? /defunct|not operating|closed|removed|relocated/i.test(a.status || '') : true);
+  // Traditional parks first (Carter: fairs "will be so much tougher to quantify and track"), grouped by park.
+  // Operating means a source says so; no status at all (German Wikipedia gives none) is its own bucket.
+  const live = a => !!a.status && /operat|construct/i.test(a.status) && !/not operat/i.test(a.status);
+  if (tab === 'adds') return D.adds.filter(has).sort((a, b) => a.park.localeCompare(b.park) || rank(a) - rank(b) || a.name.localeCompare(b.name))
+    .filter(a => f === 'op' ? live(a) && !a.fair : f === 'fair' ? live(a) && a.fair : f === 'multi' ? a.refs.length > 1 : f === 'unknown' ? !a.status : f === 'closed' ? !!a.status && !live(a) : true);
   if (tab === 'newParks') return D.newParks.filter(x => !q || (x.park + ' ' + (x.region || '') + ' ' + x.coasters.map(c => c.name).join(' ')).toLowerCase().includes(q))
     .filter(x => f === 'pin' ? x.lat != null : f === 'nopin' ? x.lat == null : f === 'multi' ? x.coasters.length >= 3 : true);
   return D.nosource.filter(has).filter(x => f === 'ridden' ? x.riders > 0 : f === 'nolink' ? !x.sources.length : true);
@@ -267,8 +273,9 @@ function render() {
   tracker();
   LIST = rows();
   const f = $('filt').value;
-  $('bulk').hidden = !((tab === 'gaps' || (tab === 'matches' && f !== 'done')) && LIST.length);
-  $('bulk').textContent = tab === 'gaps' ? 'Use all ' + fmt(LIST.length) + ' shown' : 'Link all near-certain (' + fmt(D.matches.filter(sure).length) + ')';
+  $('bulk').hidden = !((tab === 'gaps' || tab === 'adds' || (tab === 'matches' && f !== 'done')) && LIST.length);
+  $('bulk').textContent = tab === 'gaps' ? 'Use all ' + fmt(LIST.length) + ' shown' : tab === 'adds' ? 'Add all ticked (' + fmt(LIST.filter(ticked).length) + ')'
+    : 'Link all near-certain (' + fmt(D.matches.filter(sure).length) + ')';
   $('copy').hidden = tab !== 'nosource';
   $('count').innerHTML = '<b>' + fmt(LIST.length) + '</b> ' + (tab === 'gaps' || tab === 'changed' ? 'values' : 'coasters');
   $('list').innerHTML = LIST.length ? VIEW[tab](LIST.slice(0, LIMIT), f) : '<p class="muted">Nothing here right now.</p>';
@@ -298,10 +305,13 @@ const VIEW = {
           + (fs.length ? '<table class="mini"><tr><th></th><th>Site</th><th>' + (SRC[c.source] || c.source) + '</th></tr>' + fs.map(k => '<tr><th>' + NAMES[k] + '</th><td>' + val(k, c.site[k]) + '</td><td>' + val(k, c.facts[k]) + '</td></tr>').join('') + '</table>' : '')
           + '<div class="act">' + btn('Same ride: link', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'approve' }, 'yes') + btn('Not the same', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'reject' }, 'no') + '</div></div>';
       }).join('') + '</div>',
-  adds: list => '<div class="cards">' + list.map(a => '<div class="card"><div class="one"><b>' + esc(a.name) + '</b><small>' + esc(a.park) + (a.status ? ' · ' + esc(a.status) : '') + '</small>'
+  adds: list => '<div class="cards">' + list.map((a, i) => '<div class="card addc" data-k="' + esc(akey(a)) + '"><div class="one">'
+      + '<label class="tick"><input type="checkbox" class="add-tick"' + (ticked(a) ? ' checked' : '') + '> <b>' + esc(RENAME[akey(a)] || a.name) + '</b></label>'
+      + (latin(a.name) ? '' : ' <span class="chip bad">not in English</span> <input class="add-rename" placeholder="English name" value="' + esc(RENAME[akey(a)] || '') + '">')
+      + '<small>' + esc(a.park) + (a.fair ? ' · travelling fair' : '') + (a.status ? ' · ' + esc(a.status) : '') + '</small>'
       + '<div class="why">' + a.refs.filter(r => LINK[r.source]).map(r => '<a class="go" href="' + LINK[r.source](r.ref) + '" target="_blank" rel="noopener">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ')
       + (a.refs.every(r => r.source === 'osm') ? ' · <span class="bad">only in OpenStreetMap, which sometimes labels water rides and play equipment as coasters</span>' : '') + '</div></div>'
-      + '<div class="act">' + btn('Add to the site', { a: 'add', park: a.park, name: a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'yes')
+      + '<div class="act">' + btn('Add to the site', { a: 'add', park: a.park, name: RENAME[akey(a)] || a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'yes')
       + btn('Leave out', { a: 'noadd', park: a.park, name: a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'no') + '</div></div>').join('') + '</div>',
   newParks: list => '<div class="cards">' + list.map((p, i) => {
     const alive = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || '') && /operat|construct|open|betrieb/i.test(c.status || '');
@@ -354,7 +364,35 @@ document.addEventListener('click', e => {
   }
   if (b.dataset.k) return after(post('/api/open-review', { kind: b.dataset.k, source: b.dataset.s, ref: b.dataset.r, coaster_id: +b.dataset.c, decision: b.dataset.d || null }), b);
 });
+// Ticks on New coasters: on by default unless the name isn't in English (needs
+// one first) or only OpenStreetMap has it (often not a coaster).
+const UNTICK = new Set(), TICK = new Set(), RENAME = {};
+const akey = a => a.park + '|' + a.name;
+const latin = n => !/[^\u0000-\u024F\u1E00-\u1EFF\u2010-\u2027\u20AC]/.test(n || '');
+const ticked = a => { const k = akey(a); if (UNTICK.has(k)) return false; if (TICK.has(k)) return true;
+  return latin(a.name) && !a.refs.every(r => r.source === 'osm'); };
+document.addEventListener('change', e => {
+  const card = e.target.closest('.addc'); if (!card) return;
+  const k = card.dataset.k;
+  if (e.target.classList.contains('add-tick')) { (e.target.checked ? TICK : UNTICK).add(k); (e.target.checked ? UNTICK : TICK).delete(k); }
+  if (e.target.classList.contains('add-rename')) { const v = e.target.value.trim(); if (v) { RENAME[k] = v; TICK.add(k); UNTICK.delete(k); } else delete RENAME[k]; render(); return; }
+  $('bulk').textContent = 'Add all ticked (' + fmt(LIST.filter(ticked).length) + ')';
+});
+async function bulkAdd() {
+  const list = LIST.filter(ticked);
+  if (!list.length || !confirm('Add ' + list.length + ' coasters to the site? Each shows on /changes. This runs in batches and takes a little while.')) return;
+  const b = $('bulk'); b.disabled = true;
+  try {
+    for (let i = 0; i < list.length; i += 20) {
+      b.textContent = 'Adding… ' + Math.min(i + 20, list.length) + ' / ' + list.length;
+      await post('/api/cutover/apply', { many: list.slice(i, i + 20).map(a => ({ kind: 'add', park: a.park, name: RENAME[akey(a)] || a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) })) });
+    }
+  } catch (err) { alert('Stopped: ' + err + '. The ones before it were added.'); }
+  b.disabled = false;
+  D = await load(); render();
+}
 function bulk() {
+  if (tab === 'adds') return bulkAdd();
   if (tab === 'gaps') {
     if (!confirm('Fill all ' + LIST.length + ' shown values on the live site?')) return;
     return after(post('/api/cutover/apply', { many: LIST.map(g => ({ kind: 'value', id: g.id, field: g.field, source: g.source })) }), $('bulk'));

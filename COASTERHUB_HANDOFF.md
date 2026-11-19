@@ -6335,6 +6335,19 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   "(Old)", years). Picks are open_choices field 'name': source 'manual' for
   ours kept or typed, else the source whose name was taken. Unpicked names
   keep ours at the switch.
+- **Bringing in Coasterpedia in bulk (2026-11-19).** Carter wants everything
+  Coasterpedia has eventually, closed coasters included (this overrides the
+  "skip closed last century" rule for these imports), traditional parks
+  before travelling fairs ("fairs will be so much tougher to quantify and
+  track"). Pass 1 = New coasters on /sources/review: tick boxes (on by default
+  unless the name isn't in Latin script, which needs an English name typed
+  first, or only OSM has it), "Add all ticked" posts in batches of 20.
+  Filters: parks operating/under construction (default, no fairs), fairs, closed,
+  status unknown (German Wikipedia gives no status; never counted as
+  operating). addOpenCoaster now sets a model only when the source's matches one
+  of Carter's existing model names for that manufacturer, else none. Watch for
+  codenames: "Project Purple" and Bakunawa are one ride. Pass 2 = New parks in
+  bulk (not built yet); pass 3 = closed coasters.
 - **New parks on /sources/review (2026-11-19)**: suggest-matches.py groups
   open-source coasters (not Wikidata alone) at parks not on the site into
   `open_new_parks` (191): park name, average coordinates, region (Coasterpedia
