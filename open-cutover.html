@@ -147,7 +147,7 @@
     <div class="split" id="split"></div>
 
     <h2>Stats that would be lost</h2>
-    <p class="intro">Stats the site shows now that no open source has and you haven&rsquo;t picked. At the switch these would go blank unless an open source fills them or you choose to keep the current value on the mismatches page.</p>
+    <p class="intro">Stats the site shows now that no open source has and you haven&rsquo;t picked. Models always carry over from the current data. At the switch these would go blank unless an open source fills them or you choose to keep the current value on the mismatches page.</p>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Field</th><th class="num">On the site now</th><th class="num">Would be lost</th><th class="num">Kept</th></tr></thead>
       <tbody id="lose"></tbody>
@@ -200,6 +200,7 @@ fetch('/api/open-readiness', { cache: 'no-store' }).then(r => r.ok ? r.json() : 
   $('split').innerHTML = Object.keys(B).map(k => '<i class="' + B[k][1] + '" style="width:' + (d.totals[k] * 100 / d.total) + '%" title="' + B[k][0] + '"></i>').join('');
   $('buckets').onclick = e => { const b = e.target.closest('button'); if (!b) return; cur = b.dataset.b; LIMIT = 200; try { localStorage.setItem('ch_cutover', cur); } catch (e2) {} setList(); };
   $('lose').innerHTML = d.fieldOrder.map(f => { const x = d.loseBy[f];
+    if ((d.keep || []).includes(f)) return '<tr><td class="f">' + NAMES[f] + '</td><td class="num">' + fmt(x.site) + '</td><td class="num muted">kept from current data</td><td class="num">100%</td></tr>';
     return '<tr><td class="f">' + NAMES[f] + '</td><td class="num">' + fmt(x.site) + '</td><td class="num' + (x.lose ? ' diff' : '') + '">' + (x.lose ? fmt(x.lose) : '–')
       + '</td><td class="num">' + (x.site ? Math.round((x.site - x.lose) * 100 / x.site) + '%' : '–') + '</td></tr>'; }).join('');
   $('q').oninput = () => { LIMIT = 200; render(); };
@@ -273,7 +274,7 @@ document.addEventListener('click', e => {
 function refreshTop() {
   document.querySelectorAll('#buckets button').forEach(b => b.querySelector('b').textContent = fmt(D.totals[b.dataset.b]));
   document.querySelectorAll('#split i').forEach((el, i) => el.style.width = (D.totals[Object.keys(B)[i]] * 100 / D.total) + '%');
-  document.querySelectorAll('#lose tr').forEach((tr, i) => { const x = D.loseBy[D.fieldOrder[i]];
+  document.querySelectorAll('#lose tr').forEach((tr, i) => { if ((D.keep || []).includes(D.fieldOrder[i])) return; const x = D.loseBy[D.fieldOrder[i]];
     tr.children[2].textContent = x.lose ? fmt(x.lose) : '–'; tr.children[3].textContent = x.site ? Math.round((x.site - x.lose) * 100 / x.site) + '%' : '–'; });
 }
 

@@ -6289,6 +6289,10 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   table, and "keep current" on a row writes `open_choices` source 'site' for
   each field no source has. First live-ish numbers (dev snapshot): 916 ready,
   774 verify, 70 ridden-no-match (152 credits), 308 unridden.
+- **Models always carry over** (Carter, 2026-11-19: "let's keep models in all
+  instances because a lot of those were manual from me anyways"). `OPEN_KEEP`
+  in worker.js: a kept field never counts as lost and never blocks "ready";
+  the switch must copy it from the current data. ~92 coasters moved to ready.
 - **RCDB IDs hide in URLs and tags.** Wikidata's "described at URL" (P973) held
   45 rcdb.com/NNNN.htm links, and some OSM coasters carry `rcdb_id` /
   `ref:rcdb` tags; all were removed (D1 rows deleted 2026-11-18) and every

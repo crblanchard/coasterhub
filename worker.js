@@ -1259,6 +1259,10 @@ const OPEN_FIELDS = ["manu", "model", "type", "h", "s", "l", "inv", "dur", "open
 // Model names follow each source's own scheme ("Tivoli Large" / "Zierer
 // Tivoli"), so they are shown but never queued as a mismatch to choose.
 const OPEN_NO_PICK = { model: 1 };
+// Fields the switch keeps from the current data whatever the open sources say:
+// models, many of which Carter entered by hand (2026-11-19: "let's keep models
+// in all instances because a lot of those were manual from me anyways").
+const OPEN_KEEP = { model: 1 };
 const openSquash = v => String(v).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
 function openAgree(field, a, b) {
   if (field === "h" || field === "s" || field === "l" || field === "dur") {
@@ -1562,7 +1566,7 @@ async function getOpenReadiness(env) {
       if (openBlank(c[f])) continue;
       loseBy[f].site++;
       const src = o[f] || {}, ch = chose.get(c.id + "|" + f);
-      const covered = isFair || ch || Object.values(src).some(v => !v[1]);
+      const covered = OPEN_KEEP[f] || isFair || ch || Object.values(src).some(v => !v[1]);
       if (!covered) { lose.push(f); loseBy[f].lose++; }
       if (openMismatch(f, c[f], src, ch)) mism++;
     }
@@ -1574,7 +1578,7 @@ async function getOpenReadiness(env) {
              lose, mismatches: mism, pending: pending.get(c.id) || 0, keep: keep.get(c.id) || null,
              riders: rs.length, who: state === "ridden" ? rs.map(s => uname.get(s) || s).sort() : undefined };
   });
-  return { total: cs.length, totals, loseBy, fieldOrder: OPEN_FIELDS, rows };
+  return { total: cs.length, totals, loseBy, fieldOrder: OPEN_FIELDS, keep: Object.keys(OPEN_KEEP), rows };
 }
 
 // A pick where the sources disagree: which source's value is right for this
