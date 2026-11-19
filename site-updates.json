@@ -3,7 +3,7 @@
  "updates": [
   {
    "at": "2026-11-19T03:40:00Z",
-   "text": "Coaster Hub's coaster data now comes from open sources (Coasterpedia, Wikidata and OpenStreetMap) instead of RCDB, and a new Sources page, linked at the bottom of every page, shows how many stats come from each. Some stats are blank until an open source fills them in, and every rider's credits and rankings are unchanged."
+   "text": "Coaster Hub's coaster data now comes from open sources (Coasterpedia, Wikidata and OpenStreetMap) instead of RCDB, with a new Sources page in the sitemap showing how many stats come from each. Some stats are blank until an open source fills them in, and every rider's credits and rankings are unchanged."
   },
   {
    "at": "2026-11-18T00:04:23Z",

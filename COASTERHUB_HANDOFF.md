@@ -6338,7 +6338,8 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
 - **/sources is public again (2026-11-19)**: what each source is, its licence
   (Coasterpedia CC BY-SA and OSM ODbL need visible credit; this page gives
   it), and live counts from `/api/sources` (coaster_sources by source and
-  field). Linked in every footer and the sitemap. Carter wants the 'manual'
+  field). In the sitemap only, not the footer (Carter: "don't want to really
+  promote it anywhere else yet"). Carter wants the 'manual'
   values linked to official park pages later: that needs a ref per value
   (coaster_sources.ref is there for it). The weekly review moved from /cutover
   to **/sources/review** (sources-review.html; /cutover and the older
