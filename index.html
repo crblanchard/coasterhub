@@ -167,6 +167,9 @@
   .hero.home .heroyou p.hy_next{display:flex;align-items:center;gap:10px;margin:10px 0 0;font-size:.92rem;color:var(--muted)}
   .hero.home .heroyou p.hy_next[hidden]{display:none}
   .hy_next b{color:var(--fg);font-family:var(--display);font-weight:800;font-stretch:110%}
+  .hy_next a{color:inherit;text-decoration:none}
+  .hy_next a:hover{color:var(--accent2)}
+  .hy_next a:hover b{color:inherit}
   .hy_next .mbar{flex:none;width:120px;height:6px;border-radius:999px;background-color:var(--soft);overflow:hidden}
   .hy_next .mbar i{display:block;height:100%;border-radius:999px;background-color:var(--fg);opacity:.8}
 
@@ -432,12 +435,16 @@ CoasterHub.me().then(function(acct){
     })();
     $('hy_credits').href = CoasterHub.userPageHref(acct.slug, 'count');
     $('hy_rides').innerHTML = me.rides != null ? '<b>' + nfx(me.rides) + '</b> rides' : '';
-    // "0 ranked" moved to the rank card below; the hero shows the next milestone.
+    // How many of your credits are still unranked, with the share ranked as a
+    // line (Carter, 2026-11-20: "instead of next milestone show how many
+    // unranked coasters you still have"). It links to ranking them.
     $('hy_ranked').innerHTML = '';
     (function(){
-      var n = me.credits || 0, step = n < 100 ? 25 : n < 1000 ? 50 : 100;
-      var next = Math.floor(n / step) * step + step, pct = Math.round((n - (next - step)) / step * 100);
-      $('hy_next').innerHTML = '<span class="mbar"><i style="width:' + pct + '%"></i></span><span><b>' + nfx(next - n) + '</b> to go to ' + nfx(next) + ' credits</span>';
+      var n = me.credits || 0, rk = Math.min(n, me.ranked || 0), left = n - rk, pct = n ? Math.round(rk / n * 100) : 0;
+      if (!n) return;
+      $('hy_next').innerHTML = '<span class="mbar"><i style="width:' + pct + '%"></i></span>'
+        + (left ? '<a href="' + CoasterHub.userPageHref(acct.slug, 'rankings') + '"><b>' + nfx(left) + '</b> ' + (left === 1 ? 'credit' : 'credits') + ' still to rank</a>'
+                : '<span>Every credit ranked</span>');
       $('hy_next').hidden = false;
     })();
     // Rank call to action until ten are ranked; the empty top ten hides.
@@ -662,8 +669,11 @@ CoasterHub.fetchUsers().then(function(){
         if (!j || !j.events) return;
         var lastBy = {};
         j.events.forEach(function(e){ if (e.actor && !lastBy[e.actor]) lastBy[e.actor] = e; });
-        var ago = function(t){ var d = (Date.now() - new Date(t).getTime()) / 864e5;
-          return d < 1 ? 'today' : d < 2 ? 'yesterday' : d < 30 ? Math.floor(d) + 'd ago' : d < 365 ? Math.floor(d / 30) + 'mo ago' : Math.floor(d / 365) + 'y ago'; };
+        // By calendar day where you are, not 24-hour spans: last night is
+        // "yesterday", not "today" (Carter, 2026-11-20: "i don't think time is right").
+        var ago = function(t){ var a = new Date(t), b = new Date();
+          var d = Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate()) - new Date(a.getFullYear(), a.getMonth(), a.getDate())) / 864e5);
+          return d <= 0 ? 'today' : d === 1 ? 'yesterday' : d < 30 ? d + 'd ago' : d < 365 ? Math.floor(d / 30) + 'mo ago' : Math.floor(d / 365) + 'y ago'; };
         var what = function(e){ var n = e.n || (e.detail && e.detail.rides) || 0;
           return e.kind === 'rides' ? 'logged ' + (n ? n + ' ' : '') + (n === 1 ? 'ride' : 'rides')
                : e.kind === 'ranking' ? 'ranked ' + (n ? n + ' ' : '') + (n === 1 ? 'coaster' : 'coasters')
