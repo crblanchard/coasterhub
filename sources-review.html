@@ -100,6 +100,13 @@
   .npf{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:.8rem;color:var(--muted)}
   .npf input{margin-left:4px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:5px 8px;font-size:.85rem}
   .npf .np-name{min-width:220px;font-weight:600}
+  .np-into{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+  .np-into .lab{display:inline;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--muted);margin:0}
+  .np-into .np-target{min-width:260px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:7px 10px;font-size:.85rem}
+  .np-into button{border-radius:10px;padding:7px 12px;font-size:.85rem;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--fg);margin:0}
+  .np-into .yes{background:var(--accent2);border-color:var(--accent2);color:#fff}
+  .np-into button:disabled{opacity:.5}
+  .np-into .near small{color:var(--muted);margin-left:4px}
   .npf .np-tick{width:18px;height:18px;margin:0}
   .npc{display:grid;gap:4px;margin:4px 0}
   .npl{display:flex;gap:8px;align-items:baseline;font-size:.88rem;flex-wrap:wrap}
@@ -263,6 +270,30 @@ document.addEventListener('change', e => {
   s.disabled = true;
   after(post('/api/open-review', { many }), null).finally(() => { s.disabled = false; });
 });
+// "Or it's a park already on the site" on a New parks card (Carter,
+// 2026-11-20: "make it so when i match parks i can search for them"): a
+// searchable list of every park, and the three nearest within 60 km as
+// one-tap picks.
+let PARKS = {};
+const INTO = {};
+CoasterHub.fetchParks().then(ps => {
+  PARKS = ps || {};
+  const dl = document.createElement('datalist'); dl.id = 'parks-dl';
+  dl.innerHTML = Object.keys(PARKS).sort((a, b) => a.localeCompare(b)).map(n => '<option value="' + esc(n) + '">' + esc((PARKS[n] && PARKS[n].region) || '') + '</option>').join('');
+  document.body.appendChild(dl);
+  if (D) render();
+}).catch(() => {});
+function nearParks(p) {
+  if (p.lat == null) return [];
+  const r = Math.PI / 180, km = (a, b, c, d) => 6371 * Math.acos(Math.max(-1, Math.min(1, Math.sin(a*r)*Math.sin(c*r) + Math.cos(a*r)*Math.cos(c*r)*Math.cos((b-d)*r))));
+  return Object.entries(PARKS).filter(([, v]) => v && v.lat != null).map(([name, v]) => ({ name, km: km(+p.lat, +p.lon, v.lat, v.lon) }))
+    .filter(n => n.km <= 60).sort((a, b) => a.km - b.km).slice(0, 3);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('button.near'); if (!b) return;
+  const card = b.closest('.np'); card.querySelector('.np-target').value = b.dataset.pick; INTO[card.dataset.k] = b.dataset.pick;
+});
+document.addEventListener('input', e => { if (e.target.classList.contains('np-target')) INTO[e.target.closest('.np').dataset.k] = e.target.value; });
 function load() { return fetch('/api/cutover/review', { cache: 'no-store' }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(j.error || r.status))); }
 load().then(d => {
   D = d; $('loading').hidden = true; $('ui').hidden = false;
@@ -364,7 +395,12 @@ const VIEW = {
       + (p.taken ? ' <span class="chip bad">a park with this name is already on the site: rename it</span>' : '') + '</div>'
       + '<div class="npc">' + p.coasters.map((c, j) => '<label class="npl"><input type="checkbox" data-j="' + j + '"' + ((CUNTICK[p.k] && j in CUNTICK[p.k] ? !CUNTICK[p.k][j] : alive(c)) ? ' checked' : '') + '> <b>' + esc(c.name) + '</b>'
         + '<small>' + esc(c.status || 'status unknown') + ' · ' + c.refs.filter(r => LINK[r.source]).map(r => '<a class="go" target="_blank" rel="noopener" href="' + LINK[r.source](r.ref) + '">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ') + '</small></label>').join('') + '</div>'
-      + '<div class="act">' + btn('Add park + ticked coasters', { np: 'add', i: i }, 'yes') + btn('Leave out', { np: 'no', i: i }, 'no') + '</div></div>';
+      + '<div class="act">' + btn('Add park + ticked coasters', { np: 'add', i: i }, 'yes') + btn('Leave out', { np: 'no', i: i }, 'no') + '</div>'
+      + '<div class="np-into"><span class="lab">Or it&rsquo;s a park already on the site:</span>'
+      + '<input class="np-target" list="parks-dl" placeholder="Search parks on the site…" value="' + esc(INTO[p.k] || '') + '">'
+      + btn('Add ticked coasters there', { np: 'into', i: i }, 'yes')
+      + nearParks(p).map(n => '<button class="small near" data-pick="' + esc(n.name) + '">' + esc(n.name) + ' <small>' + (n.km < 1 ? '&lt;1' : Math.round(n.km)) + ' km</small></button>').join('')
+      + '</div></div>';
   }).join('') + '</div>',
   nosource: list => '<div class="tbl-wrap"><table><thead><tr><th>Coaster</th><th>Missing</th><th class="num">Riders</th><th>Find it</th></tr></thead><tbody>' + list.map(r =>
     '<tr><td class="nm">' + coaster(r) + '</td><td class="todo">' + r.missing.map(f => NAMES[f].toLowerCase()).join(', ') + (r.sources.length ? '' : ' <span class="chip">no open source</span>') + '</td><td class="num">' + r.riders + '</td><td class="todo">'
@@ -392,6 +428,14 @@ document.addEventListener('click', e => {
   if (b.dataset.np) {
     const p = LIST[+b.dataset.i], card = b.closest('.np');
     if (b.dataset.np === 'no') return after(post('/api/cutover/apply', { kind: 'noaddpark', k: p.k, park: p.park }), b);
+    if (b.dataset.np === 'into') {
+      const typed = card.querySelector('.np-target').value.trim();
+      const target = Object.keys(PARKS).find(n => n.toLowerCase() === typed.toLowerCase());
+      if (!target) return alert(typed ? typed + ' is not a park on the site: pick one from the list.' : 'Search for the park first.');
+      const into = [...card.querySelectorAll('.npc input[data-j]:checked')].map(x => p.coasters[+x.dataset.j]).map(c => ({ name: c.name, refs: c.refs.map(r => ({ source: r.source, ref: r.ref })) }));
+      if (!confirm(p.park + ' is ' + target + '?\n\n' + (into.length ? into.length + ' ticked coaster' + (into.length > 1 ? 's go' : ' goes') + ' in at ' + target + ' (any it already has are skipped), and ' : '') + '"' + p.park + '" becomes one of its former names.')) return;
+      return after(post('/api/cutover/apply', { kind: 'intopark', k: p.k, park: target, from: p.park, coasters: into }), b);
+    }
     const name = card.querySelector('.np-name').value.trim(), region = card.querySelector('.np-region').value.trim();
     const lat = card.querySelector('.np-lat').value.trim(), lon = card.querySelector('.np-lon').value.trim();
     const picked = [...card.querySelectorAll('.npc input[data-j]:checked')].map(x => p.coasters[+x.dataset.j]).map(c => ({ name: c.name, refs: c.refs.map(r => ({ source: r.source, ref: r.ref })) }));

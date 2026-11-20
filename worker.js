@@ -1791,6 +1791,29 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
       }
       await env.DB.prepare("INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES ('park', '', ?, 0, ?, ?, ?, ?)")
         .bind(k, x.kind === "addpark" ? "approve" : "reject", String(x.park || ""), by, new Date().toISOString()).run();
+    } else if (x.kind === "intopark") {
+      // A "new" park that is one already on the site, under another name or
+      // spelling (Carter, 2026-11-20: "for new parks I want to match to
+      // existing parks because i recognize so many of these"): its ticked
+      // coasters go in at that park, and the source's name becomes one of the
+      // park's former names, so imports and the next refresh find it there.
+      const k = String(x.k || ""), park = String(x.park || "").trim(), from = String(x.from || "").trim();
+      if (!k || !park) return err(400, "k and park required");
+      const row = await env.DB.prepare("SELECT name FROM parks WHERE lower(name) = lower(?)").bind(park).first();
+      if (!row) return err(404, "no park called " + park + " on the site");
+      const cs = (Array.isArray(x.coasters) ? x.coasters : []).filter(c => c && String(c.name || "").trim() && Array.isArray(c.refs) && c.refs.length);
+      for (const c of cs) {
+        const name = String(c.name).trim();
+        if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(row.name, name).first()) continue;
+        out.push(await addOpenCoaster(env, acct, row.name, name, c.refs.filter(r => r && r.source && r.ref), day));
+      }
+      if (from && from.toLowerCase() !== row.name.toLowerCase()
+          && !await env.DB.prepare("SELECT 1 FROM parks WHERE lower(name) = lower(?)").bind(from).first())
+        // former_name is the key: a name another park already answers to stays
+        // with that park.
+        await env.DB.prepare("INSERT OR IGNORE INTO park_aliases (park, former_name, note, added) VALUES (?, ?, 'open data', ?)").bind(row.name, from, day).run();
+      await env.DB.prepare("INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES ('park', '', ?, 0, 'approve', ?, ?, ?)")
+        .bind(k, from + " = " + row.name, by, new Date().toISOString()).run();
     } else return err(400, "unknown kind");
   }
   return afterWrite(ctx, env, request, json({ ok: true, done: out }));
