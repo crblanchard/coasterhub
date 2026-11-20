@@ -162,9 +162,6 @@
   .fbcard .go{background-color:var(--panel)!important;color:var(--fg)!important;border:1px solid var(--line)!important}
   .fbcard .go:hover{border-color:var(--accent2)!important;color:var(--accent2)!important}
 
-  /* A friend's last park day, under their counts. */
-  .riderlist .riderrow .lastpk{display:block;color:var(--muted);font-size:.82rem;line-height:1.35;margin-top:1px;
-    max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* ---- Home, round two (Carter, 2026-11-20: "all 1-8 please"). */
   /* Next milestone: a thin line under the steel and wood one. */
   .hero.home .heroyou p.hy_next{display:flex;align-items:center;gap:10px;margin:10px 0 0;font-size:.92rem;color:var(--muted)}
@@ -644,26 +641,6 @@ CoasterHub.fetchUsers().then(function(){
       var anyF = mine.some(function(x){ return x.u.slug !== fol.me; });
       document.getElementById('friends').innerHTML = html(mine)
         + (anyF ? '' : '<p class="hint">You&rsquo;re not following anyone yet. Find people on <a href="/explore">Explore</a>.</p>');
-      // Each one's last park day under their name (Carter, 2026-11-20: "maybe
-      // last park visit from everyone?"), filled in as their logs arrive.
-      var byIdF = {}; (coasters || []).forEach(function(c){ byIdF[c.id] = c; });
-      var rowEls = document.querySelectorAll('#friends .riderrow');
-      mine.forEach(function(x, i){
-        var el = rowEls[i]; if (!el) return;
-        CoasterHub.fetchRides(x.u.slug).then(function(lg){
-          var rides = (lg && lg.rides) || [], last = null;
-          rides.forEach(function(r){ if (r.d && r.d.length >= 10 && (!last || r.d > last)) last = r.d; });
-          if (!last) return;
-          var pk = {}; rides.forEach(function(r){ if (r.d === last && byIdF[r.c]) pk[byIdF[r.c].park] = 1; });
-          var names = Object.keys(pk); if (!names.length) return;
-          var line = document.createElement('span'); line.className = 'lastpk';
-          // The date first, so a long park name is what gets cut on a phone.
-          var dt = new Date(last + 'T12:00:00'), when = dt.toLocaleString('en-US', { month: 'short', day: 'numeric' })
-            + (dt.getFullYear() !== new Date().getFullYear() ? ', ' + dt.getFullYear() : '');
-          line.textContent = 'Last: ' + when + ' \u00b7 ' + names[0] + (names.length > 1 ? ' +' + (names.length - 1) : '');
-          var who = el.querySelector('.who'); if (who) who.appendChild(line);
-        }).catch(function(){});
-      });
       document.getElementById('friends_wrap').hidden = false;
       // You and the people you follow (Carter, 2026-09-26: "also show my own
       // changes in there too") — so it shows whenever you are signed in.
