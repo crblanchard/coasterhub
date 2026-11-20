@@ -237,7 +237,6 @@ No source placed these parks; each is pinned at its town (tools/open-data/park-p
 - Tricky Track - Station du Lac Blanc (France)
 - Uncle Bernie's Amusement Park (Florida, US)
 - Utah Fun Dome (Utah, US)
-- Venice Pier (California, US)
 - Vertical Endeavors (Minnesota, US)
 - Village Theme Park (Kuwait)
 - VinWonders Grand Park (Vietnam)
