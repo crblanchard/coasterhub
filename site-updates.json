@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-20T18:10:20Z",
-   "text": "The home page has a new look: a painted park skyline under a real sky, a bigger, bolder count, and your credits split into steel and wood. The map hides parks whose coasters have all closed, with a Closed parks box to bring them back."
+   "at": "2026-11-20T18:32:40Z",
+   "text": "Coaster Hub has a new look: a painted park skyline on every page, bolder headlines, a home page with your last park day, next milestone and friends as tiles, and coaster pages that show each stat against the record holder. Coaster pages also have a Log this ride button."
   },
   {
    "at": "2026-11-19T03:40:00Z",

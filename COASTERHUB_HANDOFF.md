@@ -6489,3 +6489,15 @@ Carter: "the entire site lacks personality ... more color" (critique in
 - Carter wants every design change shown as screenshots before it goes to
   main ("please suggest things before you push"); previews go to the session
   branch only. The day/night toggle stays.
+- **Round two, live 2026-11-20:** the font, `--steel`/`--wood`/`--display` and
+  the painted sky moved into style.css (every page's band; a band with
+  `.herotop` or `.rh-count` keeps the sky without the skyline, which would sit
+  under the count). Home: friend tiles (last activity from
+  `/api/activity?riders=1`), Last park day ticket, On this day, next-milestone
+  line (25s under 100, 50s under 1,000, then 100s), rank card while fewer than
+  10 are ranked; Global top N always shown. Coaster page: steel/wood edge,
+  You card with **Log this ride** (`/log?c=<id>` opens Log on that park with the
+  row flashed), stat cards with bars/gauge against the site's record holder
+  (inversion icons cut by Carter). `fetchRides` swaps `.user` for the display
+  name. Profile Collection section was built and CUT (milestone order within a
+  day is not stored). Saved hero key is `ch_hero2`.
