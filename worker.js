@@ -2544,12 +2544,18 @@ const FEED_HIDDEN = ["clone_set", "clone_removed",
                      // ADDED, renamed or merged still shows — those change what
                      // the list IS, not what it says about itself.
                      "coaster_edited"];
-async function getActivity(env, limit) {
+// What a rider does to their own count, as opposed to the shared list changing
+// (changes-feed.js has the same list). ?riders=1 returns only these, for the
+// home page's You & friends: a day of adding parks writes thousands of
+// coaster_added rows, which buried every ride in the last 300 rows (2026-11-20).
+const RIDER_FEED_KINDS = ["rides", "credits", "ranking", "ride_removed", "user_added", "claimed", "import", "day_edited"];
+async function getActivity(env, limit, ridersOnly) {
   const { results } = await env.DB.prepare(
     "SELECT id, at, actor, kind, subject, n, detail FROM activity " +
     "WHERE kind NOT IN (" + FEED_HIDDEN.map(() => "?").join(",") + ") " +
+    (ridersOnly ? "AND kind IN (" + RIDER_FEED_KINDS.map(() => "?").join(",") + ") " : "") +
     "ORDER BY at DESC, id DESC LIMIT ?"
-  ).bind(...FEED_HIDDEN, limit).all();
+  ).bind(...FEED_HIDDEN, ...(ridersOnly ? RIDER_FEED_KINDS : []), limit).all();
   const names = await env.DB.prepare("SELECT slug, name FROM users").all();
   const by = {};
   for (const u of names.results) by[u.slug] = u.name;
@@ -3056,7 +3062,7 @@ export default {
       // Public read: the feed says what changed, never who is allowed to change it.
       if (request.method === "GET" && path === "/api/activity") {
         const n = Math.min(Math.max(Number(url.searchParams.get("limit")) || 100, 1), 500);
-        return json(await getActivity(env, n));
+        return json(await getActivity(env, n, url.searchParams.get("riders") === "1"));
       }
       const um = path.match(/^\/api\/user\/([a-z0-9-]+)$/i);
       if (request.method === "GET" && um) {

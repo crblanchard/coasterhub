@@ -398,6 +398,10 @@
       var list = groupRuns(EVENTS.filter(function(e){
         if (e.kind === 'user_added' && e.actor && claimed[e.actor]) return false;
         if (WHO && !(e.actor && WHO[e.actor])) return false;
+        // Only what riders did to their own counts: an admin adding coasters
+        // or renaming parks is the shared list changing, not friend news
+        // (Carter, 2026-11-20: "the 'you & friends' list shows new coasters").
+        if (WHO && !RIDER_KINDS[e.kind]) return false;
         if (NOT && e.actor && NOT[e.actor]) return false;
         if (SINCE && atTime(e.at) < SINCE) return false;
         if (FILTER === 'riders')   return !!RIDER_KINDS[e.kind];
@@ -457,7 +461,7 @@
         : Promise.resolve([]);
       // Riders you blocked (2026-10-30) drop out of your feed entirely.
       var me = global.CoasterHub && global.CoasterHub.me ? global.CoasterHub.me().catch(function(){ return null; }) : Promise.resolve(null);
-      return Promise.all([fetch('/api/activity?limit=' + (limit && !WHO && !NOT ? Math.max(40, limit * 8) : 300))
+      return Promise.all([fetch('/api/activity?limit=' + (limit && !WHO && !NOT ? Math.max(40, limit * 8) : 300) + (WHO ? '&riders=1' : ''))
         .then(function(r){ if (!r.ok) throw new Error('api ' + r.status); return r.json(); }), site, me])
         .then(function(both){
           var j = both[0], blocked = (both[2] && both[2].blocked) || [];
