@@ -348,32 +348,6 @@
   .visitsall{margin:12px 0 0;font-size:.92rem}
   .visitsall a{color:var(--accent2);font-weight:600;text-decoration:none}
 
-  /* ---- Collection (2026-11-20). */
-  .coll{display:grid;grid-template-columns:1fr;gap:14px}
-  @media (min-width:760px){ .coll{grid-template-columns:1fr 1fr} .coll .cfull{grid-column:1 / -1} }
-  .coll .cpan{background-color:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
-  .coll .cpan h3{margin:0 0 12px;font-family:var(--display);font-weight:800;font-stretch:108%;font-size:1.05rem;letter-spacing:-.01em}
-  .coll .ctrack{display:flex;height:12px;border-radius:999px;overflow:hidden;background-color:var(--soft);margin:2px 0 10px}
-  .coll .ctrack i{display:block;height:100%;min-width:3px}
-  .coll .ctrack i.st{background-color:var(--steel)} .coll .ctrack i.wd{background-color:var(--wood)}
-  .coll .clegend{display:flex;gap:18px;flex-wrap:wrap;margin:0;color:var(--muted);font-size:.92rem}
-  .coll .clegend span{display:inline-flex;align-items:center;gap:7px}
-  .coll .clegend span::before{content:"";width:10px;height:10px;border-radius:3px;background-color:var(--c)}
-  .coll .clegend b{color:var(--fg);font-family:var(--display);font-weight:800;font-stretch:110%;font-size:1.1rem}
-  .coll .brow{display:grid;grid-template-columns:minmax(0,9em) 1fr auto;align-items:center;gap:10px;padding:5px 0;font-size:.92rem}
-  .coll .brow a{color:var(--fg);font-weight:600;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .coll .brow a:hover{color:var(--accent2)}
-  .coll .brow .bb{height:8px;border-radius:999px;background-color:var(--soft);overflow:hidden}
-  .coll .brow .bb i{display:block;height:100%;border-radius:999px;background-color:var(--steel)}
-  .coll .brow b{font-family:var(--display);font-weight:800;font-stretch:110%;font-variant-numeric:tabular-nums;min-width:2.2em;text-align:right}
-  .coll .miles{display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;scroll-snap-type:x mandatory}
-  .coll .mile{flex:none;width:170px;scroll-snap-align:start;border-radius:12px;padding:12px 14px;background-color:var(--steel-tint);text-decoration:none;color:var(--fg)}
-  .coll .mile.wd{background-color:var(--wood-tint)}
-  .coll .mile .mn{display:block;font-family:var(--display);font-weight:850;font-stretch:115%;font-size:1.5rem;line-height:1;color:var(--steel);letter-spacing:-.02em}
-  .coll .mile.wd .mn{color:var(--wood)}
-  .coll .mile b{display:block;margin-top:6px;font-size:.92rem;line-height:1.25}
-  .coll .mile small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
-  .coll .mile:hover b{color:var(--accent2)}
 </style>
 </head>
 <body>
@@ -507,13 +481,6 @@
     <div class="kpi"><div class="num" id="k_geo"></div><div class="lbl">States · countries</div></div>
     <div class="kpi"><div class="num" id="k_miles"></div><div class="lbl" id="k_miles_lbl">Distance ridden</div><div class="sub" id="k_inv"></div></div>
   </div>
-</div></section>
-
-<!-- The collection (Carter, 2026-11-20: "all 1-8 please"): steel and wood,
-     who built them, where, and the round-number credits. -->
-<section class="block" id="sec_coll" hidden><div class="container">
-  <h2>Collection</h2>
-  <div class="coll" id="coll"></div>
 </div></section>
 
 <section class="block" id="sec_season" hidden><div class="container">
@@ -999,32 +966,6 @@ var FOLLOWS_P={};
 function followsOnce(slug){
   return FOLLOWS_P[slug] || (FOLLOWS_P[slug]=CoasterHub.follows(slug));
 }
-// The collection (2026-11-20): steel and wood as one line, the makers and
-// places most of it comes from, and the round-number credits in the order
-// they were first ridden (a day's own order is not known, so a milestone on a
-// busy day is "one of that day's").
-function collection(s){
-  var k=s.kpi, el=document.getElementById('coll'); if(!el || !k.credits) return;
-  var h='<div class="cpan cfull"><h3>Steel and wood</h3><div class="ctrack">'
-    +(k.steel?'<i class="st" style="flex:'+k.steel+'"></i>':'')+(k.wood?'<i class="wd" style="flex:'+k.wood+'"></i>':'')+'</div>'
-    +'<p class="clegend"><span style="--c:var(--steel)"><b>'+nf(k.steel)+'</b> steel</span><span style="--c:var(--wood)"><b>'+nf(k.wood)+'</b> wood</span></p></div>';
-  var bars=function(list,key,href){ var mx=list.length?list[0].credits:1;
-    return list.slice(0,6).map(function(x){ return '<div class="brow"><a href="'+esc(href(x[key]))+'">'+esc(x[key])+'</a><span class="bb"><i style="width:'+Math.max(3,Math.round(x.credits/mx*100))+'%"></i></span><b>'+nf(x.credits)+'</b></div>'; }).join(''); };
-  if((s.top_manufacturers||[]).length) h+='<div class="cpan"><h3>Who built them</h3>'+bars(s.top_manufacturers,'name',function(n){ return CoasterHub.makerHref(n); })+'</div>';
-  if((s.top_locations||[]).length) h+='<div class="cpan"><h3>Where</h3>'+bars(s.top_locations,'loc',function(n){ return CoasterHub.locationHref ? CoasterHub.locationHref(n) : '/locations'; })+'</div>';
-  // Milestones: #1, then every 100th (every 50th under 300 credits).
-  var by=s.byCoaster||{}, cs=s.coastersById||{};
-  var dated=Object.keys(by).filter(function(id){ return by[id].first && String(by[id].first).length>=10; })
-    .sort(function(a,b){ return String(by[a].first).localeCompare(String(by[b].first)) || (+a)-(+b); });
-  if(dated.length===k.credits && dated.length>=10){
-    var step=k.credits<300?50:100, marks=[1]; for(var m=step;m<=dated.length;m+=step) marks.push(m);
-    h+='<div class="cpan cfull"><h3>Milestones</h3><div class="miles">'+marks.reverse().map(function(n){
-      var id=dated[n-1], c=cs[id]; if(!c) return '';
-      return '<a class="mile'+(c.type==='Wood'?' wd':'')+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="mn">#'+n+'</span><b>'+esc(c.name)+'</b><small>'+esc(c.park)+' · '+esc(CoasterHub.mdy(by[id].first))+'</small></a>'; }).join('')+'</div></div>';
-  }
-  el.innerHTML=h;
-  document.getElementById('sec_coll').hidden=false;
-}
 function render(s){
   document.getElementById('loading').style.display='none';
   document.getElementById('content').style.display='block';
@@ -1269,7 +1210,6 @@ function render(s){
 
   document.getElementById('k_credits').textContent=nf(k.credits);
   document.getElementById('k_split').textContent=k.steel+' steel · '+k.wood+' wood';
-  try { collection(s); } catch (e) { console.error(e); }
   document.getElementById('k_parks').textContent=k.parks;
   document.getElementById('k_geo').textContent=k.states+' · '+k.countries;
 
