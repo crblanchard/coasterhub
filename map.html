@@ -131,6 +131,8 @@
   .ctl.filt small{color:var(--muted);font-variant-numeric:tabular-nums}
   /* Each box's ramp, so the boxes are the legend. */
   .ctl.filt .sw{flex:none;width:22px;height:8px;border-radius:4px}
+  .ctl.filt .sw.dead{background-color:var(--muted);opacity:.55}
+  .ctl.filt select + .closedbox, .ctl.filt label + .closedbox{margin-top:2px;padding-top:6px;border-top:1px solid var(--line)}
   .ctl.filt select{display:block;width:100%;margin:5px 0 3px;background-color:var(--well);color:var(--fg);
     border:1px solid var(--line);border-radius:8px;padding:5px 6px;font-size:.8rem;cursor:pointer}
   /* City names, drawn by the page (see drawCities). A dot and a name beside
@@ -474,7 +476,18 @@ Promise.all([
   // they have been to (Carter, 2026-09-24: "when you click on someone else's
   // map make it default to just visited"); your own opens complete.
   var SHOW={all:true, been:true, not:!others, both:true, me:true, them:true, neither:true};
-  function shown(p){ return SHOW[kind(p)]; }
+  // Parks whose coasters are all closed are off until asked for (Carter,
+  // 2026-11-20: "make the map default to hiding parks with no defunct
+  // coasters but add a toggle"): hundreds of long-gone parks came in from
+  // Coasterpedia on 2026-11-19. A park the rider (or whoever they compare
+  // with) has credits at stays, since it is part of their own map.
+  var CLOSEDTOO=false;
+  try{ CLOSEDTOO = localStorage.getItem('ch_map_closed')==='1'; }catch(e){}
+  function gone(p){ return !p.open.length && p.closed.length; }
+  function shown(p){
+    if(gone(p) && !CLOSEDTOO && !p.been && !theyBeen(p)) return false;
+    return SHOW[kind(p)];
+  }
   function refresh(){
     var vis=placed.filter(shown);
     group.clearLayers(); vis.forEach(function(p){ group.addLayer(p.marker); });
@@ -568,7 +581,7 @@ Promise.all([
     L.DomEvent.disableClickPropagation(fbox); L.DomEvent.disableScrollPropagation(fbox);
     return fbox;
   };
-  if(log) filt.addTo(map);
+  filt.addTo(map);
   function drawFilt(){
     if(!fbox) return;
     var h='';
@@ -584,7 +597,12 @@ Promise.all([
       }
       h+='<select id="cmp" aria-label="Compare with"><option value="">Compare with…</option>'+cmpOptions()+'</select>';
     }
+    var nGone=placed.filter(gone).length;
+    h+='<label class="closedbox"><input type="checkbox" id="closedtoo"'+(CLOSEDTOO?' checked':'')+'>'
+      +'<span class="sw dead"></span>Closed parks <small>'+nGone.toLocaleString()+'</small></label>';
     fbox.innerHTML=h;
+    var ct=fbox.querySelector('#closedtoo');
+    if(ct) ct.onchange=function(){ CLOSEDTOO=this.checked; try{ localStorage.setItem('ch_map_closed', CLOSEDTOO?'1':'0'); }catch(e){} refresh(); };
     Array.prototype.forEach.call(fbox.querySelectorAll('input[data-k]'),function(el){
       el.onchange=function(){ SHOW[this.getAttribute('data-k')]=this.checked; refresh(); };
     });
