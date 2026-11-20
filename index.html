@@ -221,8 +221,13 @@
 // to show the signed-out slogan until /api/auth/me answered, then jump to your
 // count. The fresh numbers replace these as soon as they arrive.
 (function(){ try {
-  var me = localStorage.getItem('ch_me'), h = JSON.parse(localStorage.getItem('ch_hero') || 'null');
-  if (!me || !h || h.slug !== me || !h.html) return;
+  // ch_hero2 (2026-11-20): the redesigned hero, number and word in their own
+  // spans. A copy saved by the old page drew "credits" as big as the number
+  // until the fresh one landed (Carter: "credits is big ... then gets
+  // smaller"), so the old key is dropped, never drawn.
+  try { localStorage.removeItem('ch_hero'); } catch (e) {}
+  var me = localStorage.getItem('ch_me'), h = JSON.parse(localStorage.getItem('ch_hero2') || 'null');
+  if (!me || !h || h.slug !== me || !h.html || h.html.indexOf('class="n"') < 0) return;
   var y = document.getElementById('heroyou'); y.innerHTML = h.html; y.hidden = false;
   document.getElementById('hero_h').hidden = true; document.getElementById('hero_p').hidden = true;
 } catch (e) {} })();
@@ -384,7 +389,7 @@ CoasterHub.me().then(function(acct){
     // time opens on the real number.
     try { var hc = $('heroyou').cloneNode(true), hh = hc.querySelector('#hy_credits');
       if (hh) hh.innerHTML = cword(me.credits);
-      localStorage.setItem('ch_hero', JSON.stringify({ slug: acct.slug, html: hc.innerHTML })); } catch (e) {}
+      localStorage.setItem('ch_hero2', JSON.stringify({ slug: acct.slug, html: hc.innerHTML })); } catch (e) {}
   });
 }).catch(function(){ /* the slogan stays */ });
 
@@ -423,7 +428,7 @@ CoasterHub.me().then(function(acct){
     // Signed out since last time: the remembered count goes, the slogan comes back.
     document.getElementById('heroyou').hidden = true;
     document.getElementById('hero_h').hidden = false; document.getElementById('hero_p').hidden = false;
-    try { localStorage.removeItem('ch_hero'); } catch (e) {}
+    try { localStorage.removeItem('ch_hero2'); } catch (e) {}
   }
 }).catch(function(){ /* API down: no pills rather than wrong pills */ });
 
