@@ -138,16 +138,14 @@
   .hero.home .heroyou p.hy_acts{margin:16px 0 20px}
   @media (max-width:640px){ .hero.home .heroyou p.hy_acts{margin-bottom:78px} }
 
-  /* Your collection as a stretch of track: steel and wood in proportion, with
-     crossties over it, and the two counts under it. */
-  .ctrack{display:flex;height:14px;max-width:420px;margin:14px 0 8px;border-radius:999px;overflow:hidden;position:relative;
+  /* Your collection as one line: steel and wood in proportion, the two counts
+     under it (a solid bar, Carter: "the bar isn't one line I think it should be"). */
+  .ctrack{display:flex;height:12px;max-width:420px;margin:14px 0 8px;border-radius:999px;overflow:hidden;position:relative;
     background-color:var(--soft)}
   .ctrack[hidden]{display:none}
   .ctrack i{display:block;height:100%;min-width:3px}
   .ctrack i.st{background-color:var(--steel)}
   .ctrack i.wd{background-color:var(--wood)}
-  .ctrack::after{content:"";position:absolute;inset:0;pointer-events:none;
-    background-image:repeating-linear-gradient(90deg,transparent 0 10px,rgba(255,255,255,.42) 10px 12px)}
   .clegend{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 4px;font-size:.9rem;color:var(--muted)}
   .clegend[hidden]{display:none}
   .clegend span{display:inline-flex;align-items:center;gap:7px}
@@ -299,7 +297,7 @@
 </div></footer>
 
 <script src="/app.js?v=20261118a"></script>
-<script src="/changes-feed.js?v=20261120a"></script>
+<script src="/changes-feed.js?v=20261120b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('riders');

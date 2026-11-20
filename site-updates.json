@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-20T17:47:16Z",
-   "text": "The map hides parks whose coasters have all closed, with a Closed parks box to bring them back. The You & friends list on the home page shows only what you and the people you follow rode and ranked."
+   "at": "2026-11-20T18:10:20Z",
+   "text": "The home page has a new look: a painted park skyline under a real sky, a bigger, bolder count, and your credits split into steel and wood. The map hides parks whose coasters have all closed, with a Closed parks box to bring them back."
   },
   {
    "at": "2026-11-19T03:40:00Z",

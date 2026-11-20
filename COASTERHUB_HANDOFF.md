@@ -6470,3 +6470,22 @@ Fair/travelling coasters (parks.travel=1) never came from RCDB and count as open
   add-new-parks now also skips a same-name park within 30 km and holds a
   chain park with no town in its name. open-data.yml's commit uses
   `-X theirs` after a run lost its pins to a rebase conflict.
+
+## Home redesign, round one (2026-11-20)
+
+Carter: "the entire site lacks personality ... more color" (critique in
+`.impeccable/critique/2026-11-20T17-54-12Z__index-html.md`). Chosen direction
+"Track Paint + Lights", then narrowed: **two paints only, steel and wood**
+("not that many colors it will get complicated"). Home only so far:
+- `--steel` / `--wood` (+ `-tint`) tokens, defined in index.html for now;
+  move to style.css when another page uses them.
+- **Archivo** (SIL OFL, `fonts/`, width + weight axes) for headlines and big
+  numbers only, via `--display`; body stays system-ui.
+- Painted skylines `skyline-paint-day/night.svg` from `tools/make-skyline.py`
+  (now takes per-ride `paint` / `bulbs`; the plain day/night files come out
+  byte-identical). Day sky is a late-afternoon gradient.
+- The collection bar is ONE solid line (Carter rejected the crosstie version).
+- Feed rows carry `data-k` (event kind) so pages can color icons.
+- Carter wants every design change shown as screenshots before it goes to
+  main ("please suggest things before you push"); previews go to the session
+  branch only. The day/night toggle stays.
