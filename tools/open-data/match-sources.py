@@ -219,7 +219,8 @@ def town_in(park):
     return sq(m.group(1)) if m else None
 def elsewhere(it, park, pk):
     if it['lat'] is not None and pk.get('lat') is not None and km(it['lat'], it['lon'], pk['lat'], pk['lon']) > 30: return True
-    t, loc = town_in(park), sq((it.get('raw') or {}).get('location') or '')
+    raw = it.get('raw') or {}
+    t, loc = town_in(park), sq(raw.get('location') or raw.get('ort') or raw.get('standort') or '')
     return bool(t and loc and t not in loc and sq(base(park)) in it['parks'])
 found = collections.defaultdict(list)   # (source, ref) -> [(coaster, method)]
 for c in coasters:
@@ -262,7 +263,7 @@ item_by = {(it['source'], it['ref']): it for it in items}
 # (tools/open-data/reviews.json, exported from D1's open_reviews by the job).
 reviews = json.load(open('tools/open-data/reviews.json')) if os.path.exists('tools/open-data/reviews.json') else []
 for r in reviews:
-    if r.get('kind') != 'match' or r.get('source') not in ('coasterpedia', 'osm'): continue
+    if r.get('kind') != 'match' or r.get('source') not in ('coasterpedia', 'osm', 'enwiki', 'dewiki'): continue
     key, cid = (r['source'], r['ref']), int(r['coaster_id'])
     if key not in item_by or cid not in byid: continue
     # This coaster's other links in this source, and this record's other coasters, give way.
