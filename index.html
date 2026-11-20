@@ -224,7 +224,6 @@
   .rankcta .rc-t span{color:var(--muted);font-size:.92rem}
   .rankcta .btn{white-space:nowrap;background-color:var(--panel);color:var(--fg);border:1px solid var(--line)}
   .rankcta .btn:hover{border-color:var(--accent2);color:var(--accent2)}
-  #globaltop.empty{display:none}
 
   /* Friends: tiles in a row you scroll sideways, instead of a list. */
   .ftiles{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin:0 -2px 6px;
@@ -337,7 +336,7 @@
     <div class="daycard" id="daycard" hidden></div>
     <div class="otdcard" id="otdcard" hidden></div>
   </div>
-  <!-- Ranking as a call to action until there is a list worth showing. -->
+  <!-- Ranking as a call to action while you have ranked fewer than ten. -->
   <div class="rankcta" id="rankcta" hidden></div>
   <div id="globaltop"></div>
   <div id="friends_wrap" hidden>
@@ -593,11 +592,8 @@ CoasterHub.fetchCoasters().then(function(r){
   var paint = function(){ Array.prototype.forEach.call(gt.querySelectorAll('a.crow'), function(a){
     var id = a.getAttribute('data-gid') || a.getAttribute('data-cid'); var v = wood[id] ? 'wd' : 'st';
     if (a.getAttribute('data-tp') !== v) a.setAttribute('data-tp', v); }); };
-  new MutationObserver(function(){ paint();
-    // Nothing to show (no list on 2+ riders yet): hide rather than an empty card.
-    var empty = !gt.querySelector('a.crow') && /None of these|Nothing ranked/.test(gt.textContent);
-    gt.classList.toggle('empty', empty);
-  }).observe(gt, { childList: true, subtree: true });
+  // Always shown, scores and all (Carter, 2026-11-20: "still want global top 5 and scores").
+  new MutationObserver(paint).observe(gt, { childList: true, subtree: true });
 }).catch(function(){});
 CoasterHub.fetchCoasters().then(function(r){
   CoasterHub.rankSection(document.getElementById('globaltop'), r.coasters || [], {

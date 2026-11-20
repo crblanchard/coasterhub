@@ -178,11 +178,8 @@
   .bar{height:8px;border-radius:999px;background-color:var(--soft);overflow:hidden}
   .bar i{display:block;height:100%;border-radius:999px;background-color:var(--paint)}
   .gauge{display:block;width:100%;max-width:150px;height:auto}
-  .loops{display:flex;flex-wrap:wrap;gap:4px;min-height:20px;align-items:center}
-  .loops svg{width:20px;height:20px;color:var(--paint)}
-  .loops .none{color:var(--muted);font-size:.85rem}
   .gone .sc .v{color:var(--muted)}
-  .gone .bar i,.gone .loops svg{background-color:var(--muted);color:var(--muted)}
+  .gone .bar i{background-color:var(--muted)}
   @media (max-width:560px){ .stats2{grid-template-columns:1fr 1fr;gap:10px} .sc .v{font-size:1.6rem} .sc:last-child:nth-child(odd){grid-column:1 / -1} }
   /* You and this ride, under the facts: your place, your rides, first ride, and Log. */
   .youcard{display:flex;align-items:center;gap:16px 22px;flex-wrap:wrap;margin:6px 0 4px;padding:14px 18px;border-radius:14px;
@@ -400,8 +397,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
     stats.push(card('Top speed',Math.round(S.s),'mph','<svg class="gauge" viewBox="0 0 120 66" aria-hidden="true"><path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="var(--soft)" stroke-width="10" stroke-linecap="round"/>'
       +(f>0?'<path d="M10 60 A50 50 0 0 1 '+gx.toFixed(1)+' '+gy.toFixed(1)+'" fill="none" stroke="var(--paint)" stroke-width="10" stroke-linecap="round"/>':'')+'</svg>'+(ms&&ms.id!==C.id?capOf(ms,'s',' mph','Fastest'):''),top('s','fastest'))); }
   if(S.l!=null){ var ml=mx('l'); stats.push(card('Length',Math.round(S.l).toLocaleString(),'ft','<div class="bar"><i style="width:'+pct(+S.l,ml&&ml.l)+'%"></i></div>'+(ml&&ml.id!==C.id?capOf(ml,'l',' ft','Longest'):''),top('l','longest'))); }
-  if(S.inv!=null){ var n=+S.inv, loop='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 20c4 0 5-2 6-5 1-4 2-9 6-9a4 4 0 0 1 0 8c-3 0-4-3-5-6"/></svg>';
-    stats.push(card(n===1?'Inversion':'Inversions',n,'','<div class="loops">'+(n?new Array(Math.min(n,12)+1).join(loop)+(n>12?'<span class="none">+'+(n-12)+'</span>':''):'<span class="none">No inversions</span>')+'</div>',n>0?top('inv','most inversions'):'')); }
+  // Just the number (Carter, 2026-11-20: "cut these icons too").
+  if(S.inv!=null){ var n=+S.inv; stats.push(card(n===1?'Inversion':'Inversions',n,'','',n>0?top('inv','most inversions'):'')); }
   if(S.dur!=null) stats.push(card('Ride time',dur(S.dur),'',''));
   // No Laps until there is a standard for them (Carter, 2026-09-28).
   $('specs').innerHTML=stats.join('');
