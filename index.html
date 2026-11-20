@@ -13,6 +13,7 @@
 <meta name="description" content="Keep track of your roller coaster count — every credit, every re-ride, every park — and see it as maps, records and charts.">
 <link rel="stylesheet" href="/style.css?v=20261118a">
 <link rel="stylesheet" href="/lists.css?v=20261106b">
+<link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -93,6 +94,85 @@
   .atpark i{align-self:stretch;display:flex;align-items:center;margin:-13px 0;padding:13px 0 13px 16px;
     border-left:1.5px dashed var(--line);font-style:normal;font-weight:700;color:var(--accent2);white-space:nowrap}
   .atpark:hover i{color:var(--fg)}
+
+  /* ---- Home, round one of the new look (Carter, 2026-11-20: "the entire site
+     lacks personality ... more color"; direction "Track Paint + Lights", kept
+     to two paints: "split steel/wood but not that many colors").
+     Archivo (SIL OFL, fonts/ARCHIVO-OFL.txt), self-hosted, width and weight
+     axes, for headlines and big numbers only; body stays the system face. */
+  @font-face{font-family:'Archivo';font-style:normal;font-display:swap;font-weight:100 900;font-stretch:62% 125%;
+    src:url(/fonts/archivo-latin.woff2) format('woff2-variations');
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:'Archivo';font-style:normal;font-display:swap;font-weight:100 900;font-stretch:62% 125%;
+    src:url(/fonts/archivo-latin-ext.woff2) format('woff2-variations');
+    unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+  /* Two track paints: steel and wood. Night brighter, day deep enough to read on white. */
+  :root{--steel:#4fd1c5;--wood:#f2a35c;--steel-tint:rgba(79,209,197,.16);--wood-tint:rgba(242,163,92,.16);
+    --display:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  :root[data-theme="light"]{--steel:#0e7480;--wood:#b05a1e;--steel-tint:rgba(14,116,128,.12);--wood-tint:rgba(176,90,30,.12)}
+  body{background-image:none}
+
+  /* The hero: a real sky. Day is late afternoon, blue overhead warming to peach
+     at the horizon, the rides painted steel and timber; night is the park lit up. */
+  section.hero.home{background-color:#070b22;
+    background-image:url(/skyline-paint-night.svg?v=1),linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%);
+    background-size:auto min(190px,82%,max(64px,calc(36vw - 190px))),100% 100%;
+    background-position:right max(20px,calc(50vw - 520px)) bottom 0,0 0;background-repeat:no-repeat}
+  :root[data-theme="light"] section.hero.home{background-color:#9fd2f7;
+    background-image:url(/skyline-paint-day.svg?v=1),linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%);
+    background-size:auto min(190px,82%,max(64px,calc(36vw - 190px))),100% 100%;
+    background-position:right max(20px,calc(50vw - 520px)) bottom 0,0 0;
+    --muted:#33424e;--line:rgba(10,60,90,.22)}
+  @media (max-width:640px){
+    section.hero.home,:root[data-theme="light"] section.hero.home{background-size:auto 80px,100% 100%!important;background-position:right 10px bottom 0,0 0!important}
+    section.hero.home{padding-bottom:var(--hero-b,4px)}
+  }
+  .hero.home h1.wide,.hero.home .heroyou h1{font-family:var(--display);font-stretch:118%;font-weight:850;
+    font-size:clamp(3rem,10vw,5.4rem);line-height:.92;letter-spacing:-.035em;margin:0 0 10px}
+  .hero.home #hero_h{font-size:clamp(2.4rem,7vw,4.2rem)}
+  .hero.home .heroyou h1 .w{font-weight:600;font-stretch:100%;letter-spacing:-.02em;font-size:.62em;margin-left:.12em}
+  .hero.home .heroyou .hy_sub{font-size:1.02rem}
+  /* .hero p + p would otherwise set these gaps (see CLAUDE.md, the specificity trap). */
+  .hero.home .heroyou p.clegend{margin:0}
+  .hero.home .heroyou p.hy_last{margin:12px 0 0}
+  .hero.home .heroyou p.hy_acts{margin:16px 0 20px}
+  @media (max-width:640px){ .hero.home .heroyou p.hy_acts{margin-bottom:78px} }
+
+  /* Your collection as a stretch of track: steel and wood in proportion, with
+     crossties over it, and the two counts under it. */
+  .ctrack{display:flex;height:14px;max-width:420px;margin:14px 0 8px;border-radius:999px;overflow:hidden;position:relative;
+    background-color:var(--soft)}
+  .ctrack[hidden]{display:none}
+  .ctrack i{display:block;height:100%;min-width:3px}
+  .ctrack i.st{background-color:var(--steel)}
+  .ctrack i.wd{background-color:var(--wood)}
+  .ctrack::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:repeating-linear-gradient(90deg,transparent 0 10px,rgba(255,255,255,.42) 10px 12px)}
+  .clegend{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 4px;font-size:.9rem;color:var(--muted)}
+  .clegend[hidden]{display:none}
+  .clegend span{display:inline-flex;align-items:center;gap:7px}
+  .clegend span::before{content:"";width:10px;height:10px;border-radius:3px;background-color:var(--c)}
+  .clegend b{color:var(--fg);font-family:var(--display);font-weight:800;font-stretch:110%}
+
+  /* Section heads: real headings in the display face, a size up. */
+  h2.sec,#globaltop .rhead > span{display:block;font-family:var(--display);font-stretch:112%;font-weight:800;
+    font-size:clamp(1.35rem,3.6vw,1.7rem);letter-spacing:-.02em;line-height:1.1;color:var(--fg);margin:0 0 12px}
+  #globaltop .rhead{margin-bottom:12px}
+  #globaltop .rhead > span{margin:0}
+
+  /* Rank numbers: big, in the display face, painted steel or wood by the ride. */
+  #globaltop a.crow .rk{font-family:var(--display);font-stretch:112%;font-weight:850;font-size:1.45rem;min-width:2.1em;
+    color:var(--steel);font-variant-numeric:tabular-nums}
+  #globaltop a.crow[data-tp="wd"] .rk{color:var(--wood)}
+
+  /* Feed icons: a logged day in steel, a ranking in wood; the rest stay neutral. */
+  .feed .ev[data-k="rides"] .ic,.feed .ev[data-k="credits"] .ic,.feed .ev[data-k="user_added"] .ic,.feed .ev[data-k="import"] .ic{background-color:var(--steel-tint);color:var(--steel)}
+  .feed .ev[data-k="ranking"] .ic{background-color:var(--wood-tint);color:var(--wood)}
+
+  /* The contact card's button: the outline style, not a third kind of button. */
+  .fbcard .go{background-color:var(--panel)!important;color:var(--fg)!important;border:1px solid var(--line)!important}
+  .fbcard .go:hover{border-color:var(--accent2)!important;color:var(--accent2)!important}
+  ::selection{background-color:var(--steel-tint)}
 </style>
 </head>
 <body>
@@ -111,7 +191,7 @@
   <div class="people" id="people"></div>
 </div></header>
 
-<section class="hero" style="--hero-t:36px;--hero-b:4px"><div class="container">
+<section class="hero home" style="--hero-t:40px;--hero-b:4px"><div class="container">
   <svg class="track" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <path d="M-50 500 C 250 500, 300 120, 520 120 S 780 560, 1000 380 S 1300 90, 1500 300"
           fill="none" stroke="var(--line)" stroke-width="4"/>
@@ -125,6 +205,8 @@
   <div class="heroyou" id="heroyou" hidden>
     <h1 class="wide"><a id="hy_credits" href="/credits"></a></h1>
     <p class="hy_sub"><span id="hy_rides"></span><span id="hy_ranked"></span></p>
+    <div class="ctrack" id="hy_track" hidden aria-hidden="true"></div>
+    <p class="clegend" id="hy_legend" hidden></p>
     <p class="hy_last" id="hy_last" hidden></p>
     <p class="hy_acts"><a class="btn" href="/log">Log a day</a><a class="btn alt" id="hy_rank" href="/rankings">Rank more</a></p>
   </div>
@@ -176,14 +258,14 @@
        everyone's rankings. Above Friends (Carter, 2026-11-18: "put the top 5 above friends"). -->
   <div id="globaltop"></div>
   <div id="friends_wrap" hidden>
-    <span class="eyebrow lh">Friends</span>
+    <h2 class="sec">Friends</h2>
     <div class="riderlist" id="friends"></div>
     <!-- Carter, 2026-10-04: "below your list of friends do a Find friends ->";
          /users has the suggestions at its top. -->
     <p class="more findf"><a href="/users">Find friends &rarr;</a></p>
   </div>
   <div id="factivity_wrap" hidden>
-    <span class="eyebrow lh">You &amp; friends</span>
+    <h2 class="sec">You &amp; friends</h2>
     <div class="feed" id="factivity"></div>
     <p class="more"><a href="/changes">All activity &rarr;</a></p>
   </div>
@@ -193,7 +275,7 @@
      draws (changes-feed.js), cut to the last few days; the link goes to the full
      one with its filters. -->
 <section class="block recent"><div class="container">
-  <span class="eyebrow lh">Updates</span>
+  <h2 class="sec">Updates</h2>
   <div class="feed" id="feed"><div class="empty" data-loading>Loading&hellip;</div></div>
   <p class="more"><a href="/changes">All updates &rarr;</a></p>
 </div></section>
@@ -245,7 +327,8 @@ CoasterHub.me().then(function(acct){
     if (!me) return;
     var $ = function(id){ return document.getElementById(id); };
     var nfx = function(n){ return Number(n || 0).toLocaleString(); };
-    $('hy_credits').textContent = nfx(me.credits) + (me.credits === 1 ? ' credit.' : ' credits.');
+    var cword = function(n){ return '<span class="n">' + nfx(n) + '</span><span class="w">' + (me.credits === 1 ? ' credit.' : ' credits.') + '</span>'; };
+    $('hy_credits').innerHTML = cword(me.credits);
     // The count ticks up to its new number when it has grown since you last
     // saw Home — log rides, come back, watch it count (Carter, 2026-11-17).
     // Only upward, at most the last 40 steps, under a second, and never for
@@ -258,12 +341,11 @@ CoasterHub.me().then(function(acct){
       if (prev == null || !(to > prev)) return;
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       var from = Math.max(prev, to - 40), el = $('hy_credits'), t0 = null, dur = Math.min(900, 300 + (to - from) * 40);
-      var word = to === 1 ? ' credit.' : ' credits.';
-      el.textContent = nfx(from) + word;
+      el.innerHTML = cword(from); var num = el.querySelector('.n');
       function step(ts){
         if (t0 == null) t0 = ts;
         var k = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-        el.textContent = nfx(Math.round(from + (to - from) * e)) + word;
+        num.textContent = nfx(Math.round(from + (to - from) * e));
         if (k < 1) requestAnimationFrame(step);
       }
       setTimeout(function(){ requestAnimationFrame(step); }, 250);
@@ -275,6 +357,16 @@ CoasterHub.me().then(function(acct){
     // The last day you logged, and where.
     var log = r[1] && r[1].rides, cs = (r[2] && r[2].coasters) || [], byId = {};
     cs.forEach(function(c){ byId[c.id] = c; });
+    // Your credits as steel and wood, as a stretch of track (2026-11-20).
+    if (log && log.length) {
+      var seen = {}, st = 0, wd = 0;
+      log.forEach(function(x){ var c = byId[x.c]; if (!c || seen[c.id]) return; seen[c.id] = 1; if (c.type === 'Wood') wd++; else st++; });
+      if (st + wd) {
+        $('hy_track').innerHTML = (st ? '<i class="st" style="flex:' + st + '"></i>' : '') + (wd ? '<i class="wd" style="flex:' + wd + '"></i>' : '');
+        $('hy_legend').innerHTML = '<span style="--c:var(--steel)"><b>' + nfx(st) + '</b> steel</span><span style="--c:var(--wood)"><b>' + nfx(wd) + '</b> wood</span>';
+        $('hy_track').hidden = false; $('hy_legend').hidden = false;
+      }
+    }
     if (log && log.length) {
       var last = null;
       log.forEach(function(x){ if (x.d && (!last || x.d > last)) last = x.d; });
@@ -293,7 +385,7 @@ CoasterHub.me().then(function(acct){
     // Saved with the FINAL count even while it is still ticking up, so next
     // time opens on the real number.
     try { var hc = $('heroyou').cloneNode(true), hh = hc.querySelector('#hy_credits');
-      if (hh) hh.textContent = nfx(me.credits) + (me.credits === 1 ? ' credit.' : ' credits.');
+      if (hh) hh.innerHTML = cword(me.credits);
       localStorage.setItem('ch_hero', JSON.stringify({ slug: acct.slug, html: hc.innerHTML })); } catch (e) {}
   });
 }).catch(function(){ /* the slogan stays */ });
@@ -363,6 +455,16 @@ CoasterHub.openableCoasters(document.getElementById('globaltop'));
 // Five on a phone (Carter, 2026-10-02: "Home: shorter"), ten wider; the
 // rest is a tap away on /rankings either way.
 var TOPN = window.matchMedia('(max-width:560px)').matches ? 5 : 10;
+// Rank rows painted steel or wood by the ride (2026-11-20). The section
+// re-renders on Global | Mine, so it is watched rather than painted once.
+CoasterHub.fetchCoasters().then(function(r){
+  var wood = {}; (r.coasters || []).forEach(function(c){ if (c.type === 'Wood') wood[c.id] = 1; });
+  var gt = document.getElementById('globaltop');
+  var paint = function(){ Array.prototype.forEach.call(gt.querySelectorAll('a.crow'), function(a){
+    var id = a.getAttribute('data-gid') || a.getAttribute('data-cid'); var v = wood[id] ? 'wd' : 'st';
+    if (a.getAttribute('data-tp') !== v) a.setAttribute('data-tp', v); }); };
+  new MutationObserver(paint).observe(gt, { childList: true, subtree: true });
+}).catch(function(){});
 CoasterHub.fetchCoasters().then(function(r){
   CoasterHub.rankSection(document.getElementById('globaltop'), r.coasters || [], {
     model: false, lists: false, moreHref: '/rankings', fold: TOPN,

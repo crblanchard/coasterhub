@@ -63,25 +63,33 @@ def track_y(x):
 X_END=X3+4
 
 
-def build(col,op,light=None,trees=None,bg=None):
+def build(col,op,light=None,trees=None,bg=None,paint=None,bulbs=None):
+    # paint / bulbs (2026-11-20, the painted home skyline): a colour per ride,
+    # {'track','struct','wheel','tower','swings'} and {'coaster','wheel','tower',
+    # 'swings'}; anything missing falls back to col / light, which is what the
+    # plain day and night files use, so those come out byte-for-byte the same.
+    paint=paint or {}; bulbs=bulbs or {}
+    cur=[col]
+    def use(part): cur[0]=paint.get(part,col)
     o=[]; groups={}
     # the line colour at its opacity, laid over the band, as one opaque colour:
     # what a filled part is painted with, so it hides whatever is behind it
     h=lambda c:[int(c[i:i+2],16) for i in (1,3,5)]
-    solid='#%02x%02x%02x'%tuple(round(b+(f-b)*op) for f,b in zip(h(col),h(bg)))
+    sol=lambda c:'#%02x%02x%02x'%tuple(round(b+(f-b)*op) for f,b in zip(h(c),h(bg)))
     def F(d):
         # a filled, opaque part, painted now, over everything drawn before it
+        solid=sol(cur[0])
         o.append("<path d='%s' fill='%s' stroke='%s' stroke-width='.6' stroke-linejoin='round'/>"%(d,solid,solid))
     def P(d,w=1.0,a=1.0):
         # a line painted now, rather than with its weight group
-        o.append("<path d='%s' fill='none' stroke='%s' stroke-opacity='%.2f' stroke-width='%.2f' stroke-linecap='round' stroke-linejoin='round'/>"%(d,col,op*a,w))
+        o.append("<path d='%s' fill='none' stroke='%s' stroke-opacity='%.2f' stroke-width='%.2f' stroke-linecap='round' stroke-linejoin='round'/>"%(d,cur[0],op*a,w))
     def S(d,w=1.0,a=1.0):
         # strokes of the same weight share one <path>, which keeps the file small
-        k=(w,a)
+        k=(w,a,cur[0])
         if k not in groups: groups[k]=[]; o.append(k)
         groups[k].append(d)
     lights=[]
-    def L(d,gap=8,w=2.2,length=None):
+    def L(d,gap=8,w=2.2,length=None,part=None):
         # A run of lights: a dash of 0.1 and a gap. Given the run's length, the gap is
         # evened out so a light lands on both ends — pulled a hair short, because a
         # dash starting exactly at the end of a path is dropped (the far light on
@@ -89,7 +97,7 @@ def build(col,op,light=None,trees=None,bg=None):
         if length:
             n=max(1,round(length/gap)); gap=length/n-.002
         lights.append("<path d='%s' fill='none' stroke='%s' stroke-width='%.1f' stroke-dasharray='0.1 %.3f' "
-                      "stroke-linecap='round'/>"%(d,light,w,gap-.1))
+                      "stroke-linecap='round'/>"%(d,bulbs.get(part,light),w,gap-.1))
     def clen(*segs):
         """Length of a run of cubic Bezier segments, each (p0,p1,p2,p3)."""
         n=0
@@ -101,6 +109,7 @@ def build(col,op,light=None,trees=None,bg=None):
     circ=lambda cx,cy,r: 'M%.1f %.1f A%.1f %.1f 0 1 0 %.1f %.1f A%.1f %.1f 0 1 0 %.1f %.1f'%(cx-r,cy,r,r,cx+r,cy,r,r,cx-r,cy)
 
     # ---------- the coaster ----------
+    use('struct')
     xs=[-2+i*1.0 for i in range(int(X_END+2)+1)]
     pts=[(x,track_y(x)) for x in xs]
     d='M'+' L'.join('%.1f %.1f'%p for p in pts)
@@ -133,7 +142,7 @@ def build(col,op,light=None,trees=None,bg=None):
     S('M'+' L'.join('%.1f %.1f'%(x,top+.5) for x,top in cols),.6,.7)
     # the lift's walkway, a thin rail just under the chain
     S('M%.1f %.1f L%.1f %.1f'%(0,track_y(0)+2.6,TX-4,track_y(TX-4)+2.6),.5,.8)
-    S(d,2.4)
+    use('track'); S(d,2.4); use('struct')
     # the platform on top: a railing along the crest, and the mast
     p0,p1=px(1140),px(1255)
     rail='M%.1f %.1f'%(p0,track_y(p0)-3.5)
@@ -152,11 +161,12 @@ def build(col,op,light=None,trees=None,bg=None):
         cars.append('M%.1f %.1f L%.1f %.1f'%(ax+nx,ay+ny,bx+nx,by+ny))
         s=b
         while math.hypot(s-b,track_y(s)-track_y(b))<1.4: s+=.2
-    o.append("<path d='%s' fill='none' stroke='%s' stroke-opacity='%.2f' stroke-width='3.4'/>"%(' '.join(cars),col,min(1,op*1.3)))
+    o.append("<path d='%s' fill='none' stroke='%s' stroke-opacity='%.2f' stroke-width='3.4'/>"%(' '.join(cars),paint.get('train',col),min(1,op*1.3)))
     if light:
-        L(d,8); beacons.append((mx,VY-11))
+        L(d,8,part='coaster'); beacons.append((mx,VY-11))
 
     # ---------- Ferris wheel ----------
+    use('wheel')
     fx,fr=504,42; fy=G-10-fr
     S('M%d %d L%d %d L%d %d'%(fx-20,G,fx,fy,fx+20,G),1.0)          # A-frame legs
     S(circ(fx,fy,fr),1.3)
@@ -171,12 +181,13 @@ def build(col,op,light=None,trees=None,bg=None):
     S(' '.join(gond),.8)
     S(circ(fx,fy,2.2),1.0)
     if light:
-        L(circ(fx,fy,fr),5,2)
+        L(circ(fx,fy,fr),5,2,part='wheel')
         for i in range(0,18,2):
             a=2*math.pi*i/18
-            L('M%d %d L%.1f %.1f'%(fx,fy,fx+fr*math.cos(a),fy+fr*math.sin(a)),6,1.6)
+            L('M%d %d L%.1f %.1f'%(fx,fy,fx+fr*math.cos(a),fy+fr*math.sin(a)),6,1.6,part='wheel')
 
     # ---------- Power Tower ----------
+    use('tower')
     pX,pt=577,G-172          # centre, top of the masts
     for mX in (pX-7,pX+7):
         S('M%.1f %d L%.1f %d M%.1f %d L%.1f %d'%(mX-2.5,G,mX-2.5,pt,mX+2.5,G,mX+2.5,pt),.8)
@@ -194,10 +205,11 @@ def build(col,op,light=None,trees=None,bg=None):
     S(crown,1.2)
     S('M%d %d L%d %d M%d %d L%d %d M%d %d L%d %d'%(pX-5,pt,pX-5,pt-11,pX,pt,pX,pt-14,pX+5,pt,pX+5,pt-11),.5,.7)
     if light:
-        L(crown,4.5,2,clen(((pX-11,pt),(pX-11,pt-10),(pX-5,pt-14),(pX,pt-14)),((pX,pt-14),(pX+5,pt-14),(pX+11,pt-10),(pX+11,pt))))
+        L(crown,4.5,2,part='tower',length=clen(((pX-11,pt),(pX-11,pt-10),(pX-5,pt-14),(pX,pt-14)),((pX,pt-14),(pX+5,pt-14),(pX+11,pt-10),(pX+11,pt))))
         beacons.append((pX,pt-16))
 
     # ---------- WindSeeker ----------
+    use('swings')
     wx=630
     # a thick tower, solid all the way through (Carter, 2026-09-29), tapering a
     # little, with a solid cap; the carriage and swings are painted over it
@@ -212,7 +224,7 @@ def build(col,op,light=None,trees=None,bg=None):
         P('M%d %d L%d %d'%(wx+dx,cy+6,ex,ey),.45,.75)
         P('M%.1f %d L%.1f %d'%(ex-1.6,ey,ex+1.6,ey),1.6)
     if light:
-        L('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),4,2,32); beacons.append((wx,6))
+        L('M%d %d L%d %d'%(wx-16,cy+6,wx+16,cy+6),4,2,32,part='swings'); beacons.append((wx,6))
 
     # ---------- treeline: low along the floor, a low wooded rise under the drop ----------
     def env(x):
@@ -229,10 +241,18 @@ def build(col,op,light=None,trees=None,bg=None):
     beac=''.join("<circle cx='%.1f' cy='%.1f' r='1.9' fill='#ff5a5f'/>"%b for b in beacons) if light else ''
     o=[x if isinstance(x,str) else
        "<path d='%s' fill='none' stroke='%s' stroke-opacity='%.2f' stroke-width='%.2f' stroke-linecap='round' stroke-linejoin='round'/>"
-       %(' '.join(groups[x]),col,op*x[1],x[0]) for x in o]
+       %(' '.join(groups[x]),x[2],op*x[1],x[0]) for x in o]
     return ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 %d %d'>%s%s%s%s</svg>"
             %(W,H,''.join(o),''.join(lights),beac,tree))
 
 out=sys.argv[1] if len(sys.argv)>1 else '.'
 open(out+'/skyline-day.svg','w').write(build('#0a6aa0',.55,trees=('#0a6aa0',.16),bg='#d8eafa'))
 open(out+'/skyline-night.svg','w').write(build('#ffffff',.36,'#ffcc1f',trees=('#000000',.45),bg='#050b1b'))
+# The painted pair for the home page (2026-11-20, "Track Paint + Lights",
+# kept to two paints at Carter's word: "split steel/wood but not that many
+# colors"): the steel rides in steel teal, the Ferris wheel in timber, and by
+# night the wheel's bulbs warm against the yellow chasers.
+DAY=dict(track='#0e6f78',struct='#4b8c9c',train='#16181b',wheel='#b4581f',tower='#0e6f78',swings='#0e6f78')
+open(out+'/skyline-paint-day.svg','w').write(build('#4b8c9c',.9,trees=('#2f6f5a',.2),bg='#fbe3c4',paint=DAY))
+open(out+'/skyline-paint-night.svg','w').write(build('#ffffff',.36,'#ffcc1f',trees=('#000000',.45),bg='#0b0f2a',
+    bulbs=dict(wheel='#ffad5c')))

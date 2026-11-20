@@ -420,7 +420,7 @@
       list.forEach(function(e){
         var k = dayKey(e.at);
         if (k !== lastDay){ html += '<div class="day">' + esc(k) + '</div>'; lastDay = k; }
-        html += '<div class="ev' + (RIDER_KINDS[e.kind] ? ' log' : '') + '">'
+        html += '<div class="ev' + (RIDER_KINDS[e.kind] ? ' log' : '') + '" data-k="' + esc(e.kind) + '">'
           + '<span class="ic">' + icon(e.kind) + '</span>'
           + '<span class="tx">' + sentence(e) + '</span>'
           + '<span class="when">' + esc(clock(e.at)) + '</span>'
