@@ -1194,3 +1194,9 @@ body{background-image:none}
 .hero:has(.rh-count){background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
 :root[data-theme="light"] .hero:has(.rh-count){background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
 .hero p.rh-count{font-family:var(--display);font-stretch:110%;letter-spacing:-.02em}
+/* The phone's plain bands (no skyline off Home, Explore and Rankings) wear the
+   new sky too, not the old pale gradient (2026-11-20). */
+@media (max-width:680px){
+  html:not(.pg-riders):not(.pg-explore):not(.pg-rankings) .hero{background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
+  :root[data-theme="light"]:not(.pg-riders):not(.pg-explore):not(.pg-rankings) .hero{background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
+}
