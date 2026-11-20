@@ -1150,3 +1150,47 @@ html.edgeswiping,html.edgeswiping body{overflow-x:hidden}
 .leaflet-container img.leaflet-tile{mix-blend-mode:normal}
 .leaflet-container{background-color:#3a3a3a}
 :root[data-theme="light"] .leaflet-container{background-color:#e4e4e2}
+/* ---- The new look, sitewide (2026-11-20; Carter: "the entire site lacks
+   personality ... more color", direction "Track Paint + Lights", two paints:
+   "split steel/wood but not that many colors"). Home went first; this carries
+   it to every page.
+   Archivo (SIL OFL, fonts/ARCHIVO-OFL.txt), self-hosted, width + weight axes,
+   for headlines and big numbers only; body text stays the system face. */
+@font-face{font-family:'Archivo';font-style:normal;font-display:swap;font-weight:100 900;font-stretch:62% 125%;
+  src:url(/fonts/archivo-latin.woff2) format('woff2-variations');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Archivo';font-style:normal;font-display:swap;font-weight:100 900;font-stretch:62% 125%;
+  src:url(/fonts/archivo-latin-ext.woff2) format('woff2-variations');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+/* Two track paints, steel and wood: brighter by night, deep enough to read on
+   white by day. --display is the headline face. */
+:root{--steel:#4fd1c5;--wood:#f2a35c;--steel-tint:rgba(79,209,197,.16);--wood-tint:rgba(242,163,92,.16);
+  --display:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+:root[data-theme="light"]{--steel:#0e7480;--wood:#b05a1e;--steel-tint:rgba(14,116,128,.12);--wood-tint:rgba(176,90,30,.12)}
+::selection{background-color:var(--steel-tint)}
+/* The faint washes under the band read as dirt once the band itself has colour. */
+body{background-image:none}
+/* Every page's band is the sky: night is the park lit up, day is late
+   afternoon, blue overhead to peach at the horizon, the rides painted steel
+   and timber (skyline-paint-*.svg, tools/make-skyline.py). Same sizes and
+   places as before, so the phone rules above still apply. */
+.hero{background-color:#070b22;
+  background-image:url(/skyline-paint-night.svg?v=1),linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%);
+  background-size:auto min(150px,80%,max(58px,calc(30.7vw - 167px))),100% 100%;
+  background-position:right max(24px,calc(50vw - 516px)) bottom 0,0 0}
+:root[data-theme="light"] .hero{background-color:#9fd2f7;
+  background-image:url(/skyline-paint-day.svg?v=1),linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%);
+  --muted:#33424e;--line:rgba(10,60,90,.22)}
+.hero:has(.herotop){background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
+:root[data-theme="light"] .hero:has(.herotop){background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
+@media (max-width:640px){
+  .hero{background-size:auto 72px,100% 100%!important;background-position:right 12px bottom 0,0 0!important}
+}
+/* Headlines in the display face: every band's title, and section heads. */
+.hero h1,.hero h1.wide{font-family:var(--display);font-weight:850;font-stretch:112%;letter-spacing:-.03em}
+.sect,h2.sec{font-family:var(--display);font-weight:800;font-stretch:110%;letter-spacing:-.02em}
+/* A rider's header with the count on the right (Credits, Map): the count
+   stands where the skyline does, so those bands keep the sky without it. */
+.hero:has(.rh-count){background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
+:root[data-theme="light"] .hero:has(.rh-count){background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
+.hero p.rh-count{font-family:var(--display);font-stretch:110%;letter-spacing:-.02em}

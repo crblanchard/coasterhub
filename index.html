@@ -11,7 +11,7 @@
 <base href="/">
 <title>Coaster Hub — Track your coaster count</title>
 <meta name="description" content="Keep track of your roller coaster count — every credit, every re-ride, every park — and see it as maps, records and charts.">
-<link rel="stylesheet" href="/style.css?v=20261118a">
+<link rel="stylesheet" href="/style.css?v=20261120a">
 <link rel="stylesheet" href="/lists.css?v=20261106b">
 <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
@@ -62,6 +62,7 @@
   .heroyou h1 a{color:inherit;text-decoration:none}
   .heroyou .hy_sub{margin:6px 0 0;font-size:1.05rem;color:var(--muted)}
   .heroyou .hy_sub span:not(:empty) + span::before{content:" \00b7  ";white-space:pre}
+  .heroyou .hy_sub span:empty{display:none}
   .heroyou .hy_sub b{color:var(--fg);font-weight:700}
   .heroyou .hy_last{margin:4px 0 0;font-size:.92rem;color:var(--muted)}
   .heroyou .hy_last a{color:var(--accent2);text-decoration:none;font-weight:600}
@@ -100,17 +101,7 @@
      to two paints: "split steel/wood but not that many colors").
      Archivo (SIL OFL, fonts/ARCHIVO-OFL.txt), self-hosted, width and weight
      axes, for headlines and big numbers only; body stays the system face. */
-  @font-face{font-family:'Archivo';font-style:normal;font-display:swap;font-weight:100 900;font-stretch:62% 125%;
-    src:url(/fonts/archivo-latin.woff2) format('woff2-variations');
-    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-  @font-face{font-family:'Archivo';font-style:normal;font-display:swap;font-weight:100 900;font-stretch:62% 125%;
-    src:url(/fonts/archivo-latin-ext.woff2) format('woff2-variations');
-    unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-  /* Two track paints: steel and wood. Night brighter, day deep enough to read on white. */
-  :root{--steel:#4fd1c5;--wood:#f2a35c;--steel-tint:rgba(79,209,197,.16);--wood-tint:rgba(242,163,92,.16);
-    --display:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-  :root[data-theme="light"]{--steel:#0e7480;--wood:#b05a1e;--steel-tint:rgba(14,116,128,.12);--wood-tint:rgba(176,90,30,.12)}
-  body{background-image:none}
+  /* The font, the two paints and --display live in style.css now (2026-11-20). */
 
   /* The hero: a real sky. Day is late afternoon, blue overhead warming to peach
      at the horizon, the rides painted steel and timber; night is the park lit up. */
@@ -170,7 +161,87 @@
   /* The contact card's button: the outline style, not a third kind of button. */
   .fbcard .go{background-color:var(--panel)!important;color:var(--fg)!important;border:1px solid var(--line)!important}
   .fbcard .go:hover{border-color:var(--accent2)!important;color:var(--accent2)!important}
-  ::selection{background-color:var(--steel-tint)}
+
+  /* ---- Home, round two (Carter, 2026-11-20: "all 1-8 please"). */
+  /* Next milestone: a thin line under the steel and wood one. */
+  .hero.home .heroyou p.hy_next{display:flex;align-items:center;gap:10px;margin:10px 0 0;font-size:.92rem;color:var(--muted)}
+  .hero.home .heroyou p.hy_next[hidden]{display:none}
+  .hy_next b{color:var(--fg);font-family:var(--display);font-weight:800;font-stretch:110%}
+  .hy_next .mbar{flex:none;width:120px;height:6px;border-radius:999px;background-color:var(--soft);overflow:hidden}
+  .hy_next .mbar i{display:block;height:100%;border-radius:999px;background-color:var(--fg);opacity:.8}
+
+  /* Last park day, as a ticket stub: the date on the stub, the day on the ticket. */
+  .daycards{display:grid;grid-template-columns:1fr;gap:14px;margin:0 0 34px}
+  .daycards:not(:has(> :not([hidden]))){display:none}
+  @media (min-width:820px){ .daycards:has(> .otdcard:not([hidden])){grid-template-columns:3fr 2fr} }
+  .daycard[hidden],.otdcard[hidden],.rankcta[hidden]{display:none}
+  .daycard{--sw:108px;position:relative;display:flex;align-items:stretch;border-radius:14px;background-color:var(--panel);
+    border:1px solid var(--line);min-width:0;
+    -webkit-mask:radial-gradient(circle 10px at var(--sw) 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 10px at var(--sw) 100%,#0000 98%,#000) bottom/100% 51% no-repeat;
+    mask:radial-gradient(circle 10px at var(--sw) 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 10px at var(--sw) 100%,#0000 98%,#000) bottom/100% 51% no-repeat}
+  .daycard .stub{flex:none;width:var(--sw);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    padding:16px 6px;border-right:2px dashed var(--line);background-color:var(--steel-tint);border-radius:14px 0 0 14px}
+  .daycard .stub small{font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .daycard .stub b{font-family:var(--display);font-weight:850;font-stretch:115%;font-size:2.4rem;line-height:1;color:var(--fg);letter-spacing:-.03em}
+  .daycard .tix{flex:1;min-width:0;padding:16px 18px}
+  .daycard .tix .lab2{display:block;font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+  .daycard .tix h3{margin:0;font-family:var(--display);font-weight:800;font-stretch:108%;font-size:1.2rem;line-height:1.2;letter-spacing:-.01em}
+  .daycard .tix h3 a{color:var(--fg);text-decoration:none}
+  .daycard .tix h3 a:hover{color:var(--accent2)}
+  .daycard .tix .dsum{margin:4px 0 0;color:var(--muted);font-size:.92rem}
+  .daycard .tix .dsum b{color:var(--fg)}
+  .daycard .newc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+  .daycard .newc a{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:600;
+    text-decoration:none;color:var(--fg);background-color:var(--steel-tint)}
+  .daycard .newc a.wd{background-color:var(--wood-tint)}
+  .daycard .newc a::before{content:"";width:7px;height:7px;border-radius:50%;background-color:var(--steel)}
+  .daycard .newc a.wd::before{background-color:var(--wood)}
+  .daycard .newc a:hover{color:var(--accent2)}
+  .daycard .newc a.more{background-color:transparent;color:var(--accent2)}
+  .daycard .newc a.more::before{display:none}
+  @media (max-width:560px){
+    .daycard{--sw:74px}
+    .daycard .stub b{font-size:1.9rem}
+    .daycard .tix{padding:14px}
+    .daycard .newc a{font-size:.8rem;padding:3px 9px}
+  }
+  .otdcard{align-self:start}
+  /* On this day: one quiet card. */
+  .otdcard{border-radius:14px;background-color:var(--panel);border:1px solid var(--line);padding:16px 18px;min-width:0}
+  .otdcard .lab2{display:block;font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .otdcard p{margin:0 0 6px;line-height:1.45}
+  .otdcard p:last-child{margin:0}
+  .otdcard .ago{font-family:var(--display);font-weight:800;font-stretch:110%;color:var(--wood)}
+  .otdcard a{color:var(--fg);font-weight:600;text-decoration:none}
+  .otdcard a:hover{color:var(--accent2)}
+
+  /* Rank call to action: until you have ranked ten, a card instead of an empty top ten. */
+  .rankcta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:0 0 34px;padding:18px 20px;border-radius:14px;
+    background-color:var(--panel);border:1px solid var(--line)}
+  .rankcta .rc-n{font-family:var(--display);font-weight:850;font-stretch:115%;font-size:2.6rem;line-height:1;color:var(--steel);letter-spacing:-.03em}
+  .rankcta .rc-t{flex:1;min-width:200px}
+  .rankcta .rc-t b{display:block;font-family:var(--display);font-weight:800;font-stretch:108%;font-size:1.15rem}
+  .rankcta .rc-t span{color:var(--muted);font-size:.92rem}
+  .rankcta .btn{white-space:nowrap;background-color:var(--panel);color:var(--fg);border:1px solid var(--line)}
+  .rankcta .btn:hover{border-color:var(--accent2);color:var(--accent2)}
+  #globaltop.empty{display:none}
+
+  /* Friends: tiles in a row you scroll sideways, instead of a list. */
+  .ftiles{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin:0 -2px 6px;
+    scrollbar-width:thin}
+  .ftile{flex:none;width:168px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+    padding:14px;border-radius:14px;background-color:var(--panel);border:1px solid var(--line);color:var(--fg);text-decoration:none}
+  .ftile:hover{border-color:var(--accent2)}
+  .ftile .av{width:46px;height:46px;border-radius:50%;margin-bottom:8px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:1.15rem;color:var(--accent2);background-color:var(--tint);background-size:cover;background-position:center;
+    background-origin:border-box;border:2px solid var(--steel)}
+  .ftile b{font-weight:700;font-size:1rem;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ftile .fc{font-family:var(--display);font-weight:800;font-stretch:110%;font-size:1.25rem;line-height:1.2}
+  .ftile .fc small{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-weight:500;font-stretch:100%;font-size:.8rem;color:var(--muted);margin-left:4px}
+  .ftile .fl{font-size:.8rem;color:var(--muted);line-height:1.35;min-height:2.7em}
+  .ftile.me .av{border-color:var(--wood)}
+  .ftile.add{justify-content:center;align-items:center;text-align:center;border-style:dashed;color:var(--accent2);font-weight:700}
+  .ftile.add .av{border-style:dashed;border-color:var(--line);font-size:1.6rem}
 </style>
 </head>
 <body>
@@ -205,6 +276,7 @@
     <p class="hy_sub"><span id="hy_rides"></span><span id="hy_ranked"></span></p>
     <div class="ctrack" id="hy_track" hidden aria-hidden="true"></div>
     <p class="clegend" id="hy_legend" hidden></p>
+    <p class="hy_next" id="hy_next" hidden></p>
     <p class="hy_last" id="hy_last" hidden></p>
     <p class="hy_acts"><a class="btn" href="/log">Log a day</a><a class="btn alt" id="hy_rank" href="/rankings">Rank more</a></p>
   </div>
@@ -259,13 +331,19 @@
        top 5 or 10"): CoasterHub.rankSection, the same Global | Mine section
        a maker's or a location's page has, over every coaster, read live from
        everyone's rankings. Above Friends (Carter, 2026-11-18: "put the top 5 above friends"). -->
+  <!-- Your last park day as a ticket stub, and On this day beside it
+       (Carter, 2026-11-20: "all 1-8 please"). -->
+  <div class="daycards">
+    <div class="daycard" id="daycard" hidden></div>
+    <div class="otdcard" id="otdcard" hidden></div>
+  </div>
+  <!-- Ranking as a call to action until there is a list worth showing. -->
+  <div class="rankcta" id="rankcta" hidden></div>
   <div id="globaltop"></div>
   <div id="friends_wrap" hidden>
     <h2 class="sec">Friends</h2>
-    <div class="riderlist" id="friends"></div>
-    <!-- Carter, 2026-10-04: "below your list of friends do a Find friends ->";
-         /users has the suggestions at its top. -->
-    <p class="more findf"><a href="/users">Find friends &rarr;</a></p>
+    <div class="ftiles" id="friends"></div>
+    <!-- Find friends is the last tile now (2026-11-20). -->
   </div>
   <div id="factivity_wrap" hidden>
     <h2 class="sec">You &amp; friends</h2>
@@ -301,7 +379,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261118a"></script>
+<script src="/app.js?v=20261120a"></script>
 <script src="/changes-feed.js?v=20261120b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -355,7 +433,21 @@ CoasterHub.me().then(function(acct){
     })();
     $('hy_credits').href = CoasterHub.userPageHref(acct.slug, 'count');
     $('hy_rides').innerHTML = me.rides != null ? '<b>' + nfx(me.rides) + '</b> rides' : '';
-    $('hy_ranked').innerHTML = '<b>' + nfx(me.ranked) + '</b> ranked';
+    // "0 ranked" moved to the rank card below; the hero shows the next milestone.
+    $('hy_ranked').innerHTML = '';
+    (function(){
+      var n = me.credits || 0, step = n < 100 ? 25 : n < 1000 ? 50 : 100;
+      var next = Math.floor(n / step) * step + step, pct = Math.round((n - (next - step)) / step * 100);
+      $('hy_next').innerHTML = '<span class="mbar"><i style="width:' + pct + '%"></i></span><span><b>' + nfx(next - n) + '</b> to go to ' + nfx(next) + ' credits</span>';
+      $('hy_next').hidden = false;
+    })();
+    // Rank call to action until ten are ranked; the empty top ten hides.
+    if ((me.ranked || 0) < 10) {
+      $('rankcta').innerHTML = '<span class="rc-n">' + nfx(me.ranked || 0) + '</span>'
+        + '<span class="rc-t"><b>of ' + nfx(me.credits) + ' credits ranked</b><span>Start with your ten tallest. It takes a minute.</span></span>'
+        + '<a class="btn" href="' + CoasterHub.userPageHref(acct.slug, 'rankings') + '">Start ranking &rarr;</a>';
+      $('rankcta').hidden = false;
+    }
     $('hy_rank').href = CoasterHub.userPageHref(acct.slug, 'rankings');
     // The last day you logged, and where.
     var log = r[1] && r[1].rides, cs = (r[2] && r[2].coasters) || [], byId = {};
@@ -370,7 +462,42 @@ CoasterHub.me().then(function(acct){
         $('hy_track').hidden = false; $('hy_legend').hidden = false;
       }
     }
+    // Your last park day, as a ticket stub; and On this day beside it.
     if (log && log.length) {
+      var first = {}, lastD = null;
+      log.forEach(function(x){ if (!x.d) return; if (!first[x.c] || x.d < first[x.c]) first[x.c] = x.d; if (!lastD || x.d > lastD) lastD = x.d; });
+      if (lastD) {
+        var dayRides = log.filter(function(x){ return x.d === lastD; });
+        var dParks = {}, newOnes = [], seenN = {};
+        dayRides.forEach(function(x){ var c = byId[x.c]; if (!c) return; dParks[c.park] = 1;
+          if (first[x.c] === lastD && !seenN[x.c]) { seenN[x.c] = 1; newOnes.push(c); } });
+        var pk = Object.keys(dParks), dt = new Date(lastD + 'T12:00:00');
+        var mon = dt.toLocaleString('en-US', { month: 'short' }), dd = dt.getDate(), yy = dt.getFullYear();
+        $('daycard').innerHTML = '<div class="stub"><small>' + esc(mon) + '</small><b>' + dd + '</b><small>' + yy + '</small></div>'
+          + '<div class="tix"><span class="lab2">Last park day</span><h3>'
+          + pk.map(function(p){ return '<a href="' + CoasterHub.parkHref(p) + '">' + esc(p) + '</a>'; }).join(' &amp; ') + '</h3>'
+          + '<p class="dsum"><b>' + nfx(dayRides.length) + '</b> ' + (dayRides.length === 1 ? 'ride' : 'rides')
+          + (newOnes.length ? ' &middot; <b>' + newOnes.length + '</b> new ' + (newOnes.length === 1 ? 'credit' : 'credits') : '') + '</p>'
+          + (newOnes.length ? '<ul class="newc">' + newOnes.slice(0, 8).map(function(c){
+              return '<li><a class="' + (c.type === 'Wood' ? 'wd' : 'st') + '" href="' + CoasterHub.coasterHref(c) + '">' + esc(c.name) + '</a></li>'; }).join('')
+              + (newOnes.length > 8 ? '<li><a class="more" href="' + CoasterHub.userPageHref(acct.slug, 'count') + '">+' + (newOnes.length - 8) + ' more</a></li>' : '') + '</ul>' : '')
+          + '</div>';
+        $('daycard').hidden = false;
+      }
+      var now = new Date(), md = ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2), byYr = {};
+      log.forEach(function(x){ if (!x.d || x.d.slice(5) !== md || +x.d.slice(0, 4) >= now.getFullYear()) return;
+        var y = x.d.slice(0, 4), c = byId[x.c]; (byYr[y] = byYr[y] || { n: 0, parks: {} }).n++; if (c) byYr[y].parks[c.park] = 1; });
+      var yrs = Object.keys(byYr).sort().reverse().slice(0, 3);
+      if (yrs.length) {
+        $('otdcard').innerHTML = '<span class="lab2">On this day</span>' + yrs.map(function(y){
+          var ago = now.getFullYear() - (+y), b = byYr[y];
+          return '<p><span class="ago">' + ago + (ago === 1 ? ' year' : ' years') + ' ago</span> &middot; '
+            + Object.keys(b.parks).map(function(p){ return '<a href="' + CoasterHub.parkHref(p) + '">' + esc(p) + '</a>'; }).join(', ')
+            + ' &middot; ' + nfx(b.n) + (b.n === 1 ? ' ride' : ' rides') + '</p>'; }).join('');
+        $('otdcard').hidden = false;
+      }
+    }
+    if (false && log && log.length) {
       var last = null;
       log.forEach(function(x){ if (x.d && (!last || x.d > last)) last = x.d; });
       var parks = {};
@@ -466,7 +593,11 @@ CoasterHub.fetchCoasters().then(function(r){
   var paint = function(){ Array.prototype.forEach.call(gt.querySelectorAll('a.crow'), function(a){
     var id = a.getAttribute('data-gid') || a.getAttribute('data-cid'); var v = wood[id] ? 'wd' : 'st';
     if (a.getAttribute('data-tp') !== v) a.setAttribute('data-tp', v); }); };
-  new MutationObserver(paint).observe(gt, { childList: true, subtree: true });
+  new MutationObserver(function(){ paint();
+    // Nothing to show (no list on 2+ riders yet): hide rather than an empty card.
+    var empty = !gt.querySelector('a.crow') && /None of these|Nothing ranked/.test(gt.textContent);
+    gt.classList.toggle('empty', empty);
+  }).observe(gt, { childList: true, subtree: true });
 }).catch(function(){});
 CoasterHub.fetchCoasters().then(function(r){
   CoasterHub.rankSection(document.getElementById('globaltop'), r.coasters || [], {
@@ -517,8 +648,35 @@ CoasterHub.fetchUsers().then(function(){
       var inF = {}; fol.slugs.forEach(function(s){ inF[s] = 1; });
       var mine = rows.filter(function(x){ return inF[x.u.slug] || x.u.slug === fol.me; });
       var anyF = mine.some(function(x){ return x.u.slug !== fol.me; });
-      document.getElementById('friends').innerHTML = html(mine)
-        + (anyF ? '' : '<p class="hint">You&rsquo;re not following anyone yet. Find people on <a href="/explore">Explore</a>.</p>');
+      // Friends as tiles you scroll sideways (2026-11-20), you first, then
+      // whoever did something most recently; each says what they last did.
+      var tile = function(x){
+        var u = x.u, me1 = u.slug === fol.me;
+        var av = u.avatar ? '<span class="av" style="background-image:url(/avatars/' + encodeURIComponent(u.avatar) + ')"></span>'
+                          : '<span class="av">' + esc((u.name || '?').charAt(0).toUpperCase()) + '</span>';
+        return '<a class="ftile' + (me1 ? ' me' : '') + '" data-slug="' + esc(u.slug) + '" href="' + CoasterHub.userPageHref(u.slug, 'profile') + '">' + av
+          + '<b>' + esc(me1 ? 'You' : u.name) + '</b><span class="fc">' + nf(x.credits) + '<small>credits</small></span>'
+          + '<span class="fl" data-act="' + esc(u.slug) + '">' + (x.ranked ? nf(x.ranked) + ' ranked' : '') + '</span></a>';
+      };
+      var meRow = mine.filter(function(x){ return x.u.slug === fol.me; }), fr = mine.filter(function(x){ return x.u.slug !== fol.me; });
+      document.getElementById('friends').innerHTML = meRow.concat(fr).map(tile).join('')
+        + '<a class="ftile add" href="/users"><span class="av">+</span>' + (anyF ? 'Find more friends' : 'Find friends to follow') + '</a>';
+      // What each one last did, from the riders' activity (rides, rankings, credits).
+      fetch('/api/activity?limit=300&riders=1').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+        if (!j || !j.events) return;
+        var lastBy = {};
+        j.events.forEach(function(e){ if (e.actor && !lastBy[e.actor]) lastBy[e.actor] = e; });
+        var ago = function(t){ var d = (Date.now() - new Date(t).getTime()) / 864e5;
+          return d < 1 ? 'today' : d < 2 ? 'yesterday' : d < 30 ? Math.floor(d) + 'd ago' : d < 365 ? Math.floor(d / 30) + 'mo ago' : Math.floor(d / 365) + 'y ago'; };
+        var what = function(e){ var n = e.n || (e.detail && e.detail.rides) || 0;
+          return e.kind === 'rides' ? 'logged ' + (n ? n + ' ' : '') + (n === 1 ? 'ride' : 'rides')
+               : e.kind === 'ranking' ? 'ranked ' + (n ? n + ' ' : '') + (n === 1 ? 'coaster' : 'coasters')
+               : e.kind === 'import' ? 'imported credits'
+               : e.kind === 'credits' || e.kind === 'user_added' ? 'added ' + (n ? n + ' ' : '') + (n === 1 ? 'credit' : 'credits')
+               : 'was active'; };
+        Array.prototype.forEach.call(document.querySelectorAll('#friends .fl[data-act]'), function(el){
+          var e = lastBy[el.getAttribute('data-act')]; if (e) el.textContent = what(e) + ' \u00b7 ' + ago(e.at); });
+      }).catch(function(){});
       document.getElementById('friends_wrap').hidden = false;
       // You and the people you follow (Carter, 2026-09-26: "also show my own
       // changes in there too") — so it shows whenever you are signed in.

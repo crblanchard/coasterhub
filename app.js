@@ -491,7 +491,18 @@
   var ridesMemo = {};
   function fetchRides(slug) {
     if (ridesMemo[slug]) return ridesMemo[slug];
-    var p = ridesMemo[slug] = fetchRidesNow(slug);
+    // The rider's display name, not their username, wherever a page titles a
+    // log by its .user (Credits and Map headed it "crblanchard"; Carter,
+    // 2026-11-20, from the critique).
+    // Read from the users list already in hand (seeded from the cache), so a
+    // page never waits on it.
+    var p = ridesMemo[slug] = fetchRidesNow(slug)
+      .then(function (j) {
+        var u = null;
+        for (var i = 0; i < USERS.length; i++) if (USERS[i].slug === slug) { u = USERS[i]; break; }
+        if (j && u && u.name) j.user = u.name;
+        return j;
+      });
     p.catch(function () { if (ridesMemo[slug] === p) delete ridesMemo[slug]; });
     return p;
   }
@@ -2534,7 +2545,7 @@
         : '<span class="rh-av">' + E(nm.charAt(0).toUpperCase()) + '</span>';
       el.innerHTML = '<a class="rh" href="' + userPageHref(slug, "profile") + '">' + pic
         + '<span class="rh-who"><b>' + E(nm) + '</b><span>@' + E(slug) + '</span></span></a>'
-        + (sm ? '<p class="rh-count"><a href="' + userPageHref(slug, "count") + '">' + Number(sm.credits || 0).toLocaleString() + ' coasters.</a> '
+        + (sm ? '<p class="rh-count"><a href="' + userPageHref(slug, "count") + '">' + Number(sm.credits || 0).toLocaleString() + ' credits.</a> '
               + '<a href="' + userPageHref(slug, "rankings") + '">' + Number(sm.ranked || 0).toLocaleString() + ' ranked.</a></p>' : '');
     });
   }
