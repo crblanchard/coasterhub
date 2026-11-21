@@ -165,6 +165,8 @@ for r in recs:
     if not best: continue
     n = sq(r['name'])
     if not n or re.search(r'station|queue|entrance|track|lift', r['name'] or '', re.I): continue
+    # An alpine slide is a sled in a trough, not a coaster (Carter, 2026-11-21).
+    if re.search(r'alpine ?slide', r['name'] or '', re.I): continue
     if any(len(h) >= 4 and (h == n or h in n or n in h) for h in here[best[0]]): continue
     cands.append((best[0], r))
 # One ride, several sources: group by park and squashed name, one entry each,
@@ -221,6 +223,7 @@ def same_town(a, b):
 newp = collections.OrderedDict()
 for r in recs:
     if r['source'] == 'wikidata' or not r.get('park') or r['ref'] in linked[r['source']] or (r['source'], r['ref']) in claimed: continue
+    if re.search(r'alpine ?slide', r['name'] or '', re.I): continue
     pk = sq(r['park'])
     # Not parks: Coasterpedia's "Standalone" (a coaster at no park) and
     # "Traveling"; and fairs wait for their own pass (Carter: parks first).

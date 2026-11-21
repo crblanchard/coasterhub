@@ -6504,3 +6504,8 @@ Carter: "the entire site lacks personality ... more color" (critique in
 - Carter, 2026-11-21, on the coaster page's steel-teal numbers and You card:
   "I love this green good design language". The steel/wood paint is the
   direction to extend; the coaster You card's rank label is "of N".
+- **No alpine slides** (Carter, 2026-11-21): trough sleds, not coasters. 213
+  removed the twelve named "Alpine Slide" (and eleven parks left empty);
+  suggest-matches skips any record named alpine slide. Alpine/mountain
+  COASTERS on rails stay. Note for deletions: a coaster has riders if it is in
+  `rides` OR `rankings`; check both.
