@@ -476,9 +476,10 @@ CoasterHub.me().then(function(acct){
           + pk.map(function(p){ return '<a href="' + CoasterHub.parkHref(p) + '">' + esc(p) + '</a>'; }).join(' &amp; ') + '</h3>'
           + '<p class="dsum"><b>' + nfx(dayRides.length) + '</b> ' + (dayRides.length === 1 ? 'ride' : 'rides')
           + (newOnes.length ? ' &middot; <b>' + newOnes.length + '</b> new ' + (newOnes.length === 1 ? 'credit' : 'credits') : '') + '</p>'
-          + (newOnes.length ? '<ul class="newc">' + newOnes.slice(0, 8).map(function(c){
-              return '<li><a class="' + (c.type === 'Wood' ? 'wd' : 'st') + '" href="' + CoasterHub.coasterHref(c) + '">' + esc(c.name) + '</a></li>'; }).join('')
-              + (newOnes.length > 8 ? '<li><a class="more" href="' + CoasterHub.userPageHref(acct.slug, 'count') + '">+' + (newOnes.length - 8) + ' more</a></li>' : '') + '</ul>' : '')
+          // Every new credit of the day (Carter, 2026-11-21: "on desktop just show all
+          // the rides the +1 more is weird"); a phone hides the list.
+          + (newOnes.length ? '<ul class="newc">' + newOnes.map(function(c){
+              return '<li><a class="' + (c.type === 'Wood' ? 'wd' : 'st') + '" href="' + CoasterHub.coasterHref(c) + '">' + esc(c.name) + '</a></li>'; }).join('') + '</ul>' : '')
           + '</div>';
         $('daycard').hidden = false;
       }
