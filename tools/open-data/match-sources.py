@@ -150,9 +150,14 @@ def wiki_items():
     """English and German Wikipedia infoboxes (2026-11-19): sources 'enwiki'
     and 'dewiki', ref = the article title."""
     def dnum(v):
-        # German decimals use a comma ("53,5"); English uses it for thousands.
+        # German numbers (only German infoboxes come through here): the comma is
+        # the decimal point and a point before three digits groups thousands
+        # ("1.026,7" = 1026.7). The old rule skipped any value with a point in it,
+        # so "je. 1026,7" (each side of Racer 75) read as 10267 m, ten times too
+        # long; Lightning Racer the same (2026-11-21, fixed by hand in 209/214).
         v = str(v or '')
-        if re.search(r'\d,\d{1,2}(?!\d)', v) and '.' not in v: v = v.replace(',', '.')
+        v = re.sub(r'(?<=\d)\.(?=\d{3}(?!\d))', '', v)
+        v = re.sub(r'(?<=\d),(?=\d)', '.', v)
         return num(v)
     for lang, src in (('en', 'enwiki'), ('de', 'dewiki')):
         p = 'tools/open-data/wikipedia/%s.jsonl' % lang
