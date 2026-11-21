@@ -6501,3 +6501,6 @@ Carter: "the entire site lacks personality ... more color" (critique in
   (inversion icons cut by Carter). `fetchRides` swaps `.user` for the display
   name. Profile Collection section was built and CUT (milestone order within a
   day is not stored). Saved hero key is `ch_hero2`.
+- Carter, 2026-11-21, on the coaster page's steel-teal numbers and You card:
+  "I love this green good design language". The steel/wood paint is the
+  direction to extend; the coaster You card's rank label is "of N".
