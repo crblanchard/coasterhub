@@ -76,7 +76,7 @@
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
   <span class="badge" id="hero_badge">Account</span>
-  <h1 class="wide" id="hero_h">Your account</h1>
+  <h1 class="wide" id="hero_h">Your account.</h1>
   <p id="hero_p">Sign in, or make an account below.</p>
 </div></section>
 
@@ -187,7 +187,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261121a"></script>
+<script src="/app.js?v=20261122a"></script>
 <script>
 document.getElementById('y').textContent = new Date().getFullYear();
 CoasterHub.initNav('account');
@@ -354,7 +354,7 @@ fetch('/api/auth/me', { credentials: 'same-origin' })
             return;
           }
           $('hero_badge').textContent = 'Password reset';
-          $('hero_h').textContent = 'Set a new password';
+          $('hero_h').textContent = 'Set a new password.';
           $('hero_p').textContent = 'Then you\u2019re back in.';
           $('rs_p').textContent = 'For ' + res.j.email + '.';
           show('pane_reset');
@@ -379,7 +379,7 @@ fetch('/api/auth/me', { credentials: 'same-origin' })
           return;
         }
         $('hero_badge').textContent = 'Invitation';
-        $('hero_h').textContent = 'Claim your count';
+        $('hero_h').textContent = 'Claim your count.';
         $('hero_p').textContent = 'Your rides are already here. This puts them behind your own login.';
         // The name the rides are filed under, greyed into the name field so the
         // page knows who it is talking to. Placeholder only — never .value —

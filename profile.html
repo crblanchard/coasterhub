@@ -433,7 +433,7 @@
      Renaming a username deletes the old one outright (see renameRider), so a
      dead /user/<name>/ link is now an ordinary thing to land on. -->
 <div class="container"><div id="nouser" style="display:none;padding:36px 0 8px">
-  <h1 style="margin:0 0 10px">This username is inactive</h1>
+  <h1 style="margin:0 0 10px">This username is inactive.</h1>
   <p><a class="go" href="/">See everyone on Coaster Hub &rarr;</a></p>
 </div></div>
 
@@ -560,7 +560,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261121a"></script>
+<script src="/app.js?v=20261122a"></script>
 <script src="/profile-edit.js?v=20261031a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -1075,8 +1075,8 @@ function render(s){
   // than deleted: the real figures stay in the table and appear the day the
   // page is claimed.
   var showRides = has.rideCounts && s.claimed;
-  line(nf(k.credits)+(k.credits===1?' credit':' credits'),'count');
-  if(showRides) line(nf(k.rides)+' rides','count');
+  line(nf(k.credits)+(k.credits===1?' credit.':' credits.'),'count');
+  if(showRides) line(nf(k.rides)+' rides.','count');
   // A ranking lives in its own table, so it arrives after the count does and the
   // third line appears a beat later rather than holding up the first two. A
   // rider with an empty list still gets "0 ranked." — the riders page says 0
@@ -1084,7 +1084,7 @@ function render(s){
   fetch('/api/rankings/'+encodeURIComponent(CoasterHub.currentUser()||''))
     .then(function(r){ return r.ok ? r.json() : {order:[]}; })
     .then(function(d){
-      line(nf((d.order||[]).length)+' ranked','rankings');
+      line(nf((d.order||[]).length)+' ranked.','rankings');
       renderTop(d.order||[]);
     })
     .catch(function(){ /* no ranking to report is better than a wrong one */ });

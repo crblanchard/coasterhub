@@ -260,7 +260,7 @@
     <path d="M-50 520 C 250 520, 300 140, 520 140 S 780 580, 1000 400 S 1300 110, 1500 320"
           fill="none" stroke="var(--tint2)" stroke-width="2" stroke-dasharray="6 10"/>
   </svg>
-  <h1 class="wide" id="hero_h">Your coaster tracker</h1>
+  <h1 class="wide" id="hero_h">Your coaster tracker.</h1>
   <p class="wide" id="hero_p">Count every coaster you ride, rank your favorites and see where your friends have been.</p>
   <!-- Signed in, the hero is YOUR count instead of the slogan (Carter, 2026-10-01,
        from the impeccable critique: "the rider's own count is the product"). -->
@@ -376,7 +376,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261121a"></script>
+<script src="/app.js?v=20261122a"></script>
 <script src="/changes-feed.js?v=20261120b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -405,7 +405,7 @@ CoasterHub.me().then(function(acct){
     if (!me) return;
     var $ = function(id){ return document.getElementById(id); };
     var nfx = function(n){ return Number(n || 0).toLocaleString(); };
-    var cword = function(n){ return '<span class="n">' + nfx(n) + '</span><span class="w">' + (me.credits === 1 ? ' credit' : ' credits') + '</span>'; };
+    var cword = function(n){ return '<span class="n">' + nfx(n) + '</span><span class="w">' + (me.credits === 1 ? ' credit.' : ' credits.') + '</span>'; };
     $('hy_credits').innerHTML = cword(me.credits);
     // The count ticks up to its new number when it has grown since you last
     // saw Home — log rides, come back, watch it count (Carter, 2026-11-17).

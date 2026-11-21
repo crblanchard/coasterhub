@@ -690,6 +690,12 @@
   <span class="badge" id="hero_badge">Rankings</span>
   <h1 class="wide" id="hero_h1" data-loading>Loading&hellip;</h1>
   <p id="hero_p"></p>
+  <style>#hero_p:empty{display:none}
+    /* Mine | Global up on the badge's row, Edit under the bar: one row less
+       of header (Carter, 2026-11-22). */
+    .hero .container{position:relative}
+    .hero #mineglobal{position:absolute;top:0;right:16px;margin:0}
+    @media (max-width:680px){ html .hero:has(#racts:not([hidden])){padding-bottom:var(--hero-b,84px)!important} }</style>
   <!-- Your own list (Carter, 2026-10-02, from the rankings mockup): how much
        of your count is ranked, and the two things you do here — Rank 5 more
        and Edit — up top. They press the bar's own buttons, which stay where
@@ -889,7 +895,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261121a"></script>
+<script src="/app.js?v=20261122a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -935,7 +941,7 @@ var OWN=false;
 if(!slug){
   // Everyone = a summary of where every list stands. The combined master
   // ranking comes later; it needs more than one list to mean anything.
-  $('hero_h1').textContent='Global rankings';
+  $('hero_h1').textContent='Global rankings.';
   $('hero_p').textContent='Full list of ranked coasters sitewide.';
   CoasterHub.fetchUsers().then(function(){
   // Who is reading matters here: the cards say what YOU can do with each list,
@@ -1181,9 +1187,9 @@ if(!slug){
     MINE=Object.keys(seen).map(function(k){ return seen[k]; });
 
     var nm=esc(user.user||slug);
-    $('hero_h1').textContent=(user.user||slug)+'’s rankings';
+    $('hero_h1').textContent=(user.user||slug)+'’s rankings.';
     // Your own page says "Your rankings." (Carter, 2026-11-21).
-    CoasterHub.me().then(function(me){ if(me && me.slug===slug){ $('hero_h1').textContent='Your rankings'; document.title='Your Rankings — Coaster Hub'; } }).catch(function(){});
+    CoasterHub.me().then(function(me){ if(me && me.slug===slug){ $('hero_h1').textContent='Your rankings.'; document.title='Your Rankings — Coaster Hub'; } }).catch(function(){});
     $('hero_p').textContent='';
     document.title=nm+'’s Rankings — Coaster Hub';
 

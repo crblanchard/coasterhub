@@ -109,7 +109,7 @@
 
 <section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
   <span class="badge" id="hero_badge">Categories</span>
-  <h1 class="wide" id="hero_h">Categories</h1>
+  <h1 class="wide" id="hero_h">Categories.</h1>
   <p id="hero_p" data-loading>Loading…</p>
 </div></section>
 
@@ -165,7 +165,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261121a"></script>
+<script src="/app.js?v=20261122a"></script>
 <script>
 CoasterHub.initNav('categories');
 var $=function(id){return document.getElementById(id);};
@@ -423,7 +423,7 @@ CoasterHub.me().then(function(acct){
       CATS=res[3];
       var who=acct.name||acct.slug;
       $('hero_badge').textContent=who+'\u2019s rankings';
-      $('hero_h').textContent=who+'\u2019s categories';
+      $('hero_h').textContent=who+'\u2019s categories.';
       document.title=who+'\u2019s Categories — Coaster Hub';
       $('hero_p').textContent='Use any (or none) of our preset categories for your '
         +'list or create your own! Each category displays as a single row in your '
