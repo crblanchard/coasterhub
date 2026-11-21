@@ -2545,8 +2545,8 @@
         : '<span class="rh-av">' + E(nm.charAt(0).toUpperCase()) + '</span>';
       el.innerHTML = '<a class="rh" href="' + userPageHref(slug, "profile") + '">' + pic
         + '<span class="rh-who"><b>' + E(nm) + '</b><span>@' + E(slug) + '</span></span></a>'
-        + (sm ? '<p class="rh-count"><a href="' + userPageHref(slug, "count") + '">' + Number(sm.credits || 0).toLocaleString() + ' credits.</a> '
-              + '<a href="' + userPageHref(slug, "rankings") + '">' + Number(sm.ranked || 0).toLocaleString() + ' ranked.</a></p>' : '');
+        + (sm ? '<p class="rh-count"><a href="' + userPageHref(slug, "count") + '">' + Number(sm.credits || 0).toLocaleString() + ' credits</a> '
+              + '<a href="' + userPageHref(slug, "rankings") + '">' + Number(sm.ranked || 0).toLocaleString() + ' ranked</a></p>' : '');
     });
   }
   // Light one tab, in the header and the tab bar alike ("" = none).

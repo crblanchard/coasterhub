@@ -999,11 +999,16 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
      (Carter, 2026-10-31: "the pages are basic without it"), standing in the
      band's bottom-right corner beside the title or the Mine | Global switch,
      with no extra strip; elsewhere the band is just the title. */
-  html:not(.pg-riders):not(.pg-explore):not(.pg-rankings) .hero{background-image:none!important;padding-bottom:var(--hero-b,84px)}
-  :root[data-theme="light"]:not(.pg-riders):not(.pg-explore):not(.pg-rankings) .hero{background-image:linear-gradient(180deg,#cfe5f9,#e6f2fc)!important;
-    background-size:100% 100%!important;background-position:0 0!important}
-  html:is(.pg-explore,.pg-rankings) .hero{padding-bottom:var(--hero-b,84px);background-size:auto 52px!important;background-position:right 12px bottom 0}
-  :root[data-theme="light"]:is(.pg-explore,.pg-rankings) .hero{background-size:auto 52px,100% 100%!important;background-position:right 12px bottom 0,0 0}
+  /* Every page's band has the small skyline now (Carter, 2026-11-21: one
+     design language), not just Explore and Rankings. A band with a line of
+     text under the title grows a strip so the rides never sit on the words. */
+  html:not(.pg-riders) .hero{padding-bottom:var(--hero-b,84px);background-size:auto 52px,100% 100%!important;background-position:right 12px bottom 0,0 0!important}
+  html:not(.pg-riders) .hero:has(.container > p.wide:not([hidden])){padding-bottom:calc(var(--hero-b,84px) + 40px)}
+  html:not(.pg-riders) .hero:has(.container > p:not([hidden]):not(:empty)){padding-bottom:calc(var(--hero-b,84px) + 40px)}
+  /* A rider's own header has its buttons where the rides would stand, and
+     Log's band has the day chip there: those keep the plain sky. */
+  html.pg-log .hero,html:not(.pg-riders) .hero:has(.herotop){background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important;padding-bottom:var(--hero-b,84px)!important}
+  :root[data-theme="light"].pg-log .hero,:root[data-theme="light"]:not(.pg-riders) .hero:has(.herotop){background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
 
   footer.site{display:none}
 
@@ -1194,9 +1199,20 @@ body{background-image:none}
 .hero:has(.rh-count){background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
 :root[data-theme="light"] .hero:has(.rh-count){background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
 .hero p.rh-count{font-family:var(--display);font-stretch:110%;letter-spacing:-.02em}
-/* The phone's plain bands (no skyline off Home, Explore and Rankings) wear the
-   new sky too, not the old pale gradient (2026-11-20). */
-@media (max-width:680px){
-  html:not(.pg-riders):not(.pg-explore):not(.pg-rankings) .hero{background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
-  :root[data-theme="light"]:not(.pg-riders):not(.pg-explore):not(.pg-rankings) .hero{background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
-}
+
+/* ---- One design language (Carter, 2026-11-21) ----------------------------
+   One switch: every segmented control is the same oval pill — /rankings'
+   Mine | Global, Home's Global | Mine, /credits' Rides | Parks | Coasters,
+   /changes' filter, /log's and /account's mode switches. div.seg > button
+   outranks the pages' own `.controls button`. */
+div.seg,div.modesw,.rsw,.hero .segsw{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;
+  background-color:var(--soft);overflow:visible;height:auto}
+div.seg > button,div.modesw > button,.rsw a,.hero .segsw a{border:0;border-radius:999px;background-color:transparent;color:var(--muted);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-stretch:normal;font-weight:600;font-size:.88rem;
+  line-height:1.2;padding:7px 16px;cursor:pointer;text-decoration:none;letter-spacing:0;text-transform:none}
+div.seg > button:hover,div.modesw > button:hover,.rsw a:hover,.hero .segsw a:hover{color:var(--fg)}
+div.seg > button.on,div.modesw > button.on,.rsw a.on,.hero .segsw a.on{background-color:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.hero .segsw a.on,:root[data-theme="light"] .hero .segsw a.on{background-color:#fff;color:#0b3f5a}
+/* One section heading: Home's, in the display face, on every page. */
+.sect,h2.sec,.sughead .eyebrow,div.sechd h2,#content section.block > .container > h2{font-family:var(--display);font-weight:800;font-stretch:110%;
+  font-size:clamp(1.35rem,3.6vw,1.7rem);letter-spacing:-.02em;line-height:1.1;color:var(--fg);text-transform:none}

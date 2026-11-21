@@ -10,7 +10,7 @@
 <base href="/">
 <title>Welcome — Coaster Hub</title>
 <meta name="description" content="Start your coaster count: pick your parks, check the coasters you've ridden, and rank your favorites.">
-<link rel="stylesheet" href="/style.css?v=20261120b">
+<link rel="stylesheet" href="/style.css?v=20261121a">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -167,7 +167,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261120a"></script>
+<script src="/app.js?v=20261121a"></script>
 <script>
 document.getElementById('y').textContent = new Date().getFullYear();
 var $=function(id){ return document.getElementById(id); };
@@ -230,7 +230,7 @@ function send(method, url, body){
 // username (Carter: "make it not impact the username").
 function vAccount(){
   $('view').innerHTML =
-    '<div class="eyebrow">Welcome</div><h1>Track your coaster count.</h1>'
+    '<div class="eyebrow">Welcome</div><h1>Track your coaster count</h1>'
    +'<p class="lead">Rank your credits and log your rides. It takes about two minutes to get your count started.</p>'
    +'<form id="f"><label class="f" for="a_name">Your name</label><input type="text" id="a_name" autocomplete="name" maxlength="40" placeholder="Werner Stengel" required>'
    +'<label class="f" for="a_user">Username</label><input type="text" id="a_user" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="32" placeholder="username" required>'
