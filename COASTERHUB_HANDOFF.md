@@ -6509,3 +6509,9 @@ Carter: "the entire site lacks personality ... more color" (critique in
   suggest-matches skips any record named alpine slide. Alpine/mountain
   COASTERS on rails stay. Note for deletions: a coaster has riders if it is in
   `rides` OR `rankings`; check both.
+
+## One design language (2026-11-21)
+- **No full stops in titles or hero counts.** Carter: "the periods feel so much like AI I want to move away from that." Don't add them back ("610 credits", "Log a day", "Global rankings").
+- **One switch:** every segmented control (`div.seg`, `div.modesw`, `.rsw`, `.hero .segsw`) is the same oval pill, defined once at the end of `style.css`. Don't give a page its own `.seg` look again. Underline tabs are only for the profile's Overview / Credits / Map.
+- **One section heading:** `.sect`, `h2.sec` and the other section heads share Home's display-face size (end of `style.css`).
+- **Skyline on every band**, phones included (52px). A band with a subtitle grows a 40px strip. Excluded: Log (the day chip stands there) and a rider's own header (`.herotop`, where the buttons are).
