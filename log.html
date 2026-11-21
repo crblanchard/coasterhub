@@ -346,6 +346,28 @@
      Save sat two screens below the + you were pressing. This rides above the
      tab bar while anything is staged: what you have, the day it goes on, Save.
      Tap the left half to see the basket. Carter OK'd it, 2026-10-02. */
+  /* Where are you? — the park picker Log a day opens on (parkHome). */
+  .pkh{display:flex;justify-content:space-between;align-items:baseline;color:var(--muted);font-size:var(--fs-s);
+    font-weight:700;margin:14px 4px 4px}
+  .pkh:first-child{margin-top:2px}
+  .pkh a{font-weight:600;color:var(--accent2);cursor:pointer}
+  .pkrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 4px;min-height:52px;
+    background-color:transparent;border-width:0 0 1px;border-style:solid;border-color:var(--soft);color:var(--fg);
+    font-family:inherit;cursor:pointer}
+  .pkrow:hover{background-color:var(--soft)}
+  .pkrow .nm{flex:1;min-width:0}
+  .pkrow .nm b{display:block;font-weight:600;font-size:var(--fs);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pkrow .sub{display:block;color:var(--muted);font-size:var(--fs-s);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pkrow .mi{flex:none;color:var(--steel);font-weight:700;font-size:var(--fs-s)}
+  .pkloc{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px;border-radius:12px;
+    border:1px solid var(--line);background-color:var(--soft);color:var(--fg);font-family:inherit;cursor:pointer}
+  .pkloc svg{flex:none;color:var(--steel)}
+  .pkloc b{display:block;font-size:var(--fs)}
+  .pkloc span span{display:block;color:var(--muted);font-size:var(--fs-s)}
+  .pkloc:disabled{opacity:.6}
+  .pkfoot{color:var(--muted);font-size:var(--fs-s);margin:14px 4px 0}
+  /* The picker has its own location button and nearest list. */
+  .setup.home #nearme,.setup.home > .fld > .geonote{display:none}
   .savebar{display:none}
   @media (max-width:680px){
     .savebar.on{display:flex;position:fixed;z-index:19;left:10px;right:10px;
@@ -1008,6 +1030,7 @@ function setHere(pos,quiet){
     else localStorage.removeItem(GEO_KEY);
   }catch(e){}
   fillParks();
+  if(!sel().value && COASTERS.length) renderList();   // the Where-are-you picker re-sorts
   var n=$('geonote');
   if(!pos){ n.textContent=''; return; }
   var near=nearest();
@@ -1606,6 +1629,62 @@ function currentList(){
   }
   return null;
 }
+// Where are you? (Carter, 2026-11-21: "finding the park you're at is most
+// counterintuitive"). With no park picked, Log a day opens on parks you can
+// tap: the ones nearest you once the browser shares a location (or a button
+// to share it), then the parks of your last few days. Search stays above for
+// anywhere else. Only parks with something still operating.
+function parkHome(el){
+  $('listhead').textContent='Where are you riding?';
+  var pin='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  function row(p, right){
+    var g=PARKS[p]||{}, n=POPEN[p]||0;
+    return '<button type="button" class="pkrow" data-p="'+esc(p)+'"><span class="nm"><b>'+esc(p)+'</b>'
+      +'<span class="sub"><span class="txt">'+esc([g.region, n+' coaster'+(n===1?'':'s')].filter(Boolean).join(' · '))+'</span></span></span>'
+      +(right?'<span class="mi">'+esc(right)+'</span>':'')+'</button>';
+  }
+  var h='', shown={};
+  if(HERE){
+    var near=Object.keys(POPEN).map(function(p){ return {p:p, mi:parkMiles(p)}; })
+      .filter(function(x){ return x.mi!=null; }).sort(function(a,b){ return a.mi-b.mi; }).slice(0,5);
+    if(near.length){
+      h+='<p class="pkh">Nearest you <a id="ph_clear">Not here?</a></p>'
+        + near.map(function(x){ shown[x.p]=1; return row(x.p, showMiles(x.mi)); }).join('');
+    }
+  } else {
+    h+='<button type="button" class="pkloc" id="ph_loc">'+pin+'<span><b>Use my location</b>'
+      +'<span>Finds the park you&rsquo;re at</span></span></button><p class="geonote" id="ph_note"></p>';
+  }
+  // Your recent parks, newest day first.
+  var recent=[];
+  Object.keys(DAYS||{}).sort().reverse().forEach(function(d){
+    Object.keys(DAYS[d]).forEach(function(id){
+      var c=BYID[id], p=c&&c.park;
+      if(p && POPEN[p] && !shown[p] && recent.indexOf(p)<0 && recent.length<5) recent.push(p);
+    });
+  });
+  if(recent.length) h+='<p class="pkh">Your recent parks</p>'+recent.map(function(p){ return row(p); }).join('');
+  h+='<p class="pkfoot">Somewhere else? Search above.</p>';
+  el.innerHTML=h;
+  Array.prototype.forEach.call(el.querySelectorAll('.pkrow'), function(b){
+    b.onclick=function(){ choosePark(b.getAttribute('data-p')); window.scrollTo({top:0,behavior:'instant'}); };
+  });
+  var loc=$('ph_loc');
+  if(loc) loc.onclick=function(){
+    if(!navigator.geolocation){ $('ph_note').textContent='This browser can’t share a location.'; return; }
+    loc.disabled=true; $('ph_note').textContent='Finding you…';
+    navigator.geolocation.getCurrentPosition(function(g){
+      setHere({lat:g.coords.latitude,lon:g.coords.longitude});
+      if(!sel().value) renderList();
+    },function(err){
+      loc.disabled=false;
+      $('ph_note').textContent = err && err.code===1
+        ? 'Location is blocked for this site. Search for the park above.'
+        : 'Couldn’t get a location just now.';
+    },{enableHighAccuracy:false,timeout:8000,maximumAge:5*60*1000});
+  };
+  var cl=$('ph_clear'); if(cl) cl.onclick=function(){ setHere(null); renderList(); };
+}
 function renderList(){
   var list=currentList(), el=$('clist');
   SHOWN=$('park').value;
@@ -1615,6 +1694,8 @@ function renderList(){
   $('newcoaster').style.display=(park&&!searching)?'':'none';
   if(!park||searching) $('coasterform').classList.remove('on');
 
+  document.querySelector('.setup').classList.toggle('home', !list && MODE==='day');
+  if(!list && MODE==='day'){ parkHome(el); return; }
   if(!list){ $('listhead').textContent='Coasters'; el.innerHTML='<div class="hint">Pick a park, or search for a coaster above.</div>'; return; }
   if(!list.length){ $('listhead').textContent=park||'Coasters';
     el.innerHTML='<div class="hint">'+(park?'No coasters here yet — use <b>+ Coaster not listed</b> to add the first one.':'Nothing matches.')+'</div>'; return; }
