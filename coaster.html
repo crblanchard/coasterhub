@@ -512,7 +512,7 @@ function youLine(me, mine){
     if(r){
       yc.innerHTML='<span class="ylab">You</span>'
         // Your rank first, then rides, then first ride (Carter, 2026-11-21).
-        +(mine&&mine.pos?'<span class="yk" title="of '+mine.of+' you have ranked"><b>#'+mine.pos+'</b><span>your rank</span></span>':'')
+        +(mine&&mine.pos?'<span class="yk" title="of '+mine.of+' you have ranked"><b>#'+mine.pos+'</b><span>of '+mine.of+'</span></span>':'')
         +'<span class="yk"><b>'+r+'</b><span>'+(r===1?'ride':'rides')+'</span></span>'
         +(first?'<span class="yk"><b>'+esc(String(first).slice(0,4))+'</b><span>first ride</span></span>':'')
         +'<span class="yacts">'+logBtn+'</span>';
