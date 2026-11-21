@@ -483,9 +483,10 @@ CoasterHub.me().then(function(acct){
           // Every new credit of the day (Carter, 2026-11-21: "on desktop just show all
           // the rides the +1 more is weird"); a phone hides the list.
           // Every coaster of the day with how many times (Carter, 2026-11-21:
-          // "how many times each one so x2 x3"): new credits first in their
-          // paint, then re-rides plain.
-          + (order.length ? '<ul class="newc">' + order.slice().sort(function(a, b){ return (seenN[b.id] ? 1 : 0) - (seenN[a.id] ? 1 : 0); }).map(function(c){
+          // "how many times each one so x2 x3"), most-ridden first, A-Z within a
+          // count ("by number of rides and alphabetical within those"); new
+          // credits in their paint, re-rides plain.
+          + (order.length ? '<ul class="newc">' + order.slice().sort(function(a, b){ return times[b.id] - times[a.id] || a.name.localeCompare(b.name); }).map(function(c){
               return '<li><a class="' + (seenN[c.id] ? (c.type === 'Wood' ? 'wd' : 'st') : 'old') + '" href="' + CoasterHub.coasterHref(c) + '">' + esc(c.name)
                 + (times[c.id] > 1 ? '<i>&times;' + times[c.id] + '</i>' : '') + '</a></li>'; }).join('') + '</ul>' : '')
           + '</div>';
