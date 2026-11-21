@@ -242,7 +242,7 @@ function catCard(g){
         return '<div class="mrow'+(RIDDEN[id]?'':' unridden')+'">'
           +'<span class="mp">'+esc(c.name||('#'+id))
           +'<i>'+esc(c.park||'')+'</i>'
-          +'</span>'
+          +(c.closed?'<i>\u00b7 defunct</i>':'')+'</span>'
           +(own?'<button class="mini" data-drop="'+g.key+':'+id+'" title="Take it out" '
                +'aria-label="Take it out">−</button>':'')+'</div>'; }).join('')
       +(own?'<div class="foot">'
