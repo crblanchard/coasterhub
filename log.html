@@ -591,6 +591,7 @@ CoasterHub.initNav('log');
 
 var TOKEN='', COASTERS=[], BYID={}, PARKS={}, basket={};   // basket: coasterId -> laps
 var PCOUNT={};   // park name -> how many coasters, for the dropdown labels
+var POPEN={};    // park name -> how many still operating (2026-11-21)
 // Which locations the park list is narrowed to. Empty means all of them, which
 // is not the same as none ticked-and-saved: see readRegions().
 var REGSEL={};
@@ -698,6 +699,7 @@ function boot(){
     COASTERS=res[0].coasters; PARKS=res[1];
     COASTERS.forEach(function(c){BYID[c.id]=c;});
     PCOUNT={}; COASTERS.forEach(function(c){ if(c.park) PCOUNT[c.park]=(PCOUNT[c.park]||0)+1; });
+    POPEN={}; COASTERS.forEach(function(c){ if(c.park && !c.closed) POPEN[c.park]=(POPEN[c.park]||0)+1; });
     // Parks with no coasters yet still belong in the list — that is the whole
     // point of being able to add one before logging its first ride.
     Object.keys(PARKS).forEach(function(p){ if(PCOUNT[p]==null) PCOUNT[p]=0; });
@@ -929,6 +931,8 @@ function toAddCredits(orElse){
 
 function setMode(m){
   MODE=m;
+  // The park list differs by mode (closed-only parks are Add credits only).
+  if(COASTERS.length) fillParks();
   var btns=$('modesw').querySelectorAll('button');
   for(var i=0;i<btns.length;i++) btns[i].classList.toggle('on',btns[i].getAttribute('data-mode')===m);
   $('modesw').style.display = m==='list' ? '' : 'none';
@@ -1186,6 +1190,11 @@ function parksShown(){
 // always keeps the chosen one, so that typing or ticking cannot silently blank
 // what you are in the middle of logging.
 function parkPasses(p, strict){
+  // Logging a day: a park whose coasters have all closed is not somewhere you
+  // ride today (Carter, 2026-11-21: "on /log don't show parks with no
+  // operating coasters"). Add credits keeps them, for old credits; a park with
+  // no coasters yet stays so its first one can be added; the chosen park stays.
+  if(MODE==='day' && PCOUNT[p]>0 && !POPEN[p] && p!==sel().value) return false;
   var on=regionsOn();
   if(!on) return true;
   if(!strict && p===sel().value) return true;
