@@ -1801,7 +1801,9 @@
           // hide the other title stuff if necessary").
           // Not on somebody else's page: there the bar says whose it is
           // ("Emma's Rankings") rather than offering Mine | Global.
-          var sw = root.classList.contains("detail") ? null : band.querySelector(".segsw:not([hidden])");
+          // Off again (Carter, 2026-11-22): the bar says "Your rankings" /
+          // "Global rankings" like every other page's title, not the switch.
+          var sw = null;
           if (gone && sw) {
             var c = sw.cloneNode(true);
             c.removeAttribute("id"); c.className = "navseg";

@@ -471,6 +471,10 @@
   .srow .pos{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent2);
              min-width:2.2em;text-align:right;flex:none;font-size:.95rem;margin-top:1px}
   .srow .n{flex:1;min-width:0}
+  /* Rank numbers painted steel or wood by the ride, in the display face, as
+     on Home's top ten (Carter, 2026-11-22). */
+  .srow[data-tp] .pos,.rrow[data-tp] .pos{font-family:var(--display);font-stretch:112%;font-weight:850;color:var(--steel)}
+  .srow[data-tp="wd"] .pos,.rrow[data-tp="wd"] .pos{color:var(--wood)}
   .srow .n b{display:block;font-weight:600;font-size:.93rem;line-height:1.3;
              overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* Park and region lead, the model follows on the same line — and on its own
@@ -895,7 +899,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261122a"></script>
+<script src="/app.js?v=20261122b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -1049,7 +1053,7 @@ if(!slug){
         var full=CoasterHub.racingWho(G, GT, BYID, ME && ME.slug) || CoasterHub.whoByPlace(t.who, ME && ME.slug);
         // Ranked, so number them: this is a top ten and the position is half of
         // what it says.
-        return '<div class="srow" data-k="'+esc(t.id)+'">'
+        return '<div class="srow" data-k="'+esc(t.id)+'" data-tp="'+(c&&c.type==='Wood'?'wd':'st')+'">'
           +'<div class="stog" role="button" tabindex="0" aria-expanded="false">'
             +'<span class="pos">'+(i+1)+'</span>'
             +srowName(c, mk, label)
@@ -1603,7 +1607,7 @@ function renderRank(){
       head = head.replace('</b>', pmi('pm')+'</b>');
     }
     return '<div class="rrow'+(b.g?' grp':' tap')+(pl?' pulled':'')+(b.g&&OPEN[key]?' open':'')
-      +(!b.g&&STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'"'
+      +(!b.g&&STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'"'+(b.g&&!b.g.racing?'':' data-tp="'+(one.type==='Wood'?'wd':'st')+'"')
       +' data-rid="'+b.ids[0]+'"'+(b.g?'':' data-stat="'+b.ids[0]+'"')
       +(b.g?' data-open="'+key+'" role="button" tabindex="0" aria-expanded="'
             +(OPEN[key]?'true':'false')+'"':'')+'>'
