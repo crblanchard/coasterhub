@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-21T20:37:22Z",
-   "text": "Log a day now opens on “Where are you riding?”, with nearby and recent parks one tap away. Pages share one look now, and rankings numbers are painted steel or wood."
+   "at": "2026-11-21T20:58:30Z",
+   "text": "Log a day now opens on “Where are you riding?”, with nearby and recent parks one tap away. Pages share one look now, and in categories the rides you’ve ridden are bold while the rest fade to grey."
   },
   {
    "at": "2026-11-20T18:32:40Z",
