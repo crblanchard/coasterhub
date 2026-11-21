@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-21T21:13:30Z",
-   "text": "Log a day now opens on “Where are you riding?”, with nearby and recent parks one tap away. Pages share one look now, and categories show the rides you’ve ridden in bold, the rest in grey, and closed ones marked defunct."
+   "at": "2026-11-21T21:29:46Z",
+   "text": "Profiles got tidier: long multi-park days no longer take over Recent visits, and a friend’s page has one clear “Compare with me” button. Categories also show the rides you’ve ridden in bold, the rest in grey, and closed ones marked defunct."
   },
   {
    "at": "2026-11-20T18:32:40Z",

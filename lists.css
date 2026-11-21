@@ -135,7 +135,7 @@ a.crow .life .yrs{margin:0;padding:0;color:var(--fg);font-size:.8rem;font-varian
    on a phone), your ridden/total and a chevron on the right. */
 .mlist .mtwo{display:flex;flex:1 1 auto;flex-direction:row;align-items:baseline;gap:10px;min-width:0}
 .mlist .mtwo .nm{flex:0 1 auto;font-size:.93rem}
-.mlist .msub{flex:0 1 auto;min-width:0;font-size:.8rem}
+.mlist .msub{flex:none;min-width:0;font-size:.8rem}
 @media (max-width:560px){
   .mlist .mtwo{flex-direction:column;align-items:flex-start;gap:1px}
   .mlist .mtwo .nm,.mlist .msub{max-width:100%}
@@ -170,7 +170,7 @@ a.crow .nw{color:var(--accent2);font-size:.72rem;font-weight:700;letter-spacing:
 .vlist .vacts .vedit{margin-left:0}
 .vlist .vdel{background-color:transparent;border-style:none;color:var(--bad);font-family:inherit;font-size:inherit;font-weight:600;padding:8px 0;margin:-8px 0;cursor:pointer}
 /* Same for a group's name on a phone: wrap, don't cut. */
-@media (max-width:560px){ .mlist .mtwo .nm{white-space:normal;overflow:visible} }
+@media (max-width:560px){ .mlist .mtwo .nm{white-space:normal;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2} }
 /* A ranked list reads like /rankings (Carter, 2026-09-28): no box, a
    hairline under each row, the bare number. */
 .ranksec .panel{border:0;border-radius:0;background:none;box-shadow:none;overflow:visible}

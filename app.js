@@ -3221,8 +3221,12 @@
     var E = searchEsc;
     var chev = '<svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" '
       + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    // A day at many parks would wrap to eight lines on a phone: the first two
+    // and "+N more", the full list on hover (critique, 2026-11-21).
+    var shown = o.parts && o.parts.length > 2
+      ? o.parts.slice(0, 2).join(' & ') + ' +' + (o.parts.length - 2) + ' more' : o.title;
     return '<details class="mdl visit"><summary>'
-      + '<span class="mtwo"><span class="nm">' + E(o.title) + '</span><span class="msub">' + E(o.date) + '</span></span>'
+      + '<span class="mtwo"><span class="nm" title="' + E(o.title) + '">' + E(shown) + '</span><span class="msub">' + E(o.date) + '</span></span>'
       // "15 rides · 13 coasters": one line here, stacked on a phone so the park keeps its width.
       + '<span class="ct vct">' + String(o.right || "").split(" \u00b7 ").map(function (x) { return '<span>' + E(x) + '</span>'; }).join('<i> \u00b7 </i>') + '</span>' + chev + '</summary>'
       // Park by park on a day with two (Carter, 2026-10-23: Rocky Top Mountain

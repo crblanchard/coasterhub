@@ -12,7 +12,7 @@
 <title>Profile — Coaster Hub</title>
 <meta name="description" content="Interactive roller coaster count statistics.">
 <link rel="stylesheet" href="/style.css?v=20261121a">
-<link rel="stylesheet" href="/lists.css?v=20261121b">
+<link rel="stylesheet" href="/lists.css?v=20261122c">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -389,7 +389,7 @@
       <!-- On a phone, "Change password" and "Sign out" move in here beside the
            numbers (profile-edit.js), to save a row (Carter, 2026-09-29). -->
       <div class="statrow">
-      <h1 id="hero_h" style="max-width:20ch" data-loading>Credit whoring&hellip;</h1>
+      <h1 id="hero_h" style="max-width:20ch" data-loading>Loading&hellip;</h1>
       <div class="profedit ownslot" id="ownslot"></div>
       </div>
       <!-- What you can do with this count, for the person who owns it. Four
@@ -560,7 +560,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261122b"></script>
+<script src="/app.js?v=20261122c"></script>
 <script src="/profile-edit.js?v=20261031a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -1010,7 +1010,7 @@ function render(s){
     // Everyone gets the rankings, as the count and the map (Carter, 2026-09-29).
     // Nothing logged yet, there is nothing to rank (critique, 2026-10-02).
     document.getElementById('hero_rank').textContent =
-      mine ? 'Update your rankings' : ('View ' + (s.userName || 'this') + '’s rankings');
+      mine ? 'Update your rankings' : 'Rankings';
     if (mine && !k.credits) document.getElementById('hero_rank').hidden = true;
     document.getElementById('geo_h').textContent = mine ? 'Everywhere you’ve ridden' : 'Everywhere ' + (s.userName || 'they') + ' has ridden';
     CoasterHubProfile.mount(host,
@@ -1027,8 +1027,8 @@ function render(s){
     mountAmong(CoasterHub.currentUser(), s.userName, !!mine);
     // Someone else's page: compare them with you (/compare, 2026-10-17).
     if (acct && acct.slug && !mine && !document.getElementById('hero_cmp')) {
-      var cmp=document.createElement('a'); cmp.className='btn alt'; cmp.id='hero_cmp';
-      cmp.href='/compare?b='+encodeURIComponent(CoasterHub.currentUser()); cmp.textContent='Compare';
+      var cmp=document.createElement('a'); cmp.className='btn'; cmp.id='hero_cmp';
+      cmp.href='/compare?b='+encodeURIComponent(CoasterHub.currentUser()); cmp.textContent='Compare with me';
       var fb=document.getElementById('hero_follow'); fb.parentNode.insertBefore(cmp, fb.nextSibling);
     }
     mountShare(CoasterHub.currentUser(), s.userName || CoasterHub.currentUser(), !!mine);
@@ -1084,7 +1084,8 @@ function render(s){
   fetch('/api/rankings/'+encodeURIComponent(CoasterHub.currentUser()||''))
     .then(function(r){ return r.ok ? r.json() : {order:[]}; })
     .then(function(d){
-      line(nf((d.order||[]).length)+' ranked.','rankings');
+      // Nobody with an empty list gets a "0 ranked." headline (critique, 2026-11-21).
+      if((d.order||[]).length) line(nf((d.order||[]).length)+' ranked.','rankings');
       renderTop(d.order||[]);
     })
     .catch(function(){ /* no ranking to report is better than a wrong one */ });
@@ -1172,7 +1173,7 @@ function render(s){
         .sort(function(a,b){ return String(a.c.name).localeCompare(String(b.c.name)); });   // A–Z; no defunct-last on your own lists
       var many=x.p.length>1;
       return CoasterHub.visitRow({
-        title: x.p.map(function(pp){ return pp[0]; }).join(' & '), date: fmt(d),
+        title: x.p.map(function(pp){ return pp[0]; }).join(' & '), parts: x.p.map(function(pp){ return pp[0]; }), date: fmt(d),
         right: nf(x.t)+' ride'+(x.t===1?'':'s')+(rows.length?' \u00b7 '+nf(rows.length)+' coaster'+(rows.length===1?'':'s'):''),
         rows: rows.map(function(r){ return { c:r.c, n:r.n, fresh: first[r.c.id]===d,
           ctx: many ? 'park' : 'model' }; }),
