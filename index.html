@@ -200,6 +200,9 @@
   .daycard .newc a::before{content:"";width:7px;height:7px;border-radius:50%;background-color:var(--steel)}
   .daycard .newc a.wd::before{background-color:var(--wood)}
   .daycard .newc a:hover{color:var(--accent2)}
+  .daycard .newc a i{font-style:normal;font-weight:700;color:var(--muted);margin-left:2px}
+  .daycard .newc a.old{background-color:transparent;border:1px solid var(--line)}
+  .daycard .newc a.old::before{display:none}
   .daycard .newc a.more{background-color:transparent;color:var(--accent2)}
   .daycard .newc a.more::before{display:none}
   @media (max-width:560px){
@@ -466,8 +469,9 @@ CoasterHub.me().then(function(acct){
       log.forEach(function(x){ if (!x.d) return; if (!first[x.c] || x.d < first[x.c]) first[x.c] = x.d; if (!lastD || x.d > lastD) lastD = x.d; });
       if (lastD) {
         var dayRides = log.filter(function(x){ return x.d === lastD; });
-        var dParks = {}, newOnes = [], seenN = {};
+        var dParks = {}, newOnes = [], seenN = {}, times = {}, order = [];
         dayRides.forEach(function(x){ var c = byId[x.c]; if (!c) return; dParks[c.park] = 1;
+          if (!times[x.c]) order.push(c); times[x.c] = (times[x.c] || 0) + 1;
           if (first[x.c] === lastD && !seenN[x.c]) { seenN[x.c] = 1; newOnes.push(c); } });
         var pk = Object.keys(dParks), dt = new Date(lastD + 'T12:00:00');
         var mon = dt.toLocaleString('en-US', { month: 'short' }), dd = dt.getDate(), yy = dt.getFullYear();
@@ -478,8 +482,12 @@ CoasterHub.me().then(function(acct){
           + (newOnes.length ? ' &middot; <b>' + newOnes.length + '</b> new ' + (newOnes.length === 1 ? 'credit' : 'credits') : '') + '</p>'
           // Every new credit of the day (Carter, 2026-11-21: "on desktop just show all
           // the rides the +1 more is weird"); a phone hides the list.
-          + (newOnes.length ? '<ul class="newc">' + newOnes.map(function(c){
-              return '<li><a class="' + (c.type === 'Wood' ? 'wd' : 'st') + '" href="' + CoasterHub.coasterHref(c) + '">' + esc(c.name) + '</a></li>'; }).join('') + '</ul>' : '')
+          // Every coaster of the day with how many times (Carter, 2026-11-21:
+          // "how many times each one so x2 x3"): new credits first in their
+          // paint, then re-rides plain.
+          + (order.length ? '<ul class="newc">' + order.slice().sort(function(a, b){ return (seenN[b.id] ? 1 : 0) - (seenN[a.id] ? 1 : 0); }).map(function(c){
+              return '<li><a class="' + (seenN[c.id] ? (c.type === 'Wood' ? 'wd' : 'st') : 'old') + '" href="' + CoasterHub.coasterHref(c) + '">' + esc(c.name)
+                + (times[c.id] > 1 ? '<i>&times;' + times[c.id] + '</i>' : '') + '</a></li>'; }).join('') + '</ul>' : '')
           + '</div>';
         $('daycard').hidden = false;
       }
