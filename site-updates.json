@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-21T20:05:00Z",
+   "text": "Log a day now hides parks with nothing still operating, and the full coasters list can sort by length. The Global/Mine switch on the home page is plain tabs now, and your own rankings page says “Your rankings.”"
+  },
+  {
    "at": "2026-11-20T18:32:40Z",
    "text": "Coaster Hub has a new look: a painted park skyline on every page, bolder headlines, a home page with your last park day, next milestone and friends as tiles, and coaster pages that show each stat against the record holder. Coaster pages also have a Log this ride button."
   },

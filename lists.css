@@ -65,11 +65,13 @@ a.crow{align-items:center}
 .ranksec a.crow .two .pk{font-size:.8rem}
 /* Mine / Global: the /rankings switch (.hero .segsw), section-sized. */
 .sect.rhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.rsw{display:inline-flex;padding:2px;border:1px solid var(--line);border-radius:999px;background:var(--soft);
-     text-transform:none;letter-spacing:0}
-.rsw a{padding:3px 12px;border-radius:999px;color:var(--muted);font-weight:600;font-size:.78rem;cursor:pointer;text-decoration:none}
+.rsw{display:inline-flex;gap:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+     font-stretch:normal;text-transform:none;letter-spacing:0;align-self:flex-end}
+/* Text tabs, not a pill (Carter, 2026-11-21: "global / mine pill looks unnatural"). */
+.rsw a{padding:2px 0 4px;border-bottom:2px solid transparent;color:var(--muted);font-weight:600;font-size:.9rem;
+       cursor:pointer;text-decoration:none}
 .rsw a:hover{color:var(--fg)}
-.rsw a.on{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.rsw a.on{color:var(--fg);border-bottom-color:var(--steel)}
 .rnone{color:var(--muted);font-size:.86rem;margin:4px 2px 0}
 /* Global rows: /rankings' master-list look (.srow .meta, .chev, .wrow). */
 .ranksec a.crow.g{align-items:center;padding-top:9px;padding-bottom:9px}
