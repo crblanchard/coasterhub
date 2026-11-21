@@ -173,7 +173,10 @@ No `site-updates.json` entry for data (see above).
 - **Former names:** `coaster_aliases (coaster_id, former_name, note, added)`, note
   `'rcdb'`. Use note `'renamed'` only for a rename Carter reports happening now
   (that note shows the date on the site).
-- **Categories:** `clone_members (coaster, group_id)` by `clone_groups.name`:
+- **Categories:** after any batch of new coasters, re-run `migrations/216-categories-catch-up.sql`
+  (both statements). It adds every coaster whose model IS a category and writes the `clone_set`
+  rows. Batman clones and Superman flyers are hand-picked, so add those by hand.
+  `clone_members (coaster, group_id)` by `clone_groups.name`:
   Vekoma Boomerangs, Vekoma SLCs, Vekoma SFCs, Zierer Tivolis, Schwarzkopf Jet
   Stars, SDC Galaxis, Wacky Worms, Dragon Wagons (Wisdom), Go Gators, RES Roller
   Balls, Batman clones. Add every matching new ride.
