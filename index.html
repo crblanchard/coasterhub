@@ -203,6 +203,10 @@
   .daycard .newc a.more{background-color:transparent;color:var(--accent2)}
   .daycard .newc a.more::before{display:none}
   @media (max-width:560px){
+    /* Just the day on a phone; the coaster names took a screen of their own
+       (Carter, 2026-11-21: "it takes up too much space so ... remove coaster
+       names on mobile"). */
+    .daycard .newc{display:none}
     .daycard{--sw:74px}
     .daycard .stub b{font-size:1.9rem}
     .daycard .tix{padding:14px}
