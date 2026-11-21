@@ -1700,7 +1700,9 @@ function renderList(){
   $('listhead').textContent = searching
     ? ('Search \u00b7 '+list.length+' match'+(list.length===1?'':'es'))
     // The park's name is on the line above the panel now; say what is in it.
-    : (list.length+' coaster'+(list.length===1?'':'s')+(MODE==='list'?(' \u00b7 '+have+' in your count'):''));
+    // Operating only (Carter, 2026-11-22); the closed ones are counted on their fold.
+    : (function(){ var n=list.filter(function(c){ return !gone(c); }).length || list.length;
+        return n+' coaster'+(n===1?'':'s')+(MODE==='list'?(' \u00b7 '+have+' in your count'):''); })();
 
   // Steel/Wood said almost nothing — every row in a park reads the same. The
   // model is the interesting half, and the park only earns its place when you
@@ -1710,6 +1712,8 @@ function renderList(){
     var bits=[];
     if(searching && c.park) bits.push(c.park);
     var mk=CoasterHub.maker(c); if(mk) bits.push(mk);
+    // A closed ride says when (Carter, 2026-11-22).
+    if(c.closed) bits.push('Closed '+String(c.closed).slice(0,4));
     return bits.join(' \u00b7 ');
   }
   // Say nothing when nothing is known — the same rule /count's life() follows.
@@ -1717,7 +1721,7 @@ function renderList(){
   // you are searching across parks; "Operating" on every row was noise
   // (Carter, 2026-11-02).
   function flag(c){
-    if(c.closed) return searching ? '<span class="stat off">Defunct</span>' : '';
+    if(c.closed) return '';   // the second line says "Closed 2012" instead
     if(c.building) return CoasterHub.UNDER_CONSTRUCTION;
     if(c.closing) return CoasterHub.CLOSING_SOON;
     return '';
