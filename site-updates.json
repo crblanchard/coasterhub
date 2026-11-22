@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-22T04:15:00Z",
-   "text": "Home now feels like the park: a steel-and-wood track runs down the page with a stop at each section, the sky fades into the page, and the ranking card is an admission ticket. The map’s filters also fold behind a small arrow on phones."
+   "at": "2026-11-22T04:19:37Z",
+   "text": "Park tickets are spreading: Home’s ranking card and each day in Recent visits are now admission tickets with the date on the stub, and Home’s sky fades into the page. The map’s filters also fold behind a small arrow on phones."
   },
   {
    "at": "2026-11-21T21:29:46Z",

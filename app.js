@@ -3225,7 +3225,14 @@
     // and "+N more", the full list on hover (critique, 2026-11-21).
     var shown = o.parts && o.parts.length > 2
       ? o.parts.slice(0, 2).join(' & ') + ' +' + (o.parts.length - 2) + ' more' : o.title;
-    return '<details class="mdl visit"><summary>'
+    // A full date makes it a ticket: the day on the stub (lists.css .visit.tk).
+    var stub = "";
+    if (o.iso && /^\d{4}-\d{2}-\d{2}$/.test(o.iso)) {
+      var q = o.iso.split("-"), dt = new Date(Date.UTC(+q[0], +q[1] - 1, +q[2]));
+      stub = '<span class="vstub"><small>' + dt.toLocaleDateString(undefined, { timeZone: "UTC", month: "short" })
+        + '</small><b>' + (+q[2]) + '</b><small>' + q[0] + '</small></span>';
+    }
+    return '<details class="mdl visit' + (stub ? ' tk' : '') + '"><summary>' + stub
       + '<span class="mtwo"><span class="nm" title="' + E(o.title) + '">' + E(shown) + '</span><span class="msub">' + E(o.date) + '</span></span>'
       // "15 rides · 13 coasters": one line here, stacked on a phone so the park keeps its width.
       + '<span class="ct vct">' + String(o.right || "").split(" \u00b7 ").map(function (x) { return '<span>' + E(x) + '</span>'; }).join('<i> \u00b7 </i>') + '</span>' + chev + '</summary>'

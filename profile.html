@@ -12,7 +12,7 @@
 <title>Profile — Coaster Hub</title>
 <meta name="description" content="Interactive roller coaster count statistics.">
 <link rel="stylesheet" href="/style.css?v=20261121a">
-<link rel="stylesheet" href="/lists.css?v=20261122c">
+<link rel="stylesheet" href="/lists.css?v=20261122f">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -561,7 +561,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261122d"></script>
+<script src="/app.js?v=20261122e"></script>
 <script src="/profile-edit.js?v=20261031a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -1174,7 +1174,7 @@ function render(s){
         .sort(function(a,b){ return String(a.c.name).localeCompare(String(b.c.name)); });   // A–Z; no defunct-last on your own lists
       var many=x.p.length>1;
       return CoasterHub.visitRow({
-        title: x.p.map(function(pp){ return pp[0]; }).join(' & '), parts: x.p.map(function(pp){ return pp[0]; }), date: fmt(d),
+        title: x.p.map(function(pp){ return pp[0]; }).join(' & '), parts: x.p.map(function(pp){ return pp[0]; }), iso: d, date: fmt(d),
         right: nf(x.t)+' ride'+(x.t===1?'':'s')+(rows.length?' \u00b7 '+nf(rows.length)+' coaster'+(rows.length===1?'':'s'):''),
         rows: rows.map(function(r){ return { c:r.c, n:r.n, fresh: first[r.c.id]===d,
           ctx: many ? 'park' : 'model' }; }),

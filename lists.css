@@ -159,6 +159,22 @@ a.crow.mk .yrs{color:var(--muted)}
 /* A day out (CoasterHub.visitRow): profile's Recent visits and /credits'
    Rides tab. The list's own box, not .panel — profile has a .panel of its own. */
 .vlist{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+/* A day out as an admission ticket (Carter, 2026-11-22: "tickets seem cool, we could
+   try it in more places"): its own card, the date on a stub, notches where it tears,
+   the same make as Home's last park day. Only rows given a full date (o.iso). */
+.vlist:has(.visit.tk){border:0;border-radius:0;background:none;overflow:visible}
+.mlist details.mdl.visit.tk{--sw:68px;margin:0 0 10px;border:1px solid var(--line);border-radius:12px;background-color:var(--panel);
+  -webkit-mask:radial-gradient(circle 9px at var(--sw) 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 9px at var(--sw) 100%,#0000 98%,#000) bottom/100% 51% no-repeat;
+  mask:radial-gradient(circle 9px at var(--sw) 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 9px at var(--sw) 100%,#0000 98%,#000) bottom/100% 51% no-repeat}
+.mlist details.mdl.visit.tk summary{padding:0;gap:0;align-items:stretch}
+.visit.tk .vstub{flex:none;width:var(--sw);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:12px 4px;
+  background-color:var(--steel-tint);border-right:2px dashed var(--line)}
+.visit.tk .vstub small{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.visit.tk .vstub b{font-family:var(--display);font-weight:850;font-stretch:115%;font-size:1.7rem;line-height:1;letter-spacing:-.03em;color:var(--fg)}
+.mlist .visit.tk .mtwo{padding:12px 0 12px 14px;align-items:center}
+.mlist .visit.tk .msub{display:none}
+.mlist .visit.tk summary .ct{align-self:center;padding-right:14px}
+@media (max-width:560px){ .mlist details.mdl.visit.tk{--sw:58px} .visit.tk .vstub b{font-size:1.45rem} .mlist .visit.tk .mtwo{padding-left:12px;align-items:flex-start;justify-content:center} .mlist .visit.tk summary .ct{padding-right:12px} }
 a.crow .lap{color:var(--accent);font-size:.84rem;font-weight:600;font-variant-numeric:tabular-nums}
 a.crow .nw{color:var(--accent2);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .vlist .vfoot{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.8rem;padding:8px 16px 10px 28px;border-top:1px solid var(--soft)}
