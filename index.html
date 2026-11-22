@@ -68,7 +68,11 @@
   .heroyou .hy_last a{color:var(--accent2);text-decoration:none;font-weight:600}
   .heroyou .hy_acts{display:flex;gap:10px;margin:18px 0 20px}
   .heroyou .hy_acts .btn{white-space:nowrap}
-  .heroyou .hy_acts .btn.alt{background-color:var(--panel);border:1px solid var(--line);color:var(--fg)}
+  /* Solid, not --panel: the hero redefines --panel as a see-through white (style.css,
+     .hero), so "Panel fill" still let the skyline's track run through "Log in" and
+     "Rank more". These are the site's real panel colours, night then day. */
+  section.hero.home .btn.alt{background-color:#15203a;border:1px solid var(--line);color:var(--fg)}
+  :root[data-theme="light"] section.hero.home .btn.alt{background-color:#fff}
   .heroyou .hy_acts .btn.alt:hover{border-color:var(--accent2);color:var(--accent2)}
   @media (max-width:640px){ .heroyou .hy_acts{margin-bottom:50px} .heroyou .hy_acts .btn{padding:10px 16px;font-size:.92rem} }
   /* A site update in the short feed: two lines, the whole thing is on /changes. */
@@ -121,6 +125,8 @@
   .hero.home h1.wide,.hero.home .heroyou h1{font-family:var(--display);font-stretch:118%;font-weight:850;
     font-size:clamp(3rem,10vw,5.4rem);line-height:.92;letter-spacing:-.035em;margin:0 0 10px}
   .hero.home #hero_h{font-size:clamp(2.4rem,7vw,4.2rem)}
+  .hero.home #hero_p:empty{display:none}
+  .hero.home .herojoin{margin-top:8px}
   .hero.home .heroyou h1 .w{font-weight:600;font-stretch:100%;letter-spacing:-.02em;font-size:.62em;margin-left:.12em}
   .hero.home .heroyou .hy_sub{font-size:1.02rem}
   /* .hero p + p would otherwise set these gaps (see CLAUDE.md, the specificity trap). */
@@ -279,8 +285,10 @@
     <path d="M-50 520 C 250 520, 300 140, 520 140 S 780 580, 1000 400 S 1300 110, 1500 320"
           fill="none" stroke="var(--tint2)" stroke-width="2" stroke-dasharray="6 10"/>
   </svg>
-  <h1 class="wide" id="hero_h">Your coaster tracker.</h1>
-  <p class="wide" id="hero_p">Count every coaster you ride, rank your favorites and see where your friends have been.</p>
+  <!-- Signed out: just the welcome for now (Carter, 2026-11-22). The sentence under it
+       is gone; the empty paragraph stays because the script toggles it. -->
+  <h1 class="wide" id="hero_h">Welcome to Coaster Hub.</h1>
+  <p class="wide" id="hero_p"></p>
   <!-- Signed in, the hero is YOUR count instead of the slogan (Carter, 2026-10-01,
        from the impeccable critique: "the rider's own count is the product"). -->
   <div class="heroyou" id="heroyou" hidden>
