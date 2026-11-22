@@ -205,12 +205,18 @@
   .park .rankcta .btn{align-self:stretch;display:flex;align-items:center;border:0;border-left:1.5px dashed var(--line);border-radius:0;
     background-color:transparent;padding:0 20px;font-weight:700;color:var(--accent2)}
   .park .rankcta .btn:hover{color:var(--fg)}
-  /* Friends: only a touch of the ticket (Carter, 2026-11-22: "really don't want to
-     overdo it"). The count sits on a stub — a dashed tear down the row, no notches,
-     no card per friend. */
-  #friends .riderrow .nums{align-self:stretch;justify-content:center;margin:-10px -16px -10px 0;padding:10px 16px 10px 16px;
-    border-left:2px dashed var(--line);min-width:84px;align-items:center}
-  @media (max-width:560px){ #friends .riderrow .nums{margin:-8px -14px -8px 0;padding:8px 14px;min-width:72px} }
+  /* Friends as tickets (Carter, 2026-11-22: "friends can be more tickety ... just don't
+     want to use tickets in so many more places"): one ticket per rider, the ranked
+     count on the stub, the same make as Recent visits. Home's Friends only. */
+  #friends{border:0;border-radius:0;background:none;overflow:visible;gap:10px}
+  #friends .riderrow{--sw:92px;border:1px solid var(--line);border-radius:12px;background-color:var(--panel);overflow:hidden;
+    -webkit-mask:radial-gradient(circle 9px at calc(100% - var(--sw)) 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 9px at calc(100% - var(--sw)) 100%,#0000 98%,#000) bottom/100% 51% no-repeat;
+    mask:radial-gradient(circle 9px at calc(100% - var(--sw)) 0,#0000 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 9px at calc(100% - var(--sw)) 100%,#0000 98%,#000) bottom/100% 51% no-repeat}
+  #friends .riderrow:hover{background-color:var(--soft)}
+  #friends .riderrow .nums{box-sizing:border-box;width:var(--sw);align-self:stretch;justify-content:center;align-items:center;
+    margin:-10px -16px -10px 0;padding:10px 6px;background-color:var(--steel-tint);border-left:2px dashed var(--line)}
+  #friends .hint{padding:2px 2px 0}
+  @media (max-width:560px){ #friends .riderrow{--sw:78px} #friends .riderrow .nums{margin:-8px -14px -8px 0;padding:8px 6px} }
   @media (max-width:560px){ .park .rankcta .btn{padding:0 12px;font-size:.86rem} .park .rankcta .rc-t{padding-right:10px} .park .rankcta .rc-t b{font-size:1.02rem} }
 
   /* ---- Home, round two (Carter, 2026-11-20: "all 1-8 please"). */
