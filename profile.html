@@ -31,6 +31,7 @@
      cards for these ... like to see the stats separated"), just tighter than
      they were: less padding, a smaller number, a smaller gap. */
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:4px}
+  .hero .lastlogged{color:var(--muted);font-size:.86rem;line-height:1.4;margin-top:-10px;margin-bottom:12px}
   .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
   .kpi .num{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1}
   .kpi .lbl{color:var(--muted);font-size:.8rem;margin-top:6px}
@@ -217,21 +218,21 @@
   .lostmore{background:none;border:0;font:inherit;font-size:.86rem;font-weight:600;color:var(--accent2);padding:10px 0 0;cursor:pointer}
   @media (max-width:680px){
     #content{display:flex;flex-direction:column}
-    #sec_visits{order:1}     /* first, then the top ten: same order, source breaks the tie */
     #sec_top{order:1}
     #sec_kpis{order:2}
-    #sec_season{order:2}
-    /* Records before the map on a phone, and not behind More stats: they are
-       what you show a friend (critique, 2026-10-02). */
-    #sec_otd{order:3}
+    /* Best-of before the log (critique, 2026-11-22): Records is what you show a
+       friend, so it sits above the season card and the visits. */
     #sec_records{order:3}
-    #sec_amg{order:3}
-    #sec_geo{order:4}
-    #morewrap{order:5;display:block;padding:2px 0 22px}
-    #sec_activity{order:7}
-    #sec_overtime{order:8}
-    #sec_breakdown{order:9}
-    #sec_lost{order:10}
+    #sec_season{order:4}
+    #sec_visits{order:5}
+    #sec_otd{order:6}
+    #sec_amg{order:6}
+    #sec_geo{order:7}
+    #morewrap{order:8;display:block;padding:2px 0 22px}
+    #sec_activity{order:9}
+    #sec_overtime{order:10}
+    #sec_breakdown{order:11}
+    #sec_lost{order:12}
     body.moreclosed #sec_activity,
     body.moreclosed #sec_overtime,body.moreclosed #sec_breakdown,body.moreclosed #sec_lost{display:none}
     /* Two up, not "as many as fit": at 320px auto-fit drops to one column and
@@ -448,20 +449,6 @@
   <p>Pick a park you&rsquo;ve been to and tick the coasters you rode there. Dates are optional &mdash; add them if you remember.</p>
   <a class="btn" href="/welcome">Start your count</a><a class="alt" href="/import">or import a list &rarr;</a>
 </div></div>
-<!-- The last five days this rider logged, in the activity feed's form —
-     first on the page (Carter, 2026-09-26: "below top ten do latest five
-     'recent visits'", then "show recent visits at the top actually").
-     Read off computeStats' day_detail, so it costs nothing extra; hidden for a
-     rider with no dated days. -->
-<section class="block" id="sec_visits" style="display:none"><div class="container">
-  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">all &rarr;</span></a></h2>
-  <div class="mlist vlist" id="visits"></div>
-  <!-- The way on to the whole count, where the five end (2026-09-27): "my
-       stuff is split up" was the thing Carter found hardest, and this puts the
-       next step where the eye already is. -->
-  <p class="visitsall"><a id="visits_all" href="/credits">See all credits &rarr;</a></p>
-</div></section>
-
 <!-- Their ten favorites, ABOVE the tiles (Carter's call, 2026-09-17): what
      somebody liked best is more interesting than how many states they have been
      to. The heading is the link to the whole list, so the section needs no "see
@@ -475,26 +462,41 @@
 
 <section class="block" id="sec_kpis"><div class="container">
   <div class="kpis">
-    <div class="kpi"><div class="num" id="k_credits"></div><div class="lbl">Credits</div><div class="sub" id="k_split"></div></div>
-    <div class="kpi" id="kpi_rides"><div class="num" id="k_rides"></div><div class="lbl">Total Rides</div></div>
+    <!-- Credits and rides are the hero's numbers; saying them again here was the
+         page counting itself twice (critique, 2026-11-22). The first tile is the
+         steel/wood split instead. -->
+    <div class="kpi"><div class="num" id="k_credits"></div><div class="lbl">Steel · wood</div></div>
     <div class="kpi"><div class="num" id="k_parks"></div><div class="lbl">Parks</div></div>
     <div class="kpi"><div class="num" id="k_geo"></div><div class="lbl">States · countries</div></div>
     <div class="kpi"><div class="num" id="k_miles"></div><div class="lbl" id="k_miles_lbl">Distance ridden</div><div class="sub" id="k_inv"></div></div>
   </div>
 </div></section>
 
+<section class="block" id="sec_records"><div class="container">
+  <h2>Records</h2>
+  <div class="records" id="records"></div>
+</div></section>
+
 <section class="block" id="sec_season" hidden><div class="container">
   <div class="season" id="season"></div>
+</div></section>
+
+<!-- The last five days this rider logged, in the activity feed's form —
+     after the best-of now (critique, 2026-11-22: a log made the first impression; was first on the page, Carter 2026-09-26).
+     Read off computeStats' day_detail, so it costs nothing extra; hidden for a
+     rider with no dated days. -->
+<section class="block" id="sec_visits" style="display:none"><div class="container">
+  <h2><a class="toplink" id="visits_h" href="/credits">Recent visits<span class="arw">all &rarr;</span></a></h2>
+  <div class="mlist vlist" id="visits"></div>
+  <!-- The way on to the whole count, where the five end (2026-09-27): "my
+       stuff is split up" was the thing Carter found hardest, and this puts the
+       next step where the eye already is. -->
+  <p class="visitsall"><a id="visits_all" href="/credits">See all credits &rarr;</a></p>
 </div></section>
 
 <section class="block" id="sec_otd"><div class="container">
   <h2>On this day</h2>
   <div id="otd"></div>
-</div></section>
-
-<section class="block" id="sec_records"><div class="container">
-  <h2>Records</h2>
-  <div class="records" id="records"></div>
 </div></section>
 
 <section class="block" id="sec_amg" hidden><div class="container amg">
@@ -1024,6 +1026,16 @@ function render(s){
     // Under the bio, so it goes up after the card has drawn one. mount() is
     // synchronous, so the bio is already there to insert against.
     mountFollows(host, CoasterHub.currentUser());
+    // "Is this rider active?" at a glance (critique, 2026-11-22): the newest
+    // dated day, read off day_detail like Recent visits, so nothing extra loads.
+    (function(){
+      var ds=Object.keys(s.day_detail||{}).sort(); if(!ds.length) return;
+      var p=ds[ds.length-1].split('-'), fl=host.querySelector('.followlist') || host.querySelector('.followline');
+      if(!fl || host.querySelector('.lastlogged')) return;
+      var ll=document.createElement('p'); ll.className='lastlogged';
+      ll.textContent='Last logged '+new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).toLocaleDateString(undefined,{timeZone:'UTC',month:'short',day:'numeric',year:'numeric'});
+      fl.parentNode.insertBefore(ll, fl.nextSibling);
+    })();
     mountAmong(CoasterHub.currentUser(), s.userName, !!mine);
     // Someone else's page: compare them with you (/compare, 2026-10-17).
     if (acct && acct.slug && !mine && !document.getElementById('hero_cmp')) {
@@ -1209,19 +1221,9 @@ function render(s){
   var note=RIDER_NOTES[CoasterHub.currentUser()||'carter'];
   if(note){ var nd=document.getElementById('ridernote'); nd.innerHTML=note; nd.style.display='block'; }
 
-  document.getElementById('k_credits').textContent=nf(k.credits);
-  document.getElementById('k_split').textContent=k.steel+' steel · '+k.wood+' wood';
+  document.getElementById('k_credits').textContent=nf(k.steel)+' · '+nf(k.wood);
   document.getElementById('k_parks').textContent=k.parks;
   document.getElementById('k_geo').textContent=k.states+' · '+k.countries;
-
-  // Total Rides tile only when ride counts are known AND mean something.
-  if(showRides){
-    if(document.getElementById('k_rides')) document.getElementById('k_rides').textContent=nf(k.rides);
-  } else {
-    // Removed, not hidden: a hidden tile still counts in the phone's two-up
-    // grid and pushed the second row's first tile off the left edge.
-    if(document.getElementById('kpi_rides')) document.getElementById('kpi_rides').remove();
-  }
 
   // Distance tile: total (with re-rides) when counts exist, else unique track.
   if(has.rideCounts){
