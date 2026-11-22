@@ -68,7 +68,7 @@
   .heroyou .hy_last a{color:var(--accent2);text-decoration:none;font-weight:600}
   .heroyou .hy_acts{display:flex;gap:10px;margin:18px 0 20px}
   .heroyou .hy_acts .btn{white-space:nowrap}
-  .heroyou .hy_acts .btn.alt{background:transparent;border:1px solid var(--line);color:var(--fg)}
+  .heroyou .hy_acts .btn.alt{background-color:var(--panel);border:1px solid var(--line);color:var(--fg)}
   .heroyou .hy_acts .btn.alt:hover{border-color:var(--accent2);color:var(--accent2)}
   @media (max-width:640px){ .heroyou .hy_acts{margin-bottom:50px} .heroyou .hy_acts .btn{padding:10px 16px;font-size:.92rem} }
   /* A site update in the short feed: two lines, the whole thing is on /changes. */
@@ -154,13 +154,33 @@
     color:var(--steel);font-variant-numeric:tabular-nums}
   #globaltop a.crow[data-tp="wd"] .rk{color:var(--wood)}
 
+  /* The Global top as queue signage: the ride's name in the display face, its
+     height, speed and opening year after the park, numbers set like a sign's
+     (critique, 2026-11-22: nothing on Home looked like coasters). Home only —
+     rankSection opts.sign — and each fact hides when the ride has no figure. */
+  #globaltop a.crow.g .cn{font-family:var(--display);font-stretch:92%;font-weight:800;font-size:1rem;letter-spacing:-.01em}
+  #globaltop .pk{display:flex;min-width:0}
+  #globaltop .pk .lnk,#globaltop .pk .lc{white-space:nowrap}
+  #globaltop .pk .lc{padding-left:.3em}
+  #globaltop .pk .lnk{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  #globaltop .sg{flex:none;display:inline-flex;white-space:nowrap}
+  #globaltop .sg .sgi::before{content:"\00b7";margin:0 6px}
+  #globaltop .sg b{font-family:var(--display);font-stretch:110%;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums}
+  /* Phone: the park keeps the line (Carter, 2026-09-25: "want to see park for each coaster"); the figures are for wider screens. */
+  @media (max-width:560px){ #globaltop .sg{display:none} }
+
+  /* Site updates are the quiet rows: the rides and riders are the news. */
+  .recent .feed .ev[data-k="site_update"] .ic{background-color:transparent;color:var(--muted)}
+  .recent .feed .ev[data-k="site_update"] .upd{color:var(--muted)}
+
   /* Feed icons: a logged day in steel, a ranking in wood; the rest stay neutral. */
   .feed .ev[data-k="rides"] .ic,.feed .ev[data-k="credits"] .ic,.feed .ev[data-k="user_added"] .ic,.feed .ev[data-k="import"] .ic{background-color:var(--steel-tint);color:var(--steel)}
   .feed .ev[data-k="ranking"] .ic{background-color:var(--wood-tint);color:var(--wood)}
 
-  /* The contact card's button: the outline style, not a third kind of button. */
-  .fbcard .go{background-color:var(--panel)!important;color:var(--fg)!important;border:1px solid var(--line)!important}
-  .fbcard .go:hover{border-color:var(--accent2)!important;color:var(--accent2)!important}
+  /* The way to reach a person: one plain line, not a card. */
+  .fbline{margin:0 0 30px;color:var(--muted);font-size:.9rem}
+  .fbline a{color:var(--accent2);font-weight:600;text-decoration:none;cursor:pointer}
+  .fbline a:hover{text-decoration:underline}
 
   /* ---- Home, round two (Carter, 2026-11-20: "all 1-8 please"). */
   /* Next milestone: a thin line under the steel and wood one. */
@@ -228,7 +248,6 @@
   /* Rank call to action: until you have ranked ten, a card instead of an empty top ten. */
   .rankcta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:0 0 34px;padding:18px 20px;border-radius:14px;
     background-color:var(--panel);border:1px solid var(--line)}
-  .rankcta .rc-n{font-family:var(--display);font-weight:850;font-stretch:115%;font-size:2.6rem;line-height:1;color:var(--steel);letter-spacing:-.03em}
   .rankcta .rc-t{flex:1;min-width:200px}
   .rankcta .rc-t b{display:block;font-family:var(--display);font-weight:800;font-stretch:108%;font-size:1.15rem}
   .rankcta .rc-t span{color:var(--muted);font-size:.92rem}
@@ -362,21 +381,14 @@
      assembled in script rather than written here: a mailto in the page source is
      the easiest thing in the world for an address harvester to walk off with. -->
 <div class="container">
-  <div class="fbcard">
-    <div>
-      <h2>Reach out to us!</h2>
-      <p>Please let us know if you come across any bugs, incorrect stats, or suggestions to improve the site.</p>
-    </div>
-    <span class="spacer"></span>
-    <a class="go" id="fb_link" rel="nofollow">Contact us &rarr;</a>
-  </div>
+  <p class="fbline">Found a bug or a wrong stat? <a id="fb_link" rel="nofollow">Tell us</a>.</p>
 </div>
 <footer class="site"><div class="container foot-inner">
   <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261122c"></script>
+<script src="/app.js?v=20261122d"></script>
 <script src="/changes-feed.js?v=20261120b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -444,10 +456,12 @@ CoasterHub.me().then(function(acct){
     })();
     // Rank call to action until ten are ranked; the empty top ten hides.
     if ((me.ranked || 0) < 10) {
-      $('rankcta').innerHTML = '<span class="rc-n">' + nfx(me.ranked || 0) + '</span>'
-        + '<span class="rc-t"><b>of ' + nfx(me.credits) + ' credits ranked</b><span>Start with your ten tallest. It takes a minute.</span></span>'
+      // One line, no "0 of 610" under a proud count, and the hero's "still to
+      // rank" line steps aside: they said the same thing (critique, 2026-11-22).
+      $('rankcta').innerHTML = '<span class="rc-t"><b>Start your top ten</b><span>Pick the ten you would ride again.</span></span>'
         + '<a class="btn" href="' + CoasterHub.userPageHref(acct.slug, 'rankings') + '">Start ranking &rarr;</a>';
       $('rankcta').hidden = false;
+      $('hy_next').hidden = true;
     }
     $('hy_rank').href = CoasterHub.userPageHref(acct.slug, 'rankings');
     // The last day you logged, and where.
@@ -606,7 +620,7 @@ CoasterHub.fetchCoasters().then(function(r){
 }).catch(function(){});
 CoasterHub.fetchCoasters().then(function(r){
   CoasterHub.rankSection(document.getElementById('globaltop'), r.coasters || [], {
-    model: false, lists: false, moreHref: '/rankings', fold: TOPN,
+    model: false, lists: false, sign: true, moreHref: '/rankings', fold: TOPN,
     title: function(v){ return (v === 'mine' ? 'Your top ' : 'Global top ') + TOPN; } });
 }).catch(function(){ /* no card rather than a broken one */ });
 

@@ -3387,6 +3387,16 @@
     }).catch(function () { return {}; });
     return globalTallyP;
   }
+  // A ride's facts the way the sign at the queue gives them: height, speed,
+  // opening year. Only what the row has; a ride with none gets nothing.
+  function signStats(c) {
+    var p = [];
+    if (c.h > 0) p.push('<span class="sgi"><b>' + Math.round(c.h) + '</b> ft</span>');
+    if (c.s > 0) p.push('<span class="sgi"><b>' + Math.round(c.s) + '</b> mph</span>');
+    if (c.yr > 0) p.push('<span class="sgi yr"><b>' + c.yr + '</b></span>');
+    return p.length ? '<span class="sg">' + p.join("") + '</span>' : "";
+  }
+
   function rankSection(el, cs, opts) {
     if (!el) return;
     opts = opts || {};
@@ -3419,7 +3429,7 @@
       if (st.view === "mine") {
         body = mine.length ? '<div class="panel">' + cut(mine).map(function (c) {
           return '<a class="crow" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + R[c.id] + '</span>'
-            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + '</span></span>'
+            + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + (opts.sign ? signStats(c) : '') + '</span></span>'
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '') + '</a>';
         }).join("") + '</div>' + more(mine.length)
           : '<p class="rnone">' + (R ? "You haven’t ranked any of these yet." : "Sign in to see where these sit in your rankings.") + '</p>';
@@ -3439,7 +3449,7 @@
         body = (rows.length ? '<div class="panel">' + cut(rows).map(function (r, i) {
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
           return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + r.pos + '</span>'
-            + '<span class="two"><span class="cn">' + E((r.g.sides && r.g.sides.length > 1 && r.g.race) || c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + '</span></span>'
+            + '<span class="two"><span class="cn">' + E((r.g.sides && r.g.sides.length > 1 && r.g.race) || c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + (opts.sign ? signStats(c) : '') + '</span></span>'
             // The model too, as /rankings' Global list shows it (2026-09-28).
             + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '')
             // Two lines, never three (Carter, 2026-10-02): the average in the
