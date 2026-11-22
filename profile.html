@@ -31,7 +31,6 @@
      cards for these ... like to see the stats separated"), just tighter than
      they were: less padding, a smaller number, a smaller gap. */
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:4px}
-  .hero .lastlogged{color:var(--muted);font-size:.86rem;line-height:1.4;margin-top:-10px;margin-bottom:12px}
   .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
   .kpi .num{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;line-height:1}
   .kpi .lbl{color:var(--muted);font-size:.8rem;margin-top:6px}
@@ -1026,16 +1025,6 @@ function render(s){
     // Under the bio, so it goes up after the card has drawn one. mount() is
     // synchronous, so the bio is already there to insert against.
     mountFollows(host, CoasterHub.currentUser());
-    // "Is this rider active?" at a glance (critique, 2026-11-22): the newest
-    // dated day, read off day_detail like Recent visits, so nothing extra loads.
-    (function(){
-      var ds=Object.keys(s.day_detail||{}).sort(); if(!ds.length) return;
-      var p=ds[ds.length-1].split('-'), fl=host.querySelector('.followlist') || host.querySelector('.followline');
-      if(!fl || host.querySelector('.lastlogged')) return;
-      var ll=document.createElement('p'); ll.className='lastlogged';
-      ll.textContent='Last logged '+new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).toLocaleDateString(undefined,{timeZone:'UTC',month:'short',day:'numeric',year:'numeric'});
-      fl.parentNode.insertBefore(ll, fl.nextSibling);
-    })();
     mountAmong(CoasterHub.currentUser(), s.userName, !!mine);
     // Someone else's page: compare them with you (/compare, 2026-10-17).
     if (acct && acct.slug && !mine && !document.getElementById('hero_cmp')) {
