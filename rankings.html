@@ -475,6 +475,13 @@
      on Home's top ten (Carter, 2026-11-22). */
   .srow[data-tp] .pos,.rrow[data-tp] .pos{font-family:var(--display);font-stretch:112%;font-weight:850;color:var(--steel)}
   .srow[data-tp="wd"] .pos,.rrow[data-tp="wd"] .pos{color:var(--wood)}
+  /* A category is all steel or all wood (Carter, 2026-11-22: "there aren't gonna be any
+     that are a combo"), so its row is washed and edged in the paint of its members
+     instead of the generic blue; the first member says which. */
+  .rrow.grp[data-tp]{--gc:var(--steel);--gt:var(--steel-tint);background:var(--gt);
+    border-top-color:var(--gc);border-left-color:var(--gc);border-right-color:var(--gc)}
+  .rrow.grp[data-tp="wd"]{--gc:var(--wood);--gt:var(--wood-tint)}
+  @media (min-width:561px){ .rrow.grp[data-tp]{border-bottom-color:var(--gc)} }
   .srow .n b{display:block;font-weight:600;font-size:.93rem;line-height:1.3;
              overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* Park and region lead, the model follows on the same line — and on its own
@@ -1607,7 +1614,7 @@ function renderRank(){
       head = head.replace('</b>', pmi('pm')+'</b>');
     }
     return '<div class="rrow'+(b.g?' grp':' tap')+(pl?' pulled':'')+(b.g&&OPEN[key]?' open':'')
-      +(!b.g&&STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'"'+(b.g&&!b.g.racing?'':' data-tp="'+(one.type==='Wood'?'wd':'st')+'"')
+      +(!b.g&&STATOPEN[b.ids[0]]?' open':'')+'" data-i="'+i+'"'+' data-tp="'+(one.type==='Wood'?'wd':'st')+'"'
       +' data-rid="'+b.ids[0]+'"'+(b.g?'':' data-stat="'+b.ids[0]+'"')
       +(b.g?' data-open="'+key+'" role="button" tabindex="0" aria-expanded="'
             +(OPEN[key]?'true':'false')+'"':'')+'>'
