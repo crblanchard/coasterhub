@@ -38,6 +38,9 @@
      summary card at its bottom is not hidden (Carter, 2026-10-31). The body's
      padding is the bar's height, counted inside the full-height column. */
   @media (max-width:680px){
+    /* The rider's head (picture, name, count) steps aside on a phone so the map gets
+       the room; Overview · Credits · Map stay, and the rider chip is on the map. */
+    .rhband{display:none}
     body{box-sizing:border-box;padding-bottom:calc(61px + max(8px, calc(env(safe-area-inset-bottom,0px) - 12px)))}
   }
   /* The number on each park: operating coasters. Every park is its own disc
@@ -132,6 +135,16 @@
   /* Each box's ramp, so the boxes are the legend. */
   .ctl.filt .sw{flex:none;width:22px;height:8px;border-radius:4px}
   .ctl.filt .sw.dead{background-color:var(--muted);opacity:.55}
+  /* The box folds away behind an arrow (Carter, 2026-11-22: "the tab is too big for
+     map on mobile ... an arrow for it to pop down and open"). Closed, it is one
+     small pill; open on a desktop, closed on a phone until you ask. */
+  .ctl.filt .ftog{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin:0;padding:6px 0;
+    background:none;border:0;color:var(--fg);font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}
+  .ctl.filt .ftog svg{flex:none;transition:transform .18s ease}
+  .ctl.filt:not(.shut) .ftog svg{transform:rotate(180deg)}
+  .ctl.filt:not(.shut) .ftog{border-bottom:1px solid var(--line);margin-bottom:3px}
+  .ctl.filt.shut .fbody{display:none}
+  .ctl.filt .ftog:focus-visible{outline:2px solid var(--accent2);outline-offset:2px;border-radius:6px}
   .ctl.filt select + .closedbox, .ctl.filt label + .closedbox{margin-top:2px;padding-top:6px;border-top:1px solid var(--line)}
   .ctl.filt select{display:block;width:100%;margin:5px 0 3px;background-color:var(--well);color:var(--fg);
     border:1px solid var(--line);border-radius:8px;padding:5px 6px;font-size:.8rem;cursor:pointer}
@@ -575,6 +588,9 @@ Promise.all([
       +(R ? '<span class="sw" style="background-image:'+grad(R)+'"></span>' : '')
       +esc(label)+' <small>'+count+'</small></label>';
   }
+  // Folded or open: remembered, and a phone starts folded.
+  var FOPEN; try{ var fv=localStorage.getItem('ch_map_filt'); FOPEN = fv==null ? window.innerWidth>680 : fv==='1'; }catch(e){ FOPEN = window.innerWidth>680; }
+  var CHEV='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
   var filt=L.control({position:'topleft'}), fbox=null, FRIENDS=null;
   filt.onAdd=function(){
     fbox=L.DomUtil.create('div','ctl filt');
@@ -600,7 +616,15 @@ Promise.all([
     var nGone=placed.filter(gone).length;
     h+='<label class="closedbox"><input type="checkbox" id="closedtoo"'+(CLOSEDTOO?' checked':'')+'>'
       +'<span class="sw dead"></span>Closed parks <small>'+nGone.toLocaleString()+'</small></label>';
-    fbox.innerHTML=h;
+    // Only worth folding when there is more than the one Closed parks box.
+    if(log){
+      fbox.innerHTML='<button type="button" class="ftog" aria-expanded="'+(FOPEN?'true':'false')+'">Filters'+CHEV+'</button><div class="fbody">'+h+'</div>';
+      fbox.classList.toggle('shut',!FOPEN);
+      fbox.querySelector('.ftog').onclick=function(){
+        FOPEN=!FOPEN; fbox.classList.toggle('shut',!FOPEN); this.setAttribute('aria-expanded',FOPEN?'true':'false');
+        try{ localStorage.setItem('ch_map_filt',FOPEN?'1':'0'); }catch(e){}
+      };
+    } else { fbox.innerHTML=h; fbox.classList.remove('shut'); }
     var ct=fbox.querySelector('#closedtoo');
     if(ct) ct.onchange=function(){ CLOSEDTOO=this.checked; try{ localStorage.setItem('ch_map_closed', CLOSEDTOO?'1':'0'); }catch(e){} refresh(); };
     Array.prototype.forEach.call(fbox.querySelectorAll('input[data-k]'),function(el){
