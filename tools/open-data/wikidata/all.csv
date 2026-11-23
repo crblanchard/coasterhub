@@ -736,6 +736,7 @@ http://www.wikidata.org/entity/Q1108603,P31,http://www.wikidata.org/entity/Q2389
 http://www.wikidata.org/entity/Q1108603,P373,RC Racer,,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1108603,P527,http://www.wikidata.org/entity/Q140363359,RC Racer,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1108603,P571,2010-01-01T00:00:00Z,,,,9,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q1108603,P625,Point(2.777428 48.86735),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q1108603,P646,/m/0ddhknb,,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q111768243,P131,http://www.wikidata.org/entity/Q1281557,Zator,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q111768243,P17,http://www.wikidata.org/entity/Q36,Poland,,,,http://wikiba.se/ontology#NormalRank,false
@@ -2183,6 +2184,12 @@ http://www.wikidata.org/entity/Q125684938,P856,https://www.lepal.com/attractions
 http://www.wikidata.org/entity/Q125843790,P276,http://www.wikidata.org/entity/Q3039179,Drayton Manor Theme Park,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q125843790,P31,http://www.wikidata.org/entity/Q2389789,steel roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q125843790,P625,Point(-1.714686 52.61058),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q126009407,P131,http://www.wikidata.org/entity/Q259120,Leopoldstadt,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q126009407,P17,http://www.wikidata.org/entity/Q40,Austria,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q126009407,P18,http://commons.wikimedia.org/wiki/Special:FilePath/Wiener%20Looping%202.jpg,,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q126009407,P276,http://www.wikidata.org/entity/Q3487269,Wurstelprater,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q126009407,P31,http://www.wikidata.org/entity/Q2389789,steel roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q126009407,P625,Point(16.401085 48.216458),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q126098387,P17,http://www.wikidata.org/entity/Q55,Netherlands,,,,http://wikiba.se/ontology#PreferredRank,false
 http://www.wikidata.org/entity/Q126098387,P17,http://www.wikidata.org/entity/Q96,Mexico,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q126098387,P176,http://www.wikidata.org/entity/Q2026965,Reverchon Industries,,,,http://wikiba.se/ontology#NormalRank,false
@@ -2357,9 +2364,11 @@ http://www.wikidata.org/entity/Q130130645,P373,Wrath of Rakshasa,,,,,http://wiki
 http://www.wikidata.org/entity/Q130130645,P625,Point(-87.933888888 42.366666666),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q130130645,P856,https://www.sixflags.com/greatamerica/attractions/wrath-of-rakshasa,,,,,http://wikiba.se/ontology#PreferredRank,false
 http://www.wikidata.org/entity/Q130198418,P17,http://www.wikidata.org/entity/Q30,United States,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q130198418,P176,http://www.wikidata.org/entity/Q660675,Intamin Amusement Rides Int. Corp. Est.,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q130198418,P276,http://www.wikidata.org/entity/Q846548,Six Flags New England,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q130198418,P31,http://www.wikidata.org/entity/Q2389789,steel roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q130198418,P625,Point(-72.6145 42.0391),,,,,http://wikiba.se/ontology#NormalRank,false
+http://www.wikidata.org/entity/Q130198418,P856,https://www.sixflags.com/newengland/attractions/quantum-accelerator,,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q130213969,P31,http://www.wikidata.org/entity/Q204832,roller coaster,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q130213969,P625,Point(-97.641111111 30.132777777),,,,,http://wikiba.se/ontology#NormalRank,false
 http://www.wikidata.org/entity/Q130266,P11693,1223043134,,,,,http://wikiba.se/ontology#NormalRank,false

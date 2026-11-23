@@ -1,6 +1,16 @@
 {
 "ambiguous": [
 {
+"coaster_id": 5,
+"method": "name+park",
+"qid": "Q3094227"
+},
+{
+"coaster_id": 3992,
+"method": "name+park",
+"qid": "Q3094227"
+},
+{
 "coaster_id": 200,
 "method": "name+park",
 "qid": "Q798461"
@@ -14,6 +24,16 @@
 "coaster_id": 836,
 "method": "name+park",
 "qid": "Q2182970"
+},
+{
+"coaster_id": 3773,
+"method": "name+park",
+"qid": "Q15044164"
+},
+{
+"coaster_id": 3853,
+"method": "name+park",
+"qid": "Q15044164"
 }
 ],
 "matches": {
@@ -49,25 +69,6 @@
 "method": "name+coords",
 "osm": null,
 "qid": "Q5138963"
-},
-"5": {
-"captainCoaster": null,
-"facts": {
-"opened": {
-"cites_rcdb": false,
-"prec": "year",
-"v": "1996"
-},
-"type": {
-"cites_rcdb": false,
-"prec": null,
-"v": "Steel"
-}
-},
-"label": "Gadget's Go Coaster",
-"method": "name+park",
-"osm": "107280551",
-"qid": "Q3094227"
 },
 "6": {
 "captainCoaster": null,
@@ -5345,7 +5346,7 @@
 }
 },
 "label": "Coney Island Cyclone",
-"method": "name+coords",
+"method": "name+park",
 "osm": "405891521",
 "qid": "Q677558"
 },
@@ -7081,7 +7082,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Vekoma"
+"v": "Arrow Dynamics"
 },
 "opened": {
 "cites_rcdb": false,
@@ -14995,6 +14996,45 @@
 "osm": null,
 "qid": "Q2229119"
 },
+"1223": {
+"captainCoaster": null,
+"facts": {
+"h": {
+"cites_rcdb": false,
+"prec": null,
+"v": 78.7
+},
+"l": {
+"cites_rcdb": false,
+"prec": null,
+"v": 3267.7
+},
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Vekoma"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "2002-03-16"
+},
+"s": {
+"cites_rcdb": false,
+"prec": null,
+"v": 57.0
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Avengers Assemble: Flight Force",
+"method": "approved",
+"osm": null,
+"qid": "Q140199236"
+},
 "1224": {
 "captainCoaster": null,
 "facts": {
@@ -15037,16 +15077,6 @@
 "1225": {
 "captainCoaster": null,
 "facts": {
-"h": {
-"cites_rcdb": false,
-"prec": null,
-"v": 82.0
-},
-"l": {
-"cites_rcdb": true,
-"prec": null,
-"v": 269.0
-},
 "manu": {
 "cites_rcdb": false,
 "prec": null,
@@ -15054,13 +15084,8 @@
 },
 "opened": {
 "cites_rcdb": false,
-"prec": "day",
-"v": "2010-08-17"
-},
-"s": {
-"cites_rcdb": false,
-"prec": null,
-"v": 49.7
+"prec": "year",
+"v": "2010"
 },
 "type": {
 "cites_rcdb": false,
@@ -15069,9 +15094,9 @@
 }
 },
 "label": "RC Racer",
-"method": "name+park",
+"method": "name+coords",
 "osm": null,
-"qid": "Q140363359"
+"qid": "Q1108603"
 },
 "1229": {
 "captainCoaster": null,
@@ -17428,7 +17453,7 @@
 }
 },
 "label": "Astro Storm",
-"method": "name+coords",
+"method": "name+park",
 "osm": null,
 "qid": "Q3492584"
 },
@@ -19617,6 +19642,20 @@
 "osm": null,
 "qid": "Q2876996"
 },
+"1870": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Wiener Looping",
+"method": "name+coords",
+"osm": null,
+"qid": "Q126009407"
+},
 "1875": {
 "captainCoaster": null,
 "facts": {
@@ -20950,6 +20989,14 @@
 "osm": null,
 "qid": "Q130213969"
 },
+"2262": {
+"captainCoaster": null,
+"facts": {},
+"label": "Anaconda roller coaster",
+"method": "approved",
+"osm": null,
+"qid": "Q483513"
+},
 "2267": {
 "captainCoaster": null,
 "facts": {},
@@ -21011,6 +21058,25 @@
 "method": "name+park",
 "osm": null,
 "qid": "Q131430980"
+},
+"2308": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Nitro (Adlabs Imagica)",
+"method": "approved",
+"osm": null,
+"qid": "Q15047527"
 },
 "2316": {
 "captainCoaster": null,
@@ -21236,6 +21302,14 @@
 "method": "name+park",
 "osm": null,
 "qid": "Q601002"
+},
+"2579": {
+"captainCoaster": null,
+"facts": {},
+"label": "Morgan's Circus Clown Coaster",
+"method": "approved",
+"osm": null,
+"qid": "Q3323957"
 },
 "2585": {
 "captainCoaster": null,
@@ -21750,6 +21824,11 @@
 "3155": {
 "captainCoaster": null,
 "facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Intamin"
+},
 "type": {
 "cites_rcdb": false,
 "prec": null,
@@ -21775,6 +21854,20 @@
 "osm": null,
 "qid": "Q122460559"
 },
+"3164": {
+"captainCoaster": null,
+"facts": {
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "1983"
+}
+},
+"label": "Space Mountain",
+"method": "approved",
+"osm": null,
+"qid": "Q7572428"
+},
 "3167": {
 "captainCoaster": null,
 "facts": {
@@ -21793,6 +21886,899 @@
 "method": "name+coords",
 "osm": "865725421",
 "qid": "Q5174058"
+},
+"3182": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Rattenm\u00fchle",
+"method": "name+coords",
+"osm": null,
+"qid": "Q19971401"
+},
+"3184": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "2006-07-09"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Crystal Wing",
+"method": "name+park",
+"osm": null,
+"qid": "Q3006010"
+},
+"3187": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Vekoma"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Golden Wings in Snowfield",
+"method": "name+coords",
+"osm": null,
+"qid": "Q28224700"
+},
+"3188": {
+"captainCoaster": null,
+"facts": {},
+"label": "Extreme Rusher",
+"method": "name+coords",
+"osm": null,
+"qid": "Q1385492"
+},
+"3189": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Vekoma"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Jungle Racing",
+"method": "name+park",
+"osm": null,
+"qid": "Q28450477"
+},
+"3198": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "MACK Rides"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "2022-03-31"
+}
+},
+"label": "Giant Digger",
+"method": "name+park",
+"osm": null,
+"qid": "Q135966997"
+},
+"3208": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Intamin"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Jet Rescue",
+"method": "name+park",
+"osm": null,
+"qid": "Q571581"
+},
+"3209": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Martin & Vleminckx"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Leviathan",
+"method": "name+park",
+"osm": null,
+"qid": "Q106179760"
+},
+"3211": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "MACK Rides"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Storm Coaster",
+"method": "name+park",
+"osm": null,
+"qid": "Q15047782"
+},
+"3212": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Arrow Dynamics"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "year",
+"v": "1982"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Sea Viper",
+"method": "name+park",
+"osm": null,
+"qid": "Q7440039"
+},
+"3281": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "EOS Rides"
+}
+},
+"label": "Disco Twister",
+"method": "name+park",
+"osm": null,
+"qid": "Q122460555"
+},
+"3504": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Big Dipper",
+"method": "name+coords",
+"osm": null,
+"qid": "Q22000267"
+},
+"3516": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "E&F Miler Industries"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Loco-Loco",
+"method": "name+coords",
+"osm": null,
+"qid": "Q6665921"
+},
+"3519": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Dania Beach Hurricane",
+"method": "name+coords",
+"osm": null,
+"qid": "Q1159776"
+},
+"3531": {
+"captainCoaster": null,
+"facts": {
+"closed": {
+"cites_rcdb": false,
+"prec": "day",
+"v": "2012-09-02"
+},
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Zierer"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "month",
+"v": "2007-07"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Knightmare",
+"method": "name+park",
+"osm": null,
+"qid": "Q13415786"
+},
+"3549": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Pinfari"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Python",
+"method": "name+coords",
+"osm": null,
+"qid": "Q7263918"
+},
+"3561": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Backety-Back Scenic Railway",
+"method": "name+coords",
+"osm": null,
+"qid": "Q15047488"
+},
+"3594": {
+"captainCoaster": null,
+"facts": {
+"closed": {
+"cites_rcdb": false,
+"prec": "month",
+"v": "2008-05"
+},
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Sansei Technologies"
+},
+"opened": {
+"cites_rcdb": false,
+"prec": "month",
+"v": "1969-10"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Daidarasaurus",
+"method": "name+park",
+"osm": null,
+"qid": "Q917073"
+},
+"3630": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Arrow Development"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Afterburner",
+"method": "name+coords",
+"osm": null,
+"qid": "Q2131335"
+},
+"3642": {
+"captainCoaster": null,
+"facts": {
+"closed": {
+"cites_rcdb": true,
+"prec": "year",
+"v": "1998"
+},
+"h": {
+"cites_rcdb": true,
+"prec": null,
+"v": 50.0
+},
+"l": {
+"cites_rcdb": true,
+"prec": null,
+"v": 1282.0
+},
+"opened": {
+"cites_rcdb": true,
+"prec": "month",
+"v": "1997-10"
+},
+"s": {
+"cites_rcdb": true,
+"prec": null,
+"v": 28.0
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Skytrak",
+"method": "name+park",
+"osm": null,
+"qid": "Q7538071"
+},
+"3667": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Tsunami",
+"method": "name+coords",
+"osm": null,
+"qid": "Q2169285"
+},
+"3708": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "National Amusement Devices"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Comet",
+"method": "name+park",
+"osm": null,
+"qid": "Q5151573"
+},
+"3740": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "S&S Worldwide"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Ring\u00b0racer",
+"method": "name+coords",
+"osm": null,
+"qid": "Q265399"
+},
+"3748": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Loop the Loop",
+"method": "name+coords",
+"osm": null,
+"qid": "Q15046120"
+},
+"3753": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Arrow Development"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Wabash Cannonball",
+"method": "name+coords",
+"osm": null,
+"qid": "Q7958638"
+},
+"3756": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Cyclone",
+"method": "name+park",
+"osm": null,
+"qid": "Q30609857"
+},
+"3793": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Lightning",
+"method": "name+coords",
+"osm": null,
+"qid": "Q6546415"
+},
+"3799": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "The Bobs",
+"method": "name+park",
+"osm": null,
+"qid": "Q7718972"
+},
+"3807": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Philadelphia Toboggan Coasters"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Jetstream",
+"method": "name+park",
+"osm": null,
+"qid": "Q6189183"
+},
+"3820": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Jazz Railway",
+"method": "name+coords",
+"osm": null,
+"qid": "Q30642325"
+},
+"3850": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Thunderbolt",
+"method": "name+park",
+"osm": null,
+"qid": "Q30610681"
+},
+"3881": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Arrow Dynamics"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Titan",
+"method": "name+coords",
+"osm": null,
+"qid": "Q3788552"
+},
+"3892": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "High Roller",
+"method": "name+coords",
+"osm": null,
+"qid": "Q1515501"
+},
+"3908": {
+"captainCoaster": null,
+"facts": {
+"h": {
+"cites_rcdb": true,
+"prec": null,
+"v": 121.4
+},
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Intamin"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Monte Makaya",
+"method": "name+coords",
+"osm": null,
+"qid": "Q1513544"
+},
+"3916": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Whirl Pool Dips",
+"method": "name+coords",
+"osm": null,
+"qid": "Q18379295"
+},
+"3928": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Tree Topper",
+"method": "name+coords",
+"osm": null,
+"qid": "Q7837569"
+},
+"3936": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Hull\u00e1mvas\u00fat",
+"method": "name+park",
+"osm": null,
+"qid": "Q1125032"
+},
+"3940": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Custom Coasters International"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Cannonball Run",
+"method": "name+park",
+"osm": null,
+"qid": "Q5032828"
+},
+"3949": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "National Amusement Devices"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Flyer Comet",
+"method": "name+coords",
+"osm": null,
+"qid": "Q1434543"
+},
+"3972": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Bolliger & Mabillard"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Harpy",
+"method": "name+coords",
+"osm": null,
+"qid": "Q28224484"
+},
+"3986": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Martin & Vleminckx"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Wooden Coaster - Fireball",
+"method": "name+park",
+"osm": null,
+"qid": "Q15047502"
+},
+"4034": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Loop the Loop",
+"method": "name+coords",
+"osm": null,
+"qid": "Q15046118"
+},
+"4035": {
+"captainCoaster": null,
+"facts": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Tornado",
+"method": "name+coords",
+"osm": null,
+"qid": "Q7825977"
+},
+"4048": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Pinfari"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Klondike Gold Mine",
+"method": "name+park",
+"osm": null,
+"qid": "Q1774843"
+},
+"4080": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Custom Coasters International"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Hurricane: Category 5",
+"method": "name+coords",
+"osm": null,
+"qid": "Q5947056"
+},
+"4081": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Arrow Dynamics"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Mad Mouse",
+"method": "name+coords",
+"osm": null,
+"qid": "Q6726029"
+},
+"4084": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Great Coasters International"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Wood"
+}
+},
+"label": "Wood Coaster (Mountain Flyer)",
+"method": "name+coords",
+"osm": null,
+"qid": "Q15047501"
+},
+"4097": {
+"captainCoaster": null,
+"facts": {},
+"label": "Orphan Rocker",
+"method": "name+coords",
+"osm": null,
+"qid": "Q1283422"
+},
+"4099": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Intamin"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Skyscraper",
+"method": "name+park",
+"osm": null,
+"qid": "Q18378567"
+},
+"4114": {
+"captainCoaster": null,
+"facts": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Zamperla"
+},
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
+"label": "Barrels O' Fun",
+"method": "name+park",
+"osm": null,
+"qid": "Q2783776"
 }
 },
 "records": {
@@ -24227,6 +25213,13 @@
 "v": "Steel"
 }
 },
+"Q126009407": {
+"type": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Steel"
+}
+},
 "Q126098387": {
 "manu": {
 "cites_rcdb": false,
@@ -24377,6 +25370,11 @@
 }
 },
 "Q130198418": {
+"manu": {
+"cites_rcdb": false,
+"prec": null,
+"v": "Intamin"
+},
 "type": {
 "cites_rcdb": false,
 "prec": null,
@@ -27364,7 +28362,7 @@
 "manu": {
 "cites_rcdb": false,
 "prec": null,
-"v": "Vekoma"
+"v": "Arrow Dynamics"
 },
 "opened": {
 "cites_rcdb": false,
@@ -40064,5 +41062,5 @@
 }
 }
 },
-"retrieved": "2026-11-19"
+"retrieved": "2026-11-23"
 }

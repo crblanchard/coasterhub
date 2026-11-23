@@ -63,6 +63,14 @@
 "lon": 55.37162,
 "state": "Sharjah Emirate"
 },
+"Adventureland|Sharjah, Sharjah": {
+"at": "2026-11-23",
+"country": "United Arab Emirates",
+"how": "osm",
+"lat": 25.2977,
+"lon": 55.37401,
+"state": "Sharjah Emirate"
+},
 "Adventurers Family Entertainment Center|Baton Rouge": {
 "at": "2026-11-19",
 "country": "United States",
@@ -798,6 +806,14 @@
 "lat": 40.40924,
 "lon": 110.0259,
 "state": "Inner Mongolia"
+},
+"Deer Forest Fun Park|Coloma": {
+"at": "2026-11-23",
+"country": "United States",
+"how": "town",
+"lat": 38.80393,
+"lon": -120.89872,
+"state": "California"
 },
 "Discovery World|": {
 "at": "2026-11-19",
@@ -1687,6 +1703,14 @@
 "lon": 44.30401,
 "state": "Baghdad Governorate"
 },
+"Joyland Park|Lexington": {
+"at": "2026-11-23",
+"country": "United States",
+"how": "town",
+"lat": 38.04641,
+"lon": -84.49704,
+"state": "Kentucky"
+},
 "Joypolis H. Factory|Naka, Yokohama, Kanagawa": {
 "at": "2026-11-19",
 "country": "Japan",
@@ -2487,6 +2511,14 @@
 "lon": -86.10888,
 "state": "Michigan"
 },
+"Nordsee Spielstadt Wangerland|Hohenkirchen, Lower Saxony": {
+"at": "2026-11-23",
+"country": "Germany",
+"how": "osm",
+"lat": 53.6664,
+"lon": 7.91416,
+"state": "Lower Saxony"
+},
 "North Parade Amusement Park|Skegness, Lincolnshire, England": {
 "at": "2026-11-19",
 "country": "United Kingdom",
@@ -2999,6 +3031,14 @@
 "lon": -93.629,
 "state": "Iowa"
 },
+"Riverview Park|Riverview Park": {
+"at": "2026-11-23",
+"country": "United States",
+"how": "wikidata Q6109292",
+"lat": 40.39119,
+"lon": -75.95086,
+"state": "Pennsylvania"
+},
 "Robotland|Masanhappo-gu, Changwon, Gyeongsangnam-do": {
 "at": "2026-11-19",
 "country": "South Korea",
@@ -3479,6 +3519,14 @@
 "lon": -90.19001,
 "state": "Missouri"
 },
+"Stage Coach Stop USA|Onsted": {
+"at": "2026-11-23",
+"country": "United States",
+"how": "town",
+"lat": 42.00616,
+"lon": -84.18994,
+"state": "Michigan"
+},
 "Star City|Pasay, Metro Manila": {
 "at": "2026-11-19",
 "country": "Philippines",
@@ -3606,6 +3654,14 @@
 "lat": 39.21747,
 "lon": -76.23939,
 "state": "Maryland"
+},
+"Tom Foolerys Adventure Park|Woodford": {
+"at": "2026-11-23",
+"country": "United States",
+"how": "town",
+"lat": 40.81454,
+"lon": -89.20742,
+"state": "Illinois"
 },
 "Tooty Town|Al-Hofuf, Eastern Province": {
 "at": "2026-11-19",
