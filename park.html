@@ -45,6 +45,8 @@
   .cxmore .former b{color:var(--fg)}
   .cxmore .lbl{color:var(--muted);font-size:.8rem;font-weight:700;margin:0 0 6px}
   .cxmore .nobody{color:var(--muted);font-size:.85rem;margin:0}
+  .cxmore .elsewhere{margin-top:6px}
+  .cxmore .elsewhere a{color:var(--accent2);text-decoration:none}
 
   /* Rider chips: under the list (who has been here) and inside an opened
      coaster (who has ridden it). */
@@ -251,7 +253,34 @@ function more(c){
     +(who===undefined ? '<p class="nobody">Loading&hellip;</p>'
       : who.length ? '<div class="who">'+youFirst(who).map(function(w){
           return '<a class="'+(w.slug===ME?'me':'')+'" href="'+esc(CoasterHub.userPageHref(w.slug,'count'))+'">'+CoasterHub.riderFace(w.slug,w.name)+(w.slug===ME?'You':esc(w.name))+(w.n>1?'<i>'+w.n+' rides</i>':'')+'</a>'; }).join('')+'</div>'
-      : '<p class="nobody">Nobody on the site has ridden it yet.</p>');
+      : '<p class="nobody">Nobody on the site has ridden it yet.</p>')
+    + elsewhere(c);
+}
+// The same ride at its other parks (Carter, 2026-11-24: a relocated ride with
+// rankings but "nobody has ridden it" read as a contradiction): "4 riders rode
+// it at Knott's Berry Farm." Those parks' riders load the first time a row is
+// opened, then the row redraws.
+var ELSELOAD={}, ELSEWHO={};   // kept apart from WHO: that one is this park's riders only
+function elsewhere(c){
+  var sibs=CoasterHub.sameRideRows(LIST.coasters, c);
+  if(!sibs.length) return '';
+  var lines=[], waiting=false;
+  sibs.forEach(function(x){
+    if(ELSEWHO[x.id]===undefined){
+      waiting=true;
+      if(!ELSELOAD[x.park]) ELSELOAD[x.park]=fetch('/api/park-riders?park='+encodeURIComponent(x.park))
+        .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+        .then(function(j){
+          LIST.coasters.forEach(function(y){ if(y.park===x.park && ELSEWHO[y.id]===undefined) ELSEWHO[y.id]=(j && j.riders && j.riders[y.id]) || []; });
+          Array.prototype.forEach.call(document.querySelectorAll('.cxmore[data-more="'+c.id+'"]'), function(d){ d.innerHTML=more(c); });
+        });
+      return;
+    }
+    var n=ELSEWHO[x.id].length;
+    if(n) lines.push(n+' rider'+(n===1?'':'s')+' rode it at <a href="'+esc(CoasterHub.parkHref(x.park))+'">'+esc(x.park)+'</a>'
+      +(x.name!==c.name?' as <a href="'+esc(CoasterHub.coasterHref(x))+'">'+esc(x.name)+'</a>':'')+'.');
+  });
+  return lines.length ? '<p class="nobody elsewhere">'+lines.join(' ')+'</p>' : '';
 }
 
 // Every rider's log, the same way the everyone view of /count reads them: a

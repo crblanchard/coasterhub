@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-24T20:18:41Z",
-   "text": "The home page's Global top 10 shows each coaster's model, and profiles open straight on Records without the stat tiles. Lost credits are grouped by park now, with a count of defunct and relocated coasters."
+   "at": "2026-11-24T20:29:33Z",
+   "text": "The home page's Global top 10 shows each coaster's model, and profiles open straight on Records, with Lost credits grouped by park. A moved coaster on a park page now says how many riders rode it at its old park."
   },
   {
    "at": "2026-11-24T17:55:14Z",
