@@ -705,7 +705,11 @@ function showPhoto(c){
   fetch('/api/coaster-photo?id='+encodeURIComponent(c.id)).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
     var p=j && j.photo; if(!p || !p.thumb) return;
     var fig=$('cphoto'), img=$('cphoto_img');
-    img.onerror=function(){ fig.hidden=true; };
+    // Shown only once it has loaded (no empty box while it fails); the resized
+    // copy first, then the original file if that one will not load.
+    var tried=0;
+    img.onload=function(){ fig.hidden=false; };
+    img.onerror=function(){ if(!tried && p.url && p.url!==p.thumb){ tried=1; img.src=p.url; } else fig.hidden=true; };
     img.alt=c.name+' at '+c.park;
     if(p.width && p.height){ img.width=p.width; img.height=p.height; }
     img.src=p.thumb;
@@ -714,7 +718,6 @@ function showPhoto(c){
     $('cphoto_cap').innerHTML='Photo: '+esc(who)
       +(p.license ? ' \u00b7 '+(p.license_url ? '<a href="'+esc(p.license_url)+'" target="_blank" rel="noopener">'+esc(p.license.toUpperCase())+'</a>' : esc(p.license.toUpperCase())) : '')
       +' \u00b7 via '+(p.page ? '<a href="'+esc(p.page)+'" target="_blank" rel="noopener">'+esc(src)+'</a>' : esc(src));
-    fig.hidden=false;
   }).catch(function(){});
 }
 </script>
