@@ -1235,3 +1235,4 @@ img.hhphoto.in{display:block;width:100%;height:120px;object-fit:cover;border-rad
   .hasphoto .facts > *{grid-column:1;grid-row:auto}
   .hasphoto .facts .fnum{margin-top:6px}
 }
+.cx .whol{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
