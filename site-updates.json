@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-24T21:02:48Z",
-   "text": "Coaster pages now show a photo of the ride, with credit, for the 1,800-plus coasters that have one in the open sources. Profiles open straight on Records, with Lost credits grouped by park."
+   "at": "2026-11-24T21:14:14Z",
+   "text": "Profiles open straight on Records, with Lost credits grouped by park and a bolder top ten painted steel or wood like the home page. The home page's Global top 10 shows each coaster's model."
   },
   {
    "at": "2026-11-24T17:55:14Z",

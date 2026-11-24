@@ -132,6 +132,14 @@
     .trow .n .mk::before{content:none}
   }
   .toplist .cx{padding-left:calc(1.7em + 16px);border-bottom:1px solid var(--line)}
+  /* Like Home's Global top ten (Carter, 2026-11-24: "bold and bigger"): big
+     rank numbers in the display face, steel or wood by the ride, and the name
+     in the display face too. */
+  .trow{padding-top:10px;padding-bottom:10px}
+  .trow .pos{font-family:var(--display);font-stretch:112%;font-weight:850;font-size:1.45rem;min-width:2.1em;text-align:left;color:var(--steel)}
+  .trow[data-tp="wd"] .pos{color:var(--wood)}
+  .trow .n b{font-family:var(--display);font-stretch:92%;font-weight:800;font-size:1rem;letter-spacing:-.01em}
+  .toplist .cx{padding-left:calc(2.1em + 16px)}
   .toplist .cx .among{font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px}
   /* The heading IS the link to the whole list. Underlined on hover only, so it
      reads as a heading first. */
@@ -1149,7 +1157,7 @@ function render(s){
           ? ('all '+nf(known.length)+' &rarr;') : 'the whole list &rarr;') + '</span>';
     document.getElementById('toplist').innerHTML=ten.map(function(r){
       var c=r.c;
-      return '<a class="trow" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="pos">'+(r.to>r.from?r.from+'\u2013'+r.to:r.from)+'</span>'
+      return '<a class="trow" data-tp="'+(c.type==='Wood'?'wd':'st')+'" data-cid="'+c.id+'" href="'+esc(CoasterHub.coasterHref(c))+'"><span class="pos">'+(r.to>r.from?r.from+'\u2013'+r.to:r.from)+'</span>'
         +'<span class="n"><b>'+esc(r.label||c.name)+'</b><span class="sub">'
         +'<span class="pl">'+esc(c.park||'')+(((s.parks||{})[c.park]||{}).region?' \u00b7 '+esc(s.parks[c.park].region):'')+'</span>'
         +(CoasterHub.maker(c)?'<span class="mk">'+esc(CoasterHub.maker(c))+'</span>':'')
