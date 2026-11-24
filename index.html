@@ -169,10 +169,10 @@
   #globaltop .pk .lnk,#globaltop .pk .lc{white-space:nowrap}
   #globaltop .pk .lc{padding-left:.3em}
   #globaltop .pk .lnk{min-width:0;overflow:hidden;text-overflow:ellipsis}
-  #globaltop .sg{flex:none;display:inline-flex;white-space:nowrap}
+  #globaltop .sg{flex:0 1 auto;min-width:0;display:inline-flex;white-space:nowrap;overflow:hidden}
+  #globaltop .sg .sgi{overflow:hidden;text-overflow:ellipsis}
   #globaltop .sg .sgi::before{content:"\00b7";margin:0 6px}
-  #globaltop .sg b{font-family:var(--display);font-stretch:110%;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums}
-  /* Phone: the park keeps the line (Carter, 2026-09-25: "want to see park for each coaster"); the figures are for wider screens. */
+  /* Phone: the park keeps the line (Carter, 2026-09-25: "want to see park for each coaster"); the model is for wider screens. */
   @media (max-width:560px){ #globaltop .sg{display:none} }
 
   /* Site updates are the quiet rows: the rides and riders are the news. */
@@ -429,7 +429,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261124a"></script>
+<script src="/app.js?v=20261124b"></script>
 <script src="/changes-feed.js?v=20261120b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();

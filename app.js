@@ -3396,14 +3396,12 @@
     }).catch(function () { return {}; });
     return globalTallyP;
   }
-  // A ride's facts the way the sign at the queue gives them: height, speed,
-  // opening year. Only what the row has; a ride with none gets nothing.
+  // Home's Global top ten: the model after the park (Carter, 2026-11-24:
+  // "take out height / speed / year and replace them with model"); the maker
+  // when there is no model, nothing when neither is known.
   function signStats(c) {
-    var p = [];
-    if (c.h > 0) p.push('<span class="sgi"><b>' + Math.round(c.h) + '</b> ft</span>');
-    if (c.s > 0) p.push('<span class="sgi"><b>' + Math.round(c.s) + '</b> mph</span>');
-    if (c.yr > 0) p.push('<span class="sgi yr"><b>' + c.yr + '</b></span>');
-    return p.length ? '<span class="sg">' + p.join("") + '</span>' : "";
+    var m = maker(c);
+    return m ? '<span class="sg"><span class="sgi">' + searchEsc(m) + '</span></span>' : "";
   }
 
   function rankSection(el, cs, opts) {
