@@ -240,7 +240,7 @@
     <div class="stats2" id="specs"></div>
     <!-- The ride's photo, under the stats and above riders (Carter, 2026-11-24),
          from the open sources with its credit; hidden when there is none. -->
-    <figure class="cphoto" id="cphoto" hidden><img id="cphoto_img" alt="" loading="lazy" decoding="async"><figcaption id="cphoto_cap"></figcaption></figure>
+    <figure class="cphoto" id="cphoto" hidden><img id="cphoto_img" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption id="cphoto_cap"></figcaption></figure>
     <div id="reloc_wrap" style="display:none">
       <div class="sect">Past locations</div>
       <div class="hist" id="reloc"></div>
@@ -712,6 +712,7 @@ function showPhoto(c){
     img.onerror=function(){ if(!tried && p.url && p.url!==p.thumb){ tried=1; img.src=p.url; } else fig.hidden=true; };
     img.alt=c.name+' at '+c.park;
     if(p.width && p.height){ img.width=p.width; img.height=p.height; }
+    img.referrerPolicy='no-referrer';   // Coasterpedia refuses pictures asked for from another site's page
     img.src=p.thumb;
     var who=p.author ? (p.author.length>60 ? p.author.slice(0,57)+'\u2026' : p.author) : 'unknown';
     var src={coasterpedia:'Coasterpedia', enwiki:'Wikipedia'}[p.source]||p.source;
