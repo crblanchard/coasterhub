@@ -261,8 +261,6 @@ function parkRow(p){
   var on=S.parks.indexOf(p)>=0;
   return '<button type="button" class="item'+(on?' on':'')+'" data-p="'+p.i+'"><span class="tick"></span>'
     +'<span class="tx"><b>'+esc(p.name)+'</b><span>'+esc(p.region?regionLabel(p.region):'')+(p.region?' · ':'')+plural(p.open,'operating coaster')
-    // How many riders on the site have ridden something here (Carter, 2026-11-24).
-    +(p.riders?' · '+plural(p.riders,'rider'):'')
     +(S.near&&p.lat!=null?' · '+miles(p)+' mi':'')
     +(ADD&&p.have?' · '+p.have+' in your count':'')+'</span></span></button>';
 }
