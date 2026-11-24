@@ -1222,3 +1222,16 @@ div.seg > button.on,div.modesw > button.on,.rsw a.on,.hero .segsw a.on{backgroun
 img.cxphoto,img.hhphoto{display:none}
 img.cxphoto.in{display:block;width:100%;max-width:480px;height:auto;max-height:270px;object-fit:cover;border-radius:10px;border:1px solid var(--line);margin:2px 0 12px;background-color:var(--soft)}
 img.hhphoto.in{display:block;width:100%;height:120px;object-fit:cover;border-radius:8px;margin:0 0 10px;background-color:var(--soft)}
+/* A loaded photo sits on the left with the facts beside it on wider screens,
+   rather than above them with empty space to its right (Carter, 2026-11-24).
+   Beside a photo there is room for one column of facts until the screen is wide. */
+@media (min-width:700px){
+  .hasphoto:not([hidden]){display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);column-gap:28px;row-gap:0;align-items:start}
+  .hasphoto > img.cxphoto.in{grid-column:1;grid-row:1 / span 30;max-width:none;margin:4px 0 0}
+  .hasphoto > :not(img.cxphoto){grid-column:2;min-width:0}
+}
+@media (min-width:700px) and (max-width:1099px){
+  .hasphoto .facts{grid-template-columns:minmax(0,1fr)}
+  .hasphoto .facts > *{grid-column:1;grid-row:auto}
+  .hasphoto .facts .fnum{margin-top:6px}
+}

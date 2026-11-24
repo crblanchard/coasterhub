@@ -2886,7 +2886,7 @@
       img.className = opts.cls || "cphoto-sm"; img.alt = ""; img.decoding = "async";
       img.referrerPolicy = "no-referrer";
       var size = function (u) { return opts.w ? String(u || "").replace(/\/(\d+)px-/, "/" + opts.w + "px-") : u; };
-      img.onload = function () { img.classList.add("in"); };
+      img.onload = function () { img.classList.add("in"); if (opts.cls === "cxphoto") el.classList.add("hasphoto"); };
       img.onerror = function () { at++; if (list[at]) img.src = size(list[at].thumb || list[at].url); else img.remove(); };
       img.src = size(list[0].thumb || list[0].url);
       if (opts.first) el.insertBefore(img, el.firstChild); else el.appendChild(img);

@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-24T23:29:56Z",
-   "text": "Coasters now have photos: on their page, when you open one in a park, list or ranking, and on both choices while you rank. Profiles open straight on Records, with Lost credits grouped by park and a bolder top ten."
+   "at": "2026-11-24T23:34:57Z",
+   "text": "Coasters now have photos: on their page, and beside the details when you open one in a park, list or ranking, plus on both choices while you rank. Profiles open straight on Records, with Lost credits grouped by park and a bolder top ten."
   },
   {
    "at": "2026-11-24T17:55:14Z",
