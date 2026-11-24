@@ -1139,11 +1139,7 @@ if(!slug){
       var mineToEdit = !rank.claimed || (acct && acct.slug === slug);
       CANEDIT = !!mineToEdit;
       OWN = !!(acct && acct.slug === slug);
-      // An open row's photo (Carter, 2026-11-24), at the top of its stats.
-  el.querySelectorAll('.rrow.open .rstats').forEach(function(st){
-    var row=st.closest('.rrow'); CoasterHub.photoInto(st, +(row.dataset.stat||row.dataset.rid), {cls:'cxphoto', w:800, first:true});
-  });
-  $('gatherbar').style.display = OWN && scattered() ? 'flex' : 'none';
+      $('gatherbar').style.display = OWN && scattered() ? 'flex' : 'none';
       // The offer waits for this: it is only worth making to the person who
       // can place the ride, and who owns the list is not known until here.
       maybeOfferJoins();
@@ -1654,6 +1650,10 @@ function renderRank(){
       // One open at a time (Carter, 2026-09-27): opening a row closes the rest.
       var was=!!STATOPEN[id]; STATOPEN={}; MSTAT=0; if(!was) STATOPEN[id]=true; renderRank();
     });
+  });
+  // An open row's photo (Carter, 2026-11-24), at the top of its stats.
+  el.querySelectorAll('.rrow.open .rstats').forEach(function(st){
+    var row=st.closest('.rrow'); CoasterHub.photoInto(st, +(row.dataset.stat||row.dataset.rid), {cls:'cxphoto', w:800, first:true});
   });
   $('gatherbar').style.display = OWN && scattered() ? 'flex' : 'none';
   var live=(CATS.categories||[]).filter(function(g){ return !g.off && !g.racing; }).length;
