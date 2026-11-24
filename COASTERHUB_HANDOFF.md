@@ -6516,3 +6516,24 @@ Carter: "the entire site lacks personality ... more color" (critique in
 - **One switch:** every segmented control (`div.seg`, `div.modesw`, `.rsw`, `.hero .segsw`) is the same oval pill, defined once at the end of `style.css`. Don't give a page its own `.seg` look again. Underline tabs are only for the profile's Overview / Credits / Map.
 - **One section heading:** `.sect`, `h2.sec` and the other section heads share Home's display-face size (end of `style.css`).
 - **Skyline on every band**, phones included (52px). A band with a subtitle grows a 40px strip. Excluded: Log (the day chip stands there) and a rider's own header (`.herotop`, where the buttons are).
+
+## Data rules settled 2026-11-24
+- **No coaster without enough information to show.** A source that says defunct/removed/SBNO
+  but gives no closing date: the coaster is not added (worker `openClosedNoDate` guards every
+  add path in the weekly review; 222 removed 40 that got in). Source records stay in
+  open_items/open_raw; reviews are marked "reject: no closing date".
+- **Removed as not coasters:** alpine slides (213), Alpine Slide Corp./LLC (218), Wiegand
+  "Summer Toboggan Run" (227). Mountain/alpine coasters on rails STAY (Carter: "leave them").
+- **Pre-2000 closures stay if anything is known about them** (only Baby Wildcat, with nothing,
+  went). Unbuilt projects (Aero Test Lab, Epic Universe "Unknown") stay. "Achterbahn"/"Roller
+  Coaster" generic names stay.
+- **Models:** "Kiddie" is one model whoever built it; Zamperla Twister = Zamperla Spinner;
+  Brucomela/Bruco Mela/Pinfari Big Apple = Wacky Worm. Fill blanks only from open sources
+  (224) or exact stat clones (226); no guessing beyond that (Carter: leave the rest alone).
+- **Relocations share track stats** (223); a closed row whose same_ride home is elsewhere
+  shows "Relocated" instead of "Defunct" (lifeTag in app.js).
+- **Weekly review:** New parks counts only pinned parks; unpinned sit below a break. Merging
+  into a park shows what it already has and unticks likely duplicates. Viewing is public,
+  every write is admin-only.
+- Cedar Point has two Wild Mice: the 2023 Zamperla (id 386, the riders' one) and
+  "Wild Mouse (Old)" (1959 Schiff, closed 1963).
