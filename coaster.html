@@ -163,6 +163,17 @@
   .cphoto img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain;border-radius:14px;border:1px solid var(--line);background-color:var(--soft)}
   .cphoto figcaption{margin-top:6px;color:var(--muted);font-size:.74rem;text-align:right}
   .cphoto figcaption a{color:inherit}
+  .cpadmin{margin:6px 0 10px}
+  .cpadmin[hidden],.cpgrid[hidden]{display:none}
+  .cpbtn{background-color:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:6px 14px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+  .cpgrid{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background-color:var(--panel)}
+  .cpacts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+  .cpnote{color:var(--muted);font-size:.8rem;margin:0}
+  .cpthumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .cpthumb{padding:0;border:2px solid transparent;border-radius:10px;overflow:hidden;background-color:var(--soft);cursor:pointer;aspect-ratio:4/3}
+  .cpthumb img{display:block;width:100%;height:100%;object-fit:cover}
+  .cpthumb.on{border-color:var(--steel)}
+  .cpthumb.bad{display:none}
   @media (max-width:640px){ .cphoto img{max-height:340px;border-radius:12px} }
   .former b{color:var(--fg);font-weight:600}
 
@@ -242,6 +253,8 @@
     <!-- The ride's photo, under the stats and above riders (Carter, 2026-11-24),
          from the open sources with its credit; hidden when there is none. -->
     <figure class="cphoto" id="cphoto" hidden><img id="cphoto_img" alt="" decoding="async" referrerpolicy="no-referrer"><figcaption id="cphoto_cap"></figcaption></figure>
+    <!-- Admins: choose the photo (Carter, 2026-11-24). Filled by showPhoto. -->
+    <div class="cpadmin" id="cpadmin" hidden></div>
     <div id="reloc_wrap" style="display:none">
       <div class="sect">Past locations</div>
       <div class="hist" id="reloc"></div>
@@ -705,8 +718,9 @@ function riders(){
 function showPhoto(c){
   fetch('/api/coaster-photo?id='+encodeURIComponent(c.id)).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
     var list=(j && (j.photos || (j.photo ? [j.photo] : []))) || [];
-    if(!list.length) return;
+    photoAdmin(c);
     var fig=$('cphoto'), img=$('cphoto_img'), at=0, tried=0;
+    if(!list.length){ fig.hidden=true; return; }
     img.alt=c.name+' at '+c.park;
     img.referrerPolicy='no-referrer';
     // Shown only once one has loaded: each candidate in turn (resized copy,
@@ -731,6 +745,41 @@ function showPhoto(c){
     };
     load();
   }).catch(function(){});
+}
+// Change photo, for admins: every candidate as a thumbnail; a click saves it
+// as the coaster's photo (/api/coaster-photo-pick). "No photo" hides it,
+// "Automatic" hands the choice back to the scores.
+var PHOTO_ADMIN=null;
+function photoAdmin(c){
+  var box=$('cpadmin');
+  (PHOTO_ADMIN || (PHOTO_ADMIN=CoasterHub.me().catch(function(){ return null; }))).then(function(a){
+    if(!a || !a.admin) return;
+    box.hidden=false;
+    box.innerHTML='<button type="button" class="cpbtn" id="cpchange">Change photo</button><div class="cpgrid" id="cpgrid" hidden></div>';
+    $('cpchange').onclick=function(){
+      var g=$('cpgrid');
+      if(!g.hidden){ g.hidden=true; return; }
+      g.hidden=false; g.innerHTML='<p class="cpnote">Loading every photo&hellip;</p>';
+      fetch('/api/coaster-photo?all=1&id='+encodeURIComponent(c.id)).then(function(r){ return r.json(); }).then(function(j){
+        var ps=(j && j.photos) || [];
+        var small=function(u){ return String(u||'').replace(/\/(\d+)px-/, '/360px-'); };
+        g.innerHTML='<div class="cpacts"><button type="button" class="cpbtn" data-pick="auto">Automatic</button><button type="button" class="cpbtn" data-pick="none">No photo</button>'
+          +'<span class="cpnote">'+ps.length+' photo'+(ps.length===1?'':'s')+' &middot; click one to use it</span></div>'
+          +'<div class="cpthumbs">'+ps.map(function(p,i){
+            return '<button type="button" class="cpthumb'+(p.picked?' on':'')+'" data-i="'+i+'" title="'+esc((p.author||'')+' \u00b7 '+(p.license||''))+'">'
+              +'<img src="'+esc(small(p.thumb||p.url))+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'bad\')"></button>';
+          }).join('')+'</div>';
+        var save=function(url){
+          fetch('/api/coaster-photo-pick',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({id:c.id,url:url})})
+            .then(function(r){ return r.json().then(function(x){ if(!r.ok) throw new Error(x.error||r.status); }); })
+            .then(function(){ g.hidden=true; showPhoto(c); })
+            .catch(function(e){ alert('Could not save: '+e.message); });
+        };
+        Array.prototype.forEach.call(g.querySelectorAll('.cpthumb'), function(b){ b.onclick=function(){ save(ps[+b.getAttribute('data-i')].url); }; });
+        Array.prototype.forEach.call(g.querySelectorAll('[data-pick]'), function(b){ b.onclick=function(){ save(b.getAttribute('data-pick')==='none'?'none':null); }; });
+      }).catch(function(){ g.innerHTML='<p class="cpnote">Could not load the photos.</p>'; });
+    };
+  });
 }
 </script>
 </body>

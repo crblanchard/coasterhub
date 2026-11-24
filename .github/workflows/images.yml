@@ -20,6 +20,10 @@ on:
         description: 'Sources to pull (space-separated: coasterpedia enwiki wikidata). Empty = all.'
         required: false
         default: 'enwiki wikidata'
+      gallery:
+        description: 'Also pull every photo in each coaster''s Commons category (yes/no)'
+        required: false
+        default: 'yes'
 
 permissions:
   contents: write
@@ -47,9 +51,16 @@ jobs:
           python3 -I tools/open-data/build-images-sql.py > migrations/233-open-data-images.sql
           python3 -I -c 'import json,collections; d=json.load(open("tools/open-data/images.json"))["images"]; print(len(d), "pictures", dict(collections.Counter(x["source"]+"/"+x["kind"] for x in d)))'
 
+      - name: Pull Commons category photos
+        if: ${{ inputs.gallery != 'no' }}
+        run: |
+          python3 -I tools/open-data/gallery-pull.py
+          python3 -I tools/open-data/build-gallery-sql.py > migrations/235-open-data-gallery.sql
+
       - name: Commit
         run: |
           git add tools/open-data/images.json migrations/233-open-data-images.sql
+          [ -f tools/open-data/gallery.json ] && git add tools/open-data/gallery.json migrations/235-open-data-gallery.sql || true
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -62,7 +73,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          FILE=migrations/233-open-data-images.sql
+          for FILE in migrations/233-open-data-images.sql migrations/235-open-data-gallery.sql; do
+          [ -f "$FILE" ] || continue
           if grep -vE '^\s*(--|$)' "$FILE" | grep -viE '^(CREATE (TABLE|INDEX) IF NOT EXISTS open_|DELETE FROM open_|INSERT OR REPLACE INTO open_)' | grep -q .; then
             echo "::error::$FILE touches something other than open_* tables"; exit 1
           fi
@@ -72,3 +84,4 @@ jobs:
             echo "::error::loading the photos failed"; exit 1
           fi
           echo "$FILE loaded"
+          done

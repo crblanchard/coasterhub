@@ -1925,6 +1925,32 @@ async function setOpenReview(env, acct, b) {
 // Which open source wins when several have a value (2026-11-19: Wikipedia,
 // English then German, between Coasterpedia and Wikidata).
 const OPEN_SOURCE_ORDER = { coasterpedia: 0, enwiki: 1, dewiki: 2, wikidata: 3, osm: 4 };
+// A coaster's photos, best first (Carter, 2026-11-24). Carter's own pick
+// (coaster_photo_pick) leads, and "none" means no photo; then the best-scored
+// photos of its Commons category (open_gallery, gallery-pull.py: wide, large,
+// named after the ride); then the sources' main photos (open_images), Commons
+// before Coasterpedia (whose image server refuses other sites). The ride's
+// other rows count (a relocated ride is one track). Free licences only, never
+// a logo. `all` lists everything for the picker; `skipPick` ignores the pick.
+// Tables not there yet give fewer candidates, never an error.
+async function coasterPhotos(env, id, all, skipPick) {
+  const own = "(l.coaster_id = ?1 OR l.coaster_id IN (SELECT b.coaster FROM same_ride a JOIN same_ride b ON b.ride = a.ride WHERE a.coaster = ?1))";
+  const safe = async (sql) => { try { return (await env.DB.prepare(sql).bind(id).all()).results || []; } catch (e) { if (/no such table/i.test(String(e && e.message || e))) return []; throw e; } };
+  let pick = null;
+  if (!skipPick) { try { pick = await env.DB.prepare("SELECT * FROM coaster_photo_pick WHERE coaster_id = ?").bind(id).first(); } catch (e) { pick = null; } }
+  if (pick && pick.url === "none" && !all) return [];
+  const gal = await safe("SELECT g.thumb, g.url, g.width, g.height, g.author, g.license, g.license_url, g.page, 'wikidata' AS source, g.score FROM open_gallery g " +
+    "JOIN open_links l ON l.source = 'wikidata' AND l.ref = g.ref WHERE g.nonfree = 0 AND " + own + " ORDER BY g.score DESC, g.width DESC LIMIT " + (all ? 80 : 4));
+  const img = await safe("SELECT DISTINCT i.thumb, i.url, i.width, i.height, i.author, i.license, i.license_url, i.page, i.source FROM open_images i " +
+    "JOIN open_links l ON l.source = i.source AND l.ref = i.ref WHERE i.kind = 'image' AND i.nonfree = 0 AND " + own +
+    " ORDER BY (i.url LIKE '%upload.wikimedia.org%') DESC, (COALESCE(i.width, 0) >= COALESCE(i.height, 0)) DESC, CASE i.source WHEN 'wikidata' THEN 0 WHEN 'enwiki' THEN 1 WHEN 'coasterpedia' THEN 2 ELSE 3 END");
+  const best = gal.filter(g => g.score >= 6), rest = gal.filter(g => g.score < 6);
+  const list = [], seen = new Set();
+  const add = (p, extra) => { if (p && p.url && p.url !== "none" && !seen.has(p.url)) { seen.add(p.url); list.push(Object.assign({}, p, extra || {})); } };
+  if (pick) add(pick, { picked: 1 });
+  best.forEach(p => add(p)); img.forEach(p => add(p)); rest.forEach(p => add(p));
+  return all ? list : list.slice(0, 6);
+}
 // A source that says the ride is gone (defunct, removed, standing but not
 // operating, in storage) but gives no closing date: such a ride is not added
 // at all (Carter, 2026-11-24: "no need to show on site at all without
@@ -3073,20 +3099,34 @@ export default {
       if (request.method === "GET" && path === "/api/coaster-photo") {
         const id = +(url.searchParams.get("id") || 0);
         if (!id) return err(400, "need ?id=");
+        // ?all=1 (the admin's Change photo picker): every candidate, not four.
+        const all = url.searchParams.get("all") === "1";
+        const photos = await coasterPhotos(env, id, all);
+        return json({ photo: photos[0] || null, photos }, 200, all ? {} : { "cache-control": "public, max-age=300" });
+      }
+      // Carter's own pick for a coaster's photo (Change photo, admins only):
+      // {id, url} where url is one of /api/coaster-photo?all=1's, or "none" for
+      // no photo, or null to go back to the automatic choice.
+      if (request.method === "POST" && path === "/api/coaster-photo-pick") {
+        if (!adminOk(request, env, acct)) return err(401, "admins only");
+        let b; try { b = await request.json(); } catch (e) { return err(400, "bad JSON"); }
+        const id = +b.id;
+        if (!id) return err(400, "id required");
         try {
-          // A few candidates, best first, and the page shows the first that
-          // loads: Wikimedia Commons pictures lead (Commons allows other sites
-          // to show them; Coasterpedia's image server refuses, 2026-11-24).
-          const rows = (await env.DB.prepare(
-            "SELECT DISTINCT i.thumb, i.url, i.width, i.height, i.author, i.license, i.license_url, i.page, i.source, (l.coaster_id = ?1) AS own FROM open_images i " +
-            "JOIN open_links l ON l.source = i.source AND l.ref = i.ref " +
-            "WHERE i.kind = 'image' AND i.nonfree = 0 AND (l.coaster_id = ?1 OR l.coaster_id IN " +
-            "(SELECT b.coaster FROM same_ride a JOIN same_ride b ON b.ride = a.ride WHERE a.coaster = ?1)) " +
-            "ORDER BY (i.url LIKE '%upload.wikimedia.org%') DESC, own DESC, (COALESCE(i.width, 0) >= COALESCE(i.height, 0)) DESC, CASE i.source WHEN 'wikidata' THEN 0 WHEN 'enwiki' THEN 1 WHEN 'coasterpedia' THEN 2 ELSE 3 END LIMIT 4").bind(id).all()).results || [];
-          const seen = new Set(), photos = rows.filter(r => !seen.has(r.url) && seen.add(r.url));
-          return json({ photo: photos[0] || null, photos }, 200, { "cache-control": "public, max-age=3600" });
+          if (b.url == null) {
+            await env.DB.prepare("DELETE FROM coaster_photo_pick WHERE coaster_id = ?").bind(id).run();
+          } else if (b.url === "none") {
+            await env.DB.prepare("INSERT OR REPLACE INTO coaster_photo_pick (coaster_id, url, by, at) VALUES (?, 'none', ?, ?)")
+              .bind(id, (acct && acct.slug) || null, new Date().toISOString()).run();
+          } else {
+            const p = (await coasterPhotos(env, id, true, true)).find(x => x.url === b.url);
+            if (!p) return err(404, "that photo is not one of this coaster's");
+            await env.DB.prepare("INSERT OR REPLACE INTO coaster_photo_pick (coaster_id, url, thumb, width, height, author, license, license_url, page, source, by, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+              .bind(id, p.url, p.thumb || null, p.width || null, p.height || null, p.author || null, p.license || null, p.license_url || null, p.page || null, p.source || null, (acct && acct.slug) || null, new Date().toISOString()).run();
+          }
+          return json({ ok: true, photos: await coasterPhotos(env, id, false) });
         } catch (e) {
-          if (/no such table/i.test(String(e && e.message || e))) return json({ photo: null });
+          if (/no such table/i.test(String(e && e.message || e))) return err(503, "run migrations/236-coaster-photo-pick.sql first");
           throw e;
         }
       }
