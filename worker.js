@@ -3065,6 +3065,27 @@ export default {
         if (!ids.length) return err(400, "need ?ids=");
         return json({ riders: await getCoasterRiders(env, ids) });
       }
+      // A coaster's photo for its page (Carter, 2026-11-24), from open_images
+      // (tools/open-data/images-pull.py): its own source records first, then
+      // the same ride's other rows (a relocated ride is one track), Coasterpedia
+      // before Wikipedia; free-licensed photos only, never a logo. With the
+      // table not there yet, no photo rather than an error.
+      if (request.method === "GET" && path === "/api/coaster-photo") {
+        const id = +(url.searchParams.get("id") || 0);
+        if (!id) return err(400, "need ?id=");
+        try {
+          const row = await env.DB.prepare(
+            "SELECT i.thumb, i.url, i.width, i.height, i.author, i.license, i.license_url, i.page, i.source FROM open_images i " +
+            "JOIN open_links l ON l.source = i.source AND l.ref = i.ref " +
+            "WHERE i.kind = 'image' AND i.nonfree = 0 AND (l.coaster_id = ?1 OR l.coaster_id IN " +
+            "(SELECT b.coaster FROM same_ride a JOIN same_ride b ON b.ride = a.ride WHERE a.coaster = ?1)) " +
+            "ORDER BY (l.coaster_id = ?1) DESC, CASE i.source WHEN 'coasterpedia' THEN 0 WHEN 'enwiki' THEN 1 ELSE 2 END LIMIT 1").bind(id).first();
+          return json({ photo: row || null }, 200, { "cache-control": "public, max-age=3600" });
+        } catch (e) {
+          if (/no such table/i.test(String(e && e.message || e))) return json({ photo: null });
+          throw e;
+        }
+      }
       if (request.method === "GET" && path === "/api/park-riders") {
         const park = url.searchParams.get("park") || "";
         if (!park) return err(400, "need ?park=");

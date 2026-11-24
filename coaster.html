@@ -157,6 +157,12 @@
   /* Former names. A retheme is the normal way a coaster changes its name, and
      the old one is what somebody following an old link typed. */
   .former{color:var(--muted);font-size:.9rem;margin:4px 0 0}
+  .cphoto{margin:20px 0 6px}
+  .cphoto[hidden]{display:none}
+  .cphoto img{display:block;width:100%;height:auto;max-height:460px;object-fit:cover;border-radius:14px;border:1px solid var(--line);background-color:var(--soft)}
+  .cphoto figcaption{margin-top:6px;color:var(--muted);font-size:.74rem;text-align:right}
+  .cphoto figcaption a{color:inherit}
+  @media (max-width:640px){ .cphoto img{max-height:260px;border-radius:12px} }
   .former b{color:var(--fg);font-weight:600}
 
   /* ---- Coaster page, new look (Carter, 2026-11-20: "all 1-8 please"). The
@@ -232,6 +238,9 @@
     </div>
     <div class="youcard" id="youcard" hidden></div>
     <div class="stats2" id="specs"></div>
+    <!-- The ride's photo, under the stats and above riders (Carter, 2026-11-24),
+         from the open sources with its credit; hidden when there is none. -->
+    <figure class="cphoto" id="cphoto" hidden><img id="cphoto_img" alt="" loading="lazy" decoding="async"><figcaption id="cphoto_cap"></figcaption></figure>
     <div id="reloc_wrap" style="display:none">
       <div class="sect">Past locations</div>
       <div class="hist" id="reloc"></div>
@@ -310,6 +319,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 
   var meta=parks[C.park]||{};
   document.querySelector('.hero h1').textContent=C.name;
+  showPhoto(C);
   document.title=C.name+' — '+C.park+' — Coaster Hub';
   // "Coaster · Cedar Point", as every database page reads (critique, 2026-10-02).
   CoasterHub.kindLine($('hero_sub'), 'Coaster', C.park, CoasterHub.parkHref(C.park));
@@ -687,6 +697,25 @@ function riders(){
       CoasterHub.confirmAdd(C, me.slug).then(function(ok){ if(ok) riders(); });
     };
   });
+}
+// The photo: /api/coaster-photo picks a free-licensed one from the ride's
+// source records (or its other locations). The licences ask for credit, so
+// the line under it names the photographer, the licence and where it is from.
+function showPhoto(c){
+  fetch('/api/coaster-photo?id='+encodeURIComponent(c.id)).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    var p=j && j.photo; if(!p || !p.thumb) return;
+    var fig=$('cphoto'), img=$('cphoto_img');
+    img.onerror=function(){ fig.hidden=true; };
+    img.alt=c.name+' at '+c.park;
+    if(p.width && p.height){ img.width=p.width; img.height=p.height; }
+    img.src=p.thumb;
+    var who=p.author ? (p.author.length>60 ? p.author.slice(0,57)+'\u2026' : p.author) : 'unknown';
+    var src={coasterpedia:'Coasterpedia', enwiki:'Wikipedia'}[p.source]||p.source;
+    $('cphoto_cap').innerHTML='Photo: '+esc(who)
+      +(p.license ? ' \u00b7 '+(p.license_url ? '<a href="'+esc(p.license_url)+'" target="_blank" rel="noopener">'+esc(p.license.toUpperCase())+'</a>' : esc(p.license.toUpperCase())) : '')
+      +' \u00b7 via '+(p.page ? '<a href="'+esc(p.page)+'" target="_blank" rel="noopener">'+esc(src)+'</a>' : esc(src));
+    fig.hidden=false;
+  }).catch(function(){});
 }
 </script>
 </body>
