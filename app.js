@@ -2873,23 +2873,55 @@
   // does. opts.w: the width to ask Commons for (it resizes on request);
   // opts.cls: the <img>'s class; opts.first: put it before what is there.
   var PHOTOS = {};
+  // A Commons thumbnail at one of Wikimedia's standard widths (Carter,
+  // 2026-11-24: photos took seconds). Those are already made and cached;
+  // any other width (the 1200 the pull asks for, the 800 this used) is drawn
+  // fresh on the first request, which was most of the wait.
+  function photoSize(u, w) { return w ? String(u || "").replace(/\/(\d+)px-/, "/" + w + "px-") : u; }
+  function photoList(id) {
+    return PHOTOS[id] || (PHOTOS[id] = fetch("/api/coaster-photo?id=" + encodeURIComponent(id))
+      .then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return (j && j.photos) || []; })
+      .catch(function () { return []; }));
+  }
+  // Warm a coaster's photo before it is opened: its list, then the picture
+  // itself into the browser's cache, so the open is instant.
+  var WARM = {};
+  function photoWarm(id, w) {
+    if (!id || WARM[id]) return; WARM[id] = 1;
+    photoList(id).then(function (list) { if (list[0]) { var i = new Image(); i.referrerPolicy = "no-referrer"; i.src = photoSize(list[0].thumb || list[0].url, w || 500); } });
+  }
+  // A pointer resting on a coaster row (or a finger touching one) starts it.
+  ["pointerover", "touchstart"].forEach(function (ev) {
+    document.addEventListener(ev, function (e) {
+      var t = e.target && e.target.closest && e.target.closest("[data-cid],[data-gid],.rrow[data-stat],.rrow[data-rid],.srow[data-k]");
+      if (!t) return;
+      var id = +(t.getAttribute("data-cid") || t.getAttribute("data-gid") || t.getAttribute("data-stat") || t.getAttribute("data-rid") || t.getAttribute("data-k"));
+      if (id) photoWarm(id);
+    }, { passive: true });
+  });
   function photoInto(el, id, opts) {
     if (!el || !id) return;
     opts = opts || {};
     el.setAttribute("data-photo-for", id);   // a newer call for this element wins
-    var p = PHOTOS[id] || (PHOTOS[id] = fetch("/api/coaster-photo?id=" + encodeURIComponent(id))
-      .then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return (j && j.photos) || []; })
-      .catch(function () { return []; }));
-    p.then(function (list) {
+    photoList(id).then(function (list) {
       if (!list.length || !el.isConnected || el.getAttribute("data-photo-for") !== String(id)) return;
+      // The box goes in at once, at its final size, and the picture fades in
+      // when it arrives: the card never changes shape under the reader.
       var img = document.createElement("img"), at = 0;
-      img.className = opts.cls || "cphoto-sm"; img.alt = ""; img.decoding = "async";
+      img.className = (opts.cls || "cphoto-sm") + " ph"; img.alt = ""; img.decoding = "async";
       img.referrerPolicy = "no-referrer";
-      var size = function (u) { return opts.w ? String(u || "").replace(/\/(\d+)px-/, "/" + opts.w + "px-") : u; };
-      img.onload = function () { img.classList.add("in"); if (opts.cls === "cxphoto") el.classList.add("hasphoto"); };
-      img.onerror = function () { at++; if (list[at]) img.src = size(list[at].thumb || list[at].url); else img.remove(); };
+      var size = function (u) { return photoSize(u, opts.w); };
+      img.onload = function () { img.classList.add("in"); };
+      img.onerror = function () {
+        // That size refused (a picture smaller than it): the original, then the next one.
+        var p = list[at];
+        if (!img._orig && p && p.url && img.src !== p.url) { img._orig = 1; img.src = p.url; return; }
+        img._orig = 0; at++; if (list[at]) { img.src = size(list[at].thumb || list[at].url); return; }
+        img.remove(); el.classList.remove("hasphoto");
+      };
       img.src = size(list[0].thumb || list[0].url);
       if (opts.first) el.insertBefore(img, el.firstChild); else el.appendChild(img);
+      if (opts.cls === "cxphoto") el.classList.add("hasphoto");
     });
   }
 
@@ -2962,7 +2994,7 @@
           // opts.more(c): what a page adds under the facts (the park page's
           // former names and riders), the same panel otherwise.
           + (opts.more ? '<div class="cxmore" data-more="' + id + '">' + opts.more(c) + '</div>' : '');
-        photoInto(inner, id, { cls: "cxphoto", w: 800, first: true });
+        photoInto(inner, id, { cls: "cxphoto", w: 500, first: true });
       });
     });
   }
@@ -3526,7 +3558,7 @@
       box.innerHTML = coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>')
         + '<div class="whol">' + (racingWho(r.g, st.glob, byId, st.me) || whoByPlace(r.who, st.me)) + '</div>';
       row.classList.add("open"); row.parentNode.insertBefore(box, row.nextSibling);
-      photoInto(box, r.c.id, { cls: "cxphoto", w: 800, first: true });
+      photoInto(box, r.c.id, { cls: "cxphoto", w: 500, first: true });
     });
     // Park · place beside each name, as /rankings reads.
     var parks = {};
@@ -3897,7 +3929,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, parkRanks: parkRanks, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, photoInto: photoInto, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
+              openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
