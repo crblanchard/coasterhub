@@ -50,7 +50,17 @@ def filename(v):
 
 # Which sources: all by default, or the ones named (python3 images-pull.py coasterpedia).
 PICK = sys.argv[1:] or list(WIKI)
-out = []
+OUT = 'tools/open-data/images.json'
+# Resumable: what an earlier, interrupted run already fetched is kept and not
+# asked again; the file is rewritten after every batch.
+try:
+    prev = json.load(open(OUT))['images']
+except Exception:
+    prev = []
+out = [x for x in prev if x['source'] not in PICK] + [x for x in prev if x['source'] in PICK]
+done = {(x['source'], x['file']) for x in out}
+def save():
+    json.dump({'retrieved': time.strftime('%Y-%m-%d'), 'images': out}, open(OUT, 'w'), indent=0, ensure_ascii=False)
 for source, (api, dump) in WIKI.items():
     if source not in PICK:
         continue
@@ -63,17 +73,17 @@ for source, (api, dump) in WIKI.items():
                 if f:
                     wanted.setdefault(f, []).append((rec['title'], kind))
                     break
-    files = sorted(wanted)
+    files = sorted(f for f in wanted if (source, f) not in done)
     print(source, len(files), 'files', file=sys.stderr)
-    for i in range(0, len(files), 50):
-        batch = files[i:i + 50]
+    for i in range(0, len(files), 20):   # 20, not 50: Coasterpedia times out on 50 with licences
+        batch = files[i:i + 20]
         d = get(api, {'action': 'query', 'format': 'json', 'formatversion': 2, 'prop': 'imageinfo',
                       'iiprop': 'url|size|extmetadata|mime', 'iiurlwidth': 1200,
                       'titles': '|'.join('File:' + f for f in batch)})
         if d is None:
             print(source, 'refused; skipping the rest of it this run', file=sys.stderr, flush=True)
             break
-        if i % 500 == 0:
+        if i % 200 == 0:
             print(source, i, '/', len(files), file=sys.stderr, flush=True)
         norm = {n['to']: n['from'] for n in d.get('query', {}).get('normalized', [])}
         for p in d.get('query', {}).get('pages', []):
@@ -92,7 +102,8 @@ for source, (api, dump) in WIKI.items():
                             'author': text(mv('Artist')), 'license': text(mv('LicenseShortName')),
                             'license_url': text(mv('LicenseUrl')), 'nonfree': nonfree,
                             'page': ii.get('descriptionurl')})
+        save()
         time.sleep(1)
 
-json.dump({'retrieved': time.strftime('%Y-%m-%d'), 'images': out}, open('tools/open-data/images.json', 'w'), indent=0, ensure_ascii=False)
+save()
 print(len(out), 'pictures', file=sys.stderr)
