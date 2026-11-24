@@ -12,7 +12,7 @@
 INSERT INTO activity (at, actor, kind, subject, n, detail)
 SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'clone_set', g.name, COUNT(*), json_object('made', 0, 'via', '216')
 FROM (VALUES
-  ('Dragon Wagons','Wisdom Dragon Wagon'),('Go Gators','Wisdom Go Gator'),('Miner Mikes','Miner Mike'),
+  ('Dragon Wagons','Wisdom Dragon Wagon'),('Go Gators','Wisdom Go Gator'),('Miner Mikes','Wisdom Miner Mike'),
   ('Orient Expresses','Wisdom Orient Express'),('RES Roller Balls','RES Roller Ball'),('S&S FreeSpins','S&S FreeSpin'),
   ('SBF Visa Spinners','SBF Visa Spinner'),('SDC Galaxis','SDC Galaxi'),('Schwarzkopf Jet Stars','Schwarzkopf Jet Star'),
   ('Sky Rocket IIs','Premier Sky Rocket II'),('Vekoma Boomerangs','Vekoma Boomerang'),
@@ -27,7 +27,7 @@ WHERE NOT EXISTS (SELECT 1 FROM clone_members m WHERE m.coaster = c.id)
 GROUP BY g.name;
 INSERT OR IGNORE INTO clone_members (coaster, group_id)
 SELECT c.id, g.id FROM (VALUES
-  ('Dragon Wagons','Wisdom Dragon Wagon'),('Go Gators','Wisdom Go Gator'),('Miner Mikes','Miner Mike'),
+  ('Dragon Wagons','Wisdom Dragon Wagon'),('Go Gators','Wisdom Go Gator'),('Miner Mikes','Wisdom Miner Mike'),
   ('Orient Expresses','Wisdom Orient Express'),('RES Roller Balls','RES Roller Ball'),('S&S FreeSpins','S&S FreeSpin'),
   ('SBF Visa Spinners','SBF Visa Spinner'),('SDC Galaxis','SDC Galaxi'),('Schwarzkopf Jet Stars','Schwarzkopf Jet Star'),
   ('Sky Rocket IIs','Premier Sky Rocket II'),('Vekoma Boomerangs','Vekoma Boomerang'),
