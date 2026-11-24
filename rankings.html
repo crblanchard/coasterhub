@@ -11,7 +11,7 @@
 <base href="/">
 <title>Rankings — Coaster Hub</title>
 <meta name="description" content="Rank your favorite coasters, and see how everyone's lists combine — Coaster Hub.">
-<link rel="stylesheet" href="/style.css?v=20261121a">
+<link rel="stylesheet" href="/style.css?v=20261124a">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
@@ -906,7 +906,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261124b"></script>
+<script src="/app.js?v=20261124c"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 CoasterHub.initNav('rankings');
@@ -1139,7 +1139,11 @@ if(!slug){
       var mineToEdit = !rank.claimed || (acct && acct.slug === slug);
       CANEDIT = !!mineToEdit;
       OWN = !!(acct && acct.slug === slug);
-      $('gatherbar').style.display = OWN && scattered() ? 'flex' : 'none';
+      // An open row's photo (Carter, 2026-11-24), at the top of its stats.
+  el.querySelectorAll('.rrow.open .rstats').forEach(function(st){
+    var row=st.closest('.rrow'); CoasterHub.photoInto(st, +(row.dataset.stat||row.dataset.rid), {cls:'cxphoto', w:800, first:true});
+  });
+  $('gatherbar').style.display = OWN && scattered() ? 'flex' : 'none';
       // The offer waits for this: it is only worth making to the person who
       // can place the ride, and who owns the list is not known until here.
       maybeOfferJoins();
@@ -2945,6 +2949,9 @@ function stepHH(){
   var aMdl = ga ? ga.mdl : CoasterHub.maker(a), bMdl = gb ? gb.mdl : CoasterHub.maker(b);
   $('hh_a').innerHTML='<b>'+esc(aName)+'</b><span>'+esc(aSub)+'</span>'+(aMdl?'<span class="mdl">'+esc(aMdl)+'</span>':'');
   $('hh_b').innerHTML='<b>'+esc(bName)+'</b><span>'+esc(bSub)+'</span>'+(bMdl?'<span class="mdl">'+esc(bMdl)+'</span>':'');
+  // A photo of each, so you see the ride as well as read it (Carter, 2026-11-24).
+  CoasterHub.photoInto($('hh_a'), a.id, {cls:'hhphoto', w:500, first:true});
+  CoasterHub.photoInto($('hh_b'), b.id, {cls:'hhphoto', w:500, first:true});
   // How many more, roughly (critique, 2026-10-02: the end was invisible): the
   // halvings still to do plus a confirmation.
   var togo=Math.max(1, (hh.hi>hh.lo ? Math.ceil(Math.log2(hh.hi-hh.lo+1)) : 0) + 1);
@@ -3210,6 +3217,8 @@ function srowToggles(root){
       if(!open) Array.prototype.forEach.call(root.querySelectorAll('.stog[aria-expanded="true"]'), function(t){
         t.setAttribute('aria-expanded','false'); var w=t.closest('.srow').querySelector('.who'); if(w) w.hidden=true; });
       tog.setAttribute('aria-expanded', open?'false':'true'); who.hidden=open;
+      // Its photo, the first time it opens (Carter, 2026-11-24).
+      if(!open && !who.dataset.ph){ who.dataset.ph='1'; CoasterHub.photoInto(who, +row.dataset.k, {cls:'cxphoto', w:800, first:true}); }
       // Closing a long one above can pull this row up past the header.
       if(!open){ var t=tog.getBoundingClientRect().top; if(t<70) window.scrollBy({top:t-80,behavior:'instant'}); } };
     // Closed, any tap opens it (links included); open, the links go.

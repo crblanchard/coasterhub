@@ -1216,3 +1216,9 @@ div.seg > button.on,div.modesw > button.on,.rsw a.on,.hero .segsw a.on{backgroun
 /* One section heading: Home's, in the display face, on every page. */
 .sect,h2.sec,.sughead .eyebrow,div.sechd h2,#content section.block > .container > h2{font-family:var(--display);font-weight:800;font-stretch:110%;
   font-size:clamp(1.35rem,3.6vw,1.7rem);letter-spacing:-.02em;line-height:1.1;color:var(--fg);text-transform:none}
+
+/* A coaster's photo inside an opened row and on the ranking picker
+   (CoasterHub.photoInto, 2026-11-24): nothing until it has loaded. */
+img.cxphoto,img.hhphoto{display:none}
+img.cxphoto.in{display:block;width:100%;max-width:480px;height:auto;max-height:270px;object-fit:cover;border-radius:10px;border:1px solid var(--line);margin:2px 0 12px;background-color:var(--soft)}
+img.hhphoto.in{display:block;width:100%;height:120px;object-fit:cover;border-radius:8px;margin:0 0 10px;background-color:var(--soft)}

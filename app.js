@@ -2867,6 +2867,32 @@
   // among(c) returns coasterFacts' {manu, model} "N of M" strings — the
   // profile's top ten uses both, since the list on screen is the profile
   // owner's, not the reader's (2026-09-27).
+  // A coaster's photo into an element (Carter, 2026-11-24: photos in an
+  // opened row and while ranking). /api/coaster-photo gives candidates best
+  // first; the first that actually loads is shown, nothing at all if none
+  // does. opts.w: the width to ask Commons for (it resizes on request);
+  // opts.cls: the <img>'s class; opts.first: put it before what is there.
+  var PHOTOS = {};
+  function photoInto(el, id, opts) {
+    if (!el || !id) return;
+    opts = opts || {};
+    el.setAttribute("data-photo-for", id);   // a newer call for this element wins
+    var p = PHOTOS[id] || (PHOTOS[id] = fetch("/api/coaster-photo?id=" + encodeURIComponent(id))
+      .then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return (j && j.photos) || []; })
+      .catch(function () { return []; }));
+    p.then(function (list) {
+      if (!list.length || !el.isConnected || el.getAttribute("data-photo-for") !== String(id)) return;
+      var img = document.createElement("img"), at = 0;
+      img.className = opts.cls || "cphoto-sm"; img.alt = ""; img.decoding = "async";
+      img.referrerPolicy = "no-referrer";
+      var size = function (u) { return opts.w ? String(u || "").replace(/\/(\d+)px-/, "/" + opts.w + "px-") : u; };
+      img.onload = function () { img.classList.add("in"); };
+      img.onerror = function () { at++; if (list[at]) img.src = size(list[at].thumb || list[at].url); else img.remove(); };
+      img.src = size(list[0].thumb || list[0].url);
+      if (opts.first) el.insertBefore(img, el.firstChild); else el.appendChild(img);
+    });
+  }
+
   function openableCoasters(root, opts) {
     opts = opts || {};
     if (!root || root._openable) return;
@@ -2936,6 +2962,7 @@
           // opts.more(c): what a page adds under the facts (the park page's
           // former names and riders), the same panel otherwise.
           + (opts.more ? '<div class="cxmore" data-more="' + id + '">' + opts.more(c) + '</div>' : '');
+        photoInto(inner, id, { cls: "cxphoto", w: 800, first: true });
       });
     });
   }
@@ -3867,7 +3894,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, parkRanks: parkRanks, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
+              openableCoasters: openableCoasters, photoInto: photoInto, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
