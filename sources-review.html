@@ -107,6 +107,11 @@
   .np-into .yes{background:var(--accent2);border-color:var(--accent2);color:#fff}
   .np-into button:disabled{opacity:.5}
   .np-into .near small{color:var(--muted);margin-left:4px}
+  .np-have{flex:1 1 100%;font-size:.85rem;color:var(--muted);line-height:1.5}
+  .np-have b{color:var(--fg)}
+  .np-have .cl{opacity:.75}
+  .np-have:empty{display:none}
+  .npbreak{margin:22px 0 4px;padding-top:14px;border-top:2px solid var(--line);color:var(--muted);font-size:.85rem;font-weight:600}
   .npf .np-tick{width:18px;height:18px;margin:0}
   .npc{display:grid;gap:4px;margin:4px 0}
   .npl{display:flex;gap:8px;align-items:baseline;font-size:.88rem;flex-wrap:wrap}
@@ -228,7 +233,7 @@ const TABS = {
     f: [['op', 'Parks: operating or under construction'], ['fair', 'Travelling fairs: operating'], ['closed', 'Closed'], ['unknown', 'Status unknown'], ['multi', 'In two or more sources'], ['', 'Everything']] },
   newParks: { t: 'New parks', h: 'Parks the sources have that the site doesn&rsquo;t',
     p: 'Each with its coasters from Coasterpedia and Wikipedia. Check the name, region and pin (fix any of them right on the card) and which coasters to bring in. Then add one park, or tick several and add them all. Parks are ticked by default only when they have a pin, a region and an English name that isn&rsquo;t already a park here. Nothing goes up until you press Add.',
-    f: [['ready', 'Ready: pin, region and name'], ['pin', 'Has a map pin'], ['nopin', 'No map pin yet'], ['multi', 'Three or more coasters'], ['', 'All']] },
+    f: [['', 'All, pinned first'], ['ready', 'Ready: pin, region and name'], ['pin', 'Has a map pin'], ['nopin', 'No map pin yet'], ['multi', 'Three or more coasters']] },
   nosource: { t: 'Needs a source', h: 'Coasters still missing stats',
     p: 'Stats that are blank and no open source has. Most-ridden first. Add them to Coasterpedia or Wikidata, citing a park page or news article (not RCDB), and they arrive here on the next Monday refresh.',
     f: [['ridden', 'Ridden by someone here'], ['', 'All'], ['nolink', 'No open source at all']] },
@@ -289,11 +294,36 @@ function nearParks(p) {
   return Object.entries(PARKS).filter(([, v]) => v && v.lat != null).map(([name, v]) => ({ name, km: km(+p.lat, +p.lon, v.lat, v.lon) }))
     .filter(n => n.km <= 60).sort((a, b) => a.km - b.km).slice(0, 3);
 }
+// What the park being merged into already has (Carter, 2026-11-24: "I want
+// to see what coasters already exist at each park ... so I don't duplicate
+// coasters"): listed under the picker, and a ticked coaster whose name is
+// already there gets a flag and is unticked (the server skips exact names
+// anyway; this catches "Thirteen" vs "TH13TEEN").
+const squash = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '').replace(/13/g, 'thirteen');
+function showHave(card) {
+  const box = card.querySelector('.np-have'); if (!box) return;
+  const typed = (card.querySelector('.np-target').value || '').trim().toLowerCase();
+  const target = typed && Object.keys(PARKS).find(n => n.toLowerCase() === typed);
+  card.querySelectorAll('.npl .dup').forEach(x => x.remove());
+  if (!target) { box.innerHTML = ''; return; }
+  const have = (BYPARK[target] || []).slice().sort((a, b) => (a.closed ? 1 : 0) - (b.closed ? 1 : 0) || a.name.localeCompare(b.name));
+  const names = new Set(have.map(c => squash(c.name)));
+  box.innerHTML = '<b>Already at ' + esc(target) + ' (' + have.length + '):</b> ' + (have.length ? have.map(c => esc(c.name) + (c.closed ? ' <span class="cl">(closed ' + esc(String(c.closed).slice(0, 4)) + ')</span>' : '')).join(', ') : 'no coasters yet');
+  card.querySelectorAll('.npl').forEach(l => {
+    const nm = l.querySelector('b'), cb = l.querySelector('input[data-j]');
+    const n = squash(nm.textContent);
+    if (n && [...names].some(h => h === n || (n.length >= 5 && (h.includes(n) || n.includes(h))))) {
+      nm.insertAdjacentHTML('afterend', ' <span class="chip bad dup">already there?</span>');
+      if (cb.checked) { cb.checked = false; cb.dispatchEvent(new Event('change', { bubbles: true })); }
+    }
+  });
+}
 document.addEventListener('click', e => {
   const b = e.target.closest('button.near'); if (!b) return;
   const card = b.closest('.np'); card.querySelector('.np-target').value = b.dataset.pick; INTO[card.dataset.k] = b.dataset.pick;
+  showHave(card);
 });
-document.addEventListener('input', e => { if (e.target.classList.contains('np-target')) INTO[e.target.closest('.np').dataset.k] = e.target.value; });
+document.addEventListener('input', e => { if (e.target.classList.contains('np-target')) { const card = e.target.closest('.np'); INTO[card.dataset.k] = e.target.value; showHave(card); } });
 function load() { return fetch('/api/cutover/review', { cache: 'no-store' }).then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(j.error || r.status))); }
 load().then(d => {
   D = d; $('loading').hidden = true; $('ui').hidden = false;
@@ -318,7 +348,9 @@ function go(t, first) {
   LIMIT = 100; render();
 }
 function tracker() {
-  const C = D.counts;
+  // New parks counts only the ones with a pin (Carter, 2026-11-24); the
+  // unpinned stay on the list, below a break, but not in the number.
+  const C = Object.assign({}, D.counts, { newParks: (D.newParks || []).filter(p => p.lat != null).length });
   $('tracker').innerHTML = Object.keys(TABS).map(k => '<button data-t="' + k + '" class="' + (k === tab ? 'on' : '') + (C[k] ? '' : ' full') + '"><span class="tt">' + TABS[k].t + '</span>'
     + '<b>' + fmt(C[k]) + '</b><span class="pc">' + (k === 'nosource' ? 'coasters' : C[k] ? 'to review' : 'all clear') + '</span></button>').join('');
 }
@@ -335,7 +367,9 @@ function rows() {
   if (tab === 'adds') return D.adds.filter(has).sort((a, b) => a.park.localeCompare(b.park) || rank(a) - rank(b) || a.name.localeCompare(b.name))
     .filter(a => f === 'op' ? live(a) && !a.fair : f === 'fair' ? live(a) && a.fair : f === 'multi' ? a.refs.length > 1 : f === 'unknown' ? !a.status : f === 'closed' ? !!a.status && !live(a) : true);
   if (tab === 'newParks') return D.newParks.filter(x => !q || (x.park + ' ' + (x.region || '') + ' ' + x.coasters.map(c => c.name).join(' ')).toLowerCase().includes(q))
-    .filter(x => f === 'ready' ? parkReady(x) : f === 'pin' ? x.lat != null : f === 'nopin' ? x.lat == null : f === 'multi' ? x.coasters.length >= 3 : true);
+    .filter(x => f === 'ready' ? parkReady(x) : f === 'pin' ? x.lat != null : f === 'nopin' ? x.lat == null : f === 'multi' ? x.coasters.length >= 3 : true)
+    // Pinned parks first, always (Carter, 2026-11-24); the rest wait below a break.
+    .map((x, i) => [x, i]).sort((a, b) => ((a[0].lat == null) - (b[0].lat == null)) || a[1] - b[1]).map(a => a[0]);
   return D.nosource.filter(has).filter(x => f === 'ridden' ? x.riders > 0 : f === 'nolink' ? !x.sources.length : true);
 }
 function render() {
@@ -351,8 +385,11 @@ function render() {
     : tab === 'newParks' ? 'Add all ticked parks (' + fmt(LIST.filter(parkTicked).length) + ')'
     : 'Link all near-certain (' + fmt(D.matches.filter(sure).length) + ')';
   $('copy').hidden = tab !== 'nosource';
-  $('count').innerHTML = '<b>' + fmt(LIST.length) + '</b> ' + (tab === 'gaps' || tab === 'changed' ? 'values' : tab === 'newParks' ? 'parks' : 'coasters');
+  const pinned = tab === 'newParks' ? LIST.filter(p => p.lat != null).length : 0;
+  $('count').innerHTML = tab === 'newParks' ? '<b>' + fmt(pinned) + '</b> park' + (pinned === 1 ? '' : 's') + ' with a pin' + (LIST.length > pinned ? ' &middot; ' + fmt(LIST.length - pinned) + ' without, below' : '')
+    : '<b>' + fmt(LIST.length) + '</b> ' + (tab === 'gaps' || tab === 'changed' ? 'values' : 'coasters');
   $('list').innerHTML = LIST.length ? VIEW[tab](LIST.slice(0, LIMIT), f) : '<p class="muted">Nothing here right now.</p>';
+  if (tab === 'newParks') document.querySelectorAll('.np').forEach(card => showHave(card));
   $('more').hidden = LIST.length <= LIMIT;
 }
 const sure = c => /Wikidata item/.test(c.reason) || c.score >= 0.95;
@@ -390,7 +427,8 @@ const VIEW = {
       + sameAs(a) + '</div></div>').join('') + '</div>',
   newParks: list => '<div class="cards">' + list.map((p, i) => {
     const alive = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || '') && /operat|construct|open|betrieb/i.test(c.status || '');
-    return '<div class="card np" data-k="' + esc(p.k) + '">'
+    return (p.lat == null && (i === 0 || list[i - 1].lat != null) ? '<div class="npbreak">No map pin yet: not counted above. Add coordinates on a card to bring it up.</div>' : '')
+      + '<div class="card np" data-k="' + esc(p.k) + '">'
       + '<div class="npf"><input type="checkbox" class="np-tick" title="Include in Add all ticked parks"' + (parkTicked(p) ? ' checked' : '') + '>'
       + '<label>Park <input class="np-name" value="' + esc(EDIT[p.k] && EDIT[p.k].park || p.park) + '"></label>'
       + '<label>Region <input class="np-region" placeholder="State, US or country" value="' + esc(EDIT[p.k] && EDIT[p.k].region != null ? EDIT[p.k].region : (p.region || '')) + '"></label>'
@@ -404,7 +442,7 @@ const VIEW = {
       + '<input class="np-target" list="parks-dl" placeholder="Search parks on the site…" value="' + esc(INTO[p.k] || '') + '">'
       + btn('Add ticked coasters there', { np: 'into', i: i }, 'yes')
       + nearParks(p).map(n => '<button class="small near" data-pick="' + esc(n.name) + '">' + esc(n.name) + ' <small>' + (n.km < 1 ? '&lt;1' : Math.round(n.km)) + ' km</small></button>').join('')
-      + '</div></div>';
+      + '<div class="np-have"></div></div></div>';
   }).join('') + '</div>',
   nosource: list => '<div class="tbl-wrap"><table><thead><tr><th>Coaster</th><th>Missing</th><th class="num">Riders</th><th>Find it</th></tr></thead><tbody>' + list.map(r =>
     '<tr><td class="nm">' + coaster(r) + '</td><td class="todo">' + r.missing.map(f => NAMES[f].toLowerCase()).join(', ') + (r.sources.length ? '' : ' <span class="chip">no open source</span>') + '</td><td class="num">' + r.riders + '</td><td class="todo">'

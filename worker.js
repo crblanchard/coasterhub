@@ -1765,6 +1765,7 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
         if (!park || !name) return err(400, "park and name required");
         if (!await env.DB.prepare("SELECT 1 FROM parks WHERE name = ?").bind(park).first()) return err(404, "no such park");
         if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(park, name).first()) return err(409, name + " is already at " + park);
+        if (await openClosedNoDate(env, refs)) return err(409, "The source says " + name + " is closed but gives no closing date, so it isn't added");
         out.push(await addOpenCoaster(env, acct, park, name, refs, day));
       }
       await env.DB.prepare("INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES ('add', ?, ?, 0, ?, ?, ?, ?)")
@@ -1786,7 +1787,9 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
         for (const c of cs) {
           const name = String(c.name).trim();
           if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(park, name).first()) continue;
-          out.push(await addOpenCoaster(env, acct, park, name, c.refs.filter(r => r && r.source && r.ref), day));
+          const crefs = c.refs.filter(r => r && r.source && r.ref);
+          if (await openClosedNoDate(env, crefs)) { out.push({ skipped: name, why: "closed, no date" }); continue; }
+          out.push(await addOpenCoaster(env, acct, park, name, crefs, day));
         }
       }
       await env.DB.prepare("INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES ('park', '', ?, 0, ?, ?, ?, ?)")
@@ -1805,7 +1808,9 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
       for (const c of cs) {
         const name = String(c.name).trim();
         if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(row.name, name).first()) continue;
-        out.push(await addOpenCoaster(env, acct, row.name, name, c.refs.filter(r => r && r.source && r.ref), day));
+        const crefs = c.refs.filter(r => r && r.source && r.ref);
+        if (await openClosedNoDate(env, crefs)) { out.push({ skipped: name, why: "closed, no date" }); continue; }
+        out.push(await addOpenCoaster(env, acct, row.name, name, crefs, day));
       }
       if (from && from.toLowerCase() !== row.name.toLowerCase()
           && !await env.DB.prepare("SELECT 1 FROM parks WHERE lower(name) = lower(?)").bind(from).first())
@@ -1920,6 +1925,20 @@ async function setOpenReview(env, acct, b) {
 // Which open source wins when several have a value (2026-11-19: Wikipedia,
 // English then German, between Coasterpedia and Wikidata).
 const OPEN_SOURCE_ORDER = { coasterpedia: 0, enwiki: 1, dewiki: 2, wikidata: 3, osm: 4 };
+// A source that says the ride is gone (defunct, removed, standing but not
+// operating, in storage) but gives no closing date: such a ride is not added
+// at all (Carter, 2026-11-24: "no need to show on site at all without
+// sufficient info"; 222 removed the 40 that got in as Operating this way).
+// Its records stay in open_items/open_raw for when a date turns up.
+async function openClosedNoDate(env, refs) {
+  let dead = false;
+  for (const r of refs) {
+    const st = await env.DB.prepare("SELECT v FROM open_raw WHERE source = ? AND ref = ? AND k = 'status'").bind(r.source, r.ref).first();
+    if (st && /defunct|not operat|nicht in betrieb|sbno|storage|closed|removed|demolish|relocat/i.test(st.v || "")) dead = true;
+    if (await env.DB.prepare("SELECT 1 FROM open_record_facts WHERE source = ? AND ref = ? AND field = 'closed' AND value IS NOT NULL AND value <> ''").bind(r.source, r.ref).first()) return false;
+  }
+  return dead;
+}
 async function setOpenChoice(env, acct, id, field, source, typed) {
   const isName = field === "name";
   if (!OPEN_FIELDS.includes(field) && !isName) return err(400, "unknown field");
