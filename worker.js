@@ -1952,8 +1952,28 @@ async function coasterPhotos(env, id, all, skipPick) {
   const best = gal.filter(g => g.score >= 8), rest = gal.filter(g => g.score < 8);
   const list = [], seen = new Set();
   const add = (p, extra) => { if (p && p.url && p.url !== "none" && !seen.has(p.url)) { seen.add(p.url); list.push(Object.assign({}, p, extra || {})); } };
-  if (pick) add(pick, { picked: 1 });
   best.forEach(p => add(p)); img.forEach(p => add(p)); rest.forEach(p => add(p));
+  // A racing side (Carter, 2026-11-24): the pair shares one Wikidata item,
+  // so both sides get the same photos; a photo whose file names THIS side
+  // ("Walibi-holland-yoy-thrill.jpg" for YoY - Thrill) goes first, one naming
+  // the other side goes last. Sides are "Name (Side)" or "Name - Side".
+  try {
+    const me = await env.DB.prepare("SELECT name, park FROM coasters WHERE id = ?").bind(id).first();
+    const m = me && /^(.*?)\s*(?:\(([^)]+)\)|\s-\s(.+))\s*$/.exec(me.name || "");
+    if (m && list.length > 1) {
+      const base = m[1].trim(), side = (m[2] || m[3] || "").trim().toLowerCase();
+      const sibs = ((await env.DB.prepare("SELECT name FROM coasters WHERE park = ? AND id <> ? AND (name LIKE ? OR name LIKE ?)")
+        .bind(me.park, id, base + " (%", base + " - %").all()).results || [])
+        .map(r => { const k = /^(.*?)\s*(?:\(([^)]+)\)|\s-\s(.+))\s*$/.exec(r.name); return k ? (k[2] || k[3] || "").trim().toLowerCase() : ""; })
+        .filter(s => s && s !== side);
+      if (sibs.length && side) {
+        const has = (u, w) => { let s; try { s = decodeURIComponent(u); } catch (e) { s = u; } return new RegExp("(^|[^a-z])" + w.replace(/[^a-z0-9]+/g, ".?") + "([^a-z]|$)", "i").test(s.split("/").pop()); };
+        const rank = p => has(p.url, side) ? 0 : sibs.some(s => has(p.url, s)) ? 2 : 1;
+        list.sort((a, b) => rank(a) - rank(b));   // stable: the order above holds within each
+      }
+    }
+  } catch (e) { /* the plain order */ }
+  if (pick) { const at = list.findIndex(p => p.url === pick.url); if (at >= 0) list.splice(at, 1); if (pick.url !== "none") list.unshift(Object.assign({}, pick, { picked: 1 })); }
   return all ? list : list.slice(0, 6);
 }
 // A source that says the ride is gone (defunct, removed, standing but not

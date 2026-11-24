@@ -39,11 +39,13 @@ def wikidata_wanted(path):
         qid = row['c'].rsplit('/', 1)[-1]
         if (qid, kind) not in {(q, k) for q, k in wanted.get(f, [])}:
             wanted.setdefault(f, []).append((qid, kind))
-    # one image and one logo per item: the first named
+    # Every image (a racing pair's item often has one per side: YoY's
+    # "...-yoy-chill.jpg" and "...-yoy-thrill.jpg", Carter 2026-11-24), but
+    # one logo per item: the first named.
     seen, keep = set(), {}
     for f in sorted(wanted):
         for qid, kind in wanted[f]:
-            if (qid, kind) in seen:
+            if kind == 'logo' and (qid, kind) in seen:
                 continue
             seen.add((qid, kind))
             keep.setdefault(f, []).append((qid, kind))
