@@ -706,6 +706,11 @@
        of header (Carter, 2026-11-22). */
     .hero .container{position:relative}
     .hero #mineglobal{position:absolute;top:0;right:16px;margin:0}
+    /* ...and never on top of the skyline (Carter, 2026-11-24): the band is
+       at least the pill's row plus the art, and the art never grows into
+       the pill's row. Phones put the art in its own strip below, so wider only. */
+    @media (min-width:641px){ .hero:has(#mineglobal:not([hidden])){min-height:calc(78px + min(130px,max(58px,calc(30.7vw - 167px))));
+      background-size:auto min(130px,calc(100% - 78px),max(58px,calc(30.7vw - 167px))),100% 100%!important} }
     @media (max-width:680px){ html .hero:has(#racts:not([hidden])){padding-bottom:var(--hero-b,84px)!important} }</style>
   <!-- Your own list (Carter, 2026-10-02, from the rankings mockup): how much
        of your count is ranked, and the two things you do here — Rank 5 more
