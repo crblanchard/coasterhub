@@ -507,7 +507,7 @@ function youLine(me, mine){
   ROWS.forEach(function(x){ var m=me.rides[x.id]; if(m){ r+=m.n; if(m.first && (!first || m.first<first)) first=m.first; } });
   // The You card (2026-11-20): your place, your rides, your first ride, and
   // a Log button that opens Log on this coaster.
-  var yc=$('youcard'), logBtn='<a class="btn" href="/log?c='+encodeURIComponent(C.id)+'">Log this ride</a>';
+  var yc=$('youcard'), logBtn='<a class="btn" href="/log?c='+encodeURIComponent(C.id)+'">Log a ride</a>';
   if(yc){
     if(r){
       yc.innerHTML='<span class="ylab">You</span>'
