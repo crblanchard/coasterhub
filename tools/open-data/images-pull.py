@@ -94,7 +94,7 @@ for source, (api, dump) in WIKI.items():
             f = title.split(':', 1)[1]
             m = ii.get('extmetadata') or {}
             mv = lambda k: (m.get(k) or {}).get('value')
-            nonfree = 1 if str(mv('NonFree') or '').lower() == 'true' or re.search(r'fair use|non-free', str(mv('LicenseShortName') or ''), re.I) else 0
+            nonfree = 1 if str(mv('NonFree') or '').lower() == 'true' or re.search(r'fair use|non-free|copyright', str(mv('LicenseShortName') or ''), re.I) or not mv('LicenseShortName') else 0
             for ref, kind in wanted.get(f, wanted.get(f.replace('_', ' '), [])):
                 out.append({'source': source, 'ref': ref, 'kind': kind, 'file': f,
                             'url': ii.get('url'), 'thumb': ii.get('thumburl') or ii.get('url'),
