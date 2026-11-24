@@ -341,6 +341,10 @@ function rows() {
 function render() {
   tracker();
   LIST = rows();
+  // A filter that hides everything (New parks opens on "Ready", and when none
+  // is ready the tab looked empty beside a count of 29): fall back to All
+  // (Carter, 2026-11-24).
+  if (!LIST.length && $('filt').value && $('q').value.trim() === '' && TABS[tab].f.some(o => o[0] === '')) { $('filt').value = ''; LIST = rows(); }
   const f = $('filt').value;
   $('bulk').hidden = !((tab === 'gaps' || tab === 'adds' || tab === 'newParks' || (tab === 'matches' && f !== 'done')) && LIST.length);
   $('bulk').textContent = tab === 'gaps' ? 'Use all ' + fmt(LIST.length) + ' shown' : tab === 'adds' ? 'Add all ticked (' + fmt(LIST.filter(ticked).length) + ')'
