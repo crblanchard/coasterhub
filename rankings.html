@@ -520,6 +520,9 @@
   @media (max-width:560px){ .srow .n .sub .lc,.srow .n .sub .mk{display:none} }
   .srow .who .go{color:var(--accent2);font-size:.86rem;font-weight:600;text-decoration:none}
   .srow .who[hidden]{display:none}
+  .srow .who .whol{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+  /* Open is grey here as on a rider's list (Carter, 2026-11-24). */
+  .srow:has(.stog[aria-expanded="true"]){background:var(--soft)}
   .srow .wrow{display:inline-flex;align-items:baseline;gap:6px;padding:3px 10px;border:1px solid var(--line);
     border-radius:999px;background-color:var(--soft);text-decoration:none;color:var(--fg)}
   .srow .wrow:hover{border-color:var(--accent2)}
@@ -1079,8 +1082,11 @@ if(!slug){
               +'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
               +'stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
           +'</div>'
-          +'<div class="who" hidden>'+full
-            +CoasterHub.coasterFacts(c, null, c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+'</div>'
+          // Stats first, then who ranked it where, the photo beside them: the
+          // same order as an opened row on a rider's list (Carter, 2026-11-24).
+          +'<div class="who" hidden>'
+            +CoasterHub.coasterFacts(c, null, c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')
+            +'<div class="whol">'+full+'</div></div>'
           +'</div>';
       }).join('');
       // One open at a time (Carter, 2026-09-28 — this used to keep each row
