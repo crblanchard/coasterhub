@@ -185,7 +185,9 @@ No `site-updates.json` entry for data (see above).
   latest one (a future row counts). Then a `same_ride_set` activity row per home
   (copy 167). If an old home exists, re-point its group (`UPDATE same_ride SET
   ride = new WHERE ride = old`). Stops at parks not in the DB are noted in
-  `missing-parks.md`, not added.
+  `missing-parks.md`, not added. After linking, re-run `migrations/223-relocation-stats.sql`:
+  it fills a relocated row's blank height/speed/length/inversions/duration/maker/model
+  from the ride's other rows (dates are per location and are not copied).
 
 **Carter's naming and data rules:**
 - English names only: no Hangul/Chinese/Hebrew unless the name itself uses it
