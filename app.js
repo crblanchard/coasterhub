@@ -2944,13 +2944,15 @@
   // the colour (teal running, orange gone, red closing soon), the years stay
   // body-coloured. The park page's, shared (2026-09-28).
   // val, when given, takes the years' place (a height or a speed on /coasters).
+  // A closed row whose ride lives on elsewhere (same_ride home is another
+  // row) says Relocated, not Defunct (Carter, 2026-11-24). Same colour.
   function lifeTag(c, val) {
     var E = searchEsc;
     var op = c.opened ? String(c.opened).slice(0, 4) : (c.yr ? String(c.yr) : "");
     var cl = c.closed ? String(c.closed).slice(0, 4) : "";
     if (!op && !cl && val == null) return "";
     var years = val != null ? E(val) : cl ? (op ? E(op) + "–" + E(cl) : "closed " + E(cl)) : E(op);
-    return '<span class="life">' + (c.building ? UNDER_CONSTRUCTION : c.closing ? CLOSING_SOON : '<span class="stat' + (cl ? ' off' : ' on') + '">' + (cl ? "Defunct" : "Operating") + '</span>')
+    return '<span class="life">' + (c.building ? UNDER_CONSTRUCTION : c.closing ? CLOSING_SOON : '<span class="stat' + (cl ? ' off' : ' on') + '">' + (cl ? (c.same && c.same !== c.id ? "Relocated" : "Defunct") : "Operating") + '</span>')
       + '<span class="yrs">' + years + '</span></span>';
   }
   // "2 operating · 1 defunct" on the right of a group or link row (Carter,

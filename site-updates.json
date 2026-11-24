@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-24T17:55:14Z",
+   "text": "A ride that moved to another park now says Relocated instead of Defunct in park, manufacturer and model lists."
+  },
+  {
    "at": "2026-11-22T04:55:07Z",
    "text": "Profiles got more park-ticket touches: the season card is a tear-off pass, Recent visits are tickets, and Records are sign plates. Home’s ranking card and each friend are tickets too, and the map’s filters fold behind an arrow on phones."
   },
