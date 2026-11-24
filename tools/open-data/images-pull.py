@@ -21,7 +21,33 @@ import json, re, sys, time, urllib.parse, urllib.request, html
 
 UA = 'CoasterHubBot/1.0 (https://coasterhub.org)'
 WIKI = {'coasterpedia': ('https://coasterpedia.net/w/api.php', 'tools/open-data/coasterpedia/infoboxes.jsonl'),
-        'enwiki': ('https://en.wikipedia.org/w/api.php', 'tools/open-data/wikipedia/en.jsonl')}
+        'enwiki': ('https://en.wikipedia.org/w/api.php', 'tools/open-data/wikipedia/en.jsonl'),
+        # Wikidata's image (P18) and logo (P154) are Commons files; the ref is
+        # the item's Q-id, as in open_links. (Carter, 2026-11-24: "start the
+        # wikidata photo setup".) Commons lets other sites show its images.
+        'wikidata': ('https://commons.wikimedia.org/w/api.php', 'tools/open-data/wikidata/all.csv')}
+
+
+def wikidata_wanted(path):
+    import csv
+    wanted = {}
+    for row in csv.DictReader(open(path)):
+        kind = {'P18': 'image', 'P154': 'logo'}.get(row['pid'])
+        if not kind or 'Special:FilePath/' not in row['val']:
+            continue
+        f = urllib.parse.unquote(row['val'].split('Special:FilePath/', 1)[1]).replace('_', ' ')
+        qid = row['c'].rsplit('/', 1)[-1]
+        if (qid, kind) not in {(q, k) for q, k in wanted.get(f, [])}:
+            wanted.setdefault(f, []).append((qid, kind))
+    # one image and one logo per item: the first named
+    seen, keep = set(), {}
+    for f in sorted(wanted):
+        for qid, kind in wanted[f]:
+            if (qid, kind) in seen:
+                continue
+            seen.add((qid, kind))
+            keep.setdefault(f, []).append((qid, kind))
+    return keep
 
 
 def get(api, params):
@@ -65,7 +91,7 @@ for source, (api, dump) in WIKI.items():
     if source not in PICK:
         continue
     wanted = {}  # file -> [(ref, kind)]
-    for line in open(dump):
+    for line in ([] if source == 'wikidata' else open(dump)):
         rec = json.loads(line)
         for kind, keys in (('image', ('image', 'image1', 'photo')), ('logo', ('logo',))):
             for k in keys:
@@ -73,6 +99,8 @@ for source, (api, dump) in WIKI.items():
                 if f:
                     wanted.setdefault(f, []).append((rec['title'], kind))
                     break
+    if source == 'wikidata':
+        wanted = wikidata_wanted(dump)
     files = sorted(f for f in wanted if (source, f) not in done)
     print(source, len(files), 'files', file=sys.stderr)
     for i in range(0, len(files), 20):   # 20, not 50: Coasterpedia times out on 50 with licences

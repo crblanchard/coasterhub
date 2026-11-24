@@ -3074,13 +3074,17 @@ export default {
         const id = +(url.searchParams.get("id") || 0);
         if (!id) return err(400, "need ?id=");
         try {
-          const row = await env.DB.prepare(
-            "SELECT i.thumb, i.url, i.width, i.height, i.author, i.license, i.license_url, i.page, i.source FROM open_images i " +
+          // A few candidates, best first, and the page shows the first that
+          // loads: Wikimedia Commons pictures lead (Commons allows other sites
+          // to show them; Coasterpedia's image server refuses, 2026-11-24).
+          const rows = (await env.DB.prepare(
+            "SELECT DISTINCT i.thumb, i.url, i.width, i.height, i.author, i.license, i.license_url, i.page, i.source, (l.coaster_id = ?1) AS own FROM open_images i " +
             "JOIN open_links l ON l.source = i.source AND l.ref = i.ref " +
             "WHERE i.kind = 'image' AND i.nonfree = 0 AND (l.coaster_id = ?1 OR l.coaster_id IN " +
             "(SELECT b.coaster FROM same_ride a JOIN same_ride b ON b.ride = a.ride WHERE a.coaster = ?1)) " +
-            "ORDER BY (l.coaster_id = ?1) DESC, CASE i.source WHEN 'coasterpedia' THEN 0 WHEN 'enwiki' THEN 1 ELSE 2 END LIMIT 1").bind(id).first();
-          return json({ photo: row || null }, 200, { "cache-control": "public, max-age=3600" });
+            "ORDER BY (i.url LIKE '%upload.wikimedia.org%') DESC, own DESC, CASE i.source WHEN 'wikidata' THEN 0 WHEN 'enwiki' THEN 1 WHEN 'coasterpedia' THEN 2 ELSE 3 END LIMIT 4").bind(id).all()).results || [];
+          const seen = new Set(), photos = rows.filter(r => !seen.has(r.url) && seen.add(r.url));
+          return json({ photo: photos[0] || null, photos }, 200, { "cache-control": "public, max-age=3600" });
         } catch (e) {
           if (/no such table/i.test(String(e && e.message || e))) return json({ photo: null });
           throw e;

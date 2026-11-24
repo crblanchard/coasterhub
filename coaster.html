@@ -240,7 +240,7 @@
     <div class="stats2" id="specs"></div>
     <!-- The ride's photo, under the stats and above riders (Carter, 2026-11-24),
          from the open sources with its credit; hidden when there is none. -->
-    <figure class="cphoto" id="cphoto" hidden><img id="cphoto_img" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption id="cphoto_cap"></figcaption></figure>
+    <figure class="cphoto" id="cphoto" hidden><img id="cphoto_img" alt="" decoding="async" referrerpolicy="no-referrer"><figcaption id="cphoto_cap"></figcaption></figure>
     <div id="reloc_wrap" style="display:none">
       <div class="sect">Past locations</div>
       <div class="hist" id="reloc"></div>
@@ -703,22 +703,32 @@ function riders(){
 // the line under it names the photographer, the licence and where it is from.
 function showPhoto(c){
   fetch('/api/coaster-photo?id='+encodeURIComponent(c.id)).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
-    var p=j && j.photo; if(!p || !p.thumb) return;
-    var fig=$('cphoto'), img=$('cphoto_img');
-    // Shown only once it has loaded (no empty box while it fails); the resized
-    // copy first, then the original file if that one will not load.
-    var tried=0;
-    img.onload=function(){ fig.hidden=false; };
-    img.onerror=function(){ if(!tried && p.url && p.url!==p.thumb){ tried=1; img.src=p.url; } else fig.hidden=true; };
+    var list=(j && (j.photos || (j.photo ? [j.photo] : []))) || [];
+    if(!list.length) return;
+    var fig=$('cphoto'), img=$('cphoto_img'), at=0, tried=0;
     img.alt=c.name+' at '+c.park;
-    if(p.width && p.height){ img.width=p.width; img.height=p.height; }
-    img.referrerPolicy='no-referrer';   // Coasterpedia refuses pictures asked for from another site's page
-    img.src=p.thumb;
-    var who=p.author ? (p.author.length>60 ? p.author.slice(0,57)+'\u2026' : p.author) : 'unknown';
-    var src={coasterpedia:'Coasterpedia', enwiki:'Wikipedia'}[p.source]||p.source;
-    $('cphoto_cap').innerHTML='Photo: '+esc(who)
-      +(p.license ? ' \u00b7 '+(p.license_url ? '<a href="'+esc(p.license_url)+'" target="_blank" rel="noopener">'+esc(p.license.toUpperCase())+'</a>' : esc(p.license.toUpperCase())) : '')
-      +' \u00b7 via '+(p.page ? '<a href="'+esc(p.page)+'" target="_blank" rel="noopener">'+esc(src)+'</a>' : esc(src));
+    img.referrerPolicy='no-referrer';
+    // Shown only once one has loaded: each candidate in turn (resized copy,
+    // then its original), so a refused picture never leaves an empty box.
+    function caption(p){
+      var who=p.author ? (p.author.length>60 ? p.author.slice(0,57)+'\u2026' : p.author) : 'unknown';
+      var src={coasterpedia:'Coasterpedia', enwiki:'Wikipedia', wikidata:'Wikimedia Commons'}[p.source]||p.source;
+      $('cphoto_cap').innerHTML='Photo: '+esc(who)
+        +(p.license ? ' \u00b7 '+(p.license_url ? '<a href="'+esc(p.license_url)+'" target="_blank" rel="noopener">'+esc(p.license.toUpperCase())+'</a>' : esc(p.license.toUpperCase())) : '')
+        +' \u00b7 via '+(p.page ? '<a href="'+esc(p.page)+'" target="_blank" rel="noopener">'+esc(src)+'</a>' : esc(src));
+    }
+    function load(){
+      var p=list[at]; if(!p){ fig.hidden=true; return; }
+      if(p.width && p.height){ img.width=p.width; img.height=p.height; }
+      img.src=tried ? p.url : (p.thumb||p.url);
+    }
+    img.onload=function(){ caption(list[at]); fig.hidden=false; };
+    img.onerror=function(){
+      var p=list[at];
+      if(!tried && p.url && p.url!==p.thumb){ tried=1; } else { at++; tried=0; }
+      load();
+    };
+    load();
   }).catch(function(){});
 }
 </script>

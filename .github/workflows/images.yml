@@ -1,0 +1,74 @@
+name: Coaster photos from the open sources
+
+# Photos (and logos) for coaster pages (Carter, 2026-11-24): asks Coasterpedia,
+# English Wikipedia and Wikimedia Commons (Wikidata's P18 image / P154 logo)
+# for each named file's address, size, author and licence
+# (tools/open-data/images-pull.py), writes migrations/233-open-data-images.sql
+# and loads it into open_images on D1. Nothing is downloaded: the site shows
+# Commons pictures straight from Commons, which allows that.
+#
+# Runs here because Wikipedia/Commons refuse the cloud sandbox (429). The pull
+# is resumable (images.json keeps what was already fetched), so later runs
+# only ask about new files. Weekly after the open-data refresh, or by hand.
+
+on:
+  schedule:
+    - cron: '23 12 * * 1'   # Mondays, after the open-data refresh
+  workflow_dispatch:
+    inputs:
+      sources:
+        description: 'Sources to pull (space-separated: coasterpedia enwiki wikidata). Empty = all.'
+        required: false
+        default: 'enwiki wikidata'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: images
+  cancel-in-progress: false
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Pull photo details
+        env:
+          SOURCES: ${{ inputs.sources }}
+        run: |
+          python3 -I tools/open-data/images-pull.py $SOURCES
+          python3 -I tools/open-data/build-images-sql.py > migrations/233-open-data-images.sql
+          python3 -I -c 'import json,collections; d=json.load(open("tools/open-data/images.json"))["images"]; print(len(d), "pictures", dict(collections.Counter(x["source"]+"/"+x["kind"] for x in d)))'
+
+      - name: Commit
+        run: |
+          git add tools/open-data/images.json migrations/233-open-data-images.sql
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -qm "Open data: photo details refreshed"
+            git pull -q --rebase -X theirs origin main && git push -q origin HEAD:main
+          fi
+
+      - name: Load into D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          FILE=migrations/233-open-data-images.sql
+          if grep -vE '^\s*(--|$)' "$FILE" | grep -viE '^(CREATE (TABLE|INDEX) IF NOT EXISTS open_|DELETE FROM open_|INSERT OR REPLACE INTO open_)' | grep -q .; then
+            echo "::error::$FILE touches something other than open_* tables"; exit 1
+          fi
+          # Output to a file, not the log (this repo's logs are public; see backup.yml).
+          if ! npx --yes wrangler@4 d1 execute coasterhub --remote --yes --file "$FILE" > "$RUNNER_TEMP/wrangler.log" 2>&1; then
+            tail -n 20 "$RUNNER_TEMP/wrangler.log" | sed -E 's#https?://[^ ]+#[link removed]#g'
+            echo "::error::loading the photos failed"; exit 1
+          fi
+          echo "$FILE loaded"
