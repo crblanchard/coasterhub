@@ -230,16 +230,18 @@
      moved. Two columns of hairline rows on a desktop, one on a phone. */
   .lost{columns:2 300px;column-gap:36px}
   /* One park per group, its rides under it (2026-11-24). */
-  .lost .lg{break-inside:avoid;padding:10px 0 4px}
-  .lost .lg .lp{display:block;color:var(--fg);font-weight:700;font-size:.95rem;text-decoration:none;padding-bottom:4px;border-bottom:1px solid var(--line)}
+  .lost .lg{break-inside:avoid;padding:0 0 18px}
+  .lost .lg .lp{display:block;color:var(--fg);font-weight:700;font-size:.95rem;text-decoration:none;padding-bottom:2px}
   .lost .lg .lp:hover{color:var(--accent2)}
-  .lost .lr{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);min-width:0}
+  /* No rules between a park and its rides, or between rides (Carter, 2026-11-24: "easier to read"). */
+  .lost .lr{display:flex;justify-content:space-between;gap:12px;padding:3px 0;min-width:0}
   .lost .lr .ln{min-width:0}
   .lost .lr .ln a{color:var(--fg);font-weight:600;font-size:.93rem;text-decoration:none}
   .lost .lr .ln a:hover{color:var(--accent2)}
   .lost .lr .ln span{display:block;color:var(--muted);font-size:.8rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lost .lr .lw{flex:none;color:var(--muted);font-size:.8rem;font-weight:600;text-align:right;white-space:nowrap}
-  .lost .lr .lw.mv{color:var(--accent2)}
+  .lost .lr .lw .now{display:block;color:var(--accent2);text-decoration:none}
+  .lost .lr .lw .now:hover{text-decoration:underline}
   .lostmore{background:none;border:0;font:inherit;font-size:.86rem;font-weight:600;color:var(--accent2);padding:10px 0 0;cursor:pointer}
   @media (max-width:680px){
     #content{display:flex;flex-direction:column}
@@ -1418,7 +1420,9 @@ function render(s){
       var c=x.c;
       // "Closed 2025" whether it closed or moved on (Carter, 2026-11-24).
       return '<div class="lr"><div class="ln"><a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></div>'
-        +'<div class="lw">Closed '+yr(c.closed)+'</div></div>';
+        +'<div class="lw">Closed '+yr(c.closed)
+        // A ride that moved on still says where it went (Carter, 2026-11-24).
+        +(x.moved?'<a class="now" href="'+esc(CoasterHub.coasterHref(x.moved))+'">now at '+esc(x.moved.park)+'</a>':'')+'</div></div>';
     };
     var group=function(list){
       var out='', cur=null, open=false;
