@@ -159,10 +159,11 @@
   .former{color:var(--muted);font-size:.9rem;margin:4px 0 0}
   .cphoto{margin:20px 0 6px}
   .cphoto[hidden]{display:none}
-  .cphoto img{display:block;width:100%;height:auto;max-height:460px;object-fit:cover;border-radius:14px;border:1px solid var(--line);background-color:var(--soft)}
+  /* The whole photo at its own shape, never cropped (Carter, 2026-11-24: "cropped weirdly"); a tall one sits centred on the panel colour. */
+  .cphoto img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain;border-radius:14px;border:1px solid var(--line);background-color:var(--soft)}
   .cphoto figcaption{margin-top:6px;color:var(--muted);font-size:.74rem;text-align:right}
   .cphoto figcaption a{color:inherit}
-  @media (max-width:640px){ .cphoto img{max-height:260px;border-radius:12px} }
+  @media (max-width:640px){ .cphoto img{max-height:340px;border-radius:12px} }
   .former b{color:var(--fg);font-weight:600}
 
   /* ---- Coaster page, new look (Carter, 2026-11-20: "all 1-8 please"). The

@@ -3082,7 +3082,7 @@ export default {
             "JOIN open_links l ON l.source = i.source AND l.ref = i.ref " +
             "WHERE i.kind = 'image' AND i.nonfree = 0 AND (l.coaster_id = ?1 OR l.coaster_id IN " +
             "(SELECT b.coaster FROM same_ride a JOIN same_ride b ON b.ride = a.ride WHERE a.coaster = ?1)) " +
-            "ORDER BY (i.url LIKE '%upload.wikimedia.org%') DESC, own DESC, CASE i.source WHEN 'wikidata' THEN 0 WHEN 'enwiki' THEN 1 WHEN 'coasterpedia' THEN 2 ELSE 3 END LIMIT 4").bind(id).all()).results || [];
+            "ORDER BY (i.url LIKE '%upload.wikimedia.org%') DESC, own DESC, (COALESCE(i.width, 0) >= COALESCE(i.height, 0)) DESC, CASE i.source WHEN 'wikidata' THEN 0 WHEN 'enwiki' THEN 1 WHEN 'coasterpedia' THEN 2 ELSE 3 END LIMIT 4").bind(id).all()).results || [];
           const seen = new Set(), photos = rows.filter(r => !seen.has(r.url) && seen.add(r.url));
           return json({ photo: photos[0] || null, photos }, 200, { "cache-control": "public, max-age=3600" });
         } catch (e) {
