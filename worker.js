@@ -1941,10 +1941,15 @@ async function coasterPhotos(env, id, all, skipPick) {
   if (pick && pick.url === "none" && !all) return [];
   const gal = await safe("SELECT g.thumb, g.url, g.width, g.height, g.author, g.license, g.license_url, g.page, 'wikidata' AS source, g.score FROM open_gallery g " +
     "JOIN open_links l ON l.source = 'wikidata' AND l.ref = g.ref WHERE g.nonfree = 0 AND " + own + " ORDER BY g.score DESC, g.width DESC LIMIT " + (all ? 80 : 4));
+  // A zoomed-out shot first where the file name says so (Carter, 2026-11-24:
+  // "zoomed out photos showing as much of the ride as possible").
   const img = await safe("SELECT DISTINCT i.thumb, i.url, i.width, i.height, i.author, i.license, i.license_url, i.page, i.source FROM open_images i " +
     "JOIN open_links l ON l.source = i.source AND l.ref = i.ref WHERE i.kind = 'image' AND i.nonfree = 0 AND " + own +
-    " ORDER BY (i.url LIKE '%upload.wikimedia.org%') DESC, (COALESCE(i.width, 0) >= COALESCE(i.height, 0)) DESC, CASE i.source WHEN 'wikidata' THEN 0 WHEN 'enwiki' THEN 1 WHEN 'coasterpedia' THEN 2 ELSE 3 END");
-  const best = gal.filter(g => g.score >= 6), rest = gal.filter(g => g.score < 6);
+    " ORDER BY (i.url LIKE '%upload.wikimedia.org%') DESC, (lower(i.file) LIKE '%overview%' OR lower(i.file) LIKE '%aerial%' OR lower(i.file) LIKE '%panoram%') DESC," +
+    " (COALESCE(i.width, 0) >= COALESCE(i.height, 0)) DESC, CASE i.source WHEN 'wikidata' THEN 0 WHEN 'enwiki' THEN 1 WHEN 'coasterpedia' THEN 2 ELSE 3 END");
+  // A gallery photo beats the sources' main photo only when it scores well:
+  // wide, large and named after the ride, or named as a wide shot.
+  const best = gal.filter(g => g.score >= 8), rest = gal.filter(g => g.score < 8);
   const list = [], seen = new Set();
   const add = (p, extra) => { if (p && p.url && p.url !== "none" && !seen.has(p.url)) { seen.add(p.url); list.push(Object.assign({}, p, extra || {})); } };
   if (pick) add(pick, { picked: 1 });
