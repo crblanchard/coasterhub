@@ -26,14 +26,14 @@ WIKI = {'coasterpedia': ('https://coasterpedia.net/w/api.php', 'tools/open-data/
 
 def get(api, params):
     url = api + '?' + urllib.parse.urlencode(params)
-    for attempt in range(4):
+    for attempt in range(3):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': UA}), timeout=60) as r:
                 return json.load(r)
         except Exception as e:
-            print('retry', attempt + 1, e, file=sys.stderr)
-            time.sleep(10 * (attempt + 1))
-    raise SystemExit('gave up on ' + api)
+            print('retry', attempt + 1, e, file=sys.stderr, flush=True)
+            time.sleep(5 * (attempt + 1))
+    return None   # a refused source (429) is skipped this run, not fatal
 
 
 def text(v):
@@ -48,8 +48,12 @@ def filename(v):
     return v.replace('_', ' ') if re.search(r'\.(jpe?g|png|gif|svg|webp|tiff?)$', v, re.I) else None
 
 
+# Which sources: all by default, or the ones named (python3 images-pull.py coasterpedia).
+PICK = sys.argv[1:] or list(WIKI)
 out = []
 for source, (api, dump) in WIKI.items():
+    if source not in PICK:
+        continue
     wanted = {}  # file -> [(ref, kind)]
     for line in open(dump):
         rec = json.loads(line)
@@ -66,6 +70,11 @@ for source, (api, dump) in WIKI.items():
         d = get(api, {'action': 'query', 'format': 'json', 'formatversion': 2, 'prop': 'imageinfo',
                       'iiprop': 'url|size|extmetadata|mime', 'iiurlwidth': 1200,
                       'titles': '|'.join('File:' + f for f in batch)})
+        if d is None:
+            print(source, 'refused; skipping the rest of it this run', file=sys.stderr, flush=True)
+            break
+        if i % 500 == 0:
+            print(source, i, '/', len(files), file=sys.stderr, flush=True)
         norm = {n['to']: n['from'] for n in d.get('query', {}).get('normalized', [])}
         for p in d.get('query', {}).get('pages', []):
             ii = (p.get('imageinfo') or [None])[0]
