@@ -2915,8 +2915,11 @@
       img.onerror = function () {
         // That size refused (a picture smaller than it): the original, then the next one.
         var p = list[at];
-        if (!img._orig && p && p.url && img.src !== p.url) { img._orig = 1; img.src = p.url; return; }
-        img._orig = 0; at++; if (list[at]) { img.src = size(list[at].thumb || list[at].url); return; }
+        // Fall back to the size Commons itself handed out, then the original.
+        var steps = p ? [p.thumb, p.url].filter(Boolean) : [];
+        img._step = (img._step || 0);
+        while (img._step < steps.length) { var u = steps[img._step++]; if (u !== img.src) { img.src = u; return; } }
+        img._step = 0; at++; if (list[at]) { img.src = size(list[at].thumb || list[at].url); return; }
         img.remove(); el.classList.remove("hasphoto");
       };
       img.src = size(list[0].thumb || list[0].url);
