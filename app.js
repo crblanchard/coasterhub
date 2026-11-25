@@ -2924,7 +2924,7 @@
     var d = p.taken ? (String(p.taken).length >= 7 ? monthYear(p.taken) : String(p.taken).slice(0, 4)) : "";
     var lic = String(p.license || "").trim();
     if (/^cc/i.test(lic)) lic = lic.toUpperCase().replace(/\s+\d+(\.\d+)*$/, "").replace(/\s+/g, "-");
-    var t = "Photo: " + (d ? d + ", " : "") + who + "." + (lic ? " " + lic + "." : "");
+    var t = (d ? d + ", " : "") + who + "." + (lic ? " " + lic + "." : "");   // no "Photo:" (Carter: "very clear")
     var c = cls ? ' class="' + cls + '"' : "";
     return p.page ? '<a' + c + ' href="' + E(p.page) + '" target="_blank" rel="noopener">' + E(t) + "</a>" : "<span" + c + ">" + E(t) + "</span>";
   }

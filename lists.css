@@ -326,3 +326,13 @@ a.crow .tick.busy{opacity:.4;pointer-events:none}
 .suglist .sugrow .riderrow .nm{font-size:.98rem}
 .suglist .sugrow .riderrow .un,.suglist .sugrow .riderrow .sub{font-size:.82rem}
 .suglist .sugf{min-width:80px;min-height:36px;padding:6px 12px;font-size:.85rem;margin-right:12px}
+
+/* An opened park is one grey block, its coasters included, and "Park page →"
+   sits on the park's own line beside its place, not as a row that reads like
+   another coaster (Carter, 2026-11-25). */
+.mlist details.mdl[open]{background:var(--soft)}
+.mlist details.mdl[open] > summary{border-bottom-color:var(--line)}
+.mlist details.mdl[open] a.crow:hover{background:var(--tint)}
+.mlist .mpark{display:none;flex:none;font-size:.8rem;font-weight:600;color:var(--accent2);text-decoration:none;white-space:nowrap}
+.mlist .mpark:hover{text-decoration:underline}
+.mlist details.mdl[open] .mpark{display:inline}
