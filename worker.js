@@ -1719,7 +1719,14 @@ async function getPostLaunch(env) {
   const adds2 = addList.filter(a => notOsmOnly(a.refs)).map(a => ({ ...a, facts: factsOf(a.refs) }));
   const parks2 = newParks.map(p => ({ ...p, coasters: p.coasters.filter(c => notOsmOnly(c.refs)).map(c => ({ ...c, facts: factsOf(c.refs) })) })).filter(p => p.coasters.length);
   const models = await getModelSuggestions(env, cs, linked, id => riders.get(home.get(id) || id) || 0).catch(() => []);
-  return { fields: OPEN_FIELDS, gaps, changed, matches: cut.changes, decided: cut.decided, adds: adds2, nosource, newParks: parks2, models,
+  // Every model each maker on the Models tab already uses, most-used first, to
+  // pick from (Carter, 2026-11-26: "show all models that other coasters from
+  // that manufacturer use so i can match more easily").
+  const makerModels = {};
+  const wantMakers = new Set(models.map(m => m.manu).filter(Boolean));
+  for (const c of cs) if (c.manu && c.model && wantMakers.has(c.manu)) { const m = makerModels[c.manu] || (makerModels[c.manu] = {}); m[c.model] = (m[c.model] || 0) + 1; }
+  for (const k in makerModels) makerModels[k] = Object.entries(makerModels[k]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([model, n]) => ({ model, n }));
+  return { fields: OPEN_FIELDS, gaps, changed, matches: cut.changes, decided: cut.decided, adds: adds2, nosource, newParks: parks2, models, makerModels,
            counts: { gaps: gaps.length, changed: changed.length, matches: cut.changes.length,
                      // Every one still to decide, closed ones too (Carter, 2026-11-25).
                      adds: adds2.length, newParks: parks2.length, nosource: nosource.length, models: models.length } };

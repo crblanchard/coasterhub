@@ -100,6 +100,15 @@
   .mdc .mdtag{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
   .mdc .mdtag.have{color:var(--accent2)}
   .mdc .mdfrom{color:var(--muted);font-size:.8rem}
+  .mdc .mdchips{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:8px}
+  .mdc .mdlbl{color:var(--muted);font-size:.72rem;font-weight:700;margin-right:2px}
+  .mdc .mdchip{font:inherit;font-size:.76rem;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+  .mdc .mdchip i{font-style:normal;color:var(--muted);margin-left:2px}
+  .mdc .mdchip:hover,.mdc .mdchip.on{border-color:var(--accent2);color:var(--accent2)}
+  .mdc .mdmore{display:contents}
+  .mdc .mdmore summary{list-style:none;cursor:pointer;font-size:.76rem;color:var(--accent2);font-weight:600;padding:3px 4px}
+  .mdc .mdmore summary::-webkit-details-marker{display:none}
+  .mdc .mdmore[open] summary{display:none}
   .parkhead .parkall{float:right;margin:0 0 4px 10px;padding:6px 12px;border:1px solid var(--accent2);border-radius:999px;background:var(--panel);color:var(--accent2);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}
   .parkhead .parkall:hover{background:var(--accent2);color:#fff}
   .parkhead small{color:var(--muted);font-size:.8rem;line-height:1.7}
@@ -433,13 +442,29 @@ const factLine = f => {
 // openName; Carter, 2026-11-25), so it reads that way here too.
 const qName = n => /^Q\d+$/i.test(String(n || '')) ? 'Unknown' : n;
 const MEDIT = {};   // model boxes edited while the page is open
+// The models this maker's other coasters already use, most-used first; a tap
+// puts one in the box (Carter, 2026-11-26: "so i can match more easily").
+function makerChips(x) {
+  const ms = (D.makerModels || {})[x.manu] || [];
+  if (!ms.length) return '';
+  const chip = m => '<button type="button" class="mdchip" data-mpick="' + esc(m.model) + '">' + esc(m.model) + ' <i>' + m.n + '</i></button>';
+  return '<div class="mdchips"><span class="mdlbl">' + esc(x.manu) + '&rsquo;s models</span>' + ms.slice(0, 8).map(chip).join('')
+    + (ms.length > 8 ? '<details class="mdmore"><summary>+' + (ms.length - 8) + ' more</summary>' + ms.slice(8).map(chip).join('') + '</details>' : '') + '</div>';
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-mpick]'); if (!b) return;
+  const card = b.closest('.mdc'), inp = card.querySelector('.md-in');
+  inp.value = b.getAttribute('data-mpick'); MEDIT[card.dataset.id] = inp.value;
+  const tag = card.querySelector('.mdtag'); if (tag) { tag.textContent = 'On the site'; tag.classList.add('have'); }
+  card.querySelectorAll('.mdchip.on').forEach(c => c.classList.remove('on')); b.classList.add('on');
+});
 const VIEW = {
   models: list => '<div class="cards">' + list.map(x => '<div class="card mdc" data-id="' + x.id + '"><div class="one">'
     + '<a href="' + esc(CoasterHub.coasterHref(x.name, x.park)) + '" target="_blank"><b>' + esc(x.name) + '</b></a> <small>' + esc(x.park) + (x.manu ? ' &middot; ' + esc(x.manu) : '') + (x.closed ? ' &middot; closed' : '') + (x.riders ? ' &middot; ' + x.riders + ' rider' + (x.riders === 1 ? '' : 's') : '') + '</small></div>'
     + '<div class="mdrow"><input class="md-in" type="text" maxlength="80" value="' + esc(MEDIT[x.id] != null ? MEDIT[x.id] : x.suggest) + '">'
     + '<span class="mdtag' + (x.existing ? ' have' : '') + '">' + (x.existing ? 'On the site' : 'New') + '</span>'
     + '<button type="button" class="btn sm" data-muse>Use</button><button type="button" class="ghost sm" data-mskip>Skip</button></div>'
-    + '<small class="mdfrom">' + esc(x.from || '') + '</small></div>').join('') + '</div>',
+    + '<small class="mdfrom">' + esc(x.from || '') + '</small>' + makerChips(x) + '</div>').join('') + '</div>',
   gaps: list => '<div class="tbl-wrap"><table class="mm"><thead><tr><th>Coaster</th><th>Source says</th><th></th></tr></thead><tbody>' + list.map(g =>
     '<tr><td class="nm"><span class="fld">' + NAMES[g.field] + '</span>' + coaster(g) + '</td><td>' + val(g.field, g.value) + ' ' + srcTag(g.source) + '</td><td class="todo">'
     + btn('Use', { a: 'value', id: g.id, f: g.field, s: g.source }, 'small yes') + btn('Skip', { a: 'skip', id: g.id, f: g.field, s: g.source, v: g.value }, 'small') + '</td></tr>').join('') + '</tbody></table></div>',
