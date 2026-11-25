@@ -3260,6 +3260,8 @@ async function main() {
     check("...but not to a link that doesn't exist", r.status === 404, JSON.stringify(r.data));
     r = await call(db, "POST", "/api/trip-link", { cookie: rider, body: { code: "ohio-run", url: "/rankings" } });
     check("...and only with a trip", r.status === 400, JSON.stringify(r.data));
+    r = await call(db, "GET", "/api/trips");
+    check("everyone's trips: the named ones, with parks and riders", r.status === 200 && r.data.trips.length === 1 && r.data.trips[0].code === "ohio-run" && r.data.trips[0].parks.length === 3 && r.data.trips[0].riders.includes("trip-rider"), JSON.stringify(r.data));
     res = await worker.fetch(new Request("https://coasterhub.org/trip/nothere"), E, ctx);
     check("an unknown trip goes to the planner", res.status === 302 && res.headers.get("location") === "https://coasterhub.org/trip", res.status + " " + res.headers.get("location"));
   }

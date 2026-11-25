@@ -141,6 +141,15 @@
   .tbtn:hover{border-color:var(--accent2);color:var(--accent2)}
   .tbtn[disabled]{opacity:.5;cursor:default}
   #triplist{margin:22px 0 0}
+  /* Everyone's saved trips (Carter, 2026-11-26), at the foot of the planner. */
+  #alltrips_wrap[hidden]{display:none}
+  .alltrips{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .atrip{display:block;border:1px solid var(--line);border-radius:14px;background-color:var(--panel);padding:12px 14px;color:var(--fg);text-decoration:none}
+  .atrip:hover{border-color:var(--accent2)}
+  .atrip.here{border-color:var(--accent2);box-shadow:inset 0 0 0 1px var(--accent2)}
+  .atrip b{display:block;font-family:var(--display);font-stretch:92%;font-weight:800;font-size:1.02rem;letter-spacing:-.01em}
+  .atrip .ap{display:block;color:var(--muted);font-size:.84rem;margin-top:3px;line-height:1.35}
+  .atrip .aw{display:block;color:var(--muted);font-size:.78rem;margin-top:6px}
   #triplist .tlc{color:var(--muted);font-weight:600;font-size:.8em}
   /* Each park its own box, a little apart (Carter, 2026-11-25: easier to read
      on a phone). */
@@ -251,6 +260,10 @@
       <div class="near" id="near"></div>
       <p class="note">Distances are as the crow flies.</p>
     </div>
+    <div id="alltrips_wrap" hidden>
+      <div class="sect">Everyone&rsquo;s trips</div>
+      <div class="alltrips" id="alltrips"></div>
+    </div>
   </div>
 </div></section>
 
@@ -279,7 +292,7 @@ var TRIPQS='', TRIPBASE=null, CANSAVE=null, ME_SLUG=null;
 if(window.TRIP_QS!=null) CoasterHub.me().then(function(a){ ME_SLUG=a&&a.slug||null; CANSAVE=!!(ME_SLUG && (window.TRIP_EDITORS||[]).indexOf(ME_SLUG)>=0); }).catch(function(){ CANSAVE=false; });
 // A named trip (coasterhub.org/trip/<name> lands here with ?name=): its title.
 var TRIPNAME=(Q.get('name')||'').trim().slice(0,60);
-function showName(){ var h=document.querySelector('.hero h1'), hp=document.getElementById('hero_p'); if(h && TRIPNAME){ h.textContent=TRIPNAME; document.title=TRIPNAME+' \u2014 Coaster Hub'; if(hp) hp.textContent='Edit trip plan below.'; } }
+function showName(){ var h=document.querySelector('.hero h1'), hp=document.getElementById('hero_p'); if(h && TRIPNAME){ h.textContent=TRIPNAME; document.title=TRIPNAME+' \u2014 Coaster Hub'; } if(hp && (TRIPNAME || window.TRIP_CODE)) hp.textContent='Edit trip plan below.'; }
 showName();
 var css=function(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); };
 
@@ -303,6 +316,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
       return '<div class="tlr soon"><span class="tln"><a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'+(mdl?'<small>'+esc(mdl)+'</small>':'')+'</span><span class="tlsoon">'+esc(soonLabel(c))+'</span></div>';
     }).join('');
   }
+  window.TRIP_BYSLUG=BYSLUG;   // for Everyone's trips, outside this function
   Object.keys(P).forEach(function(n){ BYSLUG[CoasterHub.slugify(n)]=n; P[n].open.sort(function(a,b){ return (b.h||0)-(a.h||0) || String(a.name).localeCompare(String(b.name)); }); });
   var ALL=Object.keys(P).map(function(n){ return P[n]; }).filter(function(p){ return p.open.length; });
   function park(slug){ return P[BYSLUG[slug]] || P[CoasterHub.findPark(list, parks, slug) || ''] || null; }
@@ -767,13 +781,33 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     FRIENDS=rr[1] ? (rr[1].following||[]).map(function(x){ return x.slug; }) : [];
     return Promise.all(withList.filter(function(s){ return s!==me; }).slice(0,8).map(function(s){ return addRider(s); }));
   }).then(function(){
-    if(!me && !TRIPNAME) $('hero_p').textContent='Pick parks and see what each one has. Sign in to see which coasters are new to you.';
+    if(!me && !TRIPNAME && !window.TRIP_CODE) $('hero_p').textContent='Pick parks and see what each one has. Sign in to see which coasters are new to you.';
     $('loading').style.display='none'; $('ui').hidden=false;
     drawRiders();
+    allTrips();
     setupMap();
     draw();
   });
 }).catch(function(e){ console.error(e); $('loading').style.display='none'; $('err').style.display='block'; });
+// Everyone's saved trips (Carter, 2026-11-26: "publicly see trips saved by
+// everyone"): the named ones, newest first, from /api/trips.
+function allTrips(){
+  var who={};
+  CoasterHub.fetchUsers().catch(function(){ return []; }).then(function(us){ (us||[]).forEach(function(u){ who[u.slug]=u.name||u.slug; }); return fetch('/api/trips'); })
+  .then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    var ts=(j && j.trips) || [];
+    if(!ts.length) return;
+    $('alltrips').innerHTML=ts.map(function(t){
+      var names=t.parks.map(function(sl){ return (window.TRIP_BYSLUG||{})[sl]; }).filter(Boolean);
+      var shown=names.slice(0,4).join(', ')+(names.length>4?' &amp; '+(names.length-4)+' more':'');
+      var people=t.riders.map(function(sl){ return who[sl]; }).filter(Boolean);
+      return '<a class="atrip'+(t.code===window.TRIP_CODE?' here':'')+'" href="/trip/'+encodeURIComponent(t.code)+'"><b>'+esc(t.name)+'</b>'
+        +'<span class="ap">'+names.length+' park'+(names.length===1?'':'s')+(names.length?' &middot; '+esc(shown).replace(/&amp;amp;/g,'&amp;'):'')+'</span>'
+        +(people.length?'<span class="aw">'+esc(people.join(', '))+'</span>':'')+'</a>';
+    }).join('');
+    $('alltrips_wrap').hidden=false;
+  }).catch(function(){});
+}
 </script>
 </body>
 </html>

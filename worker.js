@@ -3216,7 +3216,10 @@ export default {
       // be /trip/china-2027 after you open it"): the trip is handed to the page
       // as window.TRIP_QS instead of a redirect to the long address.
       if (typeof HTMLRewriter !== "undefined" && env.ASSETS) try {
-        const page = await env.ASSETS.fetch(new Request(new URL("/trip", url).toString(), { headers: request.headers }));
+        // A fresh request, not the browser's headers: its If-None-Match made
+        // the assets answer 304 on a second visit, which is not ok, so the trip
+        // fell through to the redirect to the long address (Carter, 2026-11-26).
+        const page = await env.ASSETS.fetch(new Request(new URL("/trip", url).toString(), { headers: { accept: "text/html" } }));
         if (page.ok) {
           const qs = new URL(full).search;
           let rw = new HTMLRewriter()
@@ -3418,6 +3421,22 @@ export default {
         }
         if (!row) return err(500, "could not make a link");
         return json({ code: row.code, short: url.origin + "/trip/" + row.code });
+      }
+      // Everyone's saved trips (Carter, 2026-11-26: "a page/list where you can
+      // publicly see trips saved by everyone"): the named ones only, newest
+      // first; an unnamed link is somebody's scratch pad, not a trip.
+      if (request.method === "GET" && path === "/api/trips") {
+        try {
+          const rows = (await env.DB.prepare("SELECT code, url, name, created, hits, owner FROM trip_links WHERE name IS NOT NULL AND name != '' ORDER BY created DESC LIMIT 200").all()).results || [];
+          return json({ trips: rows.map(r => {
+            let parks = [];
+            try { parks = (new URL(r.url, "https://x").searchParams.get("p") || "").split(",").filter(Boolean); } catch (e) {}
+            return { code: r.code, name: r.name, created: r.created, hits: r.hits || 0, riders: [...new Set(tripEditors(r))], parks };
+          }) });
+        } catch (e) {
+          if (/no such (table|column)/i.test(String(e && e.message || e))) return json({ trips: [] });
+          throw e;
+        }
       }
       // A park's photos, best first (Carter, 2026-11-25), for the carousel on
       // its page: open_park_gallery (park-photos-pull.py), free licences only.
