@@ -92,6 +92,7 @@
   .act select.same-as{max-width:220px}
   .parkhead{margin:14px 0 2px;padding:10px 14px;border-left:3px solid var(--accent2);background:var(--well);border-radius:0 10px 10px 0}
   .parkhead b{display:block;font-size:.95rem}
+  .addc .aboveall{margin-left:auto;font-size:.82rem}
   .facts1{display:block;margin:3px 0 0;font-size:.82rem;color:var(--fg);font-variant-numeric:tabular-nums}
   .facts1.none{color:var(--muted);font-style:italic}
   .mdc .mdrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 4px}
@@ -466,7 +467,10 @@ const VIEW = {
       + (a.refs.every(r => r.source === 'osm') ? ' · <span class="bad">only in OpenStreetMap, which sometimes labels water rides and play equipment as coasters</span>' : '') + '</div></div>'
       + '<div class="act">' + btn('Add to the site', { a: 'add', park: a.park, name: RENAME[akey(a)] || a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'yes')
       + btn('Leave out', { a: 'noadd', park: a.park, name: a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'no')
-      + sameAs(a) + '</div></div>').join('') + '</div>',
+      + sameAs(a)
+      // Everything ticked from the top of the list down to this one (Carter,
+      // 2026-11-25: "go through like ten then push it").
+      + '<button type="button" class="ghost aboveall" data-above="' + i + '">Add all above</button></div></div>').join('') + '</div>',
   newParks: list => '<div class="cards">' + list.map((p, i) => {
     const alive = c => !/not operat|nicht in betrieb|sbno/i.test(c.status || '') && /operat|construct|open|betrieb/i.test(c.status || '');
     return (p.lat == null && (i === 0 || list[i - 1].lat != null) ? '<div class="npbreak">No map pin yet: not counted above. Add coordinates on a card to bring it up.</div>' : '')
@@ -568,6 +572,10 @@ async function bulkModels() {
   catch (err) { alert('Stopped: ' + err + '. The ones before it were saved.'); }
   b.disabled = false; D = await load(); render();
 }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-above]'); if (!b) return;
+  bulkAdd(LIST.slice(0, +b.getAttribute('data-above') + 1).filter(ticked));
+});
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-parkall]'); if (!b) return;
   const park = b.getAttribute('data-parkall');
