@@ -2109,7 +2109,21 @@ async function openClosedNoDate(env, refs) {
     if (st && /defunct|not operat|nicht in betrieb|sbno|storage|closed|removed|demolish|relocat/i.test(st.v || "")) dead = true;
     if (await env.DB.prepare("SELECT 1 FROM open_record_facts WHERE source = ? AND ref = ? AND field = 'closed' AND value IS NOT NULL AND value <> ''").bind(r.source, r.ref).first()) return false;
   }
-  return dead;
+  if (!dead) return false;
+  // A rough closing time ("c. 1970s", "1961 or earlier to c. 1970s") is a
+  // closing year all the same (Carter, 2026-11-25: "could we just write 1970
+  // as closing date in that instance moving forward"): the last year named, a
+  // decade read as its first year, recorded as the source's closed fact (year
+  // precision) so the add takes it.
+  for (const r of refs) {
+    const row = await env.DB.prepare("SELECT v FROM open_raw WHERE source = ? AND ref = ? AND k IN ('closed', 'closing_date', 'close_date', 'schliessung') AND v IS NOT NULL AND v <> '' LIMIT 1").bind(r.source, r.ref).first();
+    const ys = row ? String(row.v).match(/\b(1[89]\d\d|20\d\d)s?\b/g) : null;
+    if (!ys) continue;
+    const y = ys[ys.length - 1].slice(0, 4);
+    await env.DB.prepare("INSERT OR REPLACE INTO open_record_facts (source, ref, field, value, prec, cites_rcdb) VALUES (?, ?, 'closed', ?, 'year', 0)").bind(r.source, r.ref, y).run();
+    return false;
+  }
+  return true;
 }
 async function setOpenChoice(env, acct, id, field, source, typed) {
   const isName = field === "name";
