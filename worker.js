@@ -3033,6 +3033,17 @@ export default {
     // /rankings/all right what's the point of that"). Old links land there.
     if (path.replace(/\/+$/, "") === "/rankings/all") return Response.redirect(new URL("/rankings", url).toString(), 301);
 
+    // Short links, coasterhub.org/t/<code> (Carter, 2026-11-25: "is there an
+    // auto bitly thing ... the url is sooo long"): our own, so a shared trip
+    // stays on the site and nobody else sees who opened it. See /api/short.
+    const sm = path.match(/^\/t\/([A-Za-z0-9]{4,12})\/?$/);
+    if (sm) {
+      const row = await env.DB.prepare("SELECT url FROM short_links WHERE code = ?").bind(sm[1]).first().catch(() => null);
+      if (!row) return Response.redirect(new URL("/", url).toString(), 302);
+      env.DB.prepare("UPDATE short_links SET hits = hits + 1 WHERE code = ?").bind(sm[1]).run().catch(() => {});
+      return Response.redirect(new URL(row.url, url).toString(), 302);
+    }
+
     if (!path.startsWith("/api/")) {
       const res = await env.ASSETS.fetch(request);
       // The pretty URLs are _redirects rewrites, and live the model pages
@@ -3155,6 +3166,35 @@ export default {
         // Change photo look unsaved on refresh (Carter, 2026-11-25). Pages warm
         // and keep the list themselves, so speed comes from that instead.
         return json({ photo: photos[0] || null, photos });
+      }
+      // Make a short link (see /t/ above): {url} -> {code, short}. Only a path
+      // on this site, never another site's address, so it can't be used to
+      // dress up a link elsewhere. The same address always gets the same code.
+      // The table makes itself the first time (migrations/241-short-links.sql
+      // records it).
+      if (request.method === "POST" && path === "/api/short") {
+        let b; try { b = await request.json(); } catch (e) { return err(400, "bad JSON"); }
+        let u = String((b && b.url) || "");
+        try {
+          const x = new URL(u, url);
+          if (x.host !== url.host && !/(^|\.)coasterhub\.org$/i.test(x.hostname)) return err(400, "only links on this site");
+          u = x.pathname + x.search + x.hash;
+        }
+        catch (e) { return err(400, "not a link"); }
+        if (!u.startsWith("/") || u.startsWith("//") || u.length > 6000) return err(400, "not a link on this site");
+        await env.DB.prepare("CREATE TABLE IF NOT EXISTS short_links (code TEXT PRIMARY KEY, url TEXT NOT NULL UNIQUE, created TEXT, hits INTEGER NOT NULL DEFAULT 0)").run();
+        let row = await env.DB.prepare("SELECT code FROM short_links WHERE url = ?").bind(u).first();
+        if (!row) {
+          const A = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+          for (let tries = 0; tries < 5 && !row; tries++) {
+            const rnd = crypto.getRandomValues(new Uint8Array(6)), code = Array.from(rnd, n => A[n % A.length]).join("");
+            const r = await env.DB.prepare("INSERT OR IGNORE INTO short_links (code, url, created) VALUES (?, ?, ?)").bind(code, u, new Date().toISOString()).run();
+            if (r.meta && r.meta.changes) row = { code };
+            else row = await env.DB.prepare("SELECT code FROM short_links WHERE url = ?").bind(u).first();
+          }
+          if (!row) return err(500, "could not make a link");
+        }
+        return json({ code: row.code, short: url.origin + "/t/" + row.code });
       }
       // A park's photos, best first (Carter, 2026-11-25), for the carousel on
       // its page: open_park_gallery (park-photos-pull.py), free licences only.

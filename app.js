@@ -3023,6 +3023,13 @@
     requestAnimationFrame(function () { show(at, false); });
     box.querySelector(".pbx").focus();
   }
+  // A short coasterhub.org/t/<code> link for a page on this site (worker
+  // /api/short); the full address if that fails, so sharing always works.
+  function shortLink(href) {
+    return fetch("/api/short", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url: href }) })
+      .then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return (j && j.short) || href; })
+      .catch(function () { return href; });
+  }
   function photoInto(el, id, opts) {
     if (!el || !id) return;
     opts = opts || {};
@@ -4074,7 +4081,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, parkRanks: parkRanks, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, photoGallery: photoGallery, photoSize: photoSize, photoBox: photoBox, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
+              openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, photoGallery: photoGallery, photoSize: photoSize, photoBox: photoBox, shortLink: shortLink, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;

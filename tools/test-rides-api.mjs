@@ -3211,6 +3211,26 @@ async function main() {
     check("with both keys, a sign-up with no token is refused", r.status === 403, JSON.stringify(r.data));
   }
 
+  // Short links (Carter, 2026-11-25): coasterhub.org/t/<code>, this site only.
+  {
+    const db = freshDb();
+    let r = await call(db, "POST", "/api/short", { body: { url: "https://coasterhub.org/trip?p=cedar-point,kings-island&r=carter" } });
+    check("a short link is made for a page on this site", r.status === 200 && /^https:\/\/coasterhub\.org\/t\/[A-Za-z0-9]{6}$/.test(r.data.short), JSON.stringify(r.data));
+    const code = r.data && r.data.code;
+    r = await call(db, "POST", "/api/short", { body: { url: "/trip?p=cedar-point,kings-island&r=carter" } });
+    check("...the same address gets the same code", r.data && r.data.code === code, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/short", { body: { url: "https://example.com/phish" } });
+    check("...another site's address is refused", r.status === 400, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/short", { body: { url: "//example.com/x" } });
+    check("...and so is a protocol-relative one", r.status === 400, JSON.stringify(r.data));
+    const res = await worker.fetch(new Request("https://coasterhub.org/t/" + code), { DB: new FakeD1(db), ADMIN_PASSWORD: PW }, ctx);
+    check("/t/<code> redirects to the page", res.status === 302 && res.headers.get("location") === "https://coasterhub.org/trip?p=cedar-point,kings-island&r=carter", res.status + " " + res.headers.get("location"));
+    await new Promise(z => setTimeout(z, 10));
+    check("...and counts the visit", rows(db, "SELECT hits FROM short_links WHERE code = ?", code)[0].hits === 1);
+    const miss = await worker.fetch(new Request("https://coasterhub.org/t/nothere"), { DB: new FakeD1(db), ADMIN_PASSWORD: PW }, ctx);
+    check("an unknown code goes home", miss.status === 302 && miss.headers.get("location") === "https://coasterhub.org/", miss.status + " " + miss.headers.get("location"));
+  }
+
   console.log("\n" + pass + " passed, " + fail + " failed\n");
   process.exit(fail ? 1 : 0);
 }
