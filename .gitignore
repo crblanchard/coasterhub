@@ -29,3 +29,4 @@ staging-seed.sql
 # The app project's installed packages (app/: npm install)
 app/node_modules/
 node_modules/
+__pycache__/
