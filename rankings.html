@@ -405,6 +405,15 @@
   .hhbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:520px;width:100%}
   .hhbox h3{font-size:1.05rem;margin-bottom:4px}
   .hhbox .sub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  /* Which is better, on a computer: much wider, so each ride's photo is big
+     enough to see (Carter, 2026-11-25). Phones keep the compact box. */
+  @media (min-width:900px){
+    #hh .hhbox{max-width:980px;padding:28px 30px}
+    #hh .hhbox h3{font-size:1.25rem}
+    #hh .pick{padding:14px 14px 18px}
+    #hh .pick b{font-size:1.1rem}
+    #hh img.hhphoto.ph{height:auto;aspect-ratio:3/2;border-radius:10px;margin-bottom:12px}
+  }
   .vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
   .pick{background:transparent;border:1px solid var(--line);border-radius:12px;padding:16px 12px;cursor:pointer;
         color:var(--fg);text-align:center;font-family:inherit}
@@ -2961,8 +2970,8 @@ function stepHH(){
   $('hh_a').innerHTML='<b>'+esc(aName)+'</b><span>'+esc(aSub)+'</span>'+(aMdl?'<span class="mdl">'+esc(aMdl)+'</span>':'');
   $('hh_b').innerHTML='<b>'+esc(bName)+'</b><span>'+esc(bSub)+'</span>'+(bMdl?'<span class="mdl">'+esc(bMdl)+'</span>':'');
   // A photo of each, so you see the ride as well as read it (Carter, 2026-11-24).
-  CoasterHub.photoInto($('hh_a'), a.id, {cls:'hhphoto', w:500, first:true});
-  CoasterHub.photoInto($('hh_b'), b.id, {cls:'hhphoto', w:500, first:true});
+  CoasterHub.photoInto($('hh_a'), a.id, {cls:'hhphoto', w:(innerWidth>=900?960:500), first:true});
+  CoasterHub.photoInto($('hh_b'), b.id, {cls:'hhphoto', w:(innerWidth>=900?960:500), first:true});
   // How many more, roughly (critique, 2026-10-02: the end was invisible): the
   // halvings still to do plus a confirmation.
   var togo=Math.max(1, (hh.hi>hh.lo ? Math.ceil(Math.log2(hh.hi-hh.lo+1)) : 0) + 1);
