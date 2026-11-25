@@ -1233,8 +1233,8 @@ img.hhphoto.ph{display:block;width:100%;height:120px;object-fit:cover;border-rad
    Beside a photo there is room for one column of facts until the screen is wide. */
 @media (min-width:700px){
   .hasphoto:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);column-gap:28px;row-gap:0;align-items:start}
-  .hasphoto > img.cxphoto.ph{grid-column:2;grid-row:1;max-width:none;margin:4px 0 0}
-  .hasphoto > :not(img.cxphoto){grid-column:1;min-width:0}
+  .hasphoto > img.cxphoto.ph,.hasphoto > div.pgal.cxgal{grid-column:2;grid-row:1;max-width:none;margin:4px 0 0}
+  .hasphoto > :not(img.cxphoto):not(.cxgal){grid-column:1;min-width:0}
   /* Who ranked and rode it goes under whichever side is shorter: under the
      photo when the facts run longer than it (.morer, set by photoInto), else
      under the facts, so both sides fill (Carter, 2026-11-25). */
@@ -1249,3 +1249,23 @@ img.hhphoto.ph{display:block;width:100%;height:120px;object-fit:cover;border-rad
 .cx .whol{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
 img.cxphoto.fit,img.hhphoto.fit{object-fit:contain}
 .facts.nonum{grid-template-columns:minmax(0,1fr)}
+/* The photo carousel (photoGallery in app.js; Carter, 2026-11-25): one 3:2
+   frame, swiped or stepped with the arrows, the count and credit beneath. */
+.pgal{position:relative;max-width:480px;margin:2px 0 12px}
+.pgtrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:10px;border:1px solid var(--line);background-color:var(--soft);aspect-ratio:3/2;overscroll-behavior-x:contain}
+.pgtrack::-webkit-scrollbar{display:none}
+.pgs{flex:0 0 100%;margin:0;scroll-snap-align:start;scroll-snap-stop:always}
+.pgs img{display:block;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .2s}
+.pgs img.in{opacity:1}
+.pgs img.fit{object-fit:contain}
+.pgal .pgprev,.pgal .pgnext{position:absolute;top:calc(50% - 30px);width:36px;height:36px;border-radius:50%;border:0;display:flex;align-items:center;justify-content:center;
+  background-color:rgba(10,16,30,.55);color:#fff;cursor:pointer;opacity:0;transition:opacity .15s}
+.pgal .pgprev{left:8px}.pgal .pgnext{right:8px}
+.pgal:hover .pgprev,.pgal:hover .pgnext,.pgal .pgprev:focus-visible,.pgal .pgnext:focus-visible{opacity:1}
+.pgal.atstart .pgprev,.pgal.atend .pgnext,.pgal.one .pgprev,.pgal.one .pgnext{display:none}
+@media (hover:none){ .pgal .pgprev,.pgal .pgnext{display:none} }
+.pgfoot{display:flex;gap:10px;align-items:baseline;margin-top:5px;font-size:.72rem;color:var(--muted);min-height:1.2em}
+.pgfoot .pgn{font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums;flex:none}
+.pgfoot .pgcap{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pgfoot a{color:inherit}
+.hasphoto > div.pgal.cxgal{max-width:none}

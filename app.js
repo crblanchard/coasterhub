@@ -2881,7 +2881,8 @@
   // fresh on the first request, which was most of the wait.
   function photoSize(u, w) { return w ? String(u || "").replace(/\/(\d+)px-/, "/" + w + "px-") : u; }
   function photoList(id) {
-    return PHOTOS[id] || (PHOTOS[id] = fetch("/api/coaster-photo?id=" + encodeURIComponent(id))
+    // many=1: up to 24, for the carousel; the first is the same one as before.
+    return PHOTOS[id] || (PHOTOS[id] = fetch("/api/coaster-photo?many=1&id=" + encodeURIComponent(id))
       .then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return (j && j.photos) || []; })
       .catch(function () { return []; }));
   }
@@ -2901,12 +2902,78 @@
       if (id) photoWarm(id);
     }, { passive: true });
   });
+  // A row of photos to swipe through (Carter, 2026-11-25: "let them scroll
+  // through all uploaded photos so they can see more of one coaster"), used by
+  // opened coasters, the coaster page and park pages. One frame, 3:2; scroll
+  // snapping does the swiping, arrows step it on a computer, and the line under
+  // it says which photo this is and whose (their licences ask for credit).
+  // Photos load as they come into view; one that won't load drops out.
+  // opts.w: thumbnail width; opts.cls: extra class; opts.onEmpty: all failed.
+  var SRCNAME = { coasterpedia: "Coasterpedia", enwiki: "Wikipedia", wikidata: "Wikimedia Commons" };
+  function photoGallery(list, opts) {
+    opts = opts || {};
+    var E = searchEsc, g = document.createElement("div");
+    g.className = "pgal" + (opts.cls ? " " + opts.cls : "");
+    var track = document.createElement("div"); track.className = "pgtrack"; g.appendChild(track);
+    var foot = document.createElement("div"); foot.className = "pgfoot"; g.appendChild(foot);
+    var live = [];
+    function caption() {
+      var n = live.length; if (!n) return;
+      var at = Math.round(track.scrollLeft / Math.max(1, track.clientWidth)); at = Math.max(0, Math.min(n - 1, at));
+      var p = live[at].p, who = p.author ? (p.author.length > 48 ? p.author.slice(0, 45) + "\u2026" : p.author) : "unknown";
+      foot.innerHTML = (n > 1 ? '<span class="pgn">' + (at + 1) + " / " + n + "</span>" : "")
+        + '<span class="pgcap">Photo: ' + E(who) + (p.license ? " \u00b7 " + E(String(p.license).toUpperCase()) : "")
+        + (p.page ? ' \u00b7 <a href="' + E(p.page) + '" target="_blank" rel="noopener">' + E(SRCNAME[p.source] || p.source || "source") + "</a>" : "") + "</span>";
+      g.classList.toggle("atstart", at === 0); g.classList.toggle("atend", at === n - 1);
+    }
+    list.forEach(function (p, i) {
+      var fig = document.createElement("figure"); fig.className = "pgs";
+      var img = document.createElement("img"); img.alt = ""; img.decoding = "async"; img.referrerPolicy = "no-referrer";
+      if (i > 0) img.loading = "lazy";
+      var steps = [photoSize(p.thumb || p.url, opts.w), p.thumb, p.url].filter(Boolean), k = 0;
+      img.onload = function () { var r = img.naturalWidth / (img.naturalHeight || 1); if (r < 1.24 || r > 2.1) img.classList.add("fit"); img.classList.add("in"); };
+      img.onerror = function () {
+        while (++k < steps.length) { if (steps[k] !== img.src) { img.src = steps[k]; return; } }
+        fig.remove(); live = live.filter(function (x) { return x.fig !== fig; });
+        g.classList.toggle("one", live.length < 2);
+        if (!live.length) { if (opts.onEmpty) opts.onEmpty(); g.remove(); } else caption();
+      };
+      img.src = steps[0];
+      fig.appendChild(img); track.appendChild(fig); live.push({ fig: fig, p: p });
+    });
+    if (list.length > 1) {
+      ["prev", "next"].forEach(function (d) {
+        var b = document.createElement("button"); b.type = "button"; b.className = "pg" + d;
+        b.setAttribute("aria-label", d === "prev" ? "Previous photo" : "Next photo");
+        b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (d === "prev" ? "m15 6-6 6 6 6" : "m9 6 6 6-6 6") + '"/></svg>';
+        b.onclick = function (e) { e.stopPropagation(); e.preventDefault(); track.scrollBy({ left: (d === "prev" ? -1 : 1) * track.clientWidth, behavior: "smooth" }); };
+        g.appendChild(b);
+      });
+    } else g.classList.add("one");
+    var t = null;
+    track.addEventListener("scroll", function () { clearTimeout(t); t = setTimeout(caption, 60); }, { passive: true });
+    // A swipe inside an opened row must not close it.
+    g.addEventListener("click", function (e) { if (!e.target.closest("a")) e.stopPropagation(); });
+    setTimeout(caption, 0);
+    return g;
+  }
   function photoInto(el, id, opts) {
     if (!el || !id) return;
     opts = opts || {};
     el.setAttribute("data-photo-for", id);   // a newer call for this element wins
     photoList(id).then(function (list) {
       if (!list.length || !el.isConnected || el.getAttribute("data-photo-for") !== String(id)) return;
+      if (opts.cls === "cxphoto") {
+        // An opened coaster: every photo, to swipe through.
+        var gal = photoGallery(list, { w: opts.w, cls: "cxgal", onEmpty: function () { el.classList.remove("hasphoto", "morer"); } });
+        if (opts.first) el.insertBefore(gal, el.firstChild); else el.appendChild(gal);
+        el.classList.add("hasphoto");
+        // Balance the two sides: the facts longer than the photo box send the
+        // rest (who ranked it, riders) up under the photo.
+        var ff = el.querySelector(":scope > .facts");
+        el.classList.toggle("morer", !!(ff && gal.offsetHeight && ff.offsetHeight > gal.offsetHeight + 24));
+        return;
+      }
       // The box goes in at once, at its final size, and the picture fades in
       // when it arrives: the card never changes shape under the reader.
       var img = document.createElement("img"), at = 0;
@@ -3941,7 +4008,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, parkRanks: parkRanks, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
+              openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, photoGallery: photoGallery, photoSize: photoSize, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;

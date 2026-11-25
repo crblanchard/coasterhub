@@ -1939,14 +1939,14 @@ const OPEN_SOURCE_ORDER = { coasterpedia: 0, enwiki: 1, dewiki: 2, wikidata: 3, 
 // other rows count (a relocated ride is one track). Free licences only, never
 // a logo. `all` lists everything for the picker; `skipPick` ignores the pick.
 // Tables not there yet give fewer candidates, never an error.
-async function coasterPhotos(env, id, all, skipPick) {
+async function coasterPhotos(env, id, all, skipPick, max) {
   const own = "(l.coaster_id = ?1 OR l.coaster_id IN (SELECT b.coaster FROM same_ride a JOIN same_ride b ON b.ride = a.ride WHERE a.coaster = ?1))";
   const safe = async (sql) => { try { return (await env.DB.prepare(sql).bind(id).all()).results || []; } catch (e) { if (/no such table/i.test(String(e && e.message || e))) return []; throw e; } };
   let pick = null;
   if (!skipPick) { try { pick = await env.DB.prepare("SELECT * FROM coaster_photo_pick WHERE coaster_id = ?").bind(id).first(); } catch (e) { pick = null; } }
   if (pick && pick.url === "none" && !all) return [];
   const gal = await safe("SELECT g.thumb, g.url, g.width, g.height, g.author, g.license, g.license_url, g.page, 'wikidata' AS source, g.score FROM open_gallery g " +
-    "JOIN open_links l ON l.source = 'wikidata' AND l.ref = g.ref WHERE g.nonfree = 0 AND " + own + " ORDER BY g.score DESC, g.width DESC LIMIT " + (all ? 80 : 4));
+    "JOIN open_links l ON l.source = 'wikidata' AND l.ref = g.ref WHERE g.nonfree = 0 AND " + own + " ORDER BY g.score DESC, g.width DESC LIMIT " + (all ? 80 : max ? 40 : 4));
   // A zoomed-out shot first where the file name says so (Carter, 2026-11-24:
   // "zoomed out photos showing as much of the ride as possible").
   const img = await safe("SELECT DISTINCT i.thumb, i.url, i.width, i.height, i.author, i.license, i.license_url, i.page, i.source FROM open_images i " +
@@ -1994,7 +1994,7 @@ async function coasterPhotos(env, id, all, skipPick) {
     }
   } catch (e) { /* the plain order */ }
   if (pick) { const at = list.findIndex(p => p.url === pick.url); if (at >= 0) list.splice(at, 1); if (pick.url !== "none") list.unshift(Object.assign({}, pick, { picked: 1 })); }
-  return all ? list : list.slice(0, 6);
+  return all ? list : list.slice(0, max || 6);
 }
 // A source that says the ride is gone (defunct, removed, standing but not
 // operating, in storage) but gives no closing date: such a ride is not added
@@ -3146,7 +3146,11 @@ export default {
         if (!id) return err(400, "need ?id=");
         // ?all=1 (the admin's Change photo picker): every candidate, not four.
         const all = url.searchParams.get("all") === "1";
-        const photos = await coasterPhotos(env, id, all);
+        // ?many=1: up to 24 for the photo carousel (Carter, 2026-11-25: "let
+        // them scroll through all uploaded photos"), still honouring the pick
+        // and its "no photo".
+        const many = url.searchParams.get("many") === "1";
+        const photos = await coasterPhotos(env, id, all, false, many ? 24 : 0);
         // No browser copy (no-store, the default): a 5-minute one made a
         // Change photo look unsaved on refresh (Carter, 2026-11-25). Pages warm
         // and keep the list themselves, so speed comes from that instead.
