@@ -3211,6 +3211,19 @@ async function main() {
     check("with both keys, a sign-up with no token is refused", r.status === 403, JSON.stringify(r.data));
   }
 
+  // Weekly ranking snapshots (Carter, 2026-11-26): Mondays from 10:00 UTC, once.
+  {
+    const db = freshDb(), E = { DB: new FakeD1(db), ADMIN_PASSWORD: PW };
+    const run = async (iso) => { const w = []; await worker.scheduled({ scheduledTime: Date.parse(iso) }, E, { waitUntil: p => w.push(p) }); await Promise.all(w); };
+    await run("2026-11-30T09:45:00Z");
+    check("no snapshot before 2am Pacific on Monday", !rows(db, "SELECT name FROM sqlite_master WHERE name = 'rank_snapshots'").length || !rows(db, "SELECT 1 FROM rank_snapshots").length);
+    await run("2026-11-30T10:00:00Z"); await run("2026-11-30T10:15:00Z");
+    const snap = rows(db, "SELECT week, data FROM rank_snapshots");
+    check("one snapshot that Monday, with every list", snap.length === 1 && snap[0].week === "2026-11-30" && Array.isArray(JSON.parse(snap[0].data).rankings), JSON.stringify(snap.map(x => x.week)));
+    await run("2026-12-01T10:00:00Z");
+    check("...and none on a Tuesday", rows(db, "SELECT 1 FROM rank_snapshots").length === 1);
+  }
+
   // Trip links (Carter, 2026-11-25): coasterhub.org/trip/<name or code>, trips only.
   {
     const db = freshDb(), E = { DB: new FakeD1(db), ADMIN_PASSWORD: PW };

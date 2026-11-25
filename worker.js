@@ -2102,6 +2102,23 @@ async function coasterPhotos(env, id, all, skipPick, max) {
 // at all (Carter, 2026-11-24: "no need to show on site at all without
 // sufficient info"; 222 removed the 40 that got in as Operating this way).
 // Its records stay in open_items/open_raw for when a date turns up.
+// Every Monday at 2am Pacific (10:00 UTC; Carter, 2026-11-26), a copy of every
+// rider's ranking list and credit count, so the Global scores of any week can be
+// worked out later with the same formula the pages use (app.js globalScores) —
+// for "the biggest riser this week, by how many points". The first run on or
+// after 10:00 UTC each Monday saves it (the cron fires every 15 minutes); the
+// week's key makes a second run a no-op. The table makes itself.
+async function weeklyRankSnapshot(env, t) {
+  const d = new Date(t);
+  if (d.getUTCDay() !== 1 || d.getUTCHours() < 10) return;
+  const week = d.toISOString().slice(0, 10);
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS rank_snapshots (week TEXT PRIMARY KEY, at TEXT NOT NULL, data TEXT NOT NULL)").run();
+  if (await env.DB.prepare("SELECT 1 FROM rank_snapshots WHERE week = ?").bind(week).first()) return;
+  const rankings = await getAllRankings(env);
+  const credits = Object.fromEntries(((await env.DB.prepare("SELECT user_slug, COUNT(DISTINCT coaster_id) AS n FROM rides GROUP BY user_slug").all()).results || []).map(r => [r.user_slug, r.n]));
+  await env.DB.prepare("INSERT OR IGNORE INTO rank_snapshots (week, at, data) VALUES (?, ?, ?)")
+    .bind(week, d.toISOString(), JSON.stringify({ rankings: rankings.map(r => ({ slug: r.slug, order: r.order || [] })), credits })).run();
+}
 // Who may save a trip link: its maker and the riders on it (the with= list of
 // its address).
 function tripEditors(row) {
@@ -3111,7 +3128,9 @@ async function geocodeMissing(env, limit) {
 export default {
   // The cron in wrangler.jsonc: the morning recap of friends' park days.
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(dailyRecap(env, event && event.scheduledTime || Date.now()).catch(() => {}));
+    const t = event && event.scheduledTime || Date.now();
+    ctx.waitUntil(dailyRecap(env, t).catch(() => {}));
+    ctx.waitUntil(weeklyRankSnapshot(env, t).catch(() => {}));
   },
 
   async fetch(request, env, ctx) {
