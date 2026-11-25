@@ -2927,7 +2927,7 @@
     var lic = String(p.license || "").trim();
     if (/^cc/i.test(lic)) lic = lic.toUpperCase().replace(/\s+\d+(\.\d+)*$/, "").replace(/\s+/g, "-");
     var t = (d ? d + ", " : "") + who + "." + (lic ? " " + lic + "." : "")   // no "Photo:" (Carter: "very clear")
-      + (p.source === "coasterpedia" ? " Coasterpedia." : "");             // its source when it isn't Commons (Carter, 2026-11-26)
+      + (p.source === "coasterpedia" ? " Coasterpedia." : " Wikimedia.");  // where it's from, short (Carter, 2026-11-26)
     var c = cls ? ' class="' + cls + '"' : "";
     return p.page ? '<a' + c + ' href="' + E(p.page) + '" target="_blank" rel="noopener">' + E(t) + "</a>" : "<span" + c + ">" + E(t) + "</span>";
   }
