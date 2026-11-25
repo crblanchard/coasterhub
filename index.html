@@ -694,10 +694,10 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
           +(chips.length?'<div class="chips">'+chips.map(function(t){ return '<span>'+E(t)+'</span>'; }).join('')+'</div>':'')+'</div>';
         // The line under it: its place in words, and you.
         var k=CoasterHub.rideKey(c), mine=Y && (Y.rides[x.id] || Y.rides[k]), myRank=Y && (Y.rank[x.id] || Y.rank[k]);
-        // Only you: "Ranked as your #12, 55 rides logged" / "Not on your count yet"
+        // Only you: "#12 on your rankings. 55 rides logged." / "Not on your count yet."
         // (Carter, 2026-11-26; its Coaster Hub place came off the same day).
         var line='';
-        if(Y) line = mine ? (myRank?'Ranked as your <b>#'+myRank+'</b>, ':'')+'<b>'+mine.n+'</b> ride'+(mine.n===1?'':'s')+' logged.'
+        if(Y) line = mine ? (myRank?'<b>#'+myRank+'</b> on your rankings. ':'')+'<b>'+mine.n+'</b> ride'+(mine.n===1?'':'s')+' logged.'
                           : 'Not on your count yet.';
         var fy=document.getElementById('featyou'); fy.innerHTML=line; fy.hidden=!line;
         document.getElementById('featwrap').hidden=false;
