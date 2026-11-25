@@ -3127,7 +3127,10 @@ export default {
         // ?all=1 (the admin's Change photo picker): every candidate, not four.
         const all = url.searchParams.get("all") === "1";
         const photos = await coasterPhotos(env, id, all);
-        return json({ photo: photos[0] || null, photos }, 200, all ? {} : { "cache-control": "public, max-age=300" });
+        // No browser copy (no-store, the default): a 5-minute one made a
+        // Change photo look unsaved on refresh (Carter, 2026-11-25). Pages warm
+        // and keep the list themselves, so speed comes from that instead.
+        return json({ photo: photos[0] || null, photos });
       }
       // Carter's own pick for a coaster's photo (Change photo, admins only):
       // {id, url} where url is one of /api/coaster-photo?all=1's, or "none" for
