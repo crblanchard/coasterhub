@@ -1,0 +1,1222 @@
+[
+{
+"park": "Adventure City",
+"q": "Q44043",
+"lbl": "Adventure City"
+},
+{
+"park": "Adventure World",
+"q": "Q4686555",
+"lbl": "Adventure World"
+},
+{
+"park": "Adventuredome",
+"q": "Q379978",
+"lbl": "Adventuredome"
+},
+{
+"park": "Adventureland (Iowa)",
+"q": "Q4033431",
+"lbl": "Adventureland"
+},
+{
+"park": "Adventureland (New York)",
+"q": "Q4033432",
+"lbl": "Adventureland"
+},
+{
+"park": "Alabama Adventure",
+"q": "Q3493652",
+"lbl": "Alabama Adventure & Splash Adventure"
+},
+{
+"park": "Alton Towers",
+"q": "Q443909",
+"lbl": "Alton Towers"
+},
+{
+"park": "Attractiepark Slagharen",
+"q": "Q758228",
+"lbl": "Attractiepark Slagharen"
+},
+{
+"park": "Avonturenpark Hellendoorn",
+"q": "Q2874483",
+"lbl": "Avonturenpark Hellendoorn"
+},
+{
+"park": "Aztlán Parque Urbano",
+"q": "Q1811321",
+"lbl": "La Feria Chapultepec Mágico"
+},
+{
+"park": "Bagatelle",
+"q": "Q3363781",
+"lbl": "Parc Bagatelle"
+},
+{
+"park": "Bakken",
+"q": "Q496893",
+"lbl": "Dyrehavsbakken"
+},
+{
+"park": "Battersea Funfair",
+"q": "Q810947",
+"lbl": "Battersea Park"
+},
+{
+"park": "Bay Beach Amusement Park",
+"q": "Q4873935",
+"lbl": "Bay Beach Amusement Park"
+},
+{
+"park": "Belantis",
+"q": "Q815261",
+"lbl": "Belantis"
+},
+{
+"park": "Bellewaerde",
+"q": "Q1832013",
+"lbl": "Bellewaerde"
+},
+{
+"park": "Bobbejaanland",
+"q": "Q888402",
+"lbl": "Bobbejaanland"
+},
+{
+"park": "BonBon-Land",
+"q": "Q892017",
+"lbl": "BonBon-Land"
+},
+{
+"park": "Boomers (Dania Beach)",
+"q": "Q2910494",
+"lbl": "Boomers! Parks"
+},
+{
+"park": "Brean Theme Park",
+"q": "Q4959732",
+"lbl": "Brean Leisure Park"
+},
+{
+"park": "Busch Gardens Tampa Bay",
+"q": "Q2743812",
+"lbl": "Busch Gardens Tampa"
+},
+{
+"park": "Busch Gardens Williamsburg",
+"q": "Q2928695",
+"lbl": "Busch Gardens Williamsburg"
+},
+{
+"park": "Calaway Park",
+"q": "Q5018638",
+"lbl": "Calaway Park"
+},
+{
+"park": "California's Great America",
+"q": "Q987756",
+"lbl": "California's Great America"
+},
+{
+"park": "Camden Park",
+"q": "Q5025799",
+"lbl": "Camden Park"
+},
+{
+"park": "Camelot Theme Park",
+"q": "Q2934740",
+"lbl": "Camelot Theme Park"
+},
+{
+"park": "Canada's Wonderland",
+"q": "Q940673",
+"lbl": "Canada's Wonderland"
+},
+{
+"park": "Canobie Lake Park",
+"q": "Q2936437",
+"lbl": "Canobie Lake Park"
+},
+{
+"park": "Carowinds",
+"q": "Q2940113",
+"lbl": "Carowinds"
+},
+{
+"park": "Cavallino Matto",
+"q": "Q940673",
+"lbl": "Canada's Wonderland"
+},
+{
+"park": "Cedar Point",
+"q": "Q859230",
+"lbl": "Cedar Point"
+},
+{
+"park": "Celebration City",
+"q": "Q2943892",
+"lbl": "Celebration City"
+},
+{
+"park": "Chelyuskintsev Park",
+"q": "Q859230",
+"lbl": "Cedar Point"
+},
+{
+"park": "Chessington World of Adventures",
+"q": "Q1070642",
+"lbl": "Chessington World of Adventures"
+},
+{
+"park": "China Dinosaurs Park",
+"q": "Q2963705",
+"lbl": "China Dinosaurs Park"
+},
+{
+"park": "Cliff's Amusement Park",
+"q": "Q5132509",
+"lbl": "Cliff's Amusement Park"
+},
+{
+"park": "Columbus Zoo and Aquarium",
+"q": "Q5150169",
+"lbl": "Columbus Zoo and Aquarium"
+},
+{
+"park": "Dai Nam Wonderland",
+"q": "Q8079949",
+"lbl": "Đại Nam Văn Hiến"
+},
+{
+"park": "De Waarbeek",
+"q": "Q2706557",
+"lbl": null
+},
+{
+"park": "DippieDoe Attractiepark",
+"q": "Q1957525",
+"lbl": "DippieDoe"
+},
+{
+"park": "Disney Adventure World",
+"q": "Q764906",
+"lbl": "Disney Adventure World"
+},
+{
+"park": "Disney's Animal Kingdom",
+"q": "Q764186",
+"lbl": "Disney's Animal Kingdom"
+},
+{
+"park": "Disney's Hollywood Studios",
+"q": "Q71623813",
+"lbl": "Toy Story Land"
+},
+{
+"park": "Disneyland",
+"q": "Q181185",
+"lbl": "Disneyland"
+},
+{
+"park": "Disneyland Park (Paris)",
+"q": "Q50180603",
+"lbl": "Adventureland at Disneyland Paris"
+},
+{
+"park": "Djurs Sommerland",
+"q": "Q593464",
+"lbl": "Djurs Sommerland"
+},
+{
+"park": "Dollywood",
+"q": "Q530744",
+"lbl": "Dollywood"
+},
+{
+"park": "Dorney Park",
+"q": "Q3037111",
+"lbl": "Dorney Park & Wildwater Kingdom"
+},
+{
+"park": "Dragon Park",
+"q": "Q3087377",
+"lbl": "Freestyle Music Park"
+},
+{
+"park": "Drayton Manor",
+"q": "Q3039179",
+"lbl": "Drayton Manor Theme Park"
+},
+{
+"park": "Dream Island",
+"q": "Q25395425",
+"lbl": "Dream Island"
+},
+{
+"park": "Dreamland",
+"q": "Q3039291",
+"lbl": "Dreamland Margate"
+},
+{
+"park": "Dreamworld",
+"q": "Q1256280",
+"lbl": "Dreamworld"
+},
+{
+"park": "Duinrell",
+"q": "Q643201",
+"lbl": "Duinrell"
+},
+{
+"park": "Dutch Wonderland",
+"q": "Q3041729",
+"lbl": "Dutch Wonderland"
+},
+{
+"park": "EPCOT",
+"q": "Q118008724",
+"lbl": "World Discovery"
+},
+{
+"park": "Efteling",
+"q": "Q733234",
+"lbl": "Efteling"
+},
+{
+"park": "Elitch Gardens",
+"q": "Q961917",
+"lbl": "Särkänniemi"
+},
+{
+"park": "Emerald Park",
+"q": "Q20971849",
+"lbl": "Emerald Park"
+},
+{
+"park": "Enchanted Kingdom",
+"q": "Q7985928",
+"lbl": "West Midland Safari Park"
+},
+{
+"park": "Energylandia",
+"q": "Q23805582",
+"lbl": "Energylandia"
+},
+{
+"park": "Erlebnispark Tripsdrill",
+"q": "Q520675",
+"lbl": "Erlebnispark Tripsdrill"
+},
+{
+"park": "Europa Park",
+"q": "Q159144",
+"lbl": "Europa-Park"
+},
+{
+"park": "Everland",
+"q": "Q494673",
+"lbl": "Everland"
+},
+{
+"park": "Expoland",
+"q": "Q1384663",
+"lbl": "Expoland"
+},
+{
+"park": "Familypark",
+"q": "Q661531",
+"lbl": "Sankt Margarethen im Burgenland"
+},
+{
+"park": "Ferrari Land",
+"q": "Q908792",
+"lbl": "PortAventura World"
+},
+{
+"park": "Ferrari World",
+"q": "Q673656",
+"lbl": "Ferrari World Abu Dhabi"
+},
+{
+"park": "Festyland",
+"q": "Q3070877",
+"lbl": "Festyland"
+},
+{
+"park": "Flamingo Land",
+"q": "Q114525",
+"lbl": "Flamingo Land Resort"
+},
+{
+"park": "FortFun Abenteuerland",
+"q": "Q878022",
+"lbl": "Fort Fun Abenteuerland"
+},
+{
+"park": "Fraispertuis City",
+"q": "Q950545",
+"lbl": "Fraispertuis City"
+},
+{
+"park": "Frontier City",
+"q": "Q3088620",
+"lbl": "Frontier City"
+},
+{
+"park": "Fuji-Q Highland",
+"q": "Q1192174",
+"lbl": "Fuji-Q Highland"
+},
+{
+"park": "Fun Spot America - Atlanta",
+"q": "Q782494",
+"lbl": "Fayetteville"
+},
+{
+"park": "Fun Spot America - Kissimmee",
+"q": "Q23994725",
+"lbl": "Fun Sport America-Kissimmee"
+},
+{
+"park": "Fun Spot Park",
+"q": "Q5508689",
+"lbl": "Fun Spot Amusement Park & Zoo"
+},
+{
+"park": "Funland Amusement Park",
+"q": "Q3039179",
+"lbl": "Drayton Manor Theme Park"
+},
+{
+"park": "Futuroscope",
+"q": "Q1475660",
+"lbl": "Futuroscope"
+},
+{
+"park": "Fårup Sommerland",
+"q": "Q125316",
+"lbl": "Fårup Summer Park"
+},
+{
+"park": "Galaxyland",
+"q": "Q441647",
+"lbl": "Galaxyland"
+},
+{
+"park": "Gardaland",
+"q": "Q1144922",
+"lbl": "Gardaland"
+},
+{
+"park": "Geauga Lake",
+"q": "Q5529536",
+"lbl": "Geauga Lake"
+},
+{
+"park": "Glenwood Caverns",
+"q": "Q2892945",
+"lbl": "Glenwood Caverns"
+},
+{
+"park": "Granada Studios",
+"q": "Q5594106",
+"lbl": "Granada Studios Tour"
+},
+{
+"park": "Gröna Lund",
+"q": "Q260304",
+"lbl": "Gröna Lund"
+},
+{
+"park": "Gumbuya World",
+"q": "Q5618090",
+"lbl": "Gumbuya World"
+},
+{
+"park": "Hansa-Park",
+"q": "Q571557",
+"lbl": "Hansa Park"
+},
+{
+"park": "Happy Valley (Beijing)",
+"q": "Q3127206",
+"lbl": "Happy Valley Beijing"
+},
+{
+"park": "Happy Valley (Shanghai)",
+"q": "Q855246",
+"lbl": "Happy Valley Shanghai"
+},
+{
+"park": "Happy Valley (Tianjin)",
+"q": "Q14505646",
+"lbl": "Happy Valley Tianjin"
+},
+{
+"park": "Happy Valley (Wuhan)",
+"q": "Q11124693",
+"lbl": "Happy Valley Wuhan"
+},
+{
+"park": "Heide Park Resort",
+"q": "Q702179",
+"lbl": "Heide Park"
+},
+{
+"park": "Hersheypark",
+"q": "Q3107826",
+"lbl": "Hersheypark"
+},
+{
+"park": "Holiday World",
+"q": "Q1624689",
+"lbl": "Holiday World & Splashin' Safari"
+},
+{
+"park": "Hong Kong Disneyland",
+"q": "Q605959",
+"lbl": "Hong Kong Disneyland"
+},
+{
+"park": "Hopi Hari",
+"q": "Q3038760",
+"lbl": "Hopi Hari"
+},
+{
+"park": "Imagicaa",
+"q": "Q4683250",
+"lbl": "Imagicaa"
+},
+{
+"park": "Indiana Beach",
+"q": "Q3150104",
+"lbl": "Indiana Beach"
+},
+{
+"park": "Islands of Adventure",
+"q": "Q2583112",
+"lbl": "Universal's Islands of Adventure"
+},
+{
+"park": "Jolly Roger Amusement Park",
+"q": "Q15229708",
+"lbl": "Jolly Roger Amusement Park"
+},
+{
+"park": "Joyland",
+"q": "Q3569978",
+"lbl": "World Joyland"
+},
+{
+"park": "Julianatoren",
+"q": "Q18770717",
+"lbl": "Koningin Juliana Toren"
+},
+{
+"park": "Kemah Boardwalk",
+"q": "Q6386811",
+"lbl": "Kemah Boardwalk"
+},
+{
+"park": "Kennywood",
+"q": "Q2028841",
+"lbl": "Kennywood"
+},
+{
+"park": "Kentucky Kingdom",
+"q": "Q369789",
+"lbl": "Kentucky Kingdom"
+},
+{
+"park": "Kijima Kogen",
+"q": "Q3196520",
+"lbl": "Kijima Kōgen Park"
+},
+{
+"park": "Kings Dominion",
+"q": "Q2720654",
+"lbl": "Kings Dominion"
+},
+{
+"park": "Kings Island",
+"q": "Q953752",
+"lbl": "Kings Island"
+},
+{
+"park": "Knoebels",
+"q": "Q3198042",
+"lbl": "Knoebels Amusement Resort"
+},
+{
+"park": "Knott's Berry Farm",
+"q": "Q1207585",
+"lbl": "Knott's Berry Farm"
+},
+{
+"park": "Kolmården",
+"q": "Q1938567",
+"lbl": "Kolmården Wildlife Park"
+},
+{
+"park": "Kongeparken",
+"q": "Q4588838",
+"lbl": "Kongeparken"
+},
+{
+"park": "La Ronde",
+"q": "Q1132664",
+"lbl": "La Ronde"
+},
+{
+"park": "La Récré des 3 Curés",
+"q": "Q3212567",
+"lbl": "La Récré des 3 Curés"
+},
+{
+"park": "Lagoon",
+"q": "Q3216196",
+"lbl": "Lagoon Amusement Park"
+},
+{
+"park": "Lake Compounce",
+"q": "Q3216454",
+"lbl": "Lake Compounce"
+},
+{
+"park": "Lake Winnepesaukah",
+"q": "Q6478516",
+"lbl": "Lake Winnepesaukah"
+},
+{
+"park": "Lakeside Amusement Park",
+"q": "Q6479071",
+"lbl": "Lakeside Amusement Park"
+},
+{
+"park": "Le Fleury",
+"q": "Q51880358",
+"lbl": "Le Fleury"
+},
+{
+"park": "Le Pal",
+"q": "Q3225108",
+"lbl": "Le Pal"
+},
+{
+"park": "Legendia",
+"q": "Q7514811",
+"lbl": "Silesian Amusement Park"
+},
+{
+"park": "Legoland Billund",
+"q": "Q1063513",
+"lbl": "Legoland Billund"
+},
+{
+"park": "Legoland Deutschland",
+"q": "Q3178547",
+"lbl": "Legoland Deutschland"
+},
+{
+"park": "Legoland Windsor",
+"q": "Q3047891",
+"lbl": "Legoland Windsor"
+},
+{
+"park": "Lewa Adventure",
+"q": "Q55185408",
+"lbl": "Lewa Adventure"
+},
+{
+"park": "Lincoln Park",
+"q": "Q6550914",
+"lbl": "Lincoln Park"
+},
+{
+"park": "Linnanmäki",
+"q": "Q1635596",
+"lbl": "Linnanmäki"
+},
+{
+"park": "Liseberg",
+"q": "Q1413270",
+"lbl": "Liseberg"
+},
+{
+"park": "Lost Island Theme Park",
+"q": "Q105806364",
+"lbl": "Lost Island Theme Park"
+},
+{
+"park": "Lotte World Adventure",
+"q": "Q494668",
+"lbl": "Lotte World"
+},
+{
+"park": "Lotte World Adventure Busan - Magic Forest",
+"q": "Q109458312",
+"lbl": "Lotte World Adventure Busan"
+},
+{
+"park": "Luna Park",
+"q": "Q628201",
+"lbl": "Coney Island"
+},
+{
+"park": "Luna Park (Melbourne)",
+"q": "Q823531",
+"lbl": "St Kilda"
+},
+{
+"park": "Magic Kingdom",
+"q": "Q1324340",
+"lbl": "Magic Kingdom"
+},
+{
+"park": "Magic Springs Theme and Water Park",
+"q": "Q2372906",
+"lbl": "Magic Springs and Crystal Falls"
+},
+{
+"park": "MagicLand (Valmontone)",
+"q": "Q509529",
+"lbl": "MagicLand"
+},
+{
+"park": "Majaland Kownaty",
+"q": "Q56824864",
+"lbl": "Majaland Kownaty"
+},
+{
+"park": "Mega Speelstad",
+"q": "Q3304238",
+"lbl": "Mega Speelstad"
+},
+{
+"park": "Mer de Sable",
+"q": "Q3210673",
+"lbl": "La Mer de sable"
+},
+{
+"park": "Michigan's Adventure",
+"q": "Q3311504",
+"lbl": "Michigan's Adventure"
+},
+{
+"park": "Mirabilandia",
+"q": "Q180878",
+"lbl": "Mirabilandia"
+},
+{
+"park": "Morey's Piers",
+"q": "Q3323943",
+"lbl": "Morey's Piers"
+},
+{
+"park": "Motiongate",
+"q": "Q23823579",
+"lbl": "Motiongate"
+},
+{
+"park": "Movie Park Germany",
+"q": "Q314414",
+"lbl": "Movie Park Germany"
+},
+{
+"park": "Mt. Olympus",
+"q": "Q3327295",
+"lbl": "Mt. Olympus Water & Theme Park"
+},
+{
+"park": "Nagashima Spaland",
+"q": "Q2496699",
+"lbl": "Nagashima Spa Land"
+},
+{
+"park": "New York, New York Hotel & Casino",
+"q": "Q1429071",
+"lbl": "New York-New York Hotel and Casino"
+},
+{
+"park": "Niagara Amusement Park & Splash World",
+"q": "Q6774786",
+"lbl": "Niagara Amusement Park and Splash World"
+},
+{
+"park": "Nickelodeon Universe",
+"q": "Q3339833",
+"lbl": "Nickelodeon Universe"
+},
+{
+"park": "Nickelodeon Universe Theme Park",
+"q": "Q59563752",
+"lbl": "Nickelodeon Universe"
+},
+{
+"park": "Nigloland",
+"q": "Q3341433",
+"lbl": "Nigloland"
+},
+{
+"park": "OK Corral",
+"q": "Q3349991",
+"lbl": "OK Corral"
+},
+{
+"park": "Ocean Park",
+"q": "Q1207908",
+"lbl": "Ocean Park Hong Kong"
+},
+{
+"park": "Pacific Park",
+"q": "Q595439",
+"lbl": "Santa Monica Pier"
+},
+{
+"park": "Palisades Amusement Park",
+"q": "Q3361454",
+"lbl": "Palisades Amusement Park"
+},
+{
+"park": "Papéa Parc",
+"q": "Q3362986",
+"lbl": "Papea Parc"
+},
+{
+"park": "Parc Astérix",
+"q": "Q377592",
+"lbl": "Parc Astérix"
+},
+{
+"park": "Parc Spirou Provence",
+"q": "Q20669824",
+"lbl": "Parc Spirou"
+},
+{
+"park": "Parque Espana-Shima Spain Village",
+"q": "Q16669013",
+"lbl": "Parque España-Shima Spain Village"
+},
+{
+"park": "Parque Warner Madrid",
+"q": "Q781609",
+"lbl": "Parque Warner Madrid"
+},
+{
+"park": "Parque de Atracciones de Madrid",
+"q": "Q587612",
+"lbl": "Parque de Atracciones de Madrid"
+},
+{
+"park": "Paultons Park",
+"q": "Q99595138",
+"lbl": "Paultons Estate"
+},
+{
+"park": "Phantasialand",
+"q": "Q2151241",
+"lbl": "Wuze Town"
+},
+{
+"park": "Playland",
+"q": "Q3392121",
+"lbl": "Playland"
+},
+{
+"park": "Pleasure Beach Resort",
+"q": "Q578703",
+"lbl": "Pleasure Beach Resort"
+},
+{
+"park": "Pleasurewood Hills",
+"q": "Q3392192",
+"lbl": "Pleasurewood Hills"
+},
+{
+"park": "Plopsa Coo",
+"q": "Q2197655",
+"lbl": null
+},
+{
+"park": "Plopsaland Belgium",
+"q": "Q1414854",
+"lbl": "Plopsaland Belgium"
+},
+{
+"park": "Plopsaland Deutschland",
+"q": "Q565945",
+"lbl": "Plopsaland Deutschland"
+},
+{
+"park": "PortAventura Park",
+"q": "Q908792",
+"lbl": "PortAventura World"
+},
+{
+"park": "Powerpark",
+"q": "Q1940476",
+"lbl": "PowerPark"
+},
+{
+"park": "Quassy Amusement Park",
+"q": "Q12066678",
+"lbl": "Quassy Amusement Park"
+},
+{
+"park": "Riverview Park (Chicago)",
+"q": "Q2389341",
+"lbl": "Riverview Park"
+},
+{
+"park": "Safariland Stukenbrock",
+"q": "Q220077",
+"lbl": "Safariland Stukenbrock"
+},
+{
+"park": "Santa Cruz Beach Boardwalk",
+"q": "Q3472599",
+"lbl": "Santa Cruz Beach Boardwalk"
+},
+{
+"park": "Savin Rock",
+"q": "Q20011458",
+"lbl": "Savin Rock Amusement Park"
+},
+{
+"park": "Schwaben Park",
+"q": "Q947775",
+"lbl": "Schwaben Park"
+},
+{
+"park": "Sea Lion Park",
+"q": "Q3476665",
+"lbl": "Sea Lion Park"
+},
+{
+"park": "Sea World",
+"q": "Q505518",
+"lbl": "Sea World"
+},
+{
+"park": "SeaWorld Orlando",
+"q": "Q2449490",
+"lbl": "SeaWorld Orlando"
+},
+{
+"park": "SeaWorld San Antonio",
+"q": "Q567864",
+"lbl": "SeaWorld San Antonio"
+},
+{
+"park": "SeaWorld San Diego",
+"q": "Q1946237",
+"lbl": "SeaWorld San Diego"
+},
+{
+"park": "Seabreeze",
+"q": "Q7440208",
+"lbl": "Seabreeze Amusement Park"
+},
+{
+"park": "Sesame Place (PA)",
+"q": "Q7455979",
+"lbl": "Sesame Place Philadelphia"
+},
+{
+"park": "Shanghai Disneyland",
+"q": "Q865312",
+"lbl": "Shanghai Disneyland Park"
+},
+{
+"park": "Silver Dollar City",
+"q": "Q3483991",
+"lbl": "Silver Dollar City"
+},
+{
+"park": "Silverwood Theme Park",
+"q": "Q3484028",
+"lbl": "Silverwood Theme Park"
+},
+{
+"park": "Six Flags America",
+"q": "Q1749186",
+"lbl": "Six Flags America"
+},
+{
+"park": "Six Flags AstroWorld",
+"q": "Q432237",
+"lbl": "Six Flags AstroWorld"
+},
+{
+"park": "Six Flags Darien Lake",
+"q": "Q3016111",
+"lbl": "Six Flags Darien Lake"
+},
+{
+"park": "Six Flags Discovery Kingdom",
+"q": "Q2001885",
+"lbl": "Six Flags Discovery Kingdom"
+},
+{
+"park": "Six Flags Fiesta Texas",
+"q": "Q2521644",
+"lbl": "Six Flags Fiesta Texas"
+},
+{
+"park": "Six Flags Great Adventure",
+"q": "Q1064760",
+"lbl": "Six Flags Great Adventure"
+},
+{
+"park": "Six Flags Great America",
+"q": "Q611275",
+"lbl": "Six Flags Great America"
+},
+{
+"park": "Six Flags Great Escape",
+"q": "Q2496825",
+"lbl": "Great Escape"
+},
+{
+"park": "Six Flags Magic Mountain",
+"q": "Q1515080",
+"lbl": "Six Flags Magic Mountain"
+},
+{
+"park": "Six Flags Mexico",
+"q": "Q2562111",
+"lbl": "Six Flags México"
+},
+{
+"park": "Six Flags New England",
+"q": "Q846548",
+"lbl": "Six Flags New England"
+},
+{
+"park": "Six Flags New Orleans",
+"q": "Q648192",
+"lbl": "Six Flags New Orleans"
+},
+{
+"park": "Six Flags Over Georgia",
+"q": "Q2403850",
+"lbl": "Six Flags Over Georgia"
+},
+{
+"park": "Six Flags Over Texas",
+"q": "Q2074361",
+"lbl": "Six Flags Over Texas"
+},
+{
+"park": "Six Flags Qiddiya City",
+"q": "Q54872003",
+"lbl": "Qiddiya"
+},
+{
+"park": "Six Flags St. Louis",
+"q": "Q261618",
+"lbl": "Mid America Adventure"
+},
+{
+"park": "Skara Sommarland",
+"q": "Q2800195",
+"lbl": "Skara Sommarland"
+},
+{
+"park": "Skyline Park",
+"q": "Q1695355",
+"lbl": "Skyline Park"
+},
+{
+"park": "SnowWorld Landgraaf",
+"q": "Q2784579",
+"lbl": "Mondo Verde, Landgraaf"
+},
+{
+"park": "Speelpark Oud Valkeveen",
+"q": "Q729566",
+"lbl": "Oud Valkeveen"
+},
+{
+"park": "Story Land",
+"q": "Q3499899",
+"lbl": "Story Land"
+},
+{
+"park": "Stratosphere Tower",
+"q": "Q845846",
+"lbl": "The STRAT Hotel, Casino & SkyPod"
+},
+{
+"park": "Särkänniemi",
+"q": "Q961917",
+"lbl": "Särkänniemi"
+},
+{
+"park": "Tatzmania Löffingen",
+"q": "Q123503730",
+"lbl": "Tatzmania Löffingen"
+},
+{
+"park": "Thorpe Park",
+"q": "Q2301819",
+"lbl": "Thorpe Park"
+},
+{
+"park": "Tivoli Friheden",
+"q": "Q3529963",
+"lbl": "Tivoli Friheden"
+},
+{
+"park": "Tivoli Gardens",
+"q": "Q110289",
+"lbl": "Tivoli Gardens"
+},
+{
+"park": "Tokyo DisneySea",
+"q": "Q1202341",
+"lbl": "Tokyo DisneySea"
+},
+{
+"park": "Tokyo Disneyland",
+"q": "Q843997",
+"lbl": "Tokyo Disneyland"
+},
+{
+"park": "Tokyo Dome City",
+"q": "Q564554",
+"lbl": "Tokyo Dome City"
+},
+{
+"park": "Toverland",
+"q": "Q1358423",
+"lbl": "Toverland"
+},
+{
+"park": "Tusenfryd",
+"q": "Q2581206",
+"lbl": "Tusenfryd"
+},
+{
+"park": "Universal Epic Universe",
+"q": "Q66085108",
+"lbl": "Universal Epic Universe"
+},
+{
+"park": "Universal Studios Beijing",
+"q": "Q18233530",
+"lbl": "Universal Studios Beijing"
+},
+{
+"park": "Universal Studios Florida",
+"q": "Q66487205",
+"lbl": "Diagon Alley"
+},
+{
+"park": "Universal Studios Japan",
+"q": "Q1375103",
+"lbl": "Universal Studios Japan"
+},
+{
+"park": "Universal Studios Singapore",
+"q": "Q1186714",
+"lbl": "Universal Studios Singapore"
+},
+{
+"park": "Valleyfair!",
+"q": "Q3553873",
+"lbl": "Valleyfair"
+},
+{
+"park": "Vidámpark",
+"q": "Q723078",
+"lbl": "Vidám Park"
+},
+{
+"park": "Waldameer",
+"q": "Q3565299",
+"lbl": "Waldameer Park"
+},
+{
+"park": "Walibi Belgium",
+"q": "Q489313",
+"lbl": "Walibi Belgium"
+},
+{
+"park": "Walibi Holland",
+"q": "Q391162",
+"lbl": "Walibi Holland"
+},
+{
+"park": "Walibi Rhône-Alpes",
+"q": "Q258524",
+"lbl": "Walibi Rhône-Alpes"
+},
+{
+"park": "Walygator Grand Est",
+"q": "Q1721757",
+"lbl": "Walygator Grand-Est"
+},
+{
+"park": "Warner Bros. Movie World",
+"q": "Q1417567",
+"lbl": "Warner Bros. Movie World"
+},
+{
+"park": "Waterville USA",
+"q": "Q7974547",
+"lbl": "Waterville USA"
+},
+{
+"park": "Wiener Prater",
+"q": "Q3487269",
+"lbl": "Wurstelprater"
+},
+{
+"park": "Wild Adventures",
+"q": "Q3568104",
+"lbl": "Wild Adventures"
+},
+{
+"park": "Wonderland Amusement Park",
+"q": "Q2370456",
+"lbl": "Wonderland Park"
+},
+{
+"park": "Wonderland Sydney",
+"q": "Q8031906",
+"lbl": "Wonderland Sydney"
+},
+{
+"park": "Worlds of Fun",
+"q": "Q3570037",
+"lbl": "Worlds of Fun"
+},
+{
+"park": "Xetulul",
+"q": "Q3570941",
+"lbl": "Xetulul"
+},
+{
+"park": "Yokohama Cosmoworld",
+"q": "Q38283",
+"lbl": "Yokohama"
+},
+{
+"park": "Yomiuriland",
+"q": "Q1046970",
+"lbl": "Yomiuriland"
+},
+{
+"park": "ZDT's Amusement Park",
+"q": "Q18589096",
+"lbl": "ZDT's Amusement Park"
+},
+{
+"park": "Zoosafari Fasanolandia",
+"q": "Q3576064",
+"lbl": "Zoosafari Fasanolandia"
+}
+]
