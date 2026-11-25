@@ -3161,10 +3161,12 @@
   // and the grey "2 of 49" maker/model counts from your ranking. Shared by the
   // openable rows and the Global rows, so a coaster opens the same everywhere
   // (Carter, 2026-11-26: "i feel like these should be the same").
-  function youLines(c, cs, y, noRank, among) {
+  // rides: the Global rows, whose "Ranked by" already shows your place, say
+  // how many times you have ridden it instead (Carter, 2026-11-26).
+  function youLines(c, cs, y, noRank, among, rides) {
     var extra = [], id = c.id, m = y && y.rides[id];
-    if (y && y.rank[id] && !noRank) {
-      extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your ranking"]);
+    if (y && y.rank[id] && (!noRank || rides)) {
+      if (!rides) extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your ranking"]);
       if (!among) {
         var byId = {}; cs.forEach(function (o) { byId[o.id] = o; });
         var order = Object.keys(y.rank).map(Number).sort(function (a, b) { return y.rank[a] - y.rank[b]; });
@@ -3172,6 +3174,7 @@
       }
     }
     if (m && m.first) extra.push([mdy(m.first), "First ridden"]);
+    if (rides && m && m.n) extra.push([m.n.toLocaleString(), "Your rides"]);
     return { extra: extra, among: among };
   }
 
@@ -3745,7 +3748,7 @@
       // Your ranking, first ridden and the maker/model counts too, as every
       // other opened coaster has them (Carter, 2026-11-26).
       Promise.all([fetchCoasters().catch(function () { return null; }), you().catch(function () { return null; })]).then(function (rr) {
-        var yl = youLines(r.c, (rr[0] && rr[0].coasters) || cs, rr[1], false, null);
+        var yl = youLines(r.c, (rr[0] && rr[0].coasters) || cs, rr[1], true, null, true);
         box.innerHTML = coasterFacts(r.c, yl.extra, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>', yl.among)
           + '<div class="whol"><p class="lbl">Ranked by</p>' + (racingWho(r.g, st.glob, byId, st.me) || whoByPlace(r.who, st.me)) + '</div>';
         photoInto(box, r.c.id, { cls: "cxphoto", w: cxW(), first: true });
