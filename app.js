@@ -2894,10 +2894,13 @@
   }
   // Warm a coaster's photo before it is opened: its list, then the picture
   // itself into the browser's cache, so the open is instant.
+  // The opened-row photo is three-fifths of the row on a wide screen, so it
+  // asks Commons for the 960px size there (a standard width) and 500 elsewhere.
+  function cxW() { return window.innerWidth >= 1000 ? 960 : 500; }
   var WARM = {};
   function photoWarm(id, w) {
     if (!id || WARM[id]) return; WARM[id] = 1;
-    photoList(id).then(function (list) { if (list[0]) { var i = new Image(); i.referrerPolicy = "no-referrer"; i.src = photoSize(list[0].thumb || list[0].url, w || 500); } });
+    photoList(id).then(function (list) { if (list[0]) { var i = new Image(); i.referrerPolicy = "no-referrer"; i.src = photoSize(list[0].thumb || list[0].url, w || cxW()); } });
   }
   // A pointer resting on a coaster row (or a finger touching one) starts it.
   ["pointerover", "touchstart"].forEach(function (ev) {
@@ -3157,7 +3160,7 @@
           // opts.more(c): what a page adds under the facts (the park page's
           // former names and riders), the same panel otherwise.
           + (opts.more ? '<div class="cxmore" data-more="' + id + '">' + opts.more(c) + '</div>' : '');
-        photoInto(inner, id, { cls: "cxphoto", w: 500, first: true });
+        photoInto(inner, id, { cls: "cxphoto", w: cxW(), first: true });
       });
     });
   }
@@ -3730,7 +3733,7 @@
       box.innerHTML = coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>')
         + '<div class="whol">' + (racingWho(r.g, st.glob, byId, st.me) || whoByPlace(r.who, st.me)) + '</div>';
       row.classList.add("open"); row.parentNode.insertBefore(box, row.nextSibling);
-      photoInto(box, r.c.id, { cls: "cxphoto", w: 500, first: true });
+      photoInto(box, r.c.id, { cls: "cxphoto", w: cxW(), first: true });
     });
     // Park · place beside each name, as /rankings reads.
     var parks = {};

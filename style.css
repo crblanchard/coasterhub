@@ -1232,7 +1232,7 @@ img.hhphoto.ph{display:block;width:100%;height:120px;object-fit:cover;border-rad
    rather than above them with empty space to its right (Carter, 2026-11-24).
    Beside a photo there is room for one column of facts until the screen is wide. */
 @media (min-width:700px){
-  .hasphoto:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);column-gap:28px;row-gap:0;align-items:start}
+  .hasphoto:not([hidden]){display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);column-gap:28px;row-gap:0;align-items:start}
   .hasphoto > img.cxphoto.ph,.hasphoto > div.pgal.cxgal{grid-column:2;grid-row:1;max-width:none;margin:4px 0 0}
   .hasphoto > :not(img.cxphoto):not(.cxgal){grid-column:1;min-width:0}
   /* Who ranked and rode it goes under whichever side is shorter: under the
@@ -1241,7 +1241,9 @@ img.hhphoto.ph{display:block;width:100%;height:120px;object-fit:cover;border-rad
   .hasphoto.morer > div.facts{grid-row:1 / span 2}
   .hasphoto.morer > div.cxmore,.hasphoto.morer > div.whol{grid-column:2;grid-row:2;margin-top:14px;border-top:0;padding-top:0}
 }
-@media (min-width:700px) and (max-width:1099px){
+/* Facts in one column at every width so the photo gets three-fifths of the
+   row: the photos are nearly all landscape (Carter, 2026-11-26). */
+@media (min-width:700px){
   .hasphoto .facts{grid-template-columns:minmax(0,1fr)}
   .hasphoto .facts > *{grid-column:1;grid-row:auto}
   .hasphoto .facts .fnum{margin-top:6px}
