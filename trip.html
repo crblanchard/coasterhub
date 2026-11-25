@@ -140,6 +140,24 @@
     padding:9px 14px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap}
   .tbtn:hover{border-color:var(--accent2);color:var(--accent2)}
   .tbtn[disabled]{opacity:.5;cursor:default}
+  #triplist{margin:22px 0 0}
+  #triplist .tlc{color:var(--muted);font-weight:600;font-size:.8em}
+  .tlist{border:1px solid var(--line);border-radius:14px;background-color:var(--panel);overflow:hidden}
+  .tlpark + .tlpark{border-top:1px solid var(--line)}
+  .tlph{display:flex;align-items:center;gap:10px;padding:12px 14px 6px;font-weight:700}
+  .tlph a{color:var(--fg);text-decoration:none}
+  .tlph a:hover{color:var(--accent2)}
+  .tlph small{color:var(--muted);font-weight:600;font-size:.8rem}
+  .tlph .dot{flex:none;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background-color:var(--tint2);color:var(--accent2);font-size:.75rem;font-weight:800}
+  .tlr{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:6px 14px 6px 46px;font-size:.92rem}
+  .tlr:last-child{padding-bottom:12px}
+  .tln{flex:1 1 220px;min-width:0}
+  .tln a{color:var(--fg);text-decoration:none;font-weight:600}
+  .tln a:hover{color:var(--accent2)}
+  .tln small{color:var(--muted);margin-left:8px;font-size:.8rem}
+  .tlwho{color:var(--muted);font-size:.8rem}
+  .tlflags{display:inline-flex;flex-wrap:wrap;gap:4px}
+  .tlms{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background-color:var(--tint2);color:var(--accent2);font-size:.74rem;font-weight:700;white-space:nowrap}
   .tshare{margin:12px 0 0;padding:14px;border:1px solid var(--line);border-radius:14px;background-color:var(--panel)}
   .tshare label{display:block;font-weight:600;font-size:.9rem;margin:0 0 8px}
   .tshare label span{color:var(--muted);font-weight:400}
@@ -212,6 +230,7 @@
         <button type="button" class="btn" id="b_link">Get link</button></div>
       <p class="tprev" id="tprev"></p>
     </div>
+    <div id="triplist"></div>
     <div id="near_wrap" hidden>
       <div class="sect" id="near_h">Worth adding nearby</div>
       <div class="near" id="near"></div>
@@ -458,7 +477,41 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     if(pts.length===1) map.setView(pts[0], 8); else if(pts.length) map.fitBounds(pts,{ padding:[30,30], maxZoom:9 });
   }
 
-  function draw(){ drawAfter(); drawStops(); drawNear(); drawMap(); save(); }
+  // ---- every credit on the trip ---------------------------------------------
+  // Park by park in trip order, A–Z within a park, each with its model, and a
+  // flag where a rider's count reaches a milestone (Carter, 2026-11-25: "make
+  // a list of all the credits/parks/models ... make a little icon where each
+  // person hits a milestone"). Milestones: every 25 to 100, then every 100.
+  // With riders, only rides new to at least one of them; a ride on the trip
+  // twice (relocated) counts once.
+  var FLAG='<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>';
+  function ordinal(n){ var v=n%100; return n.toLocaleString()+((v>=11&&v<=13)?'th':(['th','st','nd','rd'][n%10]||'th')); }
+  function drawList(){
+    var el=$('triplist');
+    if(!STOPS.length){ el.innerHTML=''; return; }
+    var seen={}, cnt=RIDERS.map(function(R){ return R.n; }), total=0;
+    var mile=function(n){ return n<100 ? n%25===0 : n%100===0; };
+    var h=STOPS.map(function(n,si){
+      var rows=P[n].open.filter(function(c){
+        var k=CoasterHub.rideKey(c); if(seen[k]) return false;
+        return !RIDERS.length || RIDERS.some(function(R){ return isNew(R,c); });
+      }).sort(function(a,b){ return a.name.localeCompare(b.name); });
+      if(!rows.length) return '';
+      return '<div class="tlpark"><div class="tlph"><span class="dot">'+(si+1)+'</span><a href="'+esc(CoasterHub.parkHref(n))+'">'+esc(n)+'</a><small>'+rows.length+'</small></div>'
+        +rows.map(function(c){
+          seen[CoasterHub.rideKey(c)]=1; total++;
+          var flags=[], who=[];
+          RIDERS.forEach(function(R,i){ if(isNew(R,c)){ cnt[i]++; who.push(R); if(mile(cnt[i])) flags.push('<span class="tlms" title="'+esc((R.you?'Your':R.name+'\u2019s')+' '+ordinal(cnt[i])+' credit')+'">'+FLAG+esc(R.you?'Your':R.name+'\u2019s')+' '+ordinal(cnt[i])+'</span>'); } });
+          var whoTxt = RIDERS.length>1 ? (who.length===RIDERS.length?'Everyone':who.map(function(R){ return R.you?'You':esc(R.name); }).join(', ')) : '';
+          var mdl=CoasterHub.maker(c);
+          return '<div class="tlr"><span class="tln"><a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'+(mdl?'<small>'+esc(mdl)+'</small>':'')+'</span>'
+            +(flags.length?'<span class="tlflags">'+flags.join('')+'</span>':'')
+            +(whoTxt?'<span class="tlwho">'+whoTxt+'</span>':'')+'</div>';
+        }).join('')+'</div>';
+    }).join('');
+    el.innerHTML = total ? '<div class="sect">'+(RIDERS.length?'Every new credit':'Every coaster')+' <span class="tlc">'+total+'</span></div><div class="tlist">'+h+'</div>' : '';
+  }
+  function draw(){ drawAfter(); drawStops(); drawList(); drawNear(); drawMap(); save(); }
 
   function addPark(n, fromMap){
     if(!n || STOPS.indexOf(n)>=0) return;
