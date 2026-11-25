@@ -230,7 +230,9 @@ const TABS = {
     f: [['todo', 'To decide'], ['done', 'Decided']] },
   adds: { t: 'New coasters', h: 'Coasters the sources have that the site doesn&rsquo;t',
     p: 'At parks already on the site. Untick anything wrong, then add them all at once, or one by one. Each is created with the sources&rsquo; stats and shows on /changes; &ldquo;Leave out&rdquo; means it won&rsquo;t come back. Names not in English are unticked until you give them one. Models are set only where the source&rsquo;s matches one of your own model names.',
-    f: [['op', 'Parks: operating or under construction'], ['fair', 'Travelling fairs: operating'], ['closed', 'Closed'], ['unknown', 'Status unknown'], ['multi', 'In two or more sources'], ['', 'Everything']] },
+    // Everything first (Carter, 2026-11-25: closed rides go in too, so the
+    // operating-only view hid nearly all of them).
+    f: [['', 'Everything'], ['op', 'Parks: operating or under construction'], ['fair', 'Travelling fairs: operating'], ['closed', 'Closed'], ['unknown', 'Status unknown'], ['multi', 'In two or more sources']] },
   newParks: { t: 'New parks', h: 'Parks the sources have that the site doesn&rsquo;t',
     p: 'Each with its coasters from Coasterpedia and Wikipedia. Check the name, region and pin (fix any of them right on the card) and which coasters to bring in. Then add one park, or tick several and add them all. Parks are ticked by default only when they have a pin, a region and an English name that isn&rsquo;t already a park here. Nothing goes up until you press Add.',
     f: [['', 'All, pinned first'], ['ready', 'Ready: pin, region and name'], ['pin', 'Has a map pin'], ['nopin', 'No map pin yet'], ['multi', 'Three or more coasters']] },

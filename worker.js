@@ -1700,7 +1700,8 @@ async function getPostLaunch(env) {
       .map(c => ({ ...c, refs: c.refs.map(r => ({ ...r, name: item.get(r.source + "|" + r.ref) || null })) })) }));
   return { fields: OPEN_FIELDS, gaps, changed, matches: cut.changes, decided: cut.decided, adds: addList, nosource, newParks,
            counts: { gaps: gaps.length, changed: changed.length, matches: cut.changes.length,
-                     adds: addList.filter(a => !a.fair && !!a.status && /operat|construct/i.test(a.status) && !/not operat/i.test(a.status)).length, newParks: newParks.length, nosource: nosource.length } };
+                     // Every one still to decide, closed ones too (Carter, 2026-11-25).
+                     adds: addList.length, newParks: newParks.length, nosource: nosource.length } };
 }
 
 // /sources (2026-11-19): where every stat on the site comes from, live.
