@@ -295,8 +295,10 @@
   .featwrap{margin:0 0 26px}
   .featwrap[hidden]{display:none}
   .featc{position:relative;display:block;border-radius:18px;overflow:hidden;aspect-ratio:16/8;max-height:460px;width:100%;background-color:var(--soft);background-size:cover;background-position:center;color:#fff;text-decoration:none;box-shadow:0 10px 30px -18px rgba(10,30,60,.55)}
-  .featc .ov{position:absolute;inset:auto 0 0 0;padding:90px 20px 18px;background-image:linear-gradient(180deg,transparent,rgba(5,10,25,.88))}
-  .featc .kick{display:inline-flex;align-items:center;gap:6px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.7rem;padding:5px 10px;border-radius:999px;background-color:rgba(255,255,255,.16);backdrop-filter:blur(4px)}
+  .featc .ov{position:absolute;inset:auto 0 0 0;padding:90px 20px 18px;text-shadow:0 1px 3px rgba(0,0,0,.6),0 2px 16px rgba(0,0,0,.45)}
+  /* No dark fade along the bottom either (Carter, 2026-11-26): the words carry
+     their own shadow, the chips their own backing. */
+  .featc .kick{display:inline-flex;align-items:center;gap:6px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.7rem;padding:5px 10px;border-radius:999px;background-color:rgba(10,16,30,.5);backdrop-filter:blur(4px)}
   .featc .rk{position:absolute;top:14px;left:16px;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:clamp(2.6rem,7vw,4.2rem);line-height:1;letter-spacing:-.03em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55)}
   .featc .rk i{font-style:normal;font-size:.45em;vertical-align:.9em;margin-right:2px;opacity:.85}
   .featc .rk.st{color:#7fe3d9}.featc .rk.wd{color:#ffb27a}
@@ -304,9 +306,9 @@
      the dark wash at the top came off again the same day). */
   .featc .rk{z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.55),0 2px 14px rgba(0,0,0,.55)}
   .featc .ov b{display:block;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:clamp(1.7rem,5vw,2.8rem);line-height:1.02;letter-spacing:-.02em;margin:8px 0 4px}
-  .featc .ov .pk{font-size:.95rem;opacity:.92}
+  .featc .ov .pk{font-size:.95rem;font-weight:600}
   .featc .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-  .featc .chips span{font-size:.78rem;font-weight:700;padding:4px 9px;border-radius:8px;background-color:rgba(255,255,255,.14)}
+  .featc .chips span{font-size:.78rem;font-weight:700;padding:4px 9px;border-radius:8px;background-color:rgba(10,16,30,.5);backdrop-filter:blur(4px)}
   /* Phones: a shorter card, and the stats on one line along the bottom, the
      last ones dropped if they still do not fit (Carter, 2026-11-26). */
   @media (max-width:640px){
