@@ -2835,7 +2835,10 @@
       return String(v).slice(0, 4);
     }
     if (c.type) kv(info, '<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
-    var amg = function (t) { return t ? '<i class="among" style="font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px">' + E(t) + '</i>' : ''; };
+    // "#1 of 3 ranked": its place among the list's rides by that maker / of
+    // that model, counting only RANKED ones (Carter, 2026-11-25: a bare "1 of
+    // 3" read as rides ridden).
+    var amg = function (t) { return t ? '<i class="among" title="Its place among the ranked rides by this maker or of this model" style="font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px">#' + E(t) + ' ranked</i>' : ''; };
     if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
     if (c.model) kv(info, amg(among && among.model) + (c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model)), "Model");
     if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), c.building ? "Opening" : "Opened"); else if (c.yr) kv(info, E(c.yr), c.building ? "Opening" : "Opened");
