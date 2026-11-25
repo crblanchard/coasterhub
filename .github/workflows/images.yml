@@ -19,7 +19,9 @@ on:
       sources:
         description: 'Sources to pull (space-separated: coasterpedia enwiki wikidata). Empty = all.'
         required: false
-        default: 'enwiki wikidata'
+        # Coasterpedia too (Carter, 2026-11-26): its photos do show on the site.
+        # The Monday run passes no input, which already means all three.
+        default: 'coasterpedia enwiki wikidata'
       gallery:
         description: 'Also pull every photo in each coaster''s Commons category (yes/no)'
         required: false
