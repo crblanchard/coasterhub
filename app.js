@@ -283,11 +283,12 @@
       top_manufacturers: topN(manu, 10, "name", "credits"),
       top_locations: topN(loc, 12, "loc", "credits"),
       records: {
-        tallest: tallest && { name: tallest.name, val: tallest.h, unit: "ft" },
-        fastest: fastest && { name: fastest.name, val: fastest.s, unit: "mph" },
-        longest: longest && { name: longest.name, val: longest.l, unit: "ft" },
-        oldest: oldest && { name: oldest.name, val: curYear - oldest.yr, unit: "yrs" },
-        most_ridden: mostRiddenId && { name: byId[rep[mostRiddenId]].name, val: creditCount[mostRiddenId], unit: "rides" },
+        // The park too (Carter, 2026-11-25): "Jack Rabbit" alone is nine rides.
+        tallest: tallest && { name: tallest.name, park: tallest.park, val: tallest.h, unit: "ft" },
+        fastest: fastest && { name: fastest.name, park: fastest.park, val: fastest.s, unit: "mph" },
+        longest: longest && { name: longest.name, park: longest.park, val: longest.l, unit: "ft" },
+        oldest: oldest && { name: oldest.name, park: oldest.park, val: curYear - oldest.yr, unit: "yrs" },
+        most_ridden: mostRiddenId && { name: byId[rep[mostRiddenId]].name, park: byId[rep[mostRiddenId]].park, val: creditCount[mostRiddenId], unit: "rides" },
         most_visited_park: mostVisitedPark && { name: mostVisitedPark, val: parkVisitDays[mostVisitedPark], unit: "visits" }
       },
       day_detail: dayDetail,
@@ -3296,7 +3297,7 @@
     // A day at many parks would wrap to eight lines on a phone: the first two
     // and "+N more", the full list on hover (critique, 2026-11-21).
     var shown = o.parts && o.parts.length > 2
-      ? o.parts.slice(0, 2).join(' & ') + ' +' + (o.parts.length - 2) + ' more' : o.title;
+      ? o.parts.slice(0, 2).join(' & ') + ' & ' + (o.parts.length - 2) + ' more' : o.title;   // "&", as between the two (Carter, 2026-11-25)
     // A full date makes it a ticket: the day on the stub (lists.css .visit.tk).
     var stub = "";
     if (o.iso && /^\d{4}-\d{2}-\d{2}$/.test(o.iso)) {

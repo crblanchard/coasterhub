@@ -11,7 +11,7 @@
 <base href="/">
 <title>Profile — Coaster Hub</title>
 <meta name="description" content="Interactive roller coaster count statistics.">
-<link rel="stylesheet" href="/style.css?v=20261125b">
+<link rel="stylesheet" href="/style.css?v=20261125c">
 <link rel="stylesheet" href="/lists.css?v=20261122f">
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
@@ -170,6 +170,9 @@
      whole profile sideways on a phone (Carter, 2026-11-02). It is a second
      line under the name now, ellipsized if it still does not fit. */
   .rec .rname .rsub{display:block;color:var(--muted);font-weight:600;font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #records .rec .rname .rsub{font-family:inherit;font-stretch:100%;font-weight:500;letter-spacing:0}
+  #records .rec .rsub a{color:inherit;text-decoration:none}
+  #records .rec .rsub a:hover{color:var(--accent2)}
   /* On this day's own visits: one row per year and park, the rides listed
      under it. The ride list wraps (it is the point of the row), unlike a
      record's park line, and the row spans both columns. */
@@ -344,6 +347,8 @@
   .hm-svg{flex:1 1 auto;min-width:0;width:100%;height:auto;display:block}
   .hm-lbl{width:38px;color:var(--muted);font-size:.75rem;text-align:right;flex:none}
   .hm-cell{stroke:var(--hmline);stroke-width:.5;cursor:pointer}
+  #heatmap:not(.hm-open) .hm-old{display:none}
+  .hm-all{margin:10px 0 0;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--accent2);font:inherit;font-size:.84rem;font-weight:600;cursor:pointer}
   .hm-cell:hover{stroke:var(--hmhover);stroke-width:1.2}
   .hm-legend{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.78rem;margin-top:10px}
   .hm-legend .sw{width:12px;height:12px;border-radius:2px;display:inline-block}
@@ -558,7 +563,7 @@
 
 <section class="block" id="sec_activity"><div class="container">
   <h2>Every riding day</h2>
-  <p class="lead">Each square is a day; darker means more rides. Tap or hover one for the date, parks, and count.</p>
+  <p class="lead">Each square is a day; the stronger the colour, the more rides. Tap one for the date, parks and count.</p>
   <div class="hm-wrap" id="heatmap"></div>
   <div class="hm-legend">Less
     <span class="sw hm-l0"></span>
@@ -582,7 +587,7 @@
   <div class="chart-grid">
     <div class="panel"><h3 id="parks_title">Top parks by rides</h3><div class="cap">Home turf</div><div class="cwrap" style="height:360px"><canvas id="cParks"></canvas></div></div>
     <div class="panel"><h3>Top manufacturers</h3><div class="cap">By credits ridden</div><div class="cwrap" style="height:360px"><canvas id="cManu"></canvas></div></div>
-    <div class="panel" id="panel_days"><h3>Biggest single days</h3><div class="cap">Most rides in one day (hover for park)</div><div class="cwrap" style="height:360px"><canvas id="cDays"></canvas></div></div>
+    <div class="panel" id="panel_days"><h3>Biggest single days</h3><div class="cap">Most rides in one day &middot; tap a bar for the park</div><div class="cwrap" style="height:360px"><canvas id="cDays"></canvas></div></div>
     <div class="panel"><h3>Steel vs wood</h3><div class="cap">Credit breakdown</div><div class="cwrap"><canvas id="cType"></canvas></div></div>
   </div>
 </div></section>
@@ -600,7 +605,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261125d"></script>
+<script src="/app.js?v=20261125e"></script>
 <script src="/profile-edit.js?v=20261031a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -803,6 +808,9 @@ function mountAmong(slug, name, mine){
   });
 }
 
+// Redraws the follow state once it is known, so a Compare button made later
+// still gets the right weight.
+var FOLLOWS_DRAWN=null, FOLLOWS_LOUD=0;
 function mountFollows(host, slug){
   if(!slug) return;
   var btn=document.getElementById('hero_follow');
@@ -874,6 +882,10 @@ function mountFollows(host, slug){
     if(!btn) return;
     var canFollow = D.me && D.me !== slug && D.claimed && !BLOCKED;
     btn.hidden = !canFollow;
+    // One yellow button (Carter, 2026-11-25): Follow while you don't follow
+    // them, then Compare takes the yellow and Unfollow goes quiet.
+    var cmp=document.getElementById('hero_cmp');
+    if(cmp) cmp.className = canFollow && !D.you ? 'btn alt' : 'btn';
     if(!canFollow) return;
     btn.textContent = D.you ? 'Unfollow' : 'Follow';
     btn.className = D.you ? 'btn alt' : 'btn';
@@ -900,9 +912,10 @@ function mountFollows(host, slug){
   }
   if(btn) btn.onclick=act;
 
+  var loud=function(){ FOLLOWS_LOUD=1; var c=document.getElementById('hero_cmp'); if(c) c.className='btn'; };
   followsOnce(slug)
-    .then(function(d){ if(!d) return; D=d; draw(); })
-    .catch(function(){ /* not switched on, or offline: the page is fine without it */ });
+    .then(function(d){ if(!d){ loud(); return; } D=d; FOLLOWS_DRAWN=draw; draw(); })
+    .catch(function(){ loud(); /* not switched on, or offline: the page is fine without it */ });
 }
 
 // Report and block (2026-10-30; both app stores require them). A ⋯ button
@@ -1067,8 +1080,13 @@ function render(s){
     mountAmong(CoasterHub.currentUser(), s.userName, !!mine);
     // Someone else's page: compare them with you (/compare, 2026-10-17).
     if (acct && acct.slug && !mine && !document.getElementById('hero_cmp')) {
-      var cmp=document.createElement('a'); cmp.className='btn'; cmp.id='hero_cmp';
-      cmp.href='/compare?b='+encodeURIComponent(CoasterHub.currentUser()); cmp.textContent='Compare with me';
+      // Quiet until the follow state is known (mountFollows' draw() decides), so
+      // two yellow buttons never show at once. Named, not "with me", which read
+      // as the page's owner speaking (critique, 2026-11-25).
+      var cmp=document.createElement('a'); cmp.className='btn alt'; cmp.id='hero_cmp';
+      cmp.href='/compare?b='+encodeURIComponent(CoasterHub.currentUser());
+      cmp.textContent='Compare with '+String(s.userName||CoasterHub.currentUser()).split(' ')[0];
+      if(FOLLOWS_DRAWN) FOLLOWS_DRAWN(); else if(FOLLOWS_LOUD) cmp.className='btn';
       var fb=document.getElementById('hero_follow'); fb.parentNode.insertBefore(cmp, fb.nextSibling);
     }
     mountShare(CoasterHub.currentUser(), s.userName || CoasterHub.currentUser(), !!mine);
@@ -1277,7 +1295,7 @@ function render(s){
   const fmt=v=>typeof v==='number'?(Number.isInteger(v)?v.toLocaleString():v.toLocaleString(undefined,{maximumFractionDigits:1})):v;
   const recs=order.filter(([key])=>R[key]);
   document.getElementById('records').style.setProperty('--rows', Math.ceil(recs.length/2));
-  document.getElementById('records').innerHTML=recs.map(([key,label])=>{const r=R[key];return '<div class="rec"><span class="tag">'+label+'</span><span class="rname">'+r.name+'</span><span class="rval">'+fmt(r.val)+' <span>'+r.unit+'</span></span></div>';}).join('');
+  document.getElementById('records').innerHTML=recs.map(([key,label])=>{const r=R[key];return '<div class="rec"><span class="tag">'+label+'</span><span class="rname">'+esc(r.name)+(r.park?'<span class="rsub"><a href="'+esc(CoasterHub.parkHref(r.park))+'">'+esc(r.park)+'</a></span>':'')+'</span><span class="rval">'+fmt(r.val)+' <span>'+r.unit+'</span></span></div>';}).join('');
 
   // On This Day
   (function(){
@@ -1337,7 +1355,7 @@ function render(s){
         var list=v.ids.map(function(id){ return v.by[id]; }).sort(function(a,b){ return b.n-a.n||a.c.name.localeCompare(b.c.name); });
         var nNew=list.filter(function(x){ return x.isNew; }).length;
         var names=list.slice(0,MAXN).map(function(x){ return esc(x.c.name)+(has.activity&&x.n>1?' \u00d7'+x.n:'')+(has.activity&&x.isNew?' <span class="new">new</span>':''); });
-        if(list.length>MAXN) names.push('+'+(list.length-MAXN)+' more');
+        if(list.length>MAXN) names.push('& '+(list.length-MAXN)+' more');
         var tail=has.activity?(v.n+' ride'+(v.n>1?'s':'')+(nNew?' \u00b7 '+nNew+' new':'')):(list.length+' credit'+(list.length>1?'s':''));
         // The count sits under the park, not in a right-hand column: on a phone
         // that column squeezed the park and the ride list to a word a line.
@@ -1381,7 +1399,9 @@ function render(s){
     var nf2=function(n){ return Number(n).toLocaleString(); };
     var fmt=function(d){ var p=d.split('-'); return new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).toLocaleDateString(undefined,{timeZone:'UTC',month:'short',day:'numeric'}); };
     var plink=function(p){ return '<a href="'+esc(CoasterHub.parkHref(p))+'">'+esc(p)+'</a>'; };
-    var figs=[[newCred,'New credits'],[cur.length,has.activity?'Rides':'Credits ridden'],[nDays,'Park days'],[nParks,'Parks']];
+    // No ride counts kept (every credit once): "credits ridden" would just repeat
+    // New credits, so it goes (Carter, 2026-11-25).
+    var figs=[[newCred,'New credits']].concat(has.activity?[[cur.length,'Rides']]:[]).concat([[nDays,'Park days'],[nParks,'Parks']]);
     var lines=[];
     if(best && days[best].n>1) lines.push('Biggest day: <b>'+fmt(best)+'</b> at '+Object.keys(days[best].parks).map(plink).join(' & ')+' &middot; '+days[best].n+' rides');
     if(top && Object.keys(parkDays[top]).length>1) lines.push('Most visited: '+plink(top)+' &middot; '+Object.keys(parkDays[top]).length+' days');
@@ -1581,8 +1601,16 @@ function render(s){
     x=Math.max(8, Math.min(x, window.innerWidth-tip.offsetWidth-8));
     tip.style.left=x+'px'; tip.style.top=y+'px';
   }
-  if(has.activity) for(let yr=k.year_min; yr<=k.year_max; yr++){
-    const row=document.createElement('div'); row.className='hm-year';
+  // Only years with a ride in them, newest first, three to start (Carter,
+  // 2026-11-25: "every riding day please clean up"); the rest behind a button.
+  const HMYRS=[]; if(has.activity) for(let yr=k.year_max; yr>=k.year_min; yr--){ if(Object.keys(DAY).some(d=>d.slice(0,4)===String(yr))) HMYRS.push(yr); }
+  if(HMYRS.length>3){
+    const mb=document.createElement('button'); mb.type='button'; mb.className='hm-all'; mb.textContent='Show all '+HMYRS.length+' years';
+    mb.onclick=()=>{ const shut=hm.classList.toggle('hm-open'); mb.textContent=shut?'Show fewer years':'Show all '+HMYRS.length+' years'; };
+    hm.insertAdjacentElement('afterend', mb);
+  }
+  HMYRS.forEach((yr,yi)=>{
+    const row=document.createElement('div'); row.className='hm-year'+(yi>=3?' hm-old':'');
     const lbl=document.createElement('div'); lbl.className='hm-lbl'; lbl.textContent=yr; row.appendChild(lbl);
     const start=new Date(yr,0,1), startWd=start.getDay();
     const days=((yr%4==0&&yr%100!=0)||yr%400==0)?366:365;
@@ -1610,7 +1638,7 @@ function render(s){
       svg.appendChild(rect);
     }
     row.appendChild(svg); hm.appendChild(row);
-  }
+  });
   // Chart.js takes colours as values, not CSS — it cannot resolve a var(). Read
   // the computed variables, and rebuild on a theme change so the axes and fills
   // follow the toggle instead of going stale until the next reload.
@@ -1624,8 +1652,18 @@ function render(s){
   // Bars and slices are FILLS, so they take the fill yellow, not --accent:
   // on light, --accent is the darker marigold that text needs, and the bars
   // came out brown (Carter, 2026-09-24: "make these the brighter yellow too").
-  const AX=cssVar('--muted'), GRID=cssVar('--soft2'), ACC=cssVar('--accentfill'),
-        ACC2=cssVar('--accent2'), FILL=cssVar('--tint2'), PANEL=cssVar('--panel');
+  // Bars are Signal Blue now, not ride yellow: yellow means "do something"
+  // (critique, 2026-11-25). Steel and wood use the site's steel/wood colours,
+  // the same as the top ten's numbers.
+  const AX=cssVar('--muted'), GRID=cssVar('--soft2'), ACC=cssVar('--accent2'),
+        ACC2=cssVar('--accent2'), FILL=cssVar('--tint2'), PANEL=cssVar('--panel'),
+        STEEL=cssVar('--steel')||ACC2, WOOD=cssVar('--wood')||cssVar('--accentfill');
+  // Long names on a phone were cut at the card's edge ("a Cruz Beach Boardwalk"):
+  // shortened with an ellipsis instead.
+  const cut=n=>v=>{ const t=String(v); return t.length>n ? t.slice(0,n-1)+'\u2026' : t; };
+  const NARROW=window.innerWidth<560, LBL=NARROW?16:26;
+  const ylab={...{grid:{color:GRID}}, ticks:{color:AX, callback:function(v){ return cut(LBL)(this.getLabelForValue(v)); }}};
+  const mdy=d=>CoasterHub.mdy(d);
   Chart.defaults.color=AX; Chart.defaults.font.family='system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
   const grid={grid:{color:GRID},ticks:{color:AX}}, noLeg={plugins:{legend:{display:false}}};
   if(has.timeline){
@@ -1647,11 +1685,11 @@ function render(s){
   }
   if(has.activity){
   CH.push(new Chart(cRides,{type:'bar',data:{labels:s.years,datasets:[{data:s.rides_per_year,backgroundColor:ACC,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:grid,y:{...grid,beginAtZero:true}}}}));
-  CH.push(new Chart(cDays,{type:'bar',data:{labels:s.biggest_days.map(d=>d.date),datasets:[{data:s.biggest_days.map(d=>d.rides),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:c=>s.biggest_days[c.dataIndex].park}}},scales:{x:{...grid,beginAtZero:true},y:grid}}}));
+  CH.push(new Chart(cDays,{type:'bar',data:{labels:s.biggest_days.map(d=>mdy(d.date)),datasets:[{data:s.biggest_days.map(d=>d.rides),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:c=>s.biggest_days[c.dataIndex].park}}},scales:{x:{...grid,beginAtZero:true},y:ylab}}}));
   }
-  CH.push(new Chart(cParks,{type:'bar',data:{labels:s.top_parks.map(p=>p.park),datasets:[{data:s.top_parks.map(p=>p.val),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}}));
-  CH.push(new Chart(cManu,{type:'bar',data:{labels:s.top_manufacturers.map(m=>m.name),datasets:[{data:s.top_manufacturers.map(m=>m.credits),backgroundColor:ACC2,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:grid}}}));
-  CH.push(new Chart(cType,{type:'doughnut',data:{labels:['Steel','Wood'],datasets:[{data:[k.steel,k.wood],backgroundColor:[ACC2,ACC],borderColor:PANEL,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}}));
+  CH.push(new Chart(cParks,{type:'bar',data:{labels:s.top_parks.map(p=>p.park),datasets:[{data:s.top_parks.map(p=>p.val),backgroundColor:ACC,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:ylab}}}));
+  CH.push(new Chart(cManu,{type:'bar',data:{labels:s.top_manufacturers.map(m=>m.name),datasets:[{data:s.top_manufacturers.map(m=>m.credits),backgroundColor:ACC2,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,...noLeg,scales:{x:{...grid,beginAtZero:true},y:ylab}}}));
+  CH.push(new Chart(cType,{type:'doughnut',data:{labels:['Steel','Wood'],datasets:[{data:[k.steel,k.wood],backgroundColor:[STEEL,WOOD],borderColor:PANEL,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}}));
   }
   // Same for the charts: without Chart.js the More stats charts are missing,
   // not the page.
