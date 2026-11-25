@@ -693,6 +693,18 @@ Promise.all([
   };
   note.addTo(map);
   refresh();
+  // /map?park=<slug>: open on that park, zoomed in, its card open (Carter,
+  // 2026-11-25: a Map link beside a park's trail). Shown even if a filter
+  // would hide it.
+  try{
+    var want=new URLSearchParams(location.search).get('park');
+    var fp=want && placed.filter(function(p){ return CoasterHub.slugify(p.name)===want; })[0];
+    if(fp){
+      if(!group.hasLayer(fp.marker)) group.addLayer(fp.marker);
+      map.setView([fp.lat, fp.lon], 11, {animate:false});
+      fp.marker.openPopup();
+    }
+  }catch(e){}
   document.title=(slug && log && log.user ? log.user+'’s Map' : 'Map')+' — Coaster Hub';
   document.body.setAttribute('data-ready','1');
 }).catch(fail);
