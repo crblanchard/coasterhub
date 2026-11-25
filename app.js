@@ -2911,7 +2911,8 @@
       img.className = (opts.cls || "cphoto-sm") + " ph"; img.alt = ""; img.decoding = "async";
       img.referrerPolicy = "no-referrer";
       var size = function (u) { return photoSize(u, opts.w); };
-      img.onload = function () { img.classList.add("in"); };
+      // Near the box's 3:2 it fills it; square, tall or panoramic is shown whole.
+      img.onload = function () { var r = img.naturalWidth / (img.naturalHeight || 1); if (r < 1.24 || r > 2.1) img.classList.add("fit"); img.classList.add("in"); };
       img.onerror = function () {
         // That size refused (a picture smaller than it): the original, then the next one.
         var p = list[at];
