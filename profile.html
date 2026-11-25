@@ -240,6 +240,10 @@
   /* Lost credits (2026-11-17): rides you have done that are gone, closed or
      moved. Two columns of hairline rows on a desktop, one on a phone. */
   .lost{columns:2 300px;column-gap:36px}
+  /* One panel around them all (Carter, 2026-11-25: "it looks like they're all
+     floating in space separately"), the park groups still spaced, no lines. */
+  .lost{background-color:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px 0;box-shadow:0 1px 2px rgba(17,24,39,.05)}
+  @media (max-width:640px){ .lost{padding:14px 14px 0} }
   /* One park per group, its rides under it (2026-11-24). */
   .lost .lg{break-inside:avoid;padding:0 0 30px}
   .lost .lg .lp{display:block;color:var(--fg);font-weight:700;font-size:.95rem;text-decoration:none;padding-bottom:2px}
