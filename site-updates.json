@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-25T21:47:20Z",
-   "text": "The home page features a big photo of a coaster from the Global top 100, opened coasters show a much bigger photo, and rankings can be filtered by location. Trip links can now only be edited by the people on the trip."
+   "at": "2026-11-25T22:37:55Z",
+   "text": "The home page features a big photo of a Global top 100 coaster, opened coasters show a much bigger photo, and rankings can be filtered by location. Headings and coaster names now use the same bold type on every page."
   },
   {
    "at": "2026-11-25T02:00:51Z",

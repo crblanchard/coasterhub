@@ -11,7 +11,7 @@
 <base href="/">
 <title>Coaster Hub — Track your coaster count</title>
 <meta name="description" content="Keep track of your roller coaster count — every credit, every re-ride, every park — and see it as maps, records and charts.">
-<link rel="stylesheet" href="/style.css?v=20261126c">
+<link rel="stylesheet" href="/style.css?v=20261126d">
 <link rel="stylesheet" href="/lists.css?v=20261125b">
 <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
@@ -300,6 +300,11 @@
   .featc .rk{position:absolute;top:14px;left:16px;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:clamp(2.6rem,7vw,4.2rem);line-height:1;letter-spacing:-.03em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55)}
   .featc .rk i{font-style:normal;font-size:.45em;vertical-align:.9em;margin-right:2px;opacity:.85}
   .featc .rk.st{color:#7fe3d9}.featc .rk.wd{color:#ffb27a}
+  /* Readable on any photo (Carter, 2026-11-26: pale sky behind a pale #20): a
+     dark wash in the number's corner, and a firmer shadow on the number. */
+  .featc::before{content:"";position:absolute;inset:0 0 auto 0;height:45%;pointer-events:none;
+    background-image:linear-gradient(180deg,rgba(5,10,25,.55),rgba(5,10,25,.18) 55%,transparent)}
+  .featc .rk{z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.55),0 2px 14px rgba(0,0,0,.55)}
   .featc .ov b{display:block;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:clamp(1.7rem,5vw,2.8rem);line-height:1.02;letter-spacing:-.02em;margin:8px 0 4px}
   .featc .ov .pk{font-size:.95rem;opacity:.92}
   .featc .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}

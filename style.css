@@ -1306,3 +1306,10 @@ html.pboxopen{overflow:hidden}
 .pgfoot a.pgcap:hover{text-decoration:underline}
 .pbox .pbcap a{text-decoration:none}
 .pbox .pbcap a:hover{text-decoration:underline}
+/* One type system (Carter, 2026-11-26: "do all three"). Every heading and
+   every coaster's name in a list is in the display face, as on Home, not just
+   the ones a page happened to restyle. Family/stretch/weight only, so each
+   page keeps its sizes; :root lifts these over the pages' own name rules. */
+h1,h2{font-family:var(--display);font-stretch:110%;letter-spacing:-.02em}
+:root a.crow .cn,:root details.mdl summary .nm,:root .rrow .nm b,:root .srow .n b,:root .top .t .n b,
+:root .addrow .cn,:root .trow .n b,:root .mlist .mtwo .nm{font-family:var(--display);font-stretch:92%;font-weight:800;letter-spacing:-.01em}
