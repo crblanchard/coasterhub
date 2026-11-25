@@ -1269,3 +1269,27 @@ img.cxphoto.fit,img.hhphoto.fit{object-fit:contain}
 .pgfoot .pgcap{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pgfoot a{color:inherit}
 .hasphoto > div.pgal.cxgal{max-width:none}
+.pgtrack{cursor:zoom-in}
+/* Every photo, big (photoBox in app.js; Carter, 2026-11-25). */
+html.pboxopen{overflow:hidden}
+.pbox{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;background-color:rgba(4,8,18,.94);color:#fff;padding:10px 0 14px}
+.pbox .pbtop{display:flex;align-items:center;justify-content:space-between;padding:0 16px 8px}
+.pbox .pbn{font-weight:700;font-variant-numeric:tabular-nums;font-size:.95rem}
+.pbox .pbx{width:44px;height:44px;border-radius:50%;border:0;background-color:rgba(255,255,255,.12);color:#fff;font-size:1.7rem;line-height:1;cursor:pointer}
+.pbox .pbstage{position:relative;flex:1;min-height:0}
+.pbox .pbtrack{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior:contain}
+.pbox .pbtrack::-webkit-scrollbar{display:none}
+.pbox .pbs{flex:0 0 100%;margin:0;display:flex;align-items:center;justify-content:center;scroll-snap-align:start;scroll-snap-stop:always;padding:0 12px}
+.pbox .pbs img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+.pbox .pbprev,.pbox .pbnext{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:0;display:flex;align-items:center;justify-content:center;background-color:rgba(255,255,255,.14);color:#fff;cursor:pointer}
+.pbox .pbprev{left:14px}.pbox .pbnext{right:14px}
+.pbox .pbprev:hover,.pbox .pbnext:hover{background-color:rgba(255,255,255,.26)}
+.pbox.atstart .pbprev,.pbox.atend .pbnext{visibility:hidden}
+@media (hover:none){ .pbox .pbprev,.pbox .pbnext{display:none} }
+.pbox .pbcap{padding:8px 16px 0;font-size:.78rem;color:rgba(255,255,255,.75);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbox .pbcap a{color:inherit}
+.pbox .pbthumbs{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 0;scrollbar-width:none;justify-content:safe center}
+.pbox .pbthumbs::-webkit-scrollbar{display:none}
+.pbox .pbthumbs button{flex:none;width:64px;height:44px;padding:0;border:2px solid transparent;border-radius:6px;overflow:hidden;background-color:rgba(255,255,255,.08);cursor:pointer;opacity:.6}
+.pbox .pbthumbs button.on{border-color:#fff;opacity:1}
+.pbox .pbthumbs img{display:block;width:100%;height:100%;object-fit:cover}

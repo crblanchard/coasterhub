@@ -2917,9 +2917,13 @@
     var track = document.createElement("div"); track.className = "pgtrack"; g.appendChild(track);
     var foot = document.createElement("div"); foot.className = "pgfoot"; g.appendChild(foot);
     var live = [];
+    // Where the arrows are heading: a click while the last one is still
+    // sliding steps on from there instead of being lost (Carter, 2026-11-25).
+    var want = null;
+    function now() { var n = live.length; var at = want != null ? want : Math.round(track.scrollLeft / Math.max(1, track.clientWidth)); return Math.max(0, Math.min(n - 1, at)); }
     function caption() {
       var n = live.length; if (!n) return;
-      var at = Math.round(track.scrollLeft / Math.max(1, track.clientWidth)); at = Math.max(0, Math.min(n - 1, at));
+      var at = now();
       var p = live[at].p, who = p.author ? (p.author.length > 48 ? p.author.slice(0, 45) + "\u2026" : p.author) : "unknown";
       foot.innerHTML = (n > 1 ? '<span class="pgn">' + (at + 1) + " / " + n + "</span>" : "")
         + '<span class="pgcap">Photo: ' + E(who) + (p.license ? " \u00b7 " + E(String(p.license).toUpperCase()) : "")
@@ -2946,16 +2950,78 @@
         var b = document.createElement("button"); b.type = "button"; b.className = "pg" + d;
         b.setAttribute("aria-label", d === "prev" ? "Previous photo" : "Next photo");
         b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (d === "prev" ? "m15 6-6 6 6 6" : "m9 6 6 6-6 6") + '"/></svg>';
-        b.onclick = function (e) { e.stopPropagation(); e.preventDefault(); track.scrollBy({ left: (d === "prev" ? -1 : 1) * track.clientWidth, behavior: "smooth" }); };
+        b.onclick = function (e) {
+          e.stopPropagation(); e.preventDefault();
+          want = Math.max(0, Math.min(live.length - 1, now() + (d === "prev" ? -1 : 1)));
+          track.scrollTo({ left: want * track.clientWidth, behavior: "smooth" }); caption();
+        };
         g.appendChild(b);
       });
     } else g.classList.add("one");
     var t = null;
-    track.addEventListener("scroll", function () { clearTimeout(t); t = setTimeout(caption, 60); }, { passive: true });
+    track.addEventListener("scroll", function () { clearTimeout(t); t = setTimeout(function () { want = null; caption(); }, 140); }, { passive: true });
+    // A click on the photo (not the arrows at its edges) opens them all, big.
+    track.addEventListener("click", function (e) {
+      if (!live.length) return;
+      e.preventDefault();
+      photoBox(live.map(function (x) { return x.p; }), now());
+    });
     // A swipe inside an opened row must not close it.
     g.addEventListener("click", function (e) { if (!e.target.closest("a")) e.stopPropagation(); });
     setTimeout(caption, 0);
     return g;
+  }
+  // Every photo, big, over the page: arrows, the count and credit, a strip of
+  // thumbnails to jump with, ← → and Esc on a keyboard, swipe on a phone.
+  // Opened by clicking a carousel's photo (Carter, 2026-11-25). Built at the
+  // end of <body>, fixed, so no list or hero can clip it.
+  function photoBox(list, start) {
+    var E = searchEsc, old = document.querySelector(".pbox"); if (old) old.remove();
+    var box = document.createElement("div"); box.className = "pbox"; box.setAttribute("role", "dialog"); box.setAttribute("aria-label", "Photos");
+    var arrow = function (d) { return '<button type="button" class="pb' + d + '" aria-label="' + (d === "prev" ? "Previous" : "Next") + ' photo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (d === "prev" ? "m15 6-6 6 6 6" : "m9 6 6 6-6 6") + '"/></svg></button>'; };
+    box.innerHTML = '<div class="pbtop"><span class="pbn"></span><button type="button" class="pbx" aria-label="Close">\u00d7</button></div>'
+      + '<div class="pbstage"><div class="pbtrack">' + list.map(function (p) {
+          return '<figure class="pbs"><img alt="" decoding="async" referrerpolicy="no-referrer" loading="lazy" src="' + E(photoSize(p.thumb || p.url, 1280)) + '" data-alt="' + E(p.thumb || p.url) + '"></figure>'; }).join("")
+      + '</div>' + (list.length > 1 ? arrow("prev") + arrow("next") : "") + '</div>'
+      + '<div class="pbcap"></div>'
+      + (list.length > 1 ? '<div class="pbthumbs">' + list.map(function (p, i) {
+          return '<button type="button" data-i="' + i + '"><img alt="" loading="lazy" referrerpolicy="no-referrer" src="' + E(photoSize(p.thumb || p.url, 120)) + '"></button>'; }).join("") + '</div>' : "");
+    document.body.appendChild(box);
+    var root = document.documentElement, track = box.querySelector(".pbtrack"), at = start || 0, want = null;
+    root.classList.add("pboxopen");
+    box.querySelectorAll(".pbs img").forEach(function (img) {
+      img.onerror = function () { var a = img.getAttribute("data-alt"); if (a && img.src !== a) { img.src = a; img.removeAttribute("data-alt"); } };
+    });
+    function show(i, smooth) {
+      at = Math.max(0, Math.min(list.length - 1, i));
+      var p = list[at];
+      box.querySelector(".pbn").textContent = list.length > 1 ? (at + 1) + " / " + list.length : "";
+      box.querySelector(".pbcap").innerHTML = "Photo: " + E(p.author || "unknown") + (p.license ? " \u00b7 " + E(String(p.license).toUpperCase()) : "")
+        + (p.page ? ' \u00b7 <a href="' + E(p.page) + '" target="_blank" rel="noopener">' + E(SRCNAME[p.source] || p.source || "source") + "</a>" : "");
+      box.classList.toggle("atstart", at === 0); box.classList.toggle("atend", at === list.length - 1);
+      box.querySelectorAll(".pbthumbs button").forEach(function (b, j) { b.classList.toggle("on", j === at); if (j === at && b.scrollIntoView) b.scrollIntoView({ block: "nearest", inline: "center", behavior: "instant" }); });
+      if (smooth !== null) { want = at; track.scrollTo({ left: at * track.clientWidth, behavior: smooth ? "smooth" : "instant" }); }
+    }
+    var tt = null;
+    track.addEventListener("scroll", function () { clearTimeout(tt); tt = setTimeout(function () { want = null; var i = Math.round(track.scrollLeft / Math.max(1, track.clientWidth)); if (i !== at) show(i, null); }, 140); }, { passive: true });
+    function close() { box.remove(); root.classList.remove("pboxopen"); document.removeEventListener("keydown", key); }
+    function key(e) {
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowRight") show((want != null ? want : at) + 1, true);
+      else if (e.key === "ArrowLeft") show((want != null ? want : at) - 1, true);
+    }
+    document.addEventListener("keydown", key);
+    box.addEventListener("click", function (e) {
+      var b = e.target.closest("button");
+      if (b && b.classList.contains("pbx")) return close();
+      if (b && b.classList.contains("pbprev")) return show((want != null ? want : at) - 1, true);
+      if (b && b.classList.contains("pbnext")) return show((want != null ? want : at) + 1, true);
+      if (b && b.hasAttribute("data-i")) return show(+b.getAttribute("data-i"), true);
+      // The dark around the photo closes it, as anywhere else would expect.
+      if (!e.target.closest("img, a, .pbthumbs")) close();
+    });
+    requestAnimationFrame(function () { show(at, false); });
+    box.querySelector(".pbx").focus();
   }
   function photoInto(el, id, opts) {
     if (!el || !id) return;
@@ -4008,7 +4074,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, parkRanks: parkRanks, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, photoGallery: photoGallery, photoSize: photoSize, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
+              openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, photoGallery: photoGallery, photoSize: photoSize, photoBox: photoBox, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
