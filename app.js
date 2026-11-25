@@ -3731,7 +3731,7 @@
       // Stats, then who ranked it where, the photo beside them (above them on
       // a phone): the same as an opened row on /rankings (Carter, 2026-11-24).
       box.innerHTML = coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>')
-        + '<div class="whol">' + (racingWho(r.g, st.glob, byId, st.me) || whoByPlace(r.who, st.me)) + '</div>';
+        + '<div class="whol"><p class="lbl">Ranked by</p>' + (racingWho(r.g, st.glob, byId, st.me) || whoByPlace(r.who, st.me)) + '</div>';
       row.classList.add("open"); row.parentNode.insertBefore(box, row.nextSibling);
       photoInto(box, r.c.id, { cls: "cxphoto", w: cxW(), first: true });
     });

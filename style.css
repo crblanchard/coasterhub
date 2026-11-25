@@ -1239,6 +1239,10 @@ img.hhphoto.ph{display:block;width:100%;height:120px;object-fit:cover;border-rad
      photo when the facts run longer than it (.morer, set by photoInto), else
      under the facts, so both sides fill (Carter, 2026-11-25). */
   .hasphoto.morer > div.facts{grid-row:1 / span 2}
+  /* Otherwise the photo spans both rows and row 2 takes the slack, so the list
+     sits right under the facts instead of under the photo (Carter, 2026-11-26). */
+  .hasphoto:not(.morer){grid-template-rows:auto 1fr}
+  .hasphoto:not(.morer) > img.cxphoto.ph,.hasphoto:not(.morer) > div.pgal.cxgal{grid-row:1 / span 2}
   .hasphoto.morer > div.cxmore,.hasphoto.morer > div.whol{grid-column:2;grid-row:2;margin-top:14px;border-top:0;padding-top:0}
 }
 /* Facts in one column at every width so the photo gets three-fifths of the
@@ -1249,6 +1253,7 @@ img.hhphoto.ph{display:block;width:100%;height:120px;object-fit:cover;border-rad
   .hasphoto .facts .fnum{margin-top:6px}
 }
 .cx .whol{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+.whol > .lbl{color:var(--muted);font-size:.8rem;font-weight:700;margin:0 0 6px}
 img.cxphoto.fit,img.hhphoto.fit{object-fit:contain}
 .facts.nonum{grid-template-columns:minmax(0,1fr)}
 /* The photo carousel (photoGallery in app.js; Carter, 2026-11-25): one 3:2
