@@ -3145,16 +3145,8 @@
         // ranking rather than your ride count, first ridden, and the grey
         // maker/model counts from your ranking. The profile passes its own
         // (the list on screen is the profile owner's) and no "Your ranking".
-        var m = y && y.rides[id], among = opts.among ? opts.among(c) : null;
-        if (y && y.rank[id] && !opts.noRank) {
-          extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your ranking"]);
-          if (!among) {
-            var byId = {}; cs.forEach(function (o) { byId[o.id] = o; });
-            var order = Object.keys(y.rank).map(Number).sort(function (a, b) { return y.rank[a] - y.rank[b]; });
-            among = amongIn(order, byId, c);
-          }
-        }
-        if (m && m.first) extra.push([mdy(m.first), "First ridden"]);
+        var yl = youLines(c, cs, y, opts.noRank, opts.among ? opts.among(c) : null);
+        extra = yl.extra; var among = yl.among;
         inner.innerHTML = coasterFacts(c, extra,
           '<a class="go" href="' + searchEsc(coasterHref(c)) + '">Coaster page &rarr;</a>', among)
           // opts.more(c): what a page adds under the facts (the park page's
@@ -3163,6 +3155,24 @@
         photoInto(inner, id, { cls: "cxphoto", w: cxW(), first: true });
       });
     });
+  }
+
+  // Your lines on an opened coaster: "Your ranking #6 of 610", "First ridden",
+  // and the grey "2 of 49" maker/model counts from your ranking. Shared by the
+  // openable rows and the Global rows, so a coaster opens the same everywhere
+  // (Carter, 2026-11-26: "i feel like these should be the same").
+  function youLines(c, cs, y, noRank, among) {
+    var extra = [], id = c.id, m = y && y.rides[id];
+    if (y && y.rank[id] && !noRank) {
+      extra.push(["#" + y.rank[id] + " of " + y.ranked, "Your ranking"]);
+      if (!among) {
+        var byId = {}; cs.forEach(function (o) { byId[o.id] = o; });
+        var order = Object.keys(y.rank).map(Number).sort(function (a, b) { return y.rank[a] - y.rank[b]; });
+        among = amongIn(order, byId, c);
+      }
+    }
+    if (m && m.first) extra.push([mdy(m.first), "First ridden"]);
+    return { extra: extra, among: among };
   }
 
   // Status and years, the right-hand end of a coaster row: the status carries
@@ -3730,10 +3740,16 @@
       var byId = {}; cs.forEach(function (c) { byId[c.id] = c; });
       // Stats, then who ranked it where, the photo beside them (above them on
       // a phone): the same as an opened row on /rankings (Carter, 2026-11-24).
-      box.innerHTML = coasterFacts(r.c, null, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>')
-        + '<div class="whol"><p class="lbl">Ranked by</p>' + (racingWho(r.g, st.glob, byId, st.me) || whoByPlace(r.who, st.me)) + '</div>';
+      box.innerHTML = '<p class="facts none">Loading&hellip;</p>';
       row.classList.add("open"); row.parentNode.insertBefore(box, row.nextSibling);
-      photoInto(box, r.c.id, { cls: "cxphoto", w: cxW(), first: true });
+      // Your ranking, first ridden and the maker/model counts too, as every
+      // other opened coaster has them (Carter, 2026-11-26).
+      Promise.all([fetchCoasters().catch(function () { return null; }), you().catch(function () { return null; })]).then(function (rr) {
+        var yl = youLines(r.c, (rr[0] && rr[0].coasters) || cs, rr[1], false, null);
+        box.innerHTML = coasterFacts(r.c, yl.extra, '<a class="go" href="' + E(coasterHref(r.c)) + '">Coaster page &rarr;</a>', yl.among)
+          + '<div class="whol"><p class="lbl">Ranked by</p>' + (racingWho(r.g, st.glob, byId, st.me) || whoByPlace(r.who, st.me)) + '</div>';
+        photoInto(box, r.c.id, { cls: "cxphoto", w: cxW(), first: true });
+      });
     });
     // Park · place beside each name, as /rankings reads.
     var parks = {};
