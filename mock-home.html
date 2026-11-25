@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<!-- Add to home screen (2026-09-27): opens full-screen with its own icon. See site.webmanifest. -->
+<link rel="manifest" href="/site.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coaster Hub">
+<base href="/">
+<title>Home with photos — mock-ups</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Keep track of your roller coaster count — every credit, every re-ride, every park — and see it as maps, records and charts.">
+<link rel="stylesheet" href="/style.css?v=20261125f">
+<link rel="stylesheet" href="/lists.css?v=20261125b">
+<link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
+<link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png?v=20260924b" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260924b">
+<meta property="og:title" content="Coaster Hub">
+<meta property="og:description" content="Track your coaster count, rank your credits and log your rides — every park and every coaster you’ve been on, in one place.">
+<meta property="og:image" content="https://coasterhub.org/og-image.png?v=4">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  /* Mock-ups only (Carter, 2026-11-26: "new homepage with photos please I
+     don't know how they'd be good"). Unlinked; delete once a direction is
+     chosen. Live data and live photos, so it looks the way it would. */
+  .mk{padding:28px 0 8px}
+  .mk h2.opt{font-family:var(--display);font-weight:800;font-size:1.4rem;margin:0 0 4px}
+  .mk p.why{color:var(--muted);margin:0 0 14px;max-width:46em}
+  .mk .tag{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);margin-bottom:6px}
+  /* A: the Global top 10 as photo cards */
+  .rowcards{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:thin}
+  .pcard{flex:0 0 220px;scroll-snap-align:start;border:1px solid var(--line);border-radius:14px;background-color:var(--panel);overflow:hidden;text-decoration:none;color:var(--fg)}
+  @media (min-width:900px){ .rowcards{display:grid;grid-template-columns:repeat(5,1fr);overflow:visible} .pcard{flex:none} }
+  .pcard .ph{position:relative;aspect-ratio:3/2;background-color:var(--soft);background-size:cover;background-position:center}
+  .pcard .rk{position:absolute;left:8px;top:8px;min-width:30px;height:30px;padding:0 8px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:850;font-size:.95rem;color:#fff;background-color:var(--steel)}
+  .pcard .rk.wd{background-color:var(--wood)}
+  .pcard .tx{padding:10px 12px 12px}
+  .pcard .tx b{display:block;font-family:var(--display);font-weight:800;font-size:.98rem;line-height:1.2}
+  .pcard .tx small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* B: one big featured photo */
+  .feat{position:relative;display:block;border-radius:16px;overflow:hidden;aspect-ratio:16/9;max-height:440px;width:100%;background-color:var(--soft);background-size:cover;background-position:center;color:#fff;text-decoration:none}
+  @media (max-width:640px){ .feat{aspect-ratio:4/3} }
+  .feat .ov{position:absolute;inset:auto 0 0 0;padding:60px 20px 18px;background-image:linear-gradient(180deg,transparent,rgba(5,10,25,.82))}
+  .feat .ov small{display:block;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.72rem;opacity:.85}
+  .feat .ov b{display:block;font-family:var(--display);font-weight:850;font-size:clamp(1.5rem,4vw,2.4rem);line-height:1.05;margin:4px 0}
+  .feat .ov span{font-size:.92rem;opacity:.9}
+  /* C: your last park day with its park's photo */
+  .day{border:1px solid var(--line);border-radius:16px;background-color:var(--panel);overflow:hidden}
+  .day .ph{aspect-ratio:21/9;background-color:var(--soft);background-size:cover;background-position:center}
+  @media (max-width:640px){ .day .ph{aspect-ratio:16/9} }
+  .day .tx{padding:14px 16px 16px}
+  .day .tx b{font-family:var(--display);font-weight:800;font-size:1.15rem}
+  .day .tx p{margin:4px 0 10px;color:var(--muted);font-size:.9rem}
+  .thumbs{display:flex;gap:8px;overflow-x:auto}
+  .thumbs a{flex:0 0 120px;min-width:0;text-decoration:none;color:var(--fg)}
+  .thumbs .t{aspect-ratio:3/2;border-radius:8px;background-color:var(--soft);background-size:cover;background-position:center;margin-bottom:4px}
+  .thumbs small{display:block;font-size:.76rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mknote{color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner">
+  <a class="brand" href="/">
+    <img src="/mark.svg?v=20260924b" alt="" class="brand-mark" width="40" height="40">
+    <span class="brand-text">Coaster <b>Hub</b></span>
+  </a>
+  <nav class="links">
+    <a href="/" data-nav="riders">Home</a>
+    <a href="/explore" data-nav="explore">Explore</a>
+    <a href="/log" data-nav="log" class="navlog">+ Log</a>
+    <a href="/rankings" data-nav="rankings">Rankings</a>
+    <a href="/account" data-nav="profile">Me</a>
+  </nav>
+  <div class="people" id="people"></div>
+</div></header>
+<section class="hero compact" style="--hero-t:30px;--hero-b:20px"><div class="container">
+  <h1 class="wide">Home with photos.</h1>
+  <p>Three ways photos could go on the home page, with live data. Not linked anywhere; pick what you like (or none).</p>
+</div></section>
+<section class="block"><div class="container">
+  <div class="mk"><span class="tag">Option A</span><h2 class="opt">The Global top 10 as photo cards</h2>
+    <p class="why">The list that's already on the home page, but each ride is a card with its photo and the rank badge in steel or wood. Swipe on a phone, two rows of five on a computer.</p>
+    <div class="rowcards" id="optA"><p class="mknote">Loading&hellip;</p></div></div>
+  <div class="mk"><span class="tag">Option B</span><h2 class="opt">One big photo up top</h2>
+    <p class="why">A single wide photo under the header: today&rsquo;s pick from the Global top 25 (a different one each day), with its rank, park and score over the picture. Taps through to the coaster.</p>
+    <div id="optB"><p class="mknote">Loading&hellip;</p></div></div>
+  <div class="mk"><span class="tag">Option C</span><h2 class="opt">Your last park day, with the park&rsquo;s photo</h2>
+    <p class="why">For a signed-in rider: the park photo across the top of the card, the day and ride count, then the coasters you rode as small photos. A friend&rsquo;s day could use the same card in the feed.</p>
+    <div id="optC"><p class="mknote">Loading&hellip;</p></div></div>
+</div></section>
+<footer class="site"><div class="container foot-inner">
+  <div>&copy; <span id="y"></span> Coaster Hub &middot; coasterhub.org</div>
+  <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
+</div></footer>
+<script src="/app.js?v=20261125n"></script>
+<script>
+var E=CoasterHub.esc||function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+function pic(id, w){ return fetch('/api/coaster-photo?id='+id).then(function(r){ return r.ok?r.json():null; }).then(function(j){ var p=j&&j.photos&&j.photos[0]; return p ? CoasterHub.photoSize(p.thumb||p.url, w||500) : null; }).catch(function(){ return null; }); }
+function bg(u){ return u ? ' style="background-image:url(&quot;'+E(u)+'&quot;)"' : ''; }
+Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally()]).then(function(r){
+  var byId={}; (r[0].coasters||[]).forEach(function(c){ byId[c.id]=c; });
+  var g=r[1]||{}, top=Object.keys(g).map(function(k){ return Object.assign({id:+k}, g[k]); }).filter(function(x){ return x.pos && !x.under && byId[x.id]; }).sort(function(a,b){ return a.pos-b.pos; });
+  // A
+  var ten=top.slice(0,10);
+  Promise.all(ten.map(function(x){ return pic(x.id, 500); })).then(function(ps){
+    document.getElementById('optA').innerHTML=ten.map(function(x,i){ var c=byId[x.id];
+      return '<a class="pcard" href="'+E(CoasterHub.coasterHref(c))+'"><div class="ph"'+bg(ps[i])+'><span class="rk'+(c.type==='Wood'?' wd':'')+'">'+x.pos+'</span></div>'
+        +'<div class="tx"><b>'+E(c.name)+'</b><small>'+E(c.park)+' &middot; '+CoasterHub.scoreText(x.score)+'</small></div></a>'; }).join('');
+  });
+  // B: one of the top 25 with a photo, a different one each day
+  var pool=top.slice(0,25), day=Math.floor(Date.now()/864e5);
+  (function tryAt(n){ if(n>=pool.length){ document.getElementById('optB').innerHTML='<p class="mknote">No photo found.</p>'; return; }
+    var x=pool[(day+n)%pool.length], c=byId[x.id];
+    pic(x.id, 1280).then(function(u){ if(!u) return tryAt(n+1);
+      document.getElementById('optB').innerHTML='<a class="feat" href="'+E(CoasterHub.coasterHref(c))+'"'+bg(u)+'><div class="ov"><small>Global #'+x.pos+' &middot; today&rsquo;s pick</small><b>'+E(c.name)+'</b><span>'+E(c.park)+' &middot; score '+CoasterHub.scoreText(x.score)+'</span></div></a>'; });
+  })(0);
+  // C: your last dated day
+  CoasterHub.me().catch(function(){ return null; }).then(function(me){
+    if(!me||!me.slug){ document.getElementById('optC').innerHTML='<p class="mknote">Sign in to see this one with your own last park day.</p>'; return; }
+    CoasterHub.fetchRides(me.slug).then(function(log){
+      var rides=((log&&log.rides)||[]).filter(function(x){ return x.d; });
+      if(!rides.length){ document.getElementById('optC').innerHTML='<p class="mknote">No dated rides yet.</p>'; return; }
+      var last=rides.map(function(x){ return String(x.d).slice(0,10); }).sort().pop();
+      var that=rides.filter(function(x){ return String(x.d).slice(0,10)===last; }), ids=[], seen={};
+      that.forEach(function(x){ if(!seen[x.c] && byId[x.c]){ seen[x.c]=1; ids.push(x.c); } });
+      var parks={}; ids.forEach(function(id){ var p=byId[id].park; parks[p]=(parks[p]||0)+1; });
+      var park=Object.keys(parks).sort(function(a,b){ return parks[b]-parks[a]; })[0];
+      Promise.all([fetch('/api/park-photos?park='+encodeURIComponent(park)).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; })].concat(ids.slice(0,8).map(function(id){ return pic(id,330); }))).then(function(res){
+        var pp=res[0]&&res[0].photos&&res[0].photos[0], pu=pp?CoasterHub.photoSize(pp.thumb||pp.url,1280):null;
+        document.getElementById('optC').innerHTML='<div class="day"><div class="ph"'+bg(pu)+'></div><div class="tx"><b>Your last day: '+E(CoasterHub.mdy(last))+' at '+E(Object.keys(parks).join(' & '))+'</b>'
+          +'<p>'+that.length+' ride'+(that.length===1?'':'s')+' on '+ids.length+' coaster'+(ids.length===1?'':'s')+'</p>'
+          +'<div class="thumbs">'+ids.slice(0,8).map(function(id,i){ var c=byId[id]; return '<a href="'+E(CoasterHub.coasterHref(c))+'"><div class="t"'+bg(res[i+1])+'></div><small>'+E(c.name)+'</small></a>'; }).join('')+'</div></div></div>';
+      });
+    });
+  });
+});
+</script>
+</body>
+</html>
