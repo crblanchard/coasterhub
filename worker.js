@@ -1953,6 +1953,20 @@ async function coasterPhotos(env, id, all, skipPick) {
   const list = [], seen = new Set();
   const add = (p, extra) => { if (p && p.url && p.url !== "none" && !seen.has(p.url)) { seen.add(p.url); list.push(Object.assign({}, p, extra || {})); } };
   best.forEach(p => add(p)); img.forEach(p => add(p)); rest.forEach(p => add(p));
+  // A ride rebuilt or renamed whose Commons folder is still the OLD ride's
+  // (Carter, 2026-11-25: Wind Chaser's photos were all of Twisted Twins, the
+  // ride its structure came from). When few of the photos name the ride as it
+  // is called now, the ones that do go first; the folder's own come after.
+  try {
+    const me = await env.DB.prepare("SELECT name FROM coasters WHERE id = ?").bind(id).first();
+    const norm = s => String(s || "").toLowerCase().replace(/%[0-9a-f]{2}/gi, " ").replace(/[^a-z0-9]+/g, " ").trim();
+    const nm = norm(String(me && me.name || "").replace(/\s*\([^)]*\)\s*$/, ""));
+    if (nm.length >= 4 && list.length > 1) {
+      const names = p => { let f = String(p.url || ""); try { f = decodeURIComponent(f); } catch (e) {} return (" " + norm(f.split("/").pop()) + " ").includes(" " + nm + " "); };
+      const hits = list.filter(names).length;
+      if (hits && hits * 3 < list.length) list.sort((a, b) => names(b) - names(a));
+    }
+  } catch (e) { /* the plain order */ }
   // A racing side (Carter, 2026-11-24): the pair shares one Wikidata item,
   // so both sides get the same photos; a photo whose file names THIS side
   // ("Walibi-holland-yoy-thrill.jpg" for YoY - Thrill) goes first, one naming
