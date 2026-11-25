@@ -12,9 +12,9 @@ import json
 
 d = json.load(open('tools/open-data/gallery.json'))
 q = lambda v: 'NULL' if v is None or v == '' else (str(v) if isinstance(v, (int, float)) else "'" + str(v).replace("'", "''") + "'")
-cols = ['ref', 'file', 'url', 'thumb', 'width', 'height', 'author', 'license', 'license_url', 'nonfree', 'page', 'score']
+cols = ['ref', 'file', 'url', 'thumb', 'width', 'height', 'author', 'license', 'license_url', 'nonfree', 'page', 'score', 'taken']
 print('-- Commons category photos per coaster (gallery-pull.py, ' + d['retrieved'] + ').')
-print('CREATE TABLE IF NOT EXISTS open_gallery (source TEXT NOT NULL, ref TEXT NOT NULL, file TEXT NOT NULL, url TEXT, thumb TEXT, width INTEGER, height INTEGER, author TEXT, license TEXT, license_url TEXT, nonfree INTEGER NOT NULL DEFAULT 0, page TEXT, score INTEGER NOT NULL DEFAULT 0, retrieved TEXT, PRIMARY KEY (source, ref, file));')
+print('CREATE TABLE IF NOT EXISTS open_gallery (source TEXT NOT NULL, ref TEXT NOT NULL, file TEXT NOT NULL, url TEXT, thumb TEXT, width INTEGER, height INTEGER, author TEXT, license TEXT, license_url TEXT, nonfree INTEGER NOT NULL DEFAULT 0, page TEXT, score INTEGER NOT NULL DEFAULT 0, retrieved TEXT, taken TEXT, PRIMARY KEY (source, ref, file));')
 print('DELETE FROM open_gallery;')
 # Zoomed-out first (Carter, 2026-11-24: "zoomed out photos showing as much
 # of the ride as possible. or like a prominent element"). Nothing here can see

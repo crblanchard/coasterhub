@@ -12,9 +12,9 @@ import json
 
 d = json.load(open('tools/open-data/images.json'))
 q = lambda v: 'NULL' if v is None or v == '' else (str(v) if isinstance(v, (int, float)) else "'" + str(v).replace("'", "''") + "'")
-cols = ['source', 'ref', 'kind', 'file', 'url', 'thumb', 'width', 'height', 'author', 'license', 'license_url', 'nonfree', 'page']
+cols = ['source', 'ref', 'kind', 'file', 'url', 'thumb', 'width', 'height', 'author', 'license', 'license_url', 'nonfree', 'page', 'taken']
 print('-- Photos and logos from Coasterpedia and English Wikipedia (images-pull.py, ' + d['retrieved'] + ').')
-print('CREATE TABLE IF NOT EXISTS open_images (source TEXT NOT NULL, ref TEXT NOT NULL, kind TEXT NOT NULL, file TEXT NOT NULL DEFAULT \'\', url TEXT, thumb TEXT, width INTEGER, height INTEGER, author TEXT, license TEXT, license_url TEXT, nonfree INTEGER NOT NULL DEFAULT 0, page TEXT, retrieved TEXT, PRIMARY KEY (source, ref, kind, file));')
+print('CREATE TABLE IF NOT EXISTS open_images (source TEXT NOT NULL, ref TEXT NOT NULL, kind TEXT NOT NULL, file TEXT NOT NULL DEFAULT \'\', url TEXT, thumb TEXT, width INTEGER, height INTEGER, author TEXT, license TEXT, license_url TEXT, nonfree INTEGER NOT NULL DEFAULT 0, page TEXT, retrieved TEXT, taken TEXT, PRIMARY KEY (source, ref, kind, file));')
 print('DELETE FROM open_images;')
 rows = d['images']
 for i in range(0, len(rows), 40):

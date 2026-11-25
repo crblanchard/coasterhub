@@ -70,6 +70,21 @@ def text(v):
     return re.sub(r'\s+', ' ', html.unescape(v)).strip() or None
 
 
+def taken(v):
+    """When the photo was taken (Commons' DateTimeOriginal, from the camera or
+    the photographer), as YYYY-MM-DD, YYYY-MM or YYYY; None when unknown.
+    (Carter, 2026-11-25: dates in the photo credit.)"""
+    t = text(v) or ''
+    m = re.search(r'(1[89]\d\d|20\d\d)[-:./](\d{1,2})(?:[-:./](\d{1,2}))?', t)
+    if m and 1 <= int(m.group(2)) <= 12:
+        return m.group(1) + '-' + m.group(2).zfill(2) + ('-' + m.group(3).zfill(2) if m.group(3) and 1 <= int(m.group(3)) <= 31 else '')
+    m = re.search(r'\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? (?:\d{1,2},? )?(1[89]\d\d|20\d\d)\b', t, re.I)
+    if m:
+        return m.group(2) + '-' + str('janfebmaraprmayjunjulaugsepoctnovdec'.index(m.group(1).lower()[:3]) // 3 + 1).zfill(2)
+    m = re.search(r'\b(1[89]\d\d|20\d\d)\b', t)
+    return m.group(1) if m else None
+
+
 def filename(v):
     v = re.sub(r'^\s*(\[\[)?\s*(File|Image|Datei|Bild)\s*:', '', v or '', flags=re.I)
     v = re.split(r'[|\]]', v)[0].strip()
@@ -85,6 +100,8 @@ try:
     prev = json.load(open(OUT))['images']
 except Exception:
     prev = []
+# Pulled before dates were kept: asked again for theirs.
+prev = [x for x in prev if 'taken' in x or x['source'] not in PICK]
 out = [x for x in prev if x['source'] not in PICK] + [x for x in prev if x['source'] in PICK]
 done = {(x['source'], x['file']) for x in out}
 def save():
@@ -131,7 +148,7 @@ for source, (api, dump) in WIKI.items():
                             'width': ii.get('thumbwidth') or ii.get('width'), 'height': ii.get('thumbheight') or ii.get('height'),
                             'author': text(mv('Artist')), 'license': text(mv('LicenseShortName')),
                             'license_url': text(mv('LicenseUrl')), 'nonfree': nonfree,
-                            'page': ii.get('descriptionurl')})
+                            'page': ii.get('descriptionurl'), 'taken': taken(mv('DateTimeOriginal'))})
         save()
         time.sleep(1)
 

@@ -2914,6 +2914,20 @@
   // Photos load as they come into view; one that won't load drops out.
   // opts.w: thumbnail width; opts.cls: extra class; opts.onEmpty: all failed.
   var SRCNAME = { coasterpedia: "Coasterpedia", enwiki: "Wikipedia", wikidata: "Wikimedia Commons" };
+  // "Photo: Jun 2019, John Smith. CC-BY-SA." (Carter, 2026-11-25): when it was
+  // taken, who took it, the licence, the whole line a link to the photo's own
+  // page (where the full credit and licence live). Date and licence only when
+  // known. max: how much of a long author name to show.
+  function photoCredit(p, max, cls) {
+    var E = searchEsc, who = String(p.author || "unknown").trim();
+    if (max && who.length > max) who = who.slice(0, max - 3) + "\u2026";
+    var d = p.taken ? (String(p.taken).length >= 7 ? monthYear(p.taken) : String(p.taken).slice(0, 4)) : "";
+    var lic = String(p.license || "").trim();
+    if (/^cc/i.test(lic)) lic = lic.toUpperCase().replace(/\s+\d+(\.\d+)*$/, "").replace(/\s+/g, "-");
+    var t = "Photo: " + (d ? d + ", " : "") + who + "." + (lic ? " " + lic + "." : "");
+    var c = cls ? ' class="' + cls + '"' : "";
+    return p.page ? '<a' + c + ' href="' + E(p.page) + '" target="_blank" rel="noopener">' + E(t) + "</a>" : "<span" + c + ">" + E(t) + "</span>";
+  }
   function photoGallery(list, opts) {
     opts = opts || {};
     var E = searchEsc, g = document.createElement("div");
@@ -2928,10 +2942,8 @@
     function caption() {
       var n = live.length; if (!n) return;
       var at = now();
-      var p = live[at].p, who = p.author ? (p.author.length > 48 ? p.author.slice(0, 45) + "\u2026" : p.author) : "unknown";
-      foot.innerHTML = (n > 1 ? '<span class="pgn">' + (at + 1) + " / " + n + "</span>" : "")
-        + '<span class="pgcap">Photo: ' + E(who) + (p.license ? " \u00b7 " + E(String(p.license).toUpperCase()) : "")
-        + (p.page ? ' \u00b7 <a href="' + E(p.page) + '" target="_blank" rel="noopener">' + E(SRCNAME[p.source] || p.source || "source") + "</a>" : "") + "</span>";
+      var p = live[at].p;
+      foot.innerHTML = (n > 1 ? '<span class="pgn">' + (at + 1) + " / " + n + "</span>" : "") + photoCredit(p, 48, "pgcap");
       g.classList.toggle("atstart", at === 0); g.classList.toggle("atend", at === n - 1);
     }
     list.forEach(function (p, i) {
@@ -3000,8 +3012,7 @@
       at = Math.max(0, Math.min(list.length - 1, i));
       var p = list[at];
       box.querySelector(".pbn").textContent = list.length > 1 ? (at + 1) + " / " + list.length : "";
-      box.querySelector(".pbcap").innerHTML = "Photo: " + E(p.author || "unknown") + (p.license ? " \u00b7 " + E(String(p.license).toUpperCase()) : "")
-        + (p.page ? ' \u00b7 <a href="' + E(p.page) + '" target="_blank" rel="noopener">' + E(SRCNAME[p.source] || p.source || "source") + "</a>" : "");
+      box.querySelector(".pbcap").innerHTML = photoCredit(p, 90);
       box.classList.toggle("atstart", at === 0); box.classList.toggle("atend", at === list.length - 1);
       box.querySelectorAll(".pbthumbs button").forEach(function (b, j) { b.classList.toggle("on", j === at); if (j === at && b.scrollIntoView) b.scrollIntoView({ block: "nearest", inline: "center", behavior: "instant" }); });
       if (smooth !== null) { want = at; track.scrollTo({ left: at * track.clientWidth, behavior: smooth ? "smooth" : "instant" }); }

@@ -11,9 +11,9 @@ import json
 
 d = json.load(open('tools/open-data/park-gallery.json'))
 q = lambda v: 'NULL' if v is None or v == '' else (str(v) if isinstance(v, (int, float)) else "'" + str(v).replace("'", "''") + "'")
-cols = ['park', 'file', 'q', 'url', 'thumb', 'width', 'height', 'author', 'license', 'license_url', 'nonfree', 'page', 'score']
+cols = ['park', 'file', 'q', 'url', 'thumb', 'width', 'height', 'author', 'license', 'license_url', 'nonfree', 'page', 'score', 'taken']
 print('-- Commons photos per park (park-photos-pull.py, ' + d['retrieved'] + ').')
-print('CREATE TABLE IF NOT EXISTS open_park_gallery (park TEXT NOT NULL, file TEXT NOT NULL, q TEXT, url TEXT, thumb TEXT, width INTEGER, height INTEGER, author TEXT, license TEXT, license_url TEXT, nonfree INTEGER NOT NULL DEFAULT 0, page TEXT, score INTEGER NOT NULL DEFAULT 0, retrieved TEXT, PRIMARY KEY (park, file));')
+print('CREATE TABLE IF NOT EXISTS open_park_gallery (park TEXT NOT NULL, file TEXT NOT NULL, q TEXT, url TEXT, thumb TEXT, width INTEGER, height INTEGER, author TEXT, license TEXT, license_url TEXT, nonfree INTEGER NOT NULL DEFAULT 0, page TEXT, score INTEGER NOT NULL DEFAULT 0, retrieved TEXT, taken TEXT, PRIMARY KEY (park, file));')
 print('DELETE FROM open_park_gallery;')
 rows = d['photos']
 for i in range(0, len(rows), 40):

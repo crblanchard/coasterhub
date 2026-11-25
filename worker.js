@@ -1945,11 +1945,12 @@ async function coasterPhotos(env, id, all, skipPick, max) {
   let pick = null;
   if (!skipPick) { try { pick = await env.DB.prepare("SELECT * FROM coaster_photo_pick WHERE coaster_id = ?").bind(id).first(); } catch (e) { pick = null; } }
   if (pick && pick.url === "none" && !all) return [];
-  const gal = await safe("SELECT g.thumb, g.url, g.width, g.height, g.author, g.license, g.license_url, g.page, 'wikidata' AS source, g.score FROM open_gallery g " +
+  // taken: when the photo was taken, for its credit line (Carter, 2026-11-25).
+  const gal = await safe("SELECT g.thumb, g.url, g.width, g.height, g.author, g.license, g.license_url, g.page, 'wikidata' AS source, g.score, g.taken FROM open_gallery g " +
     "JOIN open_links l ON l.source = 'wikidata' AND l.ref = g.ref WHERE g.nonfree = 0 AND " + own + " ORDER BY g.score DESC, g.width DESC LIMIT " + (all ? 80 : max ? 40 : 4));
   // A zoomed-out shot first where the file name says so (Carter, 2026-11-24:
   // "zoomed out photos showing as much of the ride as possible").
-  const img = await safe("SELECT DISTINCT i.thumb, i.url, i.width, i.height, i.author, i.license, i.license_url, i.page, i.source FROM open_images i " +
+  const img = await safe("SELECT DISTINCT i.thumb, i.url, i.width, i.height, i.author, i.license, i.license_url, i.page, i.source, i.taken FROM open_images i " +
     "JOIN open_links l ON l.source = i.source AND l.ref = i.ref WHERE i.kind = 'image' AND i.nonfree = 0 AND " + own +
     " ORDER BY (i.url LIKE '%upload.wikimedia.org%') DESC, (lower(i.file) LIKE '%overview%' OR lower(i.file) LIKE '%aerial%' OR lower(i.file) LIKE '%panoram%') DESC," +
     " (COALESCE(i.width, 0) >= COALESCE(i.height, 0)) DESC, CASE i.source WHEN 'wikidata' THEN 0 WHEN 'enwiki' THEN 1 WHEN 'coasterpedia' THEN 2 ELSE 3 END");
@@ -1993,7 +1994,12 @@ async function coasterPhotos(env, id, all, skipPick, max) {
       }
     }
   } catch (e) { /* the plain order */ }
-  if (pick) { const at = list.findIndex(p => p.url === pick.url); if (at >= 0) list.splice(at, 1); if (pick.url !== "none") list.unshift(Object.assign({}, pick, { picked: 1 })); }
+  if (pick) {
+    const at = list.findIndex(p => p.url === pick.url), same = at >= 0 ? list[at] : null;
+    if (at >= 0) list.splice(at, 1);
+    // The pick keeps what its source row knows that the pick table doesn't (its date).
+    if (pick.url !== "none") list.unshift(Object.assign({}, pick, { picked: 1, taken: same ? same.taken || null : null }));
+  }
   return all ? list : list.slice(0, max || 6);
 }
 // A source that says the ride is gone (defunct, removed, standing but not
@@ -3246,7 +3252,7 @@ export default {
         const park = url.searchParams.get("park") || "";
         if (!park) return err(400, "need ?park=");
         try {
-          const rows = (await env.DB.prepare("SELECT thumb, url, width, height, author, license, license_url, page, 'wikidata' AS source FROM open_park_gallery WHERE nonfree = 0 AND (park = ?1 OR park IN (SELECT former_name FROM park_aliases WHERE park = ?1)) ORDER BY score DESC, width DESC LIMIT 24").bind(park).all()).results || [];
+          const rows = (await env.DB.prepare("SELECT thumb, url, width, height, author, license, license_url, page, 'wikidata' AS source, taken FROM open_park_gallery WHERE nonfree = 0 AND (park = ?1 OR park IN (SELECT former_name FROM park_aliases WHERE park = ?1)) ORDER BY score DESC, width DESC LIMIT 24").bind(park).all()).results || [];
           return json({ photos: rows });
         } catch (e) {
           if (/no such table/i.test(String(e && e.message || e))) return json({ photos: [] });
