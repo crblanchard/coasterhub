@@ -497,7 +497,9 @@ const UNTICK = new Set(), TICK = new Set(), RENAME = {};
 const akey = a => a.park + '|' + a.name;
 const latin = n => !/[^\u0000-\u024F\u1E00-\u1EFF\u2010-\u2027\u20AC]/.test(n || '');
 const ticked = a => { const k = akey(a); if (UNTICK.has(k)) return false; if (TICK.has(k)) return true;
-  return latin(a.name) && !a.refs.every(r => r.source === 'osm'); };
+  // Never-built rides (cancelled, planned) stay unticked; everything else that
+  // happened goes in, closed last century included (Carter, 2026-11-25).
+  return latin(a.name) && !a.refs.every(r => r.source === 'osm') && !/cancel|planned|never/i.test(a.status || ''); };
 document.addEventListener('change', e => {
   const card = e.target.closest('.addc'); if (!card) return;
   const k = card.dataset.k;
@@ -509,11 +511,16 @@ async function bulkAdd() {
   const list = LIST.filter(ticked);
   if (!list.length || !confirm('Add ' + list.length + ' coasters to the site? Each shows on /changes. This runs in batches and takes a little while.')) return;
   const b = $('bulk'); b.disabled = true;
+  // bulk: one that can't go in (already there, closed with no date) is skipped
+  // and counted rather than stopping the run.
+  const skipped = [];
   try {
     for (let i = 0; i < list.length; i += 20) {
       b.textContent = 'Adding… ' + Math.min(i + 20, list.length) + ' / ' + list.length;
-      await post('/api/cutover/apply', { many: list.slice(i, i + 20).map(a => ({ kind: 'add', park: a.park, name: RENAME[akey(a)] || a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) })) });
+      const r = await post('/api/cutover/apply', { bulk: true, many: list.slice(i, i + 20).map(a => ({ kind: 'add', park: a.park, name: RENAME[akey(a)] || a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) })) });
+      ((r && (r.done || r.out)) || []).forEach(x => { if (x && x.skipped) skipped.push(x.skipped + ' (' + x.why + ')'); });
     }
+    if (skipped.length) alert('Added ' + (list.length - skipped.length) + '. Skipped ' + skipped.length + ':\n' + skipped.slice(0, 30).join('\n') + (skipped.length > 30 ? '\n…' : ''));
   } catch (err) { alert('Stopped: ' + err + '. The ones before it were added.'); }
   b.disabled = false;
   D = await load(); render();

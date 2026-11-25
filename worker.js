@@ -1762,10 +1762,16 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
       if (!refs.length) return err(400, "refs required");
       if (x.kind === "add") {
         const park = String(x.park || ""), name = String(x.name || "").trim();
-        if (!park || !name) return err(400, "park and name required");
-        if (!await env.DB.prepare("SELECT 1 FROM parks WHERE name = ?").bind(park).first()) return err(404, "no such park");
-        if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(park, name).first()) return err(409, name + " is already at " + park);
-        if (await openClosedNoDate(env, refs)) return err(409, "The source says " + name + " is closed but gives no closing date, so it isn't added");
+        // In a bulk run (b.bulk, the review page's Add all: Carter, 2026-11-25
+        // "add all of those") one that can't go in is skipped and reported,
+        // instead of stopping the batch.
+        let why = null;
+        if (!park || !name) why = "park and name required";
+        else if (!await env.DB.prepare("SELECT 1 FROM parks WHERE name = ?").bind(park).first()) why = "no such park";
+        else if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(park, name).first()) why = name + " is already at " + park;
+        else if (await openClosedNoDate(env, refs)) why = "The source says " + name + " is closed but gives no closing date, so it isn't added";
+        if (why && !b.bulk) return err(why === "no such park" ? 404 : why === "park and name required" ? 400 : 409, why);
+        if (why) { out.push({ skipped: name, park, why }); continue; }
         out.push(await addOpenCoaster(env, acct, park, name, refs, day));
       }
       await env.DB.prepare("INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES ('add', ?, ?, 0, ?, ?, ?, ?)")
