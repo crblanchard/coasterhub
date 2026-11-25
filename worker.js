@@ -3060,17 +3060,22 @@ export default {
       // name in the title tags, so a shared link's preview reads "China 2027
       // trip plan" (Carter, 2026-11-25; previews never run the page's script).
       // The page then puts the trip's full address in the bar and runs as usual.
-      if (row.name && typeof HTMLRewriter !== "undefined" && env.ASSETS) try {
+      // The address stays /trip/<name> (Carter, 2026-11-25: "make the url still
+      // be /trip/china-2027 after you open it"): the trip is handed to the page
+      // as window.TRIP_QS instead of a redirect to the long address.
+      if (typeof HTMLRewriter !== "undefined" && env.ASSETS) try {
         const page = await env.ASSETS.fetch(new Request(new URL("/trip", url).toString(), { headers: request.headers }));
         if (page.ok) {
-          const title = row.name + " trip plan";
-          const go = new URL(full).pathname + new URL(full).search;
-          return new HTMLRewriter()
-            .on("head", { element(e) { e.prepend("<script>history.replaceState(null,''," + JSON.stringify(go).replace(/</g, "\\u003c") + ")</script>", { html: true }); } })
-            .on("title", { element(e) { e.setInnerContent(title + " — Coaster Hub"); } })
-            .on('meta[property="og:title"]', { element(e) { e.setAttribute("content", title); } })
-            .on('meta[property="og:description"]', { element(e) { e.setAttribute("content", "A coaster trip on Coaster Hub: the parks, the route and every new credit."); } })
-            .transform(new Response(page.body, { status: 200, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } }));
+          const qs = new URL(full).search;
+          let rw = new HTMLRewriter()
+            .on("head", { element(e) { e.prepend("<script>window.TRIP_QS=" + JSON.stringify(qs).replace(/</g, "\\u003c") + "</script>", { html: true }); } });
+          if (row.name) {
+            const title = row.name + " trip plan";
+            rw = rw.on("title", { element(e) { e.setInnerContent(title + " — Coaster Hub"); } })
+              .on('meta[property="og:title"]', { element(e) { e.setAttribute("content", title); } })
+              .on('meta[property="og:description"]', { element(e) { e.setAttribute("content", "A coaster trip on Coaster Hub: the parks, the route and every new credit."); } });
+          }
+          return rw.transform(new Response(page.body, { status: 200, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } }));
         }
       } catch (e) { /* the plain redirect below still opens the trip */ }
       return Response.redirect(full, 302);
