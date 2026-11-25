@@ -755,9 +755,9 @@ function photoAdmin(c){
       if(!g.hidden){ g.hidden=true; return; }
       g.hidden=false; g.innerHTML='<p class="cpnote">Loading every photo&hellip;</p>';
       fetch('/api/coaster-photo?all=1&id='+encodeURIComponent(c.id)).then(function(r){ return r.json(); }).then(function(j){
-        // Not Coasterpedia's: its image server refuses other sites, so a pick
-        // of one shows nothing (Carter, 2026-11-25: hide them for now).
-        var ps=((j && j.photos) || []).filter(function(p){ return !/coasterpedia\.net/i.test(p.url||''); });
+        // Coasterpedia's are in too: they do show here after all (Carter,
+        // 2026-11-26, Diavlo's photo is one), so they can be picked.
+        var ps=(j && j.photos) || [];
         // 330: a standard Commons width (any other is refused now).
         var small=function(u){ return String(u||'').replace(/\/(\d+)px-/, '/330px-'); };
         g.innerHTML='<div class="cpacts"><button type="button" class="cpbtn" data-pick="auto">Automatic</button><button type="button" class="cpbtn" data-pick="none">No photo</button>'

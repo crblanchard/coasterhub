@@ -669,7 +669,7 @@ var following = CoasterHub.me().then(function(acct){
 // maker's page.
 CoasterHub.openableCoasters(document.getElementById('globaltop'));
 // The featured coaster: a random one from the Global top 100 that has a
-// photo (tries up to six): its place big, its name and park, its numbers, how
+// photo (skipping any without, up to 30): its place big, its name and park, its numbers, how
 // many lists it is on, and where it stands with you.
 Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.you().catch(function(){ return null; })]).then(function(r){
   var byId={}; (r[0].coasters||[]).forEach(function(c){ byId[c.id]=c; });
@@ -679,7 +679,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
   var E=function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
   var ord=function(n){ var v=n%100; return n+((v>=11&&v<=13)?'th':(['th','st','nd','rd'][n%10]||'th')); };
   (function tryAt(n){
-    if(n>=Math.min(6, top.length)) return;
+    if(n>=Math.min(30, top.length)) return;   // no photo: on to the next one
     var x=top[n], c=byId[x.id];
     fetch('/api/coaster-photo?id='+x.id).then(function(res){ return res.ok?res.json():null; }).then(function(j){
       var p=j&&j.photos&&j.photos[0]; if(!p) return tryAt(n+1);
