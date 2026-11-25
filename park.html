@@ -249,12 +249,52 @@ function more(c){
   }
   return (was.length?'<p class="former">Formerly '+was.map(function(n){ return '<b>'+esc(n)+'</b>'; }).join(', ')+'.</p>':'')
     +(moved?'<p class="former">'+moved+'</p>':'')
-    +'<p class="lbl">Riders</p>'
+    +ranked(c, who)
+    +'<p class="lbl">'+(RANKS && RANKS[rkey(c)] && RANKS[rkey(c)].length ? 'Ridden, not ranked' : 'Riders')+'</p>'
     +(who===undefined ? '<p class="nobody">Loading&hellip;</p>'
-      : who.length ? '<div class="who">'+youFirst(who).map(function(w){
+      : (who=unranked(c, who)).length ? '<div class="who">'+youFirst(who).map(function(w){
           return '<a class="'+(w.slug===ME?'me':'')+'" href="'+esc(CoasterHub.userPageHref(w.slug,'count'))+'">'+CoasterHub.riderFace(w.slug,w.name)+(w.slug===ME?'You':esc(w.name))+(w.n>1?'<i>'+w.n+' rides</i>':'')+'</a>'; }).join('')+'</div>'
-      : '<p class="nobody">Nobody on the site has ridden it yet.</p>')
+      : '<p class="nobody">'+(WHO[c.id] && WHO[c.id].length ? 'Everyone who rode it has ranked it.' : 'Nobody on the site has ridden it yet.')+'</p>')
     + elsewhere(c);
+}
+// Who ranked it where, as on /rankings (Carter, 2026-11-25: "put people's
+// rankings like we do on rankings page ... then at the bottom something
+// showing riders that haven't ranked it"). By ride, not row: a relocated
+// coaster ranked at its old park counts here too, and a place counts each
+// ride once, the way /rankings numbers a list.
+var RANKS=null, RANKLOAD=null;
+function rkey(c){ var h=CoasterHub.rideHome(LIST.coasters, c); return (h||c).id; }
+function loadRanks(){
+  if(RANKLOAD) return RANKLOAD;
+  var byId={}; LIST.coasters.forEach(function(x){ byId[x.id]=x; });
+  RANKLOAD=CoasterHub.fetchAllRankings().then(function(all){
+    var out={};
+    (all||[]).forEach(function(l){
+      var seen={}, n=0;
+      (l.order||[]).forEach(function(id){
+        var o=byId[id]; if(!o) return;
+        var k=rkey(o); if(seen[k]) return; seen[k]=1; n++;
+        (out[k]=out[k]||[]).push({slug:l.slug, name:l.user||l.slug, pos:n});
+      });
+    });
+    RANKS=out;
+  }).catch(function(){ RANKS={}; }).then(function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.cxmore[data-more]'), function(d){
+      var c=LIST.coasters.filter(function(x){ return String(x.id)===d.getAttribute('data-more'); })[0];
+      if(c) d.innerHTML=more(c);
+    });
+  });
+  return RANKLOAD;
+}
+function ranked(c){
+  if(!RANKS){ loadRanks(); return ''; }
+  var r=RANKS[rkey(c)];
+  return r && r.length ? '<p class="lbl">Rankings</p>'+CoasterHub.whoByPlace(r, ME) : '';
+}
+function unranked(c, who){
+  var r=RANKS && RANKS[rkey(c)]; if(!r) return who;
+  var on={}; r.forEach(function(x){ on[x.slug]=1; });
+  return who.filter(function(w){ return !on[w.slug]; });
 }
 // The same ride at its other parks (Carter, 2026-11-24: a relocated ride with
 // rankings but "nobody has ridden it" read as a contradiction): "4 riders rode
