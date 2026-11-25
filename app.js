@@ -3475,6 +3475,15 @@
       + '</details>';
   }
 
+  // A park group's name is a link (lists.css): while the park is closed a tap
+  // on it opens the park instead, the rule every coaster row follows; open,
+  // it goes to the park's page (Carter, 2026-11-25).
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("details.mdl > summary a.nm");
+    if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+    var d = a.closest("details.mdl");
+    if (d && !d.open) { e.preventDefault(); d.open = true; }
+  });
   // A model or park group (lists.css details.mdl) opens one at a time, like
   // the coaster rows inside it (Carter, 2026-09-28). 'toggle' does not
   // bubble, hence the capture.
