@@ -2852,7 +2852,8 @@
     if (!info.length && !nums.length && !mine.length) return '<p class="facts none">No stats on file yet.</p>' + (link ? '<div class="fgo">' + link + '</div>' : '');
     // Yours (rides, first ridden, rank) under the left column on a wide
     // screen (Carter, 2026-09-25); last of all on a phone.
-    return '<div class="facts"><div class="fcol">' + info.join("") + '</div><div class="fcol fnum">' + nums.join("") + '</div>'
+    // No numbers on file: one column, not a blank right half.
+    return '<div class="facts' + (nums.length ? '' : ' nonum') + '"><div class="fcol">' + info.join("") + '</div>' + (nums.length ? '<div class="fcol fnum">' + nums.join("") + '</div>' : '')
       + (mine.length ? '<div class="fme">' + mine.join("") + '</div>' : '')
       + (link ? '<div class="fgo">' + link + '</div>' : '') + '</div>';
   }
@@ -2925,7 +2926,13 @@
       };
       img.src = size(list[0].thumb || list[0].url);
       if (opts.first) el.insertBefore(img, el.firstChild); else el.appendChild(img);
-      if (opts.cls === "cxphoto") el.classList.add("hasphoto");
+      if (opts.cls === "cxphoto") {
+        el.classList.add("hasphoto");
+        // Balance the two sides: the facts longer than the photo box send the
+        // rest (who ranked it, riders) up under the photo.
+        var f = el.querySelector(":scope > .facts");
+        el.classList.toggle("morer", !!(f && img.offsetHeight && f.offsetHeight > img.offsetHeight + 24));
+      }
     });
   }
 
