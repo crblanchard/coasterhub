@@ -150,6 +150,7 @@
   .atrip b{display:block;font-family:var(--display);font-stretch:92%;font-weight:800;font-size:1.02rem;letter-spacing:-.01em}
   .atrip .ap{display:block;color:var(--muted);font-size:.84rem;margin-top:3px;line-height:1.35}
   .atrip .aw{display:block;color:var(--muted);font-size:.78rem;margin-top:6px}
+  .atrip .ae{display:block;color:var(--muted);font-size:.72rem;margin-top:4px;opacity:.85}
   .tq{width:100%;box-sizing:border-box;margin:0 0 10px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background-color:var(--panel);color:var(--fg);font:inherit;font-size:.95rem}
   .atmore{margin:10px 0 0}
   .atmore[hidden],#newtrip_h[hidden]{display:none}
@@ -826,7 +827,8 @@ function allTrips(){
       var shown=t.names.slice(0,4).map(esc).join(', ')+(t.names.length>4?' &amp; '+(t.names.length-4)+' more':'');
       return '<a class="atrip'+(t.code===window.TRIP_CODE?' here':'')+'" href="/trip/'+encodeURIComponent(t.code)+'"><b>'+esc(t.name)+'</b>'
         +'<span class="ap">'+t.names.length+' park'+(t.names.length===1?'':'s')+(t.names.length?' &middot; '+shown:'')+'</span>'
-        +(t.people.length?'<span class="aw">'+esc(t.people.join(', '))+'</span>':'')+'</a>';
+        +(t.people.length?'<span class="aw">'+esc(t.people.join(', '))+'</span>':'')
+        +(t.edited?'<span class="ae">Last edited '+esc(t.edited)+'</span>':'')+'</a>';
     }).join('') : '<p class="atnone">No trips match.</p>';
     var more=!q && !ALL && hit.length>6;
     $('atmore').hidden=!more; if(more) $('b_atall').textContent='Show all '+hit.length+' trips';
@@ -837,7 +839,8 @@ function allTrips(){
     TS=((j && j.trips) || []).map(function(t){
       var names=t.parks.map(function(sl){ return by[sl]; }).filter(Boolean);
       var people=t.riders.map(function(sl){ return who[sl]; }).filter(Boolean);
-      return { code:t.code, name:t.name, names:names, people:people, hay:[t.name].concat(names, people).join(' ').toLowerCase() };
+      var ed=t.edited ? new Date(t.edited) : null;
+      return { code:t.code, name:t.name, names:names, people:people, edited: ed && !isNaN(ed) ? ed.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', hay:[t.name].concat(names, people).join(' ').toLowerCase() };
     });
     if(!TS.length) return;
     $('tq').oninput=draw;

@@ -3432,13 +3432,13 @@ export default {
         try {
           // Last edited first (Carter, 2026-11-26), a trip never edited by when
           // it was made; by when it was made alone until 252 has run.
-          const q = "SELECT code, url, name, created, hits, owner FROM trip_links WHERE name IS NOT NULL AND name != '' ORDER BY ";
-          const rows = ((await env.DB.prepare(q + "COALESCE(updated, created) DESC LIMIT 200").all()
-            .catch(() => env.DB.prepare(q + "created DESC LIMIT 200").all())).results) || [];
+          const q = " FROM trip_links WHERE name IS NOT NULL AND name != '' ORDER BY ";
+          const rows = ((await env.DB.prepare("SELECT code, url, name, created, updated, hits, owner" + q + "COALESCE(updated, created) DESC LIMIT 200").all()
+            .catch(() => env.DB.prepare("SELECT code, url, name, created, hits, owner" + q + "created DESC LIMIT 200").all())).results) || [];
           return json({ trips: rows.map(r => {
             let parks = [];
             try { parks = (new URL(r.url, "https://x").searchParams.get("p") || "").split(",").filter(Boolean); } catch (e) {}
-            return { code: r.code, name: r.name, created: r.created, hits: r.hits || 0, riders: [...new Set(tripEditors(r))], parks };
+            return { code: r.code, name: r.name, created: r.created, edited: r.updated || r.created || null, hits: r.hits || 0, riders: [...new Set(tripEditors(r))], parks };
           }) });
         } catch (e) {
           if (/no such (table|column)/i.test(String(e && e.message || e))) return json({ trips: [] });
