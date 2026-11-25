@@ -3047,7 +3047,25 @@ export default {
       if (!row) return Response.redirect(new URL("/trip", url).toString(), 302);
       env.DB.prepare("UPDATE trip_links SET hits = hits + 1 WHERE code = ?").bind(code).run().catch(() => {});
       const to = new URL(row.url, url).toString();
-      return Response.redirect(row.name ? to + (to.includes("?") ? "&" : "?") + "name=" + encodeURIComponent(row.name) : to, 302);
+      const full = row.name ? to + (to.includes("?") ? "&" : "?") + "name=" + encodeURIComponent(row.name) : to;
+      // A named trip is served right here rather than redirected, with its
+      // name in the title tags, so a shared link's preview reads "China 2027
+      // trip plan" (Carter, 2026-11-25; previews never run the page's script).
+      // The page then puts the trip's full address in the bar and runs as usual.
+      if (row.name && typeof HTMLRewriter !== "undefined" && env.ASSETS) try {
+        const page = await env.ASSETS.fetch(new Request(new URL("/trip", url).toString(), { headers: request.headers }));
+        if (page.ok) {
+          const title = row.name + " trip plan";
+          const go = new URL(full).pathname + new URL(full).search;
+          return new HTMLRewriter()
+            .on("head", { element(e) { e.prepend("<script>history.replaceState(null,''," + JSON.stringify(go).replace(/</g, "\\u003c") + ")</script>", { html: true }); } })
+            .on("title", { element(e) { e.setInnerContent(title + " — Coaster Hub"); } })
+            .on('meta[property="og:title"]', { element(e) { e.setAttribute("content", title); } })
+            .on('meta[property="og:description"]', { element(e) { e.setAttribute("content", "A coaster trip on Coaster Hub: the parks, the route and every new credit."); } })
+            .transform(new Response(page.body, { status: 200, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } }));
+        }
+      } catch (e) { /* the plain redirect below still opens the trip */ }
+      return Response.redirect(full, 302);
     }
     const sm = path.match(/^\/t\/([A-Za-z0-9]{4,12})\/?$/);
     if (sm) {
