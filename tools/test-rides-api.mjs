@@ -3264,6 +3264,33 @@ async function main() {
     check("an unknown trip goes to the planner", res.status === 302 && res.headers.get("location") === "https://coasterhub.org/trip", res.status + " " + res.headers.get("location"));
   }
 
+  console.log("\nPark photos — Change photo (Carter, 2026-11-26)");
+  {
+    const db = freshDb();
+    db.exec("CREATE TABLE IF NOT EXISTS park_aliases (park TEXT, former_name TEXT)");
+    db.exec("CREATE TABLE open_park_gallery (park TEXT NOT NULL, file TEXT NOT NULL, q TEXT, url TEXT, thumb TEXT, width INTEGER, height INTEGER, author TEXT, license TEXT, license_url TEXT, nonfree INTEGER NOT NULL DEFAULT 0, page TEXT, score INTEGER NOT NULL DEFAULT 0, retrieved TEXT, taken TEXT, PRIMARY KEY (park, file))");
+    db.exec("INSERT INTO open_park_gallery (park, file, url, score) VALUES ('Holiday World','a','https://x/a.jpg',9), ('Holiday World','b','https://x/b.jpg',5), ('Kings Island','c','https://x/c.jpg',9)");
+    const rider = await signedUp(db, "rider@example.com", "Rider");
+    const boss = await signedUp(db, "boss@example.com", "Boss");
+    db.exec("UPDATE accounts SET is_admin = 1 WHERE slug = 'boss'");
+    let r = await call(db, "GET", "/api/park-photos?park=Holiday%20World");
+    check("best-scored photo first with no pick", r.status === 200 && r.data.photos[0].url === "https://x/a.jpg", JSON.stringify(r.data));
+    r = await callNoPassword(db, "POST", "/api/park-photo-pick", { cookie: rider, body: { park: "Holiday World", url: "https://x/b.jpg" } });
+    check("only admins can pick", r.status === 401, JSON.stringify(r.data));
+    r = await callNoPassword(db, "POST", "/api/park-photo-pick", { cookie: boss, body: { park: "Holiday World", url: "https://x/c.jpg" } });
+    check("...and only one of that park's photos", r.status === 404, JSON.stringify(r.data));
+    r = await callNoPassword(db, "POST", "/api/park-photo-pick", { cookie: boss, body: { park: "Holiday World", url: "https://x/b.jpg" } });
+    r = await call(db, "GET", "/api/park-photos?park=Holiday%20World");
+    check("the pick leads", r.data.photos[0].url === "https://x/b.jpg" && r.data.photos.length === 2, JSON.stringify(r.data));
+    await callNoPassword(db, "POST", "/api/park-photo-pick", { cookie: boss, body: { park: "Holiday World", url: "none" } });
+    r = await call(db, "GET", "/api/park-photos?park=Holiday%20World");
+    const all = await call(db, "GET", "/api/park-photos?all=1&park=Holiday%20World");
+    check("No photo hides them, the picker still lists them", r.data.photos.length === 0 && all.data.photos.length === 2 && all.data.pick === "none", JSON.stringify([r.data, all.data]));
+    await callNoPassword(db, "POST", "/api/park-photo-pick", { cookie: boss, body: { park: "Holiday World", url: null } });
+    r = await call(db, "GET", "/api/park-photos?park=Holiday%20World");
+    check("Automatic goes back to the scores", r.data.photos[0].url === "https://x/a.jpg", JSON.stringify(r.data));
+  }
+
   console.log("\n" + pass + " passed, " + fail + " failed\n");
   process.exit(fail ? 1 : 0);
 }

@@ -47,6 +47,18 @@
   #parkphotos .pgal.pkgal{max-width:none;margin:0}
   #parkphotos .pgal.pkgal .pgtrack{border-radius:14px;aspect-ratio:16/9}
   #parkphotos .pgfoot{justify-content:space-between}
+  /* Change photo, for admins (Carter, 2026-11-26): the coaster page's picker. */
+  .cpadmin{margin:8px 0 6px}
+  .cpadmin[hidden],.cpgrid[hidden]{display:none}
+  .cpbtn{background-color:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:6px 14px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+  .cpgrid{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background-color:var(--panel)}
+  .cpacts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+  .cpnote{color:var(--muted);font-size:.8rem;margin:0}
+  .cpthumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .cpthumb{padding:0;border:2px solid transparent;border-radius:10px;overflow:hidden;background-color:var(--soft);cursor:pointer;aspect-ratio:4/3}
+  .cpthumb img{display:block;width:100%;height:100%;object-fit:cover}
+  .cpthumb.on{border-color:var(--steel)}
+  .cpthumb.bad{display:none}
   .crumbs a.crumbmap{margin-left:14px;color:var(--accent2);font-weight:600}
   .crumbs a.crumbmap:hover{text-decoration:underline}
   .cxmore .lbl{color:var(--muted);font-size:.8rem;font-weight:700;margin:0 0 6px}
@@ -98,6 +110,7 @@
     <!-- The park's photos, to swipe through (Carter, 2026-11-25), between the
          stats and the coasters. Filled once they load; nothing shows without. -->
     <div id="parkphotos" hidden></div>
+    <div class="cpadmin" id="cpadmin" hidden></div>
     <div class="sect" id="list_h">Coasters</div>
     <div class="panel" id="list"></div>
     <!-- Rankings, as every database page has them (critique, 2026-10-02). -->
@@ -177,12 +190,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   // operator · Germany" for a fair with no fixed place.
   CoasterHub.kindLine($('hero_sub'), CoasterHub.traveling(parks[PARK]) ? 'Fair operator' : 'Park', meta.region||null, meta.region ? CoasterHub.locationHref(meta.region) : null);
   CoasterHub.crumbs($('crumb'), CoasterHub.placeTrail(meta.region).concat([[PARK]]));
-  fetch('/api/park-photos?park='+encodeURIComponent(PARK)).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
-    var list=(j && j.photos) || [], box=$('parkphotos');
-    if(!list.length) return;
-    box.appendChild(CoasterHub.photoGallery(list, {w:960, cls:'pkgal', onEmpty:function(){ box.hidden=true; }}));
-    box.hidden=false;
-  }).catch(function(){});
+  showParkPhotos(false);
   // Map, a little apart from the trail: the park picked out on the map
   // (Carter, 2026-11-25). Not for a travelling show, which has no pin.
   if(meta.lat!=null && meta.lon!=null && !CoasterHub.traveling(meta))
@@ -431,6 +439,53 @@ function showRiders(mine, perCoaster){
     if(!list.length) return;
     WHOLIST=list; WHOMAX=mine.length; drawWho();
     $('who_wrap').style.display='block';
+}
+// The park's photos, its lead one first; fresh: straight after Change photo.
+function showParkPhotos(fresh){
+  var box=$('parkphotos');
+  fetch('/api/park-photos?park='+encodeURIComponent(PARK)+(fresh?'&t='+Date.now():'')).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    var list=(j && j.photos) || [];
+    box.innerHTML=''; box.hidden=true;
+    parkPhotoAdmin();
+    if(!list.length) return;
+    box.appendChild(CoasterHub.photoGallery(list, {w:960, cls:'pkgal', onEmpty:function(){ box.hidden=true; }}));
+    box.hidden=false;
+  }).catch(function(){});
+}
+// Change photo, for admins (Carter, 2026-11-26), as on a coaster's page: every
+// photo of the park as a thumbnail; a click makes it the lead one
+// (/api/park-photo-pick). "No photo" hides them, "Automatic" goes back to the scores.
+var PARK_ADMIN=null;
+function parkPhotoAdmin(){
+  var box=$('cpadmin');
+  (PARK_ADMIN || (PARK_ADMIN=CoasterHub.me().catch(function(){ return null; }))).then(function(a){
+    if(!a || !a.admin || box.dataset.ready) return;
+    box.dataset.ready='1'; box.hidden=false;
+    box.innerHTML='<button type="button" class="cpbtn" id="cpchange">Change photo</button><div class="cpgrid" id="cpgrid" hidden></div>';
+    $('cpchange').onclick=function(){
+      var g=$('cpgrid');
+      if(!g.hidden){ g.hidden=true; return; }
+      g.hidden=false; g.innerHTML='<p class="cpnote">Loading every photo&hellip;</p>';
+      fetch('/api/park-photos?all=1&park='+encodeURIComponent(PARK)+'&t='+Date.now()).then(function(r){ return r.json(); }).then(function(j){
+        var ps=(j && j.photos) || [];
+        var small=function(u){ return String(u||'').replace(/\/(\d+)px-/, '/330px-'); };
+        g.innerHTML='<div class="cpacts"><button type="button" class="cpbtn" data-pick="auto">Automatic</button><button type="button" class="cpbtn" data-pick="none">No photo</button>'
+          +'<span class="cpnote">'+ps.length+' photo'+(ps.length===1?'':'s')+(j&&j.pick==='none'?' &middot; hidden now':'')+' &middot; click one to lead with it</span></div>'
+          +'<div class="cpthumbs">'+ps.map(function(p,i){
+            return '<button type="button" class="cpthumb'+(p.picked?' on':'')+'" data-i="'+i+'" title="'+esc((p.author||'')+' \u00b7 '+(p.license||''))+'">'
+              +'<img src="'+esc(small(p.thumb||p.url))+'" alt="" loading="lazy" referrerpolicy="no-referrer" data-alt="'+esc(p.thumb||p.url)+'" onerror="if(this.dataset.alt&&this.src!==this.dataset.alt){this.src=this.dataset.alt;this.dataset.alt=\'\';}else{this.parentNode.classList.add(\'bad\');}"></button>';
+          }).join('')+'</div>';
+        var save=function(url){
+          fetch('/api/park-photo-pick',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({park:PARK,url:url})})
+            .then(function(r){ return r.json().then(function(x){ if(!r.ok) throw new Error(x.error||r.status); }); })
+            .then(function(){ g.hidden=true; showParkPhotos(true); })
+            .catch(function(e){ alert('Could not save: '+e.message); });
+        };
+        Array.prototype.forEach.call(g.querySelectorAll('.cpthumb'), function(b){ b.onclick=function(){ save(ps[+b.getAttribute('data-i')].url); }; });
+        Array.prototype.forEach.call(g.querySelectorAll('[data-pick]'), function(b){ b.onclick=function(){ save(b.getAttribute('data-pick')==='none'?'none':null); }; });
+      }).catch(function(){ g.innerHTML='<p class="cpnote">Could not load the photos.</p>'; });
+    };
+  });
 }
 </script>
 </body>

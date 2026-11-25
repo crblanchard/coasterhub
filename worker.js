@@ -3425,13 +3425,43 @@ export default {
       if (request.method === "GET" && path === "/api/park-photos") {
         const park = url.searchParams.get("park") || "";
         if (!park) return err(400, "need ?park=");
+        // Carter's pick (park_photo_pick, Change photo on the park page) leads;
+        // "none" hides them all. ?all=1 (the picker) lists every one regardless.
+        const all = url.searchParams.get("all") === "1";
+        const base = "SELECT g.thumb, g.url, g.width, g.height, g.author, g.license, g.license_url, g.page, 'wikidata' AS source, g.taken";
+        const where = " FROM open_park_gallery g WHERE g.nonfree = 0 AND (g.park = ?1 OR g.park IN (SELECT former_name FROM park_aliases WHERE park = ?1))";
         try {
-          const rows = (await env.DB.prepare("SELECT thumb, url, width, height, author, license, license_url, page, 'wikidata' AS source, taken FROM open_park_gallery WHERE nonfree = 0 AND (park = ?1 OR park IN (SELECT former_name FROM park_aliases WHERE park = ?1)) ORDER BY score DESC, width DESC LIMIT 24").bind(park).all()).results || [];
-          return json({ photos: rows });
+          let pick = null;
+          try { pick = await env.DB.prepare("SELECT url FROM park_photo_pick WHERE park = ?").bind(park).first(); } catch (e) { pick = null; }
+          if (pick && pick.url === "none" && !all) return json({ photos: [] });
+          const rows = (await env.DB.prepare(base + ", (g.url = ?2) AS picked" + where + " ORDER BY picked DESC, g.score DESC, g.width DESC LIMIT " + (all ? 200 : 24))
+            .bind(park, (pick && pick.url) || "").all()).results || [];
+          return json({ photos: rows, pick: (pick && pick.url) || null });
         } catch (e) {
           if (/no such table/i.test(String(e && e.message || e))) return json({ photos: [] });
           throw e;
         }
+      }
+      // Carter's pick for a park's lead photo (admins only, 2026-11-26): {park,
+      // url} with url one of the park's photos, "none" for no photos, or null
+      // to go back to the scores. Makes its table on first use.
+      if (request.method === "POST" && path === "/api/park-photo-pick") {
+        if (!adminOk(request, env, acct)) return err(401, "admins only");
+        let b; try { b = await request.json(); } catch (e) { return err(400, "bad JSON"); }
+        const park = String(b.park || "");
+        if (!park) return err(400, "park required");
+        await env.DB.prepare("CREATE TABLE IF NOT EXISTS park_photo_pick (park TEXT PRIMARY KEY, url TEXT NOT NULL, by TEXT, at TEXT)").run();
+        if (b.url == null) {
+          await env.DB.prepare("DELETE FROM park_photo_pick WHERE park = ?").bind(park).run();
+        } else {
+          if (b.url !== "none") {
+            const hit = await env.DB.prepare("SELECT 1 AS x FROM open_park_gallery WHERE url = ?2 AND (park = ?1 OR park IN (SELECT former_name FROM park_aliases WHERE park = ?1))").bind(park, String(b.url)).first();
+            if (!hit) return err(404, "that photo is not one of this park's");
+          }
+          await env.DB.prepare("INSERT OR REPLACE INTO park_photo_pick (park, url, by, at) VALUES (?, ?, ?, ?)")
+            .bind(park, String(b.url), (acct && acct.slug) || null, new Date().toISOString()).run();
+        }
+        return json({ ok: true });
       }
       // Carter's own pick for a coaster's photo (Change photo, admins only):
       // {id, url} where url is one of /api/coaster-photo?all=1's, or "none" for
