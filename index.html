@@ -291,6 +291,15 @@
   .rankcta .btn{white-space:nowrap;background-color:var(--panel);color:var(--fg);border:1px solid var(--line)}
   .rankcta .btn:hover{border-color:var(--accent2);color:var(--accent2)}
 
+  /* The featured coaster: one wide photo, its rank, name, park and score over it. */
+  .featc{position:relative;display:block;margin:0 0 28px;border-radius:16px;overflow:hidden;aspect-ratio:16/9;max-height:420px;width:100%;background-color:var(--soft);background-size:cover;background-position:center;color:#fff;text-decoration:none}
+  .featc[hidden]{display:none}
+  @media (max-width:640px){ .featc{aspect-ratio:4/3;border-radius:14px} }
+  .featc .ov{position:absolute;inset:auto 0 0 0;padding:70px 20px 18px;background-image:linear-gradient(180deg,transparent,rgba(5,10,25,.85))}
+  .featc .ov small{display:block;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.72rem;opacity:.9}
+  .featc .ov b{display:block;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:clamp(1.5rem,4vw,2.4rem);line-height:1.05;letter-spacing:-.02em;margin:4px 0}
+  .featc .ov span{font-size:.92rem;opacity:.92}
+  .featc .cr{position:absolute;top:10px;right:12px;font-size:.66rem;opacity:.75;max-width:60%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 </style>
 </head>
 <body>
@@ -391,6 +400,10 @@
   </div>
   <!-- Ranking as a call to action while you have ranked fewer than ten. -->
   <div class="rankcta" id="rankcta" hidden></div>
+  <!-- A featured coaster (Carter, 2026-11-26): a random one from the Global
+       top 100 with its photo, a new one each visit. Later, with more riders,
+       the week's biggest riser in the rankings and by how many points. -->
+  <a class="featc" id="featc" hidden></a>
   <div id="globaltop"></div>
   <div id="friends_wrap" hidden>
     <h2 class="sec">Friends</h2>
@@ -645,6 +658,33 @@ var following = CoasterHub.me().then(function(acct){
 // The Global top ten, live (see the markup). Rows open in place, as on a
 // maker's page.
 CoasterHub.openableCoasters(document.getElementById('globaltop'));
+// The featured coaster: a random one from the Global top 100 that has a
+// photo (tries up to six), its rank, park and score over the picture.
+Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally()]).then(function(r){
+  var byId={}; (r[0].coasters||[]).forEach(function(c){ byId[c.id]=c; });
+  var g=r[1]||{}, top=Object.keys(g).map(function(k){ return { id:+k, pos:g[k].pos, under:g[k].under, score:g[k].score }; })
+    .filter(function(x){ return x.pos && x.pos<=100 && !x.under && byId[x.id]; });
+  for(var i=top.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=top[i]; top[i]=top[j]; top[j]=t; }
+  var E=function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  (function tryAt(n){
+    if(n>=Math.min(6, top.length)) return;
+    var x=top[n], c=byId[x.id];
+    fetch('/api/coaster-photo?id='+x.id).then(function(res){ return res.ok?res.json():null; }).then(function(j){
+      var p=j&&j.photos&&j.photos[0]; if(!p) return tryAt(n+1);
+      var u=CoasterHub.photoSize(p.thumb||p.url, 1280), img=new Image();
+      img.referrerPolicy='no-referrer';
+      img.onload=function(){
+        var el=document.getElementById('featc');
+        el.href=CoasterHub.coasterHref(c);
+        el.style.backgroundImage='url("'+u.replace(/"/g,'%22')+'")';
+        el.innerHTML='<span class="cr">'+E(String(p.author||'').slice(0,60))+'</span><div class="ov"><small>Featured &middot; Global #'+x.pos+'</small><b>'+E(c.name)+'</b><span>'+E(c.park)+' &middot; score '+CoasterHub.scoreText(x.score)+'</span></div>';
+        el.hidden=false;
+      };
+      img.onerror=function(){ tryAt(n+1); };
+      img.src=u;
+    }).catch(function(){ tryAt(n+1); });
+  })(0);
+}).catch(function(){});
 // Five on a phone (Carter, 2026-10-02: "Home: shorter"), ten wider; the
 // rest is a tap away on /rankings either way.
 var TOPN = window.matchMedia('(max-width:560px)').matches ? 5 : 10;
