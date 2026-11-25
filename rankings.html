@@ -782,6 +782,12 @@
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
           stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="m6 9 6 6 6-6"/></svg></button>
+      <!-- And by where (Carter, 2026-11-25: "sort other people's rankings by
+           location. i want to see keltan's top coasters in china"). -->
+      <button class="catpill" id="lfbtn" type="button" aria-expanded="false" aria-controls="lfpanel">Locations<span class="n" id="lfn"></span>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+          stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m6 9 6 6 6-6"/></svg></button>
       <a class="catpill" id="catpill" href="/categories">Categories
         <span class="n" id="catn"></span>
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
@@ -799,6 +805,11 @@
         <input type="search" id="mfq" placeholder="Search models&hellip;" autocomplete="off" aria-label="Search models">
         <div class="mflist" id="mflist"></div>
         <div class="mfacts"><button type="button" class="ghost" id="mfclear">Clear</button><button type="button" class="ghost" id="mfdone">Done</button></div>
+      </div>
+      <div class="mfpanel" id="lfpanel" hidden>
+        <input type="search" id="lfq" placeholder="Search countries and states&hellip;" autocomplete="off" aria-label="Search locations">
+        <div class="mflist" id="lflist"></div>
+        <div class="mfacts"><button type="button" class="ghost" id="lfclear">Clear</button><button type="button" class="ghost" id="lfdone">Done</button></div>
       </div>
     </div>
 
@@ -1488,9 +1499,27 @@ var MSEL={};
 // rankings extras). It rides on the model filter's machinery, so a found ride
 // can still be dragged in edit mode the same way a filtered one can.
 var FQ='';
-function mselOn(){ return Object.keys(MSEL).length>0; }
+function mselOn(){ return Object.keys(MSEL).length>0 || lselOn(); }
+// Locations ticked: a country or a US state ("Ohio, US"); "United States"
+// takes in every state.
+var LSEL={};
+function lselOn(){ return Object.keys(LSEL).length>0; }
+function locOf(id){ return String((BYID[id]||{}).loc||''); }
+function locHit(id){ var l=locOf(id); return !!LSEL[l] || (!!LSEL['United States'] && /, US$/.test(l)); }
 function fqHit(id){ var c=BYID[id]||{}; return (String(c.name||'')+' '+String(c.park||'')).toLowerCase().indexOf(FQ)>=0; }
-function idMatch(id){ return (!mselOn() || !!MSEL[CoasterHub.maker(BYID[id]||{})]) && (!FQ || fqHit(id)); }
+function idMatch(id){ return (!Object.keys(MSEL).length || !!MSEL[CoasterHub.maker(BYID[id]||{})]) && (!lselOn() || locHit(id)) && (!FQ || fqHit(id)); }
+function lfDraw(){
+  var q=($('lfq').value||'').trim().toLowerCase(), n={}, seen={};
+  ORDER.forEach(function(id){ var k=KEY(id); if(seen[k]) return; seen[k]=1; var l=locOf(id); if(!l) return;
+    n[l]=(n[l]||0)+1; if(/, US$/.test(l)) n['United States']=(n['United States']||0)+1; });
+  var names=Object.keys(n).filter(function(m){ return !q || m.toLowerCase().indexOf(q)>=0; })
+    .sort(function(a,b){ return (LSEL[b]?1:0)-(LSEL[a]?1:0) || n[b]-n[a] || a.localeCompare(b); });
+  $('lflist').innerHTML=names.map(function(m){
+    return '<label><input type="checkbox" data-l="'+esc(m)+'"'+(LSEL[m]?' checked':'')+'><span>'+esc(m.replace(/, US$/,''))+'</span><i>'+n[m]+'</i></label>';
+  }).join('') || '<p class="mfnote" style="margin:6px 0">Nowhere called that in this list.</p>';
+  var k=Object.keys(LSEL).length;
+  $('lfn').textContent = k ? String(k) : '';
+}
 function mfOn(){ return mselOn() || !!FQ; }
 function mfMatch(b){ return b.ids.some(idMatch) || (!!FQ && !mselOn() && b.g && String(b.g.name||'').toLowerCase().indexOf(FQ)>=0); }
 function mfDraw(){
@@ -1505,7 +1534,7 @@ function mfDraw(){
   $('mfn').textContent = k ? String(k) : '';
 }
 function mfWire(){
-  $('mfbtn').onclick=function(){ var p=$('mfpanel'); p.hidden=!p.hidden; this.setAttribute('aria-expanded',String(!p.hidden)); if(!p.hidden){ mfDraw();
+  $('mfbtn').onclick=function(){ var p=$('mfpanel'); p.hidden=!p.hidden; this.setAttribute('aria-expanded',String(!p.hidden)); if(!p.hidden){ $('lfpanel').hidden=true; mfDraw();
     // Straight into the search on a computer; not on a phone, where focusing it
     // throws the keyboard over the list (Carter, 2026-09-28).
     if(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches) $('mfq').focus(); } };
@@ -1515,6 +1544,13 @@ function mfWire(){
   $('mfclear').onclick=function(){ MSEL={}; $('mfq').value=''; mfDraw(); renderRank(); };
   $('fq').addEventListener('input', function(){ FQ=this.value.trim().toLowerCase(); renderRank(); });
   $('mfdone').onclick=function(){ $('mfpanel').hidden=true; $('mfbtn').setAttribute('aria-expanded','false'); };
+  $('lfbtn').onclick=function(){ var p=$('lfpanel'); p.hidden=!p.hidden; this.setAttribute('aria-expanded',String(!p.hidden));
+    if(!p.hidden){ $('mfpanel').hidden=true; lfDraw(); if(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches) $('lfq').focus(); } };
+  $('lfq').addEventListener('input', lfDraw);
+  $('lflist').addEventListener('change', function(e){ var m=e.target.getAttribute('data-l'); if(m==null) return;
+    if(e.target.checked) LSEL[m]=1; else delete LSEL[m]; lfDraw(); renderRank(); });
+  $('lfclear').onclick=function(){ LSEL={}; $('lfq').value=''; lfDraw(); renderRank(); };
+  $('lfdone').onclick=function(){ $('lfpanel').hidden=true; $('lfbtn').setAttribute('aria-expanded','false'); };
 }
 
 // Swipe left on a row (touch, editing only) to bring out its Delete. One row
@@ -1558,9 +1594,10 @@ function renderRank(){
   var shown = mf ? bs.filter(mfMatch).reduce(function(t,b){ var n=b.ids.filter(idMatch).length; return t+(n||b.ids.length); },0) : 0;
   var what = [];
   // "Showing 19 of your credits · B&M Inverts" — always plural (Carter, 2026-09-27).
-  if(mselOn()) what.push(Object.keys(MSEL).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return esc(/s$/i.test(m)?m:m+'s'); }).join(', '));
+  if(Object.keys(MSEL).length) what.push(Object.keys(MSEL).sort(function(a,b){ return a.localeCompare(b); }).map(function(m){ return esc(/s$/i.test(m)?m:m+'s'); }).join(', '));
+  if(lselOn()) what.push('in '+Object.keys(LSEL).sort().map(function(m){ return esc(m.replace(/, US$/,'')); }).join(', '));
   if(FQ) what.push('&ldquo;'+esc(FQ)+'&rdquo;');
-  var note = mf ? '<p class="mfnote">'+(shown ? 'Showing '+shown+' of your credits' : 'Nothing in this list matches')+' &middot; '+what.join(' &middot; ')
+  var note = mf ? '<p class="mfnote">'+(shown ? 'Showing '+shown+(OWN?' of your credits':' of '+(slug?'their':'the')+' rides') : 'Nothing in this list matches')+' &middot; '+what.join(' &middot; ')
     +' &middot; <a href="#" id="mfoff" style="color:var(--accent2)">show all</a></p>' : '';
   el.innerHTML=note+bs.map(function(b,i){
     if(mf && !mfMatch(b)) return '';
@@ -1682,7 +1719,7 @@ function renderRank(){
         
       +'</span>'+members+(b.g?'':statsFor(b.ids[0]))+'</div>';
   }).join('');
-  if($('mfoff')) $('mfoff').onclick=function(e){ e.preventDefault(); MSEL={}; FQ=''; $('fq').value=''; mfDraw(); renderRank(); };
+  if($('mfoff')) $('mfoff').onclick=function(e){ e.preventDefault(); MSEL={}; LSEL={}; FQ=''; $('fq').value=''; mfDraw(); lfDraw(); renderRank(); };
   // The find box only earns its place on a list long enough to lose a ride in.
   $('findbar').hidden = ORDER.length < 15;
   // Read-only only: in edit mode a tap on a row is the start of a drag.
