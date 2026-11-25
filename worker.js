@@ -1718,7 +1718,7 @@ async function getPostLaunch(env) {
   };
   const adds2 = addList.filter(a => notOsmOnly(a.refs)).map(a => ({ ...a, facts: factsOf(a.refs) }));
   const parks2 = newParks.map(p => ({ ...p, coasters: p.coasters.filter(c => notOsmOnly(c.refs)).map(c => ({ ...c, facts: factsOf(c.refs) })) })).filter(p => p.coasters.length);
-  const models = await getModelSuggestions(env, cs, linked).catch(() => []);
+  const models = await getModelSuggestions(env, cs, linked, id => riders.get(home.get(id) || id) || 0).catch(() => []);
   return { fields: OPEN_FIELDS, gaps, changed, matches: cut.changes, decided: cut.decided, adds: adds2, nosource, newParks: parks2, models,
            counts: { gaps: gaps.length, changed: changed.length, matches: cut.changes.length,
                      // Every one still to decide, closed ones too (Carter, 2026-11-25).
@@ -1734,7 +1734,7 @@ async function getPostLaunch(env) {
 // and matched to a model already on the site where one fits; else, an
 // estimate: the model of a coaster by the same maker with the same height and
 // length (within 1.5 ft / 2%). Decided ones (open_reviews kind 'model') stay gone.
-async function getModelSuggestions(env, cs, linked) {
+async function getModelSuggestions(env, cs, linked, ridersOf) {
   const q = (sql) => env.DB.prepare(sql).all().then(r => r.results || []).catch(() => []);
   const [raw, done] = await Promise.all([
     q("SELECT r.source, r.ref, r.v FROM open_raw r WHERE (r.source = 'coasterpedia' AND r.k = 'product') OR (r.source = 'enwiki' AND r.k = 'model') OR (r.source = 'dewiki' AND r.k = 'modell')"),
@@ -1780,9 +1780,10 @@ async function getModelSuggestions(env, cs, linked) {
       const twin = cs.find(o => o.id !== c.id && o.manu === c.manu && o.model && o.h && o.l && Math.abs(o.h - c.h) <= 1.5 && Math.abs(o.l - c.l) <= c.l * 0.02);
       if (twin) { suggest = twin.model; existing = true; from = "Estimate: same height and length as " + twin.name + " (" + twin.park + ")"; }
     }
-    if (suggest) out.push({ id: c.id, name: c.name, park: c.park, manu: c.manu || null, suggest, existing: existing ? 1 : 0, from, closed: c.closed || null });
+    if (suggest) out.push({ id: c.id, name: c.name, park: c.park, manu: c.manu || null, suggest, existing: existing ? 1 : 0, from, closed: c.closed || null, riders: ridersOf ? ridersOf(c.id) : 0 });
   }
-  out.sort((a, b) => (a.manu || "~").localeCompare(b.manu || "~") || a.suggest.localeCompare(b.suggest) || a.name.localeCompare(b.name));
+  // Most-ridden first (Carter, 2026-11-26: "sort by number of riders").
+  out.sort((a, b) => b.riders - a.riders || (a.manu || "~").localeCompare(b.manu || "~") || a.suggest.localeCompare(b.suggest) || a.name.localeCompare(b.name));
   return out;
 }
 

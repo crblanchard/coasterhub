@@ -435,7 +435,7 @@ const qName = n => /^Q\d+$/i.test(String(n || '')) ? 'Unknown' : n;
 const MEDIT = {};   // model boxes edited while the page is open
 const VIEW = {
   models: list => '<div class="cards">' + list.map(x => '<div class="card mdc" data-id="' + x.id + '"><div class="one">'
-    + '<a href="' + esc(CoasterHub.coasterHref(x.name, x.park)) + '" target="_blank"><b>' + esc(x.name) + '</b></a> <small>' + esc(x.park) + (x.manu ? ' &middot; ' + esc(x.manu) : '') + (x.closed ? ' &middot; closed' : '') + '</small></div>'
+    + '<a href="' + esc(CoasterHub.coasterHref(x.name, x.park)) + '" target="_blank"><b>' + esc(x.name) + '</b></a> <small>' + esc(x.park) + (x.manu ? ' &middot; ' + esc(x.manu) : '') + (x.closed ? ' &middot; closed' : '') + (x.riders ? ' &middot; ' + x.riders + ' rider' + (x.riders === 1 ? '' : 's') : '') + '</small></div>'
     + '<div class="mdrow"><input class="md-in" type="text" maxlength="80" value="' + esc(MEDIT[x.id] != null ? MEDIT[x.id] : x.suggest) + '">'
     + '<span class="mdtag' + (x.existing ? ' have' : '') + '">' + (x.existing ? 'On the site' : 'New') + '</span>'
     + '<button type="button" class="btn sm" data-muse>Use</button><button type="button" class="ghost sm" data-mskip>Skip</button></div>'

@@ -37,6 +37,11 @@ Added so far: Everland (121), Lotte World Adventure (122), Gyeongju World (123),
 Hong Kong Disneyland (124), Ocean Park (125).
 
 
+### Wrong-state pins moved to an estimate (2026-11-26, migration 254)
+
+These were pinned in another state; each now sits at an estimate from its address. Real coordinates welcome:
+Fantasy Farm Amusement Park (OH), Fun Pier, Nickel's Midway Pier, Sportland Pier (Wildwood, NJ), Kentucky Shores Family Fun Center (KY), Sans Souci Park (PA), Santa's Village AZoosment Park (IL), Uncle Bernie's Amusement Park (FL), Utah Fun Dome (UT), Vollmar's Park (OH), West Point Park (PA), Deer Forest Fun Park (MI), Castle Fun Center (NY), Fast Lane Entertainment (AR), Holly Springs Farm (TX), Kiddieland (KS), Mainstay Farm (TX), Malibu Jack's (Lafayette) (IN), Memphis' Incredible Pizza Company (TN), Starland Sportsplex & Fun Park (MA), Magic Harbor (SC), Tom Foolerys Adventure Park (VA).
+
 ### Town-estimated pins from the 2026-11-19 closed-coaster pass
 
 No source placed these parks; each is pinned at its town (tools/open-data/park-pins.json, how: town). Real coordinates welcome:
