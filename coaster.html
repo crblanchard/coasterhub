@@ -715,8 +715,9 @@ function riders(){
 // The photo: /api/coaster-photo picks a free-licensed one from the ride's
 // source records (or its other locations). The licences ask for credit, so
 // the line under it names the photographer, the licence and where it is from.
-function showPhoto(c){
-  fetch('/api/coaster-photo?id='+encodeURIComponent(c.id)).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+function showPhoto(c, fresh){
+  // fresh: straight after Change photo, past the browser's 5-minute copy.
+  fetch('/api/coaster-photo?id='+encodeURIComponent(c.id)+(fresh?'&t='+Date.now():'')).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
     var list=(j && (j.photos || (j.photo ? [j.photo] : []))) || [];
     photoAdmin(c);
     var fig=$('cphoto'), img=$('cphoto_img'), at=0, tried=0;
@@ -763,17 +764,18 @@ function photoAdmin(c){
       g.hidden=false; g.innerHTML='<p class="cpnote">Loading every photo&hellip;</p>';
       fetch('/api/coaster-photo?all=1&id='+encodeURIComponent(c.id)).then(function(r){ return r.json(); }).then(function(j){
         var ps=(j && j.photos) || [];
-        var small=function(u){ return String(u||'').replace(/\/(\d+)px-/, '/360px-'); };
+        // 330: a standard Commons width (any other is refused now).
+        var small=function(u){ return String(u||'').replace(/\/(\d+)px-/, '/330px-'); };
         g.innerHTML='<div class="cpacts"><button type="button" class="cpbtn" data-pick="auto">Automatic</button><button type="button" class="cpbtn" data-pick="none">No photo</button>'
           +'<span class="cpnote">'+ps.length+' photo'+(ps.length===1?'':'s')+' &middot; click one to use it</span></div>'
           +'<div class="cpthumbs">'+ps.map(function(p,i){
             return '<button type="button" class="cpthumb'+(p.picked?' on':'')+'" data-i="'+i+'" title="'+esc((p.author||'')+' \u00b7 '+(p.license||''))+'">'
-              +'<img src="'+esc(small(p.thumb||p.url))+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'bad\')"></button>';
+              +'<img src="'+esc(small(p.thumb||p.url))+'" alt="" loading="lazy" referrerpolicy="no-referrer" data-alt="'+esc(p.thumb||p.url)+'" onerror="if(this.dataset.alt&&this.src!==this.dataset.alt){this.src=this.dataset.alt;this.dataset.alt=\'\';}else{this.parentNode.classList.add(\'bad\');}"></button>';
           }).join('')+'</div>';
         var save=function(url){
           fetch('/api/coaster-photo-pick',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({id:c.id,url:url})})
             .then(function(r){ return r.json().then(function(x){ if(!r.ok) throw new Error(x.error||r.status); }); })
-            .then(function(){ g.hidden=true; showPhoto(c); })
+            .then(function(){ g.hidden=true; showPhoto(c, true); })
             .catch(function(e){ alert('Could not save: '+e.message); });
         };
         Array.prototype.forEach.call(g.querySelectorAll('.cpthumb'), function(b){ b.onclick=function(){ save(ps[+b.getAttribute('data-i')].url); }; });
