@@ -446,7 +446,8 @@
   }
   function markClosing(r) {
     ((r && r.coasters) || []).forEach(function (c) {
-      if (c.closed && !c.closing && stillOpen(c.closed, c.closedPrec)) {
+      // "?" is closed with the date unknown: defunct, never "closing soon".
+      if (c.closed && c.closed !== "?" && !c.closing && stillOpen(c.closed, c.closedPrec)) {
         c.closing = c.closed; c.closingPrec = c.closedPrec; c.closed = null; c.closedPrec = null;
       }
       var od = !c.closed && openingDay(c);
@@ -2834,6 +2835,7 @@
     var info = [], nums = [], mine = [], E = searchEsc;
     function kv(t, v, label) { t.push('<div class="kv"><span>' + E(label) + '</span><b>' + v + '</b></div>'); }
     function when(v, prec) {
+      if (String(v) === "?") return "Date unknown";   // closed, date unknown (closedPrec 'unknown')
       if (prec === "day" && /^\d{4}-\d{2}-\d{2}/.test(String(v))) return mdy(v);
       if (prec === "month" && /^\d{4}-\d{2}/.test(String(v))) return monthYear(v);
       return String(v).slice(0, 4);

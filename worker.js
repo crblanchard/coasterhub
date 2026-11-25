@@ -2134,7 +2134,12 @@ async function openClosedNoDate(env, refs) {
     await env.DB.prepare("INSERT OR REPLACE INTO open_record_facts (source, ref, field, value, prec, cites_rcdb) VALUES (?, ?, 'closed', ?, 'year', 0)").bind(r.source, r.ref, y).run();
     return false;
   }
-  return true;
+  // No closing time at all: it still goes in, as defunct with the date unknown
+  // (Carter, 2026-11-25: "make it accept defunct without a closing date"),
+  // stored as closed '?' / closedPrec 'unknown' — a closed value, so every page
+  // treats it as defunct, and pages show "date unknown" for it.
+  if (refs[0]) await env.DB.prepare("INSERT OR REPLACE INTO open_record_facts (source, ref, field, value, prec, cites_rcdb) VALUES (?, ?, 'closed', '?', 'unknown', 0)").bind(refs[0].source, refs[0].ref).run();
+  return false;
 }
 async function setOpenChoice(env, acct, id, field, source, typed) {
   const isName = field === "name";

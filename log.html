@@ -600,7 +600,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261125m"></script>
+<script src="/app.js?v=20261125n"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
 // Runs before the gate: the nav has to work whether or not you unlock.
@@ -1713,7 +1713,7 @@ function renderList(){
     if(searching && c.park) bits.push(c.park);
     var mk=CoasterHub.maker(c); if(mk) bits.push(mk);
     // A closed ride says when (Carter, 2026-11-22).
-    if(c.closed) bits.push('Closed '+String(c.closed).slice(0,4));
+    if(c.closed) bits.push(c.closed==='?' ? 'Closed, date unknown' : 'Closed '+String(c.closed).slice(0,4));
     return bits.join(' \u00b7 ');
   }
   // Say nothing when nothing is known — the same rule /count's life() follows.

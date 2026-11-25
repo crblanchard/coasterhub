@@ -196,7 +196,10 @@ No `site-updates.json` entry for data (see above).
   (`Wildcat (Old)`). Duelling/racing tracks are two rows, `X (Left)` / `X (Right)`
   or their side names (`Battlestar Galactica (Human)` / `(Cylon)`).
 - SBNO spells are not recorded; a ride is operating or closed. Its closing date is
-  when it last ran.
+  when it last ran. A source's rough closing time ("c.1970s") is a year (the last
+  named; a decade as its first year), and a closed ride with no closing time at all
+  goes in as `closed '?'`, `closedPrec 'unknown'` ("date unknown") rather than being
+  left out (Carter, 2026-11-25; this reverses the 2026-11-24 rule behind 222).
 - A ride that never opened at a park is left out (Alpen Coaster at Safariland).
 - Skip rides that closed last century unless Carter asks for them.
 - Future rides: `yr` = the opening year, opened `'2027'`/`year`; the site shows

@@ -615,7 +615,7 @@
 </div></footer>
 <div id="hm-tip"></div>
 
-<script src="/app.js?v=20261125m"></script>
+<script src="/app.js?v=20261125n"></script>
 <script src="/profile-edit.js?v=20261031a"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -1458,7 +1458,7 @@ function render(s){
       var c=x.c;
       // "Closed 2025" whether it closed or moved on (Carter, 2026-11-24).
       return '<div class="lr"><div class="ln"><a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a></div>'
-        +'<div class="lw">Closed '+yr(c.closed)
+        +'<div class="lw">'+(c.closed==='?'?'Closed, date unknown':'Closed '+yr(c.closed))
         // A ride that moved on still says where it went (Carter, 2026-11-24).
         +(x.moved?'<a class="now" href="'+esc(CoasterHub.coasterHref(x.moved))+'">now at '+esc(x.moved.park)+'</a>':'')+'</div></div>';
     };
