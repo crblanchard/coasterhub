@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-25T01:08:43Z",
-   "text": "You can now swipe through every photo of a coaster, tap one to see them all full screen, and park pages get their own photos. Shared trips use short coasterhub.org/t/ links, and profiles got cleaner charts, Records with each ride's park and finger-sized header buttons."
+   "at": "2026-11-25T01:13:41Z",
+   "text": "You can now swipe through every photo of a coaster, tap one to see them all full screen, and park pages get their own photos. Shared trips get short coasterhub.org/trip/ links you can name, and profiles got cleaner charts, Records with each ride's park and finger-sized header buttons."
   },
   {
    "at": "2026-11-24T17:55:14Z",
