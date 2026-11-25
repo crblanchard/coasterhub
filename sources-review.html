@@ -92,6 +92,8 @@
   .act select.same-as{max-width:220px}
   .parkhead{margin:14px 0 2px;padding:10px 14px;border-left:3px solid var(--accent2);background:var(--well);border-radius:0 10px 10px 0}
   .parkhead b{display:block;font-size:.95rem}
+  .parkhead .parkall{float:right;margin:0 0 4px 10px;padding:6px 12px;border:1px solid var(--accent2);border-radius:999px;background:var(--panel);color:var(--accent2);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}
+  .parkhead .parkall:hover{background:var(--accent2);color:#fff}
   .parkhead small{color:var(--muted);font-size:.8rem;line-height:1.7}
   .parkhead a{color:var(--fg);text-decoration:none;font-weight:600} .parkhead a:hover{color:var(--accent2)}
   .parkhead .yr{color:var(--muted);font-weight:400}
@@ -255,7 +257,9 @@ function parkHead(park) {
   const cs = (BYPARK[park] || []).slice().sort((a, b) => (!!a.closed - !!b.closed) || a.name.localeCompare(b.name));
   const one = c => '<a href="' + esc(CoasterHub.coasterHref(c.name, c.park)) + '" target="_blank">' + esc(c.name) + '</a>'
     + '<span class="yr">' + (c.closed ? ' closed ' + esc(String(c.closed).slice(0, 4)) : (c.yr || c.opened ? ' ' + esc(String(c.yr || c.opened).slice(0, 4)) : '')) + '</span>';
-  return '<div class="parkhead"><b>' + esc(park) + '</b><small>' + (cs.length ? 'Already on the site (' + cs.length + '): ' + cs.map(one).join(' · ') : 'No coasters on the site yet') + '</small></div>';
+  // Add every ticked coaster at this park in one go (Carter, 2026-11-25).
+  const here = tab === 'adds' ? LIST.filter(a => a.park === park && ticked(a)).length : 0;
+  return '<div class="parkhead">' + (here ? '<button type="button" class="parkall" data-parkall="' + esc(park) + '">Add all ' + here + ' here</button>' : '') + '<b>' + esc(park) + '</b><small>' + (cs.length ? 'Already on the site (' + cs.length + '): ' + cs.map(one).join(' · ') : 'No coasters on the site yet') + '</small></div>';
 }
 // "Same ride as..." on a New coasters card (Carter, 2026-11-19: "allow me to
 // link it to another coaster ... thirteen and th13teen at Alton Towers are
@@ -509,8 +513,13 @@ document.addEventListener('change', e => {
   if (e.target.classList.contains('add-rename')) { const v = e.target.value.trim(); if (v) { RENAME[k] = v; TICK.add(k); UNTICK.delete(k); } else delete RENAME[k]; render(); return; }
   $('bulk').textContent = 'Add all ticked (' + fmt(LIST.filter(ticked).length) + ')';
 });
-async function bulkAdd() {
-  const list = LIST.filter(ticked);
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-parkall]'); if (!b) return;
+  const park = b.getAttribute('data-parkall');
+  bulkAdd(LIST.filter(a => a.park === park && ticked(a)));
+});
+async function bulkAdd(only) {
+  const list = only || LIST.filter(ticked);
   if (!list.length || !confirm('Add ' + list.length + ' coasters to the site? Each shows on /changes. This runs in batches and takes a little while.')) return;
   const b = $('bulk'); b.disabled = true;
   // bulk: one that can't go in (already there, closed with no date) is skipped
