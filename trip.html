@@ -142,8 +142,9 @@
   .tbtn[disabled]{opacity:.5;cursor:default}
   #triplist{margin:22px 0 0}
   #triplist .tlc{color:var(--muted);font-weight:600;font-size:.8em}
-  .tlist{border:1px solid var(--line);border-radius:14px;background-color:var(--panel);overflow:hidden}
-  .tlpark + .tlpark{border-top:1px solid var(--line)}
+  /* Each park its own box, a little apart (Carter, 2026-11-25: easier to read
+     on a phone). */
+  .tlpark{border:1px solid var(--line);border-radius:14px;background-color:var(--panel);overflow:hidden;margin:0 0 12px}
   .tlph{display:flex;align-items:center;gap:10px;padding:12px 14px 6px;font-weight:700}
   .tlph a{color:var(--fg);text-decoration:none}
   .tlph a:hover{color:var(--accent2)}
