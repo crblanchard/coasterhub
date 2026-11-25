@@ -141,21 +141,9 @@
   .tbtn:hover{border-color:var(--accent2);color:var(--accent2)}
   .tbtn[disabled]{opacity:.5;cursor:default}
   #triplist{margin:22px 0 0}
-  /* Everyone's saved trips (Carter, 2026-11-26), at the foot of the planner. */
-  #alltrips_wrap[hidden]{display:none}
-  .alltrips{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-  .atrip{display:block;border:1px solid var(--line);border-radius:14px;background-color:var(--panel);padding:12px 14px;color:var(--fg);text-decoration:none}
-  .atrip:hover{border-color:var(--accent2)}
-  .atrip.here{border-color:var(--accent2);box-shadow:inset 0 0 0 1px var(--accent2)}
-  .atrip b{display:block;font-family:var(--display);font-stretch:92%;font-weight:800;font-size:1.02rem;letter-spacing:-.01em}
-  .atrip .ap{display:block;color:var(--muted);font-size:.84rem;margin-top:3px;line-height:1.35}
-  .atrip .aw{display:block;color:var(--muted);font-size:.78rem;margin-top:6px}
-  .atrip .ae{display:block;color:var(--muted);font-size:.72rem;margin-top:4px;opacity:.85}
-  .tq{width:100%;box-sizing:border-box;margin:0 0 10px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background-color:var(--panel);color:var(--fg);font:inherit;font-size:.95rem}
-  .atmore{margin:10px 0 0}
-  .atmore[hidden],#newtrip_h[hidden]{display:none}
-  .atnone{color:var(--muted);font-size:.9rem;margin:4px 0}
-  #alltrips_wrap .sect:first-child{margin-top:0}
+  .tolist{margin:0 0 12px;font-size:.9rem}
+  .tolist a{color:var(--accent2);font-weight:600;text-decoration:none}
+  .tolist a:hover{text-decoration:underline}
   #triplist .tlc{color:var(--muted);font-weight:600;font-size:.8em}
   /* Each park its own box, a little apart (Carter, 2026-11-25: easier to read
      on a phone). */
@@ -233,15 +221,8 @@
   <div id="loading" data-loading>Loading&hellip;</div>
   <div id="err" style="display:none"><strong>Couldn&rsquo;t load the data.</strong></div>
   <div id="ui" hidden>
-    <!-- Open a trip (Carter, 2026-11-26): everyone's saved trips, searchable,
-         above the planner on plain /trip; under it on a trip's own page. -->
-    <div id="alltrips_wrap" hidden>
-      <div class="sect">Open a trip</div>
-      <input id="tq" class="tq" type="search" placeholder="Search trips by name, park or rider&hellip;" autocomplete="off" aria-label="Search trips">
-      <div class="alltrips" id="alltrips"></div>
-      <p class="atmore" id="atmore" hidden><button type="button" class="tbtn" id="b_atall"></button></p>
-      <div class="sect" id="newtrip_h">Plan a new trip</div>
-    </div>
+    <!-- Saved trips have their own page now (Carter, 2026-11-26). -->
+    <p class="tolist"><a href="/trips">See existing trips &rarr;</a></p>
     <div class="tbar">
       <input id="q" type="search" placeholder="Add a park&hellip;" autocomplete="off" aria-label="Add a park">
       <div class="hits" id="hits" hidden></div>
@@ -331,7 +312,6 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
       return '<div class="tlr soon"><span class="tln"><a href="'+esc(CoasterHub.coasterHref(c))+'">'+esc(c.name)+'</a>'+(mdl?'<small>'+esc(mdl)+'</small>':'')+'</span><span class="tlsoon">'+esc(soonLabel(c))+'</span></div>';
     }).join('');
   }
-  window.TRIP_BYSLUG=BYSLUG;   // for Everyone's trips, outside this function
   Object.keys(P).forEach(function(n){ BYSLUG[CoasterHub.slugify(n)]=n; P[n].open.sort(function(a,b){ return (b.h||0)-(a.h||0) || String(a.name).localeCompare(String(b.name)); }); });
   var ALL=Object.keys(P).map(function(n){ return P[n]; }).filter(function(p){ return p.open.length; });
   function park(slug){ return P[BYSLUG[slug]] || P[CoasterHub.findPark(list, parks, slug) || ''] || null; }
@@ -348,6 +328,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
   function uName(slug){ var u=(CoasterHub.USERS||[]).filter(function(x){ return x.slug===slug; })[0]; return u; }
 
   var STOPS=[];
+  // ?new=1 (+ Plan a new trip on /trips): a blank planner, the old draft dropped.
+  if(Q.get('new')){ try { localStorage.removeItem(STORE); } catch(e){} history.replaceState(null,'','/trip'); }
   var saved=null; try { saved=JSON.parse(localStorage.getItem(STORE)||'null'); } catch(e){}
   var fromUrl=(Q.get('p')||'').split(',').filter(Boolean);
   (fromUrl.length ? fromUrl : ((saved&&saved.p)||[])).forEach(function(s){ var p=park(s); if(p && STOPS.indexOf(p.name)<0) STOPS.push(p.name); });
@@ -465,9 +447,6 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
         +'<ol class="tl" id="tl">'+STOPS.map(stopHtml).join('')+'</ol>';
     }
     $('tacts').hidden=!STOPS.length;
-    // Starting a new trip: Open a trip steps aside, back when the trip is cleared.
-    window.TRIP_NSTOPS=STOPS.length;
-    var aw=$('alltrips_wrap'); if(aw && aw.dataset.ok && !window.TRIP_CODE) aw.hidden=!!STOPS.length;
     $('b_order').disabled=STOPS.length<3;
   }
 
@@ -694,7 +673,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
   var slugOf=function(n){ return String(n||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48); };
   function preview(){
     var sl=slugOf($('tname').value);
-    $('tprev').innerHTML = sl.length>=3 ? 'coasterhub.org/trip/<b>'+esc(sl)+'</b>' : (window.TRIP_CODE ? 'Leave it blank for a short code, or name it for a link of your own.' : 'Its name becomes its link, and it shows under Open a trip.');
+    $('tprev').innerHTML = sl.length>=3 ? 'coasterhub.org/trip/<b>'+esc(sl)+'</b>' : (window.TRIP_CODE ? 'Leave it blank for a short code, or name it for a link of your own.' : 'Its name becomes its link, and it shows on the Trips page.');
   }
   // A saved trip shares its own link; a new one is saved (named) first.
   if(window.TRIP_CODE) $('b_share').textContent='Share trip'; else $('b_link').textContent='Save';
@@ -808,49 +787,10 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     if(!me && !TRIPNAME && !window.TRIP_CODE) $('hero_p').textContent='Pick parks and see what each one has. Sign in to see which coasters are new to you.';
     $('loading').style.display='none'; $('ui').hidden=false;
     drawRiders();
-    allTrips();
     setupMap();
     draw();
   });
 }).catch(function(e){ console.error(e); $('loading').style.display='none'; $('err').style.display='block'; });
-// Everyone's saved trips (Carter, 2026-11-26: "publicly see trips saved by
-// everyone"): the named ones, newest first, from /api/trips.
-function allTrips(){
-  var who={}, TS=[], ALL=false, onTrip=!!window.TRIP_CODE;
-  var wrap=$('alltrips_wrap');
-  // On a trip's own page the list goes under the planner, not over it.
-  if(onTrip){ $('newtrip_h').hidden=true; $('ui').appendChild(wrap); wrap.querySelector('.sect').textContent='Other trips'; }
-  function draw(){
-    var q=$('tq').value.trim().toLowerCase();
-    var hit=TS.filter(function(t){ return !q || t.hay.indexOf(q)>=0; });
-    var cut=(q||ALL) ? hit : hit.slice(0,6);
-    $('alltrips').innerHTML=cut.length ? cut.map(function(t){
-      var shown=t.names.slice(0,4).map(esc).join(', ')+(t.names.length>4?' &amp; '+(t.names.length-4)+' more':'');
-      return '<a class="atrip'+(t.code===window.TRIP_CODE?' here':'')+'" href="/trip/'+encodeURIComponent(t.code)+'"><b>'+esc(t.name)+'</b>'
-        +'<span class="ap">'+t.names.length+' park'+(t.names.length===1?'':'s')+(t.names.length?' &middot; '+shown:'')+'</span>'
-        +(t.people.length?'<span class="aw">'+esc(t.people.join(', '))+'</span>':'')
-        +(t.edited?'<span class="ae">Last edited '+esc(t.edited)+'</span>':'')+'</a>';
-    }).join('') : '<p class="atnone">No trips match.</p>';
-    var more=!q && !ALL && hit.length>6;
-    $('atmore').hidden=!more; if(more) $('b_atall').textContent='Show all '+hit.length+' trips';
-  }
-  CoasterHub.fetchUsers().catch(function(){ return []; }).then(function(us){ (us||[]).forEach(function(u){ who[u.slug]=u.name||u.slug; }); return fetch('/api/trips'); })
-  .then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
-    var by=window.TRIP_BYSLUG||{};
-    TS=((j && j.trips) || []).map(function(t){
-      var names=t.parks.map(function(sl){ return by[sl]; }).filter(Boolean);
-      var people=t.riders.map(function(sl){ return who[sl]; }).filter(Boolean);
-      var ed=t.edited ? new Date(t.edited) : null;
-      return { code:t.code, name:t.name, names:names, people:people, edited: ed && !isNaN(ed) ? ed.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '', hay:[t.name].concat(names, people).join(' ').toLowerCase() };
-    });
-    if(!TS.length) return;
-    $('tq').oninput=draw;
-    $('b_atall').onclick=function(){ ALL=true; draw(); };
-    draw();
-    wrap.dataset.ok='1';
-    wrap.hidden=!onTrip && !!window.TRIP_NSTOPS;
-  }).catch(function(){});
-}
 </script>
 </body>
 </html>
