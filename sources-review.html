@@ -428,6 +428,9 @@ const factLine = f => {
   const parts = [f.type, f.model || f.manu, n(f.h, 'ft'), n(f.s, 'mph'), n(f.l, 'ft'), f.inv != null && f.inv !== '' && !isNaN(+f.inv) ? (+f.inv) + ' inversion' + (+f.inv === 1 ? '' : 's') : '', yrs].filter(Boolean);
   return parts.length ? '<span class="facts1">' + parts.map(esc).join(' &middot; ') + '</span>' : '<span class="facts1 none">No stats in the sources</span>';
 };
+// A record with only a Wikidata id for a name goes in as "Unknown" (worker
+// openName; Carter, 2026-11-25), so it reads that way here too.
+const qName = n => /^Q\d+$/i.test(String(n || '')) ? 'Unknown' : n;
 const MEDIT = {};   // model boxes edited while the page is open
 const VIEW = {
   models: list => '<div class="cards">' + list.map(x => '<div class="card mdc" data-id="' + x.id + '"><div class="one">'
@@ -455,7 +458,7 @@ const VIEW = {
           + '<div class="act">' + btn('Same ride: link', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'approve' }, 'yes') + btn('Not the same', { k: 'match', s: c.source, r: c.ref, c: c.coaster_id, d: 'reject' }, 'no') + '</div></div>';
       }).join('') + '</div>',
   adds: list => '<div class="cards">' + list.map((a, i) => (i === 0 || list[i - 1].park !== a.park ? parkHead(a.park) : '') + '<div class="card addc" data-k="' + esc(akey(a)) + '"><div class="one">'
-      + '<label class="tick"><input type="checkbox" class="add-tick"' + (ticked(a) ? ' checked' : '') + '> <b>' + esc(RENAME[akey(a)] || a.name) + '</b></label>'
+      + '<label class="tick"><input type="checkbox" class="add-tick"' + (ticked(a) ? ' checked' : '') + '> <b>' + esc(RENAME[akey(a)] || qName(a.name)) + '</b></label>'
       + (latin(a.name) ? '' : ' <span class="chip bad">not in English</span> <input class="add-rename" placeholder="English name" value="' + esc(RENAME[akey(a)] || '') + '">')
       + '<small>' + esc(a.park) + (a.fair ? ' · travelling fair' : '') + (a.status ? ' · ' + esc(a.status) : '') + '</small>'
       + factLine(a.facts)
@@ -474,7 +477,7 @@ const VIEW = {
       + '<label>Lat <input class="np-lat" value="' + esc(EDIT[p.k] && EDIT[p.k].lat != null ? EDIT[p.k].lat : (p.lat ?? '')) + '" size="9"></label><label>Lon <input class="np-lon" value="' + esc(EDIT[p.k] && EDIT[p.k].lon != null ? EDIT[p.k].lon : (p.lon ?? '')) + '" size="9"></label>'
       + (p.lat != null ? '<a class="go" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=' + p.lat + '&mlon=' + p.lon + '#map=15/' + p.lat + '/' + p.lon + '">check the pin ↗</a>' : '<span class="chip bad">no pin yet</span>')
       + (p.taken ? ' <span class="chip bad">a park with this name is already on the site: rename it</span>' : '') + '</div>'
-      + '<div class="npc">' + p.coasters.map((c, j) => '<label class="npl"><input type="checkbox" data-j="' + j + '"' + ((CUNTICK[p.k] && j in CUNTICK[p.k] ? !CUNTICK[p.k][j] : alive(c)) ? ' checked' : '') + '> <b>' + esc(c.name) + '</b>'
+      + '<div class="npc">' + p.coasters.map((c, j) => '<label class="npl"><input type="checkbox" data-j="' + j + '"' + ((CUNTICK[p.k] && j in CUNTICK[p.k] ? !CUNTICK[p.k][j] : alive(c)) ? ' checked' : '') + '> <b>' + esc(qName(c.name)) + '</b>'
         + factLine(c.facts) + '<small>' + esc(c.status || 'status unknown') + ' · ' + c.refs.filter(r => LINK[r.source]).map(r => '<a class="go" target="_blank" rel="noopener" href="' + LINK[r.source](r.ref) + '">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ') + '</small></label>').join('') + '</div>'
       + '<div class="act">' + btn('Add park + ticked coasters', { np: 'add', i: i }, 'yes') + btn('Leave out', { np: 'no', i: i }, 'no') + '</div>'
       + '<div class="np-into"><span class="lab">Or it&rsquo;s a park already on the site:</span>'

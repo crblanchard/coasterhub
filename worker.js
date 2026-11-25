@@ -1844,7 +1844,7 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
       const refs = Array.isArray(x.refs) ? x.refs.filter(r => r && r.source && r.ref) : [];
       if (!refs.length) return err(400, "refs required");
       if (x.kind === "add") {
-        const park = String(x.park || ""), name = String(x.name || "").trim();
+        const park = String(x.park || ""), name = await openName(env, park, String(x.name || "").trim());
         // In a bulk run (b.bulk, the review page's Add all: Carter, 2026-11-25
         // "add all of those") one that can't go in is skipped and reported,
         // instead of stopping the batch.
@@ -1886,7 +1886,7 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
         if (!cs.length) return err(400, "tick at least one coaster");
         await env.DB.prepare("INSERT INTO parks (name, lat, lon, region, travel) VALUES (?, ?, ?, ?, 0)").bind(park, lat, lon, region).run();
         for (const c of cs) {
-          const name = String(c.name).trim();
+          const name = await openName(env, park, String(c.name).trim());
           if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(park, name).first()) continue;
           const crefs = c.refs.filter(r => r && r.source && r.ref);
           if (await openClosedNoDate(env, crefs)) { out.push({ skipped: name, why: "closed, no date" }); continue; }
@@ -1907,7 +1907,7 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
       if (!row) return err(404, "no park called " + park + " on the site");
       const cs = (Array.isArray(x.coasters) ? x.coasters : []).filter(c => c && String(c.name || "").trim() && Array.isArray(c.refs) && c.refs.length);
       for (const c of cs) {
-        const name = String(c.name).trim();
+        const name = await openName(env, row.name, String(c.name).trim());
         if (await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(row.name, name).first()) continue;
         const crefs = c.refs.filter(r => r && r.source && r.ref);
         if (await openClosedNoDate(env, crefs)) { out.push({ skipped: name, why: "closed, no date" }); continue; }
@@ -2102,6 +2102,17 @@ async function coasterPhotos(env, id, all, skipPick, max) {
 // at all (Carter, 2026-11-24: "no need to show on site at all without
 // sufficient info"; 222 removed the 40 that got in as Operating this way).
 // Its records stay in open_items/open_raw for when a date turns up.
+// A source's coaster with no name, only a Wikidata id ("Q123456"), goes in as
+// "Unknown" (Carter, 2026-11-25), the name unnamed rides already use; a second
+// one at the same park is "Unknown (2)" and so on, since names are unique per park.
+async function openName(env, park, name) {
+  if (!/^Q\d+$/i.test(name)) return name;
+  for (let n = 1; n < 50; n++) {
+    const t = n === 1 ? "Unknown" : "Unknown (" + n + ")";
+    if (!await env.DB.prepare("SELECT 1 FROM coasters WHERE park = ? AND lower(name) = lower(?)").bind(park, t).first()) return t;
+  }
+  return name;
+}
 async function openClosedNoDate(env, refs) {
   let dead = false;
   for (const r of refs) {
