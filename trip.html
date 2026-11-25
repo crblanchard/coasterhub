@@ -509,7 +509,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
             +(whoTxt?'<span class="tlwho">'+whoTxt+'</span>':'')+'</div>';
         }).join('')+'</div>';
     }).join('');
-    el.innerHTML = total ? '<div class="sect">'+(RIDERS.length?'Every new credit':'Every coaster')+' <span class="tlc">'+total+'</span></div><div class="tlist">'+h+'</div>' : '';
+    el.innerHTML = total ? '<div class="sect">Credit list <span class="tlc">'+total+'</span></div><div class="tlist">'+h+'</div>' : '';
   }
   function draw(){ drawAfter(); drawStops(); drawList(); drawNear(); drawMap(); save(); }
 
