@@ -295,7 +295,6 @@
   .featwrap{margin:0 0 26px}
   .featwrap[hidden]{display:none}
   .featc{position:relative;display:block;border-radius:18px;overflow:hidden;aspect-ratio:16/8;max-height:460px;width:100%;background-color:var(--soft);background-size:cover;background-position:center;color:#fff;text-decoration:none;box-shadow:0 10px 30px -18px rgba(10,30,60,.55)}
-  @media (max-width:640px){ .featc{aspect-ratio:4/3.4;border-radius:16px} }
   .featc .ov{position:absolute;inset:auto 0 0 0;padding:90px 20px 18px;background-image:linear-gradient(180deg,transparent,rgba(5,10,25,.88))}
   .featc .kick{display:inline-flex;align-items:center;gap:6px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.7rem;padding:5px 10px;border-radius:999px;background-color:rgba(255,255,255,.16);backdrop-filter:blur(4px)}
   .featc .rk{position:absolute;top:14px;left:16px;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:clamp(2.6rem,7vw,4.2rem);line-height:1;letter-spacing:-.03em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55)}
@@ -305,6 +304,14 @@
   .featc .ov .pk{font-size:.95rem;opacity:.92}
   .featc .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
   .featc .chips span{font-size:.78rem;font-weight:700;padding:4px 9px;border-radius:8px;background-color:rgba(255,255,255,.14)}
+  /* Phones: a shorter card, and the stats on one line along the bottom, the
+     last ones dropped if they still do not fit (Carter, 2026-11-26). */
+  @media (max-width:640px){
+    .featc{aspect-ratio:4/3;border-radius:16px}
+    .featc .ov{padding:70px 14px 14px}
+    .featc .chips{flex-wrap:nowrap;gap:4px;margin-top:8px;overflow:hidden}
+    .featc .chips span{flex:none;font-size:.7rem;padding:3px 7px;border-radius:7px;white-space:nowrap}
+  }
   .featyou{margin:10px 2px 0;font-size:.92rem;color:var(--muted)}
   .featyou b{color:var(--fg)}
   .featyou a{color:var(--accent2);font-weight:600;text-decoration:none}
@@ -690,7 +697,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
         el.style.backgroundImage='url("'+u.replace(/"/g,'%22')+'")';
         var chips=[c.h?Math.round(c.h)+' ft':'', c.s?Math.round(c.s)+' mph':'', c.inv!=null&&c.inv!==''?c.inv+' inversion'+(+c.inv===1?'':'s'):'', CoasterHub.maker(c)||'', (c.opened||c.yr)?'Opened '+String(c.opened||c.yr).slice(0,4):''].filter(Boolean);
         el.innerHTML='<span class="rk '+(c.type==='Wood'?'wd':'st')+'"><i>#</i>'+x.pos+'</span>'
-          +'<div class="ov"><span class="kick">Featured coaster</span><b>'+E(c.name)+'</b><span class="pk">'+E(c.park)+'</span>'
+          +'<div class="ov"><span class="kick">Featured</span><b>'+E(c.name)+'</b><span class="pk">'+E(c.park)+'</span>'
           +(chips.length?'<div class="chips">'+chips.map(function(t){ return '<span>'+E(t)+'</span>'; }).join('')+'</div>':'')+'</div>';
         // The line under it: its place in words, and you.
         var k=CoasterHub.rideKey(c), mine=Y && (Y.rides[x.id] || Y.rides[k]), myRank=Y && (Y.rank[x.id] || Y.rank[k]);
@@ -701,6 +708,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
                           : 'Not on your count yet.';
         var fy=document.getElementById('featyou'); fy.innerHTML=line; fy.hidden=!line;
         document.getElementById('featwrap').hidden=false;
+        var ch=document.querySelector('#featc .chips');
+        while(ch && ch.children.length>1 && ch.scrollWidth>ch.clientWidth+1) ch.lastElementChild.remove();
       };
       img.onerror=function(){ tryAt(n+1); };
       img.src=u;
