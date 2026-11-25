@@ -260,7 +260,7 @@ function mi(n){ return n<10 ? n.toFixed(1) : Math.round(n).toLocaleString(); }
 var Q=new URLSearchParams(location.search);
 // A named trip (coasterhub.org/trip/<name> lands here with ?name=): its title.
 var TRIPNAME=(Q.get('name')||'').trim().slice(0,60);
-function showName(){ var h=document.querySelector('.hero h1'); if(h && TRIPNAME){ h.textContent=TRIPNAME; document.title=TRIPNAME+' \u2014 Coaster Hub'; } }
+function showName(){ var h=document.querySelector('.hero h1'), hp=document.getElementById('hero_p'); if(h && TRIPNAME){ h.textContent=TRIPNAME; document.title=TRIPNAME+' \u2014 Coaster Hub'; if(hp) hp.textContent='Edit trip plan below.'; } }
 showName();
 var css=function(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); };
 
@@ -682,7 +682,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     FRIENDS=rr[1] ? (rr[1].following||[]).map(function(x){ return x.slug; }) : [];
     return Promise.all(withList.filter(function(s){ return s!==me; }).slice(0,8).map(function(s){ return addRider(s); }));
   }).then(function(){
-    if(!me) $('hero_p').textContent='Pick parks and see what each one has. Sign in to see which coasters are new to you.';
+    if(!me && !TRIPNAME) $('hero_p').textContent='Pick parks and see what each one has. Sign in to see which coasters are new to you.';
     $('loading').style.display='none'; $('ui').hidden=false;
     drawRiders();
     setupMap();
