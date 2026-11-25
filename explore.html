@@ -39,6 +39,8 @@
   .xgrid.xbig{grid-template-columns:repeat(2,1fr)}
   .xgrid.xbig a{padding:20px 18px;min-height:96px;justify-content:flex-end}
   .xgrid.xbig b{font-size:1.3rem;font-weight:800}
+  .xgrid.xbig.x3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:420px){ .xgrid.xbig.x3{gap:8px} .xgrid.xbig.x3 a{padding:16px 12px;min-height:88px} .xgrid.xbig.x3 b{font-size:1.08rem;line-height:1.15} .xgrid.xbig.x3 span{white-space:nowrap} }
   /* "Manufacturers" (Carter, 2026-10-05: not "Makers") is the long one: its
      card gets the extra width so the word fits on a phone. */
   .xgrid.xsmall{grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
@@ -80,24 +82,20 @@
            stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <span>Search coasters, parks, manufacturers, riders&hellip;</span>
     </button>
-    <!-- Parks and Coasters first and big, then the other ways in, smaller,
-         then people (Carter, 2026-10-02, from the critique: six equal cards
-         with nothing leading). -->
-    <div class="xgrid xbig">
+    <!-- Map, Near me and the Trip planner first and big, then Parks and
+         Coasters smaller (Carter, 2026-11-25: "top line is map / near me / trip
+         planner then second line is parks / coasters smaller than the top").
+         Manufacturers and Locations stay a search away, on the sitemap and in
+         the footer, and in every coaster's and park's own links. -->
+    <div class="xgrid xbig x3">
+      <a href="/map"><b>Map</b><span>Every park</span></a>
+      <a href="/parks?sort=near"><b>Near me</b><span>By distance</span></a>
+      <a href="/trip"><b>Trip planner</b><span>Plan a trip</span></a>
+    </div>
+    <div class="xgrid xsmall">
       <a href="/parks"><b>Parks</b><span id="x_parks">&nbsp;</span></a>
       <a href="/coasters"><b>Coasters</b><span id="x_coasters">&nbsp;</span></a>
     </div>
-    <!-- Map and Near me (Carter, 2026-10-31: "parks > coasters / map > near
-         me"). Manufacturers and Locations stay a search away, on the sitemap
-         and in the footer, and in every coaster's and park's own links. -->
-    <div class="xgrid xsmall">
-      <a href="/map"><b>Map</b><span>Every park</span></a>
-      <a href="/parks?sort=near"><b>Near me</b><span>Parks by distance</span></a>
-    </div>
-    <!-- Trip planner and Compare had tiles here too (2026-10-17) until Carter
-         thinned the page (2026-10-23: "too many buttons"). The trip planner is
-         reached from every park popup's "+ Add to trip" on the map (its "Plan a
-         trip" button went too, 2026-10-25); Compare from the button on every rider's profile. -->
   </div>
   <div class="sughead"><span class="eyebrow">Riders</span><a href="/users">All <span id="x_users">riders</span> &rarr;</a></div>
   <div id="sug_wrap" hidden>
