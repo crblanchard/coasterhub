@@ -362,7 +362,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     // viewer's own slug is dropped on load). Carter, 2026-10-17, sending one to Sean.
     var w=RIDERS.map(function(R){ return R.slug; });
     if(window.TRIP_QS==null) try { localStorage.setItem(STORE, JSON.stringify({ p:p, w:w })); } catch(e){}
-    var qs=[]; if(p.length) qs.push('p='+p.join(',')); if(w.length) qs.push('with='+w.map(encodeURIComponent).join(','));
+    // No ?with=you on an empty planner (Carter, 2026-11-26: it read like a filter).
+    var qs=[]; if(p.length) qs.push('p='+p.join(',')); if(w.length && (p.length || w.length>1)) qs.push('with='+w.map(encodeURIComponent).join(','));
     if(TRIPNAME) qs.push('name='+encodeURIComponent(TRIPNAME));
     TRIPQS=qs.join('&');
     // From a trip link: the short address stays until the trip is changed,
