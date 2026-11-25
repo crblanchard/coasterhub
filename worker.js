@@ -2102,6 +2102,13 @@ async function coasterPhotos(env, id, all, skipPick, max) {
 // at all (Carter, 2026-11-24: "no need to show on site at all without
 // sufficient info"; 222 removed the 40 that got in as Operating this way).
 // Its records stay in open_items/open_raw for when a date turns up.
+// Who may save a trip link: its maker and the riders on it (the with= list of
+// its address).
+function tripEditors(row) {
+  let w = [];
+  try { w = (new URL(row.url, "https://x").searchParams.get("with") || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean); } catch (e) {}
+  return [row.owner].concat(w).filter(Boolean);
+}
 // A source's coaster with no name, only a Wikidata id ("Q123456"), goes in as
 // "Unknown" (Carter, 2026-11-25), the name unnamed rides already use; a second
 // one at the same park is "Unknown (2)" and so on, since names are unique per park.
@@ -3174,7 +3181,8 @@ export default {
     const tm = path.match(/^\/trip\/([a-z0-9][a-z0-9-]{1,47})\/?$/i);
     if (tm) {
       const code = tm[1].toLowerCase();
-      const row = await env.DB.prepare("SELECT url, name FROM trip_links WHERE code = ?").bind(code).first().catch(() => null);
+      const row = await env.DB.prepare("SELECT url, name, owner FROM trip_links WHERE code = ?").bind(code).first()
+        .catch(() => env.DB.prepare("SELECT url, name FROM trip_links WHERE code = ?").bind(code).first().catch(() => null));
       if (!row) return Response.redirect(new URL("/trip", url).toString(), 302);
       // waitUntil: a write nobody awaits can be cut off when the response goes.
       const hit = env.DB.prepare("UPDATE trip_links SET hits = hits + 1 WHERE code = ?").bind(code).run().catch(() => {});
@@ -3193,7 +3201,7 @@ export default {
         if (page.ok) {
           const qs = new URL(full).search;
           let rw = new HTMLRewriter()
-            .on("head", { element(e) { e.prepend("<script>window.TRIP_QS=" + JSON.stringify(qs).replace(/</g, "\\u003c") + ";window.TRIP_CODE=" + JSON.stringify(code) + "</script>", { html: true }); } });
+            .on("head", { element(e) { e.prepend("<script>window.TRIP_QS=" + JSON.stringify(qs).replace(/</g, "\\u003c") + ";window.TRIP_CODE=" + JSON.stringify(code) + ";window.TRIP_EDITORS=" + JSON.stringify(tripEditors(row)).replace(/</g, "\\u003c") + "</script>", { html: true }); } });
           if (row.name) {
             const title = row.name + " trip plan";
             rw = rw.on("title", { element(e) { e.setInnerContent(title + " — Coaster Hub"); } })
@@ -3354,7 +3362,7 @@ export default {
         } catch (e) { return err(400, "not a link"); }
         if (!/^\/trip(\?|$)/.test(u) || u.length > 6000) return err(400, "only trip planner links");
         const name = String((b && b.name) || "").replace(/\s+/g, " ").trim().slice(0, 60);
-        await env.DB.prepare("CREATE TABLE IF NOT EXISTS trip_links (code TEXT PRIMARY KEY, url TEXT NOT NULL, name TEXT, created TEXT, hits INTEGER NOT NULL DEFAULT 0)").run();
+        await env.DB.prepare("CREATE TABLE IF NOT EXISTS trip_links (code TEXT PRIMARY KEY, url TEXT NOT NULL, name TEXT, created TEXT, hits INTEGER NOT NULL DEFAULT 0, owner TEXT)").run();
         const now = new Date().toISOString();
         // {code, url}: save an edited trip back to its link (Carter, 2026-11-25:
         // "edit then click save ... so you can keep the url and other people can
@@ -3363,8 +3371,14 @@ export default {
         const edit = String((b && b.code) || "").toLowerCase();
         if (edit) {
           if (!/^[a-z0-9][a-z0-9-]{1,47}$/.test(edit)) return err(400, "not a trip link");
-          const r = await env.DB.prepare("UPDATE trip_links SET url = ? WHERE code = ?").bind(u, edit).run();
-          if (!(r.meta && r.meta.changes)) return err(404, "no such trip link");
+          // Only the people on the trip may save it (Carter, 2026-11-26: "make it
+          // so anyone added to the trip can edit it"): whoever made the link and
+          // every rider on it (its with= list, which always includes its maker).
+          const row = await env.DB.prepare("SELECT url, owner FROM trip_links WHERE code = ?").bind(edit).first().catch(() => null);
+          if (!row) return err(404, "no such trip link");
+          if (!acct || !acct.slug) return err(401, "Sign in to save changes to this trip");
+          if (!tripEditors(row).includes(acct.slug)) return err(403, "Only people on this trip can save changes to it");
+          await env.DB.prepare("UPDATE trip_links SET url = ? WHERE code = ?").bind(u, edit).run();
           return json({ code: edit, short: url.origin + "/trip/" + edit, saved: true });
         }
         if (name) {
@@ -3372,7 +3386,7 @@ export default {
           if (code.length < 3) return err(400, "Give the trip a name of at least 3 letters or numbers");
           const had = await env.DB.prepare("SELECT url FROM trip_links WHERE code = ?").bind(code).first();
           if (had && had.url !== u) return err(409, "coasterhub.org/trip/" + code + " is already another trip. Try another name.");
-          if (!had) await env.DB.prepare("INSERT INTO trip_links (code, url, name, created) VALUES (?, ?, ?, ?)").bind(code, u, name, now).run();
+          if (!had) await env.DB.prepare("INSERT INTO trip_links (code, url, name, created, owner) VALUES (?, ?, ?, ?, ?)").bind(code, u, name, now, (acct && acct.slug) || null).run();
           else await env.DB.prepare("UPDATE trip_links SET name = ? WHERE code = ?").bind(name, code).run();
           return json({ code, short: url.origin + "/trip/" + code });
         }
@@ -3380,7 +3394,7 @@ export default {
         const A = "abcdefghijkmnpqrstuvwxyz23456789";
         for (let tries = 0; tries < 5 && !row; tries++) {
           const code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => A[n % A.length]).join("");
-          const r = await env.DB.prepare("INSERT OR IGNORE INTO trip_links (code, url, created) VALUES (?, ?, ?)").bind(code, u, now).run();
+          const r = await env.DB.prepare("INSERT OR IGNORE INTO trip_links (code, url, created, owner) VALUES (?, ?, ?, ?)").bind(code, u, now, (acct && acct.slug) || null).run();
           if (r.meta && r.meta.changes) row = { code };
         }
         if (!row) return err(500, "could not make a link");

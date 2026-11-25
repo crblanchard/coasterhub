@@ -275,7 +275,8 @@ function mi(n){ return n<10 ? n.toFixed(1) : Math.round(n).toLocaleString(); }
 // Opened from a trip link (/trip/<name>), the Worker hands the trip over as
 // window.TRIP_QS and the address stays short (Carter, 2026-11-25).
 var Q=new URLSearchParams(window.TRIP_QS!=null ? window.TRIP_QS : location.search);
-var TRIPQS='', TRIPBASE=null;
+var TRIPQS='', TRIPBASE=null, CANSAVE=null, ME_SLUG=null;
+if(window.TRIP_QS!=null) CoasterHub.me().then(function(a){ ME_SLUG=a&&a.slug||null; CANSAVE=!!(ME_SLUG && (window.TRIP_EDITORS||[]).indexOf(ME_SLUG)>=0); }).catch(function(){ CANSAVE=false; });
 // A named trip (coasterhub.org/trip/<name> lands here with ?name=): its title.
 var TRIPNAME=(Q.get('name')||'').trim().slice(0,60);
 function showName(){ var h=document.querySelector('.hero h1'), hp=document.getElementById('hero_p'); if(h && TRIPNAME){ h.textContent=TRIPNAME; document.title=TRIPNAME+' \u2014 Coaster Hub'; if(hp) hp.textContent='Edit trip plan below.'; } }
@@ -342,7 +343,15 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     // 2026-11-25). Riders load a moment later and are not an edit.
     if(window.TRIP_QS!=null){
       var pk=p.join(','); if(TRIPBASE===null) TRIPBASE=pk;
-      var bar=$('tsave'); if(bar) bar.hidden = pk===TRIPBASE;
+      var bar=$('tsave');
+      if(bar){
+        bar.hidden = pk===TRIPBASE;
+        // Only the people on the trip can save it (Carter, 2026-11-26); anyone
+        // else can still play with it and share it as a link of their own.
+        var can = CANSAVE!==false;
+        $('b_save').hidden=!can;
+        bar.querySelector('span').textContent = can ? 'You changed this trip.' : (CANSAVE===false && !ME_SLUG ? 'Sign in to save changes to this trip.' : 'Only people on this trip can save changes. Share trip to make a link of your own.');
+      }
       return;
     }
     history.replaceState(null,'','/trip'+(TRIPQS?'?'+TRIPQS:''));
