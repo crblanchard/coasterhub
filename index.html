@@ -677,7 +677,6 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
     .filter(function(x){ return x.pos && x.pos<=100 && !x.under && byId[x.id]; });
   for(var i=top.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=top[i]; top[i]=top[j]; top[j]=t; }
   var E=function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
-  var ord=function(n){ var v=n%100; return n+((v>=11&&v<=13)?'th':(['th','st','nd','rd'][n%10]||'th')); };
   (function tryAt(n){
     if(n>=Math.min(30, top.length)) return;   // no photo: on to the next one
     var x=top[n], c=byId[x.id];
@@ -695,11 +694,12 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
           +(chips.length?'<div class="chips">'+chips.map(function(t){ return '<span>'+E(t)+'</span>'; }).join('')+'</div>':'')+'</div>';
         // The line under it: its place in words, and you.
         var k=CoasterHub.rideKey(c), mine=Y && (Y.rides[x.id] || Y.rides[k]), myRank=Y && (Y.rank[x.id] || Y.rank[k]);
-        var line='The <b>'+ord(x.pos)+'</b> best coaster on Coaster Hub, on <b>'+(x.n||0)+'</b> riders&rsquo; lists.';
-        // "Ranked as your #12, 55 rides logged" / "Not on your count yet" (Carter, 2026-11-26).
-        if(Y) line += mine ? ' '+(myRank?'Ranked as your <b>#'+myRank+'</b>, ':'')+'<b>'+mine.n+'</b> ride'+(mine.n===1?'':'s')+' logged.'
-                           : ' Not on your count yet &middot; <a href="/log">Log it</a>';
-        document.getElementById('featyou').innerHTML=line;
+        // Only you: "Ranked as your #12, 55 rides logged" / "Not on your count yet"
+        // (Carter, 2026-11-26; its Coaster Hub place came off the same day).
+        var line='';
+        if(Y) line = mine ? (myRank?'Ranked as your <b>#'+myRank+'</b>, ':'')+'<b>'+mine.n+'</b> ride'+(mine.n===1?'':'s')+' logged.'
+                          : 'Not on your count yet &middot; <a href="/log">Log it</a>';
+        var fy=document.getElementById('featyou'); fy.innerHTML=line; fy.hidden=!line;
         document.getElementById('featwrap').hidden=false;
       };
       img.onerror=function(){ tryAt(n+1); };
