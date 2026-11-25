@@ -3045,7 +3045,9 @@ export default {
       const code = tm[1].toLowerCase();
       const row = await env.DB.prepare("SELECT url, name FROM trip_links WHERE code = ?").bind(code).first().catch(() => null);
       if (!row) return Response.redirect(new URL("/trip", url).toString(), 302);
-      env.DB.prepare("UPDATE trip_links SET hits = hits + 1 WHERE code = ?").bind(code).run().catch(() => {});
+      // waitUntil: a write nobody awaits can be cut off when the response goes.
+      const hit = env.DB.prepare("UPDATE trip_links SET hits = hits + 1 WHERE code = ?").bind(code).run().catch(() => {});
+      if (ctx && ctx.waitUntil) ctx.waitUntil(hit);
       const to = new URL(row.url, url).toString();
       const full = row.name ? to + (to.includes("?") ? "&" : "?") + "name=" + encodeURIComponent(row.name) : to;
       // A named trip is served right here rather than redirected, with its
