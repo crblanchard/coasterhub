@@ -92,6 +92,13 @@
   .act select.same-as{max-width:220px}
   .parkhead{margin:14px 0 2px;padding:10px 14px;border-left:3px solid var(--accent2);background:var(--well);border-radius:0 10px 10px 0}
   .parkhead b{display:block;font-size:.95rem}
+  .facts1{display:block;margin:3px 0 0;font-size:.82rem;color:var(--fg);font-variant-numeric:tabular-nums}
+  .facts1.none{color:var(--muted);font-style:italic}
+  .mdc .mdrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 4px}
+  .mdc .md-in{flex:1 1 220px;min-width:0;font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--well);color:var(--fg)}
+  .mdc .mdtag{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+  .mdc .mdtag.have{color:var(--accent2)}
+  .mdc .mdfrom{color:var(--muted);font-size:.8rem}
   .parkhead .parkall{float:right;margin:0 0 4px 10px;padding:6px 12px;border:1px solid var(--accent2);border-radius:999px;background:var(--panel);color:var(--accent2);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}
   .parkhead .parkall:hover{background:var(--accent2);color:#fff}
   .parkhead small{color:var(--muted);font-size:.8rem;line-height:1.7}
@@ -238,6 +245,11 @@ const TABS = {
   newParks: { t: 'New parks', h: 'Parks the sources have that the site doesn&rsquo;t',
     p: 'Each with its coasters from Coasterpedia and Wikipedia. Check the name, region and pin (fix any of them right on the card) and which coasters to bring in. Then add one park, or tick several and add them all. Parks are ticked by default only when they have a pin, a region and an English name that isn&rsquo;t already a park here. Nothing goes up until you press Add.',
     f: [['', 'All, pinned first'], ['ready', 'Ready: pin, region and name'], ['pin', 'Has a map pin'], ['nopin', 'No map pin yet'], ['multi', 'Three or more coasters']] },
+  // Models for coasters with none (Carter, 2026-11-25): from a source, put in
+  // the site's form, or estimated from a twin's stats. Edit the box to change it.
+  models: { t: 'Models', h: 'Coasters with no model',
+    p: 'A model for each, from the sources (Coasterpedia&rsquo;s product, Wikipedia&rsquo;s model) written the site&rsquo;s way with the maker in front, or estimated from a coaster by the same maker with the same height and length. &ldquo;On the site&rdquo; means it matches a model you already have; &ldquo;new&rdquo; would start one. Edit the box before using it if the name is off; Skip leaves the coaster without a model and it won&rsquo;t come back.',
+    f: [['', 'All'], ['have', 'Matches a model on the site'], ['new', 'Would be a new model'], ['est', 'Estimates from stats'], ['open', 'Operating only']] },
   nosource: { t: 'Needs a source', h: 'Coasters still missing stats',
     p: 'Stats that are blank and no open source has. Most-ridden first. Add them to Coasterpedia or Wikidata, citing a park page or news article (not RCDB), and they arrive here on the next Monday refresh.',
     f: [['ridden', 'Ridden by someone here'], ['', 'All'], ['nolink', 'No open source at all']] },
@@ -376,6 +388,8 @@ function rows() {
     .filter(x => f === 'ready' ? parkReady(x) : f === 'pin' ? x.lat != null : f === 'nopin' ? x.lat == null : f === 'multi' ? x.coasters.length >= 3 : true)
     // Pinned parks first, always (Carter, 2026-11-24); the rest wait below a break.
     .map((x, i) => [x, i]).sort((a, b) => ((a[0].lat == null) - (b[0].lat == null)) || a[1] - b[1]).map(a => a[0]);
+  if (tab === 'models') return (D.models || []).filter(x => !q || ((x.name || '') + ' ' + (x.park || '') + ' ' + (x.manu || '') + ' ' + (x.suggest || '')).toLowerCase().includes(q))
+    .filter(x => f === 'have' ? x.existing : f === 'new' ? !x.existing : f === 'est' ? /^Estimate/.test(x.from || '') : f === 'open' ? !x.closed : true);
   return D.nosource.filter(has).filter(x => f === 'ridden' ? x.riders > 0 : f === 'nolink' ? !x.sources.length : true);
 }
 function render() {
@@ -386,8 +400,8 @@ function render() {
   // (Carter, 2026-11-24).
   if (!LIST.length && $('filt').value && $('q').value.trim() === '' && TABS[tab].f.some(o => o[0] === '')) { $('filt').value = ''; LIST = rows(); }
   const f = $('filt').value;
-  $('bulk').hidden = !((tab === 'gaps' || tab === 'adds' || tab === 'newParks' || (tab === 'matches' && f !== 'done')) && LIST.length);
-  $('bulk').textContent = tab === 'gaps' ? 'Use all ' + fmt(LIST.length) + ' shown' : tab === 'adds' ? 'Add all ticked (' + fmt(LIST.filter(ticked).length) + ')'
+  $('bulk').hidden = !((tab === 'gaps' || tab === 'adds' || tab === 'newParks' || tab === 'models' || (tab === 'matches' && f !== 'done')) && LIST.length);
+  $('bulk').textContent = tab === 'gaps' || tab === 'models' ? 'Use all ' + fmt(LIST.length) + ' shown' : tab === 'adds' ? 'Add all ticked (' + fmt(LIST.filter(ticked).length) + ')'
     : tab === 'newParks' ? 'Add all ticked parks (' + fmt(LIST.filter(parkTicked).length) + ')'
     : 'Link all near-certain (' + fmt(D.matches.filter(sure).length) + ')';
   $('copy').hidden = tab !== 'nosource';
@@ -403,7 +417,25 @@ const coaster = r => '<a href="' + esc(CoasterHub.coasterHref(r.name, r.park)) +
 const btn = (label, data, cls) => '<button class="' + (cls || '') + '" ' + Object.entries(data).map(([k, v]) => 'data-' + k + '="' + esc(typeof v === 'object' ? JSON.stringify(v) : v) + '"').join(' ') + '>' + label + '</button>';
 const srcTag = s => '<span class="src">' + (SRC[s] || s) + '</span>';
 
+// The sources' stats in one line: "Steel · Vekoma Boomerang · 116 ft · 47 mph
+// · 935 ft · 3 inversions · 1984–2016" (Carter, 2026-11-25: to tell whether a
+// ride is real).
+const factLine = f => {
+  if (!f) return '';
+  const n = (v, u) => v != null && v !== '' && !isNaN(+v) && +v ? Math.round(+v).toLocaleString() + ' ' + u : '';
+  const y = v => v ? String(v).slice(0, 4) : '';
+  const yrs = f.opened || f.closed ? (y(f.opened) || '?') + (f.closed ? '\u2013' + y(f.closed) : '') : '';
+  const parts = [f.type, f.model || f.manu, n(f.h, 'ft'), n(f.s, 'mph'), n(f.l, 'ft'), f.inv != null && f.inv !== '' && !isNaN(+f.inv) ? (+f.inv) + ' inversion' + (+f.inv === 1 ? '' : 's') : '', yrs].filter(Boolean);
+  return parts.length ? '<span class="facts1">' + parts.map(esc).join(' &middot; ') + '</span>' : '<span class="facts1 none">No stats in the sources</span>';
+};
+const MEDIT = {};   // model boxes edited while the page is open
 const VIEW = {
+  models: list => '<div class="cards">' + list.map(x => '<div class="card mdc" data-id="' + x.id + '"><div class="one">'
+    + '<a href="' + esc(CoasterHub.coasterHref(x.name, x.park)) + '" target="_blank"><b>' + esc(x.name) + '</b></a> <small>' + esc(x.park) + (x.manu ? ' &middot; ' + esc(x.manu) : '') + (x.closed ? ' &middot; closed' : '') + '</small></div>'
+    + '<div class="mdrow"><input class="md-in" type="text" maxlength="80" value="' + esc(MEDIT[x.id] != null ? MEDIT[x.id] : x.suggest) + '">'
+    + '<span class="mdtag' + (x.existing ? ' have' : '') + '">' + (x.existing ? 'On the site' : 'New') + '</span>'
+    + '<button type="button" class="btn sm" data-muse>Use</button><button type="button" class="ghost sm" data-mskip>Skip</button></div>'
+    + '<small class="mdfrom">' + esc(x.from || '') + '</small></div>').join('') + '</div>',
   gaps: list => '<div class="tbl-wrap"><table class="mm"><thead><tr><th>Coaster</th><th>Source says</th><th></th></tr></thead><tbody>' + list.map(g =>
     '<tr><td class="nm"><span class="fld">' + NAMES[g.field] + '</span>' + coaster(g) + '</td><td>' + val(g.field, g.value) + ' ' + srcTag(g.source) + '</td><td class="todo">'
     + btn('Use', { a: 'value', id: g.id, f: g.field, s: g.source }, 'small yes') + btn('Skip', { a: 'skip', id: g.id, f: g.field, s: g.source, v: g.value }, 'small') + '</td></tr>').join('') + '</tbody></table></div>',
@@ -426,6 +458,7 @@ const VIEW = {
       + '<label class="tick"><input type="checkbox" class="add-tick"' + (ticked(a) ? ' checked' : '') + '> <b>' + esc(RENAME[akey(a)] || a.name) + '</b></label>'
       + (latin(a.name) ? '' : ' <span class="chip bad">not in English</span> <input class="add-rename" placeholder="English name" value="' + esc(RENAME[akey(a)] || '') + '">')
       + '<small>' + esc(a.park) + (a.fair ? ' · travelling fair' : '') + (a.status ? ' · ' + esc(a.status) : '') + '</small>'
+      + factLine(a.facts)
       + '<div class="why">' + a.refs.filter(r => LINK[r.source]).map(r => '<a class="go" href="' + LINK[r.source](r.ref) + '" target="_blank" rel="noopener">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ')
       + (a.refs.every(r => r.source === 'osm') ? ' · <span class="bad">only in OpenStreetMap, which sometimes labels water rides and play equipment as coasters</span>' : '') + '</div></div>'
       + '<div class="act">' + btn('Add to the site', { a: 'add', park: a.park, name: RENAME[akey(a)] || a.name, refs: a.refs.map(r => ({ source: r.source, ref: r.ref })) }, 'yes')
@@ -442,7 +475,7 @@ const VIEW = {
       + (p.lat != null ? '<a class="go" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=' + p.lat + '&mlon=' + p.lon + '#map=15/' + p.lat + '/' + p.lon + '">check the pin ↗</a>' : '<span class="chip bad">no pin yet</span>')
       + (p.taken ? ' <span class="chip bad">a park with this name is already on the site: rename it</span>' : '') + '</div>'
       + '<div class="npc">' + p.coasters.map((c, j) => '<label class="npl"><input type="checkbox" data-j="' + j + '"' + ((CUNTICK[p.k] && j in CUNTICK[p.k] ? !CUNTICK[p.k][j] : alive(c)) ? ' checked' : '') + '> <b>' + esc(c.name) + '</b>'
-        + '<small>' + esc(c.status || 'status unknown') + ' · ' + c.refs.filter(r => LINK[r.source]).map(r => '<a class="go" target="_blank" rel="noopener" href="' + LINK[r.source](r.ref) + '">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ') + '</small></label>').join('') + '</div>'
+        + factLine(c.facts) + '<small>' + esc(c.status || 'status unknown') + ' · ' + c.refs.filter(r => LINK[r.source]).map(r => '<a class="go" target="_blank" rel="noopener" href="' + LINK[r.source](r.ref) + '">' + (SRC[r.source] || r.source) + ' ↗</a>').join(' · ') + '</small></label>').join('') + '</div>'
       + '<div class="act">' + btn('Add park + ticked coasters', { np: 'add', i: i }, 'yes') + btn('Leave out', { np: 'no', i: i }, 'no') + '</div>'
       + '<div class="np-into"><span class="lab">Or it&rsquo;s a park already on the site:</span>'
       + '<input class="np-target" list="parks-dl" placeholder="Search parks on the site…" value="' + esc(INTO[p.k] || '') + '">'
@@ -513,6 +546,25 @@ document.addEventListener('change', e => {
   if (e.target.classList.contains('add-rename')) { const v = e.target.value.trim(); if (v) { RENAME[k] = v; TICK.add(k); UNTICK.delete(k); } else delete RENAME[k]; render(); return; }
   $('bulk').textContent = 'Add all ticked (' + fmt(LIST.filter(ticked).length) + ')';
 });
+// Models: Use / Skip one, or Use all shown (each box as it reads now).
+document.addEventListener('input', e => { if (e.target.classList.contains('md-in')) MEDIT[e.target.closest('.mdc').dataset.id] = e.target.value; });
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-muse],[data-mskip]'); if (!b) return;
+  const card = b.closest('.mdc'), id = +card.dataset.id, m = card.querySelector('.md-in').value.trim();
+  if (b.hasAttribute('data-muse') && !m) return;
+  b.disabled = true;
+  post('/api/cutover/apply', b.hasAttribute('data-muse') ? { kind: 'model', id, model: m } : { kind: 'nomodel', id })
+    .then(() => { D.models = D.models.filter(x => x.id !== id); D.counts.models = D.models.length; render(); })
+    .catch(err => { b.disabled = false; alert('Could not save: ' + err); });
+});
+async function bulkModels() {
+  const list = LIST.map(x => ({ kind: 'model', id: x.id, model: String(MEDIT[x.id] != null ? MEDIT[x.id] : x.suggest).trim() })).filter(x => x.model);
+  if (!list.length || !confirm('Set the model on ' + list.length + ' coasters as shown?')) return;
+  const b = $('bulk'); b.disabled = true;
+  try { for (let i = 0; i < list.length; i += 100) { b.textContent = 'Saving… ' + Math.min(i + 100, list.length) + ' / ' + list.length; await post('/api/cutover/apply', { many: list.slice(i, i + 100) }); } }
+  catch (err) { alert('Stopped: ' + err + '. The ones before it were saved.'); }
+  b.disabled = false; D = await load(); render();
+}
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-parkall]'); if (!b) return;
   const park = b.getAttribute('data-parkall');
@@ -580,6 +632,7 @@ async function bulkParks() {
 function bulk() {
   if (tab === 'newParks') return bulkParks();
   if (tab === 'adds') return bulkAdd();
+  if (tab === 'models') return bulkModels();
   if (tab === 'gaps') {
     if (!confirm('Fill all ' + LIST.length + ' shown values on the live site?')) return;
     return after(post('/api/cutover/apply', { many: LIST.map(g => ({ kind: 'value', id: g.id, field: g.field, source: g.source })) }), $('bulk'));

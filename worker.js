@@ -1698,10 +1698,92 @@ async function getPostLaunch(env) {
   const newParks = (await q("SELECT k, park, lat, lon, region, coasters FROM open_new_parks")).filter(p => !parkDone.has(p.k))
     .map(p => ({ ...p, taken: parkNames.has(p.park.toLowerCase()) ? 1 : 0, coasters: JSON.parse(p.coasters || "[]")
       .map(c => ({ ...c, refs: c.refs.map(r => ({ ...r, name: item.get(r.source + "|" + r.ref) || null })) })) }));
-  return { fields: OPEN_FIELDS, gaps, changed, matches: cut.changes, decided: cut.decided, adds: addList, nosource, newParks,
+  // OpenStreetMap alone never brings a coaster or park in (Carter, 2026-11-25:
+  // "so variable. only use it to add stats to coasters added via other means"):
+  // a coaster only OSM knows is left off; with another source, OSM's stats still ride along.
+  const notOsmOnly = refs => (refs || []).some(r => r.source !== "osm");
+  // What the sources say about each one (maker, type, height ...), so a ride
+  // nobody has heard of can be judged at a glance (Carter, 2026-11-25). The
+  // first source in OPEN_SOURCE_ORDER with a value wins.
+  const rf = await q("SELECT source, ref, field, value FROM open_record_facts WHERE value IS NOT NULL AND value <> '' AND field IN ('manu','model','type','h','s','l','inv','opened','closed')");
+  const factBy = new Map();
+  for (const f of rf) { const k = f.source + "|" + f.ref; if (!factBy.has(k)) factBy.set(k, {}); factBy.get(k)[f.field] = f.value; }
+  const factsOf = refs => {
+    const o = {};
+    for (const r of (refs || []).slice().sort((a, b) => (OPEN_SOURCE_ORDER[a.source] ?? 9) - (OPEN_SOURCE_ORDER[b.source] ?? 9))) {
+      const f = factBy.get(r.source + "|" + r.ref) || {};
+      for (const k in f) if (o[k] == null) o[k] = f[k];
+    }
+    return o;
+  };
+  const adds2 = addList.filter(a => notOsmOnly(a.refs)).map(a => ({ ...a, facts: factsOf(a.refs) }));
+  const parks2 = newParks.map(p => ({ ...p, coasters: p.coasters.filter(c => notOsmOnly(c.refs)).map(c => ({ ...c, facts: factsOf(c.refs) })) })).filter(p => p.coasters.length);
+  const models = await getModelSuggestions(env, cs, linked).catch(() => []);
+  return { fields: OPEN_FIELDS, gaps, changed, matches: cut.changes, decided: cut.decided, adds: adds2, nosource, newParks: parks2, models,
            counts: { gaps: gaps.length, changed: changed.length, matches: cut.changes.length,
                      // Every one still to decide, closed ones too (Carter, 2026-11-25).
-                     adds: addList.length, newParks: newParks.length, nosource: nosource.length } };
+                     adds: adds2.length, newParks: parks2.length, nosource: nosource.length, models: models.length } };
+}
+
+// Models to suggest (Carter, 2026-11-25: "what other coasters don't have
+// models assigned that you can locate, or at least estimate? ... a review
+// setup for them"). For each coaster with no model: the model a source names
+// (Coasterpedia's product, English Wikipedia's model, German Wikipedia's
+// Modell), put in the site's form — the maker's prefix in front, as every
+// model reads since 230 ("Cyclon Coaster" -> "SBF Visa Cyclon Coaster") —
+// and matched to a model already on the site where one fits; else, an
+// estimate: the model of a coaster by the same maker with the same height and
+// length (within 1.5 ft / 2%). Decided ones (open_reviews kind 'model') stay gone.
+async function getModelSuggestions(env, cs, linked) {
+  const q = (sql) => env.DB.prepare(sql).all().then(r => r.results || []).catch(() => []);
+  const [raw, done] = await Promise.all([
+    q("SELECT r.source, r.ref, r.v FROM open_raw r WHERE (r.source = 'coasterpedia' AND r.k = 'product') OR (r.source = 'enwiki' AND r.k = 'model') OR (r.source = 'dewiki' AND r.k = 'modell')"),
+    q("SELECT ref FROM open_reviews WHERE kind = 'model'"),
+  ]);
+  const skip = new Set(done.map(d => String(d.ref)));
+  const said = new Map(raw.map(r => [r.source + "|" + r.ref, r.v]));
+  const norm = s => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  // Each maker's models, and the prefix its models share ("B&M", "SBF Visa").
+  const byMaker = new Map();
+  for (const c of cs) if (c.manu && c.model) { const m = byMaker.get(c.manu) || new Map(); m.set(c.model, (m.get(c.model) || 0) + 1); byMaker.set(c.manu, m); }
+  const prefixOf = (manu) => {
+    const ms = [...((byMaker.get(manu) || new Map()).keys())];
+    if (!ms.length) return manu;
+    const count = new Map();
+    for (const m of ms) { const w = m.split(" "); for (let k = 1; k <= Math.min(3, w.length - 1); k++) { const p = w.slice(0, k).join(" "); count.set(p, (count.get(p) || 0) + 1); } }
+    let best = null, bestN = 0;
+    for (const [p, n] of count) if (n >= ms.length / 2 && (n > bestN || (n === bestN && p.length > best.length))) { best = p; bestN = n; }
+    return best || manu;
+  };
+  const prefixes = new Map();
+  const out = [];
+  for (const c of cs) {
+    if (c.model || skip.has(String(c.id))) continue;
+    const L = linked.get(c.id) || {};
+    let from = null, val = null;
+    for (const [src, label] of [["coasterpedia", "Coasterpedia product"], ["enwiki", "Wikipedia model"], ["dewiki", "German Wikipedia model"]]) {
+      for (const ref of (Array.isArray(L[src]) ? L[src] : L[src] ? [L[src]] : [])) {
+        const v = said.get(src + "|" + ref);
+        if (v && String(v).trim() && !/^(custom|unknown|n\/a|-)$/i.test(String(v).trim())) { val = String(v).replace(/\s+/g, " ").trim().slice(0, 80); from = label + ' "' + val + '"'; break; }
+      }
+      if (val) break;
+    }
+    let suggest = null, existing = false;
+    if (val) {
+      const models = [...((byMaker.get(c.manu) || new Map()).keys())];
+      const pre = c.manu ? (prefixes.get(c.manu) || prefixes.set(c.manu, prefixOf(c.manu)).get(c.manu)) : "";
+      const want = norm(val), wantP = norm(pre + " " + val);
+      const hit = models.find(m => norm(m) === wantP || norm(m) === want) || models.find(m => norm(m).endsWith(" " + want));
+      if (hit) { suggest = hit; existing = true; }
+      else suggest = (pre && !norm(val).startsWith(norm(pre)) ? pre + " " : "") + val;
+    } else if (c.manu && c.h && c.l) {
+      const twin = cs.find(o => o.id !== c.id && o.manu === c.manu && o.model && o.h && o.l && Math.abs(o.h - c.h) <= 1.5 && Math.abs(o.l - c.l) <= c.l * 0.02);
+      if (twin) { suggest = twin.model; existing = true; from = "Estimate: same height and length as " + twin.name + " (" + twin.park + ")"; }
+    }
+    if (suggest) out.push({ id: c.id, name: c.name, park: c.park, manu: c.manu || null, suggest, existing: existing ? 1 : 0, from, closed: c.closed || null });
+  }
+  out.sort((a, b) => (a.manu || "~").localeCompare(b.manu || "~") || a.suggest.localeCompare(b.suggest) || a.name.localeCompare(b.name));
+  return out;
 }
 
 // /sources (2026-11-19): where every stat on the site comes from, live.
@@ -1777,6 +1859,18 @@ async function applyPostLaunch(env, acct, b, ctx, request) {
       }
       await env.DB.prepare("INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES ('add', ?, ?, 0, ?, ?, ?, ?)")
         .bind(refs[0].source, refs[0].ref, x.kind === "add" ? "approve" : "reject", (x.name || "") + " @ " + (x.park || ""), by, new Date().toISOString()).run();
+    } else if (x.kind === "model" || x.kind === "nomodel") {
+      // A model suggestion (getModelSuggestions): use it (as typed, if Carter
+      // edited it) or leave the coaster without one. Only fills a blank model.
+      if (!id) return err(400, "id required");
+      const m = String(x.model || "").replace(/\s+/g, " ").trim().slice(0, 80);
+      if (x.kind === "model") {
+        if (!m) return err(400, "model required");
+        await env.DB.prepare("UPDATE coasters SET model = ? WHERE id = ? AND (model IS NULL OR model = '')").bind(m, id).run();
+        out.push({ id, model: m });
+      }
+      await env.DB.prepare("INSERT OR REPLACE INTO open_reviews (kind, source, ref, coaster_id, decision, note, by, at) VALUES ('model', '', ?, ?, ?, ?, ?, ?)")
+        .bind(String(id), id, x.kind === "model" ? "approve" : "reject", m || null, by, new Date().toISOString()).run();
     } else if (x.kind === "addpark" || x.kind === "noaddpark") {
       // A park not on the site, checked by Carter first: its name, region and
       // coordinates as he leaves them on the card, and the coasters he ticked.
