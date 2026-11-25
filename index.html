@@ -688,7 +688,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
         var el=document.getElementById('featc');
         el.href=CoasterHub.coasterHref(c);
         el.style.backgroundImage='url("'+u.replace(/"/g,'%22')+'")';
-        var chips=[c.h?Math.round(c.h)+' ft':'', c.s?Math.round(c.s)+' mph':'', c.inv!=null&&c.inv!==''?c.inv+' inversion'+(+c.inv===1?'':'s'):'', CoasterHub.maker(c)||'', (c.opened||c.yr)?'Since '+String(c.opened||c.yr).slice(0,4):''].filter(Boolean);
+        var chips=[c.h?Math.round(c.h)+' ft':'', c.s?Math.round(c.s)+' mph':'', c.inv!=null&&c.inv!==''?c.inv+' inversion'+(+c.inv===1?'':'s'):'', CoasterHub.maker(c)||'', (c.opened||c.yr)?'Opened '+String(c.opened||c.yr).slice(0,4):''].filter(Boolean);
         el.innerHTML='<span class="rk '+(c.type==='Wood'?'wd':'st')+'"><i>#</i>'+x.pos+'</span>'
           +'<div class="ov"><span class="kick">Featured coaster</span><b>'+E(c.name)+'</b><span class="pk">'+E(c.park)+'</span>'
           +(chips.length?'<div class="chips">'+chips.map(function(t){ return '<span>'+E(t)+'</span>'; }).join('')+'</div>':'')+'</div>';
@@ -698,7 +698,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
         // (Carter, 2026-11-26; its Coaster Hub place came off the same day).
         var line='';
         if(Y) line = mine ? (myRank?'Ranked as your <b>#'+myRank+'</b>, ':'')+'<b>'+mine.n+'</b> ride'+(mine.n===1?'':'s')+' logged.'
-                          : 'Not on your count yet &middot; <a href="/log">Log it</a>';
+                          : 'Not on your count yet.';
         var fy=document.getElementById('featyou'); fy.innerHTML=line; fy.hidden=!line;
         document.getElementById('featwrap').hidden=false;
       };
