@@ -248,11 +248,11 @@
     <div class="riders" id="riders" hidden></div>
     <div id="tmap" role="application" aria-label="Map of the trip"></div>
     <p class="maphint" id="maphint">Tap a park on the map to add it. Yellow parks have new credits.</p>
-    <div class="after" id="after" hidden></div>
-    <div id="stopwrap"></div>
+    <!-- The trip's buttons and Save under the map, not at the foot of the stops
+         where they went unseen (Carter, 2026-11-26: "can't find the button to save"). -->
     <div class="tacts" id="tacts" hidden>
       <button type="button" class="tbtn" id="b_order">Shortest order</button>
-      <button type="button" class="tbtn" id="b_share">Share trip</button>
+      <button type="button" class="btn" id="b_share">Save trip</button>
       <button type="button" class="tbtn" id="b_clear">Clear</button>
       <span class="toast" id="toast"></span>
     </div>
@@ -263,11 +263,13 @@
       <button type="button" class="btn" id="b_save">Save changes</button>
       <button type="button" class="tbtn" id="b_undo">Undo</button></div>
     <div class="tshare" id="tshare" hidden>
-      <label for="tname">Name this trip <span>(optional)</span></label>
+      <label for="tname">Name this trip</label>
       <div class="trow"><input id="tname" type="text" maxlength="60" placeholder="Ohio run" autocomplete="off">
         <button type="button" class="btn" id="b_link">Get link</button></div>
       <p class="tprev" id="tprev"></p>
     </div>
+    <div class="after" id="after" hidden></div>
+    <div id="stopwrap"></div>
     <div id="triplist"></div>
     <div id="near_wrap" hidden>
       <div class="sect" id="near_h">Worth adding nearby</div>
@@ -461,6 +463,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
         +'<ol class="tl" id="tl">'+STOPS.map(stopHtml).join('')+'</ol>';
     }
     $('tacts').hidden=!STOPS.length;
+    // Starting a new trip: Open a trip steps aside, back when the trip is cleared.
+    window.TRIP_NSTOPS=STOPS.length;
+    var aw=$('alltrips_wrap'); if(aw && aw.dataset.ok && !window.TRIP_CODE) aw.hidden=!!STOPS.length;
     $('b_order').disabled=STOPS.length<3;
   }
 
@@ -687,8 +692,10 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
   var slugOf=function(n){ return String(n||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48); };
   function preview(){
     var sl=slugOf($('tname').value);
-    $('tprev').innerHTML = sl.length>=3 ? 'coasterhub.org/trip/<b>'+esc(sl)+'</b>' : 'Leave it blank for a short code, or name it for a link of your own.';
+    $('tprev').innerHTML = sl.length>=3 ? 'coasterhub.org/trip/<b>'+esc(sl)+'</b>' : (window.TRIP_CODE ? 'Leave it blank for a short code, or name it for a link of your own.' : 'Its name becomes its link, and it shows under Open a trip.');
   }
+  // A saved trip shares its own link; a new one is saved (named) first.
+  if(window.TRIP_CODE) $('b_share').textContent='Share trip'; else $('b_link').textContent='Save';
   $('b_share').onclick=function(){
     var box=$('tshare'); box.hidden=!box.hidden;
     if(!box.hidden){ $('tname').value=$('tname').value||TRIPNAME||''; preview(); $('tname').focus(); }
@@ -711,6 +718,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     fetch('/api/trip-link',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:'/trip'+(TRIPQS?'?'+TRIPQS:''),name:name})})
       .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||'Could not make a link'); return j; }); })
       .then(function(j){
+        // A new trip, once saved, opens as the saved trip at its own address,
+        // and your draft is cleared so the planner starts blank next time.
+        if(window.TRIP_CODE==null && name){ try { localStorage.removeItem(STORE); } catch(e){} location.href='/trip/'+encodeURIComponent(j.code); return; }
         if(name){ TRIPNAME=name; showName(); save(); }
         var url=j.short, bare=url.replace(/^https?:\/\//,'');
         $('tprev').innerHTML='<a href="'+esc(url)+'">'+esc(bare)+'</a> &middot; copied';
@@ -833,7 +843,8 @@ function allTrips(){
     $('tq').oninput=draw;
     $('b_atall').onclick=function(){ ALL=true; draw(); };
     draw();
-    wrap.hidden=false;
+    wrap.dataset.ok='1';
+    wrap.hidden=!onTrip && !!window.TRIP_NSTOPS;
   }).catch(function(){});
 }
 </script>

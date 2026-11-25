@@ -3400,7 +3400,10 @@ export default {
           if (!row) return err(404, "no such trip link");
           if (!acct || !acct.slug) return err(401, "Sign in to save changes to this trip");
           if (!tripEditors(row).includes(acct.slug)) return err(403, "Only people on this trip can save changes to it");
-          await env.DB.prepare("UPDATE trip_links SET url = ? WHERE code = ?").bind(u, edit).run();
+          // updated: for Open a trip's last-edited-first order (252); before
+          // that migration has run, the save still goes through without it.
+          await env.DB.prepare("UPDATE trip_links SET url = ?, updated = ? WHERE code = ?").bind(u, now, edit).run()
+            .catch(() => env.DB.prepare("UPDATE trip_links SET url = ? WHERE code = ?").bind(u, edit).run());
           return json({ code: edit, short: url.origin + "/trip/" + edit, saved: true });
         }
         if (name) {
@@ -3427,7 +3430,11 @@ export default {
       // first; an unnamed link is somebody's scratch pad, not a trip.
       if (request.method === "GET" && path === "/api/trips") {
         try {
-          const rows = (await env.DB.prepare("SELECT code, url, name, created, hits, owner FROM trip_links WHERE name IS NOT NULL AND name != '' ORDER BY created DESC LIMIT 200").all()).results || [];
+          // Last edited first (Carter, 2026-11-26), a trip never edited by when
+          // it was made; by when it was made alone until 252 has run.
+          const q = "SELECT code, url, name, created, hits, owner FROM trip_links WHERE name IS NOT NULL AND name != '' ORDER BY ";
+          const rows = ((await env.DB.prepare(q + "COALESCE(updated, created) DESC LIMIT 200").all()
+            .catch(() => env.DB.prepare(q + "created DESC LIMIT 200").all())).results) || [];
           return json({ trips: rows.map(r => {
             let parks = [];
             try { parks = (new URL(r.url, "https://x").searchParams.get("p") || "").split(",").filter(Boolean); } catch (e) {}
