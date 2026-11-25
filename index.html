@@ -299,7 +299,6 @@
   .featc .ov small{display:block;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.72rem;opacity:.9}
   .featc .ov b{display:block;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:clamp(1.5rem,4vw,2.4rem);line-height:1.05;letter-spacing:-.02em;margin:4px 0}
   .featc .ov span{font-size:.92rem;opacity:.92}
-  .featc .cr{position:absolute;top:10px;right:12px;font-size:.66rem;opacity:.75;max-width:60%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 </style>
 </head>
 <body>
@@ -677,7 +676,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally()]).then(functio
         var el=document.getElementById('featc');
         el.href=CoasterHub.coasterHref(c);
         el.style.backgroundImage='url("'+u.replace(/"/g,'%22')+'")';
-        el.innerHTML='<span class="cr">'+E(String(p.author||'').slice(0,60))+'</span><div class="ov"><small>Featured &middot; Global #'+x.pos+'</small><b>'+E(c.name)+'</b><span>'+E(c.park)+' &middot; score '+CoasterHub.scoreText(x.score)+'</span></div>';
+        // No credit on the picture (Carter, 2026-11-26): it opens the coaster,
+        // whose photo carries the full credit.
+        el.innerHTML='<div class="ov"><small>Featured &middot; Global #'+x.pos+'</small><b>'+E(c.name)+'</b><span>'+E(c.park)+' &middot; score '+CoasterHub.scoreText(x.score)+'</span></div>';
         el.hidden=false;
       };
       img.onerror=function(){ tryAt(n+1); };
