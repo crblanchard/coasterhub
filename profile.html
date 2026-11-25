@@ -334,6 +334,12 @@
   .hero .profedit .blocknote{margin:10px 0 0;font-size:.92rem;color:var(--muted)}
   .hero .blocknote .linkbtn{font-family:inherit;font-size:inherit;font-weight:600;color:var(--accent2);background-color:transparent;border-style:none;padding:0;cursor:pointer}
   @media (max-width:680px){ .badgerow{margin-bottom:14px} }
+  /* Finger-sized (44px) header buttons, each in its own soft tile (Carter,
+     2026-11-25, from the mock: "finger-sized are good"). */
+  .badgerow .sharebtn,.badgerow .morebtn2{min-width:44px;min-height:44px;border:1px solid var(--line);border-style:solid;border-radius:12px;background-color:var(--panel);color:var(--fg)}
+  .badgerow .sharebtn:hover,.badgerow .morebtn2:hover{border-color:var(--accent2)}
+  .badgerow .acctmenu summary{min-height:44px;display:inline-flex;align-items:center}
+  .hero .badgerow .riderbadge .badge{min-height:44px;padding:0 18px;font-size:.9rem}
   /* A phone: Account at the far right, its menu opening leftwards. */
   @media (max-width:640px){
     .badgerow{justify-content:space-between}

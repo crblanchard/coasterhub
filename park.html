@@ -43,6 +43,10 @@
   .joinline a{color:var(--accent2);font-weight:600;text-decoration:none}
   .cxmore .former{color:var(--muted);font-size:.84rem;margin:0 0 10px}
   .cxmore .former b{color:var(--fg)}
+  #parkphotos{margin:18px 0 6px}
+  #parkphotos .pgal.pkgal{max-width:none;margin:0}
+  #parkphotos .pgal.pkgal .pgtrack{border-radius:14px;aspect-ratio:16/9}
+  #parkphotos .pgfoot{justify-content:space-between}
   .crumbs a.crumbmap{margin-left:14px;color:var(--accent2);font-weight:600}
   .crumbs a.crumbmap:hover{text-decoration:underline}
   .cxmore .lbl{color:var(--muted);font-size:.8rem;font-weight:700;margin:0 0 6px}
@@ -91,6 +95,9 @@
     <p id="you" hidden></p>
     <div class="tiles row3" id="tiles"></div>
     <p class="joinline" id="joinpk" hidden>Keep your own count of this park &mdash; <a href="/account?tab=up">Start your count &rarr;</a></p>
+    <!-- The park's photos, to swipe through (Carter, 2026-11-25), between the
+         stats and the coasters. Filled once they load; nothing shows without. -->
+    <div id="parkphotos" hidden></div>
     <div class="sect" id="list_h">Coasters</div>
     <div class="panel" id="list"></div>
     <!-- Rankings, as every database page has them (critique, 2026-10-02). -->
@@ -170,6 +177,12 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   // operator · Germany" for a fair with no fixed place.
   CoasterHub.kindLine($('hero_sub'), CoasterHub.traveling(parks[PARK]) ? 'Fair operator' : 'Park', meta.region||null, meta.region ? CoasterHub.locationHref(meta.region) : null);
   CoasterHub.crumbs($('crumb'), CoasterHub.placeTrail(meta.region).concat([[PARK]]));
+  fetch('/api/park-photos?park='+encodeURIComponent(PARK)).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    var list=(j && j.photos) || [], box=$('parkphotos');
+    if(!list.length) return;
+    box.appendChild(CoasterHub.photoGallery(list, {w:960, cls:'pkgal', onEmpty:function(){ box.hidden=true; }}));
+    box.hidden=false;
+  }).catch(function(){});
   // Map, a little apart from the trail: the park picked out on the map
   // (Carter, 2026-11-25). Not for a travelling show, which has no pin.
   if(meta.lat!=null && meta.lon!=null && !CoasterHub.traveling(meta))

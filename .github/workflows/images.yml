@@ -24,6 +24,10 @@ on:
         description: 'Also pull every photo in each coaster''s Commons category (yes/no)'
         required: false
         default: 'yes'
+      parks:
+        description: 'Also pull each park''s Commons photos (yes/no)'
+        required: false
+        default: 'yes'
 
 permissions:
   contents: write
@@ -57,10 +61,25 @@ jobs:
           python3 -I tools/open-data/gallery-pull.py
           python3 -I tools/open-data/build-gallery-sql.py > migrations/235-open-data-gallery.sql
 
+      - name: Pull park photos
+        if: ${{ inputs.parks != 'no' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # Each park's Wikidata item: the one most of its linked coasters are
+          # "part of" (P361) or located at (P276). Read from D1, output to a
+          # file, not the log.
+          npx --yes wrangler@4 d1 execute coasterhub --remote --json --command "SELECT park, value AS q, value_label AS lbl FROM (SELECT c.park, w.value, w.value_label, ROW_NUMBER() OVER (PARTITION BY c.park ORDER BY COUNT(DISTINCT c.id) DESC) rk FROM coasters c JOIN open_links l ON l.coaster_id = c.id AND l.source = 'wikidata' JOIN wd_claims w ON w.qid = l.ref AND w.pid IN ('P361','P276') GROUP BY c.park, w.value) WHERE rk = 1" > "$RUNNER_TEMP/parkq.json" 2> "$RUNNER_TEMP/parkq.err"
+          python3 -I -c 'import json,sys; d=json.load(open(sys.argv[1])); json.dump(d[0]["results"], open("tools/open-data/park-qids.json","w"), indent=0, ensure_ascii=False); print(len(d[0]["results"]), "parks")' "$RUNNER_TEMP/parkq.json"
+          python3 -I tools/open-data/park-photos-pull.py
+          python3 -I tools/open-data/build-park-gallery-sql.py > migrations/240-open-data-park-gallery.sql
+
       - name: Commit
         run: |
           git add tools/open-data/images.json migrations/233-open-data-images.sql
           [ -f tools/open-data/gallery.json ] && git add tools/open-data/gallery.json migrations/235-open-data-gallery.sql || true
+          [ -f tools/open-data/park-gallery.json ] && git add tools/open-data/park-qids.json tools/open-data/park-gallery.json migrations/240-open-data-park-gallery.sql || true
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -73,7 +92,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          for FILE in migrations/233-open-data-images.sql migrations/235-open-data-gallery.sql; do
+          for FILE in migrations/233-open-data-images.sql migrations/235-open-data-gallery.sql migrations/240-open-data-park-gallery.sql; do
           [ -f "$FILE" ] || continue
           if grep -vE '^\s*(--|$)' "$FILE" | grep -viE '^(CREATE (TABLE|INDEX) IF NOT EXISTS open_|DELETE FROM open_|INSERT OR REPLACE INTO open_)' | grep -q .; then
             echo "::error::$FILE touches something other than open_* tables"; exit 1

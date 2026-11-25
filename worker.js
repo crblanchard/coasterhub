@@ -3156,6 +3156,20 @@ export default {
         // and keep the list themselves, so speed comes from that instead.
         return json({ photo: photos[0] || null, photos });
       }
+      // A park's photos, best first (Carter, 2026-11-25), for the carousel on
+      // its page: open_park_gallery (park-photos-pull.py), free licences only.
+      // A park renamed since the last pull also answers to its former names.
+      if (request.method === "GET" && path === "/api/park-photos") {
+        const park = url.searchParams.get("park") || "";
+        if (!park) return err(400, "need ?park=");
+        try {
+          const rows = (await env.DB.prepare("SELECT thumb, url, width, height, author, license, license_url, page, 'wikidata' AS source FROM open_park_gallery WHERE nonfree = 0 AND (park = ?1 OR park IN (SELECT former_name FROM park_aliases WHERE park = ?1)) ORDER BY score DESC, width DESC LIMIT 24").bind(park).all()).results || [];
+          return json({ photos: rows });
+        } catch (e) {
+          if (/no such table/i.test(String(e && e.message || e))) return json({ photos: [] });
+          throw e;
+        }
+      }
       // Carter's own pick for a coaster's photo (Change photo, admins only):
       // {id, url} where url is one of /api/coaster-photo?all=1's, or "none" for
       // no photo, or null to go back to the automatic choice.
