@@ -696,7 +696,8 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
         // The line under it: its place in words, and you.
         var k=CoasterHub.rideKey(c), mine=Y && (Y.rides[x.id] || Y.rides[k]), myRank=Y && (Y.rank[x.id] || Y.rank[k]);
         var line='The <b>'+ord(x.pos)+'</b> best coaster on Coaster Hub, on <b>'+(x.n||0)+'</b> riders&rsquo; lists.';
-        if(Y) line += mine ? ' You&rsquo;ve ridden it'+(mine.n>1?' <b>'+mine.n+'</b> times':'')+(myRank?' &middot; your <b>#'+myRank+'</b>':'')+'.'
+        // "Ranked as your #12, 55 rides logged" / "Not on your count yet" (Carter, 2026-11-26).
+        if(Y) line += mine ? ' '+(myRank?'Ranked as your <b>#'+myRank+'</b>, ':'')+'<b>'+mine.n+'</b> ride'+(mine.n===1?'':'s')+' logged.'
                            : ' Not on your count yet &middot; <a href="/log">Log it</a>';
         document.getElementById('featyou').innerHTML=line;
         document.getElementById('featwrap').hidden=false;
