@@ -163,6 +163,11 @@
   .stsoon{margin:2px 0 8px}
   .stsoon .tlr{padding-left:4px}
   .tlms{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background-color:var(--tint2);color:var(--accent2);font-size:.74rem;font-weight:700;white-space:nowrap}
+  .tsave{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom));z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0 0;padding:12px 14px;border:1px solid var(--accent2);border-radius:14px;background-color:var(--panel);box-shadow:0 6px 18px -10px rgba(10,30,60,.35)}
+  @media (min-width:681px){ .tsave{bottom:16px} }
+  .tsave[hidden]{display:none}
+  .tsave span{flex:1 1 auto;font-weight:600;font-size:.92rem}
+  .tsave .btn{padding:9px 16px;border-radius:10px;font-weight:600}
   .tshare{margin:12px 0 0;padding:14px;border:1px solid var(--line);border-radius:14px;background-color:var(--panel)}
   .tshare label{display:block;font-weight:600;font-size:.9rem;margin:0 0 8px}
   .tshare label span{color:var(--muted);font-weight:400}
@@ -229,6 +234,10 @@
     </div>
     <!-- Share: an optional name becomes the link, coasterhub.org/trip/<name>,
          and the trip's title for whoever opens it (Carter, 2026-11-25). -->
+    <!-- A trip link's edits: saved back to the same link (Carter, 2026-11-25). -->
+    <div class="tsave" id="tsave" hidden><span>You changed this trip.</span>
+      <button type="button" class="btn" id="b_save">Save changes</button>
+      <button type="button" class="tbtn" id="b_undo">Undo</button></div>
     <div class="tshare" id="tshare" hidden>
       <label for="tname">Name this trip <span>(optional)</span></label>
       <div class="trow"><input id="tname" type="text" maxlength="60" placeholder="Ohio run" autocomplete="off">
@@ -327,8 +336,14 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     TRIPQS=qs.join('&');
     // From a trip link: the short address stays until the trip is changed,
     // then it becomes the full one (the short link no longer matches it).
-    // The parks decide it: riders load a moment later and are not an edit.
-    if(window.TRIP_QS!=null){ var pk=p.join(','); if(TRIPBASE===null) TRIPBASE=pk; if(pk===TRIPBASE) return; }
+    // From a trip link the address never changes; an edit to the parks offers
+    // Save, which writes it back to the link for everyone who has it (Carter,
+    // 2026-11-25). Riders load a moment later and are not an edit.
+    if(window.TRIP_QS!=null){
+      var pk=p.join(','); if(TRIPBASE===null) TRIPBASE=pk;
+      var bar=$('tsave'); if(bar) bar.hidden = pk===TRIPBASE;
+      return;
+    }
     history.replaceState(null,'','/trip'+(TRIPQS?'?'+TRIPQS:''));
   }
 
@@ -642,6 +657,17 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks(), CoasterHub.me(
     var box=$('tshare'); box.hidden=!box.hidden;
     if(!box.hidden){ $('tname').value=$('tname').value||TRIPNAME||''; preview(); $('tname').focus(); }
   };
+  // Save an edited trip link (see save()); Undo goes back to the saved trip.
+  $('b_save').onclick=function(){
+    var b=this; b.disabled=true;
+    fetch('/api/trip-link',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:'/trip'+(TRIPQS?'?'+TRIPQS:''), code:window.TRIP_CODE})})
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||'Could not save'); return j; }); })
+      .then(function(){ TRIPBASE=STOPS.map(function(n){ return CoasterHub.slugify(n); }).join(','); $('tsave').hidden=true;
+        $('toast').textContent='Saved to '+location.host+location.pathname; setTimeout(function(){ $('toast').textContent=''; },3000); })
+      .catch(function(e){ alert(e.message); })
+      .then(function(){ b.disabled=false; });
+  };
+  $('b_undo').onclick=function(){ location.reload(); };
   $('tname').oninput=preview;
   $('tname').onkeydown=function(e){ if(e.key==='Enter') $('b_link').click(); };
   $('b_link').onclick=function(){

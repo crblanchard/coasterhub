@@ -3234,6 +3234,12 @@ async function main() {
     check("/trip/<name> opens it with its name", res.status === 302 && res.headers.get("location") === T + "&name=Ohio%20Run!", res.status + " " + res.headers.get("location"));
     await new Promise(z => setTimeout(z, 10));
     check("...and visits are counted", rows(db, "SELECT hits FROM trip_links WHERE code = 'ohio-run'")[0].hits === 1);
+    r = await call(db, "POST", "/api/trip-link", { body: { code: "ohio-run", url: "/trip?p=cedar-point,kings-island,holiday-world" } });
+    check("an edited trip saves back to its link", r.status === 200 && r.data.saved && rows(db, "SELECT url, name FROM trip_links WHERE code = 'ohio-run'")[0].url === "/trip?p=cedar-point,kings-island,holiday-world" && rows(db, "SELECT name FROM trip_links WHERE code = 'ohio-run'")[0].name === "Ohio Run!", JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/trip-link", { body: { code: "nope-nope", url: "/trip?p=x" } });
+    check("...but not to a link that doesn't exist", r.status === 404, JSON.stringify(r.data));
+    r = await call(db, "POST", "/api/trip-link", { body: { code: "ohio-run", url: "/rankings" } });
+    check("...and only with a trip", r.status === 400, JSON.stringify(r.data));
     res = await worker.fetch(new Request("https://coasterhub.org/trip/nothere"), E, ctx);
     check("an unknown trip goes to the planner", res.status === 302 && res.headers.get("location") === "https://coasterhub.org/trip", res.status + " " + res.headers.get("location"));
   }

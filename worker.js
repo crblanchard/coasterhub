@@ -3068,7 +3068,7 @@ export default {
         if (page.ok) {
           const qs = new URL(full).search;
           let rw = new HTMLRewriter()
-            .on("head", { element(e) { e.prepend("<script>window.TRIP_QS=" + JSON.stringify(qs).replace(/</g, "\\u003c") + "</script>", { html: true }); } });
+            .on("head", { element(e) { e.prepend("<script>window.TRIP_QS=" + JSON.stringify(qs).replace(/</g, "\\u003c") + ";window.TRIP_CODE=" + JSON.stringify(code) + "</script>", { html: true }); } });
           if (row.name) {
             const title = row.name + " trip plan";
             rw = rw.on("title", { element(e) { e.setInnerContent(title + " — Coaster Hub"); } })
@@ -3231,6 +3231,17 @@ export default {
         const name = String((b && b.name) || "").replace(/\s+/g, " ").trim().slice(0, 60);
         await env.DB.prepare("CREATE TABLE IF NOT EXISTS trip_links (code TEXT PRIMARY KEY, url TEXT NOT NULL, name TEXT, created TEXT, hits INTEGER NOT NULL DEFAULT 0)").run();
         const now = new Date().toISOString();
+        // {code, url}: save an edited trip back to its link (Carter, 2026-11-25:
+        // "edit then click save ... so you can keep the url and other people can
+        // edit it too via the shared link"). Anyone with the link may, like a
+        // shared document; the name stays.
+        const edit = String((b && b.code) || "").toLowerCase();
+        if (edit) {
+          if (!/^[a-z0-9][a-z0-9-]{1,47}$/.test(edit)) return err(400, "not a trip link");
+          const r = await env.DB.prepare("UPDATE trip_links SET url = ? WHERE code = ?").bind(u, edit).run();
+          if (!(r.meta && r.meta.changes)) return err(404, "no such trip link");
+          return json({ code: edit, short: url.origin + "/trip/" + edit, saved: true });
+        }
         if (name) {
           const code = name.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48);
           if (code.length < 3) return err(400, "Give the trip a name of at least 3 letters or numbers");
