@@ -434,6 +434,9 @@
   // a bare year on June 1 ("by default change all of them on june 1"), so a
   // 2027 coaster reads as under construction until 2027-06-01.
   function openingDay(c) {
+    // Announced with no year yet (openedPrec 'soon', no date: migration 244):
+    // under construction, "Opening soon" (Carter, 2026-11-25).
+    if (!c.opened && !c.yr && c.openedPrec === "soon") return "9999-12-31";
     var o = c.opened ? String(c.opened) : (c.yr ? String(c.yr) : "");
     if (!o) return "";
     var prec = c.opened ? c.openedPrec : "year";
@@ -2840,6 +2843,7 @@
     if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
     if (c.model) kv(info, amg(among && among.model) + (c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model)), "Model");
     if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), c.building ? "Opening" : "Opened"); else if (c.yr) kv(info, E(c.yr), c.building ? "Opening" : "Opened");
+    else if (c.building) kv(info, "Soon", "Opening");
     if (c.closed) kv(info, E(when(c.closed, c.closedPrec)), "Closed");
     if (c.closing) kv(info, '<span style="color:var(--bad)">' + E(when(c.closing, c.closingPrec)) + '</span>', "Closing");
     if (c.h != null) kv(nums, Math.round(c.h), "Height (ft)");
