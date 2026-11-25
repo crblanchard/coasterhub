@@ -170,6 +170,9 @@
   .rstats a.go{color:var(--accent2);text-decoration:none}
   .rstats .among{font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px}
   .rstats .go{display:inline-block;margin-top:6px;font-size:.84rem;font-weight:600}
+  /* Your rides on it, set apart from the coaster's facts by a hairline. */
+  .rstats .myrides{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:.84rem;color:var(--muted)}
+  .rstats .myrides b{color:var(--fg);font-weight:700;font-variant-numeric:tabular-nums}
   .rrow .mrow{display:flex;align-items:center;gap:9px;padding:4px 0}
   .rrow .mrow .mp{color:var(--accent2);font-weight:700;font-size:.75rem;
                   font-variant-numeric:tabular-nums;min-width:2.2em;text-align:right;flex:none}
@@ -1160,6 +1163,7 @@ if(!slug){
       CANEDIT = !!mineToEdit;
       OWN = !!(acct && acct.slug === slug);
       $('gatherbar').style.display = OWN && scattered() ? 'flex' : 'none';
+      if(OWN) loadMyRides();
       // The offer waits for this: it is only worth making to the person who
       // can place the ride, and who owns the list is not known until here.
       maybeOfferJoins();
@@ -1448,7 +1452,32 @@ function factsFor(id){
   });
   var among={ manu: mi ? mi+' of '+mn : '', model: di ? di+' of '+dn : '' };
   return CoasterHub.coasterFacts(c, extra,
-    c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'', among);
+    (c.park?'<a class="go" href="'+esc(CoasterHub.coasterHref(c))+'">Coaster page &rarr;</a>':'')+myRidesLine(id), among);
+}
+// On your own list, your rides on it and when you first rode it, under the
+// coaster's own facts (Carter, 2026-11-25: "below the coaster page button so
+// it's clearly differentiated"). By ride, so a relocated coaster's rides at
+// its other parks count too.
+var MYRIDES=null;
+function loadMyRides(){
+  if(MYRIDES) return;
+  MYRIDES={};
+  CoasterHub.fetchRides(slug).then(function(r){
+    var m={};
+    ((r&&r.rides)||[]).forEach(function(x){
+      var k=KEY(x.c); if(k==null) return;
+      var o=m[k]||(m[k]={n:0, first:null}); o.n++;
+      if(x.d && (!o.first || String(x.d)<o.first)) o.first=String(x.d);
+    });
+    MYRIDES=m;
+    if(document.querySelector('.rrow.open')) renderRank();
+  }).catch(function(){});
+}
+function myRidesLine(id){
+  if(!OWN || !MYRIDES) return '';
+  var o=MYRIDES[KEY(id)]; if(!o || !o.n) return '';
+  return '<div class="myrides"><span><b>'+o.n+'</b> '+(o.n===1?'ride':'rides')+'</span>'
+    +(o.first?'<span>First ridden <b>'+esc(CoasterHub.mdy(o.first))+'</b></span>':'')+'</div>';
 }
 // ---- model filter ------------------------------------------------------------
 // Which models to show (maker() — the model, or the maker when there is none).

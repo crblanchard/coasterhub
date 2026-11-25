@@ -254,7 +254,7 @@ function more(c){
     +(who===undefined ? '<p class="nobody">Loading&hellip;</p>'
       : (who=unranked(c, who)).length ? '<div class="who">'+youFirst(who).map(function(w){
           return '<a class="'+(w.slug===ME?'me':'')+'" href="'+esc(CoasterHub.userPageHref(w.slug,'count'))+'">'+CoasterHub.riderFace(w.slug,w.name)+(w.slug===ME?'You':esc(w.name))+(w.n>1?'<i>'+w.n+' rides</i>':'')+'</a>'; }).join('')+'</div>'
-      : '<p class="nobody">'+(WHO[c.id] && WHO[c.id].length ? 'Everyone who rode it has ranked it.' : 'Nobody on the site has ridden it yet.')+'</p>')
+      : '<p class="nobody">'+(WHO[c.id] && WHO[c.id].length ? 'Everyone who rode it has ranked it.' : nobodyLine(c))+'</p>')
     + elsewhere(c);
 }
 // Who ranked it where, as on /rankings (Carter, 2026-11-25: "put people's
@@ -295,6 +295,14 @@ function unranked(c, who){
   var r=RANKS && RANKS[rkey(c)]; if(!r) return who;
   var on={}; r.forEach(function(x){ on[x.slug]=1; });
   return who.filter(function(w){ return !on[w.slug]; });
+}
+// Nobody has ridden it (Carter, 2026-11-25): a ride that has been at other
+// parks says "at <this park>" (its other parks are counted just below); a
+// closed one drops the "yet", since nobody new can.
+function nobodyLine(c){
+  if(CoasterHub.sameRideRows(LIST.coasters, c).length) return 'Nobody on the site has ridden it at '+esc(c.park)+'.';
+  var gone=c.closed && String(c.closed) <= new Date().toISOString().slice(0,10);   // a closing date ahead is still open
+  return 'Nobody on the site has ridden it'+(gone ? '' : ' yet')+'.';
 }
 // The same ride at its other parks (Carter, 2026-11-24: a relocated ride with
 // rankings but "nobody has ridden it" read as a contradiction): "4 riders rode
