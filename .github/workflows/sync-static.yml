@@ -7,6 +7,11 @@ on:
   repository_dispatch:
     types: [edit]
   workflow_dispatch: {}
+  # And once a week on its own (Carter, 2026-11-26: "auto data sync (once a
+  # week)"), Mondays after the open-data and photo refreshes, so the fallback
+  # JSON never drifts far even when nobody starts it by hand.
+  schedule:
+    - cron: '47 13 * * 1'
 
 # Debounce. While you keep editing, each new ping starts a fresh run and cancels
 # the previous one, so only the run after your LAST edit survives. Together with
