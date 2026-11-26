@@ -369,7 +369,7 @@ function drawWho(){
   $('who').innerHTML=youFirst(WHOLIST).map(function(p){
     var isMe=p.slug===ME;
     return '<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'">'+CoasterHub.riderFace(p.slug,p.name)
-      +(isMe?'You':esc(p.name))+'<i>'+p.n+' of '+WHOMAX+'</i></a>';
+      +(isMe?'You':esc(p.name))+'<i>'+p.n+'</i></a>';   // just their credits here (Carter, 2026-11-26): "of 10" counted defunct rides too
   }).join('');
 }
 function riders(mine){
