@@ -47,6 +47,7 @@
   #parkphotos .pgal.pkgal{max-width:none;margin:0}
   #parkphotos .pgal.pkgal .pgtrack{border-radius:14px;aspect-ratio:16/9}
   #parkphotos .pgfoot{justify-content:space-between}
+  #parkphotos.ppwait{aspect-ratio:16/9;border-radius:14px;background-color:var(--soft);margin-bottom:28px}
   /* Change photo, for admins (Carter, 2026-11-26): the coaster page's picker. */
   .cpadmin{margin:8px 0 6px}
   .cpadmin[hidden],.cpgrid[hidden]{display:none}
@@ -196,6 +197,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   // operator · Germany" for a fair with no fixed place.
   CoasterHub.kindLine($('hero_sub'), CoasterHub.traveling(parks[PARK]) ? 'Fair operator' : 'Park', meta.region||null, meta.region ? CoasterHub.locationHref(meta.region) : null);
   CoasterHub.crumbs($('crumb'), CoasterHub.placeTrail(meta.region).concat([[PARK]]));
+  // A park known to have photos holds their place while they load (parks' ph
+  // flag; Carter, 2026-11-26: the list jumped down when they arrived).
+  if(parks[PARK] && parks[PARK].ph && $('parkphotos').hidden){ $('parkphotos').classList.add('ppwait'); $('parkphotos').hidden=false; }
   showParkPhotos(false);
   // Map, a little apart from the trail: the park picked out on the map
   // (Carter, 2026-11-25). Not for a travelling show, which has no pin.
@@ -472,12 +476,12 @@ function showParkPhotos(fresh){
   var box=$('parkphotos');
   fetch('/api/park-photos?park='+encodeURIComponent(PARK)+(fresh?'&t='+Date.now():'')).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
     var list=(j && j.photos) || [];
-    box.innerHTML=''; box.hidden=true;
+    box.classList.remove('ppwait'); box.innerHTML=''; box.hidden=true;
     parkPhotoAdmin();
     if(!list.length) return;
     box.appendChild(CoasterHub.photoGallery(list, {w:960, cls:'pkgal', onEmpty:function(){ box.hidden=true; }}));
     box.hidden=false;
-  }).catch(function(){});
+  }).catch(function(){ if(box.classList.contains('ppwait')){ box.classList.remove('ppwait'); box.hidden=true; } });
 }
 // Change photo, for admins (Carter, 2026-11-26), as on a coaster's page: every
 // photo of the park as a thumbnail; a click makes it the lead one

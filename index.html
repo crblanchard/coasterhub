@@ -332,6 +332,12 @@
   .rankcta .btn:hover{border-color:var(--accent2);color:var(--accent2)}
 
   /* The featured coaster: one wide photo with its place, name and numbers over it. */
+  /* Held places while loading (Carter, 2026-11-26: "give it a spot beforehand"):
+     the featured card shows its empty frame at once; signed in, the park-day
+     card's height is kept and the line under the featured card too. */
+  .featc:empty{pointer-events:none}
+  html.chme #daycard[hidden]:not([data-none]){display:flex;visibility:hidden;min-height:122px}
+  html.chme .featyou:empty{display:block;min-height:1.45em}
   .featwrap{margin:0 0 26px}
   .featwrap[hidden]{display:none}
   .featc{position:relative;display:block;border-radius:18px;overflow:hidden;aspect-ratio:16/8;max-height:460px;width:100%;background-color:var(--soft);background-size:cover;background-position:center;color:#fff;text-decoration:none;box-shadow:0 10px 30px -18px rgba(10,30,60,.55)}
@@ -433,6 +439,9 @@
   // smaller"), so the old key is dropped, never drawn.
   try { localStorage.removeItem('ch_hero'); } catch (e) {}
   var me = localStorage.getItem('ch_me'), h = JSON.parse(localStorage.getItem('ch_hero2') || 'null');
+  // Probably signed in: hold the places the signed-in cards will fill, so the
+  // page does not jump as they arrive (Carter, 2026-11-26).
+  if (me) document.documentElement.classList.add('chme');
   if (!me || !h || h.slug !== me || !h.html || h.html.indexOf('class="n"') < 0) return;
   var y = document.getElementById('heroyou'); y.innerHTML = h.html; y.hidden = false;
   document.getElementById('hero_h').hidden = true; document.getElementById('hero_p').hidden = true;
@@ -473,7 +482,7 @@
        header ("more prominent ... more personality"): its Global place in big
        steel/wood type, its numbers, and where it stands with you. Later, with
        more riders, the week's biggest riser and by how many points. -->
-  <div class="featwrap" id="featwrap" hidden><a class="featc" id="featc"></a><p class="featyou" id="featyou"></p></div>
+  <div class="featwrap" id="featwrap"><a class="featc" id="featc" aria-hidden="true"></a><p class="featyou" id="featyou"></p></div>
   <div class="daycards">
     <div class="daycard" id="daycard" hidden></div>
     <div class="otdcard" id="otdcard" hidden></div>
@@ -540,7 +549,7 @@ CoasterHub.initNav('riders');
 // Signed in: your count in the hero, your last park day, and the two things you
 // come here to do (Carter, 2026-10-01).
 CoasterHub.me().then(function(acct){
-  if (!acct || !acct.slug) return;
+  if (!acct || !acct.slug) { document.documentElement.classList.remove('chme'); return; }
   return Promise.all([CoasterHub.fetchSummary(), CoasterHub.fetchRides(acct.slug).catch(function(){ return null; }),
                       CoasterHub.fetchCoasters()]).then(function(r){
     var me = (r[0] || []).filter(function(x){ return x.slug === acct.slug; })[0];
@@ -621,6 +630,9 @@ CoasterHub.me().then(function(acct){
         $('hy_track').hidden = false; $('hy_legend').hidden = false;
       }
     }
+    // The held place for the park-day card (html.chme) is let go unless a
+    // card fills it below.
+    $('daycard').dataset.none = '1';
     // Your last park day, as a ticket stub; and On this day beside it.
     if (log && log.length) {
       var first = {}, lastD = null;
@@ -759,7 +771,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
   for(var i=top.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=top[i]; top[i]=top[j]; top[j]=t; }
   var E=function(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
   (function tryAt(n){
-    if(n>=Math.min(30, top.length)) return;   // no photo: on to the next one
+    if(n>=Math.min(30, top.length)){ document.getElementById('featwrap').hidden=true; return; }   // none with a photo: the placeholder goes
     var x=top[n], c=byId[x.id];
     fetch('/api/coaster-photo?id='+x.id).then(function(res){ return res.ok?res.json():null; }).then(function(j){
       var p=j&&j.photos&&j.photos[0]; if(!p) return tryAt(n+1);
@@ -767,7 +779,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
       img.referrerPolicy='no-referrer';
       img.onload=function(){
         var el=document.getElementById('featc');
-        el.href=CoasterHub.coasterHref(c);
+        el.href=CoasterHub.coasterHref(c); el.removeAttribute('aria-hidden');
         el.style.backgroundImage='url("'+u.replace(/"/g,'%22')+'")';
         var chips=[c.h?Math.round(c.h)+' ft':'', c.s?Math.round(c.s)+' mph':'', c.inv!=null&&c.inv!==''?c.inv+' inversion'+(+c.inv===1?'':'s'):'', CoasterHub.maker(c)||'', (c.opened||c.yr)?'Opened '+String(c.opened||c.yr).slice(0,4):''].filter(Boolean);
         el.innerHTML='<span class="rk '+(c.type==='Wood'?'wd':'st')+'"><i>#</i>'+x.pos+'</span>'
@@ -793,7 +805,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
       img.src=u;
     }).catch(function(){ tryAt(n+1); });
   })(0);
-}).catch(function(){});
+}).catch(function(){ document.getElementById('featwrap').hidden=true; });
 // Five on a phone (Carter, 2026-10-02: "Home: shorter"), ten wider; the
 // rest is a tap away on /rankings either way.
 var TOPN = window.matchMedia('(max-width:560px)').matches ? 5 : 10;

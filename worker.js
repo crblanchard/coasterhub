@@ -688,6 +688,13 @@ async function getParks(env) {
     out[p.name] = { lat: p.lat, lon: p.lon, region: p.region };
     if (p.travel !== undefined) out[p.name].travel = p.travel ? 1 : 0;
   }
+  // `ph`: the park has photos (open_park_gallery), so its page can hold their
+  // place before they load instead of jumping (Carter, 2026-11-26). Only ~200
+  // parks do, so a park without the flag holds nothing.
+  try {
+    const ph = (await env.DB.prepare("SELECT DISTINCT park FROM open_park_gallery WHERE nonfree = 0").all()).results || [];
+    for (const r of ph) if (out[r.park]) out[r.park].ph = 1;
+  } catch (e) { /* no gallery table yet: no flags */ }
   return out;
 }
 // Which riders have claimed their page. Used to decide whether a RIDE COUNT is

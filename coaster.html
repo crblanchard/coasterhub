@@ -159,6 +159,9 @@
   .former{color:var(--muted);font-size:.9rem;margin:4px 0 0}
   .cphoto{margin:20px 0 6px}
   .cphoto[hidden]{display:none}
+  .cphoto.cpwait{aspect-ratio:3/2;border-radius:14px;background-color:var(--soft)}
+  .youcard.ycwait{min-height:70px}
+  @media (max-width:640px){ .youcard.ycwait{min-height:164px} }
   /* The whole photo at its own shape, never cropped (Carter, 2026-11-24: "cropped weirdly"); a tall one sits centred on the panel colour. */
   /* One 3:2 frame (Carter, 2026-11-25): a photo near that shape (5:4 to about
      2:1) fills it edge to edge, trimmed a little; a square, tall or panoramic
@@ -350,6 +353,15 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
 
   var meta=parks[C.park]||{};
   document.querySelector('.hero h1').textContent=C.name;
+  // Held places while the photo and your card load, so the page does not jump
+  // (Carter, 2026-11-26): an empty photo frame, and the You card's height when
+  // you are probably signed in. Both are let go if nothing comes.
+  (function(){
+    var f=$('cphoto'); if(f && f.hidden && !f.childElementCount){ f.classList.add('cpwait'); f.hidden=false; }
+    var yc=$('youcard'), me=null; try { me=localStorage.getItem('ch_me'); } catch(e){}
+    if(yc && me && yc.hidden && !yc.innerHTML){ yc.classList.add('ycwait'); yc.hidden=false; }
+    if(yc && me) CoasterHub.me().then(function(a){ if(!a || !a.slug){ yc.classList.remove('ycwait'); if(!yc.innerHTML) yc.hidden=true; } }).catch(function(){});
+  })();
   showPhoto(C);
   showNotes(C);
   document.title=C.name+' — '+C.park+' — Coaster Hub';
@@ -551,7 +563,8 @@ function youLine(me, mine){
   ROWS.forEach(function(x){ var m=me.rides[x.id]; if(m){ r+=m.n; if(m.first && (!first || m.first<first)) first=m.first; } });
   // The You card (2026-11-20): your place, your rides, your first ride, and
   // a Log button that opens Log on this coaster.
-  var yc=$('youcard'), logBtn='<a class="btn" href="/log?c='+encodeURIComponent(C.id)+'">Log a ride</a>';
+  var yc=$('youcard'); if(yc) yc.classList.remove('ycwait');
+  var logBtn='<a class="btn" href="/log?c='+encodeURIComponent(C.id)+'">Log a ride</a>';
   if(yc){
     if(r){
       yc.innerHTML='<span class="ylab">You</span>'
@@ -742,12 +755,13 @@ function showPhoto(c, fresh){
     var list=(j && (j.photos || (j.photo ? [j.photo] : []))) || [];
     photoAdmin(c);
     var fig=$('cphoto');
+    fig.classList.remove('cpwait');
     fig.innerHTML='';
     if(!list.length){ fig.hidden=true; return; }
     // 960: a standard Commons width, already made, so it comes at once.
     fig.appendChild(CoasterHub.photoGallery(list, {w:960, cls:'cpgal', onEmpty:function(){ fig.hidden=true; }}));
     fig.hidden=false;
-  }).catch(function(){});
+  }).catch(function(){ var f=$('cphoto'); if(f && f.classList.contains('cpwait')){ f.classList.remove('cpwait'); f.hidden=true; } });
 }
 // Change photo, for admins: every candidate as a thumbnail; a click saves it
 // as the coaster's photo (/api/coaster-photo-pick). "No photo" hides it,
