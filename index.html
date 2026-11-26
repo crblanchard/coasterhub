@@ -68,6 +68,7 @@
   .heroyou .hy_last a{color:var(--accent2);text-decoration:none;font-weight:600}
   .heroyou .hy_acts{display:flex;gap:10px;margin:18px 0 20px}
   .heroyou .hy_acts .btn{white-space:nowrap}
+  .heroyou .hy_acts .btn[hidden]{display:none}
   /* Solid, not --panel: the hero redefines --panel as a see-through white (style.css,
      .hero), so "Panel fill" still let the skyline's track run through "Log in" and
      "Rank more". These are the site's real panel colours, night then day. */
@@ -133,7 +134,13 @@
   .hero.home .heroyou p.clegend{margin:0}
   .hero.home .heroyou p.hy_last{margin:12px 0 0}
   .hero.home .heroyou p.hy_acts{margin:16px 0 20px}
-  @media (max-width:640px){ .hero.home .heroyou p.hy_acts{margin-bottom:78px} }
+  /* Phones: the two buttons stacked at the left, beside the skyline rather
+     than above it, so the hero is shorter and the featured coaster shows
+     without scrolling (Carter, 2026-11-26). */
+  @media (max-width:640px){
+    .hero.home .heroyou p.hy_acts{flex-direction:column;align-items:flex-start;gap:8px;margin:14px 0 6px}
+    .hero.home .heroyou p.hy_acts .btn{min-width:128px;text-align:center;box-sizing:border-box}
+  }
 
   /* Your collection as one line: steel and wood in proportion, the two counts
      under it (a solid bar, Carter: "the bar isn't one line I think it should be"). */
@@ -528,6 +535,8 @@ CoasterHub.me().then(function(acct){
       $('hy_next').innerHTML = '<span class="mbar"><i style="width:' + pct + '%"></i></span>'
         + (left ? '<a href="' + CoasterHub.userPageHref(acct.slug, 'rankings') + '"><b>' + nfx(left) + '</b> ' + (left === 1 ? 'credit' : 'credits') + ' still to rank</a>'
                 : '<span>Every credit ranked</span>');
+      // Nothing left to rank: no Rank more (Carter, 2026-11-26).
+      $('hy_rank').hidden = !left;
       $('hy_next').hidden = false;
     })();
     // Rank call to action until ten are ranked; the empty top ten hides.
