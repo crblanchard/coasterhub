@@ -64,7 +64,11 @@
 :root[data-theme="light"] .card,
 :root[data-theme="light"] .panel{box-shadow:0 1px 2px rgba(17,24,39,.05)}
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;overscroll-behavior-y:none}
+/* Smooth scrolling only once the page has settled (app.js adds .smoothok):
+   otherwise going Back animates the browser's own scroll restore across the
+   page (Carter, 2026-11-26: "it pans to the homepage again"). */
+html{overscroll-behavior-y:none}
+html.smoothok{scroll-behavior:smooth}
 body{overscroll-behavior-y:none}
 body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;

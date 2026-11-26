@@ -20,6 +20,16 @@
    None of them is stored; each turns itself on as a rider logs more.
    (Legacy: computeStats may also be called with a bare rides array.) */
 (function (global) {
+  // Smooth scrolling (style.css html.smoothok) switches on only after the page
+  // has loaded and the browser has put the scroll back where it was, and
+  // off again whenever a page is shown from the back/forward cache, so Back
+  // lands in place instead of gliding there (Carter, 2026-11-26).
+  if (typeof document !== "undefined" && typeof window !== "undefined") {
+    var smoothOn = function () { setTimeout(function () { document.documentElement.classList.add("smoothok"); }, 700); };
+    if (document.readyState === "complete") smoothOn(); else window.addEventListener("load", smoothOn);
+    window.addEventListener("pageshow", function (e) { if (e.persisted) { document.documentElement.classList.remove("smoothok"); smoothOn(); } });
+    window.addEventListener("pagehide", function () { document.documentElement.classList.remove("smoothok"); });
+  }
   "use strict";
 
   var US_STATES = new Set(["Alabama","Alaska","Arizona","Arkansas","California","Colorado",
