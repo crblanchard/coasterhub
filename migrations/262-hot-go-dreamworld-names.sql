@@ -1,0 +1,4 @@
+-- Hot Go Dreamworld's two unnamed B&Ms say which they are (Carter, 2026-11-26):
+-- "Unknown (B&M Wing)" and "Unknown (B&M Hyper)", with coaster_renamed rows.
+UPDATE coasters SET name = CASE name WHEN 'Unknown' THEN 'Unknown (B&M Wing)' WHEN 'Unknown (2)' THEN 'Unknown (B&M Hyper)' END WHERE park = 'Hot Go Dreamworld' AND name IN ('Unknown', 'Unknown (2)');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_renamed', c.name, NULL, json_object('id', c.id, 'from', CASE c.name WHEN 'Unknown (B&M Wing)' THEN 'Unknown' ELSE 'Unknown (2)' END, 'park', c.park) FROM coasters c WHERE c.park = 'Hot Go Dreamworld' AND c.name IN ('Unknown (B&M Wing)', 'Unknown (B&M Hyper)') AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_renamed' AND json_extract(a.detail, '$.id') = c.id);
