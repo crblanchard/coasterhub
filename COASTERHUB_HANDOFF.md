@@ -6546,3 +6546,5 @@ the first photo, with no dark wash; the text turns dark when the photo behind
 the name measures light. To revert: delete the two `CoasterHub.photoHero(...)`
 calls (coaster.html showPhoto, park.html showParkPhotos). The CSS (`.photohero`
 at the end of style.css) is inert without them.
+
+Reverted the same day (Carter: "undo the photo headers"): the two calls are gone; photoHero and the .photohero CSS stay unused.

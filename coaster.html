@@ -743,8 +743,6 @@ function showPhoto(c, fresh){
     photoAdmin(c);
     var fig=$('cphoto');
     fig.innerHTML='';
-    // The first photo is the page's header too (Carter, 2026-11-26, on trial).
-    CoasterHub.photoHero($('chero'), list);
     if(!list.length){ fig.hidden=true; return; }
     // 960: a standard Commons width, already made, so it comes at once.
     fig.appendChild(CoasterHub.photoGallery(list, {w:960, cls:'cpgal', onEmpty:function(){ fig.hidden=true; }}));

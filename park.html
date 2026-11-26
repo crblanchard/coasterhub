@@ -447,8 +447,6 @@ function showParkPhotos(fresh){
     var list=(j && j.photos) || [];
     box.innerHTML=''; box.hidden=true;
     parkPhotoAdmin();
-    // The first photo is the page's header too (Carter, 2026-11-26, on trial).
-    CoasterHub.photoHero(document.querySelector('section.hero'), list);
     if(!list.length) return;
     box.appendChild(CoasterHub.photoGallery(list, {w:960, cls:'pkgal', onEmpty:function(){ box.hidden=true; }}));
     box.hidden=false;
