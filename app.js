@@ -2957,6 +2957,12 @@
     var E = searchEsc, g = document.createElement("div");
     g.className = "pgal" + (opts.cls ? " " + opts.cls : "");
     var track = document.createElement("div"); track.className = "pgtrack"; g.appendChild(track);
+    // The frame takes the first photo's own shape (Carter, 2026-11-26: "if it is
+    // a standard landscape photo just keep it landscape"), within 3:4 to 2:1,
+    // so a landscape one is not cropped tall and a square or upright one gets
+    // the height it needs. Known from the record, else from the loaded picture.
+    function shape(w, h) { if (w > 0 && h > 0) g.style.setProperty("--ar", String(Math.max(0.75, Math.min(2, w / h)))); }
+    if (list[0]) shape(+list[0].width, +list[0].height);
     var foot = document.createElement("div"); foot.className = "pgfoot"; g.appendChild(foot);
     var live = [];
     // Where the arrows are heading: a click while the last one is still
@@ -2975,7 +2981,14 @@
       var img = document.createElement("img"); img.alt = ""; img.decoding = "async"; img.referrerPolicy = "no-referrer";
       if (i > 0) img.loading = "lazy";
       var steps = [photoSize(p.thumb || p.url, opts.w), p.thumb, p.url].filter(Boolean), k = 0;
-      img.onload = function () { var r = img.naturalWidth / (img.naturalHeight || 1); if (r < 1.24 || r > 2.1) img.classList.add("fit"); img.classList.add("in"); };
+      img.onload = function () {
+        var r = img.naturalWidth / (img.naturalHeight || 1);
+        if (i === 0 && !(+p.width > 0 && +p.height > 0)) shape(img.naturalWidth, img.naturalHeight);
+        // A photo far from the frame's shape is shown whole rather than cropped.
+        var ar = parseFloat(g.style.getPropertyValue("--ar")) || 1.5;
+        if (Math.abs(r - ar) / ar > 0.2) img.classList.add("fit");
+        img.classList.add("in");
+      };
       img.onerror = function () {
         while (++k < steps.length) { if (steps[k] !== img.src) { img.src = steps[k]; return; } }
         fig.remove(); live = live.filter(function (x) { return x.fig !== fig; });

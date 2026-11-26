@@ -1242,10 +1242,12 @@ img.hhphoto.ph{display:block;width:100%;height:120px;object-fit:cover;border-rad
      photos crop less as the list grows. */
   .hasphoto:not([hidden]){grid-template-rows:auto 1fr}
   .hasphoto > div.cxmore,.hasphoto > div.whol{grid-row:2}
-  .hasphoto > img.cxphoto.ph,.hasphoto > div.pgal.cxgal{grid-row:1 / span 2;align-self:stretch}
-  .hasphoto > img.cxphoto.ph{aspect-ratio:auto;min-height:0;height:100%;max-height:640px}
-  .hasphoto > div.pgal.cxgal{display:flex;flex-direction:column;max-height:640px}
-  .hasphoto > div.pgal.cxgal > .pgtrack{flex:1 1 auto;aspect-ratio:3/2;min-height:0}
+  /* The photo keeps its own shape and sits centred down the right side, the
+     spare space split above and below (Carter, 2026-11-26: "did you stretch the
+     photo so it fits?"). An upright or square one is simply taller. */
+  .hasphoto > img.cxphoto.ph,.hasphoto > div.pgal.cxgal{grid-row:1 / span 2;align-self:center}
+  .hasphoto > img.cxphoto.ph{aspect-ratio:auto;height:auto;max-height:640px}
+  .hasphoto > div.pgal.cxgal > .pgtrack{aspect-ratio:var(--ar,3/2);max-height:640px}
 }
 /* Facts in one column at every width so the photo gets three-fifths of the
    row: the photos are nearly all landscape (Carter, 2026-11-26). */
