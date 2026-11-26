@@ -995,6 +995,7 @@ function photoTone(url, done){
         // sky, except a dark navy that can only be paint (Goliath at Six Flags
         // Over Georgia came out sky blue instead of orange).
         if(deg>=165 && deg<192 && (Lp>0.6 || Sp<0.5)) continue;          // hazy cyan sky near the horizon (X2) is pale; painted turquoise is deep
+        if(deg>=165 && deg<192 && y<H*0.4) continue;                     // and up top it is sky however deep (Goliath at Six Flags Over Georgia)
         if(deg>=192 && deg<=245 && Lp>0.33) continue;
         if(deg>=56 && deg<=160) continue;                               // trees, grass, spring leaves
         // Track is mostly up in the picture; trucks, buildings and crowds sit
@@ -1002,10 +1003,17 @@ function photoTone(url, done){
         // red of a dumpster, not its maroon track).
         if(y>H*0.75) continue;                                          // the bottom quarter: trucks, crowds, buildings
         var k=Math.floor(deg/15)%24, w=c*(.5+mx/2)*(y<H*0.6 ? 1.6 : 0.6);
+        if(deg>=165 && deg<=260) w*=0.5;                                 // cool colours are more often sky or water than track: warm track wins
         var L=(mx+mn)/2, Sat=c/(1-Math.abs(2*L-1)||1);
         B[k]+=w; S[k]+=deg*w; N[k]++; Lt[k]+=L*w; St[k]+=Sat*w;
       }
       var best=-1, bw=0; for(var j=0;j<24;j++) if(B[j]>bw){ bw=B[j]; best=j; }
+      // A cool winner (sky, water) gives way to a warm colour with a fair
+      // share of it: an orange track under a deep sky is orange (Goliath).
+      if(best>=11 && best<=17){
+        var wb=-1, ww=0; for(var q=0;q<24;q++){ if(q>=4 && q<=17) continue; if(B[q]>ww){ ww=B[q]; wb=q; } }
+        if(wb>=0 && ww>=bw*0.12 && N[wb]>=W*H*0.75*0.008){ best=wb; bw=ww; }
+      }
       // At least ~1.2% of the upper three quarters in that colour (a thin
       // track still counts), or there is no clear track colour.
       if(best<0 || N[best] < W*H*0.75*0.008) return;
