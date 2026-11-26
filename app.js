@@ -2626,10 +2626,28 @@
   // because there is no stutter to remove there and "Philadelphia Toboggan
   // Coasters" beats an empty space. Neither filled gives an empty string and no
   // separator anywhere.
+  // Long model names said short in lists, the way coaster people say them
+  // (Carter, 2026-11-26: "shorten vekoma suspended looping coaster to slc in
+  // other places then full name when you get to the page"). The model's own
+  // page and its links keep the full name; this is only what a row shows.
+  var MODEL_SHORT = {
+    "Vekoma Suspended Looping Coaster": "Vekoma SLC",
+    "Vekoma Suspended Family Coaster": "Vekoma SFC"
+  };
+  function modelLabel(mo) { mo = String(mo || "").trim(); return MODEL_SHORT[mo] || mo; }
+  // And makers by the names riders use (Carter, same day: "rmc too", "mack",
+  // "s&s is shorthand"): the short form most of their models already start
+  // with. The maker's own page keeps its full name.
+  var MAKER_SHORT = {
+    "Bolliger & Mabillard": "B&M", "Rocky Mountain Coasters": "RMC", "Great Coasters International": "GCI",
+    "Custom Coasters International": "CCI", "Philadelphia Toboggan Coasters": "PTC", "Philadelphia Toboggan Company": "PTC",
+    "MACK Rides": "MACK", "S&S Worldwide": "S&S", "Arrow Dynamics": "Arrow", "Maurer Rides": "Maurer"
+  };
+  function manuLabel(m) { m = String(m || "").trim(); return MAKER_SHORT[m] || m; }
   function maker(c) {
     if (!c) return "";
     var mo = String(c.model || "").trim();
-    return mo || String(c.manu || "").trim();
+    return mo ? modelLabel(mo) : manuLabel(c.manu);
   }
 
   // The line a hero wears while its numbers are still on the way. One pool for
@@ -2842,8 +2860,8 @@
     }
     if (c.type) kv(info, '<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
     var amg = function (t) { return t ? '<i class="among" style="font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px">' + E(t) + '</i>' : ''; };
-    if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
-    if (c.model) kv(info, amg(among && among.model) + (c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(c.model) + '</a>' : E(c.model)), "Model");
+    if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '" title="' + E(c.manu) + '">' + E(manuLabel(c.manu)) + '</a>', "Manufacturer");
+    if (c.model) kv(info, amg(among && among.model) + (c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(modelLabel(c.model)) + '</a>' : E(modelLabel(c.model))), "Model");
     if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), c.building ? "Opening" : "Opened"); else if (c.yr) kv(info, E(c.yr), c.building ? "Opening" : "Opened");
     else if (c.building) kv(info, "Soon", "Opening");
     if (c.closed) kv(info, E(when(c.closed, c.closedPrec)), "Closed");
@@ -3684,7 +3702,7 @@
         body = mine.length ? '<div class="panel">' + cut(mine).map(function (c) {
           return '<a class="crow" data-cid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + R[c.id] + '</span>'
             + '<span class="two"><span class="cn">' + E(c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + (opts.sign ? signStats(c) : '') + '</span></span>'
-            + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '') + '</a>';
+            + (opts.model !== false && c.model ? '<span class="md">' + E(modelLabel(c.model)) + '</span>' : '') + '</a>';
         }).join("") + '</div>' + more(mine.length)
           : '<p class="rnone">' + (R ? "You haven’t ranked any of these yet." : "Sign in to see where these sit in your rankings.") + '</p>';
       } else if (st.glob === "loading") {
@@ -3705,7 +3723,7 @@
           return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + r.pos + '</span>'
             + '<span class="two"><span class="cn">' + E((r.g.sides && r.g.sides.length > 1 && r.g.race) || c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + (opts.sign ? signStats(c) : '') + '</span></span>'
             // The model too, as /rankings' Global list shows it (2026-09-28).
-            + (opts.model !== false && c.model ? '<span class="md">' + E(c.model) + '</span>' : '')
+            + (opts.model !== false && c.model ? '<span class="md">' + E(modelLabel(c.model)) + '</span>' : '')
             // Two lines, never three (Carter, 2026-10-02): the average in the
             // accent, and under it in grey "your #3" when you have ranked it —
             // on every Global list, every width (Carter, same day) — else how
@@ -4114,7 +4132,7 @@
     }, { passive: false });
   }
 
-  var api = { computeStats: computeStats, rideKey: rideKey, undatedKeys: undatedKeys, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
+  var api = { computeStats: computeStats, rideKey: rideKey, undatedKeys: undatedKeys, sameRideRows: sameRideRows, rideHome: rideHome, maker: maker, modelLabel: modelLabel, manuLabel: manuLabel, loadingLine: loadingLine, loadUser: loadUser, currentUser: currentUser, me: me,
               USERS: USERS, initNav: initNav, userPageHref: userPageHref,
               slugify: slugify, parkHref: parkHref, makerHref: makerHref, locationHref: locationHref, mdy: mdy, monthYear: monthYear, amongIn: amongIn, confirmAdd: confirmAdd, confirmRemove: confirmRemove, CLOSING_SOON: CLOSING_SOON, UNDER_CONSTRUCTION: UNDER_CONSTRUCTION, coasterHref: coasterHref,
               findPark: findPark, findCoaster: findCoaster, formerNames: formerNames, formerNamesDated: formerNamesDated,
