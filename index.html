@@ -951,24 +951,32 @@ function photoTone(url, done){
   var im=new Image(); im.crossOrigin='anonymous'; im.referrerPolicy='no-referrer';
   im.onload=function(){
     try{
-      var cv=document.createElement('canvas'), W=48, H=32; cv.width=W; cv.height=H;
+      var cv=document.createElement('canvas'), W=120, H=80;   // fine enough that a thin track survives cv.width=W; cv.height=H;
       var cx=cv.getContext('2d'); cx.drawImage(im,0,0,W,H);
-      var d=cx.getImageData(0,0,W,H).data, B=new Array(24).fill(0), S=new Array(24).fill(0), N=new Array(24).fill(0);
+      var d=cx.getImageData(0,0,W,H).data, B=new Array(24).fill(0), S=new Array(24).fill(0), N=new Array(24).fill(0), Lt=new Array(24).fill(0), St=new Array(24).fill(0);
       for(var i=0;i<d.length;i+=4){
         var px=i/4, y=Math.floor(px/W);
         var r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255, mx=Math.max(r,g,b), mn=Math.min(r,g,b), c=mx-mn;
-        if(c<.28 || mx<.3) continue;                                   // greys, white, shadow
+        if(c<.2 || mx<.24) continue;                                   // greys, white, deep shadow (a maroon track still counts)
         var h = mx===r ? ((g-b)/c+6)%6 : mx===g ? (b-r)/c+2 : (r-g)/c+4, deg=h*60;
         if(deg>=185 && deg<=235 && y<H*0.55) continue;                  // sky
         if(deg>=56 && deg<=160) continue;                               // trees, grass, spring leaves
-        var k=Math.floor(deg/15)%24, w=c*mx;
-        B[k]+=w; S[k]+=deg*w; N[k]++;
+        // Track is mostly up in the picture; trucks, buildings and crowds sit
+        // along the bottom (Carter, 2026-11-26: Ride to Happiness came out the
+        // red of a dumpster, not its maroon track).
+        if(y>H*0.75) continue;                                          // the bottom quarter: trucks, crowds, buildings
+        var k=Math.floor(deg/15)%24, w=c*(.5+mx/2)*(y<H*0.6 ? 1.6 : 0.6);
+        var L=(mx+mn)/2, Sat=c/(1-Math.abs(2*L-1)||1);
+        B[k]+=w; S[k]+=deg*w; N[k]++; Lt[k]+=L*w; St[k]+=Sat*w;
       }
       var best=-1, bw=0; for(var j=0;j<24;j++) if(B[j]>bw){ bw=B[j]; best=j; }
-      // At least ~1.2% of the picture in that colour (a thin track still
-      // counts), or there is no clear track colour.
-      if(best<0 || N[best] < W*H*0.012) return;
-      done('hsl('+Math.round(S[best]/B[best])+',85%,62%)');
+      // At least ~1.2% of the upper three quarters in that colour (a thin
+      // track still counts), or there is no clear track colour.
+      if(best<0 || N[best] < W*H*0.75*0.012) return;
+      // The track's own depth (a maroon stays a deep red, not coral), lifted
+      // just enough to read on a photo.
+      var l=Lt[best]/B[best]*100, sa=St[best]/B[best]*100;
+      done('hsl('+Math.round(S[best]/B[best])+','+Math.round(Math.max(70,Math.min(90,sa+25)))+'%,'+Math.round(Math.max(48,Math.min(66,l+12)))+'%)');
     }catch(e){}
   };
   im.src=url;
