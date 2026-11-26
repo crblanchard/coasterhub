@@ -1,0 +1,8 @@
+-- Hot Go Dreamworld's third ride (Carter, 2026-11-26: "info on the Preston &
+-- Barbieri ride there ... call it Unknown"): an unnamed Preston & Barbieri
+-- Double Coaster ("Double Race" on Wikipedia's P&B list), standing unfinished
+-- like the two B&Ms. The model string already exists on the site. Opening
+-- soon, with a note like the others. Idempotent; matched by name + park.
+INSERT INTO coasters (id, name, park, type, manu, model, h, s, l, inv, dur, yr, opened, openedPrec, closed, closedPrec, laps) SELECT (SELECT MAX(id) FROM coasters) + 1, 'Unknown', 'Hot Go Dreamworld', 'Steel', 'Preston & Barbieri', 'Preston & Barbieri Double Coaster', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'soon', NULL, NULL, 1 WHERE NOT EXISTS (SELECT 1 FROM coasters WHERE name = 'Unknown' AND park = 'Hot Go Dreamworld');
+INSERT INTO activity (at, actor, kind, subject, n, detail) SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now'), NULL, 'coaster_added', c.name, NULL, json_object('id', c.id, 'park', c.park) FROM coasters c WHERE c.park = 'Hot Go Dreamworld' AND c.name = 'Unknown' AND NOT EXISTS (SELECT 1 FROM activity a WHERE a.kind = 'coaster_added' AND json_extract(a.detail, '$.id') = c.id);
+INSERT INTO coaster_notes (coaster_id, note, url, kind, added) SELECT c.id, 'Unfinished: construction stalled around 2015 (financial and legal trouble). Recorded as opening soon. Model from Wikipedia''s Preston & Barbieri list ("Double Race") and RCDB ("Double Coaster / Nitro").', 'https://en.wikipedia.org/wiki/Preston_%26_Barbieri', 'status', date('now') FROM coasters c WHERE c.park = 'Hot Go Dreamworld' AND c.name = 'Unknown' AND NOT EXISTS (SELECT 1 FROM coaster_notes n WHERE n.coaster_id = c.id);
