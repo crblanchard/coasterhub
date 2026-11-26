@@ -1315,3 +1315,21 @@ html.pboxopen{overflow:hidden}
 h1,h2{font-family:var(--display);font-stretch:110%;letter-spacing:-.02em}
 :root a.crow .cn,:root details.mdl summary .nm,:root .rrow .nm b,:root .srow .n b,:root .top .t .n b,
 :root .addrow .cn,:root .trow .n b,:root .mlist .mtwo .nm{font-family:var(--display);font-stretch:92%;font-weight:800;letter-spacing:-.01em}
+/* A park's or coaster's first photo as its header (CoasterHub.photoHero;
+   Carter, 2026-11-26, on trial). No dark wash: white words with a shadow, or,
+   on a light photo (measured), dark words with a light glow. */
+:root .hero.photohero,:root[data-theme="light"] .hero.photohero{background-color:#2a3140!important;
+  background-image:var(--phimg)!important;background-size:cover!important;background-position:center 45%!important;background-repeat:no-repeat!important;
+  min-height:clamp(300px,46vh,460px);display:flex;align-items:flex-end;padding-bottom:30px!important;box-sizing:border-box;
+  --fg:#fff;--muted:rgba(255,255,255,.95);--accent2:#fff;--line:rgba(255,255,255,.5);
+  text-shadow:0 1px 3px rgba(0,0,0,.65),0 2px 18px rgba(0,0,0,.5)}
+:root .hero.photohero > .container{width:100%}
+:root .hero.photohero h1,:root .hero.photohero p,:root .hero.photohero p a{color:var(--fg)!important}
+:root .hero.photohero p{font-weight:600}
+:root .hero.photohero.phdark,:root[data-theme="light"] .hero.photohero.phdark{--fg:#111418;--muted:#1d2329;--accent2:#08304b;
+  text-shadow:0 0 2px rgba(255,255,255,.9),0 1px 14px rgba(255,255,255,.75)}
+.hero.photohero .phcred{position:absolute;right:12px;bottom:8px;font-size:.68rem;color:#fff!important;text-decoration:none;text-shadow:0 1px 3px rgba(0,0,0,.8);max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero.photohero .phall{position:absolute;right:14px;top:14px;font:inherit;font-size:.78rem;font-weight:700;padding:6px 12px;border:0;border-radius:999px;background-color:rgba(10,16,30,.55);color:#fff;cursor:pointer;text-shadow:none}
+.hero:not(.photohero) .phcred,.hero:not(.photohero) .phall{display:none}
+@media (max-width:640px){ :root .hero.photohero,:root[data-theme="light"] .hero.photohero{min-height:280px;padding-bottom:40px!important} .hero.photohero .phcred{max-width:80%} }
+

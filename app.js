@@ -2952,6 +2952,46 @@
     var c = cls ? ' class="' + cls + '"' : "";
     return p.page ? '<a' + c + ' href="' + E(p.page) + '" target="_blank" rel="noopener">' + E(t) + "</a>" : "<span" + c + ">" + E(t) + "</span>";
   }
+  // A page's header made of its first photo (Carter, 2026-11-26: "push it for
+  // parks and coasters" — on trial, he may revert). The name sits on the
+  // photo; its colour follows the photo: the part behind the words is
+  // measured and a light one gets dark text, so it never needs a dark wash.
+  // The credit sits in the corner, and the photo count opens every photo.
+  function photoHero(hero, list) {
+    if (!hero) return;
+    Array.prototype.forEach.call(hero.querySelectorAll(".phcred,.phall"), function (x) { x.remove(); });
+    hero.classList.remove("photohero", "phdark");
+    var p = list && list[0]; if (!p) return;
+    var src = photoSize(p.thumb || p.url, window.innerWidth >= 700 ? 1280 : 960);
+    var probe = new Image(); probe.crossOrigin = "anonymous"; probe.referrerPolicy = "no-referrer";
+    function show(dark) {
+      hero.style.setProperty("--phimg", 'url("' + src.replace(/"/g, "%22") + '")');
+      hero.classList.add("photohero"); if (dark) hero.classList.add("phdark");
+      hero.insertAdjacentHTML("beforeend", photoCredit(p, 40, "phcred")
+        + '<button type="button" class="phall">' + (list.length > 1 ? list.length + " photos" : "Photo") + "</button>");
+      hero.querySelector(".phall").onclick = function () { photoBox(list, 0); };
+    }
+    probe.onload = function () {
+      var dark = false;
+      try {
+        // The lower-left of the photo, where the name and the line under it sit.
+        var cv = document.createElement("canvas"), w = 48, h = 24; cv.width = w; cv.height = h;
+        var cx = cv.getContext("2d"), iw = probe.naturalWidth, ih = probe.naturalHeight;
+        cx.drawImage(probe, 0, ih * 0.5, iw * 0.6, ih * 0.5, 0, 0, w, h);
+        var d = cx.getImageData(0, 0, w, h).data, sum = 0, n = 0;
+        for (var i = 0; i < d.length; i += 4) { sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; n++; }
+        dark = sum / n / 255 > 0.6;
+      } catch (e) { dark = false; }   // a photo the browser won't let us measure keeps white text and its shadow
+      show(dark);
+    };
+    probe.onerror = function () {
+      // No CORS answer: try it plainly; if that loads, show it with white text.
+      var plain = new Image(); plain.referrerPolicy = "no-referrer";
+      plain.onload = function () { show(false); };
+      plain.src = src;
+    };
+    probe.src = src;
+  }
   function photoGallery(list, opts) {
     opts = opts || {};
     var E = searchEsc, g = document.createElement("div");
@@ -4154,7 +4194,7 @@
               adoptUsers: adoptUsers, riderBadge: riderBadge, accountCorner: accountCorner,
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, parkRanks: parkRanks, youStrip: youStrip, coasterFacts: coasterFacts,
-              openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, photoGallery: photoGallery, photoSize: photoSize, photoBox: photoBox, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
+              openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, photoGallery: photoGallery, photoHero: photoHero, photoSize: photoSize, photoBox: photoBox, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
               riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
