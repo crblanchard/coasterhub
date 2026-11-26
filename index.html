@@ -356,8 +356,13 @@
   /* Phones: a shorter card, and the stats on one line along the bottom, the
      last ones dropped if they still do not fit (Carter, 2026-11-26). */
   @media (max-width:640px){
-    .featc{aspect-ratio:4/3;border-radius:16px}
-    .featc .ov{padding:70px 14px 14px}
+    /* Smaller still (Carter, 2026-11-26: "make featured smaller on mobile"). */
+    .featc{aspect-ratio:16/11;border-radius:14px}
+    .featc .ov{padding:50px 12px 11px}
+    .featc .rk{top:10px;left:12px;font-size:2.2rem}
+    .featc .ov b{font-size:1.45rem;margin:6px 0 2px}
+    .featc .ov .pk{font-size:.85rem}
+    .featc .kick{font-size:.62rem;padding:4px 8px}
     .featc .chips{flex-wrap:nowrap;gap:4px;margin-top:8px;overflow:hidden}
     .featc .chips span{flex:none;font-size:.7rem;padding:3px 7px;border-radius:7px;white-space:nowrap}
   }
