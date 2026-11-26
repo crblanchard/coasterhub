@@ -43,6 +43,17 @@ decided = {(r['source'], r['ref'], int(r['coaster_id'])) for r in reviews if r.g
 added = {(r['source'], r['ref']) for r in reviews if r.get('kind') == 'add'}
 
 # ---- every record, one shape ------------------------------------------------
+# A combined name also answers to its first half: Coasterpedia's park "Holiday
+# World & Splashin' Safari" is our "Holiday World" (Carter, 2026-11-26: Cannonball!
+# never reached the review list because the park names did not match exactly).
+def park_keys(names):
+    out = set()
+    for x in names:
+        if not x: continue
+        out.add(sq(x))
+        head = re.split(r'\s+(?:&|and)\s+', x, maxsplit=1)[0]
+        if head != x and len(sq(head)) >= 8: out.add(sq(head))
+    return out - {''}
 recs = []    # {source, ref, name, names, park, parks, lat, lon, wikidata, status}
 for r in csv.DictReader(open('tools/open-data/wikidata/base.csv')):
     qid = r['c'].rsplit('/', 1)[1]
@@ -50,13 +61,13 @@ for r in csv.DictReader(open('tools/open-data/wikidata/base.csv')):
     names = [r['label']] + [a for a in r['aliases'].split('|') if a]
     pk = [x for x in (r['partOf'] + '|' + r['location']).split('|') if x]
     recs.append(dict(source='wikidata', ref=qid, name=r['label'] or qid, names=[n for n in names if n], park=' | '.join(pk) or None,
-                     parks={sq(x) for x in pk}, lat=float(m.group(2)) if m else None, lon=float(m.group(1)) if m else None,
+                     parks=park_keys(pk), lat=float(m.group(2)) if m else None, lon=float(m.group(1)) if m else None,
                      wikidata=qid, status=None, country=r['country']))
 for i in src['items']:
     raw = i['raw']
     names = [i['name']] + [v for k, v in raw.items() if re.fullmatch(r'name\d|old_name|alt_name|name:en', k)]
     recs.append(dict(source=i['source'], ref=i['ref'], name=i['name'], names=[n for n in names if n], park=i['park'],
-                     parks={sq(i['park'])} - {''} if i['park'] else set(), lat=i['lat'], lon=i['lon'],
+                     parks=park_keys([i['park']]) if i['park'] else set(), lat=i['lat'], lon=i['lon'],
                      wikidata=raw.get('wikidata'), status=raw.get('status'), country=raw.get('country'), location=raw.get('location')))
 
 # ---- what is linked already -------------------------------------------------
