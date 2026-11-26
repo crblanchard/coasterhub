@@ -1734,9 +1734,13 @@
   // slides in from the right, Back slides it away, a tab change crossfades.
   // The kind is read here, on the arriving page, before its first frame.
   if (typeof window !== "undefined") window.addEventListener("pagereveal", function (e) {
-    if (!e.viewTransition) return;
+    // Read and clear the mark FIRST, transition or not: a tab tap opts the page
+    // it leaves out, so the page it opens has no transition, and a mark left
+    // unread here was read by the NEXT page instead, which then skipped its
+    // slide (Carter, 2026-11-26: no sliding from Home, Explore or any tab page).
     var t = null;
     try { t = window.sessionStorage.getItem("ch_vt"); window.sessionStorage.removeItem("ch_vt"); } catch (x) {}
+    if (!e.viewTransition) return;
     var act = window.navigation && window.navigation.activation;
     if (!t && act && act.navigationType === "traverse") t = "back";
     // Same tier (Carter, 2026-10-30: "don't do the screen slide for my rankings
