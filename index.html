@@ -130,8 +130,13 @@
   .hero.home .herojoin{margin-top:8px}
   /* The skyline's train run (trainRun): while it runs, the hero shows only its
      sky, and a copy of the skyline sits exactly where the painted one was. */
-  section.hero.home.trainon{background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
-  :root[data-theme="light"] section.hero.home.trainon{background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
+  section.hero.home.trainon{background-image:var(--sky,linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%))!important;background-size:100% 100%!important;background-position:0 0!important}
+  :root[data-theme="light"] section.hero.home.trainon{background-image:var(--sky,linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%))!important}
+  /* Seasonal touches (the sky script): on the skyline's own box, and snow over the whole band. */
+  section.hero.home .skydeco{position:absolute;bottom:0;right:max(20px,calc(50vw - 520px));height:min(190px,82%,max(64px,calc(36vw - 190px)));aspect-ratio:662/200;pointer-events:none;z-index:0}
+  section.hero.home .skydeco svg,section.hero.home .skysnow svg{display:block;width:100%;height:100%}
+  section.hero.home .skysnow{position:absolute;inset:0;pointer-events:none;z-index:0}
+  @media (max-width:640px){ section.hero.home .skydeco{right:10px;height:80px} }
   section.hero.home .trainrun{position:absolute;bottom:0;right:max(20px,calc(50vw - 520px));height:min(190px,82%,max(64px,calc(36vw - 190px)));aspect-ratio:662/200;pointer-events:none;z-index:0}
   section.hero.home .trainrun svg{display:block;width:100%;height:100%}
   section.hero.home > .container{position:relative;z-index:1}
@@ -139,12 +144,16 @@
   /* The split-flap count (Carter, 2026-11-26): each digit a dark tile with
      the seam across its middle; .flip folds the top half down. */
   .hero.home .heroyou h1 .n{display:inline-flex;align-items:stretch;gap:.06em;vertical-align:baseline}
-  .hero.home .heroyou h1 .fd{position:relative;display:inline-block;min-width:.66em;padding:.04em .07em .02em;border-radius:.1em;text-align:center;
-    background-color:#17202e;color:#f6f7f9;box-shadow:inset 0 -.05em 0 rgba(0,0,0,.35),0 .03em .08em rgba(0,0,0,.25);perspective:3em}
-  .hero.home .heroyou h1 .fd::after{content:"";position:absolute;left:0;right:0;top:50%;height:.035em;background-color:rgba(0,0,0,.55);box-shadow:0 1px 0 rgba(255,255,255,.08)}
+  /* Quiet tiles in the page's own colours (Carter, 2026-11-26: "too strong ...
+     dark mode has dark background and light/light"): day is a pale glassy
+     tile with dark digits, night a deep one with light digits; a faint seam. */
+  .hero.home .heroyou h1 .fd{position:relative;display:inline-block;min-width:.64em;padding:.03em .06em .01em;border-radius:.09em;text-align:center;
+    background-color:rgba(255,255,255,.5);color:var(--fg);box-shadow:inset 0 0 0 1px rgba(10,60,90,.12),0 .02em .05em rgba(10,40,70,.10);perspective:3em}
+  .hero.home .heroyou h1 .fd::after{content:"";position:absolute;left:.06em;right:.06em;top:52%;height:1px;background-color:rgba(10,60,90,.16)}
   .hero.home .heroyou h1 .fd b{display:block;font-weight:inherit}
   .hero.home .heroyou h1 .fs{align-self:flex-end;margin:0 .01em}
-  :root:not([data-theme="light"]) .hero.home .heroyou h1 .fd{background-color:#e9edf3;color:#0b1228}
+  :root:not([data-theme="light"]) .hero.home .heroyou h1 .fd{background-color:rgba(255,255,255,.07);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 .02em .06em rgba(0,0,0,.3)}
+  :root:not([data-theme="light"]) .hero.home .heroyou h1 .fd::after{background-color:rgba(0,0,0,.45)}
   .hero.home .heroyou h1 .fd.flip b{animation:flapdown .07s ease-in}
   @keyframes flapdown{0%{transform:rotateX(70deg);opacity:.4}100%{transform:none;opacity:1}}
   @media (prefers-reduced-motion:reduce){ .hero.home .heroyou h1 .fd.flip b{animation:none} }
@@ -329,6 +338,8 @@
   .featc .rk{position:absolute;top:14px;left:16px;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:clamp(2.6rem,7vw,4.2rem);line-height:1;letter-spacing:-.03em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55)}
   .featc .rk i{font-style:normal;font-size:.45em;vertical-align:.9em;margin-right:2px;opacity:.85}
   .featc .rk.st{color:#7fe3d9}.featc .rk.wd{color:#ffb27a}
+  .featc.toned .rk{color:var(--tone)}
+  .featc .fbar{position:absolute;left:0;right:0;bottom:0;height:6px;background-color:var(--tone)}
   /* A firmer shadow so the number reads on pale photos (Carter, 2026-11-26;
      the dark wash at the top came off again the same day). */
   .featc .rk{z-index:1;text-shadow:0 1px 2px rgba(0,0,0,.55),0 2px 14px rgba(0,0,0,.55)}
@@ -755,6 +766,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
                           : 'Not on your count yet.';
         var fy=document.getElementById('featyou'); fy.innerHTML=line; fy.hidden=!line;
         document.getElementById('featwrap').hidden=false;
+        photoTone(u, function(col){ el.style.setProperty('--tone', col); el.classList.add('toned'); if(!el.querySelector('.fbar')) el.insertAdjacentHTML('beforeend','<span class="fbar"></span>'); });
         var ch=document.querySelector('#featc .chips');
         while(ch && ch.children.length>1 && ch.scrollWidth>ch.clientWidth+1) ch.lastElementChild.remove();
       };
@@ -874,7 +886,8 @@ var recent = CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit
 function trainRun(){
   var hero = document.querySelector('section.hero.home'); if (!hero || hero.querySelector('.trainrun')) return;
   var light = document.documentElement.getAttribute('data-theme') === 'light';
-  fetch(light ? '/skyline-paint-day.svg?v=1' : '/skyline-paint-night.svg?v=1').then(function(r){ return r.ok ? r.text() : Promise.reject(); }).then(function(txt){
+  var skyimg = (hero.style.getPropertyValue('--skyimg') || '').replace(/^url\(|\)$/g, '');
+  fetch(skyimg || (light ? '/skyline-paint-day.svg?v=1' : '/skyline-paint-night.svg?v=1')).then(function(r){ return r.ok ? r.text() : Promise.reject(); }).then(function(txt){
     var doc = new DOMParser().parseFromString(txt, 'image/svg+xml'), svg = doc.documentElement;
     var paths = svg.querySelectorAll('path'), rail = null, parked = null;
     for (var i = 0; i < paths.length; i++) {
@@ -927,6 +940,106 @@ function trainRun(){
     requestAnimationFrame(frame);
   }).catch(function(){});
 }
+
+// The featured card's colour from its photo (Carter, 2026-11-26): the big rank
+// number and a thin bar along the bottom take the photo's strongest colour,
+// gold for a yellow track, orange for an orange one, sky blue behind a dark
+// one. Measured from a 40px copy of the picture; a grey photo, or one the
+// browser won't let us read, keeps the steel/wood colour.
+function photoTone(url, done){
+  var im=new Image(); im.crossOrigin='anonymous'; im.referrerPolicy='no-referrer';
+  im.onload=function(){
+    try{
+      var cv=document.createElement('canvas'), W=40, H=26; cv.width=W; cv.height=H;
+      var cx=cv.getContext('2d'); cx.drawImage(im,0,0,W,H);
+      var d=cx.getImageData(0,0,W,H).data, B=new Array(24).fill(0), S=new Array(24).fill(0);
+      for(var i=0;i<d.length;i+=4){
+        var r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255, mx=Math.max(r,g,b), mn=Math.min(r,g,b), c=mx-mn;
+        if(c<.18 || mx<.25) continue;                      // greys, shadows: no colour to give
+        var h = mx===r ? ((g-b)/c+6)%6 : mx===g ? (b-r)/c+2 : (r-g)/c+4;
+        var k=Math.floor(h*4)%24, w=c*mx;                  // vivid and bright counts most
+        // Green is mostly trees and grass, not the ride: it counts for less.
+        if(k>=6 && k<=10) w*=0.35;
+        B[k]+=w; S[k]+=h*60*w;
+      }
+      var best=-1, bw=0; for(var j=0;j<24;j++) if(B[j]>bw){ bw=B[j]; best=j; }
+      if(best<0 || bw<6) return;
+      var hue=Math.round(S[best]/B[best]);
+      done('hsl('+hue+',85%,62%)');
+    }catch(e){}
+  };
+  im.src=url;
+}
+
+// The home sky follows the time of day and the season (Carter, 2026-11-26),
+// in the theme you have on: day mode runs sunrise, day, golden hour and a
+// soft twilight; night mode runs pre-dawn, a deep blue day, dusk with the
+// lights on, and night. October brings bats and a pumpkin (and a fright-night
+// sky at night), December lights up the lift hill, January to March snows.
+// Preview any of it: ?sky=sunrise|day|golden|twilight|predawn|deep|dusk|night
+// and ?season=oct|dec|winter|none.
+(function(){
+  var hero = document.querySelector('section.hero.home'); if (!hero) return;
+  var Q = new URLSearchParams(location.search);
+  var DAY = '/skyline-paint-day.svg?v=1', NIGHT = '/skyline-paint-night.svg?v=1';
+  var SKIES = {
+    sunrise:  [DAY,   '#8fb6e3 0%,#f3c7a8 62%,#fde3c3 100%'],
+    day:      [DAY,   '#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%'],
+    golden:   [DAY,   '#e9a85c 0%,#f6cf8e 55%,#fde8bf 100%'],
+    twilight: [DAY,   '#9fabd9 0%,#d6c6e4 58%,#f6dccf 100%'],
+    frost:    [DAY,   '#c9d6e2 0%,#e3eaf0 60%,#f3f5f7 100%'],
+    predawn:  [NIGHT, '#0c1838 0%,#2b2f63 60%,#9c5a74 100%'],
+    deep:     [NIGHT, '#0a1630 0%,#132a52 62%,#1e3a66 100%'],
+    dusk:     [NIGHT, '#26285e 0%,#7b4a8c 58%,#ee8a5c 100%'],
+    night:    [NIGHT, '#070b22 0%,#0d1233 62%,#1d1a45 100%'],
+    fright:   [NIGHT, '#140b24 0%,#3b1748 55%,#d9601c 100%']
+  };
+  function pick(){
+    var light = document.documentElement.getAttribute('data-theme') === 'light';
+    var now = new Date(), h = now.getHours() + now.getMinutes() / 60, m = now.getMonth() + 1;
+    var season = Q.get('season') || (m === 10 ? 'oct' : m === 12 ? 'dec' : m <= 3 ? 'winter' : 'none');
+    var sky = Q.get('sky');
+    if (!SKIES[sky]) {
+      if (light) sky = h >= 5 && h < 8 ? 'sunrise' : h >= 8 && h < 16.5 ? 'day' : h >= 16.5 && h < 19.5 ? 'golden' : 'twilight';
+      else sky = h >= 5 && h < 8 ? 'predawn' : h >= 8 && h < 17 ? 'deep' : h >= 17 && h < 20 ? 'dusk' : 'night';
+      if (season === 'oct' && !light && (sky === 'dusk' || sky === 'night')) sky = 'fright';
+      if (season === 'winter' && light && sky === 'day') sky = 'frost';
+    }
+    return { sky: sky, season: season };
+  }
+  function deco(season){
+    Array.prototype.forEach.call(hero.querySelectorAll('.skydeco,.skysnow'), function(x){ x.remove(); });
+    var NS = 'http://www.w3.org/2000/svg', h = '';
+    if (season === 'oct') {
+      h = '<g fill="#140a1c" opacity=".85"><path d="M470 40 q8 -10 16 0 q4 -6 8 0 q8 -10 16 0 q-10 2 -20 10 q-10 -8 -20 -10z"/><path d="M400 70 q5 -6 10 0 q3 -4 6 0 q5 -6 10 0 q-7 1 -13 7 q-6 -6 -13 -7z"/></g>'
+        + '<g transform="translate(588,188)"><ellipse rx="12" ry="9" fill="#ff7a1a"/><rect x="-1.5" y="-13" width="3" height="5" fill="#3d6b2a"/><path d="M-6 -2 l3 -3 l3 3z M3 -2 l3 -3 l3 3z M-6 3 q6 4 12 0" fill="#3a1600"/></g>';
+    } else if (season === 'dec') {
+      var col = ['#ff5a5f', '#ffd23f', '#4fd1c5', '#9b8cff'];
+      for (var i = 0; i <= 26; i++) { var t = i / 26; h += '<circle cx="' + (250.8 * t).toFixed(1) + '" cy="' + (199.5 - 162.9 * t - 4).toFixed(1) + '" r="2.6" fill="' + col[i % 4] + '"/>'; }
+      h += '<path d="M627 15 L630 2 L633 15z" fill="#ffd23f"/>';
+    }
+    if (h) hero.insertAdjacentHTML('beforeend', '<div class="skydeco" aria-hidden="true"><svg viewBox="0 0 662 200">' + h + '</svg></div>');
+    if (season === 'winter') {
+      var f = ''; for (var k = 0; k < 70; k++) f += '<circle cx="' + ((k * 53) % 400) + '" cy="' + ((k * 37) % 210) + '" r="' + (((k * 7) % 3) + 1) + '" fill="#fff" opacity=".8"/>';
+      hero.insertAdjacentHTML('beforeend', '<div class="skysnow" aria-hidden="true"><svg viewBox="0 0 400 210" preserveAspectRatio="xMidYMid slice">' + f + '</svg></div>');
+    }
+  }
+  function apply(){
+    var p = pick(), s = SKIES[p.sky], grad = 'linear-gradient(180deg,' + s[1] + ')';
+    hero.style.backgroundImage = 'url(' + s[0] + '),' + grad;
+    hero.style.setProperty('--sky', grad);
+    hero.style.setProperty('--skyimg', 'url(' + s[0] + ')');
+    hero.setAttribute('data-sky', p.sky);
+    deco(p.season);
+  }
+  apply();
+  // The theme switch flips the family straight away; coming back to the tab
+  // later picks up the hour.
+  new MutationObserver(apply).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) apply(); });
+  // ?train=1 runs the skyline's train once, to see it without logging a credit.
+  if (Q.get('train')) setTimeout(function(){ trainRun(); }, 900);
+})();
 </script>
 </body>
 </html>
