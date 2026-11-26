@@ -1,4 +1,4 @@
--- STATUS 2026-11-26: written, NOT yet run on D1; waiting for Carter's go-ahead to delete the empty Draak row.
+-- STATUS: run on D1 2026-11-26 at Carter's go-ahead ("merge please").
 -- Draak at Plopsaland Belgium is Draconis, renamed: the MACK powered coaster
 -- (2004) was called Draak / De Draak before (Coasterpedia's "Draak" redirects
 -- to Draconis; plopsa.com's own page is Draconis). The site had both: Draconis
