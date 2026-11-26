@@ -766,7 +766,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
                           : 'Not on your count yet.';
         var fy=document.getElementById('featyou'); fy.innerHTML=line; fy.hidden=!line;
         document.getElementById('featwrap').hidden=false;
-        photoTone(u, function(col){ el.style.setProperty('--tone', col); el.classList.add('toned'); if(!el.querySelector('.fbar')) el.insertAdjacentHTML('beforeend','<span class="fbar"></span>'); });
+        if(c.type!=='Wood') photoTone(u, function(col){ el.style.setProperty('--tone', col); el.classList.add('toned'); if(!el.querySelector('.fbar')) el.insertAdjacentHTML('beforeend','<span class="fbar"></span>'); });
         var ch=document.querySelector('#featc .chips');
         while(ch && ch.children.length>1 && ch.scrollWidth>ch.clientWidth+1) ch.lastElementChild.remove();
       };
@@ -941,31 +941,34 @@ function trainRun(){
   }).catch(function(){});
 }
 
-// The featured card's colour from its photo (Carter, 2026-11-26): the big rank
-// number and a thin bar along the bottom take the photo's strongest colour,
-// gold for a yellow track, orange for an orange one, sky blue behind a dark
-// one. Measured from a 40px copy of the picture; a grey photo, or one the
-// browser won't let us read, keeps the steel/wood colour.
+// The featured card's colour from its photo, aimed at the track (Carter,
+// 2026-11-26: "make it always [the track]"): the big rank number and a thin
+// bar take the track's colour. A wooden coaster keeps the wood colour (its
+// timber rarely reads clearly in a photo). For steel: sky blue in the upper
+// part of the picture, greys, shadows and greenery are ignored; what is left
+// must be a strong, plentiful colour, else the steel colour stays.
 function photoTone(url, done){
   var im=new Image(); im.crossOrigin='anonymous'; im.referrerPolicy='no-referrer';
   im.onload=function(){
     try{
-      var cv=document.createElement('canvas'), W=40, H=26; cv.width=W; cv.height=H;
+      var cv=document.createElement('canvas'), W=48, H=32; cv.width=W; cv.height=H;
       var cx=cv.getContext('2d'); cx.drawImage(im,0,0,W,H);
-      var d=cx.getImageData(0,0,W,H).data, B=new Array(24).fill(0), S=new Array(24).fill(0);
+      var d=cx.getImageData(0,0,W,H).data, B=new Array(24).fill(0), S=new Array(24).fill(0), N=new Array(24).fill(0);
       for(var i=0;i<d.length;i+=4){
+        var px=i/4, y=Math.floor(px/W);
         var r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255, mx=Math.max(r,g,b), mn=Math.min(r,g,b), c=mx-mn;
-        if(c<.18 || mx<.25) continue;                      // greys, shadows: no colour to give
-        var h = mx===r ? ((g-b)/c+6)%6 : mx===g ? (b-r)/c+2 : (r-g)/c+4;
-        var k=Math.floor(h*4)%24, w=c*mx;                  // vivid and bright counts most
-        // Green is mostly trees and grass, not the ride: it counts for less.
-        if(k>=6 && k<=10) w*=0.35;
-        B[k]+=w; S[k]+=h*60*w;
+        if(c<.28 || mx<.3) continue;                                   // greys, white, shadow
+        var h = mx===r ? ((g-b)/c+6)%6 : mx===g ? (b-r)/c+2 : (r-g)/c+4, deg=h*60;
+        if(deg>=185 && deg<=235 && y<H*0.55) continue;                  // sky
+        if(deg>=56 && deg<=160) continue;                               // trees, grass, spring leaves
+        var k=Math.floor(deg/15)%24, w=c*mx;
+        B[k]+=w; S[k]+=deg*w; N[k]++;
       }
       var best=-1, bw=0; for(var j=0;j<24;j++) if(B[j]>bw){ bw=B[j]; best=j; }
-      if(best<0 || bw<6) return;
-      var hue=Math.round(S[best]/B[best]);
-      done('hsl('+hue+',85%,62%)');
+      // At least ~1.2% of the picture in that colour (a thin track still
+      // counts), or there is no clear track colour.
+      if(best<0 || N[best] < W*H*0.012) return;
+      done('hsl('+Math.round(S[best]/B[best])+',85%,62%)');
     }catch(e){}
   };
   im.src=url;
