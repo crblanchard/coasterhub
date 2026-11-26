@@ -997,15 +997,39 @@ function photoTone(url, done){
   function pick(){
     var light = document.documentElement.getAttribute('data-theme') === 'light';
     var now = new Date(), h = now.getHours() + now.getMinutes() / 60, m = now.getMonth() + 1;
+    var sun = sunTimes(now), rise = sun.rise, set = sun.set;   // local hours, e.g. 7.1 and 16.9
     var season = Q.get('season') || (m === 10 ? 'oct' : m === 12 ? 'dec' : m <= 3 ? 'winter' : 'none');
     var sky = Q.get('sky');
     if (!SKIES[sky]) {
-      if (light) sky = h >= 5 && h < 8 ? 'sunrise' : h >= 8 && h < 16.5 ? 'day' : h >= 16.5 && h < 19.5 ? 'golden' : 'twilight';
-      else sky = h >= 5 && h < 8 ? 'predawn' : h >= 8 && h < 17 ? 'deep' : h >= 17 && h < 20 ? 'dusk' : 'night';
+      // Around the real sunrise and sunset for the date (Carter, 2026-11-26:
+      // "sun goes down at 5pm" in late November), not fixed hours.
+      if (light) sky = h >= rise - 0.5 && h < rise + 1.5 ? 'sunrise' : h >= rise + 1.5 && h < set - 1.5 ? 'day' : h >= set - 1.5 && h < set + 0.33 ? 'golden' : 'twilight';
+      else sky = h >= rise - 1 && h < rise + 1 ? 'predawn' : h >= rise + 1 && h < set - 1 ? 'deep' : h >= set - 1 && h < set + 1 ? 'dusk' : 'night';
       if (season === 'oct' && !light && (sky === 'dusk' || sky === 'night')) sky = 'fright';
       if (season === 'winter' && light && sky === 'day') sky = 'frost';
     }
     return { sky: sky, season: season };
+  }
+  // Sunrise and sunset in local clock hours, from the standard sunrise
+  // equation. Where you are comes without asking: longitude from your time
+  // zone's standard offset (15° an hour), latitude a typical one for its
+  // region. Within half an hour or so, which is all a sky needs.
+  function sunTimes(d){
+    var y = d.getFullYear(), std = Math.max(new Date(y, 0, 1).getTimezoneOffset(), new Date(y, 6, 1).getTimezoneOffset());
+    var lon = -std / 4, tz = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    var lat = /^Australia|^Pacific\/(Auckland|Chatham)|^America\/(Argentina|Sao_Paulo|Santiago|Montevideo)|^Africa\/(Johannesburg|Maputo)/.test(tz) ? -34
+            : /^Europe|^Atlantic\/Reykjavik/.test(tz) ? 50 : /^Asia/.test(tz) ? 33 : /^Africa/.test(tz) ? 8 : 38;
+    var rad = Math.PI / 180, n = Math.round((d.getTime() / 86400000 + 2440587.5) - 2451545 + 0.0008);
+    var J = n - lon / 360, M = (357.5291 + 0.98560028 * J) % 360;
+    var C = 1.9148 * Math.sin(M * rad) + 0.02 * Math.sin(2 * M * rad) + 0.0003 * Math.sin(3 * M * rad);
+    var L = (M + C + 282.9372) % 360, Jt = 2451545 + J + 0.0053 * Math.sin(M * rad) - 0.0069 * Math.sin(2 * L * rad);
+    var dec = Math.asin(Math.sin(L * rad) * Math.sin(23.44 * rad));
+    var cw = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(dec)) / (Math.cos(lat * rad) * Math.cos(dec));
+    cw = Math.max(-1, Math.min(1, cw));
+    var w = Math.acos(cw) / rad;
+    var hrs = function(jd){ var t = new Date((jd - 2440587.5) * 86400000); return t.getHours() + t.getMinutes() / 60; };
+    return { rise: hrs(Jt - w / 360), set: hrs(Jt + w / 360) };
   }
   function deco(season){
     Array.prototype.forEach.call(hero.querySelectorAll('.skydeco,.skysnow'), function(x){ x.remove(); });

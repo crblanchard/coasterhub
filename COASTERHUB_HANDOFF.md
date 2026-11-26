@@ -6553,5 +6553,5 @@ Reverted the same day (Carter: "undo the photo headers"): the two calls are gone
 
 - Count as a split-flap board (`.fd` tiles, quiet, theme-coloured); changed digits flip after new credits.
 - `trainRun()` sends the skyline train round once after a new credit (or `?train=1`).
-- The sky follows local time in the current theme, plus seasons (Oct bats/pumpkin and a fright-night sky in dark mode, Dec lift-hill lights, Jan–Mar snow and a frosted day). Preview with `?sky=sunrise|day|golden|twilight|frost|predawn|deep|dusk|night|fright` and `?season=oct|dec|winter|none`.
+- The sky follows the real sunrise and sunset (sunTimes: longitude from the time zone, latitude by region) in the current theme, plus seasons (Oct bats/pumpkin and a fright-night sky in dark mode, Dec lift-hill lights, Jan–Mar snow and a frosted day). Preview with `?sky=sunrise|day|golden|twilight|frost|predawn|deep|dusk|night|fright` and `?season=oct|dec|winter|none`.
 - Featured card: rank number and a bottom bar take the photo's strongest colour (`photoTone`), green weighted down so trees don't win.
