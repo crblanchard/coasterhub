@@ -1094,7 +1094,61 @@
       var g = { t: h1 ? h1.textContent.replace(/\s+/g, " ").trim().slice(0, 60) : (document.title || "").split(" \u2014 ")[0],
         bi: cs ? cs.backgroundImage : "", bc: cs ? cs.backgroundColor : "", bs: cs ? cs.backgroundSize : "", bp: cs ? cs.backgroundPosition : "",
         fg: cs ? cs.color : "", h: hero ? Math.min(hero.offsetHeight, 420) : 0, top: nav ? nav.offsetHeight : 0 };
-      sessionStorage.setItem(ghostKey(location.pathname + location.search), JSON.stringify(g));
+      // And a copy of what was on screen, with the page's own styles, so the
+      // swipe back shows the real page rather than a title (Carter,
+      // 2026-11-26: "old pages have titles but they're not loaded at all").
+      // Only down to just past the bottom of the screen, and only while it is
+      // small enough to keep; a big page falls back to its header band.
+      try {
+        // Only what is on screen: anything above it becomes empty space of the
+        // same height, anything below it is left out, and a big element is
+        // opened up and taken apart the same way (a long list keeps only the
+        // rows you could see). Small enough to keep, even on /parks.
+        var vh = window.innerHeight, parts = [], size = 0;
+        var esc = function (t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;"); };
+        var snap = function (el, depth) {
+          var r = el.getBoundingClientRect();
+          if (r.top > vh * 1.15) return "";
+          if (r.bottom < -40) return r.height ? '<div style="height:' + Math.round(r.height) + 'px"></div>' : "";
+          var h = el.outerHTML;
+          if (h.length < 24000 || depth > 7 || !el.children.length) return h;
+          var shell = el.cloneNode(false).outerHTML, cut = shell.lastIndexOf("</");
+          var open = cut > 0 ? shell.slice(0, cut) : shell, close = cut > 0 ? shell.slice(cut) : "";
+          var inner = "";
+          Array.prototype.forEach.call(el.childNodes, function (n) {
+            if (n.nodeType === 1) inner += snap(n, depth + 1);
+            else if (n.nodeType === 3) inner += esc(n.textContent);
+          });
+          return open + inner + close;
+        };
+        Array.prototype.forEach.call(document.body.children, function (el) {
+          if (size < 0) return;
+          var t = el.tagName;
+          if (t === "SCRIPT" || t === "STYLE" || t === "LINK" || t === "TEMPLATE" || el.hidden) return;
+          if (el.matches("header.nav, .tabbar, .edgeghost, .edgeshade, footer.site")) return;
+          var csx = getComputedStyle(el);
+          if (csx.position === "fixed" || csx.display === "none") return;
+          var h = snap(el, 0); size += h.length;
+          if (size > 300000) { size = -1; return; }
+          parts.push(h);
+        });
+        if (size > 0) {
+          var css = Array.prototype.map.call(document.querySelectorAll("head style"), function (st) { return st.textContent; }).join("\n");
+          if (css.length < 150000) g.css = css;
+          g.html = parts.join("");
+          g.y = Math.round(window.scrollY);
+        }
+      } catch (e2) {}
+      var key = ghostKey(location.pathname + location.search);
+      try { sessionStorage.setItem(key, JSON.stringify(g)); }
+      catch (e3) { delete g.html; delete g.css; try { sessionStorage.setItem(key, JSON.stringify(g)); } catch (e4) {} }
+      // Keep the last dozen pages' copies, so the storage never fills.
+      try {
+        var list = JSON.parse(sessionStorage.getItem("ch_ghosts") || "[]").filter(function (k) { return k !== key; });
+        list.push(key);
+        while (list.length > 12) sessionStorage.removeItem(list.shift());
+        sessionStorage.setItem("ch_ghosts", JSON.stringify(list));
+      } catch (e5) {}
     } catch (e) {}
   }
   function notePrev() {
@@ -1113,6 +1167,13 @@
       if (prev) g = JSON.parse(sessionStorage.getItem(ghostKey(prev)) || "null");
     } catch (e) {}
     var el = document.createElement("div"); el.className = "edgeghost";
+    if (g && g.html) {
+      // The page's own styles, kept to the copy (@scope, iOS 17.4+): a browser
+      // without it shows the copy in the site's shared styles only.
+      var scoped = g.css && typeof CSSScopeRule !== "undefined" ? "<style>@scope (.edgeghost) {" + g.css + "}</style>" : "";
+      el.innerHTML = scoped + '<div class="ghbody" style="margin-top:' + (g.top || 0) + 'px;transform:translateY(' + (-(g.y || 0)) + 'px)">' + g.html + "</div>";
+      return el;
+    }
     if (g) {
       var hd = document.createElement("div"); hd.className = "gh";
       hd.style.marginTop = (g.top || 0) + "px";
@@ -1190,6 +1251,8 @@
         els = movers();
         els.forEach(function (el) { el.style.willChange = "transform"; });
         shade = document.createElement("div"); shade.className = "edgeshade"; document.body.appendChild(shade);
+        // Under the top bar, not through it (Carter, 2026-11-26).
+        var nb = document.querySelector("header.nav"); if (nb) shade.style.top = nb.getBoundingClientRect().bottom + "px";
         ghost = ghostEl(); document.body.appendChild(ghost);
         document.documentElement.classList.add("edgeswiping");
       }

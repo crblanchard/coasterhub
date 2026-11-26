@@ -2,6 +2,10 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
+   "at": "2026-11-26T23:00:21Z",
+   "text": "In the iPhone app, swiping back now shows the actual previous page sliding in behind, and the top bar stays still while you swipe."
+  },
+  {
    "at": "2026-11-26T02:38:35Z",
    "text": "The home page sky now follows the time of day and the season, your count sits on a flip board, and the skyline's train runs after a new credit. Saved trips have their own Trips page, and lists use short names like Vekoma SLC, B&M and RMC."
   },
