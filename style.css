@@ -1142,7 +1142,19 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
 }
 /* The app's own swipe-back (app.js edgeSwipe, 2026-11-17): what is between the
    bars follows the finger; this is the shadow on its left edge. */
-html.edgeswiping,html.edgeswiping body{overflow-x:hidden}
+/* clip, not hidden: overflow hidden on html/body turns the sticky top bar
+   into an ordinary block, so a swipe on a scrolled page took the bar with it
+   (Carter, 2026-11-26). */
+html.edgeswiping,html.edgeswiping body{overflow-x:clip}
+/* Where the previous page will be: its header band and title, remembered when
+   you left it, easing in from the left as the iPhone's own swipe does. Under
+   the bars, clipped to the strip beside the sliding page (app.js). */
+.edgeghost{position:fixed;inset:0;z-index:9;pointer-events:none;background-color:var(--bg);overflow:hidden}
+.edgeghost .gh{position:relative;padding:22px 24px 18px;box-sizing:border-box;background-repeat:no-repeat}
+.edgeghost .gh b{display:block;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:2rem;line-height:1.05;letter-spacing:-.02em;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.edgeghost .gl{margin:18px 24px 0;height:14px;border-radius:7px;background-color:var(--soft)}
+.edgeghost .gl+.gl{width:62%}
+.edgeghost .gl+.gl+.gl{width:78%}
 .edgeshade{position:fixed;top:0;bottom:0;left:-16px;width:16px;z-index:15;pointer-events:none;opacity:0;
   background:linear-gradient(to left,rgba(0,0,0,.18),rgba(0,0,0,0))}
 @keyframes vt-push-in{from{transform:translateX(100%)}}

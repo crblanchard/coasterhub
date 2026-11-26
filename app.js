@@ -1082,8 +1082,60 @@
   // turned the native gesture off and says so in its user agent ("CHSwipe/1",
   // app/capacitor.config.json) — any older build keeps the native gesture,
   // and no browser ever runs this.
+  // What each page looked like (its header band and title), kept so the swipe
+  // back can draw a stand-in for the page underneath: a web page cannot draw
+  // the previous page itself (Carter, 2026-11-26: "still getting white screens
+  // in the back"). And which page each one was opened from.
+  function ghostKey(path) { return "ch_ghost_" + path; }
+  function saveGhost() {
+    try {
+      var hero = document.querySelector("section.hero"), h1 = hero && hero.querySelector("h1");
+      var cs = hero ? getComputedStyle(hero) : null, nav = document.querySelector("header.nav");
+      var g = { t: h1 ? h1.textContent.replace(/\s+/g, " ").trim().slice(0, 60) : (document.title || "").split(" \u2014 ")[0],
+        bi: cs ? cs.backgroundImage : "", bc: cs ? cs.backgroundColor : "", bs: cs ? cs.backgroundSize : "", bp: cs ? cs.backgroundPosition : "",
+        fg: cs ? cs.color : "", h: hero ? Math.min(hero.offsetHeight, 420) : 0, top: nav ? nav.offsetHeight : 0 };
+      sessionStorage.setItem(ghostKey(location.pathname + location.search), JSON.stringify(g));
+    } catch (e) {}
+  }
+  function notePrev() {
+    try {
+      var nav0 = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+      if (nav0 && nav0.type !== "navigate") return;
+      var r = document.referrer ? new URL(document.referrer) : null;
+      if (r && r.origin === location.origin && r.pathname + r.search !== location.pathname + location.search)
+        sessionStorage.setItem("ch_prev_" + location.pathname + location.search, r.pathname + r.search);
+    } catch (e) {}
+  }
+  function ghostEl() {
+    var g = null;
+    try {
+      var prev = sessionStorage.getItem("ch_prev_" + location.pathname + location.search);
+      if (prev) g = JSON.parse(sessionStorage.getItem(ghostKey(prev)) || "null");
+    } catch (e) {}
+    var el = document.createElement("div"); el.className = "edgeghost";
+    if (g) {
+      var hd = document.createElement("div"); hd.className = "gh";
+      hd.style.marginTop = (g.top || 0) + "px";
+      hd.style.minHeight = (g.h || 0) + "px";
+      if (g.bi && g.bi !== "none") hd.style.backgroundImage = g.bi;
+      if (g.bc) hd.style.backgroundColor = g.bc;
+      if (g.bs) hd.style.backgroundSize = g.bs;
+      if (g.bp) hd.style.backgroundPosition = g.bp;
+      if (g.fg) hd.style.color = g.fg;
+      var b = document.createElement("b"); b.textContent = g.t || ""; hd.appendChild(b);
+      el.appendChild(hd);
+    }
+    for (var i = 0; i < 3; i++) { var l = document.createElement("div"); l.className = "gl"; el.appendChild(l); }
+    return el;
+  }
   function edgeSwipe() {
     if (!/CHSwipe\/1/.test(navigator.userAgent || "")) return;
+    notePrev();
+    window.addEventListener("pagehide", saveGhost);
+    document.addEventListener("visibilitychange", function () { if (document.hidden) saveGhost(); });
+    // Saved once the page has drawn its header too, for a swipe from the next page.
+    setTimeout(saveGhost, 1500);
+    var ghost = null;
     var EDGE = 24, sx = 0, sy = 0, st = 0, dx = 0, trail = [], on = false, dead = false, els = [], shade = null;
     var canBack = function () {
       var n = window.navigation;
@@ -1104,10 +1156,18 @@
       els.forEach(function (el) { el.style.transition = tr; el.style.transform = x ? "translateX(" + x + "px)" : ""; });
       if (shade) { shade.style.transition = ms ? "transform " + ms + "ms cubic-bezier(.2,.8,.2,1), opacity " + ms + "ms" : "none";
         shade.style.transform = "translateX(" + x + "px)"; shade.style.opacity = x ? "1" : "0"; }
+      // The page underneath eases in from a little to the left, as on iOS.
+      if (ghost) { var w0 = window.innerWidth; ghost.style.transition = ms ? "transform " + ms + "ms cubic-bezier(.2,.8,.2,1)" : "none";
+        var off = -0.28 * (w0 - x);
+        ghost.style.transform = "translateX(" + off + "px)";
+        // Only the strip the page has uncovered, so it never shows through gaps in the page.
+        ghost.style.clipPath = "inset(0 " + Math.max(0, w0 - x - off) + "px 0 0)";
+        if (ms) ghost.style.transition += ", clip-path " + ms + "ms cubic-bezier(.2,.8,.2,1)"; }
     };
     var reset = function () {
       els.forEach(function (el) { el.style.transition = ""; el.style.transform = ""; el.style.willChange = ""; });
       els = []; if (shade && shade.parentNode) shade.parentNode.removeChild(shade); shade = null;
+      if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost); ghost = null;
       document.documentElement.classList.remove("edgeswiping");
     };
     document.addEventListener("touchstart", function (e) {
@@ -1126,6 +1186,7 @@
         els = movers();
         els.forEach(function (el) { el.style.willChange = "transform"; });
         shade = document.createElement("div"); shade.className = "edgeshade"; document.body.appendChild(shade);
+        ghost = ghostEl(); document.body.appendChild(ghost);
         document.documentElement.classList.add("edgeswiping");
       }
       e.preventDefault();
