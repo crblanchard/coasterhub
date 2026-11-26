@@ -56,15 +56,15 @@
      wrapped), the top row only a little taller. */
   @media (max-width:640px){
     .xgrid.xbig.x3{gap:8px}
-    .xgrid.xbig.x3 a{padding:14px 12px;min-height:84px;justify-content:flex-end}
+    .xgrid.xbig.x3 a{padding:14px 12px;min-height:0;justify-content:flex-start}   /* no empty space above the words (Carter, 2026-11-26) */
     .xgrid.xbig.x3 b{font-size:1.02rem;line-height:1.2;white-space:nowrap;letter-spacing:-.01em}
     .xgrid.xbig.x3 span,.xgrid.xsmall span{font-size:.78rem;white-space:nowrap}
     .xgrid.xsmall{gap:8px}
-    .xgrid.xsmall a{padding:12px}
+    .xgrid.xsmall a{padding:14px 12px}
     .xgrid.xsmall b{font-size:.95rem}
   }
   @media (max-width:420px){
-    .xgrid.xbig.x3 a{padding:13px 9px}
+    .xgrid.xbig.x3 a{padding:12px 9px}
     .xgrid.xbig.x3 b{font-size:clamp(.8rem,3.5vw,1.02rem)}
     .xgrid.xbig.x3 span{font-size:clamp(.68rem,3vw,.78rem)}
     .xgrid.xsmall a{padding:12px 9px}
