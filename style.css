@@ -1011,8 +1011,8 @@ html.nozoom,html.nozoom body{touch-action:pan-x pan-y}
   html:not(.pg-riders) .hero:has(.container > p:not([hidden]):not(:empty)){padding-bottom:calc(var(--hero-b,84px) + 40px)}
   /* A rider's own header has its buttons where the rides would stand, and
      Log's band has the day chip there: those keep the plain sky. */
-  html.pg-log .hero,html:not(.pg-riders) .hero:has(.herotop){background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important;padding-bottom:var(--hero-b,84px)!important}
-  :root[data-theme="light"].pg-log .hero,:root[data-theme="light"]:not(.pg-riders) .hero:has(.herotop){background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
+  html.pg-log .hero,html:not(.pg-riders) .hero:has(.herotop){background-image:var(--skyd,linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%))!important;background-size:100% 100%!important;background-position:0 0!important;padding-bottom:var(--hero-b,84px)!important}
+  :root[data-theme="light"].pg-log .hero,:root[data-theme="light"]:not(.pg-riders) .hero:has(.herotop){background-image:var(--skyl,linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%))!important}
 
   footer.site{display:none}
 
@@ -1197,20 +1197,20 @@ body{background-image:none}
    and timber (skyline-paint-*.svg, tools/make-skyline.py). Same sizes and
    places as before, so the phone rules above still apply. */
 .hero{background-color:#070b22;
-  background-image:url(/skyline-paint-night.svg?v=1),linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%);
+  background-image:url(/skyline-paint-night.svg?v=1),var(--skyd,linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%));
   background-size:auto min(150px,80%,max(58px,calc(30.7vw - 167px))),100% 100%;
   background-position:right max(24px,calc(50vw - 516px)) bottom 0,0 0}
 :root[data-theme="light"] .hero{background-color:#9fd2f7;
-  background-image:url(/skyline-paint-day.svg?v=1),linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%);
+  background-image:url(/skyline-paint-day.svg?v=1),var(--skyl,linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%));
   --muted:#33424e;--line:rgba(10,60,90,.22)}
-.hero:has(.herotop){background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
+.hero:has(.herotop){background-image:var(--skyd,linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%))!important;background-size:100% 100%!important;background-position:0 0!important}
 /* The profile's night band gets the lit park back (Carter, 2026-11-25), small
    and low at the right, under the count; day stays plain sky. Not on a phone,
    where it would sit behind the count and the buttons. */
-@media (min-width:641px){ html.pg-profile:not([data-theme="light"]) .hero:has(.herotop){background-image:url(/skyline-paint-night.svg?v=1),linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:auto min(120px,60%),100% 100%!important;background-position:right max(16px,calc(50vw - 516px)) bottom 0,0 0!important} }
+@media (min-width:641px){ html.pg-profile:not([data-theme="light"]) .hero:has(.herotop){background-image:url(/skyline-paint-night.svg?v=1),var(--skyd,linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%))!important;background-size:auto min(120px,60%),100% 100%!important;background-position:right max(16px,calc(50vw - 516px)) bottom 0,0 0!important} }
 /* The rider badge on the light sky was 3.6:1; a deeper blue reads (critique). */
 :root[data-theme="light"] .hero .badge,:root[data-theme="light"] .hero .profedit .un,:root[data-theme="light"] .hero .profedit button.edit.un{color:#074a75;border-color:rgba(7,74,117,.35)}
-:root[data-theme="light"] .hero:has(.herotop){background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
+:root[data-theme="light"] .hero:has(.herotop){background-image:var(--skyl,linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%))!important}
 @media (max-width:640px){
   .hero{background-size:auto 72px,100% 100%!important;background-position:right 12px bottom 0,0 0!important}
 }
@@ -1219,8 +1219,12 @@ body{background-image:none}
 .sect,h2.sec{font-family:var(--display);font-weight:800;font-stretch:110%;letter-spacing:-.02em}
 /* A rider's header with the count on the right (Credits, Map): the count
    stands where the skyline does, so those bands keep the sky without it. */
-.hero:has(.rh-count){background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
-:root[data-theme="light"] .hero:has(.rh-count){background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
+.hero:has(.rh-count){background-image:var(--skyd,linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%))!important;background-size:100% 100%!important;background-position:0 0!important}
+:root[data-theme="light"] .hero:has(.rh-count){background-image:var(--skyl,linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%))!important}
+/* Light twilight is a darker slate than the day sky: the band's grey words
+   and blue links go deeper so they still read on it (app.js CHSky). */
+:root[data-theme="light"][data-skyl="twilight"] .hero{--muted:#222e38;--accent2:#063a5c;--line:rgba(10,30,50,.3)}
+:root[data-theme="light"][data-skyl="twilight"] .hero .badge{color:#05304d;border-color:rgba(5,48,77,.45)}
 .hero p.rh-count{font-family:var(--display);font-stretch:110%;letter-spacing:-.02em}
 
 /* ---- One design language (Carter, 2026-11-21) ----------------------------

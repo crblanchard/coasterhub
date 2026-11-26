@@ -11,10 +11,10 @@
 <base href="/">
 <title>Coaster Hub — Track your coaster count</title>
 <meta name="description" content="Keep track of your roller coaster count — every credit, every re-ride, every park — and see it as maps, records and charts.">
-<link rel="stylesheet" href="/style.css?v=20261126k">
+<link rel="stylesheet" href="/style.css?v=20261126l">
 <link rel="stylesheet" href="/lists.css?v=20261125b">
 <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp"</script>
+<script>/* theme: set before paint so the page never flashes the wrong one (see initTheme in app.js). The device's light or dark setting; on a desktop, the toggle's choice if one was made (2026-10-30). */try{var chT=matchMedia("(min-width:681px)").matches?localStorage.getItem("ch_theme"):null}catch(e){}if(chT!=="dark"&&(chT==="light"||!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)))document.documentElement.setAttribute("data-theme","light");/* In the iPhone/Android app (capacitor.config.json appendUserAgent), marked before anything renders (2026-10-31). */if(/CoasterHubApp/.test(navigator.userAgent))document.documentElement.className+=" inapp";/* The time-of-day sky (app.js CHSky), remembered from the last page, on before paint. */try{var chS=JSON.parse(localStorage.getItem("ch_sky"));if(chS&&Date.now()-chS.t<18e5){var chE=document.documentElement;chE.style.setProperty("--skyl",chS.gl);chE.style.setProperty("--skyd",chS.gd);chE.setAttribute("data-skyl",chS.l);chE.setAttribute("data-skyd",chS.d)}}catch(e){}</script>
 <link rel="icon" href="/favicon.svg?v=20260924b" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png?v=20260924b" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png?v=20260924b" sizes="16x16" type="image/png">
@@ -111,11 +111,11 @@
   /* The hero: a real sky. Day is late afternoon, blue overhead warming to peach
      at the horizon, the rides painted steel and timber; night is the park lit up. */
   section.hero.home{background-color:#070b22;
-    background-image:url(/skyline-paint-night.svg?v=1),linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%);
+    background-image:url(/skyline-paint-night.svg?v=1),var(--skyd,linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%));
     background-size:auto min(190px,82%,max(64px,calc(36vw - 190px))),100% 100%;
     background-position:right max(20px,calc(50vw - 520px)) bottom 0,0 0;background-repeat:no-repeat}
   :root[data-theme="light"] section.hero.home{background-color:#9fd2f7;
-    background-image:url(/skyline-paint-day.svg?v=1),linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%);
+    background-image:url(/skyline-paint-day.svg?v=1),var(--skyl,linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%));
     background-size:auto min(190px,82%,max(64px,calc(36vw - 190px))),100% 100%;
     background-position:right max(20px,calc(50vw - 520px)) bottom 0,0 0;
     --muted:#33424e;--line:rgba(10,60,90,.22)}
@@ -523,7 +523,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261126o"></script>
+<script src="/app.js?v=20261126p"></script>
 <script src="/changes-feed.js?v=20261120b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -1052,39 +1052,17 @@ function photoTone(url, done){
   function pick(){
     var light = document.documentElement.getAttribute('data-theme') === 'light';
     var now = new Date(), h = now.getHours() + now.getMinutes() / 60, m = now.getMonth() + 1;
-    var sun = sunTimes(now), rise = sun.rise, set = sun.set;   // local hours, e.g. 7.1 and 16.9
     var season = Q.get('season') || (m === 10 ? 'oct' : m === 12 ? 'dec' : m <= 3 ? 'winter' : 'none');
     var sky = Q.get('sky');
     if (!SKIES[sky]) {
       // Around the real sunrise and sunset for the date (Carter, 2026-11-26:
       // "sun goes down at 5pm" in late November), not fixed hours.
-      if (light) sky = h >= rise - 0.5 && h < rise + 1.5 ? 'sunrise' : h >= rise + 1.5 && h < set - 1.5 ? 'day' : h >= set - 1.5 && h < set + 0.33 ? 'golden' : 'twilight';
-      else sky = h >= rise - 1 && h < rise + 1 ? 'predawn' : h >= rise + 1 && h < set - 1 ? 'deep' : h >= set - 1 && h < set + 1 ? 'dusk' : 'night';
+      // The same pick every page's band makes (app.js CHSky).
+      sky = window.CHSky ? CHSky.skyNow(light, now) : (light ? 'day' : 'night');
       if (season === 'oct' && !light && (sky === 'dusk' || sky === 'night')) sky = 'fright';
       if (season === 'winter' && light && sky === 'day') sky = 'frost';
     }
     return { sky: sky, season: season };
-  }
-  // Sunrise and sunset in local clock hours, from the standard sunrise
-  // equation. Where you are comes without asking: longitude from your time
-  // zone's standard offset (15° an hour), latitude a typical one for its
-  // region. Within half an hour or so, which is all a sky needs.
-  function sunTimes(d){
-    var y = d.getFullYear(), std = Math.max(new Date(y, 0, 1).getTimezoneOffset(), new Date(y, 6, 1).getTimezoneOffset());
-    var lon = -std / 4, tz = '';
-    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
-    var lat = /^Australia|^Pacific\/(Auckland|Chatham)|^America\/(Argentina|Sao_Paulo|Santiago|Montevideo)|^Africa\/(Johannesburg|Maputo)/.test(tz) ? -34
-            : /^Europe|^Atlantic\/Reykjavik/.test(tz) ? 50 : /^Asia/.test(tz) ? 33 : /^Africa/.test(tz) ? 8 : 38;
-    var rad = Math.PI / 180, n = Math.round((d.getTime() / 86400000 + 2440587.5) - 2451545 + 0.0008);
-    var J = n - lon / 360, M = (357.5291 + 0.98560028 * J) % 360;
-    var C = 1.9148 * Math.sin(M * rad) + 0.02 * Math.sin(2 * M * rad) + 0.0003 * Math.sin(3 * M * rad);
-    var L = (M + C + 282.9372) % 360, Jt = 2451545 + J + 0.0053 * Math.sin(M * rad) - 0.0069 * Math.sin(2 * L * rad);
-    var dec = Math.asin(Math.sin(L * rad) * Math.sin(23.44 * rad));
-    var cw = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(dec)) / (Math.cos(lat * rad) * Math.cos(dec));
-    cw = Math.max(-1, Math.min(1, cw));
-    var w = Math.acos(cw) / rad;
-    var hrs = function(jd){ var t = new Date((jd - 2440587.5) * 86400000); return t.getHours() + t.getMinutes() / 60; };
-    return { rise: hrs(Jt - w / 360), set: hrs(Jt + w / 360) };
   }
   function deco(season){
     Array.prototype.forEach.call(hero.querySelectorAll('.skydeco,.skysnow'), function(x){ x.remove(); });

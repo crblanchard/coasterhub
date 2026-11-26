@@ -30,6 +30,74 @@
     window.addEventListener("pageshow", function (e) { if (e.persisted) { document.documentElement.classList.remove("smoothok"); smoothOn(); } });
     window.addEventListener("pagehide", function () { document.documentElement.classList.remove("smoothok"); });
   }
+
+  // The time-of-day sky on every page's band (Carter, 2026-11-26: "make every
+  // page consistent with the time of day color that's on the homepage"). The
+  // colour only: Home keeps the seasonal touches (and its fright/frost skies).
+  // Sets --skyl and --skyd on <html> (style.css reads them in every .hero rule)
+  // and remembers them for the head script, which puts them on before paint.
+  // Home's own sky script (index.html) uses skyNow and sunTimes from here.
+  var CHSky = (function () {
+    var SKIES = {
+      sunrise:  '#8fb6e3 0%,#f3c7a8 62%,#fde3c3 100%',
+      day:      '#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%',
+      golden:   '#e9a85c 0%,#f6cf8e 55%,#fde8bf 100%',
+      twilight: '#6f86ab 0%,#9fb0cb 56%,#d8cbc4 100%',
+      frost:    '#c9d6e2 0%,#e3eaf0 60%,#f3f5f7 100%',
+      predawn:  '#0c1838 0%,#2b2f63 60%,#9c5a74 100%',
+      deep:     '#0a1630 0%,#132a52 62%,#1e3a66 100%',
+      dusk:     '#26285e 0%,#7b4a8c 58%,#ee8a5c 100%',
+      night:    '#070b22 0%,#0d1233 62%,#1d1a45 100%',
+      fright:   '#140b24 0%,#3b1748 55%,#d9601c 100%'
+    };
+    // Sunrise and sunset in local clock hours, from the standard sunrise
+    // equation. Where you are comes without asking: longitude from your time
+    // zone's standard offset (15° an hour), latitude a typical one for its
+    // region. Within half an hour or so, which is all a sky needs.
+    function sunTimes(d) {
+      var y = d.getFullYear(), std = Math.max(new Date(y, 0, 1).getTimezoneOffset(), new Date(y, 6, 1).getTimezoneOffset());
+      var lon = -std / 4, tz = "";
+      try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+      var lat = /^Australia|^Pacific\/(Auckland|Chatham)|^America\/(Argentina|Sao_Paulo|Santiago|Montevideo)|^Africa\/(Johannesburg|Maputo)/.test(tz) ? -34
+              : /^Europe|^Atlantic\/Reykjavik/.test(tz) ? 50 : /^Asia/.test(tz) ? 33 : /^Africa/.test(tz) ? 8 : 38;
+      var rad = Math.PI / 180, n = Math.round((d.getTime() / 86400000 + 2440587.5) - 2451545 + 0.0008);
+      var J = n - lon / 360, M = (357.5291 + 0.98560028 * J) % 360;
+      var C = 1.9148 * Math.sin(M * rad) + 0.02 * Math.sin(2 * M * rad) + 0.0003 * Math.sin(3 * M * rad);
+      var L = (M + C + 282.9372) % 360, Jt = 2451545 + J + 0.0053 * Math.sin(M * rad) - 0.0069 * Math.sin(2 * L * rad);
+      var dec = Math.asin(Math.sin(L * rad) * Math.sin(23.44 * rad));
+      var cw = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(dec)) / (Math.cos(lat * rad) * Math.cos(dec));
+      cw = Math.max(-1, Math.min(1, cw));
+      var w = Math.acos(cw) / rad;
+      var hrs = function (jd) { var t = new Date((jd - 2440587.5) * 86400000); return t.getHours() + t.getMinutes() / 60; };
+      return { rise: hrs(Jt - w / 360), set: hrs(Jt + w / 360) };
+    }
+    // The sky for now in one theme family: day mode runs sunrise, day, golden
+    // hour and twilight; night mode pre-dawn, deep blue, dusk and night.
+    // ?sky= previews one on any page.
+    function skyNow(light, now) {
+      now = now || new Date();
+      var q = null; try { q = new URLSearchParams(location.search).get("sky"); } catch (e) {}
+      if (q && SKIES[q]) return q;
+      var h = now.getHours() + now.getMinutes() / 60, sun = sunTimes(now), rise = sun.rise, set = sun.set;
+      if (light) return h >= rise - 0.5 && h < rise + 1.5 ? "sunrise" : h >= rise + 1.5 && h < set - 1.5 ? "day" : h >= set - 1.5 && h < set + 0.33 ? "golden" : "twilight";
+      return h >= rise - 1 && h < rise + 1 ? "predawn" : h >= rise + 1 && h < set - 1 ? "deep" : h >= set - 1 && h < set + 1 ? "dusk" : "night";
+    }
+    function grad(sky) { return "linear-gradient(180deg," + SKIES[sky] + ")"; }
+    function apply() {
+      var r = document.documentElement, l = skyNow(true), d = skyNow(false);
+      r.style.setProperty("--skyl", grad(l));
+      r.style.setProperty("--skyd", grad(d));
+      r.setAttribute("data-skyl", l); r.setAttribute("data-skyd", d);
+      try { window.localStorage.setItem("ch_sky", JSON.stringify({ t: Date.now(), l: l, d: d, gl: grad(l), gd: grad(d) })); } catch (e) {}
+    }
+    return { SKIES: SKIES, sunTimes: sunTimes, skyNow: skyNow, grad: grad, apply: apply };
+  })();
+  if (typeof document !== "undefined" && typeof window !== "undefined") {
+    window.CHSky = CHSky;
+    CHSky.apply();
+    // Coming back to a tab later picks up the hour.
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) CHSky.apply(); });
+  }
   "use strict";
 
   var US_STATES = new Set(["Alabama","Alaska","Arizona","Arkansas","California","Colorado",
