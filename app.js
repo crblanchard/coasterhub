@@ -1137,7 +1137,11 @@
     setTimeout(saveGhost, 1500);
     var ghost = null;
     var EDGE = 24, sx = 0, sy = 0, st = 0, dx = 0, trail = [], on = false, dead = false, els = [], shade = null;
+    // With no history to go back to, a page you went into still swipes back,
+    // to its parent (Parks, Coasters, Locations … go to Explore; Carter,
+    // 2026-11-26: "I can't go back again to explore").
     var canBack = function () {
+      if (document.documentElement.classList.contains("detail") && window.__chBack) return true;
       var n = window.navigation;
       if (n && typeof n.canGoBack === "boolean") return n.canGoBack;
       return history.length > 1;
@@ -1161,7 +1165,7 @@
         var off = -0.28 * (w0 - x);
         ghost.style.transform = "translateX(" + off + "px)";
         // Only the strip the page has uncovered, so it never shows through gaps in the page.
-        ghost.style.clipPath = "inset(0 " + Math.max(0, w0 - x - off) + "px 0 0)";
+        ghost.style.clipPath = "inset(0 " + Math.max(0, w0 - x + off) + "px 0 0)";
         if (ms) ghost.style.transition += ", clip-path " + ms + "ms cubic-bezier(.2,.8,.2,1)"; }
     };
     var reset = function () {
@@ -1207,7 +1211,7 @@
         // The page under the bars has already slid away: the arriving one
         // must not slide in again.
         markTransition("same");
-        setTimeout(function () { history.back(); }, 170);
+        setTimeout(function () { if (window.__chBack) window.__chBack(true); else history.back(); }, 170);
       } else {
         set(0, 200);
         setTimeout(reset, 210);
@@ -1836,9 +1840,10 @@
         var img = back.querySelector(".backmark");
         if (img) { img.classList.remove("unturn"); img.style.animation = "none"; void img.offsetWidth; img.style.animation = ""; }
       });
-      var goBack = function () {
+      var goBack = function (quiet) {
         var fromHere = document.referrer && document.referrer.indexOf(location.origin) === 0;
-        markTransition("back");
+        // quiet: the swipe already slid the page away; the next must not slide in.
+        markTransition(quiet === true ? "same" : "back");
         if (fromHere && history.length > 1) {
           try { var r = new URL(document.referrer); window.sessionStorage.setItem("ch_back", r.pathname + r.search); } catch (e) {}
           history.back(); return;
@@ -1846,6 +1851,9 @@
         var k = navKey(page);
         location.href = k === "explore" ? "/explore" : k === "rankings" ? "/rankings" : k === "profile" ? "/account" : "/";
       };
+      // The app's swipe-back uses the same way back (edgeSwipe): history when
+      // there is some, else this page's parent tab page.
+      window.__chBack = goBack;
       var title = document.createElement("span");
       title.className = "navtitle"; title.setAttribute("aria-hidden", "true");
       title.innerHTML = 'Coaster <b>Hub</b>';
