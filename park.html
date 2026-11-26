@@ -75,6 +75,11 @@
   .who a:hover{border-color:var(--accent2)}
   .who a{align-items:center}
   .who a i{font-style:normal;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+  .who a.on{border-color:var(--accent2);box-shadow:inset 0 0 0 1px var(--accent2)}
+  .viewnote{margin:0 0 8px;padding:8px 12px;border-radius:10px;background:var(--tint);font-size:.88rem;color:var(--muted)}
+  .viewnote[hidden]{display:none}
+  .viewnote b{color:var(--fg)}
+  .viewnote a{color:var(--accent2);font-weight:600;text-decoration:none}
 
 </style>
 </head>
@@ -112,6 +117,7 @@
     <div id="parkphotos" hidden></div>
     <div class="cpadmin" id="cpadmin" hidden></div>
     <div class="sect" id="list_h">Coasters</div>
+    <p class="viewnote" id="viewnote" hidden></p>
     <div class="panel" id="list"></div>
     <!-- Rankings, as every database page has them (critique, 2026-10-02). -->
     <div id="ranked"></div>
@@ -248,12 +254,32 @@ function tile(n,label){ return '<div class="tile"><b>'+esc(n)+'</b><span>'+esc(l
 // have been on it. Drawn once straight away and again when you and the
 // Global list are known.
 var MINE=[], MYR=null, ME=null, G={}, RIDC={};
+// Whose ticks the list shows: you, or a rider whose chip you tapped (Carter,
+// 2026-11-26: "click on them to see what they've been on"). From WHO, the
+// riders of each coaster here.
+var VIEW=null, VIEWNAME='';
+function viewMap(slug){ var m={}; Object.keys(WHO).forEach(function(id){ (WHO[id]||[]).forEach(function(w){ if(w.slug===slug) m[id]={n:w.n}; }); }); return m; }
+function showView(slug, name){
+  VIEW = (!slug || slug===ME || slug===VIEW) ? null : slug; VIEWNAME = VIEW ? name : '';
+  drawList(); drawWho();
+  var n=$('viewnote');
+  if(n){ n.hidden=!VIEW; if(VIEW) n.innerHTML='Showing <b>'+esc(VIEWNAME)+'</b>\u2019s credits here &middot; <a href="#" id="viewback">Back to '+(ME?'yours':'all')+'</a> &middot; <a href="'+esc(CoasterHub.userPageHref(VIEW,'count'))+'">Profile &rarr;</a>'; }
+  var b=$('viewback'); if(b) b.onclick=function(e){ e.preventDefault(); showView(null); };
+  if(VIEW && $('list').getBoundingClientRect().top < 0) $('list').scrollIntoView({behavior:'instant', block:'start'});
+}
+document.addEventListener('click', function(e){
+  var a=e.target.closest && e.target.closest('#who a[data-slug]'); if(!a) return;
+  if(e.metaKey||e.ctrlKey||e.shiftKey) return;     // a new tab still opens the profile
+  e.preventDefault();
+  var p=(WHOLIST||[]).filter(function(w){ return w.slug===a.getAttribute('data-slug'); })[0];
+  showView(a.getAttribute('data-slug'), p ? p.name : '');
+});
 function riderCount(id){ var n=RIDC[id]; return n ? n+(n===1?' rider':' riders') : ''; }
 function drawList(){
   var L=$('list');
   L.innerHTML=MINE.map(function(c){
     var t=G[CoasterHub.rideKey(c)], p=t&&t.pos;
-    return CoasterHub.coasterRow(c, {mine:MYR, add:true, ctx:'model',
+    return CoasterHub.coasterRow(c, {mine:VIEW ? viewMap(VIEW) : MYR, add:!VIEW, ctx:'model',
       beside: p ? '<span class="gk" title="Place on the Global rankings">#'+p+' <i>Global</i></span>' : '',
       end: CoasterHub.lifeTag(c)+'<span class="rid" data-rid="'+c.id+'">'+riderCount(c.id)+'</span>'});
   }).join('') || '<div style="padding:18px 16px;color:var(--muted)">No coasters on the site for this park yet.</div>';
@@ -368,7 +394,8 @@ function drawWho(){
   if(!WHOLIST) return;
   $('who').innerHTML=youFirst(WHOLIST).map(function(p){
     var isMe=p.slug===ME;
-    return '<a class="'+(isMe?'me':'')+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'">'+CoasterHub.riderFace(p.slug,p.name)
+    var on=(VIEW||ME)===p.slug;
+    return '<a class="'+(isMe?'me':'')+(on?' on':'')+'" data-slug="'+esc(p.slug)+'" href="'+esc(CoasterHub.userPageHref(p.slug,'count'))+'" title="Show '+(isMe?'your':esc(p.name)+'\u2019s')+' credits here">'+CoasterHub.riderFace(p.slug,p.name)
       +(isMe?'You':esc(p.name))+'<i>'+p.n+'</i></a>';   // just their credits here (Carter, 2026-11-26): "of 10" counted defunct rides too
   }).join('');
 }
