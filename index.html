@@ -966,9 +966,13 @@ function photoTone(url, done){
       for(var i=0;i<d.length;i+=4){
         var px=i/4, y=Math.floor(px/W);
         var r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255, mx=Math.max(r,g,b), mn=Math.min(r,g,b), c=mx-mn;
-        if(c<.2 || mx<.24) continue;                                   // greys, white, deep shadow (a maroon track still counts)
+        if(c<.17 || mx<.22) continue;                                  // greys, white, deep shadow (a maroon track still counts)
         var h = mx===r ? ((g-b)/c+6)%6 : mx===g ? (b-r)/c+2 : (r-g)/c+4, deg=h*60;
-        if(deg>=180 && deg<=245) continue;                              // sky blue, anywhere (VelociCoaster's #1 came out sky blue)
+        // Sky: light, soft blue (VelociCoaster's #1 came out sky blue). A
+        // turquoise or blue TRACK is deeper and stronger and still counts
+        // (Twisted Colossus, Carter 2026-11-26).
+        var Lp=(mx+mn)/2, Sp=c/(1-Math.abs(2*Lp-1)||1);
+        if(deg>=180 && deg<=245 && (Lp>0.55 || Sp<0.45)) continue;
         if(deg>=56 && deg<=160) continue;                               // trees, grass, spring leaves
         // Track is mostly up in the picture; trucks, buildings and crowds sit
         // along the bottom (Carter, 2026-11-26: Ride to Happiness came out the
@@ -981,7 +985,7 @@ function photoTone(url, done){
       var best=-1, bw=0; for(var j=0;j<24;j++) if(B[j]>bw){ bw=B[j]; best=j; }
       // At least ~1.2% of the upper three quarters in that colour (a thin
       // track still counts), or there is no clear track colour.
-      if(best<0 || N[best] < W*H*0.75*0.012) return;
+      if(best<0 || N[best] < W*H*0.75*0.008) return;
       // The track's own depth (a maroon stays a deep red, not coral), lifted
       // just enough to read on a photo.
       var l=Lt[best]/B[best]*100, sa=St[best]/B[best]*100;
