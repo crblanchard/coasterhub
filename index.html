@@ -337,8 +337,14 @@
   .featc .kick{display:inline-flex;align-items:center;gap:6px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.7rem;padding:5px 10px;border-radius:999px;background-color:rgba(10,16,30,.5);backdrop-filter:blur(4px)}
   .featc .rk{position:absolute;top:14px;left:16px;font-family:var(--display);font-weight:850;font-stretch:112%;font-size:clamp(2.6rem,7vw,4.2rem);line-height:1;letter-spacing:-.03em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55)}
   .featc .rk i{font-style:normal;font-size:.45em;vertical-align:.9em;margin-right:2px;opacity:.85}
-  .featc .rk.st{color:#7fe3d9}.featc .rk.wd{color:#ffb27a}
-  .featc.toned .rk{color:var(--tone)}
+  /* Steel with no clear track colour shows black, the colour most steel track
+     is (Carter, 2026-11-26), with a light glow so it reads on any photo;
+     wood the wood colour. A clear track colour replaces either (.toned). */
+  .featc{--tone:#ffb27a}
+  .featc.steel{--tone:#121418}
+  .featc .rk.st{color:#121418;text-shadow:0 0 2px rgba(255,255,255,.9),0 1px 12px rgba(255,255,255,.7)}
+  .featc .rk.wd{color:#ffb27a}
+  .featc.toned .rk{color:var(--tone);text-shadow:0 1px 2px rgba(0,0,0,.55),0 2px 14px rgba(0,0,0,.55)}
   .featc .fbar{position:absolute;left:0;right:0;bottom:0;height:6px;background-color:var(--tone)}
   /* A firmer shadow so the number reads on pale photos (Carter, 2026-11-26;
      the dark wash at the top came off again the same day). */
@@ -766,7 +772,10 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
                           : 'Not on your count yet.';
         var fy=document.getElementById('featyou'); fy.innerHTML=line; fy.hidden=!line;
         document.getElementById('featwrap').hidden=false;
-        if(c.type!=='Wood') photoTone(u, function(col){ el.style.setProperty('--tone', col); el.classList.add('toned'); if(!el.querySelector('.fbar')) el.insertAdjacentHTML('beforeend','<span class="fbar"></span>'); });
+        el.classList.toggle('steel', c.type!=='Wood'); el.classList.remove('toned');
+        el.style.removeProperty('--tone');
+        if(!el.querySelector('.fbar')) el.insertAdjacentHTML('beforeend','<span class="fbar"></span>');
+        if(c.type!=='Wood') photoTone(u, function(col){ el.style.setProperty('--tone', col); el.classList.add('toned'); });
         var ch=document.querySelector('#featc .chips');
         while(ch && ch.children.length>1 && ch.scrollWidth>ch.clientWidth+1) ch.lastElementChild.remove();
       };
@@ -959,7 +968,7 @@ function photoTone(url, done){
         var r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255, mx=Math.max(r,g,b), mn=Math.min(r,g,b), c=mx-mn;
         if(c<.2 || mx<.24) continue;                                   // greys, white, deep shadow (a maroon track still counts)
         var h = mx===r ? ((g-b)/c+6)%6 : mx===g ? (b-r)/c+2 : (r-g)/c+4, deg=h*60;
-        if(deg>=185 && deg<=235 && y<H*0.55) continue;                  // sky
+        if(deg>=180 && deg<=245) continue;                              // sky blue, anywhere (VelociCoaster's #1 came out sky blue)
         if(deg>=56 && deg<=160) continue;                               // trees, grass, spring leaves
         // Track is mostly up in the picture; trucks, buildings and crowds sit
         // along the bottom (Carter, 2026-11-26: Ride to Happiness came out the

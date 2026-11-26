@@ -263,8 +263,8 @@ function showView(slug, name){
   VIEW = (!slug || slug===ME || slug===VIEW) ? null : slug; VIEWNAME = VIEW ? name : '';
   drawList(); drawWho();
   var n=$('viewnote');
-  if(n){ n.hidden=!VIEW; if(VIEW) n.innerHTML='Showing <b>'+esc(VIEWNAME)+'</b>\u2019s credits here &middot; <a href="#" id="viewback">Back to '+(ME?'yours':'all')+'</a> &middot; <a href="'+esc(CoasterHub.userPageHref(VIEW,'count'))+'">Profile &rarr;</a>'; }
-  var b=$('viewback'); if(b) b.onclick=function(e){ e.preventDefault(); showView(null); };
+  // Tapping the chip again closes it (Carter: "it's just open and close his list").
+  if(n){ n.hidden=!VIEW; if(VIEW) n.innerHTML='<b>'+esc(VIEWNAME)+'</b>\u2019s credits here &middot; <a href="'+esc(CoasterHub.userPageHref(VIEW,'count'))+'">Profile &rarr;</a>'; }
   if(VIEW && $('list').getBoundingClientRect().top < 0) $('list').scrollIntoView({behavior:'instant', block:'start'});
 }
 document.addEventListener('click', function(e){
