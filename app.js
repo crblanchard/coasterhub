@@ -2641,7 +2641,7 @@
   var MAKER_SHORT = {
     "Bolliger & Mabillard": "B&M", "Rocky Mountain Coasters": "RMC", "Great Coasters International": "GCI",
     "Custom Coasters International": "CCI", "Philadelphia Toboggan Coasters": "PTC", "Philadelphia Toboggan Company": "PTC",
-    "MACK Rides": "MACK", "S&S Worldwide": "S&S", "Arrow Dynamics": "Arrow", "Maurer Rides": "Maurer"
+    "MACK Rides": "MACK", "S&S Worldwide": "S&S", "S&S Sansei": "S&S", "Arrow Dynamics": "Arrow", "Maurer Rides": "Maurer"
   };
   function manuLabel(m) { m = String(m || "").trim(); return MAKER_SHORT[m] || m; }
   function maker(c) {
