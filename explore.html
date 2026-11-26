@@ -51,6 +51,26 @@
   .xgrid span{color:var(--muted);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   @media (max-width:420px){ .xgrid span{white-space:normal} }
   @media (max-width:760px){ .xgrid.xbig{grid-template-columns:repeat(2,1fr)} .xgrid.xsmall{grid-template-columns:1fr 1fr} }
+  /* Phones: both rows one family (Carter, 2026-11-26: "format of these boxes is
+     funky"): the same padding and type, every title on one line ("Trip planner"
+     wrapped), the top row only a little taller. */
+  @media (max-width:640px){
+    .xgrid.xbig.x3{gap:8px}
+    .xgrid.xbig.x3 a{padding:14px 12px;min-height:84px;justify-content:flex-end}
+    .xgrid.xbig.x3 b{font-size:1.02rem;line-height:1.2;white-space:nowrap;letter-spacing:-.01em}
+    .xgrid.xbig.x3 span,.xgrid.xsmall span{font-size:.78rem;white-space:nowrap}
+    .xgrid.xsmall{gap:8px}
+    .xgrid.xsmall a{padding:12px}
+    .xgrid.xsmall b{font-size:.95rem}
+  }
+  @media (max-width:420px){
+    .xgrid.xbig.x3 a{padding:13px 9px}
+    .xgrid.xbig.x3 b{font-size:clamp(.8rem,3.5vw,1.02rem)}
+    .xgrid.xbig.x3 span{font-size:clamp(.68rem,3vw,.78rem)}
+    .xgrid.xsmall a{padding:12px 9px}
+    .xgrid.xsmall b{font-size:clamp(.8rem,3.5vw,1.02rem)}
+    .xgrid.xsmall span{font-size:clamp(.68rem,3vw,.78rem)}
+  }
   .sughead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px}
   .sughead a{color:var(--accent2);font-weight:600;font-size:.9rem;text-decoration:none}
 </style>
