@@ -117,7 +117,7 @@
              widest-first pass earlier the same day. WHICH ONE OPENS is a
              separate question and is unchanged: `view` still starts on parks,
              so `on` is still on the parks button. -->
-        <button id="v_day">Rides</button><button id="v_parks" class="on">Parks</button><button id="v_list">Coasters</button>
+        <button id="v_day" class="on">Visits</button><button id="v_parks">Parks</button><button id="v_list">Coasters</button>
       </div>
       <input id="q" type="search" placeholder="Search coaster or park&hellip;">
       <select id="f_rider" style="display:none"><option value="">Rider</option></select>
@@ -426,8 +426,11 @@ return Promise.all([
     // that it is no longer the default — without it, a link to the rides view
     // could not be written.
     var want=new URLSearchParams(location.search).get('view');
+    // Visits (the park days, newest first) is where it opens now, when the
+    // log has dates (Carter, 2026-11-26: "call the button visits ... make it
+    // default to that"); an undated log still opens on Parks.
     if(want==='list' || want==='parks' || (want==='day' && DATED)) setView(want);
-    else setView(view);
+    else setView(DATED ? 'day' : 'parks');
   });
 }).catch(fail);
 
