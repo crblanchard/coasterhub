@@ -3293,6 +3293,22 @@ async function main() {
     check("Automatic goes back to the scores", r.data.photos[0].url === "https://x/a.jpg", JSON.stringify(r.data));
   }
 
+
+  console.log("\nCoaster notes (Carter, 2026-11-26)");
+  {
+    const db = freshDb();
+    db.exec("CREATE TABLE coaster_notes (id INTEGER PRIMARY KEY AUTOINCREMENT, coaster_id INTEGER NOT NULL, note TEXT NOT NULL, url TEXT, kind TEXT, public INTEGER NOT NULL DEFAULT 0, added TEXT)");
+    const cid = rows(db, "SELECT id FROM coasters LIMIT 1")[0].id;
+    db.exec("INSERT INTO coaster_notes (coaster_id, note, kind) VALUES (" + cid + ", 'internal one', 'model'), (" + cid + ", 'public one', 'status')");
+    db.exec("UPDATE coaster_notes SET public = 1 WHERE note = 'public one'");
+    const boss = await signedUp(db, "boss@example.com", "Boss");
+    db.exec("UPDATE accounts SET is_admin = 1 WHERE slug = 'boss'");
+    let r = await callNoPassword(db, "GET", "/api/notes?id=" + cid);
+    check("a visitor sees only public notes", r.status === 200 && r.data.notes.length === 1 && r.data.notes[0].note === "public one", JSON.stringify(r.data));
+    r = await callNoPassword(db, "GET", "/api/notes", { cookie: boss });
+    check("an admin sees every note, with its coaster", r.data.notes.length === 2 && r.data.notes[0].name, JSON.stringify(r.data));
+  }
+
   console.log("\n" + pass + " passed, " + fail + " failed\n");
   process.exit(fail ? 1 : 0);
 }

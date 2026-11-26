@@ -38,6 +38,13 @@
   .wrow .meta{grid-column:1 / -1;color:var(--muted);font-size:.82rem}
   .wrow.noacct .when{color:var(--muted)}
   .gate{color:var(--muted)}
+  .adnotes{overflow-x:auto;margin-bottom:24px}
+  .adnt{width:100%;border-collapse:collapse;font-size:.88rem}
+  .adnt th{text-align:left;color:var(--muted);font-weight:600;font-size:.78rem;padding:6px 8px;border-bottom:1px solid var(--line)}
+  .adnt td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+  .adnt a{color:var(--accent2);text-decoration:none}
+  .adnt small{color:var(--muted)}
+  .adnn{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -73,6 +80,10 @@
       </div>
     </div>
     <div class="adwho" id="who"></div>
+    <!-- Every note on an assumption (coaster_notes), so they can be checked
+         later (Carter, 2026-11-26: "keep a table of them saved"). -->
+    <div class="adhead"><h2>Notes</h2></div>
+    <div class="adnotes" id="notes"><p class="adnn">Loading&hellip;</p></div>
   </div>
 </div></section>
 
@@ -139,9 +150,20 @@ fetch('/api/admin/overview', { credentials: 'same-origin' })
   .then(function(x){
     if (x.status === 401) { $('gate').innerHTML = 'Admins only. <a href="/account" style="color:var(--accent2)">Sign in</a> with an admin account to see this.'; return; }
     if (!x.d || !x.d.ok) { $('gate').textContent = (x.d && x.d.error) || 'Couldn\u2019t load the dashboard.'; return; }
-    DATA = x.d; $('gate').hidden = true; $('dash').hidden = false; draw();
+    DATA = x.d; $('gate').hidden = true; $('dash').hidden = false; draw(); notes();
   })
   .catch(function(){ $('gate').textContent = 'Couldn\u2019t load the dashboard.'; });
+function notes(){
+  fetch('/api/notes', { credentials: 'same-origin' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    var ns = (j && j.notes) || [];
+    $('notes').innerHTML = ns.length ? '<table class="adnt"><thead><tr><th>Coaster</th><th>Note</th><th>Kind</th><th>Added</th></tr></thead><tbody>' + ns.map(function(n){
+      var href = n.name ? CoasterHub.coasterHref(n.name, n.park) : '';
+      return '<tr><td>' + (href ? '<a href="' + esc(href) + '"><b>' + esc(n.name) + '</b></a><br><small>' + esc(n.park) + '</small>' : '#' + n.coaster_id) + '</td>'
+        + '<td>' + esc(n.note) + (n.url ? ' <a href="' + esc(n.url) + '" target="_blank" rel="noopener">Source</a>' : '') + '</td>'
+        + '<td>' + esc(n.kind || '') + (n.public ? '' : '<br><small>admins only</small>') + '</td><td><small>' + esc(n.added || '') + '</small></td></tr>';
+    }).join('') + '</tbody></table>' : '<p class="adnn">No notes yet.</p>';
+  }).catch(function(){ $('notes').innerHTML = '<p class="adnn">Could not load the notes.</p>'; });
+}
 </script>
 </body>
 </html>

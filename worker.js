@@ -3433,6 +3433,20 @@ export default {
         if (!row) return err(500, "could not make a link");
         return json({ code: row.code, short: url.origin + "/trip/" + row.code });
       }
+      // Notes on assumptions behind a coaster's facts (coaster_notes, 260):
+      // ?id= for one coaster, else every note with its coaster's name and park.
+      // Internal for now: admins see all, everyone else only public = 1 rows.
+      if (request.method === "GET" && path === "/api/notes") {
+        const admin = adminOk(request, env, acct);
+        const id = +url.searchParams.get("id") || 0;
+        try {
+          const rows = (await env.DB.prepare("SELECT n.id, n.coaster_id, n.note, n.url, n.kind, n.public, n.added, c.name, c.park FROM coaster_notes n LEFT JOIN coasters c ON c.id = n.coaster_id WHERE (?1 = 0 OR n.coaster_id = ?1) AND (?2 = 1 OR n.public = 1) ORDER BY c.park, c.name, n.id").bind(id, admin ? 1 : 0).all()).results || [];
+          return json({ notes: rows, admin: !!admin });
+        } catch (e) {
+          if (/no such table/i.test(String(e && e.message || e))) return json({ notes: [], admin: !!admin });
+          throw e;
+        }
+      }
       // Everyone's saved trips (Carter, 2026-11-26: "a page/list where you can
       // publicly see trips saved by everyone"): the named ones only, newest
       // first; an unnamed link is somebody's scratch pad, not a trip.

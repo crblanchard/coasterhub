@@ -37,6 +37,10 @@ Added so far: Everland (121), Lotte World Adventure (122), Gyeongju World (123),
 Hong Kong Disneyland (124), Ocean Park (125).
 
 
+### Hot Go Dreamworld (2026-11-26, migration 260)
+
+Pinned at Wanghua district, Fushun; no source gives the park's coordinates.
+
 ### Wrong-state pins moved to an estimate (2026-11-26, migration 254)
 
 These were pinned in another state; each now sits at an estimate from its address. Real coordinates welcome:

@@ -185,6 +185,10 @@
   .cpthumb.bad{display:none}
   @media (max-width:640px){ .cphoto img{border-radius:12px} }
   .former b{color:var(--fg);font-weight:600}
+  .cnotes[hidden]{display:none}
+  .cnotes ul{margin:0;padding:12px 16px 12px 32px;border:1px dashed var(--line);border-radius:12px;background-color:var(--panel);color:var(--muted);font-size:.88rem;line-height:1.5}
+  .cnotes a{color:var(--accent2);font-weight:600;text-decoration:none}
+  .cnotes .cnwho{font-family:inherit;font-size:.8rem;font-weight:600;color:var(--wood);letter-spacing:0}
 
   /* ---- Coaster page, new look (Carter, 2026-11-20: "all 1-8 please"). The
      ride's paint: steel or wood, on the band's edge and the numbers. */
@@ -276,6 +280,8 @@
     </div>
   </div>
   <div id="more_wrap" hidden></div>
+  <!-- Notes on assumptions (coaster_notes): admins only for now. -->
+  <div class="cnotes" id="cnotes" hidden></div>
   <div id="none" style="display:none">
     <div class="missing">
       <strong>No coaster at that address.</strong>
@@ -345,6 +351,7 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.fetchParks()]).then(function
   var meta=parks[C.park]||{};
   document.querySelector('.hero h1').textContent=C.name;
   showPhoto(C);
+  showNotes(C);
   document.title=C.name+' — '+C.park+' — Coaster Hub';
   // "Coaster · Cedar Point", as every database page reads (critique, 2026-10-02).
   CoasterHub.kindLine($('hero_sub'), 'Coaster', C.park, CoasterHub.parkHref(C.park));
@@ -779,6 +786,19 @@ function photoAdmin(c){
       }).catch(function(){ g.innerHTML='<p class="cpnote">Could not load the photos.</p>'; });
     };
   });
+}
+// Notes behind this coaster's facts (Carter, 2026-11-26: a model from a forum
+// post, a status assumed): what was assumed and the link to check it. Only
+// admins get them for now; /api/notes decides who sees what.
+function showNotes(c){
+  fetch('/api/notes?id='+encodeURIComponent(c.id),{credentials:'same-origin'}).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    var ns=(j && j.notes) || []; if(!ns.length) return;
+    var internal=ns.some(function(n){ return !n.public; });
+    $('cnotes').innerHTML='<div class="sect">Notes'+(internal?' <small class="cnwho">(only visible to admins)</small>':'')+'</div><ul>'+ns.map(function(n){
+      return '<li>'+esc(n.note)+(n.url?' <a href="'+esc(n.url)+'" target="_blank" rel="noopener">Source</a>':'')+'</li>';
+    }).join('')+'</ul>';
+    $('cnotes').hidden=false;
+  }).catch(function(){});
 }
 </script>
 </body>
