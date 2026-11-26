@@ -128,6 +128,26 @@
   .hero.home #hero_h{font-size:clamp(2.4rem,7vw,4.2rem)}
   .hero.home #hero_p:empty{display:none}
   .hero.home .herojoin{margin-top:8px}
+  /* The skyline's train run (trainRun): while it runs, the hero shows only its
+     sky, and a copy of the skyline sits exactly where the painted one was. */
+  section.hero.home.trainon{background-image:linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%)!important;background-size:100% 100%!important;background-position:0 0!important}
+  :root[data-theme="light"] section.hero.home.trainon{background-image:linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%)!important}
+  section.hero.home .trainrun{position:absolute;bottom:0;right:max(20px,calc(50vw - 520px));height:min(190px,82%,max(64px,calc(36vw - 190px)));aspect-ratio:662/200;pointer-events:none;z-index:0}
+  section.hero.home .trainrun svg{display:block;width:100%;height:100%}
+  section.hero.home > .container{position:relative;z-index:1}
+  @media (max-width:640px){ section.hero.home .trainrun{right:10px;height:80px} }
+  /* The split-flap count (Carter, 2026-11-26): each digit a dark tile with
+     the seam across its middle; .flip folds the top half down. */
+  .hero.home .heroyou h1 .n{display:inline-flex;align-items:stretch;gap:.06em;vertical-align:baseline}
+  .hero.home .heroyou h1 .fd{position:relative;display:inline-block;min-width:.66em;padding:.04em .07em .02em;border-radius:.1em;text-align:center;
+    background-color:#17202e;color:#f6f7f9;box-shadow:inset 0 -.05em 0 rgba(0,0,0,.35),0 .03em .08em rgba(0,0,0,.25);perspective:3em}
+  .hero.home .heroyou h1 .fd::after{content:"";position:absolute;left:0;right:0;top:50%;height:.035em;background-color:rgba(0,0,0,.55);box-shadow:0 1px 0 rgba(255,255,255,.08)}
+  .hero.home .heroyou h1 .fd b{display:block;font-weight:inherit}
+  .hero.home .heroyou h1 .fs{align-self:flex-end;margin:0 .01em}
+  :root:not([data-theme="light"]) .hero.home .heroyou h1 .fd{background-color:#e9edf3;color:#0b1228}
+  .hero.home .heroyou h1 .fd.flip b{animation:flapdown .07s ease-in}
+  @keyframes flapdown{0%{transform:rotateX(70deg);opacity:.4}100%{transform:none;opacity:1}}
+  @media (prefers-reduced-motion:reduce){ .hero.home .heroyou h1 .fd.flip b{animation:none} }
   .hero.home .heroyou h1 .w{font-weight:600;font-stretch:100%;letter-spacing:-.02em;font-size:.62em;margin-left:.12em}
   .hero.home .heroyou .hy_sub{font-size:1.02rem}
   /* .hero p + p would otherwise set these gaps (see CLAUDE.md, the specificity trap). */
@@ -500,12 +520,15 @@ CoasterHub.me().then(function(acct){
     if (!me) return;
     var $ = function(id){ return document.getElementById(id); };
     var nfx = function(n){ return Number(n || 0).toLocaleString(); };
-    var cword = function(n){ return '<span class="n">' + nfx(n) + '</span><span class="w">' + (me.credits === 1 ? ' credit.' : ' credits.') + '</span>'; };
+    // The count as a split-flap board, a digit to a tile, the way a station
+    // board or a ride's cycle counter shows it (Carter, 2026-11-26).
+    var flaps = function(n){ return nfx(n).split('').map(function(ch){ return /\d/.test(ch) ? '<span class="fd"><b>' + ch + '</b></span>' : '<span class="fs">' + ch + '</span>'; }).join(''); };
+    var cword = function(n){ return '<span class="n" aria-label="' + nfx(n) + '">' + flaps(n) + '</span><span class="w">' + (me.credits === 1 ? ' credit.' : ' credits.') + '</span>'; };
     $('hy_credits').innerHTML = cword(me.credits);
-    // The count ticks up to its new number when it has grown since you last
-    // saw Home — log rides, come back, watch it count (Carter, 2026-11-17).
-    // Only upward, at most the last 40 steps, under a second, and never for
-    // anyone who has asked their phone to reduce motion.
+    // When the count has grown since you last saw Home, the changed digits
+    // flip through to their new value, right to left, like the board updating
+    // (was a count-up, 2026-11-17). Never for reduced motion. A new credit
+    // also sends the train round the skyline (trainRun, below).
     (function(){
       var key = 'ch_seen_credits', prev = null;
       try { var o = JSON.parse(localStorage.getItem(key) || 'null'); if (o && o.slug === acct.slug) prev = o.n; } catch (e) {}
@@ -513,15 +536,24 @@ CoasterHub.me().then(function(acct){
       var to = me.credits;
       if (prev == null || !(to > prev)) return;
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      var from = Math.max(prev, to - 40), el = $('hy_credits'), t0 = null, dur = Math.min(900, 300 + (to - from) * 40);
-      el.innerHTML = cword(from); var num = el.querySelector('.n');
-      function step(ts){
-        if (t0 == null) t0 = ts;
-        var k = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-        num.textContent = nfx(Math.round(from + (to - from) * e));
-        if (k < 1) requestAnimationFrame(step);
+      window.CH_NEW_CREDIT = true;
+      var A = nfx(prev), B = nfx(to), el = $('hy_credits');
+      // Same width: pad the old number on the left so digits line up.
+      while (A.length < B.length) A = ' ' + A;
+      el.innerHTML = cword(to);
+      var tiles = el.querySelectorAll('.n > span'), k = 0;
+      for (var x = B.length - 1; x >= 0; x--) {
+        var t = tiles[x]; if (!t || !t.classList.contains('fd') || A[x] === B[x]) continue;
+        (function(t, from, goal, delay){
+          var b = t.querySelector('b'), d = /\d/.test(from) ? +from : 0, end = +goal;
+          b.textContent = d;
+          setTimeout(function tick(){
+            d = (d + 1) % 10; b.textContent = d;
+            t.classList.remove('flip'); void t.offsetWidth; t.classList.add('flip');
+            if (d !== end) setTimeout(tick, 70);
+          }, delay);
+        })(t, A[x], B[x], 300 + (k++) * 120);
       }
-      setTimeout(function(){ requestAnimationFrame(step); }, 250);
     })();
     $('hy_credits').href = CoasterHub.userPageHref(acct.slug, 'count');
     $('hy_rides').innerHTML = me.rides != null ? '<b>' + nfx(me.rides) + '</b> rides' : '';
@@ -619,6 +651,7 @@ CoasterHub.me().then(function(acct){
     }
     $('hero_h').hidden = true; $('hero_p').hidden = true;
     $('heroyou').hidden = false;
+    if (window.CH_NEW_CREDIT) setTimeout(trainRun, 600);
     // Saved with the FINAL count even while it is still ticking up, so next
     // time opens on the real number.
     try { var hc = $('heroyou').cloneNode(true), hh = hc.querySelector('#hy_credits');
@@ -832,6 +865,68 @@ CoasterHub.fetchUsers().then(function(){
 // Site updates are back in it (Carter, 2026-10-04: "Put my work into 'updates'
 // also") now the section is called Updates.
 var recent = CoasterHubFeed.mount({ feed: document.getElementById('feed'), limit: 5, compact: true, site: true });
+
+// A new credit since your last visit sends the skyline's train round once: up
+// the lift, over the top, down the drop and away (Carter, 2026-11-26). The
+// painted skyline is swapped for a copy of itself without its parked train,
+// the moving one is drawn on the same track, and the picture goes back when
+// the run ends. Skipped for reduced motion (CH_NEW_CREDIT is never set then).
+function trainRun(){
+  var hero = document.querySelector('section.hero.home'); if (!hero || hero.querySelector('.trainrun')) return;
+  var light = document.documentElement.getAttribute('data-theme') === 'light';
+  fetch(light ? '/skyline-paint-day.svg?v=1' : '/skyline-paint-night.svg?v=1').then(function(r){ return r.ok ? r.text() : Promise.reject(); }).then(function(txt){
+    var doc = new DOMParser().parseFromString(txt, 'image/svg+xml'), svg = doc.documentElement;
+    var paths = svg.querySelectorAll('path'), rail = null, parked = null;
+    for (var i = 0; i < paths.length; i++) {
+      var d = paths[i].getAttribute('d') || '';
+      if (!rail && d.indexOf('M-2.0 198.2') === 0) rail = paths[i];
+      if (!parked && d.indexOf('M329.5 25.2') === 0) parked = paths[i];
+    }
+    if (!rail || !parked) return;
+    var color = parked.getAttribute('stroke') || '#0a6aa0', op = parked.getAttribute('stroke-opacity') || '1';
+    parked.parentNode.removeChild(parked);
+    var NS = 'http://www.w3.org/2000/svg', g = doc.createElementNS(NS, 'g'), cars = [];
+    for (var c = 0; c < 8; c++) {
+      var ln = doc.createElementNS(NS, 'line');
+      ln.setAttribute('stroke', color); ln.setAttribute('stroke-opacity', op); ln.setAttribute('stroke-width', '3.4'); ln.setAttribute('stroke-linecap', 'butt');
+      g.appendChild(ln); cars.push(ln);
+    }
+    svg.appendChild(g);
+    var box = document.createElement('div'); box.className = 'trainrun'; box.setAttribute('aria-hidden', 'true');
+    box.appendChild(document.importNode(svg, true));
+    hero.appendChild(box);
+    var live = box.querySelector('svg'), railLive = live.querySelectorAll('path')[Array.prototype.indexOf.call(paths, rail)] || null;
+    // Find the live copy of the rail by its start, the same way.
+    Array.prototype.forEach.call(live.querySelectorAll('path'), function(p){ if ((p.getAttribute('d') || '').indexOf('M-2.0 198.2') === 0 && !railLive) railLive = p; });
+    var carsLive = live.querySelectorAll('g:last-of-type line');
+    var total = railLive.getTotalLength();
+    // Where the crest is: the highest point along the first half of the rail.
+    var crest = 0, minY = 1e9;
+    for (var L = 0; L < total * 0.6; L += 2) { var q = railLive.getPointAtLength(L); if (q.y < minY) { minY = q.y; crest = L; } }
+    var CAR = 5.6, GAP = 1.6, train = cars.length * (CAR + GAP);
+    hero.classList.add('trainon');
+    var t0 = null, LIFT = 2400, DROP = 1700, start = Math.max(0, crest - 230), end = total + train;
+    function place(head){
+      for (var k = 0; k < carsLive.length; k++) {
+        var a = head - k * (CAR + GAP), b = a - CAR;
+        if (b < 0 || a > total) { carsLive[k].setAttribute('stroke-opacity', '0'); continue; }
+        var p1 = railLive.getPointAtLength(Math.max(0, b)), p2 = railLive.getPointAtLength(Math.min(total, a));
+        carsLive[k].setAttribute('x1', p1.x); carsLive[k].setAttribute('y1', p1.y); carsLive[k].setAttribute('x2', p2.x); carsLive[k].setAttribute('y2', p2.y);
+        carsLive[k].setAttribute('stroke-opacity', op);
+      }
+    }
+    function frame(ts){
+      if (t0 == null) t0 = ts;
+      var t = ts - t0, head;
+      if (t < LIFT) head = start + (crest + train * 0.5 - start) * (t / LIFT);                 // the chain lift: steady
+      else { var k = Math.min(1, (t - LIFT) / DROP); head = crest + train * 0.5 + (end - crest - train * 0.5) * (k * k * (1.6 - 0.6 * k)); }  // gravity
+      place(head);
+      if (t < LIFT + DROP) requestAnimationFrame(frame);
+      else { box.remove(); hero.classList.remove('trainon'); }
+    }
+    requestAnimationFrame(frame);
+  }).catch(function(){});
+}
 </script>
 </body>
 </html>

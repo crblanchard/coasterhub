@@ -105,7 +105,7 @@ Within that calm, the components are allowed to play. Carter chose "playful" for
 and cards: rounded shapes, park-themed touches like the admission-ticket "You're at" card,
 the coaster-car and podium icons in the feeds, the count that ticks up after a park day,
 and the skyline drawn into every hero. Playfulness lives in shape, iconography and small
-moments, never in extra color, gradients or glow.
+moments. Color is allowed where it means something about the park or the ride (Carter, 2026-11-26: "they're okay i just don't want it to get too messy"); keep it restrained, never color for its own sake.
 
 The voice is plain and direct, with the rider's own count as the product. Nothing on a
 page should read as generated filler: no stock slogans, no invented numbers, no
