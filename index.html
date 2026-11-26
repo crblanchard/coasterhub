@@ -976,7 +976,7 @@ function photoTone(url, done){
         // unless very pale; sky blue (192–245°) never counts, however deep the
         // sky, except a dark navy that can only be paint (Goliath at Six Flags
         // Over Georgia came out sky blue instead of orange).
-        if(deg>=165 && deg<192 && Lp>0.72) continue;
+        if(deg>=165 && deg<192 && (Lp>0.6 || Sp<0.5)) continue;          // hazy cyan sky near the horizon (X2) is pale; painted turquoise is deep
         if(deg>=192 && deg<=245 && Lp>0.33) continue;
         if(deg>=56 && deg<=160) continue;                               // trees, grass, spring leaves
         // Track is mostly up in the picture; trucks, buildings and crowds sit
