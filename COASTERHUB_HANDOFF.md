@@ -6537,3 +6537,12 @@ Carter: "the entire site lacks personality ... more color" (critique in
   every write is admin-only.
 - Cedar Point has two Wild Mice: the 2023 Zamperla (id 386, the riders' one) and
   "Wild Mouse (Old)" (1959 Schiff, closed 1963).
+
+## 2026-11-26: photo headers on park and coaster pages (on trial)
+
+Carter: "push it for parks and coasters? i'll spend some time with it and decide
+if we keep or revert." `CoasterHub.photoHero` (app.js) turns the page's hero into
+the first photo, with no dark wash; the text turns dark when the photo behind
+the name measures light. To revert: delete the two `CoasterHub.photoHero(...)`
+calls (coaster.html showPhoto, park.html showParkPhotos). The CSS (`.photohero`
+at the end of style.css) is inert without them.
