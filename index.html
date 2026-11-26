@@ -972,7 +972,12 @@ function photoTone(url, done){
         // turquoise or blue TRACK is deeper and stronger and still counts
         // (Twisted Colossus, Carter 2026-11-26).
         var Lp=(mx+mn)/2, Sp=c/(1-Math.abs(2*Lp-1)||1);
-        if(deg>=180 && deg<=245 && (Lp>0.55 || Sp<0.45)) continue;
+        // By hue: turquoise and cyan (165–191°) are track colours and count
+        // unless very pale; sky blue (192–245°) never counts, however deep the
+        // sky, except a dark navy that can only be paint (Goliath at Six Flags
+        // Over Georgia came out sky blue instead of orange).
+        if(deg>=165 && deg<192 && Lp>0.72) continue;
+        if(deg>=192 && deg<=245 && Lp>0.33) continue;
         if(deg>=56 && deg<=160) continue;                               // trees, grass, spring leaves
         // Track is mostly up in the picture; trucks, buildings and crowds sit
         // along the bottom (Carter, 2026-11-26: Ride to Happiness came out the
