@@ -1200,6 +1200,9 @@ body{background-image:none}
   background-image:url(/skyline-paint-night.svg?v=1),var(--skyd,linear-gradient(180deg,#070b22 0%,#0d1233 62%,#1d1a45 100%));
   background-size:auto min(150px,80%,max(58px,calc(30.7vw - 167px))),100% 100%;
   background-position:right max(24px,calc(50vw - 516px)) bottom 0,0 0}
+/* Desktop: the park fills more of the band (Carter, 2026-11-27: "on desktop make
+   the skyline bigger for sure"). */
+@media (min-width:900px){ .hero{background-size:auto min(190px,96%,max(58px,calc(30.7vw - 167px))),100% 100%} }
 :root[data-theme="light"] .hero{background-color:#9fd2f7;
   background-image:url(/skyline-paint-day.svg?v=1),var(--skyl,linear-gradient(180deg,#86c6f2 0%,#c4e4fa 58%,#fbe3c4 100%));
   --muted:#33424e;--line:rgba(10,60,90,.22)}
