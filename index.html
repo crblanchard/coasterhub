@@ -208,6 +208,16 @@
     font-size:clamp(1.35rem,3.6vw,1.7rem);letter-spacing:-.02em;line-height:1.1;color:var(--fg);margin:0 0 12px}
   #globaltop .rhead{margin-bottom:12px}
   #globaltop .rhead > span:not(.rsw){margin:0}
+  /* Each section head carries a small lift hill in steel, and a quiet line
+     under it saying what the section is (Carter, 2026-11-27, critique idea D). */
+  h2.sec,#globaltop .rhead > span:not(.rsw){display:flex;align-items:center;gap:10px}
+  h2.sec::before,#globaltop .rhead > span:not(.rsw)::before{content:"";flex:none;width:1.15em;height:.8em;background-color:var(--steel);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 32'%3E%3Cpath d='M2 30 L22 6 Q25 2 28 6 Q34 16 36 30' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 30V18M20 30V9M28 30V8' stroke='%23000' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='28' r='2.6'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 32'%3E%3Cpath d='M2 30 L22 6 Q25 2 28 6 Q34 16 36 30' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 30V18M20 30V9M28 30V8' stroke='%23000' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='28' r='2.6'/%3E%3C/svg%3E") center/contain no-repeat}
+  h2.sec:has(+ .secsub){margin-bottom:2px}
+  .secsub{margin:0 0 14px;font-size:.92rem;color:var(--muted)}
+  #globaltop .rhead{flex-wrap:wrap}
+  #globaltop .rhead::after{content:"Everyone\2019s lists, combined into one.";order:3;flex-basis:100%;margin-top:2px;font-size:.92rem;font-weight:400;font-stretch:normal;letter-spacing:normal;text-transform:none;color:var(--muted)}
 
   /* Rank numbers: big, in the display face, painted steel or wood by the ride. */
   #globaltop a.crow .rk{font-family:var(--display);font-stretch:112%;font-weight:850;font-size:1.45rem;min-width:2.1em;
@@ -272,6 +282,11 @@
   #friends .riderrow .nums{box-sizing:border-box;width:var(--sw);align-self:stretch;justify-content:center;align-items:center;
     margin:-10px -16px -10px 0;padding:10px 6px;background-color:var(--steel-tint);border-left:2px dashed var(--line)}
   #friends .hint{padding:2px 2px 0}
+  /* The stub's number and the rider's name in the display face, like the park-day
+     ticket (Carter, 2026-11-27, critique idea B). */
+  #friends .riderrow .nums b{font-family:var(--display);font-weight:850;font-stretch:115%;font-size:1.75rem;line-height:1;letter-spacing:-.03em}
+  #friends .riderrow .nums span{font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+  #friends .riderrow .nm{font-family:var(--display);font-weight:800;font-stretch:108%;font-size:1.08rem;letter-spacing:-.01em}
   @media (max-width:560px){ #friends .riderrow{--sw:78px} #friends .riderrow .nums{margin:-8px -14px -8px 0;padding:8px 6px} }
   @media (max-width:560px){ .park .rankcta .btn{padding:0 12px;font-size:.86rem} .park .rankcta .rc-t{padding-right:10px} .park .rankcta .rc-t b{font-size:1.02rem} }
 
@@ -521,6 +536,7 @@
   <div id="globaltop"></div>
   <div id="friends_wrap" hidden>
     <h2 class="sec">Friends</h2>
+    <p class="secsub">Who you follow, most ranked first.</p>
     <div class="riderlist" id="friends"></div>
     <!-- Carter, 2026-10-04: "below your list of friends do a Find friends ->";
          /users has the suggestions at its top. Back as a list 2026-11-20
@@ -530,6 +546,7 @@
   </div>
   <div id="factivity_wrap" hidden>
     <h2 class="sec">You &amp; friends</h2>
+    <p class="secsub">What you and the people you follow rode lately.</p>
     <div class="feed" id="factivity"></div>
     <p class="more"><a href="/changes">All activity &rarr;</a></p>
   </div>
@@ -540,6 +557,7 @@
      one with its filters. -->
 <section class="block recent"><div class="container">
   <h2 class="sec">Updates</h2>
+  <p class="secsub">What everyone has been up to.</p>
   <div class="feed" id="feed"><div class="empty" data-loading>Loading&hellip;</div></div>
   <p class="more"><a href="/changes">All updates &rarr;</a></p>
 </div></section>
