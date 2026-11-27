@@ -306,6 +306,13 @@
   .daycard .tix h3 a:hover{color:var(--accent2)}
   .daycard .tix .dsum{margin:4px 0 0;color:var(--muted);font-size:.92rem}
   .daycard .tix .dsum b{color:var(--fg)}
+  .daycard .tix .dhl{margin:6px 0 0;font-size:.9rem;line-height:1.45;color:var(--muted)}
+  .daycard .tix .dhl span{font-weight:700;color:var(--fg)}
+  .daycard .tix .dhl a{color:var(--fg);font-weight:600;text-decoration:none}
+  .daycard .tix .dhl a:hover{color:var(--accent2)}
+  .daycard .tix .dhl i{font-style:normal}
+  .daycard .tix .dhl i::before{content:"("}
+  .daycard .tix .dhl i::after{content:")"}
   .daycard .newc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;list-style:none}
   .daycard .newc a{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:600;
     text-decoration:none;color:var(--fg);background-color:var(--steel-tint)}
@@ -674,6 +681,18 @@ CoasterHub.me().then(function(acct){
           + pk.map(function(p){ return '<a href="' + CoasterHub.parkHref(p) + '">' + esc(p) + '</a>'; }).join(' &amp; ') + '</h3>'
           + '<p class="dsum"><b>' + nfx(dayRides.length) + '</b> ' + (dayRides.length === 1 ? 'ride' : 'rides')
           + (newOnes.length ? ' &middot; <b>' + newOnes.length + '</b> new ' + (newOnes.length === 1 ? 'credit' : 'credits') : '') + '</p>'
+          // Highlights: the day's three tallest new credits (the day's tallest rides
+          // when nothing was new), name and model (Carter, 2026-11-27: "top three
+          // based on height").
+          + (function(){
+              var pool = (newOnes.length ? newOnes : order).filter(function(c){ return c && +c.h > 0; })
+                .sort(function(a, b){ return b.h - a.h || a.name.localeCompare(b.name); }).slice(0, 3);
+              if (!pool.length) return '';
+              return '<p class="dhl"><span>Highlights:</span> ' + pool.map(function(c){
+                var m = CoasterHub.maker(c);
+                return '<a href="' + CoasterHub.coasterHref(c) + '">' + esc(c.name) + '</a>' + (m ? ' <i>' + esc(m) + '</i>' : '');
+              }).join(', ') + '</p>';
+            })()
           // Every new credit of the day (Carter, 2026-11-21: "on desktop just show all
           // the rides the +1 more is weird"); a phone shows them as one swipeable row.
           // Every coaster of the day with how many times (Carter, 2026-11-21:
