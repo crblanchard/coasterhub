@@ -3998,7 +3998,7 @@
             + '<span class="gmeta"><b title="Global score, out of 100">' + scoreText(r.score) + '</b>'
             + (me ? '<span class="gy">your #' + me + '</span>' : (opts.lists === false ? '' : r.n + ' lists'))
             + '</span>' + chev + '</a>';
-        }).join("") + '</div>' + more(rows.length) : '<p class="rnone">None of these are on ' + ((st.glob && st.glob.min) || 2) + '+ riders’ lists yet.</p>')
+        }).join("") + '</div>' + more(rows.length) : '<p class="rnone">No coaster here is on ' + ((st.glob && st.glob.min) || 2) + ' riders’ lists yet. Rank yours and it could be the first.</p>')
           + (one && !opts.moreHref ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');
       }
       el.innerHTML = '<div class="sect rhead"><span>' + E(opts.title ? opts.title(st.view) : "Rankings") + '</span>' + sw + '</div>' + body;

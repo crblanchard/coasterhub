@@ -131,7 +131,10 @@
   /* Signed out: the tagline stays clear of the skyline, and the buttons sit
      high enough that the lift hill rises beside them, not through the words
      (Carter, 2026-11-27: "increase spacing to prevent overlap"). */
-  .hero.home #hero_p{max-width:30ch}
+  /* One line when there is room beside the skyline, else one sentence a line,
+     never a break mid-sentence (Carter, 2026-11-27: "make it go to three lines"). */
+  .hero.home #hero_p span{display:block}
+  @media (min-width:1400px){ .hero.home #hero_p{max-width:none} .hero.home #hero_p span{display:inline} }
   @media (min-width:641px){ .hero.home .herojoin{margin-bottom:64px} }
   /* Signed out, the two ways in are the point of the hero, so they are big
      (Carter, 2026-11-27: "make ... more prominent ... something a little more clear"). */
@@ -176,6 +179,11 @@
   /* Phones: the two buttons stacked at the left, beside the skyline rather
      than above it, so the hero is shorter and the featured coaster shows
      without scrolling (Carter, 2026-11-26). */
+  /* Phones have the yellow Log tab on every screen, so the hero leaves Log a
+     day to it: one yellow button on the first screen (critique, 2026-11-27). */
+  @media (max-width:640px){ .hero.home .heroyou p.hy_acts .hy_log{display:none}
+    /* With the buttons gone the skyline would sit under the steel/wood line: room for it. */
+    .hero.home .heroyou{padding-bottom:58px} }
   @media (max-width:640px){
     .hero.home .heroyou p.hy_acts{flex-direction:column;align-items:flex-start;gap:8px;margin:14px 0 6px}
     .hero.home .heroyou p.hy_acts .btn{min-width:128px;text-align:center;box-sizing:border-box}
@@ -240,8 +248,10 @@
      the page was tried the same day and taken out: "I don't really like it".) */
   section.hero.home{position:relative}
   section.hero.home > .container{position:relative;z-index:1}
-  section.hero.home::after{content:"";position:absolute;left:0;right:0;bottom:0;height:44px;pointer-events:none;
-    background-image:linear-gradient(to bottom,transparent,var(--bg))}
+  section.hero.home::after{content:"";position:absolute;left:0;right:0;bottom:0;height:72px;pointer-events:none;
+    /* Eased, so the sky thins into the page instead of passing through a grey
+       band where half-sky meets half-paper (critique, 2026-11-27). */
+    background-image:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 0%,transparent) 0%,color-mix(in srgb,var(--bg) 18%,transparent) 30%,color-mix(in srgb,var(--bg) 55%,transparent) 60%,color-mix(in srgb,var(--bg) 85%,transparent) 82%,var(--bg) 100%)}
   /* The rank card as a ticket: notched sides, a dashed tear, the action on the stub.
      .park-scoped so these beat the plain card rules further down the sheet. */
   .park .rankcta{gap:0;flex-wrap:nowrap;padding:0 0 0 22px;border:0;border-radius:10px;
@@ -312,7 +322,13 @@
     /* Just the day on a phone; the coaster names took a screen of their own
        (Carter, 2026-11-21: "it takes up too much space so ... remove coaster
        names on mobile"). */
-    .daycard .newc{display:none}
+    /* The day's coasters as one row you can swipe, not a screen of chips
+       (2026-11-21 hid them for the space; back as one line, critique 2026-11-27). */
+    .daycard .newc{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-14px;padding-right:14px;
+      -webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent)}
+    .daycard .newc::-webkit-scrollbar{display:none}
+    .daycard .newc li{flex:none}
+    .daycard .newc a{white-space:nowrap}
     .daycard{--sw:74px}
     .daycard .stub b{font-size:1.9rem}
     .daycard .tix{padding:14px}
@@ -414,7 +430,7 @@
   <!-- Signed out: the welcome and one line on what the site does (Carter, 2026-11-27).
        Signed in, the script hides both and shows the rider's count instead. -->
   <h1 class="wide" id="hero_h">Welcome to Coaster Hub.</h1>
-  <p class="wide" id="hero_p">Track your credits. Rank your favorite coasters. Log your rides.</p>
+  <p class="wide" id="hero_p"><span>Track your credits.</span> <span>Rank your favorite coasters.</span> <span>Log your rides.</span></p>
   <!-- Signed in, the hero is YOUR count instead of the slogan (Carter, 2026-10-01,
        from the impeccable critique: "the rider's own count is the product"). -->
   <div class="heroyou" id="heroyou" hidden>
@@ -424,7 +440,7 @@
     <p class="clegend" id="hy_legend" hidden></p>
     <p class="hy_next" id="hy_next" hidden></p>
     <p class="hy_last" id="hy_last" hidden></p>
-    <p class="hy_acts"><a class="btn" href="/log">Log a day</a><a class="btn alt" id="hy_rank" href="/rankings">Rank more</a></p>
+    <p class="hy_acts"><a class="btn hy_log" href="/log">Log a day</a><a class="btn alt" id="hy_rank" href="/rankings">Rank more</a></p>
   </div>
   <!-- Signed out only: the two things a visitor can do about any of this. Shown
        by the script below once /api/auth/me has answered, so a signed-in rider
@@ -455,7 +471,7 @@
 </script>
 
 
-<div class="container"><div id="loading">Loading riders…</div></div>
+<div class="container"><div id="loading">Loading…</div></div>
 
 <div class="container"><div id="err">
   <strong>Couldn't reach Coaster Hub.</strong> Check your connection and reload the page.
@@ -533,7 +549,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261126p"></script>
+<script src="/app.js?v=20261127a"></script>
 <script src="/changes-feed.js?v=20261120b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -621,6 +637,8 @@ CoasterHub.me().then(function(acct){
         + '<a class="btn" href="' + CoasterHub.userPageHref(acct.slug, 'rankings') + '">Start ranking &rarr;</a>';
       $('rankcta').hidden = false;
       $('hy_next').hidden = true;
+      // The card says it; the hero's Rank more would say it again (critique, 2026-11-27).
+      $('hy_rank').hidden = true;
     }
     $('hy_rank').href = CoasterHub.userPageHref(acct.slug, 'rankings');
     // The last day you logged, and where.
@@ -657,7 +675,7 @@ CoasterHub.me().then(function(acct){
           + '<p class="dsum"><b>' + nfx(dayRides.length) + '</b> ' + (dayRides.length === 1 ? 'ride' : 'rides')
           + (newOnes.length ? ' &middot; <b>' + newOnes.length + '</b> new ' + (newOnes.length === 1 ? 'credit' : 'credits') : '') + '</p>'
           // Every new credit of the day (Carter, 2026-11-21: "on desktop just show all
-          // the rides the +1 more is weird"); a phone hides the list.
+          // the rides the +1 more is weird"); a phone shows them as one swipeable row.
           // Every coaster of the day with how many times (Carter, 2026-11-21:
           // "how many times each one so x2 x3"), most-ridden first, A-Z within a
           // count ("by number of rides and alphabetical within those"); new
@@ -876,7 +894,7 @@ CoasterHub.fetchUsers().then(function(){
       var mine = rows.filter(function(x){ return inF[x.u.slug] || x.u.slug === fol.me; });
       var anyF = mine.some(function(x){ return x.u.slug !== fol.me; });
       document.getElementById('friends').innerHTML = html(mine)
-        + (anyF ? '' : '<p class="hint">You&rsquo;re not following anyone yet. Find people on <a href="/explore">Explore</a>.</p>');
+        + (anyF ? '' : '<p class="hint">Follow riders to see their counts here.</p>');
       document.getElementById('friends_wrap').hidden = false;
       // You and the people you follow (Carter, 2026-09-26: "also show my own
       // changes in there too") — so it shows whenever you are signed in.
