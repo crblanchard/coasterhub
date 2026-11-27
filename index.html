@@ -213,20 +213,6 @@
   #globaltop a.crow .rk{font-family:var(--display);font-stretch:112%;font-weight:850;font-size:1.45rem;min-width:2.1em;
     color:var(--steel);font-variant-numeric:tabular-nums}
   #globaltop a.crow[data-tp="wd"] .rk{color:var(--wood)}
-  /* A leaderboard (Carter, 2026-11-27, critique idea A): each place on flip
-     tiles like the hero's count, a stripe of the ride's paint down the row's
-     edge, and the top three on solid tiles. */
-  #globaltop a.crow{box-shadow:inset 4px 0 0 var(--steel);align-items:center;padding-left:16px}
-  #globaltop a.crow[data-tp="wd"]{box-shadow:inset 4px 0 0 var(--wood)}
-  #globaltop a.crow .rk{display:inline-flex;gap:2px;min-width:2.5em;font-size:1.15rem;line-height:1}
-  #globaltop .rk .fd{position:relative;display:inline-block;min-width:.72em;padding:.16em .1em .12em;border-radius:5px;text-align:center;
-    background-color:var(--steel-tint);color:var(--steel);box-shadow:inset 0 0 0 1px rgba(10,60,90,.10)}
-  #globaltop .rk .fd::after{content:"";position:absolute;left:.08em;right:.08em;top:52%;height:1px;background-color:currentColor;opacity:.18}
-  #globaltop a.crow[data-tp="wd"] .rk .fd{background-color:var(--wood-tint);color:var(--wood)}
-  #globaltop a.crow[data-top] .rk .fd{background-color:var(--steel);color:#fff}
-  #globaltop a.crow[data-top][data-tp="wd"] .rk .fd{background-color:var(--wood)}
-  :root:not([data-theme="light"]) #globaltop a.crow[data-top] .rk .fd{color:#0b1228}
-  #globaltop a.crow[data-top] .rk .fd::after{background-color:#000;opacity:.22}
 
   /* Both top tens as queue signage (Mine too, Carter 2026-11-26): the ride's name in the display face, its
      height, speed and opening year after the park, numbers set like a sign's
@@ -873,18 +859,7 @@ CoasterHub.fetchCoasters().then(function(r){
   var gt = document.getElementById('globaltop');
   var paint = function(){ Array.prototype.forEach.call(gt.querySelectorAll('a.crow'), function(a){
     var id = a.getAttribute('data-gid') || a.getAttribute('data-cid'); var v = wood[id] ? 'wd' : 'st';
-    if (a.getAttribute('data-tp') !== v) a.setAttribute('data-tp', v);
-    // The place on flip tiles, once per drawn row (the observer sees this too,
-    // so the guard is what stops it looping).
-    var rk = a.querySelector('.rk');
-    if (rk && !rk.querySelector('.fd')) {
-      var n = rk.textContent.trim();
-      if (/^\d+$/.test(n)) {
-        rk.setAttribute('aria-label', n);
-        rk.innerHTML = n.split('').map(function(ch){ return '<span class="fd" aria-hidden="true">' + ch + '</span>'; }).join('');
-        if (+n <= 3) a.setAttribute('data-top', ''); else a.removeAttribute('data-top');
-      }
-    } }); };
+    if (a.getAttribute('data-tp') !== v) a.setAttribute('data-tp', v); }); };
   // Always shown, scores and all (Carter, 2026-11-20: "still want global top 5 and scores").
   new MutationObserver(paint).observe(gt, { childList: true, subtree: true });
 }).catch(function(){});
