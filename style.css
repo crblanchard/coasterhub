@@ -1359,3 +1359,24 @@ h1,h2{font-family:var(--display);font-stretch:110%;letter-spacing:-.02em}
 .hero:not(.photohero) .phcred,.hero:not(.photohero) .phall{display:none}
 @media (max-width:640px){ :root .hero.photohero,:root[data-theme="light"] .hero.photohero{min-height:280px;padding-bottom:40px!important} .hero.photohero .phcred{max-width:80%} }
 
+/* Up, down or new since the last weekly snapshot, beside a Global place; the
+   change in a small bubble on hover or tap, a tap elsewhere closes it (Carter,
+   2026-11-27; app.js moveMark draws it and handles the taps). In style.css because /rankings does not load lists.css. */
+  .gmv{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin:-6px;padding:6px;box-sizing:content-box;
+    font-family:system-ui,sans-serif;font-size:.62rem;font-weight:800;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .gmv.up{color:#3f9a72}
+  .gmv.dn{color:#c2474c}
+  :root:not([data-theme="light"]) .gmv.dn{color:#e87b7e}
+  .gmv.nw{color:#c99400}
+  :root:not([data-theme="light"]) .gmv.up{color:#7cc7a1}
+  :root:not([data-theme="light"]) .gmv.nw{color:var(--yellow,#ffcc1f)}
+  .gmvtip{display:none;position:absolute;right:-4px;bottom:calc(100% + 4px);z-index:5;white-space:nowrap;
+    padding:5px 9px;border-radius:8px;background-color:var(--fg);color:var(--bg);font-size:.78rem;font-weight:700;letter-spacing:0;
+    box-shadow:0 6px 18px -8px rgba(0,0,0,.45);pointer-events:none}
+  .gmvtip::after{content:"";position:absolute;right:10px;top:100%;border:5px solid transparent;border-top-color:var(--fg)}
+  @media (hover:hover){ .gmv:hover .gmvtip{display:block} }
+  .gmv.open .gmvtip,.gmv:focus-visible .gmvtip{display:block}
+/* The row with an open bubble sits above its neighbours, so the bubble is not
+   covered by the row before it; /rankings keeps a fixed slot for the arrow. */
+.srow:has(.gmv.open),a.crow:has(.gmv.open){position:relative;z-index:4;overflow:visible}
+.pmv{flex:none;align-self:center;width:14px;margin-left:-2px;display:inline-flex;justify-content:center}

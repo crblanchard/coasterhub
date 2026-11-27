@@ -3935,8 +3935,26 @@
     var t = d === null ? "New " + wk : (d > 0 ? "+" : "−") + Math.abs(d) + " " + wk;
     var cls = d === null ? "nw" : d > 0 ? "up" : "dn";
     var mark = d === null ? "★" : d > 0 ? "▲" : "▼";
-    return '<span class="mv ' + cls + '" role="button" tabindex="0" aria-label="' + t + '">' + mark + '<span class="mvtip" aria-hidden="true">' + t + '</span></span>';
+    return '<span class="gmv ' + cls + '" role="button" tabindex="0" aria-label="' + t + '">' + mark + '<span class="gmvtip" aria-hidden="true">' + t + '</span></span>';
   }
+  // A tap on an arrow opens its bubble without following the row's link or
+  // opening the row; a tap anywhere else closes it. Capture phase, so it runs
+  // before the row's own handlers (Home's Global top 10, /rankings' Global list).
+  (function () {
+    function closeAll(except) {
+      Array.prototype.forEach.call(document.querySelectorAll(".gmv.open"), function (m) { if (m !== except) m.classList.remove("open"); });
+    }
+    document.addEventListener("click", function (e) {
+      var m = e.target.closest && e.target.closest(".gmv");
+      if (!m) { closeAll(null); return; }
+      e.preventDefault(); e.stopPropagation(); closeAll(m); m.classList.toggle("open");
+    }, true);
+    document.addEventListener("keydown", function (e) {
+      var m = e.target.closest && e.target.closest(".gmv");
+      if (!m || (e.key !== "Enter" && e.key !== " ")) return;
+      e.preventDefault(); e.stopPropagation(); closeAll(m); m.classList.toggle("open");
+    }, true);
+  })();
   function scoreText(v) { return (Math.round(v * 10) / 10).toFixed(1); }
   function globalTally() {
     if (!globalTallyP) globalTallyP = Promise.all([fetchCoasters(), fetchAllRankings(), fetchSummary(), fetchRankSnapshot()]).then(function (r) {
@@ -4025,7 +4043,7 @@
         st.rows = {};
         body = (rows.length ? '<div class="panel">' + cut(rows).map(function (r, i) {
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
-          return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + r.pos + (opts.moves ? moveMark(r.g, st.glob.since) : '') + '</span>'
+          return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + r.pos + '</span>'
             + '<span class="two"><span class="cn">' + E((r.g.sides && r.g.sides.length > 1 && r.g.race) || c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + (opts.sign ? signStats(c) : '') + '</span></span>'
             // The model too, as /rankings' Global list shows it (2026-09-28).
             + (opts.model !== false && c.model ? '<span class="md">' + E(modelLabel(c.model)) + '</span>' : '')
@@ -4035,7 +4053,11 @@
             // many lists (Home's card leaves that out: opts.lists false).
             + '<span class="gmeta"><b title="Global score, out of 100">' + scoreText(r.score) + '</b>'
             + (me ? '<span class="gy">your #' + me + '</span>' : (opts.lists === false ? '' : r.n + ' lists'))
-            + '</span>' + chev + '</a>';
+            + '</span>'
+            // Up or down since last week, at the far right beside the score
+            // (Carter, 2026-11-27), in a fixed slot so the scores line up.
+            + (opts.moves && st.glob.since ? '<span class="pmv">' + moveMark(r.g, st.glob.since) + '</span>' : '')
+            + chev + '</a>';
         }).join("") + '</div>' + more(rows.length) : '<p class="rnone">No coaster here is on ' + ((st.glob && st.glob.min) || 2) + ' riders’ lists yet. Rank yours and it could be the first.</p>')
           + (one && !opts.moreHref ? '<p class="rnone">' + one + ' more on only one list.</p>' : '');
       }
@@ -4447,7 +4469,7 @@
               openSearch: openSearch, searchIndex: buildSearchIndex, searchFor: searchFor,
               crumbs: crumbs, riddenOf: riddenOf, haptic: haptic, actionSheet: actionSheet, inApp: inApp, follows: follows, rankingsOf: rankingsOf, askPush: askPush, pushForget: pushForget, toast: toast, queueRides: queueRides, isNetErr: isNetErr, isPhone: isPhone, whoByPlace: whoByPlace, riderHead: riderHead, kindLine: kindLine, placeTrail: placeTrail, you: you, parkRanks: parkRanks, youStrip: youStrip, coasterFacts: coasterFacts,
               openableCoasters: openableCoasters, photoInto: photoInto, photoWarm: photoWarm, photoGallery: photoGallery, photoHero: photoHero, photoSize: photoSize, photoBox: photoBox, rankSection: rankSection, lifeTag: lifeTag, coasterRow: coasterRow, visitRow: visitRow, countsTag: countsTag, riderRow: riderRow, suggestFriends: suggestFriends,
-              riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
+              riderFace: riderFace, traveling: traveling, needFirst: needFirst, foldList: foldList, globalTally: globalTally, moveMark: moveMark, scoreText: scoreText, racingFamilies: racingFamilies, racingWho: racingWho, humanCheck: humanCheck };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   global.CoasterHub = api;
 })(typeof window !== "undefined" ? window : globalThis);
