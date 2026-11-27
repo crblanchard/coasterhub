@@ -135,7 +135,7 @@
   @media (min-width:641px){ .hero.home .herojoin{margin-bottom:64px} }
   /* Signed out, the two ways in are the point of the hero, so they are big
      (Carter, 2026-11-27: "make ... more prominent ... something a little more clear"). */
-  .hero.home .herojoin{display:flex;flex-wrap:wrap;gap:12px}
+  .hero.home .herojoin:not([hidden]){display:flex;flex-wrap:wrap;gap:12px}
   .hero.home .herojoin .btn{font-size:1.1rem;font-weight:700;padding:15px 28px;min-height:52px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center}
   @media (max-width:640px){ .hero.home .herojoin .btn{font-size:1.02rem;padding:13px 22px;min-height:48px} }
   /* The skyline's train run (trainRun): while it runs, the hero shows only its
