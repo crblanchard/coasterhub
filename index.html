@@ -849,9 +849,9 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
     }).catch(function(){ tryAt(n+1); });
   })(0);
 }).catch(function(){ document.getElementById('featwrap').hidden=true; });
-// Five on a phone (Carter, 2026-10-02: "Home: shorter"), ten wider; the
-// rest is a tap away on /rankings either way.
-var TOPN = window.matchMedia('(max-width:560px)').matches ? 5 : 10;
+// Ten everywhere (Carter, 2026-11-27: "should be global top 10 right?"; phones
+// had five since 2026-10-02). The rest is a tap away on /rankings.
+var TOPN = 10;
 // Rank rows painted steel or wood by the ride (2026-11-20). The section
 // re-renders on Global | Mine, so it is watched rather than painted once.
 CoasterHub.fetchCoasters().then(function(r){
