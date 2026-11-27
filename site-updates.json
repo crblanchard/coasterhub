@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-27T18:29:23Z",
-   "text": "Signed out, the home page now says what Coaster Hub is for under the welcome: track your credits, rank your favorite coasters, log your rides."
+   "at": "2026-11-27T18:39:07Z",
+   "text": "Signed out, the home page now says what Coaster Hub is for under the welcome, with bigger Create an account and Log in buttons clear of the skyline. The feedback link at the foot of Home now reads Let us know and goes to the Coaster Hub inbox."
   },
   {
    "at": "2026-11-27T05:13:04Z",
