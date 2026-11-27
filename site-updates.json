@@ -2,7 +2,7 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-26T23:19:35Z",
+   "at": "2026-11-27T05:13:04Z",
    "text": "Every page's header now follows the same time-of-day sky as Home, from sunrise to night, in both light and dark mode. In the iPhone app, swiping back shows the real previous page behind, and pages slide in again from Home, Explore and the other tab pages."
   },
   {

@@ -726,7 +726,17 @@
        the pill's row. Phones put the art in its own strip below, so wider only. */
     @media (min-width:641px){ .hero:has(#mineglobal:not([hidden])){min-height:calc(78px + min(130px,max(58px,calc(30.7vw - 167px))));
       background-size:auto min(130px,calc(100% - 78px),max(58px,calc(30.7vw - 167px))),100% 100%!important} }
-    @media (max-width:680px){ html .hero:has(#racts:not([hidden])){padding-bottom:var(--hero-b,84px)!important} }</style>
+    @media (max-width:680px){ html .hero:has(#racts:not([hidden])),html.myrank .hero{padding-bottom:var(--hero-b,84px)!important} }
+    /* Your own list (html.myrank, set below before paint from the last
+       signed-in slug): the Edit row's place is held from the start, so the
+       band is its final height at once. It started tall and shrank once the
+       row arrived, and the iPhone applied the :has rule above late (Carter,
+       2026-11-27: "starts tall gets short every time"). */
+    html.myrank .hero #racts[hidden]{display:block;visibility:hidden}
+    html.myrank .hero #racts[hidden] #h_rank{display:none}
+    html.myrank .hero .rprog[hidden]{display:flex;visibility:hidden}
+    html.myrank .hero .rprog span:empty{min-height:1.45em}</style>
+  <script>try{var chM=localStorage.getItem('ch_me'),chP=location.pathname.split('/');if(chM&&chP[1]==='user'&&decodeURIComponent(chP[2]||'').toLowerCase()===chM.toLowerCase()&&chP[3]==='rankings')document.documentElement.classList.add('myrank')}catch(e){}</script>
   <!-- Your own list (Carter, 2026-10-02, from the rankings mockup): how much
        of your count is ranked, and the two things you do here — Rank 5 more
        and Edit — up top. They press the bar's own buttons, which stay where
@@ -1200,6 +1210,7 @@ if(!slug){
       $('h_rank').onclick = function(){ rankMore(5); };
       $('h_edit').onclick = function(){ edit.onclick(); };
       $('racts').hidden = false;
+      document.documentElement.classList.add('myrank');
       moreButton();
       var ask=(new URLSearchParams(location.search).get('rank')||'').split(',').map(Number).filter(Boolean);
       if(ask.length){
