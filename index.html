@@ -208,12 +208,8 @@
     font-size:clamp(1.35rem,3.6vw,1.7rem);letter-spacing:-.02em;line-height:1.1;color:var(--fg);margin:0 0 12px}
   #globaltop .rhead{margin-bottom:12px}
   #globaltop .rhead > span:not(.rsw){margin:0}
-  /* Each section head carries a small lift hill in steel, and a quiet line
-     under it saying what the section is (Carter, 2026-11-27, critique idea D). */
-  h2.sec,#globaltop .rhead > span:not(.rsw){display:flex;align-items:center;gap:10px}
-  h2.sec::before,#globaltop .rhead > span:not(.rsw)::before{content:"";flex:none;width:1.15em;height:.8em;background-color:var(--steel);
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 32'%3E%3Cpath d='M2 30 L22 6 Q25 2 28 6 Q34 16 36 30' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 30V18M20 30V9M28 30V8' stroke='%23000' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='28' r='2.6'/%3E%3C/svg%3E") center/contain no-repeat;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 32'%3E%3Cpath d='M2 30 L22 6 Q25 2 28 6 Q34 16 36 30' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 30V18M20 30V9M28 30V8' stroke='%23000' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='42' cy='28' r='2.6'/%3E%3C/svg%3E") center/contain no-repeat}
+  /* A quiet line under each section head saying what it is (Carter, 2026-11-27;
+     the lift-hill marks tried beside them were taken out the same day). */
   h2.sec:has(+ .secsub){margin-bottom:2px}
   .secsub{margin:0 0 14px;font-size:.92rem;color:var(--muted)}
   #globaltop .rhead{flex-wrap:wrap}
