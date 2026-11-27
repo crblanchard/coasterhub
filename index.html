@@ -219,6 +219,23 @@
   #globaltop a.crow .rk{font-family:var(--display);font-stretch:112%;font-weight:850;font-size:1.45rem;min-width:2.1em;
     color:var(--steel);font-variant-numeric:tabular-nums}
   #globaltop a.crow[data-tp="wd"] .rk{color:var(--wood)}
+  /* Up, down or new since Monday's snapshot, beside the place; the change in a
+     small bubble on hover or tap (Carter, 2026-11-27). */
+  #globaltop a.crow .rk{display:inline-flex;align-items:center;gap:6px}
+  #globaltop .mv{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin:-6px;padding:6px;box-sizing:content-box;
+    font-family:system-ui,sans-serif;font-size:.62rem;font-weight:800;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #globaltop .mv.up{color:#1a9a5a}
+  #globaltop .mv.dn{color:#d92c33}
+  :root:not([data-theme="light"]) #globaltop .mv.dn{color:#ff5a5f}
+  #globaltop .mv.nw{color:#c99400}
+  :root:not([data-theme="light"]) #globaltop .mv.up{color:#4ade80}
+  :root:not([data-theme="light"]) #globaltop .mv.nw{color:var(--yellow,#ffcc1f)}
+  #globaltop .mvtip{display:none;position:absolute;left:-4px;bottom:calc(100% + 4px);z-index:5;white-space:nowrap;
+    padding:5px 9px;border-radius:8px;background-color:var(--fg);color:var(--bg);font-size:.78rem;font-weight:700;letter-spacing:0;
+    box-shadow:0 6px 18px -8px rgba(0,0,0,.45);pointer-events:none}
+  #globaltop .mvtip::after{content:"";position:absolute;left:10px;top:100%;border:5px solid transparent;border-top-color:var(--fg)}
+  @media (hover:hover){ #globaltop .mv:hover .mvtip{display:block} }
+  #globaltop .mv.open .mvtip,#globaltop .mv:focus-visible .mvtip{display:block}
 
   /* Both top tens as queue signage (Mine too, Carter 2026-11-26): the ride's name in the display face, its
      height, speed and opening year after the park, numbers set like a sign's
@@ -570,7 +587,7 @@
   <div><a href="/">Home</a> &nbsp;&middot;&nbsp; <a href="/coasters">Coasters</a> &nbsp;&middot;&nbsp; <a href="/parks">Parks</a> &nbsp;&middot;&nbsp; <a href="/manufacturers">Manufacturers</a> &nbsp;&middot;&nbsp; <a href="/locations">Locations</a> &nbsp;&middot;&nbsp; <a href="/map">Map</a> &nbsp;&middot;&nbsp; <a href="/sitemap">Sitemap</a> &nbsp;&middot;&nbsp; <a href="/terms">Terms</a> &nbsp;&middot;&nbsp; <a href="/privacy">Privacy</a><span data-contrib hidden></span></div>
 </div></footer>
 
-<script src="/app.js?v=20261127a"></script>
+<script src="/app.js?v=20261127b"></script>
 <script src="/changes-feed.js?v=20261120b"></script>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -866,6 +883,22 @@ Promise.all([CoasterHub.fetchCoasters(), CoasterHub.globalTally(), CoasterHub.yo
 // Ten everywhere (Carter, 2026-11-27: "should be global top 10 right?"; phones
 // had five since 2026-10-02). The rest is a tap away on /rankings.
 var TOPN = 10;
+// The arrows' "+2 since last week": hover shows it on a desktop; a tap opens it
+// (without following the row's link) and a tap anywhere else closes it
+// (Carter, 2026-11-27).
+(function(){
+  var gt = document.getElementById('globaltop'); if (!gt) return;
+  function closeAll(except){ Array.prototype.forEach.call(document.querySelectorAll('#globaltop .mv.open'), function(m){ if (m !== except) m.classList.remove('open'); }); }
+  gt.addEventListener('click', function(e){
+    var m = e.target.closest && e.target.closest('.mv'); if (!m) return;
+    e.preventDefault(); e.stopPropagation(); closeAll(m); m.classList.toggle('open');
+  }, true);
+  gt.addEventListener('keydown', function(e){
+    var m = e.target.closest && e.target.closest('.mv'); if (!m || (e.key !== 'Enter' && e.key !== ' ')) return;
+    e.preventDefault(); closeAll(m); m.classList.toggle('open');
+  });
+  document.addEventListener('click', function(){ closeAll(null); });
+})();
 // Rank rows painted steel or wood by the ride (2026-11-20). The section
 // re-renders on Global | Mine, so it is watched rather than painted once.
 CoasterHub.fetchCoasters().then(function(r){
@@ -879,7 +912,7 @@ CoasterHub.fetchCoasters().then(function(r){
 }).catch(function(){});
 CoasterHub.fetchCoasters().then(function(r){
   CoasterHub.rankSection(document.getElementById('globaltop'), r.coasters || [], {
-    model: false, lists: false, sign: true, moreHref: '/rankings', fold: TOPN,
+    model: false, lists: false, sign: true, moves: true, moreHref: '/rankings', fold: TOPN,
     title: function(v){ return (v === 'mine' ? 'Your top ' : 'Global top ') + TOPN; } });
 }).catch(function(){ /* no card rather than a broken one */ });
 

@@ -3352,6 +3352,15 @@ export default {
       }
       // /api/park-riders?park=<name>: for one park, who has ridden each coaster
       // and how many times. { riders: { <coasterId>: [{slug,name,n}] } }.
+      // The latest weekly copy of every list, for Home's up/down arrows
+      // (2026-11-27). Null until the first Monday's run makes the table.
+      if (request.method === "GET" && path === "/api/rank-snapshot") {
+        let row = null;
+        try { row = await env.DB.prepare("SELECT week, at, data FROM rank_snapshots ORDER BY week DESC LIMIT 1").first(); } catch (e) { row = null; }
+        let snap = null;
+        if (row) { try { snap = Object.assign({ week: row.week, at: row.at }, JSON.parse(row.data)); } catch (e) { snap = null; } }
+        return json({ snapshot: snap }, 200, { "cache-control": "public, max-age=600" });
+      }
       if (request.method === "GET" && path === "/api/rankings-all") {
         return edgePut(ctx, request, json({ rankings: await getAllRankings(env) }, 200, request.headers.get("cookie") ? {} : SUMMARY_CACHE));
       }

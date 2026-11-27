@@ -593,6 +593,11 @@
   // was one request per rider. [{slug, user, order}]. Falls back to the old
   // way if the endpoint is not there.
   var allRankP = null;
+  // The latest weekly copy of every list (null until the first Monday's run).
+  function fetchRankSnapshot() {
+    return fetch("/api/rank-snapshot").then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return j && j.snapshot; }).catch(function () { return null; });
+  }
   function fetchAllRankings() {
     if (allRankP) return allRankP;
     allRankP = fetch("/api/rankings-all", wroteLately() ? LIVE : undefined)
@@ -3918,13 +3923,46 @@
     }).join("");
   }
   // "97.5": one decimal, because the top of the list sits within a point or two.
+  // Home's arrow beside a Global place: up, down or new since the snapshot
+  // week. The change ("+2 since last week") shows on hover, or on a tap on a
+  // phone (index.html opens and closes it). Nothing when the ride held its
+  // place or there is no snapshot yet.
+  function moveMark(g, since) {
+    if (!since || !g || g.prev == null) return "";
+    var d = g.prev ? g.prev - g.pos : null;
+    if (d === 0) return "";
+    var wk = "since last week";
+    var t = d === null ? "New " + wk : (d > 0 ? "+" : "−") + Math.abs(d) + " " + wk;
+    var cls = d === null ? "nw" : d > 0 ? "up" : "dn";
+    var mark = d === null ? "★" : d > 0 ? "▲" : "▼";
+    return '<span class="mv ' + cls + '" role="button" tabindex="0" aria-label="' + t + '">' + mark + '<span class="mvtip" aria-hidden="true">' + t + '</span></span>';
+  }
   function scoreText(v) { return (Math.round(v * 10) / 10).toFixed(1); }
   function globalTally() {
-    if (!globalTallyP) globalTallyP = Promise.all([fetchCoasters(), fetchAllRankings(), fetchSummary()]).then(function (r) {
+    if (!globalTallyP) globalTallyP = Promise.all([fetchCoasters(), fetchAllRankings(), fetchSummary(), fetchRankSnapshot()]).then(function (r) {
       var byId = {}, cr = {};
       (r[0].coasters || []).forEach(function (c) { byId[c.id] = c; });
       (r[2] || []).forEach(function (u) { cr[u.slug] = u.credits || 0; });
-      return globalScores(r[1] || [], cr, byId);
+      var t = globalScores(r[1] || [], cr, byId), snap = r[3];
+      // Where each ride stood at Monday's snapshot (worker.js weeklyRankSnapshot),
+      // worked out with the same formula, for Home's arrows (Carter, 2026-11-27:
+      // "'+1' '-2' or whatever since last week"). t.since is that week; a ride
+      // with a place now and none then has prev 0.
+      if (snap && snap.rankings) {
+        try {
+          var p = globalScores(snap.rankings, snap.credits || {}, byId);
+          Object.keys(t).forEach(function (k) { if (t[k].pos) t[k].prev = (p[k] && p[k].pos) || 0; });
+          Object.defineProperty(t, "since", { value: snap.week, enumerable: false });
+        } catch (e) {}
+      } else if (snap && snap.positions) {
+        // A hand-entered baseline of places (migrations/267): {coaster id: place}.
+        // Partial: a ride it does not name gets no arrow rather than "new".
+        var pk = {};
+        Object.keys(snap.positions).forEach(function (id) { var c = byId[id]; if (c) pk[rideKey(c)] = snap.positions[id]; });
+        Object.keys(t).forEach(function (k) { if (!t[k].pos) return; if (pk[k] != null) t[k].prev = pk[k]; else if (!snap.partial) t[k].prev = 0; });
+        Object.defineProperty(t, "since", { value: snap.week, enumerable: false });
+      }
+      return t;
     }).catch(function () { return {}; });
     return globalTallyP;
   }
@@ -3987,7 +4025,7 @@
         st.rows = {};
         body = (rows.length ? '<div class="panel">' + cut(rows).map(function (r, i) {
           var c = r.c, me = R && R[c.id]; st.rows[c.id] = r;
-          return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + r.pos + '</span>'
+          return '<a class="crow g" data-gid="' + c.id + '" href="' + E(coasterHref(c)) + '"><span class="rk">' + r.pos + (opts.moves ? moveMark(r.g, st.glob.since) : '') + '</span>'
             + '<span class="two"><span class="cn">' + E((r.g.sides && r.g.sides.length > 1 && r.g.race) || c.name) + '</span><span class="pk">' + ctxLinks(c, "place") + (opts.sign ? signStats(c) : '') + '</span></span>'
             // The model too, as /rankings' Global list shows it (2026-09-28).
             + (opts.model !== false && c.model ? '<span class="md">' + E(modelLabel(c.model)) + '</span>' : '')

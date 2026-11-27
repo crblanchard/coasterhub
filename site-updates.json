@@ -2,8 +2,8 @@
  "about": "Site updates shown on /changes. One entry per working session, a sentence or two: changes within 2 hours of the newest entry's time go into it (and its time moves to now); otherwise a new entry goes on top. It does not have to cover everything. See CLAUDE.md.",
  "updates": [
   {
-   "at": "2026-11-27T18:56:29Z",
-   "text": "Home is tidier: a Global top 10 on phones too, a short line under each section heading, bolder friend tickets, and your last park day's three tallest new credits as Highlights. The phone hero has one yellow button, the signed-out welcome is cleaner, and every page's header skyline is bigger on desktop."
+   "at": "2026-11-27T19:04:49Z",
+   "text": "Home's Global top 10 (now on phones too) shows a green or red arrow for each coaster that moved since last week, with the change on hover or tap, and your last park day lists its three tallest new credits as Highlights. The phone hero has one yellow button, the signed-out welcome is cleaner, and every page's header skyline is bigger on desktop."
   },
   {
    "at": "2026-11-27T05:13:04Z",
