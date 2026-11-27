@@ -33,6 +33,8 @@
   .meth ul,.meth ol{margin:0 0 14px;padding-left:22px}
   .meth li{margin:0 0 6px}
   .meth .muted{color:var(--muted);font-size:.92rem}
+  .meth p a,.meth li a{color:var(--accent2);font-weight:600;text-decoration:none}
+  .meth p a:hover,.meth li a:hover{text-decoration:underline}
   .meth .eg{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:6px 0 16px}
   .meth .eg p:last-child{margin:0}
   .meth table{width:100%;border-collapse:collapse;font-size:.94rem;margin:4px 0 12px;font-variant-numeric:tabular-nums}
@@ -65,49 +67,43 @@
 </div></section>
 
 <section class="block" style="padding-top:22px"><div class="container meth">
+<!-- Half the length it was, Categories and the Global list first (Carter,
+     2026-11-27: "like half the length ... 'your list' and 'what rank asks more
+     about' are less important than categories and global list"). -->
 
-  <h2>Your list</h2>
-  <p>Your ranking is yours: best to worst, in whatever order you put it. Nothing on the site reorders it for you.</p>
-  <p>You can drag rides into place, but the easier way is <b>Rank more</b>. It asks you one question at a time: <i>which was better?</i> Each answer halves the part of your list the ride could still go in, so even a 500-ride list takes only around ten questions. Once it has narrowed down a spot, it checks the ride against its neighbors above and below before placing it.</p>
-  <p>If two rides are honestly a toss-up, tap <b>About the same</b> and the new one goes in right below the ride you were comparing it with.</p>
+<h2>Categories</h2>
+<p>Clones and near-clones, like Vekoma Boomerangs, SLCs and Wacky Worms, share one row, so you rank the design once instead of 20 times. Every one you&rsquo;ve ridden, now or later, takes that spot. See all <a href="/categories">categories</a>.</p>
 
-  <h2>What Rank more asks about</h2>
-  <ul>
-    <li>Mostly your tallest unranked credits first, since those tend to be the ones you have the strongest feelings about.</li>
-    <li>Every third pick is a <a href="/categories">category</a> you haven&rsquo;t placed yet, until they&rsquo;re all done. Once you have 100+ ranked, new categories come first, because a category you haven&rsquo;t placed by then was probably just added.</li>
-    <li>Once you have 20 ranked, some of those every-third picks become rides other riders have ranked. Rides on only one list come first, since your ranking is what gives them a Global place.</li>
-  </ul>
+<h2>The Global list</h2>
+<p>Everyone&rsquo;s lists combined into one score out of 100.</p>
+<ul>
+<li><b>Place among your credits.</b> Your #1 scores 100, and lower spots score less, measured against everything you&rsquo;ve ridden. Unranked rides count as below your ranked ones, so ranking just your top 100 is enough.</li>
+<li><b>More credits, more say.</b> A list&rsquo;s weight is the square root of the rider&rsquo;s credits: 100 credits weighs 10, and 400 or more weighs the most, 20.</li>
+<li><b>Outliers dropped.</b> From 5 lists a ride&rsquo;s lowest score is left out, and from 20 lists the lowest tenth.</li>
+<li><b>A pull toward the middle.</b> A small extra vote at the site average keeps a ride on three perfect lists from jumping straight to #1.</li>
+</ul>
+<p>A ride needs 2 lists for a Global place, and a list counts once it has 10 rides. The arrows show how far a ride moved since last week. <a href="#" onclick="this.parentNode.nextElementSibling.hidden=!this.parentNode.nextElementSibling.hidden;return false">See an example</a></p>
 
-  <h2>Categories</h2>
-  <p>Some rides are near-identical copies: Vekoma Boomerangs, SLCs, Wacky Worms. A category puts all of them on one row, so you rank the design once instead of 20 times. Placing a category places every ride from it you&rsquo;ve been on, and one you ride later joins that row without another question. If you had already ranked some of them on their own, you&rsquo;ll be asked whether to gather them together.</p>
+<div class="eg" hidden>
+<p><b>One ride, on three lists.</b></p>
+<table>
+<thead><tr><th>Rider</th><th class="n">Credits</th><th class="n">Ranked it</th><th class="n">Score</th><th class="n">Weight</th></tr></thead>
+<tbody>
+<tr><td>A</td><td class="n">400</td><td class="n">#4</td><td class="n">99.3</td><td class="n">20</td></tr>
+<tr><td>B</td><td class="n">64</td><td class="n">#10</td><td class="n">85.9</td><td class="n">8</td></tr>
+<tr><td>C</td><td class="n">25</td><td class="n">#2</td><td class="n">96.0</td><td class="n">5</td></tr>
+</tbody>
+</table>
+<p>Weighted average <b>95.5</b>; the pull toward the middle brings it to <b>91.7</b>.</p>
+</div>
 
-  <h2>The Global list</h2>
-  <p>The Global list combines every rider&rsquo;s ranking into one score out of 100. Four ideas go into it.</p>
-  <ol>
-    <li><b>Where it sits among your credits.</b> A ride&rsquo;s score on your list depends on how far down it is, measured against how many coasters you&rsquo;ve ridden. Your #1 scores 100. Rides you haven&rsquo;t ranked count as below everything you have, so if you&rsquo;ve ridden 800 but only ranked your top 100, your #100 still scores 87.6. You don&rsquo;t need to rank your back half for your top half to count fully.</li>
-    <li><b>More credits, more say.</b> Each rider&rsquo;s vote is weighted by the square root of their credit count, capped at 400 credits: 25 credits weighs 5, 100 weighs 10, 400 or more weighs 20. Experience counts, but nobody outvotes everyone else.</li>
-    <li><b>The odd low score is dropped.</b> Once a ride is on 5 lists, its lowest score is left out. From 20 lists, the lowest tenth are (2 of 20, 3 of 30). One rider who had a bad day on it can&rsquo;t sink it.</li>
-    <li><b>A light pull toward the middle.</b> Every ride gets a small extra vote at the site-wide average, worth about a quarter of a typical rider today. It grows as the site does: the more lists a typical ride is on, the bigger that extra vote, so a handful of fans can&rsquo;t outrank a crowd. A ride on three lists can&rsquo;t jump straight to #1 on three perfect scores, but a ride everyone who&rsquo;s been on loves still ranks high.</li>
-  </ol>
-  <p>A ride needs to be on at least 2 lists to get a Global place, and a list counts once it has 10 rides ranked. Ties go to the ride on more lists.</p>
+<h2>Your list</h2>
+<p>Best to worst, in your order; nothing reorders it. <b>Rank more</b> places a ride by asking <i>which was better?</i>, about ten questions even on a 500-ride list. It starts with your tallest unranked credits and mixes in categories and rides other riders have ranked.</p>
 
-  <div class="eg">
-    <p><b>Example:</b> one ride, on three lists.</p>
-    <table>
-      <thead><tr><th>Rider</th><th class="n">Credits</th><th class="n">Ranked it</th><th class="n">Score</th><th class="n">Weight</th></tr></thead>
-      <tbody>
-        <tr><td>A</td><td class="n">400</td><td class="n">#4</td><td class="n">99.3</td><td class="n">20</td></tr>
-        <tr><td>B</td><td class="n">64</td><td class="n">#10</td><td class="n">85.9</td><td class="n">8</td></tr>
-        <tr><td>C</td><td class="n">25</td><td class="n">#2</td><td class="n">96.0</td><td class="n">5</td></tr>
-      </tbody>
-    </table>
-    <p>The weighted average is <b>95.5</b>. The pull toward the middle (here, an extra weight of 3 at an average of 50) brings it to <b>91.7</b>. With only three lists, nothing is dropped.</p>
-  </div>
+<h2>&ldquo;You agree on&rdquo;</h2>
+<p>On another rider&rsquo;s list: how often you both put the same two rides in the same order. The <b>biggest split</b> is the ride your lists disagree on most.</p>
 
-  <h2>&ldquo;You agree on&rdquo;</h2>
-  <p>On another rider&rsquo;s list, you&rsquo;ll see how much you agree. It takes every pair of rides you&rsquo;ve both ranked and counts how often you put them in the same order. The <b>biggest split</b> is the ride where your two lists are furthest apart, measured as how far down each list it sits.</p>
-
-  <p class="back"><a href="/rankings">&larr; Rankings</a></p>
+<p class="back"><a href="/rankings">&larr; Rankings</a></p>
 </div></section>
 
 <footer class="site"><div class="container foot-inner">
