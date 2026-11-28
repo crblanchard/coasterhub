@@ -3079,7 +3079,9 @@
     }
     if (c.type) kv(info, '<span class="pill ' + (c.type === "Wood" ? "wood" : "steel") + '">' + E(c.type) + '</span>', "Type");
     var amg = function (t) { return t ? '<i class="among" style="font-style:normal;font-weight:400;color:var(--muted);font-size:.8em;margin-right:8px">' + E(t) + '</i>' : ''; };
-    if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '" title="' + E(c.manu) + '">' + E(manuLabel(c.manu)) + '</a>', "Manufacturer");
+    if (c.manu) kv(info, amg(among && among.manu) + '<a href="' + E(makerHref(c.manu)) + '">' + E(c.manu) + '</a>', "Manufacturer");
+    // The full maker name on its own row (Carter, 2026-11-28: "MACK should be
+    // shortened in model ... but not manufacturer"); the short one stays in models.
     if (c.model) kv(info, amg(among && among.model) + (c.manu ? '<a href="' + E(makerHref(c.manu, c.model)) + '">' + E(modelLabel(c.model)) + '</a>' : E(modelLabel(c.model))), "Model");
     if (c.opened) kv(info, E(when(c.opened, c.openedPrec)), c.building ? "Opening" : "Opened"); else if (c.yr) kv(info, E(c.yr), c.building ? "Opening" : "Opened");
     else if (c.building) kv(info, "Soon", "Opening");
